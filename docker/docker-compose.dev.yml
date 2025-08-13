@@ -1,0 +1,59 @@
+services:
+  app:
+    container_name: ${APP_NAME:-laravel-app}-dev
+    build:
+      target: development
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      # Add all required variables for DB/Redis connection
+      - APP_NAME=${APP_NAME:-laravel-app}
+      - TZ=${TZ:-UTC}
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=${DB_DATABASE:-laravel}
+      - DB_USERNAME=${DB_USERNAME:-laravel}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - QUEUE_CONNECTION=redis
+      - REDIS_HOST=redis
+    ports:
+      - "5173:5173"
+    volumes:
+      - ../:/var/www/html
+      - fish_history:/root/.local/share/fish
+      - fish_config:/root/.config/fish
+
+  queue:
+    container_name: ${APP_NAME:-laravel-app}-queue-dev
+    build:
+      target: development
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      # Add all required variables for DB/Redis connection
+      - APP_NAME=${APP_NAME:-laravel-queue}
+      - TZ=${TZ:-UTC}
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=${DB_DATABASE:-laravel}
+      - DB_USERNAME=${DB_USERNAME:-laravel}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - QUEUE_CONNECTION=redis
+      - REDIS_HOST=redis
+    volumes:
+      - ../:/var/www/html
+
+  nginx:
+    container_name: ${APP_NAME:-laravel-app}-nginx-dev
+
+  postgres:
+    container_name: ${APP_NAME:-laravel-app}-postgres-dev
+
+  redis:
+    container_name: ${APP_NAME:-laravel-app}-redis-dev
+
+volumes:
+  fish_history:
+  fish_config:

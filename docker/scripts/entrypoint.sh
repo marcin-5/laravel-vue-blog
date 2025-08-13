@@ -1,0 +1,62 @@
+#!/bin/bash
+set -e
+
+FISH_CONFIG_DIR="/root/.config/fish"
+DEFAULT_CONFIG_DIR="/opt/fish_config_default"
+APP_NAME=${APP_NAME:-laravel-app}
+TZ=${TZ:-UTC}
+
+echo "Starting $APP_NAME..."
+
+# Set timezone at runtime
+if [ "$TZ" != "UTC" ]; then
+    echo "Setting timezone to $TZ"
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime
+    echo $TZ > /etc/timezone
+fi
+
+# Make sure the app directory exists
+mkdir -p /var/www/html
+
+# If the config directory is mounted but uninitialized (i.e., fisher is missing),
+# copy the default config from the image into the volume.
+if [ ! -f "$FISH_CONFIG_DIR/functions/fisher.fish" ]; then
+   echo "Initializing fish config in $FISH_CONFIG_DIR..."
+   # Ensure the target functions directory exists before copying
+   mkdir -p "$FISH_CONFIG_DIR/functions"
+
+   # Check if default config exists before copying
+   if [ -d "$DEFAULT_CONFIG_DIR" ] && [ "$(ls -A $DEFAULT_CONFIG_DIR)" ]; then
+      cp -a "$DEFAULT_CONFIG_DIR/." "$FISH_CONFIG_DIR/"
+   else
+      echo "Warning: Default fish configuration not found in $DEFAULT_CONFIG_DIR"
+      # Create a minimal fish config if the default one doesn't exist
+      echo "# Basic fish configuration for Laravel" > "$FISH_CONFIG_DIR/config.fish"
+      echo "# Add Laravel artisan alias" >> "$FISH_CONFIG_DIR/config.fish"
+      echo "alias artisan='php artisan'" >> "$FISH_CONFIG_DIR/config.fish"
+      echo "alias tinker='php artisan tinker'" >> "$FISH_CONFIG_DIR/config.fish"
+      echo "alias migrate='php artisan migrate'" >> "$FISH_CONFIG_DIR/config.fish"
+   fi
+fi
+
+# Set working directory
+cd /var/www/html
+
+# Laravel-specific initialization for production
+if [ "$APP_ENV" = "production" ]; then
+    echo "Production environment detected, running Laravel optimizations..."
+
+    # Wait for database to be ready
+    if command -v php >/dev/null 2>&1; then
+        echo "Waiting for database connection..."
+        until php artisan migrate:status >/dev/null 2>&1; do
+            echo "Database not ready, waiting 5 seconds..."
+            sleep 5
+        done
+    fi
+fi
+
+echo "Working in Laravel directory: /var/www/html"
+
+# Execute the command passed to the container
+exec "$@"
