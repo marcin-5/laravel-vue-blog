@@ -144,3 +144,11 @@
         @apply bg-background text-foreground;
     }
 }
+
+
+@layer base {
+    select option {
+        background-color: var(--color-secondary);
+        color: var(--color-secondary-foreground);
+    }
+}
