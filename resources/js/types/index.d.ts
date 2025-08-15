@@ -17,6 +17,10 @@ export interface NavItem {
     isActive?: boolean;
     // Optional list of roles allowed to see the item. If omitted or empty, visible to all.
     roles?: string[];
+    // Optional HTTP method for Inertia Link. Defaults to 'get'.
+    method?: 'get' | 'post' | 'put' | 'patch' | 'delete';
+    // When true, the item should appear inactive/disabled and not trigger navigation/action.
+    disabled?: boolean;
 }
 
 export type AppPageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
@@ -33,6 +37,8 @@ export interface User {
     email: string;
     avatar?: string;
     role: string;
+    blog_quota?: number | null;
+    can_create_blog?: boolean;
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;

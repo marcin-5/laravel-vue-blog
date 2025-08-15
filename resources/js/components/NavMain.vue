@@ -24,11 +24,24 @@ const visibleItems = computed(() => {
         <SidebarGroupLabel>Platform</SidebarGroupLabel>
         <SidebarMenu>
             <SidebarMenuItem v-for="item in visibleItems" :key="item.title">
-                <SidebarMenuButton :is-active="item.href === page.url" :tooltip="item.title" as-child>
-                    <Link :href="item.href">
-                        <component :is="item.icon" />
-                        <span>{{ item.title }}</span>
-                    </Link>
+                <SidebarMenuButton
+                    :class="item.href === page.url ? 'cursor-default' : 'cursor-pointer'"
+                    :is-active="item.href === page.url"
+                    :tooltip="item.title"
+                    as-child
+                >
+                    <template v-if="item.disabled">
+                        <div aria-disabled="true" class="pointer-events-none flex items-center gap-2 opacity-50 select-none">
+                            <component :is="item.icon" />
+                            <span>{{ item.title }}</span>
+                        </div>
+                    </template>
+                    <template v-else>
+                        <Link :href="item.href" :method="item.method ?? 'get'">
+                            <component :is="item.icon" />
+                            <span>{{ item.title }}</span>
+                        </Link>
+                    </template>
                 </SidebarMenuButton>
             </SidebarMenuItem>
         </SidebarMenu>
