@@ -28,6 +28,7 @@ class BlogFactory extends Factory
             'name' => $name,
             'slug' => Str::slug($name) . '-' . Str::random(6),
             'description' => $this->faker->optional()->paragraph(),
+            'is_published' => $this->faker->boolean(70),
         ];
     }
 }

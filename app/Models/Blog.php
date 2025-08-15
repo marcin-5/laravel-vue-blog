@@ -16,7 +16,25 @@ class Blog extends Model
         'name',
         'slug',
         'description',
+        'is_published',
     ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
+        'is_published' => 'boolean',
+    ];
+
+    protected $appends = [
+        'creation_date',
+    ];
+
+    /**
+     * Accessor: returns the date portion of created_at as YYYY-MM-DD.
+     */
+    public function getCreationDateAttribute(): ?string
+    {
+        return $this->created_at?->toDateString();
+    }
 
     /**
      * The owner of the blog (User).
