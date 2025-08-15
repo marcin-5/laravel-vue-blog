@@ -1,8 +1,10 @@
 <script lang="ts" setup>
+import PublishedBadge from '@/components/PublishedBadge.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import InputError from '@/components/InputError.vue';
 
 interface Blog {
     id: number;
@@ -98,7 +100,7 @@ function submitEdit(blog: Blog) {
                             required
                             type="text"
                         />
-                        <div v-if="createForm.errors.name" class="mt-1 text-sm text-red-600">{{ createForm.errors.name }}</div>
+                        <InputError :message="createForm.errors.name" />
                     </div>
                     <div>
                         <label class="mb-1 block text-sm font-medium" for="new-description">Description</label>
@@ -109,7 +111,7 @@ function submitEdit(blog: Blog) {
                             placeholder="What's this blog about?"
                             rows="3"
                         />
-                        <div v-if="createForm.errors.description" class="mt-1 text-sm text-red-600">{{ createForm.errors.description }}</div>
+                        <InputError :message="createForm.errors.description" />
                     </div>
                     <div class="flex items-center gap-2">
                         <button
@@ -133,12 +135,7 @@ function submitEdit(blog: Blog) {
                             <div class="text-xs text-muted-foreground">/{{ blog.slug }} · {{ blog.creation_date ?? '' }}</div>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span
-                                :class="blog.is_published ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'"
-                                class="rounded-full px-2 py-0.5 text-xs"
-                            >
-                                {{ blog.is_published ? 'Published' : 'Draft' }}
-                            </span>
+                            <PublishedBadge :published="blog.is_published" />
                             <button class="cursor-pointer px-3 py-2" type="button" @click="startEdit(blog)">Edit</button>
                         </div>
                     </div>
@@ -155,7 +152,7 @@ function submitEdit(blog: Blog) {
                                     required
                                     type="text"
                                 />
-                                <div v-if="editForm.errors.name" class="mt-1 text-sm text-red-600">{{ editForm.errors.name }}</div>
+                                <InputError :message="editForm.errors.name" />
                             </div>
                             <div>
                                 <label :for="`edit-description-${blog.id}`" class="mb-1 block text-sm font-medium">Description</label>
@@ -165,13 +162,13 @@ function submitEdit(blog: Blog) {
                                     class="block w-full rounded-md border px-3 py-2"
                                     rows="3"
                                 />
-                                <div v-if="editForm.errors.description" class="mt-1 text-sm text-red-600">{{ editForm.errors.description }}</div>
+                                <InputError :message="editForm.errors.description" />
                             </div>
                             <div class="flex items-center gap-2">
                                 <input :id="`edit-published-${blog.id}`" v-model="editForm.is_published" type="checkbox" />
                                 <label :for="`edit-published-${blog.id}`" class="text-sm">Published</label>
                             </div>
-                            <div v-if="editForm.errors.is_published" class="mt-1 text-sm text-red-600">{{ editForm.errors.is_published }}</div>
+                            <InputError :message="editForm.errors.is_published" />
 
                             <div class="flex items-center gap-2">
                                 <button

@@ -45,3 +45,13 @@ export interface User {
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;
+
+export interface Blog {
+    id: number;
+    user_id: number;
+    name: string;
+    slug: string;
+    description: string | null;
+    is_published: boolean;
+    created_at: string; // ISO
+}
