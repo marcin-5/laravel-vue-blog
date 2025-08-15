@@ -53,6 +53,10 @@ class AdminUserSeeder extends Seeder
             if ($verify) {
                 $user->email_verified_at = now();
             }
+            // If role column exists, ensure admin role
+            if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'role')) {
+                $user->role = User::ROLE_ADMIN;
+            }
             $user->save();
         } else {
             $attributes = [
@@ -62,6 +66,9 @@ class AdminUserSeeder extends Seeder
             ];
             if ($verify) {
                 $attributes['email_verified_at'] = now();
+            }
+            if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'role')) {
+                $attributes['role'] = User::ROLE_ADMIN;
             }
             User::query()->create($attributes);
         }
