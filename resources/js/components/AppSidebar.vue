@@ -13,11 +13,13 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: '/dashboard',
         icon: LayoutGrid,
+        // No roles => visible to everyone
     },
     {
         title: 'Users',
         href: '/admin/users',
         icon: Users,
+        roles: ['admin'], // only admins see this
     },
 ];
 
