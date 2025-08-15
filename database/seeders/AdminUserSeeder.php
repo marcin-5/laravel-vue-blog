@@ -4,10 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Illuminate\Support\Carbon;
 
 class AdminUserSeeder extends Seeder
 {
@@ -16,10 +14,10 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        $name = (string) config('admin.name');
-        $email = (string) config('admin.email');
+        $name = (string)config('admin.name');
+        $email = (string)config('admin.email');
         $passwordFromConfig = config('admin.password');
-        $verify = (bool) config('admin.verify_email');
+        $verify = (bool)config('admin.verify_email');
 
         if (empty($email)) {
             // Nothing to seed without an email
@@ -37,10 +35,14 @@ class AdminUserSeeder extends Seeder
             // In production, set ADMIN_PASSWORD; otherwise a random password is generated and logged.
             if (app()->environment(['local', 'development', 'testing'])) {
                 $passwordToSet = 'password';
-                Log::warning('AdminUserSeeder: ADMIN_PASSWORD not set; using default "password" for local/dev. Change it ASAP.');
+                Log::warning(
+                    'AdminUserSeeder: ADMIN_PASSWORD not set; using default "password" for local/dev. Change it ASAP.',
+                );
             } else {
                 $passwordToSet = Str::random(24);
-                Log::warning('AdminUserSeeder: ADMIN_PASSWORD not set in production; generated a random admin password. Consider rotating it.');
+                Log::warning(
+                    'AdminUserSeeder: ADMIN_PASSWORD not set in production; generated a random admin password. Consider rotating it.',
+                );
             }
         }
 
@@ -53,10 +55,8 @@ class AdminUserSeeder extends Seeder
             if ($verify) {
                 $user->email_verified_at = now();
             }
-            // If role column exists, ensure admin role
-            if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'role')) {
-                $user->role = User::ROLE_ADMIN;
-            }
+            // Ensure admin role
+            $user->role = User::ROLE_ADMIN;
             $user->save();
         } else {
             $attributes = [
@@ -67,9 +67,8 @@ class AdminUserSeeder extends Seeder
             if ($verify) {
                 $attributes['email_verified_at'] = now();
             }
-            if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'role')) {
-                $attributes['role'] = User::ROLE_ADMIN;
-            }
+            // Ensure admin role
+            $attributes['role'] = User::ROLE_ADMIN;
             User::query()->create($attributes);
         }
     }
