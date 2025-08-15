@@ -9,7 +9,6 @@ return new class extends Migration {
     {
         Schema::table('users', function (Blueprint $table) {
             // Default to 0 at DB level; model logic will set 1 for bloggers on create
-            /** @noinspection UnknownColumnInspection */
             $table->unsignedInteger('blog_quota')->default(0)->after('role');
         });
     }
