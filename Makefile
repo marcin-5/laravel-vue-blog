@@ -17,7 +17,7 @@ init: migrate ## ✨ First-time project setup (builds, installs, migrates)
 	@echo "➡️ Run 'make dev' to start the Vite HMR server or 'make fish' to get a shell."
 
 # Phony targets are not files.
-.PHONY: init dev build up down restart logs migrate key-gen npm-install composer-install fish setup-env help
+.PHONY: init dev build up down restart logs migrate key-gen npm-install composer-install fish setup-env help db-reset
 
 # ====================================================================================
 # Main Commands
@@ -68,6 +68,10 @@ build: setup-env ## 🔨 Build or rebuild the Docker services
 migrate: key-gen ## 🗄️ Run database migrations
 	@echo "Running database migrations..."
 	$(DOCKER_COMPOSE) exec app php artisan migrate
+
+db-reset: up ## 🔄 Reset database and run all migrations from scratch
+	@echo "Resetting database and running all migrations..."
+	$(DOCKER_COMPOSE) exec app php artisan migrate:fresh --seed
 
 key-gen: npm-install ## 🔑 Generate Laravel application key
 	@echo "Generating application key..."
