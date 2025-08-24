@@ -2,13 +2,29 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property string $name
+ * @property string $slug
+ * @property string|null $description
+ * @property bool $is_published
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ *
+ * @property-read User $user
+ * @property-read LandingPage|null $landingPage
+ * @property-read Collection<int, Post> $posts
+ * @property-read string|null $creation_date
+ */
 class Blog extends Model
 {
     use HasFactory;
@@ -20,28 +36,17 @@ class Blog extends Model
         'description',
         'is_published',
     ];
-
     protected $casts = [
-        'created_at' => 'datetime',
         'is_published' => 'boolean',
     ];
-
     protected $appends = [
         'creation_date',
     ];
 
     /**
-     * Accessor: returns the date portion of created_at as YYYY-MM-DD.
+     * The user who owns the blog.
      */
-    public function getCreationDateAttribute(): ?string
-    {
-        return $this->created_at?->toDateString();
-    }
-
-    /**
-     * The owner of the blog (User).
-     */
-    public function owner(): BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
@@ -63,13 +68,10 @@ class Blog extends Model
     }
 
     /**
-     * Ensure a slug is present. If not provided, generate from name.
+     * Accessor: returns the date portion of created_at as YYYY-MM-DD.
      */
-    public function setSlugAttribute(?string $value): void
+    public function getCreationDateAttribute(): ?string
     {
-        $slug = $value ?: ($this->attributes['name'] ?? null);
-        if ($slug) {
-            $this->attributes['slug'] = Str::slug($slug);
-        }
+        return $this->created_at?->toDateString();
     }
 }
