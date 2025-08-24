@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PublicBlogController;
 use App\Models\Blog;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ Route::get('dashboard', function () {
 // Blogs: index (list current user's blogs)
 Route::get('blogs', function () {
     $user = auth()->user();
-    abort_unless($user, 403);
+    abort_unless(!!$user, 403);
 
     $blogs = Blog::query()
         ->where('user_id', $user->id)
@@ -147,3 +148,7 @@ Route::patch('blogs/{blog}', function (Request $request, Blog $blog) {
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
+
+// Public blog routes: must be at the very end to avoid conflicts with app routes above
+Route::get('{blog:slug}/{postSlug}', [PublicBlogController::class, 'post'])->name('blog.public.post');
+Route::get('{blog:slug}', [PublicBlogController::class, 'landing'])->name('blog.public.landing');
