@@ -1,11 +1,15 @@
 <script lang="ts" setup>
+import InputError from '@/components/InputError.vue';
 import PublishedBadge from '@/components/PublishedBadge.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
-import InputError from '@/components/InputError.vue';
 
+interface Category {
+    id: number;
+    name: string;
+}
 interface Blog {
     id: number;
     user_id: number;
@@ -14,9 +18,9 @@ interface Blog {
     description: string | null;
     is_published: boolean;
     creation_date?: string | null;
+    categories?: Category[];
 }
-
-const props = defineProps<{ blogs: Blog[]; canCreate: boolean }>();
+const props = defineProps<{ blogs: Blog[]; canCreate: boolean; categories: Category[] }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -26,7 +30,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 const showCreate = ref(false);
 const createForm = useForm({
     name: '',
-    description: '' as string | null,
+    description: null as string | null,
+    categories: [] as number[],
 });
 
 function submitCreate() {
@@ -40,17 +45,19 @@ function submitCreate() {
 
 const editingId = ref<number | null>(null);
 const editForm = useForm({
-    name: '' as string,
-    description: '' as string | null,
+    name: '',
+    description: null as string | null,
     is_published: false as boolean,
+    categories: [] as number[],
 });
 
 function startEdit(blog: Blog) {
     editingId.value = blog.id;
     editForm.reset();
     editForm.name = blog.name;
-    editForm.description = blog.description ?? '';
-    editForm.is_published = !!blog.is_published;
+    editForm.description = blog.description;
+    editForm.is_published = blog.is_published;
+    editForm.categories = (blog.categories ?? []).map((c) => c.id);
 }
 
 function cancelEdit() {
@@ -113,6 +120,16 @@ function submitEdit(blog: Blog) {
                         />
                         <InputError :message="createForm.errors.description" />
                     </div>
+                    <div>
+                        <div class="mb-1 block text-sm font-medium">Categories</div>
+                        <div class="flex flex-wrap gap-3">
+                            <label v-for="cat in props.categories" :key="`new-cat-${cat.id}`" class="inline-flex items-center gap-2">
+                                <input v-model="createForm.categories" :value="cat.id" type="checkbox" />
+                                <span class="text-sm">{{ cat.name }}</span>
+                            </label>
+                        </div>
+                        <InputError :message="createForm.errors.categories" />
+                    </div>
                     <div class="flex items-center gap-2">
                         <button
                             :disabled="createForm.processing"
@@ -133,6 +150,15 @@ function submitEdit(blog: Blog) {
                         <div>
                             <div class="text-base font-medium">{{ blog.name }}</div>
                             <div class="text-xs text-muted-foreground">/{{ blog.slug }} · {{ blog.creation_date ?? '' }}</div>
+                            <div v-if="blog.categories && blog.categories.length" class="mt-1 flex flex-wrap gap-2">
+                                <span
+                                    v-for="cat in blog.categories"
+                                    :key="`badge-${blog.id}-${cat.id}`"
+                                    class="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                                >
+                                    {{ cat.name }}
+                                </span>
+                            </div>
                         </div>
                         <div class="flex items-center gap-2">
                             <PublishedBadge :published="blog.is_published" />
@@ -163,6 +189,20 @@ function submitEdit(blog: Blog) {
                                     rows="3"
                                 />
                                 <InputError :message="editForm.errors.description" />
+                            </div>
+                            <div>
+                                <div class="mb-1 block text-sm font-medium">Categories</div>
+                                <div class="flex flex-wrap gap-3">
+                                    <label
+                                        v-for="cat in props.categories"
+                                        :key="`edit-cat-${blog.id}-${cat.id}`"
+                                        class="inline-flex items-center gap-2"
+                                    >
+                                        <input v-model="editForm.categories" :value="cat.id" type="checkbox" />
+                                        <span class="text-sm">{{ cat.name }}</span>
+                                    </label>
+                                </div>
+                                <InputError :message="editForm.errors.categories" />
                             </div>
                             <div class="flex items-center gap-2">
                                 <input :id="`edit-published-${blog.id}`" v-model="editForm.is_published" type="checkbox" />

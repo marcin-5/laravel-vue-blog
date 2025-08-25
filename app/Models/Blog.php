@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
@@ -23,6 +24,7 @@ use Illuminate\Support\Carbon;
  * @property-read User $user
  * @property-read LandingPage|null $landingPage
  * @property-read Collection<int, Post> $posts
+ * @property-read Collection<int, Category> $categories
  * @property-read string|null $creation_date
  */
 class Blog extends Model
@@ -65,6 +67,14 @@ class Blog extends Model
     public function posts(): HasMany
     {
         return $this->hasMany(Post::class);
+    }
+
+    /**
+     * Categories assigned to this blog.
+     */
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class, 'blog_category');
     }
 
     /**
