@@ -73,6 +73,38 @@ function submitEdit(blog: Blog) {
         },
     });
 }
+
+// Create Post inline form state
+const creatingPostForId = ref<number | null>(null);
+const postForm = useForm({
+    blog_id: 0 as number,
+    title: '' as string,
+    excerpt: '' as string,
+    content: '' as string,
+    is_published: false as boolean,
+});
+
+function startCreatePost(blog: Blog) {
+    creatingPostForId.value = blog.id;
+    postForm.reset();
+    postForm.blog_id = blog.id;
+}
+
+function cancelCreatePost() {
+    creatingPostForId.value = null;
+    postForm.reset();
+}
+
+function submitCreatePost() {
+    // Note: backend route may be defined differently; adjust as needed when API is ready.
+    postForm.post(route('posts.store'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            creatingPostForId.value = null;
+            postForm.reset();
+        },
+    });
+}
 </script>
 
 <template>
@@ -163,6 +195,7 @@ function submitEdit(blog: Blog) {
                         <div class="flex items-center gap-2">
                             <PublishedBadge :published="blog.is_published" />
                             <button class="cursor-pointer px-3 py-2" type="button" @click="startEdit(blog)">Edit</button>
+                            <button class="cursor-pointer px-3 py-2" type="button" @click="startCreatePost(blog)">Add Post</button>
                         </div>
                     </div>
 
@@ -221,6 +254,61 @@ function submitEdit(blog: Blog) {
                                     {{ editForm.processing ? 'Saving…' : 'Save' }}
                                 </button>
                                 <button class="cursor-pointer px-3 py-2" type="button" @click="cancelEdit">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Inline Create Post Form -->
+                    <div v-if="creatingPostForId === blog.id" class="mt-4 border-t pt-4">
+                        <form class="space-y-4" @submit.prevent="submitCreatePost">
+                            <div>
+                                <label :for="`post-title-${blog.id}`" class="mb-1 block text-sm font-medium">Post title</label>
+                                <input
+                                    :id="`post-title-${blog.id}`"
+                                    v-model="postForm.title"
+                                    class="block w-full rounded-md border px-3 py-2"
+                                    required
+                                    type="text"
+                                    placeholder="My first post"
+                                />
+                                <InputError :message="postForm.errors.title" />
+                            </div>
+                            <div>
+                                <label :for="`post-excerpt-${blog.id}`" class="mb-1 block text-sm font-medium">Excerpt</label>
+                                <textarea
+                                    :id="`post-excerpt-${blog.id}`"
+                                    v-model="postForm.excerpt"
+                                    class="block w-full rounded-md border px-3 py-2"
+                                    rows="2"
+                                    placeholder="Short summary"
+                                />
+                                <InputError :message="postForm.errors.excerpt" />
+                            </div>
+                            <div>
+                                <label :for="`post-content-${blog.id}`" class="mb-1 block text-sm font-medium">Content</label>
+                                <textarea
+                                    :id="`post-content-${blog.id}`"
+                                    v-model="postForm.content"
+                                    class="block w-full rounded-md border px-3 py-2"
+                                    rows="5"
+                                    placeholder="Write your post..."
+                                />
+                                <InputError :message="postForm.errors.content" />
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input :id="`post-published-${blog.id}`" v-model="postForm.is_published" type="checkbox" />
+                                <label :for="`post-published-${blog.id}`" class="text-sm">Publish now</label>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <button
+                                    :disabled="postForm.processing"
+                                    class="inline-flex cursor-pointer items-center rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                                    type="submit"
+                                >
+                                    {{ postForm.processing ? 'Creating…' : 'Create Post' }}
+                                </button>
+                                <button class="cursor-pointer px-3 py-2" type="button" @click="cancelCreatePost">Cancel</button>
                             </div>
                         </form>
                     </div>
