@@ -56,4 +56,44 @@ class PostsController extends Controller
 
         return back()->with('success', 'Post created successfully.');
     }
+
+    /**
+     * Update an existing post.
+     */
+    public function update(Request $request, Post $post): RedirectResponse
+    {
+        $user = $request->user();
+
+        // Ensure the post belongs to a blog owned by the current user
+        $blog = Blog::query()->where('id', $post->blog_id)->where('user_id', $user->id)->firstOrFail();
+
+        $validated = $request->validate([
+            'title' => ['sometimes', 'required', 'string', 'max:255'],
+            'excerpt' => ['nullable', 'string'],
+            'content' => ['nullable', 'string'],
+            'is_published' => ['sometimes', 'boolean'],
+        ]);
+
+        if (array_key_exists('title', $validated)) {
+            $post->title = $validated['title'];
+            // trigger slug regeneration
+            $post->slug = $post->title;
+        }
+        if (array_key_exists('excerpt', $validated)) {
+            $post->excerpt = $validated['excerpt'];
+        }
+        if (array_key_exists('content', $validated)) {
+            $post->content = $validated['content'];
+        }
+        if (array_key_exists('is_published', $validated)) {
+            $post->is_published = (bool)$validated['is_published'];
+            if ($post->is_published && empty($post->published_at)) {
+                $post->published_at = now();
+            }
+        }
+
+        $post->save();
+
+        return back()->with('success', 'Post updated successfully.');
+    }
 }
