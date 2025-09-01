@@ -10,6 +10,17 @@ interface Category {
     id: number;
     name: string;
 }
+interface PostItem {
+    id: number;
+    blog_id: number;
+    title: string;
+    excerpt: string | null;
+    content?: string | null;
+    is_published: boolean;
+    visibility?: string;
+    published_at?: string | null;
+    created_at?: string | null;
+}
 interface Blog {
     id: number;
     user_id: number;
@@ -19,6 +30,7 @@ interface Blog {
     is_published: boolean;
     creation_date?: string | null;
     categories?: Category[];
+    posts?: PostItem[];
 }
 const props = defineProps<{ blogs: Blog[]; canCreate: boolean; categories: Category[] }>();
 
@@ -60,6 +72,7 @@ function startEdit(blog: Blog) {
     // Switch to this blog's edit form and ensure the create-post form is hidden
     editingId.value = blog.id;
     creatingPostForId.value = null;
+    expandedPostsForId.value = null;
     postForm.reset();
 
     editForm.reset();
@@ -102,6 +115,7 @@ function startCreatePost(blog: Blog) {
     // Open this blog's Create Post form and ensure the edit form is hidden
     creatingPostForId.value = blog.id;
     editingId.value = null;
+    expandedPostsForId.value = null;
     editForm.reset();
 
     postForm.reset();
@@ -111,6 +125,64 @@ function startCreatePost(blog: Blog) {
 function cancelCreatePost() {
     creatingPostForId.value = null;
     postForm.reset();
+}
+
+// Posts list expand/collapse state
+const expandedPostsForId = ref<number | null>(null);
+
+function togglePosts(blog: Blog) {
+    if (expandedPostsForId.value === blog.id) {
+        expandedPostsForId.value = null;
+        return;
+    }
+    // Show posts for this blog and hide other forms
+    expandedPostsForId.value = blog.id;
+    editingId.value = null;
+    creatingPostForId.value = null;
+    editForm.reset();
+    postForm.reset();
+}
+
+// Inline Post Edit state
+const editingPostId = ref<number | null>(null);
+const postEditForm = useForm({
+    title: '' as string,
+    excerpt: '' as string | null,
+    content: '' as string | null,
+    is_published: false as boolean,
+});
+
+function startEditPost(post: PostItem) {
+    if (editingPostId.value === post.id) {
+        cancelEditPost();
+        return;
+    }
+    editingPostId.value = post.id;
+    // Hide other forms
+    editingId.value = null;
+    creatingPostForId.value = null;
+    editForm.reset();
+    postForm.reset();
+
+    postEditForm.reset();
+    postEditForm.title = post.title;
+    postEditForm.excerpt = post.excerpt ?? '';
+    postEditForm.content = post.content ?? '';
+    postEditForm.is_published = !!post.is_published;
+}
+
+function cancelEditPost() {
+    editingPostId.value = null;
+    postEditForm.reset();
+}
+
+function submitEditPost(post: PostItem) {
+    postEditForm.patch(route('posts.update', post.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            editingPostId.value = null;
+        },
+    });
 }
 
 function submitCreatePost() {
@@ -214,7 +286,83 @@ function submitCreatePost() {
                             <PublishedBadge :published="blog.is_published" />
                             <button class="cursor-pointer px-3 py-2" type="button" @click="startEdit(blog)">Edit</button>
                             <button class="cursor-pointer px-3 py-2" type="button" @click="startCreatePost(blog)">Add Post</button>
+                            <button class="cursor-pointer px-3 py-2" type="button" @click="togglePosts(blog)">
+                                <span v-if="expandedPostsForId === blog.id">Hide Posts</span>
+                                <span v-else>Show Posts</span>
+                            </button>
                         </div>
+                    </div>
+
+                    <!-- Posts List -->
+                    <div v-if="expandedPostsForId === blog.id" class="mt-4 border-t pt-4 ml-4">
+                        <div v-if="blog.posts && blog.posts.length" class="space-y-3">
+                            <div v-for="post in blog.posts" :key="`post-${blog.id}-${post.id}`" class="rounded-md border p-3">
+                                <div class="flex items-start justify-between gap-4">
+                                    <div>
+                                        <div class="text-sm font-medium">{{ post.title }}</div>
+                                        <div class="text-xs text-muted-foreground">{{ post.excerpt }}</div>
+                                    </div>
+                                    <div>
+                                        <button class="cursor-pointer px-3 py-2" type="button" @click="startEditPost(post)">
+                                            {{ editingPostId === post.id ? 'Close' : 'Edit' }}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Inline Post Edit Form -->
+                                <div v-if="editingPostId === post.id" class="mt-3 border-t pt-3">
+                                    <form class="space-y-3" @submit.prevent="submitEditPost(post)">
+                                        <div>
+                                            <label :for="`edit-post-title-${post.id}`" class="mb-1 block text-sm font-medium">Title</label>
+                                            <input
+                                                :id="`edit-post-title-${post.id}`"
+                                                v-model="postEditForm.title"
+                                                class="block w-full rounded-md border px-3 py-2"
+                                                required
+                                                type="text"
+                                            />
+                                            <InputError :message="postEditForm.errors.title" />
+                                        </div>
+                                        <div>
+                                            <label :for="`edit-post-excerpt-${post.id}`" class="mb-1 block text-sm font-medium">Excerpt</label>
+                                            <textarea
+                                                :id="`edit-post-excerpt-${post.id}`"
+                                                v-model="postEditForm.excerpt"
+                                                class="block w-full rounded-md border px-3 py-2"
+                                                rows="2"
+                                            />
+                                            <InputError :message="postEditForm.errors.excerpt" />
+                                        </div>
+                                        <div>
+                                            <label :for="`edit-post-content-${post.id}`" class="mb-1 block text-sm font-medium">Content</label>
+                                            <textarea
+                                                :id="`edit-post-content-${post.id}`"
+                                                v-model="postEditForm.content"
+                                                class="block w-full rounded-md border px-3 py-2"
+                                                rows="4"
+                                            />
+                                            <InputError :message="postEditForm.errors.content" />
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <input :id="`edit-post-published-${post.id}`" v-model="postEditForm.is_published" type="checkbox" />
+                                            <label :for="`edit-post-published-${post.id}`" class="text-sm">Published</label>
+                                        </div>
+
+                                        <div class="flex items-center gap-2">
+                                            <button
+                                                :disabled="postEditForm.processing"
+                                                class="inline-flex cursor-pointer items-center rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                                                type="submit"
+                                            >
+                                                {{ postEditForm.processing ? 'Saving…' : 'Save Post' }}
+                                            </button>
+                                            <button class="cursor-pointer px-3 py-2" type="button" @click="cancelEditPost">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else class="text-sm text-muted-foreground">No posts yet.</div>
                     </div>
 
                     <!-- Inline Edit Form -->

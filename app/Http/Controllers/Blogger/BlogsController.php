@@ -28,7 +28,13 @@ class BlogsController extends Controller
 
         $blogs = Blog::query()
             ->where('user_id', $user->id)
-            ->with(['categories:id,name'])
+            ->with([
+                'categories:id,name',
+                'posts' => function ($q) {
+                    $q->orderByRaw('COALESCE(published_at, created_at) DESC')
+                        ->select('id', 'blog_id', 'title', 'excerpt', 'content', 'is_published', 'visibility', 'published_at', 'created_at');
+                },
+            ])
             ->orderByDesc('created_at')
             ->get(['id', 'user_id', 'name', 'slug', 'description', 'is_published', 'created_at']);
 

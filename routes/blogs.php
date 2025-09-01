@@ -9,6 +9,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('blogs', BlogsController::class)
         ->only(['index', 'store', 'update']);
 
-    // Posts routes (create only for now)
+    // Posts routes
     Route::post('posts', [PostsController::class, 'store'])->name('posts.store');
+    Route::patch('posts/{post}', [PostsController::class, 'update'])->name('posts.update');
 });
