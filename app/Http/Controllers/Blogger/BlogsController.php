@@ -7,19 +7,24 @@ use App\Models\Blog;
 use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class BlogsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(['auth', 'verified']);
+        $this->authorizeResource(\App\Models\Blog::class, 'blog');
+    }
+
     /**
      * Display a listing of the authenticated user's blogs.
      */
     public function index(Request $request): Response
     {
+        $this->authorize('viewAny', \App\Models\Blog::class);
         $user = $request->user();
-        abort_unless(!!$user, 403);
 
         $blogs = Blog::query()
             ->where('user_id', $user->id)
@@ -43,21 +48,10 @@ class BlogsController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $this->authorize('create', Blog::class);
         $user = $request->user();
-        abort_unless($user && ($user->isAdmin() || $user->isBlogger()), 403);
-
-        // Enforce quota for bloggers (admins bypass)
-        if (!$user->isAdmin()) {
-            abort_unless($user->canCreateBlog(), 403, 'Blog quota reached.');
-        }
 
         $name = trim((string)($request->input('name') ?: 'New Blog'));
-        $base = Str::slug($name);
-        $slug = $base ?: 'blog';
-        $i = 1;
-        while (Blog::where('slug', $slug)->exists()) {
-            $slug = ($base ?: 'blog') . '-' . $i++;
-        }
 
         $validated = $request->validate([
             'description' => ['nullable', 'string'],
@@ -68,7 +62,6 @@ class BlogsController extends Controller
         $blog = Blog::create([
             'user_id' => $user->id,
             'name' => $name,
-            'slug' => $slug,
             'description' => $validated['description'] ?? null,
             'is_published' => false,
         ]);
@@ -85,9 +78,8 @@ class BlogsController extends Controller
      */
     public function update(Request $request, Blog $blog): RedirectResponse
     {
+        $this->authorize('update', $blog);
         $user = $request->user();
-        abort_unless($user, 403);
-        abort_unless($user->isAdmin() || $blog->user_id === $user->id, 403);
 
         $validated = $request->validate([
             'name' => ['sometimes', 'required', 'string', 'max:255'],
@@ -99,14 +91,7 @@ class BlogsController extends Controller
 
         if (array_key_exists('name', $validated)) {
             $blog->name = $validated['name'];
-            // Regenerate slug if name changed and slug not explicitly provided
-            $base = Str::slug($validated['name']);
-            $slug = $base ?: 'blog';
-            $i = 1;
-            while (Blog::where('slug', $slug)->where('id', '!=', $blog->id)->exists()) {
-                $slug = ($base ?: 'blog') . '-' . $i++;
-            }
-            $blog->slug = $slug;
+            // Slug will be auto-adjusted by observer if name changed
         }
 
         if (array_key_exists('description', $validated)) {

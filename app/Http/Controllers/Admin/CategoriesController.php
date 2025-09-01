@@ -6,18 +6,22 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class CategoriesController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(['auth', 'verified']);
+    }
+
     /**
      * Display a listing of categories with blog counts (admin only).
      */
     public function index(Request $request): Response
     {
-        abort_unless($request->user() && $request->user()->isAdmin(), 403);
+        $this->authorize('viewAny', \App\Models\Category::class);
 
         $categories = Category::query()
             ->withCount('blogs')
@@ -34,22 +38,14 @@ class CategoriesController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        abort_unless($request->user() && $request->user()->isAdmin(), 403);
+        $this->authorize('create', Category::class);
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
         ]);
 
-        $base = Str::slug($validated['name']);
-        $slug = $base ?: 'category';
-        $i = 1;
-        while (Category::where('slug', $slug)->exists()) {
-            $slug = ($base ?: 'category') . '-' . $i++;
-        }
-
         Category::create([
             'name' => $validated['name'],
-            'slug' => $slug,
         ]);
 
         return back()->with('success', 'Category created.');
@@ -60,20 +56,14 @@ class CategoriesController extends Controller
      */
     public function update(Request $request, Category $category): RedirectResponse
     {
-        abort_unless($request->user() && $request->user()->isAdmin(), 403);
+        $this->authorize('update', $category);
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
         ]);
 
         $category->name = $validated['name'];
-        $base = Str::slug($validated['name']);
-        $slug = $base ?: 'category';
-        $i = 1;
-        while (Category::where('slug', $slug)->where('id', '!=', $category->id)->exists()) {
-            $slug = ($base ?: 'category') . '-' . $i++;
-        }
-        $category->slug = $slug;
+        // Slug will be auto-adjusted by observer if name changed
         $category->save();
 
         return back()->with('success', 'Category updated.');
@@ -84,7 +74,7 @@ class CategoriesController extends Controller
      */
     public function destroy(Request $request, Category $category): RedirectResponse
     {
-        abort_unless($request->user() && $request->user()->isAdmin(), 403);
+        $this->authorize('delete', $category);
 
         $category->delete();
 

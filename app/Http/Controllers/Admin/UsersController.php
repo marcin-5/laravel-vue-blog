@@ -16,8 +16,8 @@ class UsersController extends Controller
      */
     public function index(Request $request): Response
     {
-        // Ensure only admins can view
-        abort_unless($request->user() && $request->user()->isAdmin(), 403);
+        // Centralized authorization via Gate ability used in routes; double-check here as well
+        $this->authorize('edit-user-blog-quota');
 
         $users = User::query()
             ->select(['id', 'name', 'email', 'role', 'blog_quota'])
@@ -35,8 +35,8 @@ class UsersController extends Controller
      */
     public function update(Request $request, User $user): RedirectResponse
     {
-        // Ensure only admins can perform updates
-        abort_unless($request->user() && $request->user()->isAdmin(), 403);
+        // Centralized authorization via Gate
+        $this->authorize('edit-user-blog-quota');
 
         // Keep the original role from DB to enforce blog_quota edit rules
         $originalRole = $user->role;
