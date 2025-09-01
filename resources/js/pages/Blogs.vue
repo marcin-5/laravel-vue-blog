@@ -190,6 +190,13 @@ function submitEdit(blog: Blog) {
                                 />
                                 <InputError :message="editForm.errors.description" />
                             </div>
+                            <!-- Move Published checkbox up to be below the name/slug area -->
+                            <div class="flex items-center gap-2">
+                                <input :id="`edit-published-${blog.id}`" v-model="editForm.is_published" type="checkbox" />
+                                <label :for="`edit-published-${blog.id}`" class="text-sm">Published</label>
+                                <span class="text-xs text-muted-foreground">/{{ blog.slug }}</span>
+                            </div>
+                            <InputError :message="editForm.errors.is_published" />
                             <div>
                                 <div class="mb-1 block text-sm font-medium">Categories</div>
                                 <div class="flex flex-wrap gap-3">
@@ -204,11 +211,6 @@ function submitEdit(blog: Blog) {
                                 </div>
                                 <InputError :message="editForm.errors.categories" />
                             </div>
-                            <div class="flex items-center gap-2">
-                                <input :id="`edit-published-${blog.id}`" v-model="editForm.is_published" type="checkbox" />
-                                <label :for="`edit-published-${blog.id}`" class="text-sm">Published</label>
-                            </div>
-                            <InputError :message="editForm.errors.is_published" />
 
                             <div class="flex items-center gap-2">
                                 <button
