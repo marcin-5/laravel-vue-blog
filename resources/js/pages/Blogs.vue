@@ -52,7 +52,16 @@ const editForm = useForm({
 });
 
 function startEdit(blog: Blog) {
+    if (editingId.value === blog.id) {
+        // Toggle off if this blog is already being edited
+        cancelEdit();
+        return;
+    }
+    // Switch to this blog's edit form and ensure the create-post form is hidden
     editingId.value = blog.id;
+    creatingPostForId.value = null;
+    postForm.reset();
+
     editForm.reset();
     editForm.name = blog.name;
     editForm.description = blog.description;
@@ -85,7 +94,16 @@ const postForm = useForm({
 });
 
 function startCreatePost(blog: Blog) {
+    if (creatingPostForId.value === blog.id) {
+        // Toggle off if this blog's Create Post form is already open
+        cancelCreatePost();
+        return;
+    }
+    // Open this blog's Create Post form and ensure the edit form is hidden
     creatingPostForId.value = blog.id;
+    editingId.value = null;
+    editForm.reset();
+
     postForm.reset();
     postForm.blog_id = blog.id;
 }
