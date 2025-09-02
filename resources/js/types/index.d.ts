@@ -46,6 +46,23 @@ export interface User {
 
 export type BreadcrumbItemType = BreadcrumbItem;
 
+export interface Category {
+    id: number;
+    name: string;
+}
+
+export interface PostItem {
+    id: number;
+    blog_id: number;
+    title: string;
+    excerpt: string | null;
+    content?: string | null;
+    is_published: boolean;
+    visibility?: string;
+    published_at?: string | null;
+    created_at?: string | null;
+}
+
 export interface Blog {
     id: number;
     user_id: number;
@@ -53,5 +70,7 @@ export interface Blog {
     slug: string;
     description: string | null;
     is_published: boolean;
-    created_at: string; // ISO
+    creation_date?: string | null;
+    categories?: Category[];
+    posts?: PostItem[];
 }

@@ -1,0 +1,49 @@
+<script lang="ts" setup>
+import type { Category } from '@/types';
+
+interface Props {
+    categories: Category[];
+    selectedCategories: number[];
+    idPrefix?: string;
+}
+
+interface Emits {
+    (e: 'update:selectedCategories', value: number[]): void;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    idPrefix: 'category',
+});
+
+const emit = defineEmits<Emits>();
+
+function updateCategories(categoryIds: number[]) {
+    emit('update:selectedCategories', categoryIds);
+}
+</script>
+
+<template>
+    <div>
+        <div class="mb-1 block text-sm font-medium">Categories</div>
+        <div class="flex flex-wrap gap-3">
+            <label v-for="category in props.categories" :key="`${props.idPrefix}-${category.id}`" class="inline-flex items-center gap-2">
+                <input
+                    :checked="props.selectedCategories.includes(category.id)"
+                    :value="category.id"
+                    type="checkbox"
+                    @change="
+                        (e) => {
+                            const target = e.target as HTMLInputElement;
+                            const categoryId = category.id;
+                            const newSelection = target.checked
+                                ? [...props.selectedCategories, categoryId]
+                                : props.selectedCategories.filter((id) => id !== categoryId);
+                            updateCategories(newSelection);
+                        }
+                    "
+                />
+                <span class="text-sm">{{ category.name }}</span>
+            </label>
+        </div>
+    </div>
+</template>
