@@ -7,6 +7,8 @@ use App\Models\Blog;
 use App\Models\Post;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Parsedown;
 
 class PostsController extends Controller
 {
@@ -95,5 +97,24 @@ class PostsController extends Controller
         $post->save();
 
         return back()->with('success', 'Post updated successfully.');
+    }
+
+    /**
+     * Preview markdown content.
+     */
+    public function preview(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'content' => ['required', 'string'],
+        ]);
+
+        $parsedown = new Parsedown();
+        $parsedown->setSafeMode(true); // Enable safe mode to prevent XSS
+
+        $html = $parsedown->text($validated['content']);
+
+        return response()->json([
+            'html' => $html,
+        ]);
     }
 }

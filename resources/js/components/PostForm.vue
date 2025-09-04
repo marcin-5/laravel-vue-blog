@@ -1,8 +1,10 @@
 <script lang="ts" setup>
 import InputError from '@/components/InputError.vue';
+import { useAppearance } from '@/composables/useAppearance';
 import type { PostItem } from '@/types';
+import { MoonIcon, SunIcon } from '@heroicons/vue/24/outline';
 import { useForm } from '@inertiajs/vue3';
-import { watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
 interface Props {
     post?: PostItem;
@@ -23,6 +25,35 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<Emits>();
+
+// Preview mode state
+const isPreviewMode = ref(false);
+const isFullPreview = ref(false);
+const previewLayout = ref<'horizontal' | 'vertical'>('horizontal');
+const previewHtml = ref('');
+
+// Theme management
+const { appearance, updateAppearance } = useAppearance();
+const isDarkMode = ref(false);
+
+// Initialize theme state
+onMounted(() => {
+    updateCurrentTheme();
+});
+
+function updateCurrentTheme() {
+    if (appearance.value === 'system') {
+        isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    } else {
+        isDarkMode.value = appearance.value === 'dark';
+    }
+}
+
+function toggleTheme() {
+    const newTheme = isDarkMode.value ? 'light' : 'dark';
+    updateAppearance(newTheme);
+    isDarkMode.value = !isDarkMode.value;
+}
 
 // Use external form if provided, otherwise create internal form
 const form =
@@ -70,6 +101,56 @@ function handleSubmit() {
 function handleCancel() {
     emit('cancel');
 }
+
+// Preview functionality
+async function renderMarkdown() {
+    if (!form.content) {
+        previewHtml.value = '';
+        return;
+    }
+
+    try {
+        const response = await fetch(route('posts.preview'), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            },
+            body: JSON.stringify({
+                content: form.content,
+            }),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            previewHtml.value = data.html;
+        } else {
+            previewHtml.value = '<p class="text-red-500">Error rendering markdown</p>';
+        }
+    } catch (error) {
+        console.error('Failed to render markdown:', error);
+        previewHtml.value = '<p class="text-red-500">Error rendering markdown</p>';
+    }
+}
+
+function togglePreview() {
+    isPreviewMode.value = !isPreviewMode.value;
+    if (isPreviewMode.value) {
+        renderMarkdown();
+    }
+}
+
+function toggleFullPreview() {
+    isFullPreview.value = !isFullPreview.value;
+    if (isFullPreview.value) {
+        renderMarkdown();
+    }
+}
+
+function togglePreviewLayout() {
+    previewLayout.value = previewLayout.value === 'horizontal' ? 'vertical' : 'horizontal';
+}
 </script>
 
 <template>
@@ -103,22 +184,140 @@ function handleCancel() {
             </div>
 
             <div>
-                <label :for="`${props.idPrefix}-content-${props.post?.id || props.blogId}`" class="mb-1 block text-sm font-medium"> Content </label>
-                <textarea
-                    :id="`${props.idPrefix}-content-${props.post?.id || props.blogId}`"
-                    v-model="form.content"
-                    :placeholder="props.isEdit ? '' : 'Write your post...'"
-                    :rows="props.isEdit ? 4 : 5"
-                    class="block w-full rounded-md border px-3 py-2"
-                />
+                <div class="mb-1">
+                    <label :for="`${props.idPrefix}-content-${props.post?.id || props.blogId}`" class="block text-sm font-medium"> Content </label>
+                </div>
+
+                <!-- Full Preview Mode -->
+                <div v-if="isFullPreview" class="fixed inset-0 z-50 bg-background text-foreground">
+                    <div class="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background p-4">
+                        <h2 class="text-lg font-semibold">Preview Mode</h2>
+                        <div class="flex gap-2">
+                            <button
+                                :disabled="form.processing"
+                                class="rounded bg-constructive px-4 py-2 text-constructive-foreground hover:bg-constructive-hover disabled:opacity-50"
+                                type="button"
+                                @click="handleSubmit"
+                            >
+                                {{ props.isEdit ? 'Save' : 'Create' }}
+                            </button>
+                            <button
+                                class="rounded border bg-destructive px-4 py-2 text-destructive-foreground hover:bg-destructive-hover"
+                                type="button"
+                                @click="handleCancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                class="rounded border bg-toggle px-4 py-2 text-toggle-foreground hover:bg-toggle-hover"
+                                type="button"
+                                @click="togglePreviewLayout"
+                            >
+                                {{ previewLayout === 'horizontal' ? 'Horizontal' : 'Vertical' }}
+                            </button>
+                            <button
+                                class="flex items-center gap-2 rounded border bg-toggle px-4 py-2 text-toggle-foreground hover:bg-toggle-hover"
+                                type="button"
+                                @click="toggleTheme"
+                            >
+                                <SunIcon v-if="isDarkMode" class="h-4 w-4" />
+                                <MoonIcon v-else class="h-4 w-4" />
+                            </button>
+                            <button
+                                class="rounded border bg-exit px-4 py-2 text-exit-foreground hover:bg-exit-hover"
+                                type="button"
+                                @click="toggleFullPreview"
+                            >
+                                Exit Preview
+                            </button>
+                        </div>
+                    </div>
+                    <div class="h-full overflow-auto p-4">
+                        <div :class="previewLayout === 'horizontal' ? 'flex h-full gap-4' : 'space-y-4'">
+                            <div :class="previewLayout === 'horizontal' ? 'w-1/2' : ''">
+                                <h3 class="mb-2 text-sm font-medium">Markdown</h3>
+                                <textarea
+                                    v-model="form.content"
+                                    class="h-96 w-full rounded border border-border bg-background px-3 py-2 font-mono text-sm text-foreground"
+                                    placeholder="Write your markdown here..."
+                                    @input="renderMarkdown"
+                                />
+                            </div>
+                            <div :class="previewLayout === 'horizontal' ? 'w-1/2' : ''">
+                                <h3 class="mb-2 text-sm font-medium">Preview</h3>
+                                <div class="prose h-96 max-w-none overflow-auto rounded border border-border bg-muted p-4" v-html="previewHtml" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Normal Mode -->
+                <div v-else>
+                    <div v-if="isPreviewMode" :class="previewLayout === 'horizontal' ? 'flex gap-4' : 'space-y-4'">
+                        <!-- Markdown Editor -->
+                        <div :class="previewLayout === 'horizontal' ? 'w-1/2' : ''">
+                            <textarea
+                                :id="`${props.idPrefix}-content-${props.post?.id || props.blogId}`"
+                                v-model="form.content"
+                                :placeholder="props.isEdit ? '' : 'Write your post...'"
+                                :rows="props.isEdit ? 8 : 10"
+                                class="block w-full rounded-md border px-3 py-2"
+                                @input="renderMarkdown"
+                            />
+                        </div>
+                        <!-- Preview Pane -->
+                        <div :class="previewLayout === 'horizontal' ? 'w-1/2' : ''">
+                            <div
+                                class="prose min-h-[200px] max-w-none overflow-auto rounded border border-border bg-muted p-4"
+                                v-html="previewHtml"
+                            />
+                        </div>
+                    </div>
+                    <div v-else>
+                        <textarea
+                            :id="`${props.idPrefix}-content-${props.post?.id || props.blogId}`"
+                            v-model="form.content"
+                            :placeholder="props.isEdit ? '' : 'Write your post...'"
+                            :rows="props.isEdit ? 4 : 5"
+                            class="block w-full rounded-md border px-3 py-2"
+                        />
+                    </div>
+                </div>
                 <InputError :message="form.errors.content" />
             </div>
 
-            <div class="flex items-center gap-2">
-                <input :id="`${props.idPrefix}-published-${props.post?.id || props.blogId}`" v-model="form.is_published" type="checkbox" />
-                <label :for="`${props.idPrefix}-published-${props.post?.id || props.blogId}`" class="text-sm">
-                    {{ props.isEdit ? 'Published' : 'Publish now' }}
-                </label>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <input :id="`${props.idPrefix}-published-${props.post?.id || props.blogId}`" v-model="form.is_published" type="checkbox" />
+                    <label :for="`${props.idPrefix}-published-${props.post?.id || props.blogId}`" class="text-sm">
+                        {{ props.isEdit ? 'Published' : 'Publish now' }}
+                    </label>
+                </div>
+                <div class="flex gap-2">
+                    <button
+                        class="rounded border bg-exit px-3 py-1 text-sm text-exit-foreground hover:bg-exit-hover"
+                        type="button"
+                        @click="togglePreview"
+                    >
+                        {{ isPreviewMode ? 'Edit' : 'Preview' }}
+                    </button>
+                    <button
+                        v-if="isPreviewMode"
+                        class="rounded border bg-exit px-3 py-1 text-sm text-exit-foreground hover:bg-exit-hover"
+                        type="button"
+                        @click="toggleFullPreview"
+                    >
+                        {{ isFullPreview ? 'Split View' : 'Full Preview' }}
+                    </button>
+                    <button
+                        v-if="isPreviewMode && !isFullPreview"
+                        class="rounded border bg-toggle px-3 py-1 text-sm text-toggle-foreground hover:bg-toggle-hover"
+                        type="button"
+                        @click="togglePreviewLayout"
+                    >
+                        {{ previewLayout === 'horizontal' ? 'Horizontal' : 'Vertical' }}
+                    </button>
+                </div>
             </div>
 
             <div class="flex items-center gap-2">
