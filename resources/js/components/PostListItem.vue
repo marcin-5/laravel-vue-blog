@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import PostForm from '@/components/PostForm.vue';
+import { Button } from '@/components/ui/button';
 import type { PostItem } from '@/types';
 
 interface Props {
@@ -38,9 +39,9 @@ function handleCancelEdit() {
                 <div class="text-xs text-muted-foreground">{{ post.excerpt }}</div>
             </div>
             <div>
-                <button class="cursor-pointer px-3 py-2" type="button" @click="handleEdit">
+                <Button :variant="isEditing ? 'exit' : 'toggle'" size="sm" type="button" @click="handleEdit">
                     {{ isEditing ? 'Close' : 'Edit' }}
-                </button>
+                </Button>
             </div>
         </div>
 

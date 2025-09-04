@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import BlogForm from '@/components/BlogForm.vue';
+import { Button } from '@/components/ui/button';
 import type { Category } from '@/types';
 
 interface Props {
@@ -35,15 +36,10 @@ function handleCancelCreate() {
         <div class="flex items-center justify-between">
             <h1 class="text-xl font-semibold">Your Blogs</h1>
             <div :title="!props.canCreate ? 'Maximum number of blogs reached. Please ask an admin to increase your blog quota.' : ''">
-                <button
-                    :disabled="!props.canCreate"
-                    class="inline-flex cursor-pointer items-center rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
-                    type="button"
-                    @click="handleToggleCreate"
-                >
+                <Button :disabled="!props.canCreate" :variant="!props.canCreate ? 'muted' : (showCreate ? 'exit' : 'constructive')" type="button" @click="handleToggleCreate">
                     <span v-if="showCreate">Close</span>
                     <span v-else>Create New Blog</span>
-                </button>
+                </Button>
             </div>
         </div>
 

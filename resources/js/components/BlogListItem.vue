@@ -3,6 +3,7 @@ import BlogForm from '@/components/BlogForm.vue';
 import PostForm from '@/components/PostForm.vue';
 import PostListItem from '@/components/PostListItem.vue';
 import PublishedBadge from '@/components/PublishedBadge.vue';
+import { Button } from '@/components/ui/button';
 import type { Blog, Category, PostItem } from '@/types';
 
 interface Props {
@@ -91,12 +92,12 @@ function handleCancelEditPost() {
             </div>
             <div class="flex items-center gap-2">
                 <PublishedBadge :published="blog.is_published" />
-                <button class="cursor-pointer px-3 py-2" type="button" @click="handleEdit">Edit</button>
-                <button class="cursor-pointer px-3 py-2" type="button" @click="handleCreatePost">Add Post</button>
-                <button class="cursor-pointer px-3 py-2" type="button" @click="handleTogglePosts">
+                <Button size="sm" type="button" variant="toggle" @click="handleEdit">Edit</Button>
+                <Button size="sm" type="button" variant="toggle" @click="handleTogglePosts">
                     <span v-if="isPostsExpanded">Hide Posts</span>
                     <span v-else>Show Posts</span>
-                </button>
+                </Button>
+                <Button size="sm" type="button" variant="constructive" @click="handleCreatePost">Add Post</Button>
             </div>
         </div>
 
@@ -132,9 +133,9 @@ function handleCancelEditPost() {
         <PostForm
             v-if="isCreatingPost"
             :blog-id="blog.id"
+            :form="postForm"
             :id-prefix="`post-${blog.id}`"
             :is-edit="false"
-            :form="postForm"
             @cancel="handleCancelCreatePost"
             @submit="handleSubmitCreatePost"
         />

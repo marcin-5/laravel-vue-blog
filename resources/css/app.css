@@ -137,8 +137,8 @@
     --muted-foreground: hsl(0 0% 63.9%);
     --accent: hsl(0 0% 14.9%);
     --accent-foreground: hsl(0 0% 98%);
-    --constructive: hsl(121 30% 25%);
-    --constructive-hover: hsl(126 35% 35%);
+    --constructive: hsl(121 30% 15%);
+    --constructive-hover: hsl(126 35% 25%);
     --constructive-foreground: hsl(135 35% 91%);
     --destructive: hsl(5 53% 47%);
     --destructive-hover: hsl(0 64% 60%);

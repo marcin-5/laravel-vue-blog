@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-import InputError from '@/components/InputError.vue';
 import CategorySelector from '@/components/CategorySelector.vue';
+import InputError from '@/components/InputError.vue';
+import { Button } from '@/components/ui/button';
 import type { Blog, Category } from '@/types';
 import { useForm } from '@inertiajs/vue3';
 import { watch } from 'vue';
@@ -26,20 +27,24 @@ const emit = defineEmits<Emits>();
 
 const form = useForm({
     name: props.blog?.name || '',
-    description: props.blog?.description || null as string | null,
+    description: props.blog?.description || (null as string | null),
     is_published: props.blog?.is_published || false,
     categories: (props.blog?.categories ?? []).map((c) => c.id) as number[],
 });
 
 // Update form when blog prop changes (for edit mode)
-watch(() => props.blog, (newBlog) => {
-    if (newBlog) {
-        form.name = newBlog.name;
-        form.description = newBlog.description;
-        form.is_published = newBlog.is_published;
-        form.categories = (newBlog.categories ?? []).map((c) => c.id);
-    }
-}, { immediate: true });
+watch(
+    () => props.blog,
+    (newBlog) => {
+        if (newBlog) {
+            form.name = newBlog.name;
+            form.description = newBlog.description;
+            form.is_published = newBlog.is_published;
+            form.categories = (newBlog.categories ?? []).map((c) => c.id);
+        }
+    },
+    { immediate: true },
+);
 
 function handleSubmit() {
     emit('submit', form);
@@ -62,8 +67,8 @@ function updateCategories(categoryIds: number[]) {
                 <input
                     :id="`${props.idPrefix}-name`"
                     v-model="form.name"
-                    class="block w-full rounded-md border px-3 py-2"
                     :placeholder="props.isEdit ? '' : 'My Awesome Blog'"
+                    class="block w-full rounded-md border px-3 py-2"
                     required
                     type="text"
                 />
@@ -75,8 +80,8 @@ function updateCategories(categoryIds: number[]) {
                 <textarea
                     :id="`${props.idPrefix}-description`"
                     v-model="form.description"
-                    class="block w-full rounded-md border px-3 py-2"
                     :placeholder="props.isEdit ? '' : 'What\'s this blog about?'"
+                    class="block w-full rounded-md border px-3 py-2"
                     rows="3"
                 />
                 <InputError :message="form.errors.description" />
@@ -84,11 +89,7 @@ function updateCategories(categoryIds: number[]) {
 
             <!-- Published checkbox (only for edit mode) -->
             <div v-if="props.isEdit && props.blog" class="flex items-center gap-2">
-                <input
-                    :id="`${props.idPrefix}-published`"
-                    v-model="form.is_published"
-                    type="checkbox"
-                />
+                <input :id="`${props.idPrefix}-published`" v-model="form.is_published" type="checkbox" />
                 <label :for="`${props.idPrefix}-published`" class="text-sm">Published</label>
                 <span class="text-xs text-muted-foreground">/{{ props.blog.slug }}</span>
             </div>
@@ -96,32 +97,22 @@ function updateCategories(categoryIds: number[]) {
 
             <CategorySelector
                 :categories="props.categories"
-                :selected-categories="form.categories"
                 :id-prefix="`${props.idPrefix}-cat`"
+                :selected-categories="form.categories"
                 @update:selected-categories="updateCategories"
             />
             <InputError :message="form.errors.categories" />
 
             <div class="flex items-center gap-2">
-                <button
-                    :disabled="form.processing"
-                    class="inline-flex cursor-pointer items-center rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
-                    type="submit"
-                >
+                <Button :disabled="form.processing" type="submit" variant="constructive">
                     <span v-if="form.processing">
                         {{ props.isEdit ? 'Saving…' : 'Creating…' }}
                     </span>
                     <span v-else>
                         {{ props.isEdit ? 'Save' : 'Create' }}
                     </span>
-                </button>
-                <button
-                    class="cursor-pointer px-3 py-2"
-                    type="button"
-                    @click="handleCancel"
-                >
-                    Cancel
-                </button>
+                </Button>
+                <Button type="button" variant="destructive" @click="handleCancel"> Cancel </Button>
             </div>
         </form>
     </div>

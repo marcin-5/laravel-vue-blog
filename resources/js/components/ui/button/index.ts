@@ -1,4 +1,4 @@
-import { cva, type VariantProps } from 'class-variance-authority'
+import { cva, type VariantProps } from 'class-variance-authority';
 
 export { default as Button } from './Button.vue'
 
@@ -10,7 +10,15 @@ export const buttonVariants = cva(
         default:
           'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
         destructive:
-          'bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
+          'bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive-hover focus-visible:ring-destructive/20',
+        constructive:
+          'bg-constructive text-constructive-foreground shadow-xs hover:bg-constructive-hover focus-visible:ring-constructive/20',
+        exit:
+          'bg-exit text-exit-foreground shadow-xs hover:bg-exit-hover focus-visible:ring-exit/20',
+        toggle:
+          'bg-toggle text-toggle-foreground shadow-xs hover:bg-toggle-hover focus-visible:ring-toggle/20',
+        muted:
+          'bg-muted text-muted-foreground shadow-xs hover:bg-muted/80 focus-visible:ring-muted/20',
         outline:
           'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
         secondary:

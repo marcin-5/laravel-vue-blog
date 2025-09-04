@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import BlogListItem from '@/components/BlogListItem.vue';
 import CreateBlogSection from '@/components/CreateBlogSection.vue';
+import { Button } from '@/components/ui/button';
 import { useBlogForm } from '@/composables/useBlogForm';
 import { usePostForm } from '@/composables/usePostForm';
 import { useUIState } from '@/composables/useUIState';
@@ -128,14 +129,15 @@ function handleToggleCreate() {
                 <div v-if="props.blogs.length === 0" class="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
                     You have no blogs yet.
                     <span :title="!props.canCreate ? 'Maximum number of blogs reached. Please ask an admin to increase your blog quota.' : ''">
-                        <button
+                        <Button
                             :disabled="!props.canCreate"
-                            class="ml-2 cursor-pointer underline disabled:cursor-not-allowed"
+                            :variant="!props.canCreate ? 'muted' : 'link'"
+                            class="ml-2"
                             type="button"
                             @click="openCreateForm"
                         >
                             Create your first blog
-                        </button>
+                        </Button>
                     </span>
                 </div>
             </div>

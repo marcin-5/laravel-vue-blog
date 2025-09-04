@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import InputError from '@/components/InputError.vue';
+import { Button } from '@/components/ui/button';
 import { useAppearance } from '@/composables/useAppearance';
 import type { PostItem } from '@/types';
 import { MoonIcon, SunIcon } from '@heroicons/vue/24/outline';
@@ -193,43 +194,18 @@ function togglePreviewLayout() {
                     <div class="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background p-4">
                         <h2 class="text-lg font-semibold">Preview Mode</h2>
                         <div class="flex gap-2">
-                            <button
-                                :disabled="form.processing"
-                                class="rounded bg-constructive px-4 py-2 text-constructive-foreground hover:bg-constructive-hover disabled:opacity-50"
-                                type="button"
-                                @click="handleSubmit"
-                            >
+                            <Button :disabled="form.processing" type="button" variant="constructive" @click="handleSubmit">
                                 {{ props.isEdit ? 'Save' : 'Create' }}
-                            </button>
-                            <button
-                                class="rounded border bg-destructive px-4 py-2 text-destructive-foreground hover:bg-destructive-hover"
-                                type="button"
-                                @click="handleCancel"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                class="rounded border bg-toggle px-4 py-2 text-toggle-foreground hover:bg-toggle-hover"
-                                type="button"
-                                @click="togglePreviewLayout"
-                            >
+                            </Button>
+                            <Button type="button" variant="destructive" @click="handleCancel"> Cancel </Button>
+                            <Button type="button" variant="toggle" @click="togglePreviewLayout">
                                 {{ previewLayout === 'horizontal' ? 'Horizontal' : 'Vertical' }}
-                            </button>
-                            <button
-                                class="flex items-center gap-2 rounded border bg-toggle px-4 py-2 text-toggle-foreground hover:bg-toggle-hover"
-                                type="button"
-                                @click="toggleTheme"
-                            >
+                            </Button>
+                            <Button class="flex items-center gap-2" type="button" variant="toggle" @click="toggleTheme">
                                 <SunIcon v-if="isDarkMode" class="h-4 w-4" />
                                 <MoonIcon v-else class="h-4 w-4" />
-                            </button>
-                            <button
-                                class="rounded border bg-exit px-4 py-2 text-exit-foreground hover:bg-exit-hover"
-                                type="button"
-                                @click="toggleFullPreview"
-                            >
-                                Exit Preview
-                            </button>
+                            </Button>
+                            <Button type="button" variant="exit" @click="toggleFullPreview"> Exit Preview </Button>
                         </div>
                     </div>
                     <div class="h-full overflow-auto p-4">
@@ -294,46 +270,28 @@ function togglePreviewLayout() {
                     </label>
                 </div>
                 <div class="flex gap-2">
-                    <button
-                        class="rounded border bg-exit px-3 py-1 text-sm text-exit-foreground hover:bg-exit-hover"
-                        type="button"
-                        @click="togglePreview"
-                    >
-                        {{ isPreviewMode ? 'Edit' : 'Preview' }}
-                    </button>
-                    <button
-                        v-if="isPreviewMode"
-                        class="rounded border bg-exit px-3 py-1 text-sm text-exit-foreground hover:bg-exit-hover"
-                        type="button"
-                        @click="toggleFullPreview"
-                    >
+                    <Button :variant="isPreviewMode ? 'exit' : 'toggle'" size="sm" type="button" @click="togglePreview">
+                        {{ isPreviewMode ? 'Close' : 'Preview' }}
+                    </Button>
+                    <Button v-if="isPreviewMode" size="sm" type="button" variant="exit" @click="toggleFullPreview">
                         {{ isFullPreview ? 'Split View' : 'Full Preview' }}
-                    </button>
-                    <button
-                        v-if="isPreviewMode && !isFullPreview"
-                        class="rounded border bg-toggle px-3 py-1 text-sm text-toggle-foreground hover:bg-toggle-hover"
-                        type="button"
-                        @click="togglePreviewLayout"
-                    >
+                    </Button>
+                    <Button v-if="isPreviewMode && !isFullPreview" size="sm" type="button" variant="toggle" @click="togglePreviewLayout">
                         {{ previewLayout === 'horizontal' ? 'Horizontal' : 'Vertical' }}
-                    </button>
+                    </Button>
                 </div>
             </div>
 
             <div class="flex items-center gap-2">
-                <button
-                    :disabled="form.processing"
-                    class="inline-flex cursor-pointer items-center rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
-                    type="submit"
-                >
+                <Button :disabled="form.processing" type="submit" variant="constructive">
                     <span v-if="form.processing">
                         {{ props.isEdit ? 'Saving…' : 'Creating…' }}
                     </span>
                     <span v-else>
                         {{ props.isEdit ? 'Save Post' : 'Create Post' }}
                     </span>
-                </button>
-                <button class="cursor-pointer px-3 py-2" type="button" @click="handleCancel">Cancel</button>
+                </Button>
+                <Button type="button" variant="destructive" @click="handleCancel">Cancel</Button>
             </div>
         </form>
     </div>

@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
@@ -103,7 +104,7 @@ function saveUser(user: UserRow) {
                                 <td class="py-2 pr-4">{{ u.name }}</td>
                                 <td class="py-2 pr-4">{{ u.email }}</td>
                                 <td class="py-2 pr-4">
-                                    <select v-model="u.role" class="rounded-md border bg-background text-foreground px-2 py-1">
+                                    <select v-model="u.role" class="rounded-md border bg-background px-2 py-1 text-foreground">
                                         <option v-for="r in roles" :key="r" :value="r">{{ r }}</option>
                                     </select>
                                 </td>
@@ -111,20 +112,21 @@ function saveUser(user: UserRow) {
                                     <input
                                         v-model.number="u.blog_quota"
                                         :disabled="!canEditQuota(u)"
-                                        class="w-24 rounded-md border bg-background text-foreground px-2 py-1"
+                                        class="w-24 rounded-md border bg-background px-2 py-1 text-foreground"
                                         min="0"
                                         type="number"
                                     />
                                 </td>
                                 <td class="py-2 pr-4">
-                                    <button
-                                        :class="['rounded-md px-3 py-1 hover:opacity-90', isChanged(u) ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground cursor-not-allowed']"
-                                        type="button"
+                                    <Button
                                         :disabled="!isChanged(u)"
+                                        :variant="isChanged(u) ? 'constructive' : 'muted'"
+                                        size="sm"
+                                        type="button"
                                         @click="saveUser(u)"
                                     >
                                         Save
-                                    </button>
+                                    </Button>
                                 </td>
                             </tr>
                         </tbody>
