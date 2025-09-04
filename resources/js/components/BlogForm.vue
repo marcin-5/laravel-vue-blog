@@ -11,6 +11,7 @@ interface Props {
     categories: Category[];
     isEdit?: boolean;
     idPrefix?: string;
+    form?: any; // External form instance (create or edit)
 }
 
 interface Emits {
@@ -25,26 +26,31 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>();
 
-const form = useForm({
-    name: props.blog?.name || '',
-    description: props.blog?.description || (null as string | null),
-    is_published: props.blog?.is_published || false,
-    categories: (props.blog?.categories ?? []).map((c) => c.id) as number[],
-});
+// Use external form if provided, otherwise create internal form
+const form =
+    props.form ||
+    useForm({
+        name: props.blog?.name || '',
+        description: props.blog?.description || (null as string | null),
+        is_published: props.blog?.is_published || false,
+        categories: (props.blog?.categories ?? []).map((c) => c.id) as number[],
+    });
 
-// Update form when blog prop changes (for edit mode)
-watch(
-    () => props.blog,
-    (newBlog) => {
-        if (newBlog) {
-            form.name = newBlog.name;
-            form.description = newBlog.description;
-            form.is_published = newBlog.is_published;
-            form.categories = (newBlog.categories ?? []).map((c) => c.id);
-        }
-    },
-    { immediate: true },
-);
+// Update form when blog prop changes (for edit mode) - only if using internal form
+if (!props.form) {
+    watch(
+        () => props.blog,
+        (newBlog) => {
+            if (newBlog) {
+                form.name = newBlog.name;
+                form.description = newBlog.description;
+                form.is_published = newBlog.is_published;
+                form.categories = (newBlog.categories ?? []).map((c) => c.id);
+            }
+        },
+        { immediate: true },
+    );
+}
 
 function handleSubmit() {
     emit('submit', form);

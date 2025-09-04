@@ -15,6 +15,7 @@ interface Props {
     editingPostId: number | null;
     postEditForm?: any; // External post edit form instance
     postForm?: any; // External post form instance for creation
+    editForm?: any; // External blog edit form instance
 }
 
 interface Emits {
@@ -123,6 +124,7 @@ function handleCancelEditPost() {
             v-if="isEditing"
             :blog="blog"
             :categories="categories"
+            :form="props.editForm"
             :id-prefix="`edit-${blog.id}`"
             :is-edit="true"
             @cancel="handleCancelEdit"

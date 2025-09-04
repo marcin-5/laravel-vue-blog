@@ -7,6 +7,7 @@ interface Props {
     canCreate: boolean;
     categories: Category[];
     showCreate: boolean;
+    form?: any; // external create form
 }
 
 interface Emits {
@@ -36,7 +37,12 @@ function handleCancelCreate() {
         <div class="flex items-center justify-between">
             <h1 class="text-xl font-semibold">Your Blogs</h1>
             <div :title="!props.canCreate ? 'Maximum number of blogs reached. Please ask an admin to increase your blog quota.' : ''">
-                <Button :disabled="!props.canCreate" :variant="!props.canCreate ? 'muted' : (showCreate ? 'exit' : 'constructive')" type="button" @click="handleToggleCreate">
+                <Button
+                    :disabled="!props.canCreate"
+                    :variant="!props.canCreate ? 'muted' : showCreate ? 'exit' : 'constructive'"
+                    type="button"
+                    @click="handleToggleCreate"
+                >
                     <span v-if="showCreate">Close</span>
                     <span v-else>Create New Blog</span>
                 </Button>
@@ -47,6 +53,7 @@ function handleCancelCreate() {
         <BlogForm
             v-if="showCreate"
             :categories="categories"
+            :form="props.form"
             :is-edit="false"
             id-prefix="new"
             @cancel="handleCancelCreate"

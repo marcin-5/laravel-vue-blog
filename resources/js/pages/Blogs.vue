@@ -17,7 +17,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 // Use composables for state management
-const { showCreate, editingId, editForm, openCreateForm, closeCreateForm, submitCreate, startEdit, cancelEdit, submitEdit } = useBlogForm();
+const { showCreate, editingId, createForm, editForm, openCreateForm, closeCreateForm, submitCreate, startEdit, cancelEdit, submitEdit } =
+    useBlogForm();
 
 const {
     creatingPostForId,
@@ -95,6 +96,7 @@ function handleToggleCreate() {
             <CreateBlogSection
                 :can-create="props.canCreate"
                 :categories="props.categories"
+                :form="createForm"
                 :show-create="showCreate"
                 @toggle-create="handleToggleCreate"
                 @submit-create="(form) => submitCreate()"
@@ -108,6 +110,7 @@ function handleToggleCreate() {
                     :key="blog.id"
                     :blog="blog"
                     :categories="props.categories"
+                    :edit-form="editForm"
                     :editing-post-id="editingPostId"
                     :is-creating-post="creatingPostForId === blog.id"
                     :is-editing="editingId === blog.id"
@@ -119,7 +122,7 @@ function handleToggleCreate() {
                     @toggle-posts="handleTogglePosts"
                     @submit-edit="(form, blog) => submitEdit(blog)"
                     @cancel-edit="cancelEdit"
-                    @submit-create-post="(form) => submitCreatePost(form)"
+                    @submit-create-post="(form) => submitCreatePost()"
                     @cancel-create-post="cancelCreatePost"
                     @edit-post="handleStartEditPost"
                     @submit-edit-post="(form, post) => submitEditPost(post)"
