@@ -98,7 +98,9 @@ function handleCancelEditPost() {
                     <span v-if="isPostsExpanded">Hide Posts</span>
                     <span v-else>Show Posts</span>
                 </Button>
-                <Button size="sm" type="button" variant="constructive" @click="handleCreatePost">Add Post</Button>
+                <Button :variant="isCreatingPost ? 'exit' : 'constructive'" size="sm" type="button" @click="handleCreatePost">{{
+                    isCreatingPost ? 'Close' : 'Add Post'
+                }}</Button>
             </div>
         </div>
 
