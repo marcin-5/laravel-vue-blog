@@ -92,7 +92,7 @@ function handleCancelEditPost() {
             </div>
             <div class="flex items-center gap-2">
                 <PublishedBadge :published="blog.is_published" />
-                <Button size="sm" type="button" variant="toggle" @click="handleEdit">Edit</Button>
+                <Button size="sm" type="button" variant="toggle" @click="handleEdit">{{ isEditing ? 'Close' : 'Edit' }}</Button>
                 <Button size="sm" type="button" variant="toggle" @click="handleTogglePosts">
                     <span v-if="isPostsExpanded">Hide Posts</span>
                     <span v-else>Show Posts</span>
