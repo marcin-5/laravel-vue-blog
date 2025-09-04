@@ -99,7 +99,7 @@ function handleToggleCreate() {
                 :form="createForm"
                 :show-create="showCreate"
                 @toggle-create="handleToggleCreate"
-                @submit-create="(form) => submitCreate()"
+                @submit-create="() => submitCreate()"
                 @cancel-create="closeCreateForm"
             />
 
@@ -120,12 +120,12 @@ function handleToggleCreate() {
                     @edit="handleStartEdit"
                     @create-post="handleStartCreatePost"
                     @toggle-posts="handleTogglePosts"
-                    @submit-edit="(form, blog) => submitEdit(blog)"
+                    @submit-edit="() => submitEdit(blog)"
                     @cancel-edit="cancelEdit"
-                    @submit-create-post="(form) => submitCreatePost()"
+                    @submit-create-post="() => submitCreatePost()"
                     @cancel-create-post="cancelCreatePost"
                     @edit-post="handleStartEditPost"
-                    @submit-edit-post="(form, post) => submitEditPost(post)"
+                    @submit-edit-post="(post) => submitEditPost(post)"
                     @cancel-edit-post="cancelEditPost"
                 />
 
