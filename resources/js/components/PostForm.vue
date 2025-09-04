@@ -5,7 +5,8 @@ import { useAppearance } from '@/composables/useAppearance';
 import type { PostItem } from '@/types';
 import { MoonIcon, SunIcon } from '@heroicons/vue/24/outline';
 import { useForm } from '@inertiajs/vue3';
-import { onMounted, ref, watch } from 'vue';
+import { useMediaQuery } from '@vueuse/core';
+import { computed, ref, watch } from 'vue';
 
 interface Props {
     post?: PostItem;
@@ -35,25 +36,16 @@ const previewHtml = ref('');
 
 // Theme management
 const { appearance, updateAppearance } = useAppearance();
-const isDarkMode = ref(false);
-
-// Initialize theme state
-onMounted(() => {
-    updateCurrentTheme();
+const isSystemDark = useMediaQuery('(prefers-color-scheme: dark)');
+const isDarkMode = computed(() => {
+    if (appearance.value === 'system') {
+        return isSystemDark.value;
+    }
+    return appearance.value === 'dark';
 });
 
-function updateCurrentTheme() {
-    if (appearance.value === 'system') {
-        isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    } else {
-        isDarkMode.value = appearance.value === 'dark';
-    }
-}
-
 function toggleTheme() {
-    const newTheme = isDarkMode.value ? 'light' : 'dark';
-    updateAppearance(newTheme);
-    isDarkMode.value = !isDarkMode.value;
+    updateAppearance(isDarkMode.value ? 'light' : 'dark');
 }
 
 // Use external form if provided, otherwise create internal form
@@ -67,17 +59,21 @@ const form =
         is_published: props.post?.is_published || false,
     });
 
+const updateFormFromPost = (post: PostItem) => {
+    form.blog_id = post.blog_id;
+    form.title = post.title;
+    form.excerpt = post.excerpt ?? '';
+    form.content = post.content ?? '';
+    form.is_published = !!post.is_published;
+};
+
 // Update form when post prop changes (for edit mode) - only if using internal form
 if (!props.form) {
     watch(
         () => props.post,
         (newPost) => {
             if (newPost) {
-                form.blog_id = newPost.blog_id;
-                form.title = newPost.title;
-                form.excerpt = newPost.excerpt ?? '';
-                form.content = newPost.content ?? '';
-                form.is_published = !!newPost.is_published;
+                updateFormFromPost(newPost);
             }
         },
         { immediate: true },
@@ -104,6 +100,29 @@ function handleCancel() {
 }
 
 // Preview functionality
+const MARKDOWN_RENDER_ERROR_HTML = '<p class="text-red-500">Error rendering markdown</p>';
+
+async function fetchMarkdownPreview(content: string): Promise<string> {
+    const response = await fetch(route('posts.preview'), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+        },
+        body: JSON.stringify({
+            content: content,
+        }),
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch markdown preview');
+    }
+
+    const data = await response.json();
+    return data.html;
+}
+
 async function renderMarkdown() {
     if (!form.content) {
         previewHtml.value = '';
@@ -111,27 +130,10 @@ async function renderMarkdown() {
     }
 
     try {
-        const response = await fetch(route('posts.preview'), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-            },
-            body: JSON.stringify({
-                content: form.content,
-            }),
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            previewHtml.value = data.html;
-        } else {
-            previewHtml.value = '<p class="text-red-500">Error rendering markdown</p>';
-        }
+        previewHtml.value = await fetchMarkdownPreview(form.content);
     } catch (error) {
         console.error('Failed to render markdown:', error);
-        previewHtml.value = '<p class="text-red-500">Error rendering markdown</p>';
+        previewHtml.value = MARKDOWN_RENDER_ERROR_HTML;
     }
 }
 
