@@ -6,7 +6,12 @@ import ThemeToggle from '@/components/ThemeToggle.vue';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
+import {
+    NavigationMenu,
+    NavigationMenuItem,
+    NavigationMenuList,
+    navigationMenuTriggerStyle
+} from '@/components/ui/navigation-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import UserMenuContent from '@/components/UserMenuContent.vue';
@@ -147,7 +152,19 @@ const rightNavItems: NavItem[] = [
                                                 </a>
                                             </Button>
                                         </TooltipTrigger>
-                                        <TooltipContent>
+                                        <TooltipContent
+                                            :align-offset="0"
+                                            :arrow-padding="4"
+                                            :avoid-collisions="true"
+                                            :collision-boundary="undefined"
+                                            :collision-padding="8"
+                                            :hide-when-detached="false"
+                                            :position-strategy="'absolute'"
+                                            :sticky="'partial'"
+                                            :update-position-strategy="'optimized'"
+                                            align="center"
+                                            side="bottom"
+                                        >
                                             <p>{{ item.title }}</p>
                                         </TooltipContent>
                                     </Tooltip>
@@ -156,7 +173,7 @@ const rightNavItems: NavItem[] = [
                         </div>
                     </div>
 
-                    <DropdownMenu>
+                    <DropdownMenu v-if="auth.user">
                         <DropdownMenuTrigger :as-child="true">
                             <Button
                                 class="relative size-10 w-auto rounded-full p-1 focus-within:ring-2 focus-within:ring-primary"
@@ -166,7 +183,7 @@ const rightNavItems: NavItem[] = [
                                 <Avatar class="size-8 overflow-hidden rounded-full">
                                     <AvatarImage v-if="auth.user.avatar" :alt="auth.user.name" :src="auth.user.avatar" />
                                     <AvatarFallback class="rounded-lg bg-neutral-200 font-semibold text-black dark:bg-neutral-700 dark:text-white">
-                                        {{ getInitials(auth.user?.name) }}
+                                        {{ getInitials(auth.user.name) }}
                                     </AvatarFallback>
                                 </Avatar>
                             </Button>
