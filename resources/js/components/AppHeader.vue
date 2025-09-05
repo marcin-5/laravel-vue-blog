@@ -2,6 +2,7 @@
 import AppLogo from '@/components/AppLogo.vue';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
+import ThemeToggle from '@/components/ThemeToggle.vue';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -128,6 +129,7 @@ const rightNavItems: NavItem[] = [
                 </div>
 
                 <div class="ml-auto flex items-center space-x-2">
+                    <ThemeToggle />
                     <div class="relative flex items-center space-x-1">
                         <Button class="group h-9 w-9 cursor-pointer" size="icon" variant="ghost">
                             <Search class="size-5 opacity-80 group-hover:opacity-100" />

@@ -99,9 +99,9 @@
     --exit: hsl(112 11% 12%);
     --exit-hover: hsl(112 21% 26%);
     --exit-foreground: hsl(112 75% 93%);
-    --toggle: hsl(102 11% 12%);
-    --toggle-hover: hsl(102 20% 25%);
-    --toggle-foreground: hsl(102 75% 93%);
+    --toggle: hsl(102 21% 75%);
+    --toggle-hover: hsl(102 20% 61%);
+    --toggle-foreground: hsl(102 75% 5%);
     --border: hsl(0 0% 92.8%);
     --input: hsl(0 0% 89.8%);
     --ring: hsl(0 0% 3.9%);
