@@ -16,6 +16,7 @@ require __DIR__ . '/blogs.php';
 require __DIR__ . '/admin/users.php';
 require __DIR__ . '/admin/categories.php';
 require __DIR__ . '/settings.php';
+require __DIR__ . '/i18n.php';
 require __DIR__ . '/auth.php';
 
 // Public routes must be loaded last

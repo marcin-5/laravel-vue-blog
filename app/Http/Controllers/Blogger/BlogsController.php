@@ -76,7 +76,7 @@ class BlogsController extends Controller
             $blog->categories()->sync($validated['categories']);
         }
 
-        return redirect()->route('blogs.index')->with('success', 'Blog created successfully.');
+        return redirect()->route('blogs.index')->with('success', __('blogs.messages.blog_created'));
     }
 
     /**
@@ -114,6 +114,6 @@ class BlogsController extends Controller
             $blog->categories()->sync($validated['categories'] ?? []);
         }
 
-        return back()->with('success', 'Blog updated successfully.');
+        return back()->with('success', __('blogs.messages.blog_updated'));
     }
 }

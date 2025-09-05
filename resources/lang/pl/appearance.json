@@ -1,0 +1,13 @@
+{
+  "settings": {
+    "appearance": {
+      "title": "Ustawienia wyglądu",
+      "description": "Zaktualizuj ustawienia wyglądu swojego konta"
+    }
+  },
+  "appearance": {
+    "light": "Jasny",
+    "dark": "Ciemny",
+    "system": "Systemowy"
+  }
+}

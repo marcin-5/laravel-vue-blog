@@ -56,7 +56,7 @@ class PostsController extends Controller
 
         $post->save();
 
-        return back()->with('success', 'Post created successfully.');
+        return back()->with('success', __('blogs.messages.post_created'));
     }
 
     /**
@@ -96,7 +96,7 @@ class PostsController extends Controller
 
         $post->save();
 
-        return back()->with('success', 'Post updated successfully.');
+        return back()->with('success', __('blogs.messages.post_updated'));
     }
 
     /**

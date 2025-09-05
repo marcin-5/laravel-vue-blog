@@ -93,13 +93,13 @@ function handleCancelEditPost() {
             </div>
             <div class="flex items-center gap-2">
                 <PublishedBadge :published="blog.is_published" />
-                <Button size="sm" type="button" variant="toggle" @click="handleEdit">{{ isEditing ? 'Close' : 'Edit' }}</Button>
+                <Button size="sm" type="button" variant="toggle" @click="handleEdit">{{ isEditing ? $t('blogs.actions.close') : $t('blogs.actions.edit') }}</Button>
                 <Button size="sm" type="button" variant="toggle" @click="handleTogglePosts">
-                    <span v-if="isPostsExpanded">Hide Posts</span>
-                    <span v-else>Show Posts</span>
+                    <span v-if="isPostsExpanded">{{ $t('blogs.actions.hide_posts') }}</span>
+                    <span v-else>{{ $t('blogs.actions.show_posts') }}</span>
                 </Button>
                 <Button :variant="isCreatingPost ? 'exit' : 'constructive'" size="sm" type="button" @click="handleCreatePost">{{
-                    isCreatingPost ? 'Close' : 'Add Post'
+                    isCreatingPost ? $t('blogs.actions.close') : $t('blogs.actions.add_post')
                 }}</Button>
             </div>
         </div>
@@ -118,7 +118,7 @@ function handleCancelEditPost() {
                     @cancel-edit="handleCancelEditPost"
                 />
             </div>
-            <div v-else class="text-sm text-muted-foreground">No posts yet.</div>
+            <div v-else class="text-sm text-muted-foreground">{{ $t('blogs.posts.empty') }}</div>
         </div>
 
         <!-- Inline Edit Form -->

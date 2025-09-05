@@ -11,9 +11,14 @@ import { Head } from '@inertiajs/vue3';
 
 const props = defineProps<{ blogs: Blog[]; canCreate: boolean; categories: Category[] }>();
 
+import { useI18n } from 'vue-i18n';
+const { t, locale } = useI18n();
+import { ensureNamespace } from '@/i18n'
+await ensureNamespace(locale.value, 'blogs')
+
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Blogs', href: '/blogs' },
+    { title: t('blogs.breadcrumb.dashboard'), href: '/dashboard' },
+    { title: t('blogs.breadcrumb.index'), href: '/blogs' },
 ];
 
 // Use composables for state management
@@ -90,7 +95,7 @@ function handleToggleCreate() {
 </script>
 
 <template>
-    <Head title="Blogs" />
+    <Head :title="$t('blogs.title')" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
             <CreateBlogSection
@@ -130,8 +135,8 @@ function handleToggleCreate() {
                 />
 
                 <div v-if="props.blogs.length === 0" class="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
-                    You have no blogs yet.
-                    <span :title="!props.canCreate ? 'Maximum number of blogs reached. Please ask an admin to increase your blog quota.' : ''">
+                    {{ $t('blogs.empty') }}
+                    <span :title="!props.canCreate ? $t('blogs.limit_reached_hint') : ''">
                         <Button
                             :disabled="!props.canCreate"
                             :variant="!props.canCreate ? 'muted' : 'link'"
@@ -139,7 +144,7 @@ function handleToggleCreate() {
                             type="button"
                             @click="openCreateForm"
                         >
-                            Create your first blog
+                            {{ $t('blogs.empty_cta') }}
                         </Button>
                     </span>
                 </div>
