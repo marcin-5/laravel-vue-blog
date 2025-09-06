@@ -37,15 +37,59 @@ class PublicBlogController extends Controller
         // Determine sidebar placement
         $sidebarPosition = $landing?->sidebar_position ?? LandingPage::SIDEBAR_NONE;
 
+        // Parse blog description from Markdown to safe HTML using ParsedownExtra
+        $descriptionHtml = '';
+        if (!empty($blog->description)) {
+            $parser = new \ParsedownExtra();
+            if (method_exists($parser, 'setSafeMode')) {
+                $parser->setSafeMode(true);
+            }
+            $descriptionHtml = $parser->text($blog->description);
+        }
+
+        // Build plain-text meta description (SEO, SSR-safe)
+        $metaDescription = (function () use ($descriptionHtml, $landing, $blog) {
+            $source = $descriptionHtml;
+            if (empty($source)) {
+                $source = $landing?->content_html ?? '';
+            }
+            if (empty($source)) {
+                $source = $blog->name ?? '';
+            }
+            // Strip HTML tags
+            $text = trim(preg_replace('/<[^>]*>/', ' ', $source) ?? '');
+            // Convert Markdown link/image leftovers if any (should be none after HTML, but be safe)
+            $text = preg_replace('/!\[([^\]]*)\]\([^\)]+\)/', '$1', $text); // images -> alt
+            $text = preg_replace('/\[([^\]]+)\]\([^\)]+\)/', '$1', $text); // links -> text
+            // Remove emphasis markers
+            $text = preg_replace('/(\*\*|__|\*|_|`)/', '', $text);
+            // Remove heading/blockquote/list markers at line starts
+            $text = preg_replace('/^\s{0,3}[#>\-]+\s*/m', '', $text);
+            // Collapse whitespace
+            $text = preg_replace('/\s+/', ' ', $text);
+            $text = trim(html_entity_decode($text ?? '', ENT_QUOTES | ENT_HTML5));
+            // Truncate to ~160 chars without cutting words
+            $limit = 160;
+            if (mb_strlen($text) <= $limit) {
+                return $text;
+            }
+            $sliced = mb_substr($text, 0, $limit);
+            // Find last space to avoid cutting words
+            $cut = mb_strrpos($sliced, ' ');
+            $result = ($cut !== false && $cut > 80) ? mb_substr($sliced, 0, $cut) : $sliced;
+            return rtrim($result) . '…';
+        })();
+
         return Inertia::render('Blog/Landing', [
             'locale' => $blog->locale ?? config('app.locale'),
             'blog' => [
                 'id' => $blog->id,
                 'name' => $blog->name,
                 'slug' => $blog->slug,
-                'description' => $blog->description,
+                'descriptionHtml' => $descriptionHtml,
             ],
             'landingHtml' => $landing?->content_html ?? '',
+            'metaDescription' => $metaDescription,
             'posts' => $posts->map(fn (Post $p) => [
                 'id' => $p->id,
                 'title' => $p->title,

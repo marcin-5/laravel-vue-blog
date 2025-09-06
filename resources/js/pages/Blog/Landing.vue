@@ -9,7 +9,7 @@ interface Blog {
     id: number;
     name: string;
     slug: string;
-    description?: string | null;
+    descriptionHtml?: string | null;
 }
 
 interface PostItem {
@@ -25,6 +25,7 @@ const props = defineProps<{
     landingHtml: string;
     posts: PostItem[];
     sidebarPosition: 'left' | 'right' | 'none';
+    metaDescription: string;
 }>();
 
 const hasLanding = !!props.landingHtml;
@@ -32,11 +33,14 @@ const hasLanding = !!props.landingHtml;
 const { t, locale } = useI18n();
 // Ensure 'landing' namespace is available for nav labels (SSR-safe with Suspense)
 await ensureNamespace(locale.value, 'landing');
+
+// metaDescription provided by server (PublicBlogController)
+const metaDescription = props.metaDescription;
 </script>
 
 <template>
     <Head :title="blog.name">
-        <meta :content="blog.description || blog.name" name="description" />
+        <meta :content="metaDescription" name="description" />
     </Head>
 
     <div class="flex min-h-screen flex-col bg-[#FDFDFC] text-[#1b1b18] dark:bg-[#0a0a0a]">
@@ -79,7 +83,7 @@ await ensureNamespace(locale.value, 'landing');
         <div class="mx-auto w-full max-w-[1024px] p-4">
             <header class="mb-4">
                 <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-400">{{ blog.name }}</h1>
-                <p v-if="blog.description" class="text-slate-800 dark:text-gray-400">{{ blog.description }}</p>
+                <div v-if="blog.descriptionHtml" class="prose prose-slate max-w-none dark:prose-invert" v-html="blog.descriptionHtml" />
             </header>
 
             <template v-if="hasLanding">
