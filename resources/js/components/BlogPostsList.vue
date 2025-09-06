@@ -1,32 +1,41 @@
 <script lang="ts" setup>
-import { Link } from '@inertiajs/vue3'
+import { Link } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
+import { ensureNamespace } from '@/i18n';
 
 interface PostItem {
-  id: number
-  title: string
-  slug: string
-  excerpt?: string | null
-  published_at?: string | null
+    id: number;
+    title: string;
+    slug: string;
+    excerpt?: string | null;
+    published_at?: string | null;
 }
 
+const { t, locale } = useI18n();
+// Ensure "blogs" namespace is loaded for current locale (supports SSR via Suspense)
+await ensureNamespace(locale.value, 'blogs');
+
 defineProps<{
-  posts: PostItem[]
-  blogSlug: string
-}>()
+    posts: PostItem[];
+    blogSlug: string;
+}>();
 </script>
 
 <template>
-  <section aria-label="Posts list">
-    <h2 class="mb-2 text-xl font-semibold">Posts</h2>
-    <p v-if="!posts || posts.length === 0">No posts yet.</p>
-    <ul v-else class="space-y-3">
-      <li v-for="p in posts" :key="p.id">
-        <Link :href="route('blog.public.post', { blog: blogSlug, postSlug: p.slug })" class="text-blue-600 hover:underline">
-          {{ p.title }}
-        </Link>
-        <small v-if="p.published_at" class="text-gray-500"> · {{ p.published_at }}</small>
-        <div v-if="p.excerpt" class="text-gray-700">{{ p.excerpt }}</div>
-      </li>
-    </ul>
-  </section>
+    <section :aria-label="t('blog.posts_list.aria')">
+        <h2 class="mb-2 text-xl font-semibold text-slate-700 dark:text-slate-500">{{ t('blog.posts_list.title') }}</h2>
+        <p v-if="!posts || posts.length === 0">{{ t('blog.posts_list.empty') }}</p>
+        <ul v-else class="space-y-3">
+            <li v-for="p in posts" :key="p.id">
+                <Link
+                    :href="route('blog.public.post', { blog: blogSlug, postSlug: p.slug })"
+                    class="font-semibold text-teal-800 hover:underline dark:font-normal dark:text-teal-700"
+                >
+                    {{ p.title }}
+                </Link>
+                <small v-if="p.published_at" class="text-gray-700 dark:text-gray-400"> · {{ p.published_at }}</small>
+                <div v-if="p.excerpt" class="text-slate-800 dark:text-slate-400">{{ p.excerpt }}</div>
+            </li>
+        </ul>
+    </section>
 </template>

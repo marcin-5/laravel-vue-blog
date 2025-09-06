@@ -1,34 +1,21 @@
 {
-  "blogs": {
-    "title": "Blogs",
-    "breadcrumb": {
-      "dashboard": "Dashboard",
-      "index": "Blogs"
-    },
-    "empty": "You have no blogs yet.",
-    "limit_reached_hint": "Maximum number of blogs reached. Please ask an admin to increase your blog quota.",
-    "empty_cta": "Create your first blog",
-    "actions": {
-      "edit": "Edit",
-      "close": "Close",
-      "show_posts": "Show Posts",
-      "hide_posts": "Hide Posts",
-      "add_post": "Add Post"
-    },
-    "messages": {
-      "blog_created": "Blog created successfully.",
-      "blog_updated": "Blog updated successfully.",
-      "post_created": "Post created successfully.",
-      "post_updated": "Post updated successfully."
-    },
-    "posts": {
-      "empty": "No posts yet."
-    },
-    "create_section": {
-      "title": "Your Blogs",
-      "create_button": "Create New Blog",
-      "close_button": "Close",
-      "quota_reached_tooltip": "Maximum number of blogs reached. Please ask an admin to increase your blog quota."
+    "blog": {
+        "nav": {
+            "dashboard": "Dashboard",
+            "logout": "Log out",
+            "login": "Log in",
+            "register": "Register"
+        },
+        "posts_list": {
+            "aria": "Posts list",
+            "title": "Posts",
+            "empty": "No posts yet."
+        },
+        "create_section": {
+            "title": "Your Blogs",
+            "create_button": "Create New Blog",
+            "close_button": "Close",
+            "quota_reached_tooltip": "Maximum number of blogs reached. Please ask an admin to increase your blog quota."
+        }
     }
-  }
 }

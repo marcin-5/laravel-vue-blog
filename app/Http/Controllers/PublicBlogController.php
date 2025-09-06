@@ -38,6 +38,7 @@ class PublicBlogController extends Controller
         $sidebarPosition = $landing?->sidebar_position ?? LandingPage::SIDEBAR_NONE;
 
         return Inertia::render('Blog/Landing', [
+            'locale' => $blog->locale ?? config('app.locale'),
             'blog' => [
                 'id' => $blog->id,
                 'name' => $blog->name,
@@ -88,6 +89,7 @@ class PublicBlogController extends Controller
             ->get(['id', 'blog_id', 'title', 'slug', 'excerpt', 'published_at', 'created_at']);
 
         return Inertia::render('Blog/Post', [
+            'locale' => $blog->locale ?? config('app.locale'),
             'blog' => [
                 'id' => $blog->id,
                 'name' => $blog->name,

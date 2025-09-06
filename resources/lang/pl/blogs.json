@@ -1,34 +1,21 @@
 {
-  "blogs": {
-    "title": "Blogi",
-    "breadcrumb": {
-      "dashboard": "Panel",
-      "index": "Blogi"
-    },
-    "empty": "Nie masz jeszcze żadnych blogów.",
-    "limit_reached_hint": "Osiągnięto maksymalną liczbę blogów. Skontaktuj się z administratorem, aby zwiększyć limit.",
-    "empty_cta": "Utwórz swój pierwszy blog",
-    "actions": {
-      "edit": "Edytuj",
-      "close": "Zamknij",
-      "show_posts": "Pokaż wpisy",
-      "hide_posts": "Ukryj wpisy",
-      "add_post": "Dodaj wpis"
-    },
-    "messages": {
-      "blog_created": "Blog został pomyślnie utworzony.",
-      "blog_updated": "Blog został pomyślnie zaktualizowany.",
-      "post_created": "Wpis został pomyślnie utworzony.",
-      "post_updated": "Wpis został pomyślnie zaktualizowany."
-    },
-    "posts": {
-      "empty": "Brak wpisów."
-    },
-    "create_section": {
-      "title": "Twoje Blogi",
-      "create_button": "Utwórz Nowy Blog",
-      "close_button": "Zamknij",
-      "quota_reached_tooltip": "Osiągnięto maksymalną liczbę blogów. Skontaktuj się z administratorem, aby zwiększyć limit."
+    "blog": {
+        "nav": {
+            "dashboard": "Panel",
+            "logout": "Wyloguj",
+            "login": "Zaloguj",
+            "register": "Rejestracja"
+        },
+        "posts_list": {
+            "aria": "Lista wpisów",
+            "title": "Posty",
+            "empty": "Brak wpisów."
+        },
+        "create_section": {
+            "title": "Twoje Blogi",
+            "create_button": "Utwórz Nowy Blog",
+            "close_button": "Zamknij",
+            "quota_reached_tooltip": "Osiągnięto maksymalną liczbę blogów. Skontaktuj się z administratorem, aby zwiększyć limit."
+        }
     }
-  }
 }
