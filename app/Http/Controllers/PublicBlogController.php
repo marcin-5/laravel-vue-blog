@@ -23,12 +23,29 @@ class PublicBlogController extends Controller
     {
         $this->preparePublicBlog($blog);
 
+        return Inertia::render('Blog/Landing', $this->getLandingViewProps($blog));
+    }
+
+    /**
+     * Ensure blog is published and set locale.
+     */
+    private function preparePublicBlog(Blog $blog): void
+    {
+        abort_unless($blog->is_published, 404);
+        app()->setLocale($blog->locale ?? config('app.locale'));
+    }
+
+    /**
+     * Prepare properties for the landing page view.
+     */
+    private function getLandingViewProps(Blog $blog): array
+    {
         $landing = $blog->landingPage;
         $posts = $this->getPublicPosts($blog);
         $descriptionHtml = $this->parseMarkdownToHtml($blog->description);
         $metaDescription = $this->generateMetaDescription($blog, $descriptionHtml, $landing);
 
-        return Inertia::render('Blog/Landing', [
+        return [
             'locale' => app()->getLocale(),
             'blog' => [
                 'id' => $blog->id,
@@ -40,16 +57,7 @@ class PublicBlogController extends Controller
             'metaDescription' => $metaDescription,
             'posts' => $this->formatPostsForView($posts),
             'sidebarPosition' => $this->getSidebarPosition($blog),
-        ]);
-    }
-
-    /**
-     * Ensure blog is published and set locale.
-     */
-    private function preparePublicBlog(Blog $blog): void
-    {
-        abort_unless($blog->is_published, 404);
-        app()->setLocale($blog->locale ?? config('app.locale'));
+        ];
     }
 
     /**
@@ -151,14 +159,29 @@ class PublicBlogController extends Controller
     public function post(Request $request, Blog $blog, string $postSlug): Response
     {
         $this->preparePublicBlog($blog);
+        $post = $this->getPublicPost($blog, $postSlug);
 
-        $post = $blog->posts()
+        return Inertia::render('Blog/Post', $this->getPostViewProps($blog, $post));
+    }
+
+    /**
+     * Get a single published, public post for a blog by slug.
+     */
+    private function getPublicPost(Blog $blog, string $postSlug): Post
+    {
+        return $blog->posts()
             ->where('slug', $postSlug)
             ->published()
             ->public()
             ->firstOrFail();
+    }
 
-        return Inertia::render('Blog/Post', [
+    /**
+     * Prepare properties for the single post page view.
+     */
+    private function getPostViewProps(Blog $blog, Post $post): array
+    {
+        return [
             'locale' => app()->getLocale(),
             'blog' => [
                 'id' => $blog->id,
@@ -174,6 +197,6 @@ class PublicBlogController extends Controller
             ],
             'posts' => $this->formatPostsForView($this->getPublicPosts($blog)),
             'sidebarPosition' => $this->getSidebarPosition($blog),
-        ]);
+        ];
     }
 }
