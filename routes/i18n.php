@@ -2,12 +2,11 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/lang/{locale}', function (string $locale) {
-    abort_unless(in_array($locale, ['en','pl'], true), 404);
+    abort_unless(in_array($locale, ['en', 'pl'], true), 404);
 
     $jsonPath = resource_path("lang/{$locale}.json");
     $messages = File::exists($jsonPath)
@@ -22,10 +21,10 @@ Route::get('/lang/{locale}', function (string $locale) {
 
 // Per-namespace bundles: /lang/{locale}/{namespace}
 Route::get('/lang/{locale}/{namespace}', function (string $locale, string $namespace) {
-    abort_unless(in_array($locale, ['en','pl'], true), 404);
+    abort_unless(in_array($locale, ['en', 'pl'], true), 404);
 
     // Whitelist allowed namespaces to avoid arbitrary file reads
-    $allowed = ['blogs', 'appearance'];
+    $allowed = ['blogs', 'appearance', 'landing'];
     abort_unless(in_array($namespace, $allowed, true), 404);
 
     $jsonPath = resource_path("lang/{$locale}/{$namespace}.json");
@@ -42,12 +41,12 @@ Route::get('/lang/{locale}/{namespace}', function (string $locale, string $names
 
 Route::post('/locale', function (Request $request) {
     $data = $request->validate([
-        'locale' => ['required','string','in:en,pl'],
+        'locale' => ['required', 'string', 'in:en,pl'],
     ]);
 
     $locale = $data['locale'];
     App::setLocale($locale);
 
     $response = back();
-    return $response->withCookie(cookie('locale', $locale, 60*24*365));
+    return $response->withCookie(cookie('locale', $locale, 60 * 24 * 365));
 })->middleware('auth');

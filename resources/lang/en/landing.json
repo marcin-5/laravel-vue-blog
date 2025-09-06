@@ -1,0 +1,17 @@
+{
+    "landing": {
+        "nav": {
+            "dashboard": "Dashboard",
+            "logout": "Log out",
+            "login": "Log in",
+            "register": "Register"
+        },
+        "blog": {
+            "posts_list": {
+                "aria": "Posts list",
+                "title": "Posts",
+                "empty": "No posts yet."
+            }
+        }
+    }
+}

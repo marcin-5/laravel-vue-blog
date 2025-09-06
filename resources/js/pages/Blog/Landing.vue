@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import ThemeToggle from '@/components/ThemeToggle.vue';
-import { Head, Link } from '@inertiajs/vue3';
-import BlogPostsList from '../../components/BlogPostsList.vue';
-import { useI18n } from 'vue-i18n';
 import { ensureNamespace } from '@/i18n';
+import { Head, Link } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
+import BlogPostsList from '../../components/BlogPostsList.vue';
 
 interface Blog {
     id: number;
@@ -30,8 +30,8 @@ const props = defineProps<{
 const hasLanding = !!props.landingHtml;
 
 const { t, locale } = useI18n();
-// Ensure 'blogs' namespace is available for nav labels (SSR-safe with Suspense)
-await ensureNamespace(locale.value, 'blogs');
+// Ensure 'landing' namespace is available for nav labels (SSR-safe with Suspense)
+await ensureNamespace(locale.value, 'landing');
 </script>
 
 <template>
@@ -47,7 +47,7 @@ await ensureNamespace(locale.value, 'blogs');
                         :href="route('dashboard')"
                         class="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
                     >
-                        {{ t('blog.nav.dashboard') }}
+                        {{ t('landing.nav.dashboard') }}
                     </Link>
                     <Link
                         :href="route('logout')"
@@ -55,7 +55,7 @@ await ensureNamespace(locale.value, 'blogs');
                         class="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#19140035] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
                         method="post"
                     >
-                        {{ t('blog.nav.logout') }}
+                        {{ t('landing.nav.logout') }}
                     </Link>
                 </template>
                 <template v-else>
@@ -63,13 +63,13 @@ await ensureNamespace(locale.value, 'blogs');
                         :href="route('login')"
                         class="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#19140035] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
                     >
-                        {{ t('blog.nav.login') }}
+                        {{ t('landing.nav.login') }}
                     </Link>
                     <Link
                         :href="route('register')"
                         class="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
                     >
-                        {{ t('blog.nav.register') }}
+                        {{ t('landing.nav.register') }}
                     </Link>
                 </template>
                 <ThemeToggle />

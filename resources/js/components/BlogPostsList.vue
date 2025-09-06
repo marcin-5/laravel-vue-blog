@@ -1,7 +1,7 @@
 <script lang="ts" setup>
+import { ensureNamespace } from '@/i18n';
 import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import { ensureNamespace } from '@/i18n';
 
 interface PostItem {
     id: number;
@@ -12,8 +12,8 @@ interface PostItem {
 }
 
 const { t, locale } = useI18n();
-// Ensure "blogs" namespace is loaded for current locale (supports SSR via Suspense)
-await ensureNamespace(locale.value, 'blogs');
+// Ensure "landing" namespace is loaded for current locale (supports SSR via Suspense)
+await ensureNamespace(locale.value, 'landing');
 
 defineProps<{
     posts: PostItem[];
@@ -22,9 +22,9 @@ defineProps<{
 </script>
 
 <template>
-    <section :aria-label="t('blog.posts_list.aria')">
-        <h2 class="mb-2 text-xl font-semibold text-slate-700 dark:text-slate-500">{{ t('blog.posts_list.title') }}</h2>
-        <p v-if="!posts || posts.length === 0">{{ t('blog.posts_list.empty') }}</p>
+    <section :aria-label="t('landing.blog.posts_list.aria')">
+        <h2 class="mb-2 text-xl font-semibold text-slate-700 dark:text-slate-500">{{ t('landing.blog.posts_list.title') }}</h2>
+        <p v-if="!posts || posts.length === 0">{{ t('landing.blog.posts_list.empty') }}</p>
         <ul v-else class="space-y-3">
             <li v-for="p in posts" :key="p.id">
                 <Link
