@@ -214,6 +214,8 @@ class PublicBlogController extends Controller
      */
     private function getPostViewProps(Blog $blog, Post $post): array
     {
+        $paginator = $this->getPublicPostsPaginated($blog);
+
         return [
             'locale' => app()->getLocale(),
             'blog' => [
@@ -228,7 +230,8 @@ class PublicBlogController extends Controller
                 'contentHtml' => $post->content_html,
                 'published_at' => optional($post->published_at)?->toDayDateTimeString(),
             ],
-            'posts' => $this->formatPostsForView(collect($this->getPublicPostsPaginated($blog)->items())),
+            'posts' => $this->formatPostsForView(collect($paginator->items())),
+            'pagination' => $this->formatPagination($paginator),
             'sidebarPosition' => $this->getSidebarPosition($blog),
             'sidebar' => (int)($blog->sidebar ?? 0),
         ];
