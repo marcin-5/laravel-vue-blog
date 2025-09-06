@@ -34,6 +34,8 @@ const form =
         description: props.blog?.description || (null as string | null),
         is_published: props.blog?.is_published || false,
         locale: (props.blog?.locale as string) || 'en',
+        sidebar: (props.blog?.sidebar as number) ?? 0,
+        page_size: (props.blog?.page_size as number) ?? 10,
         categories: (props.blog?.categories ?? []).map((c) => c.id) as number[],
     });
 
@@ -47,6 +49,8 @@ if (!props.form) {
                 form.description = newBlog.description;
                 form.is_published = newBlog.is_published;
                 form.locale = (newBlog.locale as string) || 'en';
+                form.sidebar = (newBlog.sidebar as number) ?? 0;
+                form.page_size = (newBlog.page_size as number) ?? 10;
                 form.categories = (newBlog.categories ?? []).map((c) => c.id);
             }
         },
@@ -112,6 +116,36 @@ function updateCategories(categoryIds: number[]) {
             <div v-if="props.isEdit" class="flex items-center gap-4">
                 <InputError :message="form.errors.is_published" />
                 <InputError :message="form.errors.locale" />
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <label :for="`${props.idPrefix}-sidebar`" class="mb-1 block text-sm font-medium">Sidebar position/width</label>
+                    <input
+                        :id="`${props.idPrefix}-sidebar`"
+                        v-model.number="form.sidebar"
+                        class="block w-full rounded-md border px-3 py-2"
+                        min="-50"
+                        max="50"
+                        step="1"
+                        type="number"
+                    />
+                    <p class="mt-1 text-xs text-muted-foreground">-50..-1 = left (% width), 0 = none, 1..50 = right (% width)</p>
+                    <InputError :message="form.errors.sidebar" />
+                </div>
+                <div>
+                    <label :for="`${props.idPrefix}-page_size`" class="mb-1 block text-sm font-medium">Posts per page</label>
+                    <input
+                        :id="`${props.idPrefix}-page_size`"
+                        v-model.number="form.page_size"
+                        class="block w-full rounded-md border px-3 py-2"
+                        min="1"
+                        max="100"
+                        step="1"
+                        type="number"
+                    />
+                    <InputError :message="form.errors.page_size" />
+                </div>
             </div>
 
             <CategorySelector

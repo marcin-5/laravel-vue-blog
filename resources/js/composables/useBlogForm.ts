@@ -10,6 +10,8 @@ export function useBlogForm() {
         name: '',
         description: null as string | null,
         categories: [] as number[],
+        sidebar: 0 as number,
+        page_size: 10 as number,
     });
 
     const editForm = useForm({
@@ -18,6 +20,8 @@ export function useBlogForm() {
         is_published: false as boolean,
         locale: 'en' as string,
         categories: [] as number[],
+        sidebar: 0 as number,
+        page_size: 10 as number,
     });
 
     function openCreateForm() {
@@ -50,6 +54,8 @@ export function useBlogForm() {
         editForm.description = blog.description;
         editForm.is_published = blog.is_published;
         editForm.locale = (blog.locale as string) || 'en';
+        editForm.sidebar = (blog.sidebar as number) ?? 0;
+        editForm.page_size = (blog.page_size as number) ?? 10;
         editForm.categories = (blog.categories ?? []).map((c) => c.id);
     }
 

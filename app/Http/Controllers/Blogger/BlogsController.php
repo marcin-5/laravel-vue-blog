@@ -36,7 +36,7 @@ class BlogsController extends Controller
                 },
             ])
             ->orderByDesc('created_at')
-            ->get(['id', 'user_id', 'name', 'slug', 'description', 'is_published', 'locale', 'created_at']);
+            ->get(['id', 'user_id', 'name', 'slug', 'description', 'is_published', 'locale', 'sidebar', 'page_size', 'created_at']);
 
         $categories = Category::query()
             ->orderBy('slug')
@@ -64,6 +64,8 @@ class BlogsController extends Controller
             'categories' => ['sometimes', 'array'],
             'categories.*' => ['integer', 'exists:categories,id'],
             'locale' => ['sometimes', 'string', 'in:en,pl'],
+            'sidebar' => ['sometimes', 'integer', 'between:-50,50'],
+            'page_size' => ['sometimes', 'integer', 'min:1', 'max:100'],
         ]);
 
         $blog = Blog::create([
@@ -72,6 +74,8 @@ class BlogsController extends Controller
             'description' => $validated['description'] ?? null,
             'is_published' => false,
             'locale' => $validated['locale'] ?? app()->getLocale() ?? 'en',
+            'sidebar' => (int)($validated['sidebar'] ?? 0),
+            'page_size' => (int)($validated['page_size'] ?? 10),
         ]);
 
         if (!empty($validated['categories'])) {
@@ -96,6 +100,8 @@ class BlogsController extends Controller
             'categories' => ['sometimes', 'array'],
             'categories.*' => ['integer', 'exists:categories,id'],
             'locale' => ['sometimes', 'string', 'in:en,pl'],
+            'sidebar' => ['sometimes', 'integer', 'between:-50,50'],
+            'page_size' => ['sometimes', 'integer', 'min:1', 'max:100'],
         ]);
 
         if (array_key_exists('name', $validated)) {
@@ -112,6 +118,12 @@ class BlogsController extends Controller
         }
         if (array_key_exists('locale', $validated)) {
             $blog->locale = $validated['locale'];
+        }
+        if (array_key_exists('sidebar', $validated)) {
+            $blog->sidebar = (int)$validated['sidebar'];
+        }
+        if (array_key_exists('page_size', $validated)) {
+            $blog->page_size = (int)$validated['page_size'];
         }
 
         $blog->save();

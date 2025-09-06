@@ -41,7 +41,7 @@ class PublicBlogController extends Controller
     private function getLandingViewProps(Blog $blog): array
     {
         $landing = $blog->landingPage;
-        $posts = $this->getPublicPosts($blog);
+        $paginator = $this->getPublicPostsPaginated($blog);
         $descriptionHtml = $this->parseMarkdownToHtml($blog->description);
         $metaDescription = $this->generateMetaDescription($blog, $descriptionHtml, $landing);
 
@@ -55,22 +55,50 @@ class PublicBlogController extends Controller
             ],
             'landingHtml' => $landing?->content_html ?? '',
             'metaDescription' => $metaDescription,
-            'posts' => $this->formatPostsForView($posts),
-            'sidebarPosition' => $this->getSidebarPosition($blog),
+            'posts' => $this->formatPostsForView(collect($paginator->items())),
+            'pagination' => $this->formatPagination($paginator),
+            'sidebar' => (int)($blog->sidebar ?? 0),
         ];
     }
 
     /**
      * Get published, public posts for a blog.
      */
-    private function getPublicPosts(Blog $blog): EloquentCollection
+    private function getPublicPostsPaginated(Blog $blog)
     {
-        return $blog->posts()
+        $size = (int)($blog->page_size ?? 10);
+        $size = max(1, min(100, $size));
+        $query = $blog->posts()
             ->published()
             ->public()
             ->orderByDesc('published_at')
             ->orderByDesc('created_at')
-            ->get(['id', 'blog_id', 'title', 'slug', 'excerpt', 'published_at', 'created_at']);
+            ->select(['id', 'blog_id', 'title', 'slug', 'excerpt', 'published_at', 'created_at']);
+
+        return $query->paginate($size)->withQueryString();
+    }
+
+    /**
+     * Format Laravel LengthAwarePaginator into a simple structure for the front-end.
+     */
+    private function formatPagination($paginator): array
+    {
+        if (!$paginator) return [];
+
+        // Use the built-in pagination links array, but also expose prev/next urls
+        $links = $paginator->linkCollection()->toArray();
+
+        return [
+            'links' => array_map(function ($lnk) {
+                return [
+                    'url' => $lnk['url'] ?? null,
+                    'label' => $lnk['label'] ?? '',
+                    'active' => (bool)($lnk['active'] ?? false),
+                ];
+            }, $links),
+            'prevUrl' => $paginator->previousPageUrl(),
+            'nextUrl' => $paginator->nextPageUrl(),
+        ];
     }
 
     /**
@@ -133,9 +161,10 @@ class PublicBlogController extends Controller
     /**
      * Format posts for the Inertia view.
      */
-    private function formatPostsForView(EloquentCollection $posts): Collection
+    private function formatPostsForView($posts): Collection
     {
-        return $posts->map(fn(Post $p) => [
+        // $posts can be a collection or array of Post
+        return collect($posts)->map(fn(Post $p) => [
             'id' => $p->id,
             'title' => $p->title,
             'slug' => $p->slug,
@@ -149,7 +178,11 @@ class PublicBlogController extends Controller
      */
     private function getSidebarPosition(Blog $blog): string
     {
-        return $blog->landingPage?->sidebar_position ?? LandingPage::SIDEBAR_NONE;
+        // kept for backward compatibility (used on Post page props)
+        if (($blog->sidebar ?? 0) === 0) {
+            return LandingPage::SIDEBAR_NONE;
+        }
+        return ($blog->sidebar ?? 0) < 0 ? LandingPage::SIDEBAR_LEFT : LandingPage::SIDEBAR_RIGHT;
     }
 
     /**
@@ -195,8 +228,9 @@ class PublicBlogController extends Controller
                 'contentHtml' => $post->content_html,
                 'published_at' => optional($post->published_at)?->toDayDateTimeString(),
             ],
-            'posts' => $this->formatPostsForView($this->getPublicPosts($blog)),
+            'posts' => $this->formatPostsForView(collect($this->getPublicPostsPaginated($blog)->items())),
             'sidebarPosition' => $this->getSidebarPosition($blog),
+            'sidebar' => (int)($blog->sidebar ?? 0),
         ];
     }
 }

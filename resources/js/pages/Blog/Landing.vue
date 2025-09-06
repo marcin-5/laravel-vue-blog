@@ -24,7 +24,9 @@ const props = defineProps<{
     blog: Blog;
     landingHtml: string;
     posts: PostItem[];
-    sidebarPosition: 'left' | 'right' | 'none';
+    pagination?: { links: { url: string | null; label: string; active: boolean }[] } | null;
+    // numeric sidebar value (-50..50).
+    sidebar?: number;
     metaDescription: string;
 }>();
 
@@ -36,6 +38,11 @@ await ensureNamespace(locale.value, 'landing');
 
 // metaDescription provided by server (PublicBlogController)
 const metaDescription = props.metaDescription;
+
+// Compute sidebar layout values
+const sidebarValue = props.sidebar ?? 0;
+const sidebarWidth = Math.min(50, Math.max(0, Math.abs(sidebarValue)));
+
 </script>
 
 <template>
@@ -81,27 +88,35 @@ const metaDescription = props.metaDescription;
         </header>
 
         <div class="mx-auto w-full max-w-[1024px] p-4">
-            <header class="mb-4">
+            <header v-if="sidebarWidth === 0" class="mb-4">
                 <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-400">{{ blog.name }}</h1>
                 <div v-if="blog.descriptionHtml" class="prose prose-slate max-w-none dark:prose-invert" v-html="blog.descriptionHtml" />
             </header>
 
             <template v-if="hasLanding">
-                <div v-if="sidebarPosition === 'left'" class="flex items-start gap-8">
-                    <aside class="w-[280px]">
-                        <BlogPostsList :blogSlug="blog.slug" :posts="posts" />
+                <div v-if="sidebarWidth > 0 && (props.sidebar ?? 0) < 0" class="flex items-start gap-8">
+                    <aside :style="{ width: sidebarWidth + '%', flex: '0 0 ' + sidebarWidth + '%' }">
+                        <BlogPostsList :blogSlug="blog.slug" :posts="posts" :pagination="pagination" />
                     </aside>
-                    <main class="min-w-0 flex-1">
+                    <main class="min-w-0 flex-1" :style="{ width: (100 - sidebarWidth) + '%', flex: '1 1 ' + (100 - sidebarWidth) + '%' }">
+                        <header class="mb-4">
+                            <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-400">{{ blog.name }}</h1>
+                            <div v-if="blog.descriptionHtml" class="prose prose-slate max-w-none dark:prose-invert" v-html="blog.descriptionHtml" />
+                        </header>
                         <div class="prose max-w-none" v-html="landingHtml" />
                     </main>
                 </div>
 
-                <div v-else-if="sidebarPosition === 'right'" class="flex items-start gap-8">
-                    <main class="min-w-0 flex-1">
+                <div v-else-if="sidebarWidth > 0 && (props.sidebar ?? 0) > 0" class="flex items-start gap-8">
+                    <main class="min-w-0 flex-1" :style="{ width: (100 - sidebarWidth) + '%', flex: '1 1 ' + (100 - sidebarWidth) + '%' }">
+                        <header class="mb-4">
+                            <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-400">{{ blog.name }}</h1>
+                            <div v-if="blog.descriptionHtml" class="prose prose-slate max-w-none dark:prose-invert" v-html="blog.descriptionHtml" />
+                        </header>
                         <div class="prose max-w-none" v-html="landingHtml" />
                     </main>
-                    <aside class="w-[280px]">
-                        <BlogPostsList :blogSlug="blog.slug" :posts="posts" />
+                    <aside :style="{ width: sidebarWidth + '%', flex: '0 0 ' + sidebarWidth + '%' }">
+                        <BlogPostsList :blogSlug="blog.slug" :posts="posts" :pagination="pagination" />
                     </aside>
                 </div>
 
@@ -109,12 +124,38 @@ const metaDescription = props.metaDescription;
                     <main class="min-w-0 flex-1">
                         <div class="prose max-w-none" v-html="landingHtml" />
                     </main>
-                    <BlogPostsList :blogSlug="blog.slug" :posts="posts" class="mt-6" />
+                    <BlogPostsList :blogSlug="blog.slug" :posts="posts" :pagination="pagination" class="mt-6" />
                 </div>
             </template>
 
             <template v-else>
-                <BlogPostsList :blogSlug="blog.slug" :posts="posts" />
+                <div v-if="sidebarWidth > 0 && (props.sidebar ?? 0) < 0" class="flex items-start gap-8">
+                    <aside :style="{ width: sidebarWidth + '%', flex: '0 0 ' + sidebarWidth + '%' }">
+                        <BlogPostsList :blogSlug="blog.slug" :posts="posts" :pagination="pagination" />
+                    </aside>
+                    <main class="min-w-0 flex-1" :style="{ width: (100 - sidebarWidth) + '%', flex: '1 1 ' + (100 - sidebarWidth) + '%' }">
+                        <header class="mb-4">
+                            <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-400">{{ blog.name }}</h1>
+                            <div v-if="blog.descriptionHtml" class="prose prose-slate max-w-none dark:prose-invert" v-html="blog.descriptionHtml" />
+                        </header>
+                        <!-- No landing content -->
+                    </main>
+                </div>
+                <div v-else-if="sidebarWidth > 0 && (props.sidebar ?? 0) > 0" class="flex items-start gap-8">
+                    <main class="min-w-0 flex-1" :style="{ width: (100 - sidebarWidth) + '%', flex: '1 1 ' + (100 - sidebarWidth) + '%' }">
+                        <header class="mb-4">
+                            <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-400">{{ blog.name }}</h1>
+                            <div v-if="blog.descriptionHtml" class="prose prose-slate max-w-none dark:prose-invert" v-html="blog.descriptionHtml" />
+                        </header>
+                        <!-- No landing content -->
+                    </main>
+                    <aside :style="{ width: sidebarWidth + '%', flex: '0 0 ' + sidebarWidth + '%' }">
+                        <BlogPostsList :blogSlug="blog.slug" :posts="posts" :pagination="pagination" />
+                    </aside>
+                </div>
+                <div v-else>
+                    <BlogPostsList :blogSlug="blog.slug" :posts="posts" :pagination="pagination" />
+                </div>
             </template>
         </div>
     </div>

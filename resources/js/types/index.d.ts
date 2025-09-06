@@ -72,6 +72,8 @@ export interface Blog {
     description: string | null;
     is_published: boolean;
     locale: string;
+    sidebar?: number; // -50..50
+    page_size?: number; // default 10
     creation_date?: string | null;
     categories?: Category[];
     posts?: PostItem[];

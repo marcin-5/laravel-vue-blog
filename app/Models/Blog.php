@@ -39,9 +39,13 @@ class Blog extends Model
         'description',
         'is_published',
         'locale',
+        'sidebar',
+        'page_size',
     ];
     protected $casts = [
         'is_published' => 'boolean',
+        'sidebar' => 'integer',
+        'page_size' => 'integer',
     ];
     protected $appends = [
         'creation_date',
