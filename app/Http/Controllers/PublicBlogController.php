@@ -106,8 +106,8 @@ class PublicBlogController extends Controller
         // Strip HTML tags, replacing them with spaces to avoid words merging.
         $text = trim(preg_replace('/<[^>]*>/', ' ', $source) ?? '');
         // Convert Markdown link/image leftovers if any
-        $text = preg_replace('/!\[([^\]]*)\]\([^\)]+\)/', '$1', $text); // images -> alt
-        $text = preg_replace('/\[([^\]]+)\]\([^\)]+\)/', '$1', $text); // links -> text
+        $text = preg_replace('/!\[([^]]*)]\([^)]+\)/', '$1', $text); // images -> alt
+        $text = preg_replace('/\[([^]]+)]\([^)]+\)/', '$1', $text); // links -> text
         // Remove emphasis markers
         $text = preg_replace('/(\*\*|__|\*|_|`)/', '', $text);
         // Remove heading/blockquote/list markers at line starts
