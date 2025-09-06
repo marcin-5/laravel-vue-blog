@@ -5,7 +5,11 @@ import PostListItem from '@/components/PostListItem.vue';
 import PublishedBadge from '@/components/PublishedBadge.vue';
 import { Button } from '@/components/ui/button';
 import type { Blog, Category, PostItem } from '@/types';
-import { i18n } from '@/i18n';
+import { ensureNamespace, i18n } from '@/i18n';
+import { useI18n } from 'vue-i18n';
+
+const { locale } = useI18n();
+await ensureNamespace(locale.value, 'blogs');
 
 interface Props {
     blog: Blog;
@@ -100,7 +104,9 @@ function localizedName(name: string | Record<string, string>): string {
             </div>
             <div class="flex items-center gap-2">
                 <PublishedBadge :published="blog.is_published" />
-                <Button size="sm" type="button" variant="toggle" @click="handleEdit">{{ isEditing ? $t('blogs.actions.close') : $t('blogs.actions.edit') }}</Button>
+                <Button size="sm" type="button" variant="toggle" @click="handleEdit">{{
+                    isEditing ? $t('blogs.actions.close') : $t('blogs.actions.edit')
+                }}</Button>
                 <Button size="sm" type="button" variant="toggle" @click="handleTogglePosts">
                     <span v-if="isPostsExpanded">{{ $t('blogs.actions.hide_posts') }}</span>
                     <span v-else>{{ $t('blogs.actions.show_posts') }}</span>

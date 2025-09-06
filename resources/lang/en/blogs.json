@@ -1,10 +1,9 @@
 {
-    "blog": {
-        "nav": {
+    "blogs": {
+        "title": "Blogs",
+        "breadcrumb": {
             "dashboard": "Dashboard",
-            "logout": "Log out",
-            "login": "Log in",
-            "register": "Register"
+            "index": "Blogs"
         },
         "posts_list": {
             "aria": "Posts list",
@@ -16,6 +15,19 @@
             "create_button": "Create New Blog",
             "close_button": "Close",
             "quota_reached_tooltip": "Maximum number of blogs reached. Please ask an admin to increase your blog quota."
-        }
+        },
+        "actions": {
+            "edit": "Edit",
+            "close": "Close",
+            "hide_posts": "Hide Posts",
+            "show_posts": "Show Posts",
+            "add_post": "Add Post"
+        },
+        "posts": {
+            "empty": "No posts yet"
+        },
+        "empty": "No blogs found.",
+        "empty_cta": "Create your first blog",
+        "limit_reached_hint": "Blog limit reached"
     }
 }
