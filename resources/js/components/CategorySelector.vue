@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { Category } from '@/types';
+import { i18n } from '@/i18n';
 
 interface Props {
     categories: Category[];
@@ -19,6 +20,12 @@ const emit = defineEmits<Emits>();
 
 function updateCategories(categoryIds: number[]) {
     emit('update:selectedCategories', categoryIds);
+}
+
+function localizedName(name: string | Record<string, string>): string {
+    const locale = (i18n.global.locale.value as string) || 'en';
+    if (typeof name === 'string') return name;
+    return name?.[locale] ?? name?.en ?? Object.values(name ?? {})[0] ?? '';
 }
 </script>
 
@@ -42,7 +49,7 @@ function updateCategories(categoryIds: number[]) {
                         }
                     "
                 />
-                <span class="text-sm">{{ category.name }}</span>
+                <span class="text-sm">{{ localizedName(category.name as any) }}</span>
             </label>
         </div>
     </div>

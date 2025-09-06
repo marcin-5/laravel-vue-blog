@@ -5,6 +5,7 @@ import PostListItem from '@/components/PostListItem.vue';
 import PublishedBadge from '@/components/PublishedBadge.vue';
 import { Button } from '@/components/ui/button';
 import type { Blog, Category, PostItem } from '@/types';
+import { i18n } from '@/i18n';
 
 interface Props {
     blog: Blog;
@@ -73,6 +74,12 @@ function handleSubmitEditPost(form: any, post: PostItem) {
 function handleCancelEditPost() {
     emit('cancelEditPost');
 }
+
+function localizedName(name: string | Record<string, string>): string {
+    const locale = (i18n.global.locale.value as string) || 'en';
+    if (typeof name === 'string') return name;
+    return name?.[locale] ?? name?.en ?? Object.values(name ?? {})[0] ?? '';
+}
 </script>
 
 <template>
@@ -87,7 +94,7 @@ function handleCancelEditPost() {
                         :key="`badge-${blog.id}-${cat.id}`"
                         class="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground"
                     >
-                        {{ cat.name }}
+                        {{ localizedName(cat.name as any) }}
                     </span>
                 </div>
             </div>

@@ -39,7 +39,7 @@ class BlogsController extends Controller
             ->get(['id', 'user_id', 'name', 'slug', 'description', 'is_published', 'created_at']);
 
         $categories = Category::query()
-            ->orderBy('name')
+            ->orderBy('slug')
             ->get(['id', 'name']);
 
         return Inertia::render('Blogs', [

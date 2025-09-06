@@ -48,7 +48,8 @@ export type BreadcrumbItemType = BreadcrumbItem;
 
 export interface Category {
     id: number;
-    name: string;
+    name: string | Record<string, string>;
+    slug?: string;
 }
 
 export interface PostItem {

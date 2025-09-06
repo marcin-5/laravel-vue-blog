@@ -25,7 +25,7 @@ class CategoriesController extends Controller
 
         $categories = Category::query()
             ->withCount('blogs')
-            ->orderBy('name')
+            ->orderBy('slug')
             ->get(['id', 'name', 'slug']);
 
         return Inertia::render('Admin/Categories', [
@@ -42,10 +42,17 @@ class CategoriesController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'locale' => ['nullable', 'in:en,pl'],
         ]);
 
+        $locale = $validated['locale'] ?? app()->getLocale();
+        if (!in_array($locale, ['en', 'pl'], true)) {
+            $locale = 'en';
+        }
+
+        // Set the translated name for chosen locale
         Category::create([
-            'name' => $validated['name'],
+            'name' => [$locale => $validated['name']],
         ]);
 
         return back()->with('success', 'Category created.');
@@ -60,9 +67,15 @@ class CategoriesController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'locale' => ['nullable', 'in:en,pl'],
         ]);
 
-        $category->name = $validated['name'];
+        $locale = $validated['locale'] ?? app()->getLocale();
+        if (!in_array($locale, ['en', 'pl'], true)) {
+            $locale = 'en';
+        }
+
+        $category->setTranslation('name', $locale, $validated['name']);
         // Slug will be auto-adjusted by observer if name changed
         $category->save();
 
