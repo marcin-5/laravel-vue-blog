@@ -20,6 +20,9 @@ class PublicBlogController extends Controller
         // Only allow published blogs to be visible publicly
         abort_unless($blog->is_published, 404);
 
+        // Set application locale based on blog's locale for SSR and translations
+        app()->setLocale($blog->locale ?? config('app.locale'));
+
         // Load landing page (optional)
         $landing = $blog->landingPage;
 
@@ -61,6 +64,9 @@ class PublicBlogController extends Controller
     {
         // Only allow published blogs to be visible publicly
         abort_unless($blog->is_published, 404);
+
+        // Set application locale based on blog's locale for SSR and translations
+        app()->setLocale($blog->locale ?? config('app.locale'));
 
         // Find the post within this blog that is public and published
         $post = $blog->posts()

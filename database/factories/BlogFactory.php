@@ -29,6 +29,7 @@ class BlogFactory extends Factory
             'slug' => Str::slug($name) . '-' . Str::random(6),
             'description' => $this->faker->optional()->paragraph(),
             'is_published' => $this->faker->boolean(70),
+            'locale' => $this->faker->randomElement(['en', 'pl']),
         ];
     }
 }

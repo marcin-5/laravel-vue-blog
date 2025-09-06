@@ -36,7 +36,7 @@ class BlogsController extends Controller
                 },
             ])
             ->orderByDesc('created_at')
-            ->get(['id', 'user_id', 'name', 'slug', 'description', 'is_published', 'created_at']);
+            ->get(['id', 'user_id', 'name', 'slug', 'description', 'is_published', 'locale', 'created_at']);
 
         $categories = Category::query()
             ->orderBy('slug')
@@ -63,6 +63,7 @@ class BlogsController extends Controller
             'description' => ['nullable', 'string'],
             'categories' => ['sometimes', 'array'],
             'categories.*' => ['integer', 'exists:categories,id'],
+            'locale' => ['sometimes', 'string', 'in:en,pl'],
         ]);
 
         $blog = Blog::create([
@@ -70,6 +71,7 @@ class BlogsController extends Controller
             'name' => $name,
             'description' => $validated['description'] ?? null,
             'is_published' => false,
+            'locale' => $validated['locale'] ?? app()->getLocale() ?? 'en',
         ]);
 
         if (!empty($validated['categories'])) {
@@ -93,6 +95,7 @@ class BlogsController extends Controller
             'is_published' => ['sometimes', 'boolean'],
             'categories' => ['sometimes', 'array'],
             'categories.*' => ['integer', 'exists:categories,id'],
+            'locale' => ['sometimes', 'string', 'in:en,pl'],
         ]);
 
         if (array_key_exists('name', $validated)) {
@@ -106,6 +109,9 @@ class BlogsController extends Controller
 
         if (array_key_exists('is_published', $validated)) {
             $blog->is_published = (bool)$validated['is_published'];
+        }
+        if (array_key_exists('locale', $validated)) {
+            $blog->locale = $validated['locale'];
         }
 
         $blog->save();

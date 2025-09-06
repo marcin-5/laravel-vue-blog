@@ -16,6 +16,7 @@ export function useBlogForm() {
         name: '',
         description: null as string | null,
         is_published: false as boolean,
+        locale: 'en' as string,
         categories: [] as number[],
     });
 
@@ -48,6 +49,7 @@ export function useBlogForm() {
         editForm.name = blog.name;
         editForm.description = blog.description;
         editForm.is_published = blog.is_published;
+        editForm.locale = (blog.locale as string) || 'en';
         editForm.categories = (blog.categories ?? []).map((c) => c.id);
     }
 

@@ -33,6 +33,7 @@ const form =
         name: props.blog?.name || '',
         description: props.blog?.description || (null as string | null),
         is_published: props.blog?.is_published || false,
+        locale: (props.blog?.locale as string) || 'en',
         categories: (props.blog?.categories ?? []).map((c) => c.id) as number[],
     });
 
@@ -45,6 +46,7 @@ if (!props.form) {
                 form.name = newBlog.name;
                 form.description = newBlog.description;
                 form.is_published = newBlog.is_published;
+                form.locale = (newBlog.locale as string) || 'en';
                 form.categories = (newBlog.categories ?? []).map((c) => c.id);
             }
         },
@@ -93,13 +95,24 @@ function updateCategories(categoryIds: number[]) {
                 <InputError :message="form.errors.description" />
             </div>
 
-            <!-- Published checkbox (only for edit mode) -->
-            <div v-if="props.isEdit && props.blog" class="flex items-center gap-2">
-                <input :id="`${props.idPrefix}-published`" v-model="form.is_published" type="checkbox" />
-                <label :for="`${props.idPrefix}-published`" class="text-sm">Published</label>
-                <span class="text-xs text-muted-foreground">/{{ props.blog.slug }}</span>
+            <!-- Published checkbox + Locale selector (only for edit mode) -->
+            <div v-if="props.isEdit && props.blog" class="flex flex-wrap items-center gap-3">
+                <div class="flex items-center gap-2">
+                    <input :id="`${props.idPrefix}-published`" v-model="form.is_published" type="checkbox" />
+                    <label :for="`${props.idPrefix}-published`" class="text-sm">Published</label>
+                    <span class="text-xs text-muted-foreground">/{{ props.blog.slug }}</span>
+                </div>
+                <div class="ml-auto flex items-center gap-2">
+                    <label :for="`${props.idPrefix}-locale`" class="text-sm">Locale</label>
+                    <select :id="`${props.idPrefix}-locale`" v-model="form.locale" class="rounded border px-2 py-1 text-sm">
+                        <option v-for="loc in ['en','pl']" :key="`loc-${loc}`" :value="loc">{{ loc.toUpperCase() }}</option>
+                    </select>
+                </div>
             </div>
-            <InputError v-if="props.isEdit" :message="form.errors.is_published" />
+            <div v-if="props.isEdit" class="flex items-center gap-4">
+                <InputError :message="form.errors.is_published" />
+                <InputError :message="form.errors.locale" />
+            </div>
 
             <CategorySelector
                 :categories="props.categories"

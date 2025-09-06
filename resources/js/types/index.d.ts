@@ -71,6 +71,7 @@ export interface Blog {
     slug: string;
     description: string | null;
     is_published: boolean;
+    locale: string;
     creation_date?: string | null;
     categories?: Category[];
     posts?: PostItem[];

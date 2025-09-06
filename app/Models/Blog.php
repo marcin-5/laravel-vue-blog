@@ -18,6 +18,7 @@ use Illuminate\Support\Carbon;
  * @property string $slug
  * @property string|null $description
  * @property bool $is_published
+ * @property string $locale
  * @property Carbon $created_at
  * @property Carbon $updated_at
  *
@@ -37,6 +38,7 @@ class Blog extends Model
         'slug',
         'description',
         'is_published',
+        'locale',
     ];
     protected $casts = [
         'is_published' => 'boolean',
