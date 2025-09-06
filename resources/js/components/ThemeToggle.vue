@@ -20,7 +20,7 @@ function toggleTheme() {
 </script>
 
 <template>
-    <Button class="flex items-center gap-2" type="button" variant="toggle" @click="toggleTheme">
+    <Button class="mr-4 flex items-center gap-2" type="button" variant="toggle" @click="toggleTheme">
         <SunIcon v-if="isDarkMode" class="h-4 w-4" />
         <MoonIcon v-else class="h-4 w-4" />
     </Button>

@@ -60,8 +60,7 @@ const sidebarWidth = Math.min(50, Math.max(0, Math.abs(sidebarValue)));
         <PublicNavbar />
 
         <div class="mx-auto w-full max-w-[1024px] p-4">
-            <!-- Add separation line under navbar when no sidebar -->
-            <div v-if="sidebarWidth === 0" class="mb-4 border-b border-gray-200 dark:border-gray-700"></div>
+            <div class="mb-4 border-b border-gray-200 dark:border-gray-700"></div>
 
             <header v-if="sidebarWidth === 0" class="mb-4">
                 <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-400">{{ blog.name }}</h1>

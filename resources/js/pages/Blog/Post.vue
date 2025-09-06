@@ -57,8 +57,7 @@ await ensureNamespace(locale.value, 'landing');
         <PublicNavbar />
 
         <div class="mx-auto w-full max-w-[1024px] p-4">
-            <!-- Add separation line under navbar when no sidebar -->
-            <div v-if="sidebarPosition === 'none'" class="mb-4 border-b border-gray-200 dark:border-gray-700"></div>
+            <div class="mb-4 border-b border-gray-200 dark:border-gray-700"></div>
 
             <header class="mb-4">
                 <h1 class="text-2xl font-bold">{{ post.title }}</h1>
