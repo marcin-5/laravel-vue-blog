@@ -5,12 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Blog;
 use App\Models\LandingPage;
 use App\Models\Post;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use Number;
 use ParsedownExtra;
 
 class PublicBlogController extends Controller
@@ -45,6 +45,9 @@ class PublicBlogController extends Controller
         $descriptionHtml = $this->parseMarkdownToHtml($blog->description);
         $metaDescription = $this->generateMetaDescription($blog, $descriptionHtml, $landing);
 
+        // Get navigation for landing page with correct disabled states
+        $navigation = $this->getLandingNavigation($blog);
+
         return [
             'locale' => app()->getLocale(),
             'blog' => [
@@ -58,6 +61,7 @@ class PublicBlogController extends Controller
             'posts' => $this->formatPostsForView(collect($paginator->items())),
             'pagination' => $this->formatPagination($paginator),
             'sidebar' => (int)($blog->sidebar ?? 0),
+            'navigation' => $navigation,
         ];
     }
 
@@ -66,8 +70,7 @@ class PublicBlogController extends Controller
      */
     private function getPublicPostsPaginated(Blog $blog)
     {
-        $size = (int)($blog->page_size ?? 10);
-        $size = max(1, min(100, $size));
+        $size = Number::clamp((int)($blog->page_size ?? 10), 1, 100);
         $query = $blog->posts()
             ->published()
             ->public()
@@ -76,29 +79,6 @@ class PublicBlogController extends Controller
             ->select(['id', 'blog_id', 'title', 'slug', 'excerpt', 'published_at', 'created_at']);
 
         return $query->paginate($size)->withQueryString();
-    }
-
-    /**
-     * Format Laravel LengthAwarePaginator into a simple structure for the front-end.
-     */
-    private function formatPagination($paginator): array
-    {
-        if (!$paginator) return [];
-
-        // Use the built-in pagination links array, but also expose prev/next urls
-        $links = $paginator->linkCollection()->toArray();
-
-        return [
-            'links' => array_map(function ($lnk) {
-                return [
-                    'url' => $lnk['url'] ?? null,
-                    'label' => $lnk['label'] ?? '',
-                    'active' => (bool)($lnk['active'] ?? false),
-                ];
-            }, $links),
-            'prevUrl' => $paginator->previousPageUrl(),
-            'nextUrl' => $paginator->nextPageUrl(),
-        ];
     }
 
     /**
@@ -123,23 +103,20 @@ class PublicBlogController extends Controller
      */
     private function generateMetaDescription(Blog $blog, string $descriptionHtml, ?LandingPage $landing): string
     {
-        $source = $descriptionHtml;
-        if (empty($source)) {
-            $source = $landing?->content_html ?? '';
-        }
-        if (empty($source)) {
-            $source = $blog->name ?? '';
-        }
+        $source = $descriptionHtml ?: $landing?->content_html ?: $blog->name ?? '';
 
-        // Strip HTML tags, replacing them with spaces to avoid words merging.
-        $text = trim(preg_replace('/<[^>]*>/', ' ', $source) ?? '');
-        // Convert Markdown link/image leftovers if any
-        $text = preg_replace('/!\[([^]]*)]\([^)]+\)/', '$1', $text); // images -> alt
-        $text = preg_replace('/\[([^]]+)]\([^)]+\)/', '$1', $text); // links -> text
-        // Remove emphasis markers
-        $text = preg_replace('/(\*\*|__|\*|_|`)/', '', $text);
-        // Remove heading/blockquote/list markers at line starts
-        $text = preg_replace('/^\s{0,3}[#>\-]+\s*/m', '', $text);
+        // Strip HTML tags and clean up the text
+        $text = strip_tags($source);
+
+        // Convert Markdown leftovers and remove formatting
+        $patterns = [
+            '/!\[([^]]*)]\([^)]+\)/' => '$1',    // images -> alt
+            '/\[([^]]+)]\([^)]+\)/' => '$1',     // links -> text
+            '/(\*\*|__|\*|_|`)/' => '',          // emphasis markers
+            '/^\s{0,3}[#>\-]+\s*/m' => '',       // heading/blockquote/list markers
+        ];
+        $text = preg_replace(array_keys($patterns), array_values($patterns), $text);
+
         // Collapse whitespace and decode HTML entities
         $text = Str::squish(html_entity_decode($text, ENT_QUOTES | ENT_HTML5));
 
@@ -149,13 +126,41 @@ class PublicBlogController extends Controller
             return $text;
         }
 
-        $sliced = mb_substr($text, 0, $limit);
+        $text = mb_substr($text, 0, $limit);
+        $cutPosition = mb_strrpos($text, ' ');
 
-        // Find last space to avoid cutting words, but not too close to the beginning.
-        $cut = mb_strrpos($sliced, ' ');
-        $result = ($cut !== false && $cut > 80) ? mb_substr($sliced, 0, $cut) : $sliced;
+        // Cut at last space, but only if it's reasonably far from the start
+        if ($cutPosition !== false && $cutPosition > 80) {
+            $text = mb_substr($text, 0, $cutPosition);
+        }
 
-        return rtrim($result) . '…';
+        return rtrim($text) . '…';
+    }
+
+    /**
+     * Get navigation data for landing page.
+     */
+    private function getLandingNavigation(Blog $blog): array
+    {
+        // Get the latest post for the next button
+        $latestPost = $blog->posts()
+            ->published()
+            ->public()
+            ->orderByDesc('published_at')
+            ->orderByDesc('created_at')
+            ->select(['id', 'title', 'slug'])
+            ->first();
+
+        return [
+            'prevPost' => null, // Always disabled on landing page
+            'nextPost' => $latestPost ? [
+                'title' => $latestPost->title,
+                'slug' => $latestPost->slug,
+                'url' => route('blog.public.post', ['blog' => $blog->slug, 'postSlug' => $latestPost->slug])
+            ] : null,
+            'landingUrl' => route('blog.public.landing', ['blog' => $blog->slug]),
+            'isLandingPage' => true, // Flag to indicate this is landing page navigation
+        ];
     }
 
     /**
@@ -174,15 +179,28 @@ class PublicBlogController extends Controller
     }
 
     /**
-     * Determine sidebar placement from landing page settings.
+     * Format Laravel LengthAwarePaginator into a simple structure for the front-end.
      */
-    private function getSidebarPosition(Blog $blog): string
+    private function formatPagination($paginator): array
     {
-        // kept for backward compatibility (used on Post page props)
-        if (($blog->sidebar ?? 0) === 0) {
-            return LandingPage::SIDEBAR_NONE;
+        if (!$paginator) {
+            return [];
         }
-        return ($blog->sidebar ?? 0) < 0 ? LandingPage::SIDEBAR_LEFT : LandingPage::SIDEBAR_RIGHT;
+
+        // Use the built-in pagination links array, but also expose prev/next urls
+        $links = $paginator->linkCollection()->toArray();
+
+        return [
+            'links' => array_map(function ($lnk) {
+                return [
+                    'url' => $lnk['url'] ?? null,
+                    'label' => $lnk['label'] ?? '',
+                    'active' => (bool)($lnk['active'] ?? false),
+                ];
+            }, $links),
+            'prevUrl' => $paginator->previousPageUrl(),
+            'nextUrl' => $paginator->nextPageUrl(),
+        ];
     }
 
     /**
@@ -215,6 +233,7 @@ class PublicBlogController extends Controller
     private function getPostViewProps(Blog $blog, Post $post): array
     {
         $paginator = $this->getPublicPostsPaginated($blog);
+        $navigation = $this->getPostNavigation($blog, $post);
 
         return [
             'locale' => app()->getLocale(),
@@ -234,6 +253,70 @@ class PublicBlogController extends Controller
             'pagination' => $this->formatPagination($paginator),
             'sidebarPosition' => $this->getSidebarPosition($blog),
             'sidebar' => (int)($blog->sidebar ?? 0),
+            'navigation' => $navigation,
         ];
+    }
+
+    /**
+     * Get navigation data for previous and next posts.
+     * Previous = newer post, Next = older post (chronological navigation)
+     */
+    private function getPostNavigation(Blog $blog, Post $post): array
+    {
+        $prevPost = $this->getAdjacentPost($blog, $post, 'previous');
+        $nextPost = $this->getAdjacentPost($blog, $post, 'next');
+
+        $formatUrl = fn(Post $p) => [
+            'title' => $p->title,
+            'slug' => $p->slug,
+            'url' => route('blog.public.post', ['blog' => $blog->slug, 'postSlug' => $p->slug]),
+        ];
+
+        return [
+            'prevPost' => $prevPost ? $formatUrl($prevPost) : null,
+            'nextPost' => $nextPost ? $formatUrl($nextPost) : null,
+            'landingUrl' => route('blog.public.landing', ['blog' => $blog->slug]),
+            'isLandingPage' => false,
+        ];
+    }
+
+    /**
+     * Get the next or previous post relative to the current one.
+     *
+     * @param string $direction 'next' (older) or 'previous' (newer)
+     */
+    private function getAdjacentPost(Blog $blog, Post $post, string $direction): ?Post
+    {
+        $query = $blog->posts()
+            ->published()
+            ->public()
+            ->select(['id', 'title', 'slug', 'published_at', 'created_at']);
+
+        $compare = $direction === 'next' ? '<' : '>';
+        $order = $direction === 'next' ? 'desc' : 'asc';
+
+        return $query
+            ->where(function ($query) use ($post, $compare) {
+                $query->where('published_at', $compare, $post->published_at)
+                    ->orWhere(function ($subQuery) use ($post, $compare) {
+                        $subQuery->where('published_at', '=', $post->published_at)
+                            ->where('created_at', $compare, $post->created_at);
+                    });
+            })
+            ->orderBy('published_at', $order)
+            ->orderBy('created_at', $order)
+            ->first();
+    }
+
+    /**
+     * Determine sidebar placement from landing page settings.
+     */
+    private function getSidebarPosition(Blog $blog): string
+    {
+        // kept for backward compatibility (used on Post page props)
+        if (($blog->sidebar ?? 0) === 0) {
+            return LandingPage::SIDEBAR_NONE;
+        }
+        return ($blog->sidebar ?? 0) < 0 ? LandingPage::SIDEBAR_LEFT : LandingPage::SIDEBAR_RIGHT;
     }
 }

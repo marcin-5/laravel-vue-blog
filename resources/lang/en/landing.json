@@ -11,6 +11,12 @@
                 "aria": "Posts list",
                 "title": "Posts",
                 "empty": "No posts yet."
+            },
+            "post_nav": {
+                "aria": "Post navigation",
+                "previous": "Previous",
+                "next": "Next",
+                "back_to_blog": "Back to blog"
             }
         }
     }

@@ -11,6 +11,12 @@
                 "aria": "Lista wpisów",
                 "title": "Posty",
                 "empty": "Brak wpisów."
+            },
+            "post_nav": {
+                "aria": "Nawigacja między postami",
+                "previous": "Poprzedni",
+                "next": "Następny",
+                "back_to_blog": "Powrót do bloga"
             }
         }
     }
