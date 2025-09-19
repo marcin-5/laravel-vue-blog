@@ -1,45 +1,33 @@
 <script lang="ts" setup>
-import { Head, Link } from '@inertiajs/vue3';
+import PublicNavbar from '@/components/PublicNavbar.vue';
+import { ensureNamespace } from '@/i18n';
+import { Head } from '@inertiajs/vue3';
+import { onMounted, onServerPrefetch } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t, locale } = useI18n();
+
+// Load namespace in SSR and on client without top-level await
+const loadNs = async () => {
+    try {
+        await ensureNamespace(locale.value, 'landing');
+    } catch (error) {
+        console.warn('Failed to load landing namespace:', error);
+    }
+};
+
+onServerPrefetch(loadNs);
+onMounted(loadNs);
 </script>
 
 <template>
-    <Head title="Welcome">
-        <meta content="Welcome to Laravel Blog" name="description" />
+    <Head :title="t('landing.meta.welcomeTitle', 'Welcome')">
+        <meta :content="t('landing.meta.welcomeDescription', 'Welcome to Laravel Blog')" name="description" />
     </Head>
-    <div class="flex min-h-screen flex-col items-center bg-[#FDFDFC] p-6 text-[#1b1b18] lg:p-8 dark:bg-[#0a0a0a]">
-        <header class="w-full max-w-[335px] text-sm lg:max-w-4xl">
-            <nav class="flex items-center justify-end gap-4">
-                <template v-if="$page.props.auth.user">
-                    <Link
-                        :href="route('dashboard')"
-                        class="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
-                    >
-                        Dashboard
-                    </Link>
-                    <Link
-                        :href="route('logout')"
-                        method="post"
-                        as="button"
-                        class="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#19140035] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
-                    >
-                        Log out
-                    </Link>
-                </template>
-                <template v-else>
-                    <Link
-                        :href="route('login')"
-                        class="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#19140035] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
-                    >
-                        Log in
-                    </Link>
-                    <Link
-                        :href="route('register')"
-                        class="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
-                    >
-                        Register
-                    </Link>
-                </template>
-            </nav>
-        </header>
+    <div class="flex min-h-screen flex-col bg-[#FDFDFC] text-[#1b1b18] dark:bg-[#0a0a0a]">
+        <PublicNavbar />
+        <div class="mx-auto w-full max-w-[1024px] p-6 lg:p-8">
+            <h1 class="text-4xl font-bold text-slate-800 dark:text-slate-200">Welcome!</h1>
+        </div>
     </div>
 </template>
