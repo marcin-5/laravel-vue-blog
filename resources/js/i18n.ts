@@ -9,15 +9,25 @@ export const i18n = createI18n({
   fallbackWarn: false,
 })
 
+function withBase(path: string) {
+  if (typeof window !== 'undefined') return path
+  const base = (globalThis as any).__ziggyLocation || process.env.APP_URL || 'http://localhost'
+  try {
+    return new URL(path, base).toString()
+  } catch {
+    return path
+  }
+}
+
 export async function loadLocaleMessages(locale: string) {
-  const res = await fetch(`/lang/${locale}`)
+  const res = await fetch(withBase(`/lang/${locale}`))
   if (!res.ok) throw new Error('Failed to load messages')
   const { messages } = await res.json()
   return messages as Record<string, any>
 }
 
 export async function loadNamespaceMessages(locale: string, namespace: string) {
-  const res = await fetch(`/lang/${locale}/${namespace}`)
+  const res = await fetch(withBase(`/lang/${locale}/${namespace}`))
   if (!res.ok) throw new Error('Failed to load namespace messages')
   const { messages } = await res.json()
   return messages as Record<string, any>
@@ -52,5 +62,7 @@ export async function setLocale(locale: string, i18nInstance = i18n) {
     i18nInstance.global.setLocaleMessage(locale, {})
   }
   i18nInstance.global.locale.value = locale
-  document.documentElement.setAttribute('lang', locale)
+  if (typeof document !== 'undefined') {
+    document.documentElement.setAttribute('lang', locale)
+  }
 }
