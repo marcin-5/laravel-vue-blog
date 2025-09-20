@@ -27,6 +27,18 @@ export default defineConfig({
             },
         }),
     ],
+    // Ensure Vue and vue-i18n feature flags are defined during both client and SSR builds
+    define: {
+        __VUE_OPTIONS_API__: true,
+        __VUE_PROD_DEVTOOLS__: false,
+        __VUE_I18N_FULL_INSTALL__: true,
+        __VUE_I18N_LEGACY_API__: false,
+        __INTLIFY_PROD_DEVTOOLS__: false,
+    },
+    // Bundle vue-i18n into the SSR build so the above defines are applied inside the dependency
+    ssr: {
+        noExternal: ['vue-i18n', '@intlify/message-compiler'],
+    },
     server: {
         host: true,
         watch: usePolling ? { usePolling: true } : undefined,
