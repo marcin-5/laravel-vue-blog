@@ -7,7 +7,7 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build
+RUN npm run build:ssr
 
 # Stage 2: Base PHP image with common dependencies
 FROM php:8.4-fpm-alpine AS base
@@ -136,3 +136,16 @@ COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
 
 EXPOSE 9000
 CMD ["php-fpm"]
+
+# Stage 5: SSR runtime image for running Inertia SSR server
+FROM node:24-alpine AS ssr-runtime
+WORKDIR /var/www/html
+# Copy the application code (for env, config references if needed)
+COPY . .
+# Copy the built SSR bundle from the node-builder stage
+COPY --from=node-builder /app/bootstrap/ssr ./bootstrap/ssr
+# Default SSR port used by inertia-laravel
+ENV PORT=13714
+EXPOSE 13714
+# Start the SSR server (use .js since Vite outputs ssr.js by default)
+CMD ["node", "bootstrap/ssr/ssr.js"]

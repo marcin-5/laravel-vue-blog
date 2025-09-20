@@ -17,6 +17,8 @@ services:
       - DB_PASSWORD=${DB_PASSWORD:-password}
       - QUEUE_CONNECTION=redis
       - REDIS_HOST=redis
+      - INERTIA_SSR_ENABLED=true
+      - INERTIA_SSR_URL=http://ssr:13714
     ports:
       - "5173:5173"
     volumes:
@@ -42,8 +44,17 @@ services:
       - DB_PASSWORD=${DB_PASSWORD:-password}
       - QUEUE_CONNECTION=redis
       - REDIS_HOST=redis
+      - INERTIA_SSR_ENABLED=true
+      - INERTIA_SSR_URL=http://ssr:13714
     volumes:
       - ../:/var/www/html
+
+  ssr:
+    container_name: ${APP_NAME:-laravel-app}-ssr-dev
+    environment:
+      - SSR_BASE_URL=http://nginx
+    ports:
+      - "13714:13714"
 
   nginx:
     container_name: ${APP_NAME:-laravel-app}-nginx-dev
