@@ -70,7 +70,7 @@ function clearFilter() {
     <Head :title="t('landing.meta.welcomeTitle', 'Welcome')">
         <meta :content="t('landing.meta.welcomeDescription', 'Welcome to Laravel Blog')" name="description" />
     </Head>
-    <div class="flex min-h-screen flex-col bg-[#FDFDFC] text-[#1b1b18] dark:bg-[#0a0a0a]">
+    <div class="flex min-h-screen flex-col">
         <PublicNavbar />
         <div class="mx-auto w-full max-w-[1024px] p-6 lg:p-8">
             <h1 class="mb-4 text-4xl font-bold text-slate-800 dark:text-slate-200">Welcome!</h1>
