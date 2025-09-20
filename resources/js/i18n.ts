@@ -11,7 +11,11 @@ export const i18n = createI18n({
 
 function withBase(path: string) {
   if (typeof window !== 'undefined') return path
-  const base = (globalThis as any).__ziggyLocation || process.env.APP_URL || 'http://localhost'
+  const candidate = (process.env.SSR_BASE_URL as string | undefined)
+    || (globalThis as any).__ziggyLocation
+    || process.env.APP_URL
+    || 'http://localhost'
+  const base = (candidate instanceof URL) ? candidate.toString() : String(candidate)
   try {
     return new URL(path, base).toString()
   } catch {
