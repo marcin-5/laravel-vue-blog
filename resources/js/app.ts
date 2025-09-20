@@ -3,7 +3,7 @@ import '../css/app.css';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { DefineComponent } from 'vue';
-import { createApp, h, Suspense } from 'vue';
+import { createApp, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
 import { initializeTheme } from './composables/useAppearance';
 import { i18n, setLocale } from './i18n';
@@ -32,15 +32,7 @@ createInertiaApp({
         }
 
         const vueApp = createApp({
-            render: () =>
-                h(
-                    Suspense,
-                    {},
-                    {
-                        default: () => h(App, props),
-                        fallback: () => h('div', { class: 'flex items-center justify-center min-h-screen' }, 'Loading...'),
-                    },
-                ),
+            render: () => h(App, props),
         })
             .use(plugin)
             .use(ZiggyVue)
