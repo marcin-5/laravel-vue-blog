@@ -27,12 +27,13 @@ const props = defineProps<{
     selectedCategoryIds?: number[];
 }>();
 
-const { t, locale } = useI18n();
+const composer = useI18n();
+const { t, locale } = composer;
 
 // Load namespace in SSR and on client without top-level await
 const loadNs = async () => {
     try {
-        await ensureNamespace(locale.value, 'landing');
+        await ensureNamespace(locale.value, 'landing', composer);
     } catch (error) {
         console.warn('Failed to load landing namespace:', error);
     }

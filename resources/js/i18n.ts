@@ -48,16 +48,20 @@ function mergeDeep(target: Record<string, any>, source: Record<string, any>) {
   return target
 }
 
-export async function ensureNamespace(locale: string, namespace: string, i18nInstance = i18n) {
+export async function ensureNamespace(locale: string, namespace: string, i18nInstance: any = i18n) {
+  // Support both a full i18n instance (with .global) and a composer returned by useI18n()
+  const api = (i18nInstance && 'global' in i18nInstance) ? i18nInstance.global : i18nInstance
+  if (!api) throw new Error('Invalid i18n instance/composer passed to ensureNamespace')
+
   // Ensure base locale object exists
-  if (!i18nInstance.global.availableLocales.includes(locale)) {
-    i18nInstance.global.setLocaleMessage(locale, {})
+  if (!api.availableLocales.includes(locale)) {
+    api.setLocaleMessage(locale, {})
   }
-  const current = i18nInstance.global.getLocaleMessage(locale) as Record<string, any>
+  const current = api.getLocaleMessage(locale) as Record<string, any>
   // We don't track per-namespace state; we just merge the file into the root keys
   const nsMsgs = await loadNamespaceMessages(locale, namespace)
   const merged = mergeDeep({ ...current }, nsMsgs)
-  i18nInstance.global.setLocaleMessage(locale, merged)
+  api.setLocaleMessage(locale, merged)
 }
 
 export async function setLocale(locale: string, i18nInstance = i18n) {

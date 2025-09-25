@@ -1,9 +1,24 @@
 <script lang="ts" setup>
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import { Link } from '@inertiajs/vue3';
+import { onMounted, onServerPrefetch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { ensureNamespace } from '@/i18n';
 
-const { t } = useI18n();
+const composer = useI18n();
+const { t, locale } = composer;
+
+// Ensure the 'landing' namespace is available on both SSR and client to prevent key flash
+const loadNs = async () => {
+    try {
+        await ensureNamespace(locale.value, 'landing', composer);
+    } catch (e) {
+        console.warn('Failed to load landing namespace in PublicNavbar:', e);
+    }
+};
+
+onServerPrefetch(loadNs);
+onMounted(loadNs);
 </script>
 
 <template>
