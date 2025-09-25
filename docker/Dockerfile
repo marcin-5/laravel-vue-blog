@@ -14,9 +14,12 @@ FROM php:8.4-fpm-alpine AS base
 
 ARG APP_NAME=laravel-app
 ARG TZ=UTC
+# Use a mirror close to Poland by default; can be overridden at build time
+ARG ALPINE_MIRROR=https://mirror.plustech.pl/alpine
 
 # Install only common system dependencies
-RUN apk add --no-cache \
+RUN sed -i "s#https://dl-cdn.alpinelinux.org/alpine#${ALPINE_MIRROR}#g" /etc/apk/repositories \
+    && apk add --no-cache \
     postgresql-dev \
     zip \
     unzip \
