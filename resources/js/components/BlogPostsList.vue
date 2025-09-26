@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { ensureNamespace } from '@/i18n';
 import { Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 interface PostItem {
@@ -15,7 +16,7 @@ const { t, locale } = useI18n();
 // Ensure "landing" namespace is loaded for current locale (supports SSR via Suspense)
 await ensureNamespace(locale.value, 'landing');
 
-defineProps<{
+const props = defineProps<{
     posts: PostItem[];
     blogSlug: string;
     pagination?: {
@@ -24,6 +25,24 @@ defineProps<{
         nextUrl: string | null;
     } | null;
 }>();
+
+function translateLabel(raw: string): string {
+    // Strip HTML entities like &laquo; and &raquo; and trim
+    const txt = raw
+        .replace(/&laquo;|«/g, '')
+        .replace(/&raquo;|»/g, '')
+        .trim();
+    // If numeric (page number) return as-is
+    if (/^\d+$/.test(txt)) return txt;
+    // Laravel may return 'Previous' or 'Next'
+    const lower = txt.toLowerCase();
+    if (lower === 'previous') return t('landing.blog.pagination.previous');
+    if (lower === 'next') return t('landing.blog.pagination.next');
+    // Fallback to original text
+    return txt;
+}
+
+const links = computed(() => props.pagination?.links ?? []);
 </script>
 
 <template>
@@ -43,9 +62,9 @@ defineProps<{
             </li>
         </ul>
 
-        <nav v-if="pagination && pagination.links && pagination.links.length" class="mt-4 flex items-center gap-1" aria-label="Pagination">
+        <nav v-if="links.length" class="mt-4 flex items-center gap-1" :aria-label="t('landing.blog.pagination.aria')">
             <Link
-                v-for="(lnk, idx) in pagination.links"
+                v-for="(lnk, idx) in links"
                 :key="idx"
                 :href="lnk.url || ''"
                 :class="[
@@ -55,7 +74,7 @@ defineProps<{
                 ]"
                 preserve-scroll
             >
-                <span v-html="lnk.label"></span>
+                <span>{{ translateLabel(String(lnk.label)) }}</span>
             </Link>
         </nav>
     </section>

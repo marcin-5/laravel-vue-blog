@@ -17,7 +17,16 @@
                 "previous": "Previous",
                 "next": "Next",
                 "back_to_blog": "Back to blog"
+            },
+            "pagination": {
+                "aria": "Pagination",
+                "previous": "Previous",
+                "next": "Next"
             }
+        },
+        "meta": {
+            "welcomeTitle": "Home Page",
+            "welcomeDescription": "Welcome to Osobliwy Blog"
         }
     }
 }

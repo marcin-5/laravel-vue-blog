@@ -17,7 +17,16 @@
                 "previous": "Poprzedni",
                 "next": "Następny",
                 "back_to_blog": "Powrót do bloga"
+            },
+            "pagination": {
+                "aria": "Stronicowanie",
+                "previous": "Poprzednia",
+                "next": "Następna"
             }
+        },
+        "meta": {
+            "welcomeTitle": "Strona domowa",
+            "welcomeDescription": "Witaj na Osobliwy Blog"
         }
     }
 }
