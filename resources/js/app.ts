@@ -3,7 +3,7 @@ import '../css/app.css';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { DefineComponent } from 'vue';
-import { createApp, h } from 'vue';
+import { createApp, h, Suspense } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
 import { initializeTheme } from './composables/useAppearance';
 import { i18n, setLocale } from './i18n';
@@ -32,7 +32,16 @@ createInertiaApp({
         }
 
         const vueApp = createApp({
-            render: () => h(App, props),
+            render: () =>
+                h(
+                    Suspense,
+                    null,
+                    {
+                        default: () => h(App, props),
+                        // Minimal fallback to satisfy Suspense during async setup
+                        fallback: () => h('div', { class: 'inertia-suspense-fallback' }, 'Loading...'),
+                    }
+                ),
         })
             .use(plugin)
             .use(ZiggyVue)
