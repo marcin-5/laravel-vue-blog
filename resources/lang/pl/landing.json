@@ -27,6 +27,9 @@
         "meta": {
             "welcomeTitle": "Strona domowa",
             "welcomeDescription": "Witaj na Osobliwy Blog"
+        },
+        "actions": {
+            "clear": "Wyczyść filtr"
         }
     }
 }

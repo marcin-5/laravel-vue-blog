@@ -2,6 +2,8 @@
 import { computed } from 'vue';
 import CategoryPill from './CategoryPill.vue';
 import type { Category } from '@/types';
+import { useI18n } from 'vue-i18n';
+import { ensureNamespace } from '@/i18n';
 
 interface Emits {
   (e: 'toggle', id: number): void;
@@ -16,6 +18,9 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<Emits>();
+
+const { t, locale } = useI18n();
+await ensureNamespace(locale.value, 'landing');
 
 const selected = computed<number[]>(() => props.selectedIds ?? []);
 </script>
@@ -36,7 +41,7 @@ const selected = computed<number[]>(() => props.selectedIds ?? []);
       type="button"
       @click="emit('clear')"
     >
-      {{ clearLabel ?? 'Clear filter' }}
+      {{ clearLabel ?? t('landing.actions.clear') }}
     </button>
   </div>
 </template>
