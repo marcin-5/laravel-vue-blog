@@ -23,6 +23,7 @@ import { router } from '@inertiajs/vue3';
 function onLocaleChange(newLocale: string) {
     router.post('/locale', { locale: newLocale }, {
         preserveScroll: true,
+        preserveState: true,
         onSuccess: async () => {
             await setI18nLocale(newLocale);
             await ensureNamespace(newLocale, 'appearance');

@@ -35,6 +35,7 @@ const createForm = useForm({
 function submitCreate() {
     createForm.post(route('admin.categories.store'), {
         preserveScroll: true,
+        preserveState: true,
         onSuccess: () => {
             const current = (i18n.global.locale.value as string) || 'en';
             createForm.reset();
@@ -82,6 +83,7 @@ function cancelEdit() {
 function submitEdit(cat: CategoryRow) {
     editForm.patch(route('admin.categories.update', cat.id), {
         preserveScroll: true,
+        preserveState: true,
         onSuccess: () => {
             editingId.value = null;
         },
@@ -91,7 +93,7 @@ function submitEdit(cat: CategoryRow) {
 function destroy(cat: CategoryRow) {
     const n = localizedName(cat.name);
     if (!confirm(`Delete category "${n}"? This will remove it from all blogs.`)) return;
-    router.delete(route('admin.categories.destroy', cat.id), { preserveScroll: true });
+    router.delete(route('admin.categories.destroy', cat.id), { preserveScroll: true, preserveState: true });
 }
 
 const sortedCategories = computed(() => [...props.categories].sort((a, b) => localizedName(a.name).localeCompare(localizedName(b.name))));

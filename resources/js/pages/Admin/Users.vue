@@ -73,6 +73,7 @@ function saveUser(user: UserRow) {
     }
     router.patch(route('admin.users.update', user.id), payload, {
         preserveScroll: true,
+        preserveState: true,
     });
 }
 </script>
