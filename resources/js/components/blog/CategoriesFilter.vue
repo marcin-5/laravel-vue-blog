@@ -2,8 +2,7 @@
 import { computed } from 'vue';
 import CategoryPill from './CategoryPill.vue';
 import type { Category } from '@/types';
-import { useI18n } from 'vue-i18n';
-import { ensureNamespace } from '@/i18n';
+import { useI18nNs } from '@/composables/useI18nNs';
 
 interface Emits {
   (e: 'toggle', id: number): void;
@@ -19,8 +18,7 @@ const props = defineProps<{
 
 const emit = defineEmits<Emits>();
 
-const { t, locale } = useI18n();
-await ensureNamespace(locale.value, 'landing');
+const { t } = await useI18nNs('landing');
 
 const selected = computed<number[]>(() => props.selectedIds ?? []);
 </script>

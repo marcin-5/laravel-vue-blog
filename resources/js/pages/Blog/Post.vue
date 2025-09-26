@@ -1,10 +1,9 @@
 <script lang="ts" setup>
 import BlogPostNav from '@/components/BlogPostNav.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
-import { ensureNamespace } from '@/i18n';
 import { Head } from '@inertiajs/vue3';
-import { useI18n } from 'vue-i18n';
 import BlogPostsList from '../../components/BlogPostsList.vue';
+import { useI18nNs } from '@/composables/useI18nNs';
 
 interface Blog {
     id: number;
@@ -43,9 +42,8 @@ defineProps<{
     };
 }>();
 
-const { locale } = useI18n();
 // Ensure 'landing' namespace is available for nav labels (SSR-safe with Suspense)
-await ensureNamespace(locale.value, 'landing');
+await useI18nNs('landing');
 </script>
 
 <template>
