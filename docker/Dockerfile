@@ -14,12 +14,9 @@ FROM php:8.4-fpm-alpine AS base
 
 ARG APP_NAME=laravel-app
 ARG TZ=UTC
-# Use a mirror close to Poland by default; can be overridden at build time
-ARG ALPINE_MIRROR=https://mirror.plustech.pl/alpine
 
 # Install only common system dependencies
-RUN sed -i "s#https://dl-cdn.alpinelinux.org/alpine#${ALPINE_MIRROR}#g" /etc/apk/repositories \
-    && apk add --no-cache \
+RUN apk add --no-cache \
     postgresql-dev \
     zip \
     unzip \
@@ -143,6 +140,9 @@ CMD ["php-fpm"]
 # Stage 5: SSR runtime image for running Inertia SSR server
 FROM node:24-alpine AS ssr-runtime
 WORKDIR /var/www/html
+# Install only runtime Node dependencies required by the SSR server
+COPY package*.json ./
+RUN npm ci --omit=dev
 # Copy the application code (for env, config references if needed)
 COPY . .
 # Copy the built SSR bundle from the node-builder stage
