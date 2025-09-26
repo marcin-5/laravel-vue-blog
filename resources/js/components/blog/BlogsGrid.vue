@@ -2,7 +2,7 @@
 import BlogCard from './BlogCard.vue';
 
 interface CategoryItem { id: number; name: string | Record<string, string>; slug?: string }
-interface BlogItem { id: number; name: string; slug: string; description?: string | null; categories: CategoryItem[] }
+interface BlogItem { id: number; name: string; slug: string; descriptionHtml?: string | null; categories: CategoryItem[] }
 
 const props = defineProps<{ blogs: BlogItem[]; class?: string }>();
 </script>

@@ -7,6 +7,7 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use ParsedownExtra;
 
 class PublicHomeController extends Controller
 {
@@ -64,11 +65,21 @@ class PublicHomeController extends Controller
         $blogs = $blogsQuery->orderBy('name')->get()->map(function (Blog $b) {
             $blogLocale = $b->locale ?: app()->getLocale();
 
+            // Parse markdown description to safe HTML
+            $descriptionHtml = '';
+            if (!empty($b->description)) {
+                $parser = new ParsedownExtra();
+                if (method_exists($parser, 'setSafeMode')) {
+                    $parser->setSafeMode(true);
+                }
+                $descriptionHtml = $parser->text($b->description);
+            }
+
             return [
                 'id' => $b->id,
                 'name' => $b->name,
                 'slug' => $b->slug,
-                'description' => $b->description,
+                'descriptionHtml' => $descriptionHtml,
                 'categories' => $b->categories
                     ->filter(fn($c) => method_exists($c, 'hasTranslation') ? $c->hasTranslation('name', $blogLocale) : true)
                     ->map(fn($c) => [
