@@ -1,16 +1,18 @@
 import type { Blog } from '@/types';
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 export function useBlogForm() {
     const showCreate = ref(false);
     const editingId = ref<number | null>(null);
+    const { locale } = useI18n();
 
     const createForm = useForm({
         name: '',
         description: null as string | null,
         is_published: false as boolean,
-        locale: 'en' as string,
+        locale: locale.value as string,
         categories: [] as number[],
         sidebar: 0 as number,
         page_size: 10 as number,
@@ -20,7 +22,7 @@ export function useBlogForm() {
         name: '',
         description: null as string | null,
         is_published: false as boolean,
-        locale: 'en' as string,
+        locale: locale.value as string,
         categories: [] as number[],
         sidebar: 0 as number,
         page_size: 10 as number,
