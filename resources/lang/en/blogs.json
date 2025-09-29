@@ -28,6 +28,55 @@
         },
         "empty": "No blogs found.",
         "empty_cta": "Create your first blog",
-        "limit_reached_hint": "Blog limit reached"
+        "limit_reached_hint": "Blog limit reached",
+        "form": {
+            "name_label": "Name",
+            "name_placeholder": "My Awesome Blog",
+            "description_label": "Description",
+            "description_placeholder": "What's this blog about?",
+            "published_label": "Published",
+            "locale_label": "Locale",
+            "sidebar_label": "Sidebar position/width",
+            "sidebar_hint": "-50..-1 = left (% width), 0 = none, 1..50 = right (% width)",
+            "page_size_label": "Posts per page",
+            "save_button": "Save",
+            "create_button": "Create",
+            "cancel_button": "Cancel",
+            "saving_button": "Saving…",
+            "creating_button": "Creating…"
+        },
+        "post_form": {
+            "title_label": "Title",
+            "post_title_label": "Post title",
+            "title_placeholder": "My first post",
+            "excerpt_label": "Excerpt",
+            "excerpt_placeholder": "Short summary",
+            "content_label": "Content",
+            "content_placeholder": "Write your post...",
+            "markdown_placeholder": "Write your markdown here...",
+            "published_label": "Published",
+            "publish_now_label": "Publish now",
+            "preview_mode_title": "Preview Mode",
+            "markdown_label": "Markdown",
+            "preview_label": "Preview",
+            "save_button": "Save",
+            "create_button": "Create",
+            "cancel_button": "Cancel",
+            "saving_button": "Saving…",
+            "creating_button": "Creating…",
+            "save_post_button": "Save Post",
+            "create_post_button": "Create Post",
+            "close_button": "Close",
+            "preview_button": "Preview",
+            "exit_preview_button": "Exit Preview",
+            "full_preview_button": "Full Preview",
+            "split_view_button": "Split View",
+            "horizontal_button": "Horizontal",
+            "vertical_button": "Vertical"
+        },
+        "post_item": {
+            "close_button": "Close",
+            "edit_button": "Edit"
+        }
     }
 }

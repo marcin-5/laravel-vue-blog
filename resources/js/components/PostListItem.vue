@@ -1,7 +1,12 @@
 <script lang="ts" setup>
 import PostForm from '@/components/PostForm.vue';
 import { Button } from '@/components/ui/button';
+import { ensureNamespace } from '@/i18n';
 import type { PostItem } from '@/types';
+import { useI18n } from 'vue-i18n';
+
+const { t, locale } = useI18n();
+await ensureNamespace(locale.value, 'blogs');
 
 interface Props {
     post: PostItem;
@@ -40,7 +45,7 @@ function handleCancelEdit() {
             </div>
             <div>
                 <Button :variant="isEditing ? 'exit' : 'toggle'" size="sm" type="button" @click="handleEdit">
-                    {{ isEditing ? 'Close' : 'Edit' }}
+                    {{ isEditing ? $t('blogs.post_item.close_button') : $t('blogs.post_item.edit_button') }}
                 </Button>
             </div>
         </div>

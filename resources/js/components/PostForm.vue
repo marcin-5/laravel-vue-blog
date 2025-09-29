@@ -2,11 +2,16 @@
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { useAppearance } from '@/composables/useAppearance';
+import { ensureNamespace } from '@/i18n';
 import type { PostItem } from '@/types';
 import { MoonIcon, SunIcon } from '@heroicons/vue/24/outline';
 import { useForm } from '@inertiajs/vue3';
 import { useMediaQuery } from '@vueuse/core';
 import { computed, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t, locale } = useI18n();
+await ensureNamespace(locale.value, 'blogs');
 
 interface Props {
     post?: PostItem;
@@ -161,12 +166,12 @@ function togglePreviewLayout() {
         <form class="space-y-4" @submit.prevent="handleSubmit">
             <div>
                 <label :for="`${props.idPrefix}-title-${props.post?.id || props.blogId}`" class="mb-1 block text-sm font-medium">
-                    {{ props.isEdit ? 'Title' : 'Post title' }}
+                    {{ props.isEdit ? $t('blogs.post_form.title_label') : $t('blogs.post_form.post_title_label') }}
                 </label>
                 <input
                     :id="`${props.idPrefix}-title-${props.post?.id || props.blogId}`"
                     v-model="form.title"
-                    :placeholder="props.isEdit ? '' : 'My first post'"
+                    :placeholder="props.isEdit ? '' : $t('blogs.post_form.title_placeholder')"
                     class="block w-full rounded-md border px-3 py-2"
                     required
                     type="text"
@@ -175,11 +180,13 @@ function togglePreviewLayout() {
             </div>
 
             <div>
-                <label :for="`${props.idPrefix}-excerpt-${props.post?.id || props.blogId}`" class="mb-1 block text-sm font-medium"> Excerpt </label>
+                <label :for="`${props.idPrefix}-excerpt-${props.post?.id || props.blogId}`" class="mb-1 block text-sm font-medium">{{
+                    $t('blogs.post_form.excerpt_label')
+                }}</label>
                 <textarea
                     :id="`${props.idPrefix}-excerpt-${props.post?.id || props.blogId}`"
                     v-model="form.excerpt"
-                    :placeholder="props.isEdit ? '' : 'Short summary'"
+                    :placeholder="props.isEdit ? '' : $t('blogs.post_form.excerpt_placeholder')"
                     class="block w-full rounded-md border px-3 py-2"
                     rows="2"
                 />
@@ -188,41 +195,43 @@ function togglePreviewLayout() {
 
             <div>
                 <div class="mb-1">
-                    <label :for="`${props.idPrefix}-content-${props.post?.id || props.blogId}`" class="block text-sm font-medium"> Content </label>
+                    <label :for="`${props.idPrefix}-content-${props.post?.id || props.blogId}`" class="block text-sm font-medium">{{
+                        $t('blogs.post_form.content_label')
+                    }}</label>
                 </div>
 
                 <!-- Full Preview Mode -->
                 <div v-if="isFullPreview" class="fixed inset-0 z-50 bg-background text-foreground">
                     <div class="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background p-4">
-                        <h2 class="text-lg font-semibold">Preview Mode</h2>
+                        <h2 class="text-lg font-semibold">{{ $t('blogs.post_form.preview_mode_title') }}</h2>
                         <div class="flex gap-2">
                             <Button :disabled="form.processing" type="button" variant="constructive" @click="handleSubmit">
-                                {{ props.isEdit ? 'Save' : 'Create' }}
+                                {{ props.isEdit ? $t('blogs.post_form.save_button') : $t('blogs.post_form.create_button') }}
                             </Button>
-                            <Button type="button" variant="destructive" @click="handleCancel"> Cancel </Button>
+                            <Button type="button" variant="destructive" @click="handleCancel">{{ $t('blogs.post_form.cancel_button') }}</Button>
                             <Button type="button" variant="toggle" @click="togglePreviewLayout">
-                                {{ previewLayout === 'horizontal' ? 'Horizontal' : 'Vertical' }}
+                                {{ previewLayout === 'horizontal' ? $t('blogs.post_form.horizontal_button') : $t('blogs.post_form.vertical_button') }}
                             </Button>
                             <Button class="flex items-center gap-2" type="button" variant="toggle" @click="toggleTheme">
                                 <SunIcon v-if="isDarkMode" class="h-4 w-4" />
                                 <MoonIcon v-else class="h-4 w-4" />
                             </Button>
-                            <Button type="button" variant="exit" @click="toggleFullPreview"> Exit Preview </Button>
+                            <Button type="button" variant="exit" @click="toggleFullPreview">{{ $t('blogs.post_form.exit_preview_button') }}</Button>
                         </div>
                     </div>
                     <div class="h-full overflow-auto p-4">
                         <div :class="previewLayout === 'horizontal' ? 'flex h-full gap-4' : 'space-y-4'">
                             <div :class="previewLayout === 'horizontal' ? 'w-1/2' : ''">
-                                <h3 class="mb-2 text-sm font-medium">Markdown</h3>
+                                <h3 class="mb-2 text-sm font-medium">{{ $t('blogs.post_form.markdown_label') }}</h3>
                                 <textarea
                                     v-model="form.content"
+                                    :placeholder="$t('blogs.post_form.markdown_placeholder')"
                                     class="h-96 w-full rounded border border-border bg-background px-3 py-2 font-mono text-sm text-foreground"
-                                    placeholder="Write your markdown here..."
                                     @input="renderMarkdown"
                                 />
                             </div>
                             <div :class="previewLayout === 'horizontal' ? 'w-1/2' : ''">
-                                <h3 class="mb-2 text-sm font-medium">Preview</h3>
+                                <h3 class="mb-2 text-sm font-medium">{{ $t('blogs.post_form.preview_label') }}</h3>
                                 <div class="prose h-96 max-w-none overflow-auto rounded border border-border bg-muted p-4" v-html="previewHtml" />
                             </div>
                         </div>
@@ -237,7 +246,7 @@ function togglePreviewLayout() {
                             <textarea
                                 :id="`${props.idPrefix}-content-${props.post?.id || props.blogId}`"
                                 v-model="form.content"
-                                :placeholder="props.isEdit ? '' : 'Write your post...'"
+                                :placeholder="props.isEdit ? '' : $t('blogs.post_form.content_placeholder')"
                                 :rows="props.isEdit ? 8 : 10"
                                 class="block w-full rounded-md border px-3 py-2"
                                 @input="renderMarkdown"
@@ -255,7 +264,7 @@ function togglePreviewLayout() {
                         <textarea
                             :id="`${props.idPrefix}-content-${props.post?.id || props.blogId}`"
                             v-model="form.content"
-                            :placeholder="props.isEdit ? '' : 'Write your post...'"
+                            :placeholder="props.isEdit ? '' : $t('blogs.post_form.content_placeholder')"
                             :rows="props.isEdit ? 4 : 5"
                             class="block w-full rounded-md border px-3 py-2"
                         />
@@ -268,18 +277,18 @@ function togglePreviewLayout() {
                 <div class="flex items-center gap-2">
                     <input :id="`${props.idPrefix}-published-${props.post?.id || props.blogId}`" v-model="form.is_published" type="checkbox" />
                     <label :for="`${props.idPrefix}-published-${props.post?.id || props.blogId}`" class="text-sm">
-                        {{ props.isEdit ? 'Published' : 'Publish now' }}
+                        {{ props.isEdit ? $t('blogs.post_form.published_label') : $t('blogs.post_form.publish_now_label') }}
                     </label>
                 </div>
                 <div class="flex gap-2">
                     <Button :variant="isPreviewMode ? 'exit' : 'toggle'" size="sm" type="button" @click="togglePreview">
-                        {{ isPreviewMode ? 'Close' : 'Preview' }}
+                        {{ isPreviewMode ? $t('blogs.post_form.close_button') : $t('blogs.post_form.preview_button') }}
                     </Button>
                     <Button v-if="isPreviewMode" size="sm" type="button" variant="exit" @click="toggleFullPreview">
-                        {{ isFullPreview ? 'Split View' : 'Full Preview' }}
+                        {{ isFullPreview ? $t('blogs.post_form.split_view_button') : $t('blogs.post_form.full_preview_button') }}
                     </Button>
                     <Button v-if="isPreviewMode && !isFullPreview" size="sm" type="button" variant="toggle" @click="togglePreviewLayout">
-                        {{ previewLayout === 'horizontal' ? 'Horizontal' : 'Vertical' }}
+                        {{ previewLayout === 'horizontal' ? $t('blogs.post_form.horizontal_button') : $t('blogs.post_form.vertical_button') }}
                     </Button>
                 </div>
             </div>
@@ -287,13 +296,13 @@ function togglePreviewLayout() {
             <div class="flex items-center gap-2">
                 <Button :disabled="form.processing" type="submit" variant="constructive">
                     <span v-if="form.processing">
-                        {{ props.isEdit ? 'Saving…' : 'Creating…' }}
+                        {{ props.isEdit ? $t('blogs.post_form.saving_button') : $t('blogs.post_form.creating_button') }}
                     </span>
                     <span v-else>
-                        {{ props.isEdit ? 'Save Post' : 'Create Post' }}
+                        {{ props.isEdit ? $t('blogs.post_form.save_post_button') : $t('blogs.post_form.create_post_button') }}
                     </span>
                 </Button>
-                <Button type="button" variant="destructive" @click="handleCancel">Cancel</Button>
+                <Button type="button" variant="destructive" @click="handleCancel">{{ $t('blogs.post_form.cancel_button') }}</Button>
             </div>
         </form>
     </div>

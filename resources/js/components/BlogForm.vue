@@ -2,9 +2,14 @@
 import CategorySelector from '@/components/CategorySelector.vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
+import { ensureNamespace } from '@/i18n';
 import type { Blog, Category } from '@/types';
 import { useForm } from '@inertiajs/vue3';
 import { watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t, locale } = useI18n();
+await ensureNamespace(locale.value, 'blogs');
 
 interface Props {
     blog?: Blog;
@@ -75,11 +80,11 @@ function updateCategories(categoryIds: number[]) {
     <div class="rounded-md border border-sidebar-border/70 p-4 dark:border-sidebar-border">
         <form class="space-y-4" @submit.prevent="handleSubmit">
             <div>
-                <label :for="`${props.idPrefix}-name`" class="mb-1 block text-sm font-medium">Name</label>
+                <label :for="`${props.idPrefix}-name`" class="mb-1 block text-sm font-medium">{{ $t('blogs.form.name_label') }}</label>
                 <input
                     :id="`${props.idPrefix}-name`"
                     v-model="form.name"
-                    :placeholder="props.isEdit ? '' : 'My Awesome Blog'"
+                    :placeholder="props.isEdit ? '' : $t('blogs.form.name_placeholder')"
                     class="block w-full rounded-md border px-3 py-2"
                     required
                     type="text"
@@ -88,11 +93,11 @@ function updateCategories(categoryIds: number[]) {
             </div>
 
             <div>
-                <label :for="`${props.idPrefix}-description`" class="mb-1 block text-sm font-medium">Description</label>
+                <label :for="`${props.idPrefix}-description`" class="mb-1 block text-sm font-medium">{{ $t('blogs.form.description_label') }}</label>
                 <textarea
                     :id="`${props.idPrefix}-description`"
                     v-model="form.description"
-                    :placeholder="props.isEdit ? '' : 'What\'s this blog about?'"
+                    :placeholder="props.isEdit ? '' : $t('blogs.form.description_placeholder')"
                     class="block w-full rounded-md border px-3 py-2"
                     rows="3"
                 />
@@ -103,13 +108,13 @@ function updateCategories(categoryIds: number[]) {
             <div class="flex flex-wrap items-center gap-3">
                 <div class="flex items-center gap-2">
                     <input :id="`${props.idPrefix}-published`" v-model="form.is_published" type="checkbox" />
-                    <label :for="`${props.idPrefix}-published`" class="text-sm">Published</label>
+                    <label :for="`${props.idPrefix}-published`" class="text-sm">{{ $t('blogs.form.published_label') }}</label>
                     <span v-if="props.isEdit && props.blog" class="text-xs text-muted-foreground">/{{ props.blog.slug }}</span>
                 </div>
                 <div class="ml-auto flex items-center gap-2">
-                    <label :for="`${props.idPrefix}-locale`" class="text-sm">Locale</label>
+                    <label :for="`${props.idPrefix}-locale`" class="text-sm">{{ $t('blogs.form.locale_label') }}</label>
                     <select :id="`${props.idPrefix}-locale`" v-model="form.locale" class="rounded border px-2 py-1 text-sm">
-                        <option v-for="loc in ['en','pl']" :key="`loc-${loc}`" :value="loc">{{ loc.toUpperCase() }}</option>
+                        <option v-for="loc in ['en', 'pl']" :key="`loc-${loc}`" :value="loc">{{ loc.toUpperCase() }}</option>
                     </select>
                 </div>
             </div>
@@ -120,27 +125,27 @@ function updateCategories(categoryIds: number[]) {
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                    <label :for="`${props.idPrefix}-sidebar`" class="mb-1 block text-sm font-medium">Sidebar position/width</label>
+                    <label :for="`${props.idPrefix}-sidebar`" class="mb-1 block text-sm font-medium">{{ $t('blogs.form.sidebar_label') }}</label>
                     <input
                         :id="`${props.idPrefix}-sidebar`"
                         v-model.number="form.sidebar"
                         class="block w-full rounded-md border px-3 py-2"
-                        min="-50"
                         max="50"
+                        min="-50"
                         step="1"
                         type="number"
                     />
-                    <p class="mt-1 text-xs text-muted-foreground">-50..-1 = left (% width), 0 = none, 1..50 = right (% width)</p>
+                    <p class="mt-1 text-xs text-muted-foreground">{{ $t('blogs.form.sidebar_hint') }}</p>
                     <InputError :message="form.errors.sidebar" />
                 </div>
                 <div>
-                    <label :for="`${props.idPrefix}-page_size`" class="mb-1 block text-sm font-medium">Posts per page</label>
+                    <label :for="`${props.idPrefix}-page_size`" class="mb-1 block text-sm font-medium">{{ $t('blogs.form.page_size_label') }}</label>
                     <input
                         :id="`${props.idPrefix}-page_size`"
                         v-model.number="form.page_size"
                         class="block w-full rounded-md border px-3 py-2"
-                        min="1"
                         max="100"
+                        min="1"
                         step="1"
                         type="number"
                     />
@@ -159,13 +164,13 @@ function updateCategories(categoryIds: number[]) {
             <div class="flex items-center gap-2">
                 <Button :disabled="form.processing" type="submit" variant="constructive">
                     <span v-if="form.processing">
-                        {{ props.isEdit ? 'Saving…' : 'Creating…' }}
+                        {{ props.isEdit ? $t('blogs.form.saving_button') : $t('blogs.form.creating_button') }}
                     </span>
                     <span v-else>
-                        {{ props.isEdit ? 'Save' : 'Create' }}
+                        {{ props.isEdit ? $t('blogs.form.save_button') : $t('blogs.form.create_button') }}
                     </span>
                 </Button>
-                <Button type="button" variant="destructive" @click="handleCancel"> Cancel </Button>
+                <Button type="button" variant="destructive" @click="handleCancel">{{ $t('blogs.form.cancel_button') }}</Button>
             </div>
         </form>
     </div>
