@@ -99,12 +99,12 @@ function updateCategories(categoryIds: number[]) {
                 <InputError :message="form.errors.description" />
             </div>
 
-            <!-- Published checkbox + Locale selector (only for edit mode) -->
-            <div v-if="props.isEdit && props.blog" class="flex flex-wrap items-center gap-3">
+            <!-- Published checkbox + Locale selector -->
+            <div class="flex flex-wrap items-center gap-3">
                 <div class="flex items-center gap-2">
                     <input :id="`${props.idPrefix}-published`" v-model="form.is_published" type="checkbox" />
                     <label :for="`${props.idPrefix}-published`" class="text-sm">Published</label>
-                    <span class="text-xs text-muted-foreground">/{{ props.blog.slug }}</span>
+                    <span v-if="props.isEdit && props.blog" class="text-xs text-muted-foreground">/{{ props.blog.slug }}</span>
                 </div>
                 <div class="ml-auto flex items-center gap-2">
                     <label :for="`${props.idPrefix}-locale`" class="text-sm">Locale</label>
@@ -113,7 +113,7 @@ function updateCategories(categoryIds: number[]) {
                     </select>
                 </div>
             </div>
-            <div v-if="props.isEdit" class="flex items-center gap-4">
+            <div class="flex items-center gap-4">
                 <InputError :message="form.errors.is_published" />
                 <InputError :message="form.errors.locale" />
             </div>

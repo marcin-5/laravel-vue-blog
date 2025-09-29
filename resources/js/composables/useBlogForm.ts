@@ -9,6 +9,8 @@ export function useBlogForm() {
     const createForm = useForm({
         name: '',
         description: null as string | null,
+        is_published: false as boolean,
+        locale: 'en' as string,
         categories: [] as number[],
         sidebar: 0 as number,
         page_size: 10 as number,
