@@ -14,13 +14,8 @@ export async function useI18nNs(ns: string | string[]) {
     const composer = useI18n();
     const ready = ref(false);
 
-    // Initial ensure for current locale
-    for (const n of namespaces) {
-        await ensureNamespace(composer.locale.value, n, composer);
-    }
-    ready.value = true;
-
     // Re-ensure on locale change while component is alive
+    // IMPORTANT: Register lifecycle hooks BEFORE any await statements
     const stop = watch(
         () => composer.locale.value,
         async (newLocale) => {
@@ -33,6 +28,12 @@ export async function useI18nNs(ns: string | string[]) {
     onBeforeUnmount(() => {
         stop();
     });
+
+    // Initial ensure for current locale
+    for (const n of namespaces) {
+        await ensureNamespace(composer.locale.value, n, composer);
+    }
+    ready.value = true;
 
     return {
         t: composer.t,

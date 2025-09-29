@@ -14,13 +14,14 @@ import { useI18nNs } from '@/composables/useI18nNs';
 export async function useI18nGate(ns?: string | string[]) {
   const namespaces = (Array.isArray(ns) ? ns : ns ? [ns] : []) as string[];
 
+  // IMPORTANT: Call useI18n() BEFORE any await statements to register lifecycle hooks properly
+  const { locale, messages, t, d, n } = useI18n();
+  const ready = computed(() => !!messages.value[locale.value]);
+
   // Preload provided namespaces (safe to await under <script setup> + Suspense)
   if (namespaces.length > 0) {
     await Promise.all(namespaces.map((n) => useI18nNs(n)));
   }
-
-  const { locale, messages, t, d, n } = useI18n();
-  const ready = computed(() => !!messages.value[locale.value]);
 
   return {
     ready,
