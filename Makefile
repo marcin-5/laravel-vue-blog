@@ -68,10 +68,14 @@ build: setup-env ## 🔨 Build or rebuild the Docker services
 migrate: key-gen ## 🗄️ Run database migrations
 	@echo "Running database migrations..."
 	$(DOCKER_COMPOSE) exec app php artisan migrate
+	@echo "Generating Ziggy routes..."
+	$(DOCKER_COMPOSE) exec app php artisan ziggy:generate
 
 db-reset: up ## 🔄 Reset database and run all migrations from scratch
 	@echo "Resetting database and running all migrations..."
 	$(DOCKER_COMPOSE) exec app php artisan migrate:fresh --seed
+	@echo "Generating Ziggy routes..."
+	$(DOCKER_COMPOSE) exec app php artisan ziggy:generate
 
 key-gen: npm-install ## 🔑 Generate Laravel application key
 	@echo "Generating application key..."

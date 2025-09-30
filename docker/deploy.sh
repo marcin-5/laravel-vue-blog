@@ -23,6 +23,7 @@ echo "Running Laravel production optimizations..."
 docker compose -f docker-compose.yml -f docker-compose.prod.yml exec app php artisan config:cache
 docker compose -f docker-compose.yml -f docker-compose.prod.yml exec app php artisan route:cache
 docker compose -f docker-compose.yml -f docker-compose.prod.yml exec app php artisan view:cache
+docker compose -f docker-compose.yml -f docker-compose.prod.yml exec app php artisan ziggy:generate
 docker compose -f docker-compose.yml -f docker-compose.prod.yml exec app php artisan migrate --force
 
 echo "Deployment complete!"
