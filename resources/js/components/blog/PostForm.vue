@@ -1,16 +1,16 @@
 <script lang="ts" setup>
+import FullScreenPreview from '@/components/FullScreenPreview.vue';
 import InputError from '@/components/InputError.vue';
+import MarkdownPreview from '@/components/MarkdownPreview.vue';
 import { Button } from '@/components/ui/button';
-import { useAppearance } from '@/composables/useAppearance';
+import { useMarkdownPreview } from '@/composables/useMarkdownPreview';
 import { ensureNamespace } from '@/i18n';
 import type { PostItem } from '@/types';
-import { MoonIcon, SunIcon } from '@heroicons/vue/24/outline';
 import { useForm } from '@inertiajs/vue3';
-import { useMediaQuery } from '@vueuse/core';
-import { computed, ref, watch } from 'vue';
+import { watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-const { t, locale } = useI18n();
+const { locale } = useI18n();
 await ensureNamespace(locale.value, 'blogs');
 
 interface Props {
@@ -33,25 +33,18 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>();
 
-// Preview mode state
-const isPreviewMode = ref(false);
-const isFullPreview = ref(false);
-const previewLayout = ref<'horizontal' | 'vertical'>('vertical');
-const previewHtml = ref('');
-
-// Theme management
-const { appearance, updateAppearance } = useAppearance();
-const isSystemDark = useMediaQuery('(prefers-color-scheme: dark)');
-const isDarkMode = computed(() => {
-    if (appearance.value === 'system') {
-        return isSystemDark.value;
-    }
-    return appearance.value === 'dark';
-});
-
-function toggleTheme() {
-    updateAppearance(isDarkMode.value ? 'light' : 'dark');
-}
+// Preview functionality using composable
+const {
+    isPreviewMode,
+    isFullPreview,
+    previewLayout,
+    previewHtml,
+    renderMarkdown,
+    togglePreview,
+    toggleFullPreview,
+    setLayoutHorizontal,
+    setLayoutVertical,
+} = useMarkdownPreview('posts.preview');
 
 // Use external form if provided, otherwise create internal form
 const form =
@@ -104,64 +97,16 @@ function handleCancel() {
     emit('cancel');
 }
 
-// Preview functionality
-const MARKDOWN_RENDER_ERROR_HTML = '<p class="text-red-500">Error rendering markdown</p>';
-
-async function fetchMarkdownPreview(content: string): Promise<string> {
-    const response = await fetch(route('posts.preview'), {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-        },
-        body: JSON.stringify({
-            content: content,
-        }),
-    });
-
-    if (!response.ok) {
-        throw new Error('Failed to fetch markdown preview');
-    }
-
-    const data = await response.json();
-    return data.html;
+function handleTogglePreview() {
+    togglePreview(form.content);
 }
 
-async function renderMarkdown() {
-    if (!form.content) {
-        previewHtml.value = '';
-        return;
-    }
-
-    try {
-        previewHtml.value = await fetchMarkdownPreview(form.content);
-    } catch (error) {
-        console.error('Failed to render markdown:', error);
-        previewHtml.value = MARKDOWN_RENDER_ERROR_HTML;
-    }
+function handleToggleFullPreview() {
+    toggleFullPreview(form.content);
 }
 
-function togglePreview() {
-    isPreviewMode.value = !isPreviewMode.value;
-    if (isPreviewMode.value) {
-        renderMarkdown();
-    }
-}
-
-function toggleFullPreview() {
-    isFullPreview.value = !isFullPreview.value;
-    if (isFullPreview.value) {
-        renderMarkdown();
-    }
-}
-
-function setLayoutHorizontal() {
-    previewLayout.value = 'horizontal';
-}
-
-function setLayoutVertical() {
-    previewLayout.value = 'vertical';
+function handleContentInput() {
+    renderMarkdown(form.content);
 }
 </script>
 
@@ -205,48 +150,29 @@ function setLayoutVertical() {
                 </div>
 
                 <!-- Full Preview Mode -->
-                <div v-if="isFullPreview" class="fixed inset-0 z-50 bg-background text-foreground">
-                    <div class="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background p-4">
-                        <h2 class="text-lg font-semibold">{{ $t('blogs.post_form.preview_mode_title') }}</h2>
-                        <div class="flex gap-2">
-                            <Button :disabled="form.processing" type="button" variant="constructive" @click="handleSubmit">
-                                {{ props.isEdit ? $t('blogs.post_form.save_button') : $t('blogs.post_form.create_button') }}
-                            </Button>
-                            <Button type="button" variant="destructive" @click="handleCancel">{{ $t('blogs.post_form.cancel_button') }}</Button>
-                            <Button type="button" variant="toggle" @click="setLayoutHorizontal">
-                                {{ $t('blogs.post_form.horizontal_button') }}
-                            </Button>
-                            <Button type="button" variant="toggle" @click="setLayoutVertical">
-                                {{ $t('blogs.post_form.vertical_button') }}
-                            </Button>
-                            <Button class="flex items-center gap-2" type="button" variant="toggle" @click="toggleTheme">
-                                <SunIcon v-if="isDarkMode" class="h-4 w-4" />
-                                <MoonIcon v-else class="h-4 w-4" />
-                            </Button>
-                            <Button type="button" variant="exit" @click="toggleFullPreview">{{ $t('blogs.post_form.exit_preview_button') }}</Button>
-                        </div>
-                    </div>
-                    <div class="h-full overflow-auto p-4">
-                        <div :class="previewLayout === 'vertical' ? 'flex h-full gap-4' : 'space-y-4'">
-                            <div :class="previewLayout === 'vertical' ? 'w-1/2' : ''">
-                                <h3 class="mb-2 text-sm font-medium">{{ $t('blogs.post_form.markdown_label') }}</h3>
-                                <textarea
-                                    v-model="form.content"
-                                    :placeholder="$t('blogs.post_form.markdown_placeholder')"
-                                    class="h-96 w-full rounded border border-border bg-background px-3 py-2 font-mono text-sm text-foreground"
-                                    @input="renderMarkdown"
-                                />
-                            </div>
-                            <div :class="previewLayout === 'vertical' ? 'w-1/2' : ''">
-                                <h3 class="mb-2 text-sm font-medium">{{ $t('blogs.post_form.preview_label') }}</h3>
-                                <div
-                                    class="prose dark:prose-invert h-96 max-w-none overflow-auto rounded border border-border bg-muted p-4"
-                                    v-html="previewHtml"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <FullScreenPreview
+                    v-if="isFullPreview"
+                    v-model:content="form.content"
+                    :cancel-button-label="$t('blogs.post_form.cancel_button')"
+                    :create-button-label="$t('blogs.post_form.create_button')"
+                    :exit-preview-button-label="$t('blogs.post_form.exit_preview_button')"
+                    :horizontal-button-label="$t('blogs.post_form.horizontal_button')"
+                    :is-edit="props.isEdit"
+                    :is-processing="form.processing"
+                    :markdown-label="$t('blogs.post_form.markdown_label')"
+                    :markdown-placeholder="$t('blogs.post_form.markdown_placeholder')"
+                    :preview-html="previewHtml"
+                    :preview-label="$t('blogs.post_form.preview_label')"
+                    :preview-layout="previewLayout"
+                    :preview-mode-title-label="$t('blogs.post_form.preview_mode_title')"
+                    :save-button-label="$t('blogs.post_form.save_button')"
+                    :vertical-button-label="$t('blogs.post_form.vertical_button')"
+                    @cancel="handleCancel"
+                    @exit="handleToggleFullPreview"
+                    @input="handleContentInput"
+                    @layout="(val) => (val === 'horizontal' ? setLayoutHorizontal() : setLayoutVertical())"
+                    @save="handleSubmit"
+                />
 
                 <!-- Normal Mode -->
                 <div v-else>
@@ -259,15 +185,12 @@ function setLayoutVertical() {
                                 :placeholder="props.isEdit ? '' : $t('blogs.post_form.content_placeholder')"
                                 :rows="props.isEdit ? 8 : 10"
                                 class="block w-full rounded-md border px-3 py-2"
-                                @input="renderMarkdown"
+                                @input="handleContentInput"
                             />
                         </div>
                         <!-- Preview Pane -->
                         <div :class="previewLayout === 'vertical' ? 'w-1/2' : ''">
-                            <div
-                                class="prose min-h-[200px] max-w-none overflow-auto rounded border border-border bg-muted p-4"
-                                v-html="previewHtml"
-                            />
+                            <MarkdownPreview :html="previewHtml" class="min-h-[200px]" />
                         </div>
                     </div>
                     <div v-else>
@@ -291,10 +214,10 @@ function setLayoutVertical() {
                     </label>
                 </div>
                 <div class="flex gap-2">
-                    <Button :variant="isPreviewMode ? 'exit' : 'toggle'" size="sm" type="button" @click="togglePreview">
+                    <Button :variant="isPreviewMode ? 'exit' : 'toggle'" size="sm" type="button" @click="handleTogglePreview">
                         {{ isPreviewMode ? $t('blogs.post_form.close_button') : $t('blogs.post_form.preview_button') }}
                     </Button>
-                    <Button v-if="isPreviewMode" size="sm" type="button" variant="exit" @click="toggleFullPreview">
+                    <Button v-if="isPreviewMode" size="sm" type="button" variant="exit" @click="handleToggleFullPreview">
                         {{ isFullPreview ? $t('blogs.post_form.split_view_button') : $t('blogs.post_form.full_preview_button') }}
                     </Button>
                     <Button v-if="isPreviewMode && !isFullPreview" size="sm" type="button" variant="toggle" @click="setLayoutHorizontal">

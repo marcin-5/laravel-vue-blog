@@ -1,14 +1,17 @@
 <script lang="ts" setup>
 import CategorySelector from '@/components/CategorySelector.vue';
+import FullScreenPreview from '@/components/FullScreenPreview.vue';
 import InputError from '@/components/InputError.vue';
+import MarkdownPreview from '@/components/MarkdownPreview.vue';
 import { Button } from '@/components/ui/button';
+import { useMarkdownPreview } from '@/composables/useMarkdownPreview';
 import { ensureNamespace } from '@/i18n';
 import type { Blog, Category } from '@/types';
 import { useForm } from '@inertiajs/vue3';
 import { watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-const { t, locale } = useI18n();
+const { locale } = useI18n();
 await ensureNamespace(locale.value, 'blogs');
 
 interface Props {
@@ -30,6 +33,19 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<Emits>();
+
+// Preview functionality using composable
+const {
+    isPreviewMode,
+    isFullPreview,
+    previewLayout,
+    previewHtml,
+    renderMarkdown,
+    togglePreview,
+    toggleFullPreview,
+    setLayoutHorizontal,
+    setLayoutVertical,
+} = useMarkdownPreview('blogs.preview');
 
 // Use external form if provided, otherwise create internal form
 const form =
@@ -74,6 +90,18 @@ function handleCancel() {
 function updateCategories(categoryIds: number[]) {
     form.categories = categoryIds;
 }
+
+function handleTogglePreview() {
+    togglePreview(form.description || '');
+}
+
+function handleToggleFullPreview() {
+    toggleFullPreview(form.description || '');
+}
+
+function handleDescriptionInput() {
+    renderMarkdown(form.description || '');
+}
 </script>
 
 <template>
@@ -93,15 +121,81 @@ function updateCategories(categoryIds: number[]) {
             </div>
 
             <div>
-                <label :for="`${props.idPrefix}-description`" class="mb-1 block text-sm font-medium">{{ $t('blogs.form.description_label') }}</label>
-                <textarea
-                    :id="`${props.idPrefix}-description`"
-                    v-model="form.description"
-                    :placeholder="props.isEdit ? '' : $t('blogs.form.description_placeholder')"
-                    class="block w-full rounded-md border px-3 py-2"
-                    rows="3"
+                <div class="mb-1">
+                    <label :for="`${props.idPrefix}-description`" class="block text-sm font-medium">{{ $t('blogs.form.description_label') }}</label>
+                </div>
+
+                <!-- Full Preview Mode -->
+                <FullScreenPreview
+                    v-if="isFullPreview"
+                    v-model:content="form.description"
+                    :cancel-button-label="$t('blogs.form.cancel_button')"
+                    :create-button-label="$t('blogs.form.create_button')"
+                    :exit-preview-button-label="$t('blogs.post_form.exit_preview_button')"
+                    :horizontal-button-label="$t('blogs.post_form.horizontal_button')"
+                    :is-edit="props.isEdit"
+                    :is-processing="form.processing"
+                    :markdown-label="$t('blogs.post_form.markdown_label')"
+                    :markdown-placeholder="$t('blogs.form.description_placeholder')"
+                    :preview-html="previewHtml"
+                    :preview-label="$t('blogs.post_form.preview_label')"
+                    :preview-layout="previewLayout"
+                    :preview-mode-title-label="$t('blogs.post_form.preview_mode_title')"
+                    :save-button-label="$t('blogs.form.save_button')"
+                    :vertical-button-label="$t('blogs.post_form.vertical_button')"
+                    @cancel="handleCancel"
+                    @exit="handleToggleFullPreview"
+                    @input="handleDescriptionInput"
+                    @layout="(val) => (val === 'horizontal' ? setLayoutHorizontal() : setLayoutVertical())"
+                    @save="handleSubmit"
                 />
+
+                <!-- Normal Mode -->
+                <div v-else>
+                    <div v-if="isPreviewMode" :class="previewLayout === 'vertical' ? 'flex gap-4' : 'space-y-4'">
+                        <!-- Markdown Editor -->
+                        <div :class="previewLayout === 'vertical' ? 'w-1/2' : ''">
+                            <textarea
+                                :id="`${props.idPrefix}-description`"
+                                v-model="form.description"
+                                :placeholder="props.isEdit ? '' : $t('blogs.form.description_placeholder')"
+                                :rows="props.isEdit ? 6 : 8"
+                                class="block w-full rounded-md border px-3 py-2"
+                                @input="handleDescriptionInput"
+                            />
+                        </div>
+                        <!-- Preview Pane -->
+                        <div :class="previewLayout === 'vertical' ? 'w-1/2' : ''">
+                            <MarkdownPreview :html="previewHtml" class="min-h-[150px]" />
+                        </div>
+                    </div>
+                    <div v-else>
+                        <textarea
+                            :id="`${props.idPrefix}-description`"
+                            v-model="form.description"
+                            :placeholder="props.isEdit ? '' : $t('blogs.form.description_placeholder')"
+                            class="block w-full rounded-md border px-3 py-2"
+                            rows="3"
+                        />
+                    </div>
+                </div>
                 <InputError :message="form.errors.description" />
+
+                <!-- Preview Controls -->
+                <div class="mt-2 flex justify-end gap-2">
+                    <Button :variant="isPreviewMode ? 'exit' : 'toggle'" size="sm" type="button" @click="handleTogglePreview">
+                        {{ isPreviewMode ? $t('blogs.post_form.close_button') : $t('blogs.post_form.preview_button') }}
+                    </Button>
+                    <Button v-if="isPreviewMode" size="sm" type="button" variant="exit" @click="handleToggleFullPreview">
+                        {{ isFullPreview ? $t('blogs.post_form.split_view_button') : $t('blogs.post_form.full_preview_button') }}
+                    </Button>
+                    <Button v-if="isPreviewMode && !isFullPreview" size="sm" type="button" variant="toggle" @click="setLayoutHorizontal">
+                        {{ $t('blogs.post_form.horizontal_button') }}
+                    </Button>
+                    <Button v-if="isPreviewMode && !isFullPreview" size="sm" type="button" variant="toggle" @click="setLayoutVertical">
+                        {{ $t('blogs.post_form.vertical_button') }}
+                    </Button>
+                </div>
             </div>
 
             <!-- Published checkbox + Locale selector -->

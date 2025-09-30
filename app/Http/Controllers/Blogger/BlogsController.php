@@ -5,17 +5,19 @@ namespace App\Http\Controllers\Blogger;
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
 use App\Models\Category;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Parsedown;
 
 class BlogsController extends Controller
 {
     public function __construct()
     {
         $this->middleware(['auth', 'verified']);
-        $this->authorizeResource(\App\Models\Blog::class, 'blog');
+        $this->authorizeResource(Blog::class, 'blog');
     }
 
     /**
@@ -23,7 +25,7 @@ class BlogsController extends Controller
      */
     public function index(Request $request): Response
     {
-        $this->authorize('viewAny', \App\Models\Blog::class);
+        $this->authorize('viewAny', Blog::class);
         $user = $request->user();
 
         $blogs = Blog::query()
@@ -32,11 +34,34 @@ class BlogsController extends Controller
                 'categories:id,name',
                 'posts' => function ($q) {
                     $q->orderByRaw('COALESCE(published_at, created_at) DESC')
-                        ->select('id', 'blog_id', 'title', 'excerpt', 'content', 'is_published', 'visibility', 'published_at', 'created_at');
+                        ->select(
+                            'id',
+                            'blog_id',
+                            'title',
+                            'excerpt',
+                            'content',
+                            'is_published',
+                            'visibility',
+                            'published_at',
+                            'created_at',
+                        );
                 },
             ])
             ->orderByDesc('created_at')
-            ->get(['id', 'user_id', 'name', 'slug', 'description', 'is_published', 'locale', 'sidebar', 'page_size', 'created_at']);
+            ->get(
+                [
+                    'id',
+                    'user_id',
+                    'name',
+                    'slug',
+                    'description',
+                    'is_published',
+                    'locale',
+                    'sidebar',
+                    'page_size',
+                    'created_at'
+                ],
+            );
 
         $categories = Category::query()
             ->orderBy('slug')
@@ -133,5 +158,24 @@ class BlogsController extends Controller
         }
 
         return back()->with('success', __('blogs.messages.blog_updated'));
+    }
+
+    /**
+     * Preview markdown content.
+     */
+    public function preview(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'content' => ['required', 'string'],
+        ]);
+
+        $parsedown = new Parsedown();
+        $parsedown->setSafeMode(true); // Enable safe mode to prevent XSS
+
+        $html = $parsedown->text($validated['content']);
+
+        return response()->json([
+            'html' => $html,
+        ]);
     }
 }
