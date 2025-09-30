@@ -36,7 +36,7 @@ const emit = defineEmits<Emits>();
 // Preview mode state
 const isPreviewMode = ref(false);
 const isFullPreview = ref(false);
-const previewLayout = ref<'horizontal' | 'vertical'>('horizontal');
+const previewLayout = ref<'horizontal' | 'vertical'>('vertical');
 const previewHtml = ref('');
 
 // Theme management
@@ -112,41 +112,48 @@ async function fetchMarkdownPreview(content: string): Promise<string> {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            Accept: 'text/html',
-            'X-Requested-With': 'XMLHttpRequest',
+            Accept: 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
         },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({
+            content: content,
+        }),
     });
 
     if (!response.ok) {
-        return MARKDOWN_RENDER_ERROR_HTML;
+        throw new Error('Failed to fetch markdown preview');
+    }
+
+    const data = await response.json();
+    return data.html;
+}
+
+async function renderMarkdown() {
+    if (!form.content) {
+        previewHtml.value = '';
+        return;
     }
 
     try {
-        return await response.text();
-    } catch (e) {
-        return MARKDOWN_RENDER_ERROR_HTML;
+        previewHtml.value = await fetchMarkdownPreview(form.content);
+    } catch (error) {
+        console.error('Failed to render markdown:', error);
+        previewHtml.value = MARKDOWN_RENDER_ERROR_HTML;
     }
 }
 
-async function updatePreviewHtml() {
-    previewHtml.value = await fetchMarkdownPreview(form.content);
-}
-
-watch(
-    () => form.content,
-    () => {
-        if (isPreviewMode.value) updatePreviewHtml();
-    },
-);
-
 function togglePreview() {
     isPreviewMode.value = !isPreviewMode.value;
-    if (isPreviewMode.value) updatePreviewHtml();
+    if (isPreviewMode.value) {
+        renderMarkdown();
+    }
 }
 
 function toggleFullPreview() {
     isFullPreview.value = !isFullPreview.value;
+    if (isFullPreview.value) {
+        renderMarkdown();
+    }
 }
 
 function setLayoutHorizontal() {
@@ -159,36 +166,14 @@ function setLayoutVertical() {
 </script>
 
 <template>
-    <div class="rounded-md border border-sidebar-border/70 p-4 dark:border-sidebar-border">
+    <div class="mt-4 border-t pt-4">
         <form class="space-y-4" @submit.prevent="handleSubmit">
-            <div class="flex items-center justify-between gap-2">
-                <div class="flex items-center gap-2">
-                    <input :id="`${props.idPrefix}-published`" v-model="form.is_published" type="checkbox" />
-                    <label :for="`${props.idPrefix}-published`" class="text-sm">{{ $t('blogs.post_form.published_label') }}</label>
-                </div>
-
-                <div class="flex items-center gap-2">
-                    <Button type="button" variant="outline" @click="toggleTheme">
-                        <template v-if="isDarkMode">
-                            <SunIcon class="mr-2 size-4" />
-                            <span>Light</span>
-                        </template>
-                        <template v-else>
-                            <MoonIcon class="mr-2 size-4" />
-                            <span>Dark</span>
-                        </template>
-                    </Button>
-
-                    <Button type="button" variant="outline" @click="togglePreview">
-                        {{ isPreviewMode ? $t('blogs.post_form.hide_preview') : $t('blogs.post_form.show_preview') }}
-                    </Button>
-                </div>
-            </div>
-
             <div>
-                <label :for="`${props.idPrefix}-title`" class="mb-1 block text-sm font-medium">{{ $t('blogs.post_form.title_label') }}</label>
+                <label :for="`${props.idPrefix}-title-${props.post?.id || props.blogId}`" class="mb-1 block text-sm font-medium">
+                    {{ props.isEdit ? $t('blogs.post_form.title_label') : $t('blogs.post_form.post_title_label') }}
+                </label>
                 <input
-                    :id="`${props.idPrefix}-title`"
+                    :id="`${props.idPrefix}-title-${props.post?.id || props.blogId}`"
                     v-model="form.title"
                     :placeholder="props.isEdit ? '' : $t('blogs.post_form.title_placeholder')"
                     class="block w-full rounded-md border px-3 py-2"
@@ -199,9 +184,11 @@ function setLayoutVertical() {
             </div>
 
             <div>
-                <label :for="`${props.idPrefix}-excerpt`" class="mb-1 block text-sm font-medium">{{ $t('blogs.post_form.excerpt_label') }}</label>
+                <label :for="`${props.idPrefix}-excerpt-${props.post?.id || props.blogId}`" class="mb-1 block text-sm font-medium">{{
+                    $t('blogs.post_form.excerpt_label')
+                }}</label>
                 <textarea
-                    :id="`${props.idPrefix}-excerpt`"
+                    :id="`${props.idPrefix}-excerpt-${props.post?.id || props.blogId}`"
                     v-model="form.excerpt"
                     :placeholder="props.isEdit ? '' : $t('blogs.post_form.excerpt_placeholder')"
                     class="block w-full rounded-md border px-3 py-2"
@@ -211,42 +198,111 @@ function setLayoutVertical() {
             </div>
 
             <div>
-                <label :for="`${props.idPrefix}-content`" class="mb-1 block text-sm font-medium">{{ $t('blogs.post_form.content_label') }}</label>
-                <textarea
-                    :id="`${props.idPrefix}-content`"
-                    v-model="form.content"
-                    :placeholder="props.isEdit ? '' : $t('blogs.post_form.content_placeholder')"
-                    class="block w-full rounded-md border px-3 py-2"
-                    rows="12"
-                />
+                <div class="mb-1">
+                    <label :for="`${props.idPrefix}-content-${props.post?.id || props.blogId}`" class="block text-sm font-medium">{{
+                        $t('blogs.post_form.content_label')
+                    }}</label>
+                </div>
+
+                <!-- Full Preview Mode -->
+                <div v-if="isFullPreview" class="fixed inset-0 z-50 bg-background text-foreground">
+                    <div class="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background p-4">
+                        <h2 class="text-lg font-semibold">{{ $t('blogs.post_form.preview_mode_title') }}</h2>
+                        <div class="flex gap-2">
+                            <Button :disabled="form.processing" type="button" variant="constructive" @click="handleSubmit">
+                                {{ props.isEdit ? $t('blogs.post_form.save_button') : $t('blogs.post_form.create_button') }}
+                            </Button>
+                            <Button type="button" variant="destructive" @click="handleCancel">{{ $t('blogs.post_form.cancel_button') }}</Button>
+                            <Button type="button" variant="toggle" @click="setLayoutHorizontal">
+                                {{ $t('blogs.post_form.horizontal_button') }}
+                            </Button>
+                            <Button type="button" variant="toggle" @click="setLayoutVertical">
+                                {{ $t('blogs.post_form.vertical_button') }}
+                            </Button>
+                            <Button class="flex items-center gap-2" type="button" variant="toggle" @click="toggleTheme">
+                                <SunIcon v-if="isDarkMode" class="h-4 w-4" />
+                                <MoonIcon v-else class="h-4 w-4" />
+                            </Button>
+                            <Button type="button" variant="exit" @click="toggleFullPreview">{{ $t('blogs.post_form.exit_preview_button') }}</Button>
+                        </div>
+                    </div>
+                    <div class="h-full overflow-auto p-4">
+                        <div :class="previewLayout === 'vertical' ? 'flex h-full gap-4' : 'space-y-4'">
+                            <div :class="previewLayout === 'vertical' ? 'w-1/2' : ''">
+                                <h3 class="mb-2 text-sm font-medium">{{ $t('blogs.post_form.markdown_label') }}</h3>
+                                <textarea
+                                    v-model="form.content"
+                                    :placeholder="$t('blogs.post_form.markdown_placeholder')"
+                                    class="h-96 w-full rounded border border-border bg-background px-3 py-2 font-mono text-sm text-foreground"
+                                    @input="renderMarkdown"
+                                />
+                            </div>
+                            <div :class="previewLayout === 'vertical' ? 'w-1/2' : ''">
+                                <h3 class="mb-2 text-sm font-medium">{{ $t('blogs.post_form.preview_label') }}</h3>
+                                <div
+                                    class="prose dark:prose-invert h-96 max-w-none overflow-auto rounded border border-border bg-muted p-4"
+                                    v-html="previewHtml"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Normal Mode -->
+                <div v-else>
+                    <div v-if="isPreviewMode" :class="previewLayout === 'vertical' ? 'flex gap-4' : 'space-y-4'">
+                        <!-- Markdown Editor -->
+                        <div :class="previewLayout === 'vertical' ? 'w-1/2' : ''">
+                            <textarea
+                                :id="`${props.idPrefix}-content-${props.post?.id || props.blogId}`"
+                                v-model="form.content"
+                                :placeholder="props.isEdit ? '' : $t('blogs.post_form.content_placeholder')"
+                                :rows="props.isEdit ? 8 : 10"
+                                class="block w-full rounded-md border px-3 py-2"
+                                @input="renderMarkdown"
+                            />
+                        </div>
+                        <!-- Preview Pane -->
+                        <div :class="previewLayout === 'vertical' ? 'w-1/2' : ''">
+                            <div
+                                class="prose min-h-[200px] max-w-none overflow-auto rounded border border-border bg-muted p-4"
+                                v-html="previewHtml"
+                            />
+                        </div>
+                    </div>
+                    <div v-else>
+                        <textarea
+                            :id="`${props.idPrefix}-content-${props.post?.id || props.blogId}`"
+                            v-model="form.content"
+                            :placeholder="props.isEdit ? '' : $t('blogs.post_form.content_placeholder')"
+                            :rows="props.isEdit ? 4 : 5"
+                            class="block w-full rounded-md border px-3 py-2"
+                        />
+                    </div>
+                </div>
                 <InputError :message="form.errors.content" />
             </div>
 
-            <div v-if="isPreviewMode" class="rounded-md border p-3">
-                <div class="mb-2 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <Button :variant="previewLayout === 'horizontal' ? 'secondary' : 'outline'" type="button" @click="setLayoutHorizontal">
-                            {{ $t('blogs.post_form.preview_horizontal') }}
-                        </Button>
-                        <Button :variant="previewLayout === 'vertical' ? 'secondary' : 'outline'" type="button" @click="setLayoutVertical">
-                            {{ $t('blogs.post_form.preview_vertical') }}
-                        </Button>
-                    </div>
-                    <Button :variant="isFullPreview ? 'secondary' : 'outline'" type="button" @click="toggleFullPreview">
-                        {{ isFullPreview ? $t('blogs.post_form.exit_full_preview') : $t('blogs.post_form.full_preview') }}
-                    </Button>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <input :id="`${props.idPrefix}-published-${props.post?.id || props.blogId}`" v-model="form.is_published" type="checkbox" />
+                    <label :for="`${props.idPrefix}-published-${props.post?.id || props.blogId}`" class="text-sm">
+                        {{ props.isEdit ? $t('blogs.post_form.published_label') : $t('blogs.post_form.publish_now_label') }}
+                    </label>
                 </div>
-                <div :class="isFullPreview ? 'fixed inset-4 z-50 rounded-md border bg-background p-4 shadow-lg' : ''">
-                    <div :class="previewLayout === 'horizontal' ? 'grid grid-cols-2 gap-4' : 'space-y-4'">
-                        <div>
-                            <h3 class="mb-2 font-medium">{{ $t('blogs.post_form.preview_source') }}</h3>
-                            <pre class="rounded bg-muted p-2 text-sm whitespace-pre-wrap">{{ form.content }}</pre>
-                        </div>
-                        <div>
-                            <h3 class="mb-2 font-medium">{{ $t('blogs.post_form.preview_rendered') }}</h3>
-                            <div class="prose dark:prose-invert max-w-none" v-html="previewHtml"></div>
-                        </div>
-                    </div>
+                <div class="flex gap-2">
+                    <Button :variant="isPreviewMode ? 'exit' : 'toggle'" size="sm" type="button" @click="togglePreview">
+                        {{ isPreviewMode ? $t('blogs.post_form.close_button') : $t('blogs.post_form.preview_button') }}
+                    </Button>
+                    <Button v-if="isPreviewMode" size="sm" type="button" variant="exit" @click="toggleFullPreview">
+                        {{ isFullPreview ? $t('blogs.post_form.split_view_button') : $t('blogs.post_form.full_preview_button') }}
+                    </Button>
+                    <Button v-if="isPreviewMode && !isFullPreview" size="sm" type="button" variant="toggle" @click="setLayoutHorizontal">
+                        {{ $t('blogs.post_form.horizontal_button') }}
+                    </Button>
+                    <Button v-if="isPreviewMode && !isFullPreview" size="sm" type="button" variant="toggle" @click="setLayoutVertical">
+                        {{ $t('blogs.post_form.vertical_button') }}
+                    </Button>
                 </div>
             </div>
 
@@ -256,7 +312,7 @@ function setLayoutVertical() {
                         {{ props.isEdit ? $t('blogs.post_form.saving_button') : $t('blogs.post_form.creating_button') }}
                     </span>
                     <span v-else>
-                        {{ props.isEdit ? $t('blogs.post_form.save_button') : $t('blogs.post_form.create_button') }}
+                        {{ props.isEdit ? $t('blogs.post_form.save_post_button') : $t('blogs.post_form.create_post_button') }}
                     </span>
                 </Button>
                 <Button type="button" variant="destructive" @click="handleCancel">{{ $t('blogs.post_form.cancel_button') }}</Button>
