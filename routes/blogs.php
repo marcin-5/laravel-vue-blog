@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Blogger\BlogsController;
 use App\Http\Controllers\Blogger\PostsController;
+use App\Http\Controllers\MarkdownController;
 use Illuminate\Support\Facades\Route;
 
 // Blogger routes for managing own blogs
@@ -14,6 +15,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('posts/{post}', [PostsController::class, 'update'])->name('posts.update');
     Route::post('posts/preview', [PostsController::class, 'preview'])->name('posts.preview');
 
-    // Blog preview route
-    Route::post('blogs/preview', [BlogsController::class, 'preview'])->name('blogs.preview');
+    // Markdown preview route
+    Route::post('markdown/preview', [MarkdownController::class, 'preview'])->name('markdown.preview');
 });

@@ -5,15 +5,16 @@ namespace App\Http\Controllers\Blogger;
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
 use App\Models\Post;
+use App\Services\MarkdownService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Parsedown;
 
 class PostsController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(
+        private readonly MarkdownService $markdownService
+    ) {
         $this->middleware(['auth', 'verified']);
     }
 
@@ -108,13 +109,8 @@ class PostsController extends Controller
             'content' => ['required', 'string'],
         ]);
 
-        $parsedown = new Parsedown();
-        $parsedown->setSafeMode(true); // Enable safe mode to prevent XSS
+        $preview = $this->markdownService->preview($validated['content']);
 
-        $html = $parsedown->text($validated['content']);
-
-        return response()->json([
-            'html' => $html,
-        ]);
+        return response()->json($preview);
     }
 }

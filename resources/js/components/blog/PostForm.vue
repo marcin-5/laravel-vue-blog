@@ -176,31 +176,22 @@ function handleContentInput() {
 
                 <!-- Normal Mode -->
                 <div v-else>
-                    <div v-if="isPreviewMode" :class="previewLayout === 'vertical' ? 'flex gap-4' : 'space-y-4'">
-                        <!-- Markdown Editor -->
-                        <div :class="previewLayout === 'vertical' ? 'w-1/2' : ''">
+                    <div :class="isPreviewMode && previewLayout === 'vertical' ? 'flex gap-4' : 'space-y-4'">
+                        <!-- Markdown Editor (always present to avoid DOM disposal) -->
+                        <div :class="isPreviewMode && previewLayout === 'vertical' ? 'w-1/2' : ''">
                             <textarea
                                 :id="`${props.idPrefix}-content-${props.post?.id || props.blogId}`"
                                 v-model="form.content"
                                 :placeholder="props.isEdit ? '' : $t('blogs.post_form.content_placeholder')"
-                                :rows="props.isEdit ? 8 : 10"
+                                :rows="isPreviewMode ? (props.isEdit ? 8 : 10) : (props.isEdit ? 4 : 5)"
                                 class="block w-full rounded-md border px-3 py-2"
                                 @input="handleContentInput"
                             />
                         </div>
-                        <!-- Preview Pane -->
-                        <div :class="previewLayout === 'vertical' ? 'w-1/2' : ''">
+                        <!-- Preview Pane (only shown when in preview mode) -->
+                        <div v-if="isPreviewMode" :class="previewLayout === 'vertical' ? 'w-1/2' : ''">
                             <MarkdownPreview :html="previewHtml" class="min-h-[200px]" />
                         </div>
-                    </div>
-                    <div v-else>
-                        <textarea
-                            :id="`${props.idPrefix}-content-${props.post?.id || props.blogId}`"
-                            v-model="form.content"
-                            :placeholder="props.isEdit ? '' : $t('blogs.post_form.content_placeholder')"
-                            :rows="props.isEdit ? 4 : 5"
-                            class="block w-full rounded-md border px-3 py-2"
-                        />
                     </div>
                 </div>
                 <InputError :message="form.errors.content" />

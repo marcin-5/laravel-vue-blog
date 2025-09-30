@@ -45,7 +45,7 @@ const {
     toggleFullPreview,
     setLayoutHorizontal,
     setLayoutVertical,
-} = useMarkdownPreview('blogs.preview');
+} = useMarkdownPreview('markdown.preview');
 
 // Use external form if provided, otherwise create internal form
 const form =
@@ -152,31 +152,22 @@ function handleDescriptionInput() {
 
                 <!-- Normal Mode -->
                 <div v-else>
-                    <div v-if="isPreviewMode" :class="previewLayout === 'vertical' ? 'flex gap-4' : 'space-y-4'">
-                        <!-- Markdown Editor -->
-                        <div :class="previewLayout === 'vertical' ? 'w-1/2' : ''">
+                    <div :class="isPreviewMode && previewLayout === 'vertical' ? 'flex gap-4' : 'space-y-4'">
+                        <!-- Markdown Editor (always present to avoid DOM disposal) -->
+                        <div :class="isPreviewMode && previewLayout === 'vertical' ? 'w-1/2' : ''">
                             <textarea
                                 :id="`${props.idPrefix}-description`"
                                 v-model="form.description"
                                 :placeholder="props.isEdit ? '' : $t('blogs.form.description_placeholder')"
-                                :rows="props.isEdit ? 6 : 8"
+                                :rows="isPreviewMode ? (props.isEdit ? 6 : 8) : 3"
                                 class="block w-full rounded-md border px-3 py-2"
                                 @input="handleDescriptionInput"
                             />
                         </div>
-                        <!-- Preview Pane -->
-                        <div :class="previewLayout === 'vertical' ? 'w-1/2' : ''">
+                        <!-- Preview Pane (only shown when in preview mode) -->
+                        <div v-if="isPreviewMode" :class="previewLayout === 'vertical' ? 'w-1/2' : ''">
                             <MarkdownPreview :html="previewHtml" class="min-h-[150px]" />
                         </div>
-                    </div>
-                    <div v-else>
-                        <textarea
-                            :id="`${props.idPrefix}-description`"
-                            v-model="form.description"
-                            :placeholder="props.isEdit ? '' : $t('blogs.form.description_placeholder')"
-                            class="block w-full rounded-md border px-3 py-2"
-                            rows="3"
-                        />
                     </div>
                 </div>
                 <InputError :message="form.errors.description" />

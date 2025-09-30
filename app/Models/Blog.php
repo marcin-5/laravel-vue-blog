@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -89,5 +90,36 @@ class Blog extends Model
     public function getCreationDateAttribute(): ?string
     {
         return $this->created_at?->toDateString();
+    }
+
+    /**
+     * Scope: Load posts for the index view with proper ordering and fields.
+     */
+    public function scopeWithPostsForIndex(Builder $query): Builder
+    {
+        return $query->with([
+            'posts' => function ($q) {
+                $q->orderByRaw('COALESCE(published_at, created_at) DESC')
+                    ->select(
+                        'id',
+                        'blog_id',
+                        'title',
+                        'excerpt',
+                        'content',
+                        'is_published',
+                        'visibility',
+                        'published_at',
+                        'created_at',
+                    );
+            },
+        ]);
+    }
+
+    /**
+     * Scope: Load categories with minimal fields.
+     */
+    public function scopeWithCategories(Builder $query): Builder
+    {
+        return $query->with('categories:id,name');
     }
 }

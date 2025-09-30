@@ -3,19 +3,20 @@
 namespace App\Http\Controllers\Blogger;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreBlogRequest;
+use App\Http\Requests\UpdateBlogRequest;
 use App\Models\Blog;
-use App\Models\Category;
-use Illuminate\Http\JsonResponse;
+use App\Services\BlogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Parsedown;
 
 class BlogsController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(
+        private readonly BlogService $blogService
+    ) {
         $this->middleware(['auth', 'verified']);
         $this->authorizeResource(Blog::class, 'blog');
     }
@@ -28,44 +29,8 @@ class BlogsController extends Controller
         $this->authorize('viewAny', Blog::class);
         $user = $request->user();
 
-        $blogs = Blog::query()
-            ->where('user_id', $user->id)
-            ->with([
-                'categories:id,name',
-                'posts' => function ($q) {
-                    $q->orderByRaw('COALESCE(published_at, created_at) DESC')
-                        ->select(
-                            'id',
-                            'blog_id',
-                            'title',
-                            'excerpt',
-                            'content',
-                            'is_published',
-                            'visibility',
-                            'published_at',
-                            'created_at',
-                        );
-                },
-            ])
-            ->orderByDesc('created_at')
-            ->get(
-                [
-                    'id',
-                    'user_id',
-                    'name',
-                    'slug',
-                    'description',
-                    'is_published',
-                    'locale',
-                    'sidebar',
-                    'page_size',
-                    'created_at'
-                ],
-            );
-
-        $categories = Category::query()
-            ->orderBy('slug')
-            ->get(['id', 'name']);
+        $blogs = $this->blogService->getUserBlogs($user);
+        $categories = $this->blogService->getCategories();
 
         return Inertia::render('Blogs', [
             'blogs' => $blogs,
@@ -77,35 +42,12 @@ class BlogsController extends Controller
     /**
      * Store a newly created blog in storage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreBlogRequest $request): RedirectResponse
     {
-        $this->authorize('create', Blog::class);
-        $user = $request->user();
+        $blogData = $request->getBlogData();
+        $categories = $request->getCategories();
 
-        $name = trim((string)($request->input('name') ?: 'New Blog'));
-
-        $validated = $request->validate([
-            'description' => ['nullable', 'string'],
-            'categories' => ['sometimes', 'array'],
-            'categories.*' => ['integer', 'exists:categories,id'],
-            'locale' => ['sometimes', 'string', 'in:en,pl'],
-            'sidebar' => ['sometimes', 'integer', 'between:-50,50'],
-            'page_size' => ['sometimes', 'integer', 'min:1', 'max:100'],
-        ]);
-
-        $blog = Blog::create([
-            'user_id' => $user->id,
-            'name' => $name,
-            'description' => $validated['description'] ?? null,
-            'is_published' => false,
-            'locale' => $validated['locale'] ?? app()->getLocale() ?? 'en',
-            'sidebar' => (int)($validated['sidebar'] ?? 0),
-            'page_size' => (int)($validated['page_size'] ?? 10),
-        ]);
-
-        if (!empty($validated['categories'])) {
-            $blog->categories()->sync($validated['categories']);
-        }
+        $this->blogService->createBlog($blogData, $categories);
 
         return redirect()->route('blogs.index')->with('success', __('blogs.messages.blog_created'));
     }
@@ -113,69 +55,14 @@ class BlogsController extends Controller
     /**
      * Update the specified blog in storage.
      */
-    public function update(Request $request, Blog $blog): RedirectResponse
+    public function update(UpdateBlogRequest $request, Blog $blog): RedirectResponse
     {
-        $this->authorize('update', $blog);
-        $user = $request->user();
+        $blogData = $request->getBlogData();
+        $categories = $request->hasCategories() ? $request->getCategories() : null;
 
-        $validated = $request->validate([
-            'name' => ['sometimes', 'required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'is_published' => ['sometimes', 'boolean'],
-            'categories' => ['sometimes', 'array'],
-            'categories.*' => ['integer', 'exists:categories,id'],
-            'locale' => ['sometimes', 'string', 'in:en,pl'],
-            'sidebar' => ['sometimes', 'integer', 'between:-50,50'],
-            'page_size' => ['sometimes', 'integer', 'min:1', 'max:100'],
-        ]);
-
-        if (array_key_exists('name', $validated)) {
-            $blog->name = $validated['name'];
-            // Slug will be auto-adjusted by observer if name changed
-        }
-
-        if (array_key_exists('description', $validated)) {
-            $blog->description = $validated['description'];
-        }
-
-        if (array_key_exists('is_published', $validated)) {
-            $blog->is_published = (bool)$validated['is_published'];
-        }
-        if (array_key_exists('locale', $validated)) {
-            $blog->locale = $validated['locale'];
-        }
-        if (array_key_exists('sidebar', $validated)) {
-            $blog->sidebar = (int)$validated['sidebar'];
-        }
-        if (array_key_exists('page_size', $validated)) {
-            $blog->page_size = (int)$validated['page_size'];
-        }
-
-        $blog->save();
-
-        if (array_key_exists('categories', $validated)) {
-            $blog->categories()->sync($validated['categories'] ?? []);
-        }
+        $this->blogService->updateBlog($blog, $blogData, $categories);
 
         return back()->with('success', __('blogs.messages.blog_updated'));
     }
 
-    /**
-     * Preview markdown content.
-     */
-    public function preview(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'content' => ['required', 'string'],
-        ]);
-
-        $parsedown = new Parsedown();
-        $parsedown->setSafeMode(true); // Enable safe mode to prevent XSS
-
-        $html = $parsedown->text($validated['content']);
-
-        return response()->json([
-            'html' => $html,
-        ]);
-    }
 }
