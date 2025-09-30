@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Builder;
+use ParsedownExtra;
 
 class Post extends Model
 {
@@ -43,11 +44,11 @@ class Post extends Model
      */
     public function getContentHtmlAttribute(): string
     {
-        $content = (string) ($this->content ?? '');
+        $content = (string)($this->content ?? '');
         if ($content === '') {
             return '';
         }
-        $parser = new \ParsedownExtra();
+        $parser = new ParsedownExtra();
         if (method_exists($parser, 'setSafeMode')) {
             $parser->setSafeMode(true);
         }
@@ -90,5 +91,31 @@ class Post extends Model
     public function scopeRegistered(Builder $query): Builder
     {
         return $query->where('visibility', self::VIS_REGISTERED);
+    }
+
+    /**
+     * Scope: posts belonging to blogs owned by a specific user.
+     */
+    public function scopeOwnedBy(Builder $query, int $userId): Builder
+    {
+        return $query->whereHas('blog', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
+        });
+    }
+
+    /**
+     * Scope: posts for a specific blog with ownership validation.
+     */
+    public function scopeForBlog(Builder $query, int $blogId, int $userId = null): Builder
+    {
+        $query->where('blog_id', $blogId);
+
+        if ($userId) {
+            $query->whereHas('blog', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            });
+        }
+
+        return $query;
     }
 }

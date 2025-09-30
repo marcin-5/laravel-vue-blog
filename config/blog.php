@@ -19,4 +19,18 @@ return [
     ],
 
     'supported_locales' => ['en', 'pl'],
+
+    'posts' => [
+        'defaults' => [
+            'is_published' => false,
+            'visibility' => 'public',
+        ],
+
+        'allowed_visibility' => ['public', 'registered'],
+
+        'limits' => [
+            'excerpt_max_length' => 500,
+            'title_max_length' => 255,
+        ],
+    ],
 ];

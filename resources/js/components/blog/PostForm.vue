@@ -44,7 +44,7 @@ const {
     toggleFullPreview,
     setLayoutHorizontal,
     setLayoutVertical,
-} = useMarkdownPreview('posts.preview');
+} = useMarkdownPreview('markdown.preview');
 
 // Use external form if provided, otherwise create internal form
 const form =
@@ -183,7 +183,7 @@ function handleContentInput() {
                                 :id="`${props.idPrefix}-content-${props.post?.id || props.blogId}`"
                                 v-model="form.content"
                                 :placeholder="props.isEdit ? '' : $t('blogs.post_form.content_placeholder')"
-                                :rows="isPreviewMode ? (props.isEdit ? 8 : 10) : (props.isEdit ? 4 : 5)"
+                                :rows="isPreviewMode ? (props.isEdit ? 8 : 10) : props.isEdit ? 4 : 5"
                                 class="block w-full rounded-md border px-3 py-2"
                                 @input="handleContentInput"
                             />

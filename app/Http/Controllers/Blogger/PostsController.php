@@ -3,59 +3,30 @@
 namespace App\Http\Controllers\Blogger;
 
 use App\Http\Controllers\Controller;
-use App\Models\Blog;
+use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
 use App\Models\Post;
-use App\Services\MarkdownService;
+use App\Services\PostService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 
 class PostsController extends Controller
 {
     public function __construct(
-        private readonly MarkdownService $markdownService
+        private readonly PostService $postService,
     ) {
         $this->middleware(['auth', 'verified']);
+        $this->authorizeResource(Post::class, 'post');
     }
 
     /**
      * Store a newly created post in storage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StorePostRequest $request): RedirectResponse
     {
-        $user = $request->user();
+        $blog = $request->getBlog();
+        $postData = $request->getPostData();
 
-        $validated = $request->validate([
-            'blog_id' => ['required', 'integer', 'exists:blogs,id'],
-            'title' => ['required', 'string', 'max:255'],
-            'excerpt' => ['nullable', 'string'],
-            'content' => ['nullable', 'string'],
-            'is_published' => ['sometimes', 'boolean'],
-        ]);
-
-        // Ensure the blog belongs to the current user
-        $blog = Blog::query()->where('id', $validated['blog_id'])->where('user_id', $user->id)->firstOrFail();
-
-        $isPublished = (bool)($validated['is_published'] ?? false);
-
-        $post = new Post([
-            'blog_id' => $blog->id,
-            'title' => $validated['title'],
-            // slug will be set by Post::setSlugAttribute from title
-            'excerpt' => $validated['excerpt'] ?? null,
-            'content' => $validated['content'] ?? null,
-            'is_published' => $isPublished,
-            'visibility' => Post::VIS_PUBLIC, // default to public for now
-        ]);
-
-        // Ensure slug is generated from title before saving (mutator will slugify)
-        $post->slug = $post->title;
-
-        if ($isPublished && empty($post->published_at)) {
-            $post->published_at = now();
-        }
-
-        $post->save();
+        $this->postService->createPost($blog, $postData);
 
         return back()->with('success', __('blogs.messages.post_created'));
     }
@@ -63,54 +34,13 @@ class PostsController extends Controller
     /**
      * Update an existing post.
      */
-    public function update(Request $request, Post $post): RedirectResponse
+    public function update(UpdatePostRequest $request, Post $post): RedirectResponse
     {
-        $user = $request->user();
+        $postData = $request->getPostData();
 
-        // Ensure the post belongs to a blog owned by the current user
-        $blog = Blog::query()->where('id', $post->blog_id)->where('user_id', $user->id)->firstOrFail();
-
-        $validated = $request->validate([
-            'title' => ['sometimes', 'required', 'string', 'max:255'],
-            'excerpt' => ['nullable', 'string'],
-            'content' => ['nullable', 'string'],
-            'is_published' => ['sometimes', 'boolean'],
-        ]);
-
-        if (array_key_exists('title', $validated)) {
-            $post->title = $validated['title'];
-            // trigger slug regeneration
-            $post->slug = $post->title;
-        }
-        if (array_key_exists('excerpt', $validated)) {
-            $post->excerpt = $validated['excerpt'];
-        }
-        if (array_key_exists('content', $validated)) {
-            $post->content = $validated['content'];
-        }
-        if (array_key_exists('is_published', $validated)) {
-            $post->is_published = (bool)$validated['is_published'];
-            if ($post->is_published && empty($post->published_at)) {
-                $post->published_at = now();
-            }
-        }
-
-        $post->save();
+        $this->postService->updatePost($post, $postData);
 
         return back()->with('success', __('blogs.messages.post_updated'));
     }
 
-    /**
-     * Preview markdown content.
-     */
-    public function preview(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'content' => ['required', 'string'],
-        ]);
-
-        $preview = $this->markdownService->preview($validated['content']);
-
-        return response()->json($preview);
-    }
 }

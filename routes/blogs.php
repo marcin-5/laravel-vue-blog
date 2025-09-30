@@ -13,7 +13,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Posts routes
     Route::post('posts', [PostsController::class, 'store'])->name('posts.store');
     Route::patch('posts/{post}', [PostsController::class, 'update'])->name('posts.update');
-    Route::post('posts/preview', [PostsController::class, 'preview'])->name('posts.preview');
 
     // Markdown preview route
     Route::post('markdown/preview', [MarkdownController::class, 'preview'])->name('markdown.preview');

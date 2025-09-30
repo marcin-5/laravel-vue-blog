@@ -67,8 +67,11 @@ export function usePostForm() {
         postEditForm.reset();
     }
 
-    function submitEditPost(post: PostItem) {
-        postEditForm.patch(route('posts.update', post.id), {
+    function submitEditPost() {
+        // Use editingPostId since we have the post ID stored in state
+        const postId = editingPostId.value;
+
+        postEditForm.patch(route('posts.update', [postId]), {
             preserveScroll: true,
             onSuccess: () => {
                 editingPostId.value = null;
