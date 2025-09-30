@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import BlogForm from '@/components/BlogForm.vue';
+import BlogForm from '@/components/blog/BlogForm.vue';
 import { Button } from '@/components/ui/button';
+import { ensureNamespace } from '@/i18n';
 import type { Category } from '@/types';
 import { useI18n } from 'vue-i18n';
-import { ensureNamespace } from '@/i18n';
 
 const { t, locale } = useI18n();
 await ensureNamespace(locale.value, 'blogs');

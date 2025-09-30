@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import BlogForm from '@/components/BlogForm.vue';
-import PostForm from '@/components/PostForm.vue';
-import PostListItem from '@/components/PostListItem.vue';
-import PublishedBadge from '@/components/PublishedBadge.vue';
+import BlogForm from '@/components/blog/BlogForm.vue';
+import PostForm from '@/components/blog/PostForm.vue';
+import PostListItem from '@/components/blog/PostListItem.vue';
+import PublishedBadge from '@/components/blog/PublishedBadge.vue';
 import { Button } from '@/components/ui/button';
-import type { Blog, Category, PostItem } from '@/types';
 import { ensureNamespace, i18n } from '@/i18n';
+import type { Blog, Category, PostItem } from '@/types';
 import { useI18n } from 'vue-i18n';
 
 const { locale } = useI18n();
