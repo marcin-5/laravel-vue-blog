@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import BlogPostNav from '@/components/BlogPostNav.vue';
+import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import { Head } from '@inertiajs/vue3';
-import BlogPostsList from '../../components/BlogPostsList.vue';
+import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import { useI18nGate } from '@/composables/useI18nGate';
 
 interface Blog {

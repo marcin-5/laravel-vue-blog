@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import BlogListItem from '@/components/BlogListItem.vue';
-import CreateBlogSection from '@/components/CreateBlogSection.vue';
+import BlogListItem from '@/components/blog/BlogListItem.vue';
+import CreateBlogSection from '@/components/blog/CreateBlogSection.vue';
 import { Button } from '@/components/ui/button';
 import { useBlogForm } from '@/composables/useBlogForm';
 import { usePostForm } from '@/composables/usePostForm';
