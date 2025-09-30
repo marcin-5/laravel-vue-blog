@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Category;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class CategoryObserver
@@ -19,6 +20,21 @@ class CategoryObserver
         }
     }
 
+    public function created(Category $category): void
+    {
+        $this->clearWelcomeCache();
+    }
+
+    public function updated(Category $category): void
+    {
+        $this->clearWelcomeCache();
+    }
+
+    public function deleted(Category $category): void
+    {
+        $this->clearWelcomeCache();
+    }
+
     private function ensureSlug(Category $category, ?int $ignoreId = null): void
     {
         $base = Str::slug($category->name ?: 'category');
@@ -32,5 +48,11 @@ class CategoryObserver
             $slug = ($base ?: 'category') . '-' . $i++;
         }
         $category->slug = $slug;
+    }
+
+    private function clearWelcomeCache(): void
+    {
+        // Clear all welcome page caches (categories and blogs for all locales and filters)
+        Cache::flush();
     }
 }
