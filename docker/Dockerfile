@@ -28,7 +28,11 @@ RUN apk add --no-cache \
     icu-dev \
     oniguruma-dev \
     supervisor \
-    tzdata
+    tzdata \
+    linux-headers \
+    autoconf \
+    g++ \
+    make
 
 # Set timezone
 ENV TZ=$TZ
@@ -45,6 +49,10 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
         intl \
         mbstring \
         opcache
+
+# Install Redis extension via PECL
+RUN pecl install redis \
+    && docker-php-ext-enable redis
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
