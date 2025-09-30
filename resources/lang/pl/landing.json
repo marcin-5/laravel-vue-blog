@@ -7,6 +7,7 @@
             "register": "Rejestracja"
         },
         "blog": {
+            "author": "Autor:",
             "posts_list": {
                 "aria": "Lista wpisów",
                 "title": "Posty",

@@ -17,6 +17,7 @@ interface BlogItem {
     id: number;
     name: string;
     slug: string;
+    author: string;
     descriptionHtml?: string | null;
     categories: Category[];
 }

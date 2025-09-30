@@ -51,10 +51,15 @@ class PublicHomeController extends Controller
         // Load blogs with categories; filter when categories selected
         $blogsQuery = Blog::query()
             ->where('is_published', true)
-            ->with(['categories' => function ($q) use ($locale) {
-                $q->select(['categories.id', 'categories.slug', 'categories.name']);
-            }])
-            ->select(['id', 'name', 'slug', 'description', 'locale']);
+            ->with([
+                'categories' => function ($q) use ($locale) {
+                    $q->select(['categories.id', 'categories.slug', 'categories.name']);
+                },
+                'user' => function ($q) {
+                    $q->select(['id', 'name']);
+                }
+            ])
+            ->select(['id', 'name', 'slug', 'description', 'locale', 'user_id']);
 
         if (!empty($selectedCategoryIds)) {
             $blogsQuery->whereHas('categories', function ($q) use ($selectedCategoryIds) {
@@ -79,6 +84,7 @@ class PublicHomeController extends Controller
                 'id' => $b->id,
                 'name' => $b->name,
                 'slug' => $b->slug,
+                'author' => $b->user?->name ?? '',
                 'descriptionHtml' => $descriptionHtml,
                 'categories' => $b->categories
                     ->filter(fn($c) => method_exists($c, 'hasTranslation') ? $c->hasTranslation('name', $blogLocale) : true)
