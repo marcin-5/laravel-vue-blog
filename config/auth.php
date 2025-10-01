@@ -112,4 +112,17 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Registration Settings
+    |--------------------------------------------------------------------------
+    |
+    | This option controls whether new user registration is enabled.
+    | When set to false, the registration page will display a message
+    | indicating that registration is currently unavailable.
+    |
+    */
+
+    'registration_enabled' => env('REGISTRATION_ENABLED', true),
+
 ];
