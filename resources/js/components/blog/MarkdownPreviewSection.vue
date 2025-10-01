@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import FullScreenPreview from '@/components/FullScreenPreview.vue';
+import InputError from '@/components/InputError.vue';
 import MarkdownPreview from '@/components/MarkdownPreview.vue';
 import { Button } from '@/components/ui/button';
-import InputError from '@/components/InputError.vue';
 
 interface TranslationKeys {
     cancel: string;
@@ -45,7 +45,7 @@ interface Emits {
     (e: 'togglePreview'): void;
     (e: 'toggleFullPreview'): void;
     (e: 'setLayoutHorizontal'): void;
-    (e: 'setLayoutVertical'): void;
+    (e: 'setLayout', layout: 'horizontal' | 'vertical'): void;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -63,12 +63,8 @@ function handleInput(event: Event) {
     emit('input');
 }
 
-function handleLayoutChange(layout: string) {
-    if (layout === 'horizontal') {
-        emit('setLayoutHorizontal');
-    } else {
-        emit('setLayoutVertical');
-    }
+function handleLayoutChange(layout: 'horizontal' | 'vertical') {
+    emit('setLayout', layout);
 }
 </script>
 
@@ -81,9 +77,8 @@ function handleLayoutChange(layout: string) {
         <!-- Full Preview Mode -->
         <FullScreenPreview
             v-if="props.isFullPreview"
-            :content="props.modelValue"
-            @update:content="(value: string) => emit('update:modelValue', value)"
             :cancel-button-label="props.translations.cancel"
+            :content="props.modelValue"
             :create-button-label="props.translations.create"
             :exit-preview-button-label="props.translations.exitPreview"
             :horizontal-button-label="props.translations.horizontal"
@@ -102,6 +97,7 @@ function handleLayoutChange(layout: string) {
             @input="emit('input')"
             @layout="handleLayoutChange"
             @save="emit('submit')"
+            @update:content="(value: string) => emit('update:modelValue', value)"
         />
 
         <!-- Normal Mode -->
@@ -120,7 +116,7 @@ function handleLayoutChange(layout: string) {
                 </div>
                 <!-- Preview Pane -->
                 <div v-if="props.isPreviewMode" :class="props.previewLayout === 'vertical' ? 'w-1/2' : ''">
-                    <MarkdownPreview :html="props.previewHtml" :class="`min-h-[${props.minHeight}]`" />
+                    <MarkdownPreview :class="`min-h-[${props.minHeight}]`" :html="props.previewHtml" />
                 </div>
             </div>
         </div>
@@ -129,21 +125,10 @@ function handleLayoutChange(layout: string) {
 
         <!-- Preview Controls -->
         <div class="mt-2 flex justify-end gap-2">
-            <Button
-                :variant="props.isPreviewMode ? 'exit' : 'toggle'"
-                size="sm"
-                type="button"
-                @click="emit('togglePreview')"
-            >
+            <Button :variant="props.isPreviewMode ? 'exit' : 'toggle'" size="sm" type="button" @click="emit('togglePreview')">
                 {{ props.isPreviewMode ? props.translations.closePreview : props.translations.preview }}
             </Button>
-            <Button
-                v-if="props.isPreviewMode"
-                size="sm"
-                type="button"
-                variant="exit"
-                @click="emit('toggleFullPreview')"
-            >
+            <Button v-if="props.isPreviewMode" size="sm" type="button" variant="exit" @click="emit('toggleFullPreview')">
                 {{ props.isFullPreview ? props.translations.splitView : props.translations.fullPreview }}
             </Button>
             <Button
@@ -151,7 +136,7 @@ function handleLayoutChange(layout: string) {
                 size="sm"
                 type="button"
                 variant="toggle"
-                @click="emit('setLayoutHorizontal')"
+                @click="handleLayoutChange('horizontal')"
             >
                 {{ props.translations.horizontal }}
             </Button>
@@ -160,7 +145,7 @@ function handleLayoutChange(layout: string) {
                 size="sm"
                 type="button"
                 variant="toggle"
-                @click="emit('setLayoutVertical')"
+                @click="handleLayoutChange('vertical')"
             >
                 {{ props.translations.vertical }}
             </Button>

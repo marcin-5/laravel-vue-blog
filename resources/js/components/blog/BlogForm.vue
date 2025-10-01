@@ -42,17 +42,8 @@ const { form, fieldIdPrefix, updateCategories } = useBlogFormLogic({
     externalForm: props.form,
 });
 
-const {
-    isPreviewMode,
-    isFullPreview,
-    previewLayout,
-    previewHtml,
-    renderMarkdown,
-    togglePreview,
-    toggleFullPreview,
-    setLayoutHorizontal,
-    setLayoutVertical,
-} = useMarkdownPreview('markdown.preview');
+const { isPreviewMode, isFullPreview, previewLayout, previewHtml, renderMarkdown, togglePreview, toggleFullPreview, setLayout } =
+    useMarkdownPreview('markdown.preview');
 
 const translationKeys = computed(() => ({
     name: t('blogs.form.name_label'),
@@ -150,8 +141,7 @@ function handleDescriptionInput() {
                 @cancel="handleCancel"
                 @input="handleDescriptionInput"
                 @submit="handleSubmit"
-                @set-layout-horizontal="setLayoutHorizontal"
-                @set-layout-vertical="setLayoutVertical"
+                @set-layout="setLayout"
                 @toggle-full-preview="handleToggleFullPreview"
                 @toggle-preview="handleTogglePreview"
             />
