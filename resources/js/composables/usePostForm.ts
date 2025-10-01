@@ -1,6 +1,6 @@
+import type { Blog, PostItem } from '@/types';
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
-import type { Blog, PostItem } from '@/types';
 
 export function usePostForm() {
     const creatingPostForId = ref<number | null>(null);
@@ -59,7 +59,7 @@ export function usePostForm() {
         postEditForm.title = post.title;
         postEditForm.excerpt = post.excerpt ?? '';
         postEditForm.content = post.content ?? '';
-        postEditForm.is_published = !!post.is_published;
+        postEditForm.is_published = post.is_published;
     }
 
     function cancelEditPost() {
