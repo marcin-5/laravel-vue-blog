@@ -48,7 +48,7 @@ class BlogService
         return $blog;
     }
 
-    public function updateBlog(Blog $blog, array $blogData, array $categories = null): Blog
+    public function updateBlog(Blog $blog, array $blogData, ?array $categories = null): Blog
     {
         $blog->fill($blogData);
         $blog->save();

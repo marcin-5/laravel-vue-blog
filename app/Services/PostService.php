@@ -54,7 +54,7 @@ class PostService
         return $post;
     }
 
-    public function getUserPosts($userId, int $blogId = null)
+    public function getUserPosts($userId, ?int $blogId = null)
     {
         $query = Post::query()
             ->whereHas('blog', function ($q) use ($userId) {
