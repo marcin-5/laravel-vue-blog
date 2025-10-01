@@ -1,17 +1,19 @@
 <script lang="ts" setup>
 import CategorySelector from '@/components/CategorySelector.vue';
-import FullScreenPreview from '@/components/FullScreenPreview.vue';
-import InputError from '@/components/InputError.vue';
-import MarkdownPreview from '@/components/MarkdownPreview.vue';
-import { Button } from '@/components/ui/button';
+import BlogFormCheckboxField from '@/components/blog/BlogFormCheckboxField.vue';
+import BlogFormNumberField from '@/components/blog/BlogFormNumberField.vue';
+import BlogFormSelectField from '@/components/blog/BlogFormSelectField.vue';
+import FormSubmitActions from '@/components/blog/FormSubmitActions.vue';
+import MarkdownPreviewSection from '@/components/blog/MarkdownPreviewSection.vue';
+import PostFormField from '@/components/blog/PostFormField.vue';
+import { useBlogFormLogic } from '@/composables/useBlogFormLogic';
 import { useMarkdownPreview } from '@/composables/useMarkdownPreview';
 import { ensureNamespace } from '@/i18n';
 import type { Blog, Category } from '@/types';
-import { useForm } from '@inertiajs/vue3';
-import { watch } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 await ensureNamespace(locale.value, 'blogs');
 
 interface Props {
@@ -19,7 +21,7 @@ interface Props {
     categories: Category[];
     isEdit?: boolean;
     idPrefix?: string;
-    form?: any; // External form instance (create or edit)
+    form?: any;
 }
 
 interface Emits {
@@ -34,7 +36,12 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>();
 
-// Preview functionality using composable
+const { form, fieldIdPrefix, updateCategories } = useBlogFormLogic({
+    blog: props.blog,
+    isEdit: props.isEdit,
+    externalForm: props.form,
+});
+
 const {
     isPreviewMode,
     isFullPreview,
@@ -47,37 +54,37 @@ const {
     setLayoutVertical,
 } = useMarkdownPreview('markdown.preview');
 
-// Use external form if provided, otherwise create internal form
-const form =
-    props.form ||
-    useForm({
-        name: props.blog?.name || '',
-        description: props.blog?.description || (null as string | null),
-        is_published: props.blog?.is_published || false,
-        locale: (props.blog?.locale as string) || 'en',
-        sidebar: (props.blog?.sidebar as number) ?? 0,
-        page_size: (props.blog?.page_size as number) ?? 10,
-        categories: (props.blog?.categories ?? []).map((c) => c.id) as number[],
-    });
+const translationKeys = computed(() => ({
+    name: t('blogs.form.name_label'),
+    namePlaceholder: props.isEdit ? '' : t('blogs.form.name_placeholder'),
+    description: t('blogs.form.description_label'),
+    descriptionPlaceholder: props.isEdit ? '' : t('blogs.form.description_placeholder'),
+    published: t('blogs.form.published_label'),
+    locale: t('blogs.form.locale_label'),
+    sidebar: t('blogs.form.sidebar_label'),
+    sidebarHint: t('blogs.form.sidebar_hint'),
+    pageSize: t('blogs.form.page_size_label'),
+    cancel: t('blogs.form.cancel_button'),
+    create: t('blogs.form.create_button'),
+    save: t('blogs.form.save_button'),
+    saving: t('blogs.form.saving_button'),
+    creating: t('blogs.form.creating_button'),
+    preview: t('blogs.post_form.preview_button'),
+    close: t('blogs.post_form.close_button'),
+    fullPreview: t('blogs.post_form.full_preview_button'),
+    splitView: t('blogs.post_form.split_view_button'),
+    horizontal: t('blogs.post_form.horizontal_button'),
+    vertical: t('blogs.post_form.vertical_button'),
+    exitPreview: t('blogs.post_form.exit_preview_button'),
+    markdown: t('blogs.post_form.markdown_label'),
+    previewLabel: t('blogs.post_form.preview_label'),
+    previewModeTitle: t('blogs.post_form.preview_mode_title'),
+}));
 
-// Update form when blog prop changes (for edit mode) - only if using internal form
-if (!props.form) {
-    watch(
-        () => props.blog,
-        (newBlog) => {
-            if (newBlog) {
-                form.name = newBlog.name;
-                form.description = newBlog.description;
-                form.is_published = newBlog.is_published;
-                form.locale = (newBlog.locale as string) || 'en';
-                form.sidebar = (newBlog.sidebar as number) ?? 0;
-                form.page_size = (newBlog.page_size as number) ?? 10;
-                form.categories = (newBlog.categories ?? []).map((c) => c.id);
-            }
-        },
-        { immediate: true },
-    );
-}
+const localeOptions = computed(() => [
+    { value: 'en', label: 'EN' },
+    { value: 'pl', label: 'PL' },
+]);
 
 function handleSubmit() {
     emit('submit', form);
@@ -87,9 +94,6 @@ function handleCancel() {
     emit('cancel');
 }
 
-function updateCategories(categoryIds: number[]) {
-    form.categories = categoryIds;
-}
 
 function handleTogglePreview() {
     togglePreview(form.description || '');
@@ -107,156 +111,114 @@ function handleDescriptionInput() {
 <template>
     <div class="rounded-md border border-sidebar-border/70 p-4 dark:border-sidebar-border">
         <form class="space-y-4" @submit.prevent="handleSubmit">
-            <div>
-                <label :for="`${props.idPrefix}-name`" class="mb-1 block text-sm font-medium">{{ $t('blogs.form.name_label') }}</label>
-                <input
-                    :id="`${props.idPrefix}-name`"
-                    v-model="form.name"
-                    :placeholder="props.isEdit ? '' : $t('blogs.form.name_placeholder')"
-                    class="block w-full rounded-md border px-3 py-2"
-                    required
-                    type="text"
-                />
-                <InputError :message="form.errors.name" />
-            </div>
+            <PostFormField
+                :id="`${fieldIdPrefix}-name`"
+                v-model="form.name"
+                :error="form.errors.name"
+                :label="translationKeys.name"
+                :placeholder="translationKeys.namePlaceholder"
+                required
+                type="input"
+            />
 
-            <div>
-                <div class="mb-1">
-                    <label :for="`${props.idPrefix}-description`" class="block text-sm font-medium">{{ $t('blogs.form.description_label') }}</label>
-                </div>
+            <MarkdownPreviewSection
+                :id="`${fieldIdPrefix}-description`"
+                v-model="form.description"
+                :error="form.errors.description"
+                :is-edit="props.isEdit"
+                :is-full-preview="isFullPreview"
+                :is-preview-mode="isPreviewMode"
+                :is-processing="form.processing"
+                :label="translationKeys.description"
+                :placeholder="translationKeys.descriptionPlaceholder"
+                :preview-html="previewHtml"
+                :preview-layout="previewLayout"
+                :translations="{
+                    cancel: translationKeys.cancel,
+                    create: translationKeys.create,
+                    save: translationKeys.save,
+                    exitPreview: translationKeys.exitPreview,
+                    markdownLabel: translationKeys.markdown,
+                    previewLabel: translationKeys.previewLabel,
+                    previewModeTitle: translationKeys.previewModeTitle,
+                    horizontal: translationKeys.horizontal,
+                    vertical: translationKeys.vertical,
+                    closePreview: translationKeys.close,
+                    preview: translationKeys.preview,
+                    fullPreview: translationKeys.fullPreview,
+                    splitView: translationKeys.splitView,
+                }"
+                @cancel="handleCancel"
+                @input="handleDescriptionInput"
+                @set-layout-horizontal="setLayoutHorizontal"
+                @set-layout-vertical="setLayoutVertical"
+                @submit="handleSubmit"
+                @toggle-full-preview="handleToggleFullPreview"
+                @toggle-preview="handleTogglePreview"
+            />
 
-                <!-- Full Preview Mode -->
-                <FullScreenPreview
-                    v-if="isFullPreview"
-                    v-model:content="form.description"
-                    :cancel-button-label="$t('blogs.form.cancel_button')"
-                    :create-button-label="$t('blogs.form.create_button')"
-                    :exit-preview-button-label="$t('blogs.post_form.exit_preview_button')"
-                    :horizontal-button-label="$t('blogs.post_form.horizontal_button')"
-                    :is-edit="props.isEdit"
-                    :is-processing="form.processing"
-                    :markdown-label="$t('blogs.post_form.markdown_label')"
-                    :markdown-placeholder="$t('blogs.form.description_placeholder')"
-                    :preview-html="previewHtml"
-                    :preview-label="$t('blogs.post_form.preview_label')"
-                    :preview-layout="previewLayout"
-                    :preview-mode-title-label="$t('blogs.post_form.preview_mode_title')"
-                    :save-button-label="$t('blogs.form.save_button')"
-                    :vertical-button-label="$t('blogs.post_form.vertical_button')"
-                    @cancel="handleCancel"
-                    @exit="handleToggleFullPreview"
-                    @input="handleDescriptionInput"
-                    @layout="(val) => (val === 'horizontal' ? setLayoutHorizontal() : setLayoutVertical())"
-                    @save="handleSubmit"
-                />
-
-                <!-- Normal Mode -->
-                <div v-else>
-                    <div :class="isPreviewMode && previewLayout === 'vertical' ? 'flex gap-4' : 'space-y-4'">
-                        <!-- Markdown Editor (always present to avoid DOM disposal) -->
-                        <div :class="isPreviewMode && previewLayout === 'vertical' ? 'w-1/2' : ''">
-                            <textarea
-                                :id="`${props.idPrefix}-description`"
-                                v-model="form.description"
-                                :placeholder="props.isEdit ? '' : $t('blogs.form.description_placeholder')"
-                                :rows="isPreviewMode ? (props.isEdit ? 6 : 8) : 3"
-                                class="block w-full rounded-md border px-3 py-2"
-                                @input="handleDescriptionInput"
-                            />
-                        </div>
-                        <!-- Preview Pane (only shown when in preview mode) -->
-                        <div v-if="isPreviewMode" :class="previewLayout === 'vertical' ? 'w-1/2' : ''">
-                            <MarkdownPreview :html="previewHtml" class="min-h-[150px]" />
-                        </div>
-                    </div>
-                </div>
-                <InputError :message="form.errors.description" />
-
-                <!-- Preview Controls -->
-                <div class="mt-2 flex justify-end gap-2">
-                    <Button :variant="isPreviewMode ? 'exit' : 'toggle'" size="sm" type="button" @click="handleTogglePreview">
-                        {{ isPreviewMode ? $t('blogs.post_form.close_button') : $t('blogs.post_form.preview_button') }}
-                    </Button>
-                    <Button v-if="isPreviewMode" size="sm" type="button" variant="exit" @click="handleToggleFullPreview">
-                        {{ isFullPreview ? $t('blogs.post_form.split_view_button') : $t('blogs.post_form.full_preview_button') }}
-                    </Button>
-                    <Button v-if="isPreviewMode && !isFullPreview" size="sm" type="button" variant="toggle" @click="setLayoutHorizontal">
-                        {{ $t('blogs.post_form.horizontal_button') }}
-                    </Button>
-                    <Button v-if="isPreviewMode && !isFullPreview" size="sm" type="button" variant="toggle" @click="setLayoutVertical">
-                        {{ $t('blogs.post_form.vertical_button') }}
-                    </Button>
-                </div>
-            </div>
-
-            <!-- Published checkbox + Locale selector -->
             <div class="flex flex-wrap items-center gap-3">
-                <div class="flex items-center gap-2">
-                    <input :id="`${props.idPrefix}-published`" v-model="form.is_published" type="checkbox" />
-                    <label :for="`${props.idPrefix}-published`" class="text-sm">{{ $t('blogs.form.published_label') }}</label>
-                    <span v-if="props.isEdit && props.blog" class="text-xs text-muted-foreground">/{{ props.blog.slug }}</span>
+                <BlogFormCheckboxField
+                    :id="`${fieldIdPrefix}-published`"
+                    v-model="form.is_published"
+                    :additional-info="props.isEdit && props.blog ? `/${props.blog.slug}` : undefined"
+                    :error="form.errors.is_published"
+                    :label="translationKeys.published"
+                />
+                <div class="ml-auto">
+                    <BlogFormSelectField
+                        :id="`${fieldIdPrefix}-locale`"
+                        v-model="form.locale"
+                        :error="form.errors.locale"
+                        :label="translationKeys.locale"
+                        :options="localeOptions"
+                    />
                 </div>
-                <div class="ml-auto flex items-center gap-2">
-                    <label :for="`${props.idPrefix}-locale`" class="text-sm">{{ $t('blogs.form.locale_label') }}</label>
-                    <select :id="`${props.idPrefix}-locale`" v-model="form.locale" class="rounded border px-2 py-1 text-sm">
-                        <option v-for="loc in ['en', 'pl']" :key="`loc-${loc}`" :value="loc">{{ loc.toUpperCase() }}</option>
-                    </select>
-                </div>
-            </div>
-            <div class="flex items-center gap-4">
-                <InputError :message="form.errors.is_published" />
-                <InputError :message="form.errors.locale" />
             </div>
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                    <label :for="`${props.idPrefix}-sidebar`" class="mb-1 block text-sm font-medium">{{ $t('blogs.form.sidebar_label') }}</label>
-                    <input
-                        :id="`${props.idPrefix}-sidebar`"
-                        v-model.number="form.sidebar"
-                        class="block w-full rounded-md border px-3 py-2"
-                        max="50"
-                        min="-50"
-                        step="1"
-                        type="number"
-                    />
-                    <p class="mt-1 text-xs text-muted-foreground">{{ $t('blogs.form.sidebar_hint') }}</p>
-                    <InputError :message="form.errors.sidebar" />
-                </div>
-                <div>
-                    <label :for="`${props.idPrefix}-page_size`" class="mb-1 block text-sm font-medium">{{ $t('blogs.form.page_size_label') }}</label>
-                    <input
-                        :id="`${props.idPrefix}-page_size`"
-                        v-model.number="form.page_size"
-                        class="block w-full rounded-md border px-3 py-2"
-                        max="100"
-                        min="1"
-                        step="1"
-                        type="number"
-                    />
-                    <InputError :message="form.errors.page_size" />
-                </div>
+                <BlogFormNumberField
+                    :id="`${fieldIdPrefix}-sidebar`"
+                    v-model="form.sidebar"
+                    :error="form.errors.sidebar"
+                    :hint="translationKeys.sidebarHint"
+                    :label="translationKeys.sidebar"
+                    :max="50"
+                    :min="-50"
+                />
+                <BlogFormNumberField
+                    :id="`${fieldIdPrefix}-page_size`"
+                    v-model="form.page_size"
+                    :error="form.errors.page_size"
+                    :label="translationKeys.pageSize"
+                    :max="100"
+                    :min="1"
+                />
             </div>
 
             <CategorySelector
                 :categories="props.categories"
-                :id-prefix="`${props.idPrefix}-cat`"
+                :id-prefix="`${fieldIdPrefix}-cat`"
                 :selected-categories="form.categories"
                 @update:selected-categories="updateCategories"
             />
-            <InputError :message="form.errors.categories" />
-
-            <div class="flex items-center gap-2">
-                <Button :disabled="form.processing" type="submit" variant="constructive">
-                    <span v-if="form.processing">
-                        {{ props.isEdit ? $t('blogs.form.saving_button') : $t('blogs.form.creating_button') }}
-                    </span>
-                    <span v-else>
-                        {{ props.isEdit ? $t('blogs.form.save_button') : $t('blogs.form.create_button') }}
-                    </span>
-                </Button>
-                <Button type="button" variant="destructive" @click="handleCancel">{{ $t('blogs.form.cancel_button') }}</Button>
+            <div v-if="form.errors.categories" class="mt-1 text-sm text-red-600">
+                {{ form.errors.categories }}
             </div>
+
+            <FormSubmitActions
+                :is-edit="props.isEdit"
+                :is-processing="form.processing"
+                :translations="{
+                    cancel: translationKeys.cancel,
+                    create: translationKeys.create,
+                    save: translationKeys.save,
+                    creating: translationKeys.creating,
+                    saving: translationKeys.saving,
+                }"
+                @cancel="handleCancel"
+                @submit="handleSubmit"
+            />
         </form>
     </div>
 </template>
