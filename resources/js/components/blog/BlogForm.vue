@@ -94,7 +94,6 @@ function handleCancel() {
     emit('cancel');
 }
 
-
 function handleTogglePreview() {
     togglePreview(form.description || '');
 }
@@ -150,9 +149,9 @@ function handleDescriptionInput() {
                 }"
                 @cancel="handleCancel"
                 @input="handleDescriptionInput"
+                @submit="handleSubmit"
                 @set-layout-horizontal="setLayoutHorizontal"
                 @set-layout-vertical="setLayoutVertical"
-                @submit="handleSubmit"
                 @toggle-full-preview="handleToggleFullPreview"
                 @toggle-preview="handleTogglePreview"
             />
@@ -202,7 +201,7 @@ function handleDescriptionInput() {
                 :selected-categories="form.categories"
                 @update:selected-categories="updateCategories"
             />
-            <div v-if="form.errors.categories" class="mt-1 text-sm text-red-600">
+            <div v-if="form.errors.categories" class="mt-1 text-sm font-semibold text-error">
                 {{ form.errors.categories }}
             </div>
 
