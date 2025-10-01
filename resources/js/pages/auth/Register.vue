@@ -47,7 +47,6 @@ const submit = () => {
                             v-model="form.name"
                             :placeholder="t('register.name_placeholder')"
                             :tabindex="1"
-                            autocomplete="name"
                             autofocus
                             required
                             type="text"
@@ -57,15 +56,7 @@ const submit = () => {
 
                     <div class="grid gap-2">
                         <Label for="email">{{ t('register.email') }}</Label>
-                        <Input
-                            id="email"
-                            v-model="form.email"
-                            :placeholder="t('register.email_placeholder')"
-                            :tabindex="2"
-                            autocomplete="email"
-                            required
-                            type="email"
-                        />
+                        <Input id="email" v-model="form.email" :placeholder="t('register.email_placeholder')" :tabindex="2" required type="email" />
                         <InputError :message="form.errors.email" />
                     </div>
 
@@ -76,7 +67,6 @@ const submit = () => {
                             v-model="form.password"
                             :placeholder="t('register.password_placeholder')"
                             :tabindex="3"
-                            autocomplete="new-password"
                             required
                             type="password"
                         />
@@ -90,7 +80,6 @@ const submit = () => {
                             v-model="form.password_confirmation"
                             :placeholder="t('register.password_confirmation_placeholder')"
                             :tabindex="4"
-                            autocomplete="new-password"
                             required
                             type="password"
                         />
