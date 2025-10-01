@@ -106,7 +106,7 @@ class Post extends Model
     /**
      * Scope: posts for a specific blog with ownership validation.
      */
-    public function scopeForBlog(Builder $query, int $blogId, int $userId = null): Builder
+    public function scopeForBlog(Builder $query, int $blogId, int $userId): Builder
     {
         $query->where('blog_id', $blogId);
 
