@@ -3,6 +3,7 @@ import PostForm from '@/components/blog/PostForm.vue';
 import { Button } from '@/components/ui/button';
 import { ensureNamespace } from '@/i18n';
 import type { PostItem } from '@/types';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t, locale } = useI18n();
@@ -23,17 +24,8 @@ interface Emits {
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
-function handleEdit() {
-    emit('edit', props.post);
-}
-
-function handleSubmitEdit(form: any) {
-    emit('submitEdit', form, props.post);
-}
-
-function handleCancelEdit() {
-    emit('cancelEdit');
-}
+const editButtonVariant = computed(() => (props.isEditing ? 'exit' : 'toggle'));
+const editButtonLabel = computed(() => (props.isEditing ? t('blogs.post_item.close_button') : t('blogs.post_item.edit_button')));
 </script>
 
 <template>
@@ -44,12 +36,11 @@ function handleCancelEdit() {
                 <div class="text-xs text-muted-foreground">{{ post.excerpt }}</div>
             </div>
             <div>
-                <Button :variant="isEditing ? 'exit' : 'toggle'" size="sm" type="button" @click="handleEdit">
-                    {{ isEditing ? $t('blogs.post_item.close_button') : $t('blogs.post_item.edit_button') }}
+                <Button :variant="editButtonVariant" size="sm" type="button" @click="emit('edit', post)">
+                    {{ editButtonLabel }}
                 </Button>
             </div>
         </div>
-
         <!-- Inline Post Edit Form -->
         <PostForm
             v-if="isEditing"
@@ -57,8 +48,8 @@ function handleCancelEdit() {
             :id-prefix="`edit-post-${post.id}`"
             :is-edit="true"
             :post="post"
-            @cancel="handleCancelEdit"
-            @submit="handleSubmitEdit"
+            @cancel="emit('cancelEdit')"
+            @submit="(form) => emit('submitEdit', form, post)"
         />
     </div>
 </template>
