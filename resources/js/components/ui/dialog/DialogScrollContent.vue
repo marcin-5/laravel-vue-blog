@@ -1,27 +1,43 @@
-<script setup lang="ts">
-import { cn } from '@/lib/utils'
-import { X } from 'lucide-vue-next'
+<script lang="ts" setup>
+import { cn } from '@/lib/utils';
+import { X } from 'lucide-vue-next';
 import {
-  DialogClose,
-  DialogContent,
-  type DialogContentEmits,
-  type DialogContentProps,
-  DialogOverlay,
-  DialogPortal,
-  useForwardPropsEmits,
-} from 'reka-ui'
-import { computed, type HTMLAttributes } from 'vue'
+    DialogClose,
+    DialogContent,
+    type DialogContentEmits,
+    type DialogContentProps,
+    DialogOverlay,
+    DialogPortal,
+    useForwardPropsEmits
+} from 'reka-ui';
+import { computed, type HTMLAttributes } from 'vue';
 
-const props = defineProps<DialogContentProps & { class?: HTMLAttributes['class'] }>()
-const emits = defineEmits<DialogContentEmits>()
+const props = defineProps<DialogContentProps & { class?: HTMLAttributes['class'] }>();
+const emits = defineEmits<DialogContentEmits>();
 
 const delegatedProps = computed(() => {
-  const { class: _, ...delegated } = props
+  const { class: _, ...delegated } = props;
+  return delegated;
+});
+const forwarded = useForwardPropsEmits(delegatedProps, emits);
 
-  return delegated
-})
+/**
+ * Prevents the dialog from closing when the user clicks on the scrollbar of the overlay.
+ * The `pointer-down-outside` event is fired when the user clicks outside the dialog content.
+ * We check if the click coordinates are outside the target's client dimensions, which is
+ * a common technique to detect a click on the scrollbar.
+ */
+function handlePointerDownOutside(event: { detail: { originalEvent: PointerEvent } }) {
+    const { originalEvent } = event.detail;
+    const target = originalEvent.target as HTMLElement;
 
-const forwarded = useForwardPropsEmits(delegatedProps, emits)
+    const isClickOnScrollbar =
+        originalEvent.offsetX > target.clientWidth || originalEvent.offsetY > target.clientHeight;
+
+    if (isClickOnScrollbar) {
+        originalEvent.preventDefault();
+    }
+}
 </script>
 
 <template>
@@ -37,16 +53,9 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
           )
         "
         v-bind="forwarded"
-        @pointer-down-outside="(event) => {
-          const originalEvent = event.detail.originalEvent;
-          const target = originalEvent.target as HTMLElement;
-          if (originalEvent.offsetX > target.clientWidth || originalEvent.offsetY > target.clientHeight) {
-            event.preventDefault();
-          }
-        }"
+        @pointer-down-outside="handlePointerDownOutside"
       >
         <slot />
-
         <DialogClose
           class="absolute top-4 right-4 p-0.5 transition-colors rounded-md hover:bg-secondary"
         >
