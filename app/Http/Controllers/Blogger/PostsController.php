@@ -15,7 +15,11 @@ class PostsController extends Controller
         private readonly PostService $postService,
     ) {
         $this->middleware(['auth', 'verified']);
-        $this->authorizeResource(Post::class, 'post');
+        // Only authorize existing post resources (show, update, delete)
+        // Don't use authorizeResource for 'store' since it's handled in StorePostRequest
+        $this->authorizeResource(Post::class, 'post', [
+            'except' => ['store']
+        ]);
     }
 
     /**
