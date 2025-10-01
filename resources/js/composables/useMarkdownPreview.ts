@@ -6,7 +6,7 @@ export function useMarkdownPreview(previewRouteName: string) {
     const previewLayout = ref<'horizontal' | 'vertical'>('vertical');
     const previewHtml = ref('');
 
-    const MARKDOWN_RENDER_ERROR_HTML = '<p class="text-red-500">Error rendering markdown</p>';
+    const MARKDOWN_RENDER_ERROR_HTML = '<p class="text-error">Error rendering markdown</p>';
 
     async function fetchMarkdownPreview(content: string): Promise<string> {
         const response = await fetch(route(previewRouteName), {
