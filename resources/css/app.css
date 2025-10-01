@@ -37,8 +37,10 @@
     --color-constructive-foreground: var(--constructive-foreground);
 
     --color-destructive: var(--destructive);
-    --color-destructive-hover: var(--destructive-hover);
     --color-destructive-foreground: var(--destructive-foreground);
+    --color-destructive-hover: var(--destructive-hover);
+
+    --color-error: var(--destructive-hover);
 
     --color-exit: var(--exit);
     --color-exit-hover: var(--exit-hover);
@@ -141,8 +143,8 @@
     --constructive-hover: hsl(126 35% 25%);
     --constructive-foreground: hsl(135 35% 91%);
     --destructive: hsl(5 53% 47%);
-    --destructive-hover: hsl(0 64% 60%);
-    --destructive-foreground: hsl(5 75% 98%);
+    --destructive-hover: hsl(0 64% 69%);
+    --destructive-foreground: hsl(5 79% 98%);
     --exit: hsl(112 21% 12%);
     --exit-hover: hsl(112 21% 26%);
     --exit-foreground: hsl(112 75% 93%);
