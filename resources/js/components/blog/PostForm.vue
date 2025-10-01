@@ -1,8 +1,7 @@
 <script lang="ts" setup>
-import PostFormActions from '@/components/blog/PostFormActions.vue';
+import FormSubmitActions from '@/components/blog/FormSubmitActions.vue';
+import MarkdownPreviewSection from '@/components/blog/MarkdownPreviewSection.vue';
 import PostFormField from '@/components/blog/PostFormField.vue';
-import FullScreenPreview from '@/components/FullScreenPreview.vue';
-import MarkdownPreview from '@/components/MarkdownPreview.vue';
 import { useMarkdownPreview } from '@/composables/useMarkdownPreview';
 import { ensureNamespace } from '@/i18n';
 import type { PostItem } from '@/types';
@@ -58,38 +57,23 @@ const form =
         is_published: props.post?.is_published || false,
     });
 
-// Computed properties for better template readability
 const fieldIdPrefix = computed(() => props.idPrefix);
-
-const textareaRows = computed(() => {
-    if (isPreviewMode.value) {
-        return props.isEdit ? 8 : 10;
-    }
-    return props.isEdit ? 4 : 5;
-});
-
-const contentHasError = computed(() => !!form.errors?.content);
-
-const verticalLayoutClasses = computed(() => (isPreviewMode.value && previewLayout.value === 'vertical' ? 'flex gap-4' : 'space-y-4'));
-
-const editorContainerClasses = computed(() => (isPreviewMode.value && previewLayout.value === 'vertical' ? 'w-1/2' : ''));
-
-const previewContainerClasses = computed(() => (previewLayout.value === 'vertical' ? 'w-1/2' : ''));
 
 // Consolidated translation keys
 const translationKeys = computed(() => ({
-    title: t('blogs.post_form.title_label'),
-    titlePlaceholder: t('blogs.post_form.title_placeholder'),
+    title: props.isEdit ? t('blogs.post_form.title_label') : t('blogs.post_form.post_title_label'),
+    titlePlaceholder: props.isEdit ? '' : t('blogs.post_form.title_placeholder'),
     excerpt: t('blogs.post_form.excerpt_label'),
-    excerptPlaceholder: t('blogs.post_form.excerpt_placeholder'),
+    excerptPlaceholder: props.isEdit ? '' : t('blogs.post_form.excerpt_placeholder'),
     content: t('blogs.post_form.content_label'),
-    contentPlaceholder: t('blogs.post_form.content_placeholder'),
-    published: t('blogs.post_form.published_label'),
+    contentPlaceholder: props.isEdit ? '' : t('blogs.post_form.content_placeholder'),
+    published: props.isEdit ? t('blogs.post_form.published_label') : t('blogs.post_form.publish_now_label'),
     cancel: t('blogs.post_form.cancel_button'),
-    create: t('blogs.post_form.create_button'),
+    create: t('blogs.post_form.create_post_button'),
     creating: t('blogs.post_form.creating_button'),
-    save: t('blogs.post_form.save_button'),
+    save: t('blogs.post_form.save_post_button'),
     saving: t('blogs.post_form.saving_button'),
+    // Preview-related translations for MarkdownPreviewSection
     preview: t('blogs.post_form.preview_button'),
     closePreview: t('blogs.post_form.close_button'),
     fullPreview: t('blogs.post_form.full_preview_button'),
@@ -159,13 +143,6 @@ function handleContentInput() {
     debouncedRenderMarkdown(form.content);
 }
 
-function handleLayoutChange(layout: string) {
-    if (layout === 'horizontal') {
-        setLayoutHorizontal();
-    } else {
-        setLayoutVertical();
-    }
-}
 </script>
 
 <template>
@@ -191,65 +168,42 @@ function handleLayoutChange(layout: string) {
                 type="textarea"
             />
 
-            <div>
-                <div class="mb-1">
-                    <label :for="`${fieldIdPrefix}-content`" class="block text-sm font-medium">
-                        {{ translationKeys.content }}
-                    </label>
-                </div>
-
-                <!-- Full Preview Mode -->
-                <FullScreenPreview
-                    v-if="isFullPreview"
-                    v-model:content="form.content"
-                    :cancel-button-label="translationKeys.cancel"
-                    :create-button-label="translationKeys.create"
-                    :exit-preview-button-label="translationKeys.exitPreview"
-                    :horizontal-button-label="translationKeys.horizontal"
-                    :is-edit="props.isEdit"
-                    :is-processing="form.processing"
-                    :markdown-label="translationKeys.markdownLabel"
-                    :markdown-placeholder="translationKeys.contentPlaceholder"
-                    :preview-html="previewHtml"
-                    :preview-label="translationKeys.previewLabel"
-                    :preview-layout="previewLayout"
-                    :preview-mode-title-label="translationKeys.previewModeTitle"
-                    :save-button-label="translationKeys.save"
-                    :vertical-button-label="translationKeys.vertical"
-                    @cancel="handleCancel"
-                    @exit="handleToggleFullPreview"
-                    @input="handleContentInput"
-                    @layout="handleLayoutChange"
-                    @save="handleSubmit"
-                />
-
-                <!-- Normal Mode -->
-                <div v-else>
-                    <div :class="verticalLayoutClasses">
-                        <!-- Markdown Editor (always present to avoid DOM disposal) -->
-                        <div :class="editorContainerClasses">
-                            <textarea
-                                :id="`${fieldIdPrefix}-content`"
-                                v-model="form.content"
-                                :aria-describedby="contentHasError ? `${fieldIdPrefix}-content-error` : undefined"
-                                :aria-invalid="contentHasError"
-                                :placeholder="translationKeys.contentPlaceholder"
-                                :rows="textareaRows"
-                                class="block w-full rounded-md border px-3 py-2"
-                                required
-                                @input="handleContentInput"
-                            />
-                        </div>
-                        <!-- Preview Pane (only shown when in preview mode) -->
-                        <div v-if="isPreviewMode" :class="previewContainerClasses">
-                            <MarkdownPreview :html="previewHtml" class="min-h-[200px]" />
-                        </div>
-                    </div>
-                </div>
-                <div v-if="contentHasError" :id="`${fieldIdPrefix}-content-error`" class="text-danger dark:text-danger mt-1 text-sm">
-                    {{ form.errors.content }}
-                </div>
-            </div>
+            <MarkdownPreviewSection
+                :id="`${fieldIdPrefix}-content`"
+                v-model="form.content"
+                :error="form.errors.content"
+                :is-edit="props.isEdit"
+                :is-full-preview="isFullPreview"
+                :is-preview-mode="isPreviewMode"
+                :is-processing="form.processing"
+                :label="translationKeys.content"
+                :placeholder="translationKeys.contentPlaceholder"
+                :preview-html="previewHtml"
+                :preview-layout="previewLayout"
+                :rows="props.isEdit ? 4 : 5"
+                :translations="{
+                    cancel: translationKeys.cancel,
+                    create: translationKeys.create,
+                    save: translationKeys.save,
+                    exitPreview: translationKeys.exitPreview,
+                    markdownLabel: translationKeys.markdownLabel,
+                    previewLabel: translationKeys.previewLabel,
+                    previewModeTitle: translationKeys.previewModeTitle,
+                    horizontal: translationKeys.horizontal,
+                    vertical: translationKeys.vertical,
+                    closePreview: translationKeys.closePreview,
+                    preview: translationKeys.preview,
+                    fullPreview: translationKeys.fullPreview,
+                    splitView: translationKeys.splitView,
+                }"
+                @cancel="handleCancel"
+                @input="handleContentInput"
+                @set-layout-horizontal="setLayoutHorizontal"
+                @set-layout-vertical="setLayoutVertical"
+                @submit="handleSubmit"
+                @toggle-full-preview="handleToggleFullPreview"
+                @toggle-preview="handleTogglePreview"
+            />
 
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
@@ -260,29 +214,18 @@ function handleLayoutChange(layout: string) {
                 </div>
             </div>
 
-            <PostFormActions
-                :cancel-label="translationKeys.cancel"
-                :close-preview-label="translationKeys.closePreview"
-                :create-label="translationKeys.create"
-                :creating-label="translationKeys.creating"
-                :full-preview-label="translationKeys.fullPreview"
-                :horizontal-label="translationKeys.horizontal"
+            <FormSubmitActions
                 :is-edit="props.isEdit"
-                :is-full-preview="isFullPreview"
-                :is-preview-mode="isPreviewMode"
                 :is-processing="form.processing"
-                :preview-label="translationKeys.preview"
-                :preview-layout="previewLayout"
-                :save-label="translationKeys.save"
-                :saving-label="translationKeys.saving"
-                :split-view-label="translationKeys.splitView"
-                :vertical-label="translationKeys.vertical"
+                :translations="{
+                    cancel: translationKeys.cancel,
+                    create: translationKeys.create,
+                    save: translationKeys.save,
+                    creating: translationKeys.creating,
+                    saving: translationKeys.saving,
+                }"
                 @cancel="handleCancel"
                 @submit="handleSubmit"
-                @set-layout-horizontal="setLayoutHorizontal"
-                @set-layout-vertical="setLayoutVertical"
-                @toggle-full-preview="handleToggleFullPreview"
-                @toggle-preview="handleTogglePreview"
             />
         </form>
     </div>
