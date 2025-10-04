@@ -3,6 +3,7 @@ services:
         build:
             context: ..
             dockerfile: docker/Dockerfile
+            target: production
             args:
                 - APP_NAME=${APP_NAME:-laravel-app}
                 - TZ=${TZ:-UTC}
@@ -35,6 +36,7 @@ services:
         build:
             context: ..
             dockerfile: docker/Dockerfile
+            target: production
             args:
                 - APP_NAME=${APP_NAME:-laravel-queue}
                 - TZ=${TZ:-UTC}
