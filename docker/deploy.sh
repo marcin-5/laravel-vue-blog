@@ -37,7 +37,8 @@ sleep 3
 echo "Running Laravel production optimizations..."
 $DC exec -T app php artisan config:cache
 $DC exec -T app php artisan route:cache
-$DC exec -T app php artisan view:cache
+# Conditionally cache views only if resources/views exists
+$DC exec -T app sh -lc "[ -d resources/views ] && php artisan view:cache || echo 'Skipping view:cache: resources/views not found'"
 $DC exec -T app php artisan ziggy:generate || true
 
 # Run database migrations
