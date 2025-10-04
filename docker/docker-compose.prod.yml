@@ -1,16 +1,9 @@
 services:
   app:
-    build:
-      target: production # Build the production stage
-    # Environment variables are already set to production in the base file
-    # No code volumes are needed; code is in the image
-    # No command override; the default CMD ["php-fpm"] is used
+    volumes:
+      - /srv/laravel-blog/storage:/var/www/html/storage
+      - /srv/laravel-blog/bootstrap_cache:/var/www/html/bootstrap/cache
 
   queue:
-    build:
-      target: production # Use the production image for the queue as well
-    # Production environment variables are inherited from the base file
-
-  ssr:
-    build:
-      target: ssr-runtime # Build the SSR runtime stage for production
+    volumes:
+      - /srv/laravel-blog/storage:/var/www/html/storage
