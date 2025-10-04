@@ -52,15 +52,27 @@ services:
   ssr:
     container_name: ${APP_NAME:-laravel-app}-ssr-dev
     environment:
-      - SSR_BASE_URL=http://nginx
+      - SSR_BASE_URL=http://caddy
     ports:
       - "13714:13714"
 
-  nginx:
-    container_name: ${APP_NAME:-laravel-app}-nginx-dev
+  caddy:
+    image: caddy:alpine
+    container_name: ${APP_NAME:-laravel-app}-caddy-dev
+    ports:
+      - "80:80"
+    volumes:
+      - ../public:/var/www/html/public:ro
+      - ./Caddyfile.dev:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - app
+    networks:
+      - laravel-network
 
   postgres:
     container_name: ${APP_NAME:-laravel-app}-postgres-dev
+    ports:
+      - "5432:5432"
 
   redis:
     container_name: ${APP_NAME:-laravel-app}-redis-dev

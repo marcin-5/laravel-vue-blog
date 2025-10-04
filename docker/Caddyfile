@@ -1,0 +1,6 @@
+{$APP_DOMAIN}, {$APP_DOMAIN_WWW} {
+  root * /var/www/html/public
+  encode zstd gzip
+  php_fastcgi app:9000
+  file_server
+}

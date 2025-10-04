@@ -99,3 +99,54 @@ setup-env: ## 📝 Create .env file from .env.example if it doesn't exist
 		echo "Creating .env file from .env.example..."; \
 		cp .env.example .env; \
 	fi
+
+
+# =============================
+# Production Docker Compose
+# =============================
+COMPOSE_FILES_PROD = -f docker/docker-compose.yml -f docker/docker-compose.prod.yml
+DOCKER_COMPOSE_PROD = docker compose $(COMPOSE_FILES_PROD)
+
+.PHONY: prod-up prod-down prod-restart prod-build prod-logs \
+        prod-migrate prod-optimize prod-deploy prod-update
+
+prod-up: ## Start production services
+	$(DOCKER_COMPOSE_PROD) up -d
+
+prod-down: ## Stop production services
+	$(DOCKER_COMPOSE_PROD) down
+
+prod-restart: ## Restart production services
+	$(DOCKER_COMPOSE_PROD) up -d
+
+prod-build: ## Build/rebuild production images
+	$(DOCKER_COMPOSE_PROD) build
+
+prod-logs: ## Tail production logs
+	$(DOCKER_COMPOSE_PROD) logs -f
+
+prod-migrate: ## Run DB migrations (force)
+	$(DOCKER_COMPOSE_PROD) exec -T app php artisan migrate --force
+
+prod-optimize: ## Cache config/routes/views and generate Ziggy
+	$(DOCKER_COMPOSE_PROD) exec -T app php artisan config:cache
+	$(DOCKER_COMPOSE_PROD) exec -T app php artisan route:cache
+	$(DOCKER_COMPOSE_PROD) exec -T app php artisan view:cache
+	-$(DOCKER_COMPOSE_PROD) exec -T app php artisan ziggy:generate
+
+# Full deployment flow: pull code/images, rebuild, wait (optional), optimize, migrate
+prod-deploy: ## Build/Start prod, run optimizations & migrations
+	# If building from source on the server, ensure latest code first:
+	git fetch --all
+	git pull --ff-only
+	$(DOCKER_COMPOSE_PROD) up -d --build
+	# Optional: use healthchecks and wait for healthy
+	# $(DOCKER_COMPOSE_PROD) up -d --build --wait || true
+	$(MAKE) prod-optimize
+	$(MAKE) prod-migrate
+
+# Shorthand target to update code and restart containers
+prod-update: ## Update code from Git and restart services
+	git fetch --all
+	git pull --ff-only
+	$(DOCKER_COMPOSE_PROD) up -d --build
