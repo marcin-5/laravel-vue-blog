@@ -93,9 +93,8 @@ COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
 COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Switch to a non-root user for security
-USER www-data
-
+# Run php-fpm (master as root, workers as www-data by default). We keep root here
+# so the entrypoint can fix ownership on host-mounted volumes at runtime.
 EXPOSE 9000
 CMD ["php-fpm"]
 

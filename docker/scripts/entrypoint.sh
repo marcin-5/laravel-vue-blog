@@ -42,15 +42,28 @@ fi
 # Set working directory
 cd /var/www/html
 
+# Ensure Laravel writable directories exist and have correct permissions
+mkdir -p storage bootstrap/cache
+
+# If running as root, fix ownership and permissions on mounted volumes
+if [ "$(id -u)" = "0" ]; then
+    echo "Fixing permissions on storage and bootstrap/cache..."
+    chown -R www-data:www-data storage bootstrap/cache || true
+    chmod -R 775 storage bootstrap/cache || true
+fi
+
 # Laravel-specific initialization for production
 if [ "$APP_ENV" = "production" ]; then
-    echo "Production environment detected, running Laravel optimizations..."
+    echo "Production environment detected, waiting for database (for artisan readiness checks)..."
 
-    # Wait for database to be ready
+    # Wait for database to be ready (non-fatal loop)
     if command -v php >/dev/null 2>&1; then
         echo "Waiting for database connection..."
-        until php artisan migrate:status >/dev/null 2>&1; do
-            echo "Database not ready, waiting 5 seconds..."
+        for i in $(seq 1 30); do
+            if php artisan migrate:status >/dev/null 2>&1; then
+                echo "Database reachable."; break
+            fi
+            echo "Database not ready, retry $i/30..."
             sleep 5
         done
     fi

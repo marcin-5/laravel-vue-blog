@@ -108,7 +108,7 @@ COMPOSE_FILES_PROD = -f docker/docker-compose.yml -f docker/docker-compose.prod.
 DOCKER_COMPOSE_PROD = docker compose $(COMPOSE_FILES_PROD)
 
 .PHONY: prod-up prod-down prod-restart prod-build prod-logs \
-        prod-migrate prod-optimize prod-deploy prod-update
+        prod-migrate prod-optimize prod-deploy prod-update prod-wait
 
 prod-up: ## Start production services
 	$(DOCKER_COMPOSE_PROD) up -d
@@ -125,6 +125,15 @@ prod-build: ## Build/rebuild production images
 prod-logs: ## Tail production logs
 	$(DOCKER_COMPOSE_PROD) logs -f
 
+prod-wait: ## Wait until the app container is ready to accept php exec
+	@echo "Waiting for app container to be ready..."
+	@for i in $$(seq 1 30); do \
+		$(DOCKER_COMPOSE_PROD) exec -T app php -v >/dev/null 2>&1 && { echo "App is ready."; exit 0; }; \
+		echo "App not ready yet ($$i/30), waiting..."; \
+		sleep 5; \
+		if [ $$i -eq 30 ]; then echo "App failed to become ready in time."; exit 1; fi; \
+	 done
+
 prod-migrate: ## Run DB migrations (force)
 	$(DOCKER_COMPOSE_PROD) exec -T app php artisan migrate --force
 
@@ -134,12 +143,13 @@ prod-optimize: ## Cache config/routes/views and generate Ziggy
 	$(DOCKER_COMPOSE_PROD) exec -T app php artisan view:cache
 	-$(DOCKER_COMPOSE_PROD) exec -T app php artisan ziggy:generate
 
-# Full deployment flow: pull code/images, rebuild, wait (optional), optimize, migrate
+# Full deployment flow: pull code/images, rebuild, wait for app, optimize, migrate
 prod-deploy: ## Build/Start prod, run optimizations & migrations
 	# If building from source on the server, ensure latest code first:
 	git fetch --all
 	git pull --ff-only
 	$(DOCKER_COMPOSE_PROD) up -d --build
+	$(MAKE) prod-wait
 	# Optional: use healthchecks and wait for healthy
 	# $(DOCKER_COMPOSE_PROD) up -d --build --wait || true
 	$(MAKE) prod-optimize
