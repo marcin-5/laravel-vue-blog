@@ -139,7 +139,7 @@ prod-migrate: ## Run DB migrations (force)
 
 prod-optimize: ## Cache config/routes/views and generate Ziggy
 	$(DOCKER_COMPOSE_PROD) exec -T app php artisan config:cache
-	$(DOCKER_COMPOSE_PROD) exec -T app php artisan route:cache
+	-$(DOCKER_COMPOSE_PROD) exec -T app sh -lc 'php artisan route:cache || { echo "route:cache failed; falling back to route:clear"; php artisan route:clear; }'
 	# Conditionally cache views only if resources/views exists
 	-$(DOCKER_COMPOSE_PROD) exec -T app sh -lc "[ -d resources/views ] && php artisan view:cache || echo 'Skipping view:cache: resources/views not found'"
 	-$(DOCKER_COMPOSE_PROD) exec -T app php artisan ziggy:generate
