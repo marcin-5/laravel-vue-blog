@@ -161,29 +161,32 @@ prod-update: ## Update code from Git and restart services
 	git fetch --all
 	git pull --ff-only
 	$(DOCKER_COMPOSE_PROD) down
+	@echo "🗑️  Removing old SSR assets volume..."
+	docker volume rm laravel-blog_ssr_assets 2>/dev/null || true
+	@echo "🔨 Building fresh images..."
 	$(DOCKER_COMPOSE_PROD) build --no-cache app ssr
+	@echo "🚀 Starting services..."
 	$(DOCKER_COMPOSE_PROD) up -d --force-recreate
 	$(MAKE) prod-wait
+	@echo ""
+	@echo "🔍 Checking if SSR bundle was built in the image..."
+	$(DOCKER_COMPOSE_PROD) exec -T ssr ls -lah /var/www/html/bootstrap/ssr/ || echo "❌ No SSR assets in SSR container!"
+	@echo ""
+	@echo "🔍 Checking if SSR bundle is in app container..."
+	$(DOCKER_COMPOSE_PROD) exec -T app ls -lah /var/www/html/bootstrap/ssr/ || echo "❌ No SSR assets in app container!"
+	@echo ""
 	@echo "🔧 Clearing all Laravel caches..."
 	$(DOCKER_COMPOSE_PROD) exec -T app php artisan config:clear
 	$(DOCKER_COMPOSE_PROD) exec -T app php artisan cache:clear
 	$(DOCKER_COMPOSE_PROD) exec -T app php artisan route:clear
-	@echo "✅ Caches cleared"
-	@echo ""
-	@echo "🔍 Verifying SSR setup..."
-	@echo "1. Environment variables:"
-	$(DOCKER_COMPOSE_PROD) exec -T app env | grep INERTIA
-	@echo ""
-	@echo "2. Checking SSR bundle files:"
-	$(DOCKER_COMPOSE_PROD) exec -T app ls -lah bootstrap/ssr/ || echo "❌ bootstrap/ssr directory not found!"
-	@echo ""
-	@echo "3. Testing SSR server connection:"
-	-$(DOCKER_COMPOSE_PROD) exec -T app wget -q -O- --timeout=5 http://ssr:13714 2>&1 | head -5
 	@echo ""
 	@echo "♻️  Re-caching configuration..."
 	$(DOCKER_COMPOSE_PROD) exec -T app php artisan config:cache
 	@echo ""
-	@echo "4. Final verification - checking cached config:"
-	$(DOCKER_COMPOSE_PROD) exec -T app php artisan tinker --execute="echo 'SSR Enabled: ' . (config('inertia.ssr.enabled') ? 'YES' : 'NO') . PHP_EOL; echo 'SSR URL: ' . config('inertia.ssr.url') . PHP_EOL; echo 'SSR Bundle: ' . config('inertia.ssr.bundle') . PHP_EOL;"
+	@echo "🔗 Testing SSR server with a test request..."
+	@echo "SSR Server response:"
+	$(DOCKER_COMPOSE_PROD) exec -T app wget -q -O- --timeout=5 "http://ssr:13714/render" 2>&1 || echo "SSR server not responding to /render"
 	@echo ""
-	@echo "✅ Production update complete. Check output above for any issues."
+	@echo "✅ Production update complete."
+	@echo ""
+	@echo "If SSR still doesn't work, check your Dockerfile to ensure 'npm run build' creates bootstrap/ssr/"
