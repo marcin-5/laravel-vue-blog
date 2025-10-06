@@ -164,5 +164,25 @@ prod-update: ## Update code from Git and restart services
 	$(DOCKER_COMPOSE_PROD) build --no-cache app ssr
 	$(DOCKER_COMPOSE_PROD) up -d --force-recreate
 	$(MAKE) prod-wait
-	$(MAKE) prod-optimize
-	@echo "✅ Production update complete. SSR content has been rebuilt."
+	@echo "🔧 Clearing all Laravel caches..."
+	$(DOCKER_COMPOSE_PROD) exec -T app php artisan config:clear
+	$(DOCKER_COMPOSE_PROD) exec -T app php artisan cache:clear
+	$(DOCKER_COMPOSE_PROD) exec -T app php artisan route:clear
+	@echo "✅ Caches cleared"
+	@echo ""
+	@echo "🔍 Verifying SSR configuration..."
+	@echo "Environment variables from docker-compose:"
+	$(DOCKER_COMPOSE_PROD) exec -T app env | grep INERTIA || echo "⚠️  INERTIA_* env vars not found!"
+	@echo ""
+	@echo "Laravel config values (should match above):"
+	$(DOCKER_COMPOSE_PROD) exec -T app php -r "echo 'INERTIA_SSR_ENABLED=' . (config('inertia.ssr.enabled') ? 'true' : 'false') . PHP_EOL;"
+	$(DOCKER_COMPOSE_PROD) exec -T app php -r "echo 'INERTIA_SSR_URL=' . config('inertia.ssr.url', 'NOT SET') . PHP_EOL;"
+	@echo ""
+	@echo "🔗 Testing SSR connection..."
+	-$(DOCKER_COMPOSE_PROD) exec -T app wget -q -O- --timeout=5 http://ssr:13714 2>&1 | head -5 || echo "⚠️  Cannot reach SSR server!"
+	@echo ""
+	@echo "♻️  Re-caching configuration with SSR enabled..."
+	$(DOCKER_COMPOSE_PROD) exec -T app php artisan config:cache
+	@echo ""
+	@echo "✅ Production update complete. Testing one final time..."
+	$(DOCKER_COMPOSE_PROD) exec -T app php -r "echo 'Final check - SSR enabled: ' . (config('inertia.ssr.enabled') ? 'YES ✅' : 'NO ❌') . PHP_EOL;"
