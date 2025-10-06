@@ -160,9 +160,9 @@ prod-deploy: ## Build/Start prod, run optimizations & migrations
 prod-update: ## Update code from Git and restart services
 	git fetch --all
 	git pull --ff-only
-	$(DOCKER_COMPOSE_PROD) down ssr
-	$(DOCKER_COMPOSE_PROD) build --no-cache ssr
-	$(DOCKER_COMPOSE_PROD) up -d
+	$(DOCKER_COMPOSE_PROD) down
+	$(DOCKER_COMPOSE_PROD) build --no-cache app ssr
+	$(DOCKER_COMPOSE_PROD) up -d --force-recreate
 	$(MAKE) prod-wait
 	$(MAKE) prod-optimize
 	@echo "✅ Production update complete. SSR content has been rebuilt."

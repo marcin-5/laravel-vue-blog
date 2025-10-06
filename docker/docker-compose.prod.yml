@@ -3,6 +3,8 @@ services:
     volumes:
       - /srv/laravel-blog/storage:/var/www/html/storage
       - /srv/laravel-blog/bootstrap_cache:/var/www/html/bootstrap/cache
+      # Exclude bootstrap/ssr from the mount - let it use the image's built assets
+      - ssr_assets:/var/www/html/bootstrap/ssr
       - public_files:/var/www/html/public
 
   caddy:
@@ -13,6 +15,9 @@ services:
     volumes:
       - /srv/laravel-blog/storage:/var/www/html/storage
       - /srv/laravel-blog/bootstrap_cache:/var/www/html/bootstrap/cache
+      # Queue also needs access to the new SSR assets
+      - ssr_assets:/var/www/html/bootstrap/ssr
 
 volumes:
   public_files:
+  ssr_assets:
