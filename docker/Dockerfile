@@ -82,6 +82,8 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Copy built assets from node builder
 COPY --from=node-builder /app/public/build ./public/build
+# ✅ COPY SSR BUNDLE - This was missing!
+COPY --from=node-builder /app/bootstrap/ssr ./bootstrap/ssr
 
 # Set permissions for production
 RUN chown -R www-data:www-data /var/www/html \
@@ -115,6 +117,7 @@ RUN apk add --no-cache \
 # FIX: Copy the application code and assets BEFORE running composer install.
 COPY . .
 COPY --from=node-builder /app/public/build ./public/build
+COPY --from=node-builder /app/bootstrap/ssr ./bootstrap/ssr
 
 # Install all PHP dependencies, including dev
 RUN composer install --no-interaction
