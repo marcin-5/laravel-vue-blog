@@ -156,8 +156,13 @@ prod-deploy: ## Build/Start prod, run optimizations & migrations
 	$(MAKE) prod-optimize
 	$(MAKE) prod-migrate
 
-# Shorthand target to update code and restart containers
+# Shorthand target to update code and restart services
 prod-update: ## Update code from Git and restart services
 	git fetch --all
 	git pull --ff-only
-	$(DOCKER_COMPOSE_PROD) up -d --build
+	$(DOCKER_COMPOSE_PROD) down ssr
+	$(DOCKER_COMPOSE_PROD) build --no-cache ssr
+	$(DOCKER_COMPOSE_PROD) up -d
+	$(MAKE) prod-wait
+	$(MAKE) prod-optimize
+	@echo "✅ Production update complete. SSR content has been rebuilt."
