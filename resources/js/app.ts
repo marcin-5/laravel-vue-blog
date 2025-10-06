@@ -1,3 +1,4 @@
+import '@fontsource-variable/nunito';
 import '../css/app.css';
 
 import { createInertiaApp } from '@inertiajs/vue3';
