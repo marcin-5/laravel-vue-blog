@@ -5,7 +5,7 @@ import NoBlogs from '@/components/blog/NoBlogs.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import { ensureNamespace } from '@/i18n';
 import { Head, router } from '@inertiajs/vue3';
-import { computed, onMounted, onServerPrefetch } from 'vue';
+import { computed, onMounted, onServerPrefetch, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 interface Category {
@@ -32,17 +32,28 @@ const props = defineProps<{
 const composer = useI18n();
 const { t, locale } = composer;
 
+// Track if translations are loaded to prevent hydration mismatch
+const translationsReady = ref(false);
+
 // Load namespace in SSR and on client without top-level await
 const loadNs = async () => {
     try {
         await ensureNamespace(locale.value, 'landing', composer);
+        translationsReady.value = true;
     } catch (error) {
         console.warn('Failed to load landing namespace:', error);
+        translationsReady.value = true; // Still mark as ready to prevent infinite loading
     }
 };
 
 onServerPrefetch(loadNs);
-onMounted(loadNs);
+
+// On client, only load if not already loaded during SSR
+onMounted(async () => {
+    if (!translationsReady.value) {
+        await loadNs();
+    }
+});
 
 const selected = computed<number[]>(() => props.selectedCategoryIds ?? []);
 
@@ -78,19 +89,22 @@ function clearFilter() {
         <div class="mx-auto w-full max-w-[1024px] p-6 lg:p-8">
             <h1 class="mb-4 text-4xl font-bold text-slate-800 dark:text-slate-200">Welcome!</h1>
 
-            <!-- Categories Filter -->
-            <CategoriesFilter
-                :categories="categories"
-                :clear-label="t('landing.actions.clear', 'Clear filter')"
-                :selected-ids="selected"
-                class="mb-6"
-                @clear="clearFilter"
-                @toggle="toggleCategory"
-            />
+            <!-- Only render when translations are ready to prevent hydration mismatch -->
+            <template v-if="translationsReady">
+                <!-- Categories Filter -->
+                <CategoriesFilter
+                    :categories="categories"
+                    :clear-label="t('landing.actions.clear', 'Clear filter')"
+                    :selected-ids="selected"
+                    class="mb-6"
+                    @clear="clearFilter"
+                    @toggle="toggleCategory"
+                />
 
-            <!-- Blogs Grid -->
-            <BlogsGrid v-if="blogs.length > 0" :blogs="blogs" />
-            <NoBlogs v-else />
+                <!-- Blogs Grid -->
+                <BlogsGrid v-if="blogs.length > 0" :blogs="blogs" />
+                <NoBlogs v-else />
+            </template>
         </div>
     </div>
 </template>
