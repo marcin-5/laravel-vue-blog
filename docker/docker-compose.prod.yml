@@ -3,8 +3,16 @@ services:
     volumes:
       - /srv/laravel-blog/storage:/var/www/html/storage
       - /srv/laravel-blog/bootstrap_cache:/var/www/html/bootstrap/cache
+      - public_files:/var/www/html/public
+
+  caddy:
+    volumes:
+      - public_files:/var/www/html/public:ro
 
   queue:
     volumes:
       - /srv/laravel-blog/storage:/var/www/html/storage
       - /srv/laravel-blog/bootstrap_cache:/var/www/html/bootstrap/cache
+
+volumes:
+  public_files:
