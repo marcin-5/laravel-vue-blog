@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import BlogsGrid from '@/components/blog/BlogsGrid.vue';
 import CategoriesFilter from '@/components/blog/CategoriesFilter.vue';
+import NoBlogs from '@/components/blog/NoBlogs.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import { ensureNamespace } from '@/i18n';
 import { Head, router } from '@inertiajs/vue3';
@@ -88,7 +89,8 @@ function clearFilter() {
             />
 
             <!-- Blogs Grid -->
-            <BlogsGrid :blogs="blogs" />
+            <BlogsGrid v-if="blogs.length > 0" :blogs="blogs" />
+            <NoBlogs v-else />
         </div>
     </div>
 </template>
