@@ -85,8 +85,11 @@ COPY --from=node-builder /app/public/build ./public/build
 # ✅ COPY SSR BUNDLE - This was missing!
 COPY --from=node-builder /app/bootstrap/ssr ./bootstrap/ssr
 
-# Set permissions for production
-RUN chown -R www-data:www-data /var/www/html \
+# Prepare snapshots of built assets for seeding into mounted volumes at runtime
+RUN mkdir -p /opt/built/public /opt/built/bootstrap \
+    && cp -a /var/www/html/public/. /opt/built/public/ \
+    && cp -a /var/www/html/bootstrap/ssr /opt/built/bootstrap/ssr \
+    && chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage \
     && chmod -R 775 /var/www/html/bootstrap/cache
 
@@ -136,8 +139,11 @@ RUN mkdir -p /opt/fish_config_default && cp -r $FISH_CONFIG_DIR/* /opt/fish_conf
 RUN mkdir -p /root/.local/share/fish /root/.config/fish
 VOLUME ["/root/.local/share/fish", "/root/.config/fish"]
 
-# Development permissions can be more permissive if needed, but this is a good default
-RUN chown -R www-data:www-data /var/www/html \
+# Prepare snapshots of built assets for dev image too (useful when mounting volumes)
+RUN mkdir -p /opt/built/public /opt/built/bootstrap \
+    && cp -a /var/www/html/public/. /opt/built/public/ \
+    && cp -a /var/www/html/bootstrap/ssr /opt/built/bootstrap/ssr \
+    && chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage \
     && chmod -R 775 /var/www/html/bootstrap/cache
 

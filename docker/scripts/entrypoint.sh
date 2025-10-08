@@ -45,10 +45,36 @@ cd /var/www/html
 # Ensure Laravel writable directories exist and have correct permissions
 mkdir -p storage bootstrap/cache
 
+# Initialize/sync built assets into mounted volumes if needed
+# 1) Public directory (may be a named volume that masks image files)
+if [ -d /opt/built/public ]; then
+    # If public is empty or index.php missing, seed entire public directory
+    if [ ! -e /var/www/html/public/index.php ] || [ -z "$(ls -A /var/www/html/public 2>/dev/null)" ]; then
+        echo "Seeding public/ directory from image snapshot..."
+        mkdir -p /var/www/html/public
+        cp -a /opt/built/public/. /var/www/html/public/
+    fi
+    # Always refresh Vite build assets to ensure latest client bundle
+    if [ -d /opt/built/public/build ]; then
+        echo "Syncing Vite build assets (public/build)..."
+        rm -rf /var/www/html/public/build
+        mkdir -p /var/www/html/public
+        cp -a /opt/built/public/build /var/www/html/public/
+    fi
+fi
+
+# 2) SSR bundle
+if [ -d /opt/built/bootstrap/ssr ]; then
+    echo "Syncing SSR bundle (bootstrap/ssr)..."
+    rm -rf /var/www/html/bootstrap/ssr
+    mkdir -p /var/www/html/bootstrap
+    cp -a /opt/built/bootstrap/ssr /var/www/html/bootstrap/ssr
+fi
+
 # If running as root, fix ownership and permissions on mounted volumes
 if [ "$(id -u)" = "0" ]; then
-    echo "Fixing permissions on storage and bootstrap/cache..."
-    chown -R www-data:www-data storage bootstrap/cache || true
+    echo "Fixing permissions on storage, bootstrap/cache, public, and SSR..."
+    chown -R www-data:www-data storage bootstrap/cache public bootstrap/ssr || true
     chmod -R 775 storage bootstrap/cache || true
 fi
 
