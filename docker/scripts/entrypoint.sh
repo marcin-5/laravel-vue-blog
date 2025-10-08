@@ -85,12 +85,14 @@ if [ "$APP_ENV" = "production" ]; then
     # Wait for database to be ready (non-fatal loop)
     if command -v php >/dev/null 2>&1; then
         echo "Waiting for database connection..."
-        for i in $(seq 1 30); do
+        i=1
+        while [ $i -le 30 ]; do
             if php artisan migrate:status >/dev/null 2>&1; then
                 echo "Database reachable."; break
             fi
             echo "Database not ready, retry $i/30..."
             sleep 5
+            i=$((i+1))
         done
     fi
 fi
