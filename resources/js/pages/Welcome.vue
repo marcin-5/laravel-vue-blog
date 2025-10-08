@@ -9,7 +9,7 @@ import '@fontsource/cinzel-decorative/900.css';
 import '@fontsource/cinzel/700.css';
 import '@fontsource/cinzel/900.css';
 import { Head, router } from '@inertiajs/vue3';
-import { computed, onMounted, ref } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 interface Category {
@@ -37,12 +37,8 @@ const { t, tm } = useI18n();
 
 const selected = computed<number[]>(() => props.selectedCategoryIds ?? []);
 
-const randomSlogan = ref('');
-
-onMounted(() => {
-    const slogans = tm('landing.slogans') as string[];
-    randomSlogan.value = slogans[Math.floor(Math.random() * slogans.length)];
-});
+const slogans = tm('landing.slogans') as string[];
+const randomSlogan = slogans[Math.floor(Math.random() * slogans.length)] || '';
 
 function toggleCategory(id: number) {
     const set = new Set(selected.value);
