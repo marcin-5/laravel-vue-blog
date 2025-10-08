@@ -163,8 +163,8 @@ prod-update: ## Update code from Git and restart services
 	$(DOCKER_COMPOSE_PROD) down
 	@echo "🗑️  Removing old SSR assets volume..."
 	docker volume rm laravel-blog_ssr_assets 2>/dev/null || true
-	@echo "🔨 Building fresh images..."
-	$(DOCKER_COMPOSE_PROD) build --no-cache app ssr
+	@echo "🔨 Building fresh images (no cache)..."
+	$(DOCKER_COMPOSE_PROD) build --no-cache --pull
 	@echo "🚀 Starting services..."
 	$(DOCKER_COMPOSE_PROD) up -d --force-recreate
 	$(MAKE) prod-wait
