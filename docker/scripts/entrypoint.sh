@@ -66,9 +66,9 @@ fi
 # 2) SSR bundle
 if [ -d /opt/built/bootstrap/ssr ]; then
     echo "Syncing SSR bundle (bootstrap/ssr)..."
-    rm -rf /var/www/html/bootstrap/ssr
-    mkdir -p /var/www/html/bootstrap
-    cp -a /opt/built/bootstrap/ssr /var/www/html/bootstrap/ssr
+    mkdir -p /var/www/html/bootstrap/ssr
+    rm -rf /var/www/html/bootstrap/ssr/*
+    cp -a /opt/built/bootstrap/ssr/. /var/www/html/bootstrap/ssr/
 fi
 
 # If running as root, fix ownership and permissions on mounted volumes
