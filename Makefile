@@ -106,6 +106,8 @@ setup-env: ## 📝 Create .env file from .env.example if it doesn't exist
 # =============================
 COMPOSE_FILES_PROD = -f docker/docker-compose.yml -f docker/docker-compose.prod.yml
 DOCKER_COMPOSE_PROD = docker compose $(COMPOSE_FILES_PROD)
+# Derive Docker Compose project name from current directory to compute named volumes
+PROJECT_NAME = $(notdir $(CURDIR))
 
 .PHONY: prod-up prod-down prod-restart prod-build prod-logs \
         prod-migrate prod-optimize prod-deploy prod-update prod-wait
@@ -161,8 +163,9 @@ prod-update: ## Update code from Git and restart services
 	git fetch --all
 	git pull --ff-only
 	$(DOCKER_COMPOSE_PROD) down
-	@echo "🗑️  Removing old SSR assets volume..."
-	docker volume rm laravel-blog_ssr_assets 2>/dev/null || true
+	@echo "🗑️  Removing old named volumes for assets (public_files and ssr_assets)..."
+	-docker volume rm $(PROJECT_NAME)_ssr_assets 2>/dev/null || true
+	-docker volume rm $(PROJECT_NAME)_public_files 2>/dev/null || true
 	@echo "🔨 Building fresh images (no cache)..."
 	$(DOCKER_COMPOSE_PROD) build --no-cache --pull
 	@echo "🚀 Starting services..."
@@ -174,6 +177,9 @@ prod-update: ## Update code from Git and restart services
 	@echo ""
 	@echo "🔍 Checking if SSR bundle is in app container..."
 	$(DOCKER_COMPOSE_PROD) exec -T app ls -lah /var/www/html/bootstrap/ssr/ || echo "❌ No SSR assets in app container!"
+	@echo ""
+	@echo "🔍 Checking if Vite client bundle is in app container..."
+	$(DOCKER_COMPOSE_PROD) exec -T app ls -lah /var/www/html/public/build/ || echo "❌ No Vite build assets in app container!"
 	@echo ""
 	@echo "🔧 Clearing all Laravel caches..."
 	$(DOCKER_COMPOSE_PROD) exec -T app php artisan config:clear
