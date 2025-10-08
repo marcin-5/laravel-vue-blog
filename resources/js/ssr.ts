@@ -48,11 +48,14 @@ function configureVueErrorHandlers(app: App): void {
 function createSsrI18nInstance(pageProps: AppPageProps) {
     // Create a minimal SSR-safe i18n instance (no localStorage, no window access)
     const initialLocale = (pageProps as any)?.locale || DEFAULT_LOCALE;
+    const provided = (pageProps as any)?.translations as { locale?: string; messages?: Record<string, any> } | undefined;
+    const locale = provided?.locale || initialLocale;
+    const messages = provided?.messages ? { [locale]: provided.messages } : {};
     return createI18n({
         legacy: false,
-        locale: initialLocale,
+        locale,
         fallbackLocale: DEFAULT_LOCALE,
-        messages: {}, // Avoid loading client message loaders on the server
+        messages,
     });
 }
 

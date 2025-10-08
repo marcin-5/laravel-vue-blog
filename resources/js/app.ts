@@ -50,16 +50,25 @@ createInertiaApp({
 
         // Better type safety for locale extraction
         const typedProps = props as InertiaPageProps;
+        const pageProps: any = (props as any)?.initialPage?.props || (props as any)?.page?.props || {};
         const initialLocale = (typedProps.initialPage?.props?.locale || (typedProps as any)?.page?.props?.locale || 'en') as string;
 
-        // Set locale synchronously to avoid wrong-locale flash, then load messages asynchronously
+        // If server provided translations, hydrate them synchronously to avoid blinking
+        const provided = pageProps?.translations as { locale?: string; messages?: Record<string, any> } | undefined;
         try {
-            i18n.global.locale.value = initialLocale;
-            void setLocale(initialLocale).catch((error) => {
+            if (provided?.messages) {
+                const loc = provided.locale || initialLocale;
+                i18n.global.setLocaleMessage(loc, provided.messages);
+                i18n.global.locale.value = loc;
+            } else {
+                i18n.global.locale.value = initialLocale;
+            }
+            // Also ensure our helper state is aligned
+            void setLocale(i18n.global.locale.value).catch((error) => {
                 console.warn('Failed to set initial locale, using fallback:', error);
             });
         } catch (error) {
-            console.warn('Failed to set initial locale, using fallback:', error);
+            console.warn('Failed to set initial locale/messages, using fallback:', error);
         }
 
         vueApp.mount(el);

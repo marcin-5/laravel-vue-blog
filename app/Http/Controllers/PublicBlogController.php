@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\LoadsTranslations;
 use App\Models\Blog;
 use App\Models\LandingPage;
 use App\Models\Post;
@@ -15,6 +16,7 @@ use ParsedownExtra;
 
 class PublicBlogController extends Controller
 {
+    use LoadsTranslations;
     /**
      * Show the public landing page for a blog by slug.
      * Route: /{blog:slug}
@@ -62,6 +64,11 @@ class PublicBlogController extends Controller
             'pagination' => $this->formatPagination($paginator),
             'sidebar' => (int)($blog->sidebar ?? 0),
             'navigation' => $navigation,
+            // Provide translations to avoid async loading flicker on SSR
+            'translations' => [
+                'locale' => app()->getLocale(),
+                'messages' => $this->loadTranslations(app()->getLocale(), ['landing']),
+            ],
         ];
     }
 
@@ -254,6 +261,11 @@ class PublicBlogController extends Controller
             'sidebarPosition' => $this->getSidebarPosition($blog),
             'sidebar' => (int)($blog->sidebar ?? 0),
             'navigation' => $navigation,
+            // Provide translations to avoid async loading flicker on SSR
+            'translations' => [
+                'locale' => app()->getLocale(),
+                'messages' => $this->loadTranslations(app()->getLocale(), ['landing']),
+            ],
         ];
     }
 
@@ -319,4 +331,5 @@ class PublicBlogController extends Controller
         }
         return ($blog->sidebar ?? 0) < 0 ? LandingPage::SIDEBAR_LEFT : LandingPage::SIDEBAR_RIGHT;
     }
+
 }

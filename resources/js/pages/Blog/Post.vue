@@ -3,7 +3,6 @@ import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import { Head } from '@inertiajs/vue3';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
-import { useI18nGate } from '@/composables/useI18nGate';
 
 interface Blog {
     id: number;
@@ -42,8 +41,6 @@ defineProps<{
     };
 }>();
 
-// i18n gate: ensure messages are present and preload 'landing' namespace
-const { ready: i18nReady } = await useI18nGate('landing');
 </script>
 
 <template>
@@ -52,7 +49,7 @@ const { ready: i18nReady } = await useI18nGate('landing');
     </Head>
 
     <div class="flex min-h-screen flex-col bg-[#FDFDFC] text-[#1b1b18] dark:bg-[#0a0a0a]">
-        <PublicNavbar v-if="i18nReady" />
+        <PublicNavbar />
 
         <div class="mx-auto w-full max-w-[1024px] p-4">
             <div class="mb-4 border-b border-gray-200 dark:border-gray-700"></div>
@@ -67,7 +64,7 @@ const { ready: i18nReady } = await useI18nGate('landing');
 
             <div v-if="sidebarPosition === 'left'" class="flex items-start gap-8">
                 <aside class="w-[280px]">
-                    <BlogPostsList v-if="i18nReady" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
+                    <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
                 </aside>
                 <main class="min-w-0 flex-1">
                     <article class="prose max-w-none" v-html="post.contentHtml" />
@@ -79,7 +76,7 @@ const { ready: i18nReady } = await useI18nGate('landing');
                     <article class="prose max-w-none" v-html="post.contentHtml" />
                 </main>
                 <aside class="w-[280px]">
-                    <BlogPostsList v-if="i18nReady" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
+                    <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
                 </aside>
             </div>
 
@@ -87,11 +84,11 @@ const { ready: i18nReady } = await useI18nGate('landing');
                 <main class="min-w-0 flex-1">
                     <article class="prose max-w-none" v-html="post.contentHtml" />
                 </main>
-                <BlogPostsList v-if="i18nReady" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
+                <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
             </div>
 
             <!-- Post Navigation at bottom -->
-            <BlogPostNav v-if="i18nReady" :navigation="navigation" />
+            <BlogPostNav :navigation="navigation" />
         </div>
     </div>
 </template>

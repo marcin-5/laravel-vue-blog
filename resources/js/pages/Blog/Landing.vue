@@ -3,7 +3,6 @@ import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import { Head } from '@inertiajs/vue3';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
-import { useI18nGate } from '@/composables/useI18nGate';
 
 interface Blog {
     id: number;
@@ -38,8 +37,6 @@ const props = defineProps<{
 
 const hasLanding = !!props.landingHtml;
 
-// i18n gate: ensure messages are present and preload 'landing' namespace
-const { ready: i18nReady } = await useI18nGate('landing');
 
 // metaDescription provided by server (PublicBlogController)
 const metaDescription = props.metaDescription;
@@ -55,7 +52,7 @@ const sidebarWidth = Math.min(50, Math.max(0, Math.abs(sidebarValue)));
     </Head>
 
     <div class="flex min-h-screen flex-col bg-[#FDFDFC] text-[#1b1b18] dark:bg-[#0a0a0a]">
-        <PublicNavbar v-if="i18nReady" />
+        <PublicNavbar />
 
         <div class="mx-auto w-full max-w-[1024px] p-4">
             <div class="mb-4 border-b border-gray-200 dark:border-gray-700"></div>
@@ -71,7 +68,7 @@ const sidebarWidth = Math.min(50, Math.max(0, Math.abs(sidebarValue)));
             <template v-if="hasLanding">
                 <div v-if="sidebarWidth > 0 && (props.sidebar ?? 0) < 0" class="flex items-start gap-8">
                     <aside :style="{ width: sidebarWidth + '%', flex: '0 0 ' + sidebarWidth + '%' }">
-                        <BlogPostsList v-if="i18nReady" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
+                        <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
                     </aside>
                     <main :style="{ width: 100 - sidebarWidth + '%', flex: '1 1 ' + (100 - sidebarWidth) + '%' }" class="min-w-0 flex-1">
                         <header class="mb-4">
@@ -91,7 +88,7 @@ const sidebarWidth = Math.min(50, Math.max(0, Math.abs(sidebarValue)));
                         <div class="prose max-w-none" v-html="landingHtml" />
                     </main>
                     <aside :style="{ width: sidebarWidth + '%', flex: '0 0 ' + sidebarWidth + '%' }">
-                        <BlogPostsList v-if="i18nReady" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
+                        <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
                     </aside>
                 </div>
 
@@ -99,14 +96,14 @@ const sidebarWidth = Math.min(50, Math.max(0, Math.abs(sidebarValue)));
                     <main class="min-w-0 flex-1">
                         <div class="prose max-w-none" v-html="landingHtml" />
                     </main>
-                    <BlogPostsList v-if="i18nReady" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
+                    <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
                 </div>
             </template>
 
             <template v-else>
                 <div v-if="sidebarWidth > 0 && (props.sidebar ?? 0) < 0" class="flex items-start gap-8">
                     <aside :style="{ width: sidebarWidth + '%', flex: '0 0 ' + sidebarWidth + '%' }">
-                        <BlogPostsList v-if="i18nReady" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
+                        <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
                     </aside>
                     <main :style="{ width: 100 - sidebarWidth + '%', flex: '1 1 ' + (100 - sidebarWidth) + '%' }" class="min-w-0 flex-1">
                         <header class="mb-4">
@@ -125,16 +122,16 @@ const sidebarWidth = Math.min(50, Math.max(0, Math.abs(sidebarValue)));
                         <!-- No landing content -->
                     </main>
                     <aside :style="{ width: sidebarWidth + '%', flex: '0 0 ' + sidebarWidth + '%' }">
-                        <BlogPostsList v-if="i18nReady" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
+                        <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
                     </aside>
                 </div>
                 <div v-else>
-                    <BlogPostsList v-if="i18nReady" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
+                    <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
                 </div>
             </template>
 
             <!-- Navigation at bottom -->
-            <BlogPostNav v-if="i18nReady" :navigation="navigation" />
+            <BlogPostNav :navigation="navigation" />
         </div>
     </div>
 </template>

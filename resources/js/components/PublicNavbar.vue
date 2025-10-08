@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 import HomeButton from '@/components/HomeButton.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
-import { useI18nNs } from '@/composables/useI18nNs';
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-// Ensure the 'landing' namespace is available on both SSR and client to prevent key flash
-const { t } = await useI18nNs('landing');
+// Use translations already injected via props (hydrated in app.ts/ssr.ts)
+const { t } = useI18n();
 
 const page = usePage();
 const isHomePage = computed(() => page.url === '/');

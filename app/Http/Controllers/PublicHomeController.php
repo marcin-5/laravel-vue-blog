@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\LoadsTranslations;
 use App\Models\Blog;
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -12,6 +13,7 @@ use ParsedownExtra;
 
 class PublicHomeController extends Controller
 {
+    use LoadsTranslations;
     /**
      * Show the welcome page with blogs and categories filter.
      */
@@ -110,6 +112,12 @@ class PublicHomeController extends Controller
             'blogs' => $blogs,
             'categories' => $categories,
             'selectedCategoryIds' => $selectedCategoryIds,
+            // Provide translations to avoid async loading flicker on SSR
+            'translations' => [
+                'locale' => $locale,
+                'messages' => $this->loadTranslations($locale, ['landing']),
+            ],
         ]);
     }
+
 }
