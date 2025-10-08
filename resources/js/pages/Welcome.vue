@@ -3,8 +3,13 @@ import BlogsGrid from '@/components/blog/BlogsGrid.vue';
 import CategoriesFilter from '@/components/blog/CategoriesFilter.vue';
 import NoBlogs from '@/components/blog/NoBlogs.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
+import '@fontsource/cinzel-decorative/400.css';
+import '@fontsource/cinzel-decorative/700.css';
+import '@fontsource/cinzel-decorative/900.css';
+import '@fontsource/cinzel/700.css';
+import '@fontsource/cinzel/900.css';
 import { Head, router } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 interface Category {
@@ -28,9 +33,16 @@ const props = defineProps<{
     selectedCategoryIds?: number[];
 }>();
 
-const { t } = useI18n();
+const { t, tm } = useI18n();
 
 const selected = computed<number[]>(() => props.selectedCategoryIds ?? []);
+
+const randomSlogan = ref('');
+
+onMounted(() => {
+    const slogans = tm('landing.slogans') as string[];
+    randomSlogan.value = slogans[Math.floor(Math.random() * slogans.length)];
+});
 
 function toggleCategory(id: number) {
     const set = new Set(selected.value);
@@ -62,7 +74,16 @@ function clearFilter() {
     <div class="flex min-h-screen flex-col">
         <PublicNavbar />
         <div class="mx-auto w-full max-w-[1024px] p-6 lg:p-8">
-            <h1 class="mb-4 text-4xl font-bold text-slate-800 dark:text-slate-200">Welcome!</h1>
+            <div class="mb-12 text-center">
+                <h1
+                    class="inline-block p-2 text-5xl leading-none font-black tracking-tight text-slate-800 sm:text-8xl lg:text-9xl dark:text-slate-200"
+                    style="font-family: 'Cinzel', serif"
+                >
+                    <span class="text-[1.0em] font-black" style="font-family: 'Cinzel Decorative', serif; font-weight: 900">O</span>sobliwy
+                    <span class="text-[1.2em] font-black" style="font-family: 'Cinzel Decorative', serif; font-weight: 900">B</span>log
+                </h1>
+                <p class="mt-4 font-serif text-xl opacity-80 sm:text-2xl dark:text-white">— {{ randomSlogan }} —</p>
+            </div>
 
             <!-- Categories Filter -->
             <CategoriesFilter

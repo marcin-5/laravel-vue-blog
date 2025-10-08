@@ -26,9 +26,14 @@
             }
         },
         "meta": {
-            "welcomeTitle": "Home Page",
+            "welcomeTitle": "Osobliwy Blog",
             "welcomeDescription": "Welcome to Osobliwy Blog"
         },
+        "slogans": [
+            "Things that too few people know exist",
+            "Curiosities that can leave you amazed",
+            "The world is full of curiosities. Will you enter to discover them?"
+        ],
         "actions": {
             "clear": "Clear filter"
         }
