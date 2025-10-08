@@ -29,9 +29,7 @@ trait LoadsTranslations
             if (File::exists($nsPath)) {
                 $nsMsgs = json_decode(File::get($nsPath), true) ?: [];
                 if (is_array($nsMsgs)) {
-                    $messages[$ns] = isset($messages[$ns]) && is_array($messages[$ns])
-                        ? array_merge($messages[$ns], $nsMsgs)
-                        : $nsMsgs;
+                    $messages = array_merge_recursive($messages, $nsMsgs);
                 }
             }
         }
