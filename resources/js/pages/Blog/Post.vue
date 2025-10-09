@@ -1,14 +1,15 @@
 <script lang="ts" setup>
 import BlogPostNav from '@/components/blog/BlogPostNav.vue';
+import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import { Head } from '@inertiajs/vue3';
-import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 
 interface Blog {
     id: number;
     name: string;
     slug: string;
     description?: string | null;
+    motto?: string | null;
 }
 
 interface PostDetails {
@@ -40,7 +41,6 @@ defineProps<{
         isLandingPage?: boolean;
     };
 }>();
-
 </script>
 
 <template>
@@ -55,8 +55,8 @@ defineProps<{
             <div class="mb-4 border-b border-gray-200 dark:border-gray-700"></div>
 
             <header class="mb-4">
-                <h1 class="text-2xl font-bold">{{ post.title }}</h1>
-                <p v-if="post.published_at" class="text-gray-600">Published {{ post.published_at }}</p>
+                <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-400">{{ post.title }}</h1>
+                <p v-if="post.published_at" class="text-sm text-gray-800 italic dark:text-gray-300">Published {{ post.published_at }}</p>
             </header>
 
             <!-- Add separation line under header when no sidebar -->
