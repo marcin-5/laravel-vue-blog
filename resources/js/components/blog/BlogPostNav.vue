@@ -2,9 +2,15 @@
 import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 
+interface PostLink {
+    title: string;
+    slug: string;
+    url: string;
+}
+
 interface NavInfo {
-    prevPost?: { title: string; slug: string; url: string } | null;
-    nextPost?: { title: string; slug: string; url: string } | null;
+    prevPost?: PostLink | null;
+    nextPost?: PostLink | null;
     landingUrl: string;
     isLandingPage?: boolean;
 }
@@ -12,68 +18,44 @@ interface NavInfo {
 defineProps<{
     navigation?: NavInfo;
 }>();
-
 const { t } = useI18n();
+
+const BASE_LINK_CLASSES = 'inline-flex items-center rounded-sm px-3 py-2 text-sm';
+const ACTIVE_LINK_CLASSES = 'border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800';
+const INACTIVE_LINK_COMMON_CLASSES = 'border border-gray-200 dark:border-gray-700 dark:text-gray-600 text-gray-500';
+
+const navLinkClasses = (postExists: boolean) => [`${BASE_LINK_CLASSES} gap-2`, postExists ? ACTIVE_LINK_CLASSES : INACTIVE_LINK_COMMON_CLASSES];
+const backLinkClasses = (isLink: boolean) => [`${BASE_LINK_CLASSES} font-medium`, isLink ? ACTIVE_LINK_CLASSES : INACTIVE_LINK_COMMON_CLASSES];
 </script>
 
 <template>
     <nav v-if="navigation" :aria-label="t('landing.blog.post_nav.aria')" class="mt-8 border-t border-gray-200 pt-6 dark:border-gray-700">
         <div class="flex items-center justify-between gap-4">
-            <div class="flex items-center gap-4">
-                <Link
-                    v-if="navigation.prevPost"
-                    :href="navigation.prevPost.url"
-                    class="inline-flex items-center gap-2 rounded-sm border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
-                >
-                    <span class="text-lg">←</span>
-                    <div class="flex flex-col items-start">
-                        <span class="text-xs opacity-75">{{ t('landing.blog.post_nav.previous') }}</span>
-                        <span class="font-medium">{{ navigation.prevPost.title }}</span>
-                    </div>
-                </Link>
-                <span
-                    v-else
-                    class="inline-flex items-center gap-2 rounded-sm border border-gray-200 px-3 py-2 text-sm text-gray-400 dark:border-gray-700 dark:text-gray-600"
-                >
-                    <span class="text-lg">←</span>
-                    <span>{{ t('landing.blog.post_nav.previous') }}</span>
-                </span>
-            </div>
+            <component :is="navigation.prevPost ? Link : 'span'" :class="navLinkClasses(!!navigation.prevPost)" :href="navigation.prevPost?.url">
+                <span class="text-lg">←</span>
+                <div v-if="navigation.prevPost" class="flex flex-col items-start">
+                    <span class="text-xs opacity-75">{{ t('landing.blog.post_nav.previous') }}</span>
+                    <span class="font-medium">{{ navigation.prevPost.title }}</span>
+                </div>
+                <span v-else>{{ t('landing.blog.post_nav.previous') }}</span>
+            </component>
 
-            <Link
-                v-if="!navigation.isLandingPage"
-                :href="navigation.landingUrl"
-                class="inline-flex items-center rounded-sm border border-teal-600 bg-teal-50 px-3 py-2 text-sm font-medium text-teal-900 hover:bg-teal-100 dark:bg-teal-900/30 dark:text-teal-300 dark:hover:bg-teal-800/40"
+            <component
+                :is="!navigation.isLandingPage ? Link : 'span'"
+                :class="backLinkClasses(!navigation.isLandingPage)"
+                :href="!navigation.isLandingPage ? navigation.landingUrl : undefined"
             >
                 {{ t('landing.blog.post_nav.back_to_blog') }}
-            </Link>
-            <span
-                v-else
-                class="inline-flex items-center rounded-sm border border-gray-200 px-3 py-2 text-sm font-medium text-gray-400 dark:border-gray-700 dark:text-gray-600"
-            >
-                {{ t('landing.blog.post_nav.back_to_blog') }}
-            </span>
+            </component>
 
-            <div class="flex items-center gap-4">
-                <Link
-                    v-if="navigation.nextPost"
-                    :href="navigation.nextPost.url"
-                    class="inline-flex items-center gap-2 rounded-sm border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
-                >
-                    <div class="flex flex-col items-end">
-                        <span class="text-xs opacity-75">{{ t('landing.blog.post_nav.next') }}</span>
-                        <span class="font-medium">{{ navigation.nextPost.title }}</span>
-                    </div>
-                    <span class="text-lg">→</span>
-                </Link>
-                <span
-                    v-else
-                    class="inline-flex items-center gap-2 rounded-sm border border-gray-200 px-3 py-2 text-sm text-gray-400 dark:border-gray-700 dark:text-gray-600"
-                >
-                    <span>{{ t('landing.blog.post_nav.next') }}</span>
-                    <span class="text-lg">→</span>
-                </span>
-            </div>
+            <component :is="navigation.nextPost ? Link : 'span'" :class="navLinkClasses(!!navigation.nextPost)" :href="navigation.nextPost?.url">
+                <div v-if="navigation.nextPost" class="flex flex-col items-end">
+                    <span class="text-xs opacity-90">{{ t('landing.blog.post_nav.next') }}</span>
+                    <span class="font-medium">{{ navigation.nextPost.title }}</span>
+                </div>
+                <span v-else>{{ t('landing.blog.post_nav.next') }}</span>
+                <span class="text-lg">→</span>
+            </component>
         </div>
     </nav>
 </template>

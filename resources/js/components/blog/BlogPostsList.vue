@@ -53,7 +53,7 @@ const links = computed(() => props.pagination?.links ?? []);
             <li v-for="p in posts" :key="p.id">
                 <Link
                     :href="route('blog.public.post', { blog: blogSlug, postSlug: p.slug })"
-                    class="font-semibold text-teal-800 hover:underline dark:font-normal dark:text-teal-700"
+                    class="font-semibold text-teal-900 hover:underline dark:font-normal dark:text-sky-200"
                 >
                     {{ p.title }}
                 </Link>
@@ -69,8 +69,8 @@ const links = computed(() => props.pagination?.links ?? []);
                 :class="[
                     'rounded border px-2 py-1 text-sm',
                     lnk.active
-                        ? 'border-teal-600 bg-teal-50 text-teal-900 dark:bg-teal-900/30'
-                        : 'border-gray-300 text-gray-700 dark:border-gray-600 dark:text-gray-300',
+                        ? 'border-slate-500 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800'
+                        : 'border border-gray-200 text-gray-500 dark:border-gray-700 dark:text-gray-600',
                     !lnk.url ? 'pointer-events-none opacity-50' : 'hover:bg-gray-50 dark:hover:bg-gray-800',
                 ]"
                 :href="lnk.url || ''"
