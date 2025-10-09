@@ -70,6 +70,7 @@ export interface Blog {
     name: string;
     slug: string;
     description: string | null;
+    motto?: string | null;
     is_published: boolean;
     locale: string;
     sidebar?: number; // -50..50

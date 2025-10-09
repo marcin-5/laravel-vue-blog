@@ -50,6 +50,9 @@ const translationKeys = computed(() => ({
     namePlaceholder: props.isEdit ? '' : t('blogs.form.name_placeholder'),
     description: t('blogs.form.description_label'),
     descriptionPlaceholder: props.isEdit ? '' : t('blogs.form.description_placeholder'),
+    motto: t('blogs.form.motto_label'),
+    mottoPlaceholder: props.isEdit ? '' : t('blogs.form.motto_placeholder'),
+    mottoTooltip: t('blogs.form.motto_tooltip'),
     published: t('blogs.form.published_label'),
     locale: t('blogs.form.locale_label'),
     sidebar: t('blogs.form.sidebar_label'),
@@ -109,6 +112,16 @@ function handleDescriptionInput() {
                 :placeholder="translationKeys.namePlaceholder"
                 required
                 type="input"
+            />
+
+            <PostFormField
+                :id="`${fieldIdPrefix}-motto`"
+                v-model="form.motto"
+                :error="form.errors.motto"
+                :label="translationKeys.motto"
+                :placeholder="translationKeys.mottoPlaceholder"
+                :tooltip="translationKeys.mottoTooltip"
+                type="textarea"
             />
 
             <MarkdownPreviewSection

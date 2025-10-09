@@ -1,4 +1,5 @@
 import '@fontsource-variable/nunito';
+import '@fontsource/noto-serif';
 import '../css/app.css';
 
 import { createInertiaApp } from '@inertiajs/vue3';

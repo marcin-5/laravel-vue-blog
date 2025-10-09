@@ -11,6 +11,7 @@ export function useBlogForm() {
     const createForm = useForm({
         name: '',
         description: null as string | null,
+        motto: null as string | null,
         is_published: false as boolean,
         locale: locale.value as string,
         categories: [] as number[],
@@ -21,6 +22,7 @@ export function useBlogForm() {
     const editForm = useForm({
         name: '',
         description: null as string | null,
+        motto: null as string | null,
         is_published: false as boolean,
         locale: locale.value as string,
         categories: [] as number[],
@@ -56,6 +58,7 @@ export function useBlogForm() {
         editForm.reset();
         editForm.name = blog.name;
         editForm.description = blog.description;
+        editForm.motto = blog.motto ?? null;
         editForm.is_published = blog.is_published;
         editForm.locale = (blog.locale as string) || 'en';
         editForm.sidebar = (blog.sidebar as number) ?? 0;

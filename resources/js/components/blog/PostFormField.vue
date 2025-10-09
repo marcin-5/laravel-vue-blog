@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import InputError from '@/components/InputError.vue';
+import { InfoIcon } from 'lucide-vue-next';
 
 interface Props {
     id: string;
@@ -10,6 +11,7 @@ interface Props {
     type?: 'input' | 'textarea';
     rows?: number;
     required?: boolean;
+    tooltip?: string;
 }
 
 interface Emits {
@@ -34,7 +36,12 @@ function handleInput(event: Event) {
 
 <template>
     <div>
-        <label :for="props.id" class="mb-1 block text-sm font-medium">{{ props.label }}</label>
+        <label :for="props.id" class="mb-1 flex items-center gap-1 text-sm font-medium">
+            {{ props.label }}
+            <span v-if="props.tooltip" :title="props.tooltip" class="cursor-help text-muted-foreground">
+                <InfoIcon :size="14" />
+            </span>
+        </label>
         <input
             v-if="props.type === 'input'"
             :id="props.id"
