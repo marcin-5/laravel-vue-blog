@@ -22,6 +22,7 @@ class BlogService
                 'name',
                 'slug',
                 'description',
+                'motto',
                 'is_published',
                 'locale',
                 'sidebar',

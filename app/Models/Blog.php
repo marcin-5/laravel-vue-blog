@@ -18,6 +18,7 @@ use Illuminate\Support\Carbon;
  * @property string $name
  * @property string $slug
  * @property string|null $description
+ * @property string|null $motto
  * @property bool $is_published
  * @property string $locale
  * @property Carbon $created_at
@@ -38,6 +39,7 @@ class Blog extends Model
         'name',
         'slug',
         'description',
+        'motto',
         'is_published',
         'locale',
         'sidebar',

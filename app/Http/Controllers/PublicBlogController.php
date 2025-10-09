@@ -57,6 +57,7 @@ class PublicBlogController extends Controller
                 'name' => $blog->name,
                 'slug' => $blog->slug,
                 'descriptionHtml' => $descriptionHtml,
+                'motto' => $blog->motto,
             ],
             'landingHtml' => $landing?->content_html ?? '',
             'metaDescription' => $metaDescription,
@@ -248,6 +249,7 @@ class PublicBlogController extends Controller
                 'id' => $blog->id,
                 'name' => $blog->name,
                 'slug' => $blog->slug,
+                'motto' => $blog->motto,
             ],
             'post' => [
                 'id' => $post->id,

@@ -17,6 +17,7 @@ class StoreBlogRequest extends FormRequest
 
         return [
             'description' => ['nullable', 'string'],
+            'motto' => ['nullable', 'string'],
             'categories' => ['sometimes', 'array'],
             'categories.*' => ['integer', 'exists:categories,id'],
             'locale' => ['sometimes', 'string', 'in:' . implode(',', $config['supported_locales'])],
@@ -39,6 +40,7 @@ class StoreBlogRequest extends FormRequest
             'user_id' => $this->user()->id,
             'name' => $this->getBlogName(),
             'description' => $validated['description'] ?? null,
+            'motto' => $validated['motto'] ?? null,
             'is_published' => false,
             'locale' => $validated['locale'] ?? app()->getLocale() ?? $config['locale'],
             'sidebar' => (int)($validated['sidebar'] ?? $config['sidebar']),
