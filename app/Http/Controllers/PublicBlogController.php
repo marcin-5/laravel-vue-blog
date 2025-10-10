@@ -17,6 +17,7 @@ use ParsedownExtra;
 class PublicBlogController extends Controller
 {
     use LoadsTranslations;
+
     /**
      * Show the public landing page for a blog by slug.
      * Route: /{blog:slug}
@@ -50,6 +51,10 @@ class PublicBlogController extends Controller
         // Get navigation for landing page with correct disabled states
         $navigation = $this->getLandingNavigation($blog);
 
+        $baseUrl = config('app.url');
+        $canonicalUrl = $baseUrl . '/blogs/' . $blog->slug;
+        $ogImage = $baseUrl . '/og-image.png';
+
         return [
             'locale' => app()->getLocale(),
             'blog' => [
@@ -65,6 +70,16 @@ class PublicBlogController extends Controller
             'pagination' => $this->formatPagination($paginator),
             'sidebar' => (int)($blog->sidebar ?? 0),
             'navigation' => $navigation,
+            // SEO meta data for SSR
+            'seo' => [
+                'title' => $blog->name,
+                'description' => $metaDescription,
+                'canonicalUrl' => $canonicalUrl,
+                'ogImage' => $ogImage,
+                'ogType' => 'blog',
+                'locale' => app()->getLocale(),
+                'structuredData' => $this->generateBlogStructuredData($blog, $paginator->items(), $baseUrl),
+            ],
             // Provide translations to avoid async loading flicker on SSR
             'translations' => [
                 'locale' => app()->getLocale(),
@@ -208,6 +223,33 @@ class PublicBlogController extends Controller
             }, $links),
             'prevUrl' => $paginator->previousPageUrl(),
             'nextUrl' => $paginator->nextPageUrl(),
+        ];
+    }
+
+    /**
+     * Generate structured data for blog landing page.
+     */
+    private function generateBlogStructuredData(Blog $blog, $posts, string $baseUrl): array
+    {
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'Blog',
+            'name' => $blog->name,
+            'url' => $baseUrl . '/blogs/' . $blog->slug,
+            'description' => $blog->description,
+            'author' => [
+                '@type' => 'Organization',
+                'name' => $blog->name,
+            ],
+            'blogPost' => collect($posts)->map(function ($post) use ($blog, $baseUrl) {
+                return [
+                    '@type' => 'BlogPosting',
+                    'headline' => $post->title,
+                    'url' => $baseUrl . '/blogs/' . $blog->slug . '/' . $post->slug,
+                    'datePublished' => $post->published_at?->toIso8601String(),
+                    'description' => $post->excerpt ? strip_tags($post->excerpt) : null,
+                ];
+            })->all(),
         ];
     }
 

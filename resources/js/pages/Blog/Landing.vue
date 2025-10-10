@@ -54,6 +54,7 @@ const props = defineProps<{
     sidebar?: number;
     metaDescription: string;
     navigation?: Navigation;
+    locale?: string;
 }>();
 const hasLanding = computed(() => !!props.landingHtml);
 
@@ -70,10 +71,61 @@ const sidebarValue = computed(() => props.sidebar ?? 0);
 const sidebarWidth = computed(() => Math.min(50, Math.max(0, Math.abs(sidebarValue.value))));
 const hasSidebar = computed(() => sidebarWidth.value > 0);
 const isSidebarRight = computed(() => sidebarValue.value > 0);
+
+// SEO helpers - SSR compatible
+const baseUrl = import.meta.env.VITE_APP_URL || 'https://osobliwy.blog';
+const canonicalUrl = computed(() => `${baseUrl}/blogs/${props.blog.slug}`);
+const seoTitle = computed(() => props.blog.name);
+const seoDescription = computed(() => props.metaDescription || props.blog.name);
+const seoImage = computed(() => `${baseUrl}/og-image.png`);
+
+// Structured data for SEO
+const structuredData = computed(() => ({
+    '@context': 'https://schema.org',
+    '@type': 'Blog',
+    name: seoTitle.value,
+    url: canonicalUrl.value,
+    description: seoDescription.value,
+    author: {
+        '@type': 'Organization',
+        name: seoTitle.value,
+    },
+    blogPost: props.posts.map((post) => ({
+        '@type': 'BlogPosting',
+        headline: post.title,
+        url: `${baseUrl}/blogs/${props.blog.slug}/${post.slug}`,
+        datePublished: post.published_at,
+        description: post.excerpt?.replace(/<[^>]*>/g, '').substring(0, 200),
+    })),
+}));
 </script>
+
 <template>
-    <Head :title="blog.name">
-        <meta :content="metaDescription" name="description" />
+    <Head :title="seoTitle">
+        <!-- Primary Meta Tags -->
+        <meta :content="seoDescription" name="description" />
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <link :href="canonicalUrl" rel="canonical" />
+        <meta v-if="locale" :content="locale" http-equiv="content-language" />
+
+        <!-- Open Graph / Facebook -->
+        <meta content="blog" property="og:type" />
+        <meta :content="seoTitle" property="og:title" />
+        <meta :content="seoDescription" property="og:description" />
+        <meta :content="canonicalUrl" property="og:url" />
+        <meta :content="seoImage" property="og:image" />
+        <meta content="1200" property="og:image:width" />
+        <meta content="630" property="og:image:height" />
+        <meta :content="locale || 'en'" property="og:locale" />
+
+        <!-- Twitter -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta :content="seoTitle" name="twitter:title" />
+        <meta :content="seoDescription" name="twitter:description" />
+        <meta :content="seoImage" name="twitter:image" />
+
+        <!-- Structured Data -->
+        <component :is="'script'" type="application/ld+json" v-html="JSON.stringify(structuredData)" />
     </Head>
     <div class="flex min-h-screen flex-col bg-[#FDFDFC] text-[#1b1b18] dark:bg-[#0a0a0a]">
         <PublicNavbar />
