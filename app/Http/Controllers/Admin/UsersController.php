@@ -31,6 +31,39 @@ class UsersController extends Controller
     }
 
     /**
+     * Store a newly created user (admin only).
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $this->authorize('edit-user-blog-quota');
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8'],
+            'role' => ['required', 'in:admin,blogger,user'],
+            'blog_quota' => ['nullable', 'integer', 'min:0'],
+        ]);
+
+        // Determine blog_quota based on selected role
+        $role = $validated['role'];
+        $blogQuota = 0;
+        if (in_array($role, [User::ROLE_BLOGGER, User::ROLE_ADMIN], true)) {
+            $blogQuota = (int)($validated['blog_quota'] ?? ($role === User::ROLE_BLOGGER ? 1 : 0));
+        }
+
+        User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => $validated['password'], // hashed via casts()
+            'role' => $role,
+            'blog_quota' => $blogQuota,
+        ]);
+
+        return back()->with('success', 'User created successfully.');
+    }
+
+    /**
      * Update the specified user (role and blog_quota).
      */
     public function update(Request $request, User $user): RedirectResponse

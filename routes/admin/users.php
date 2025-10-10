@@ -10,6 +10,6 @@ Route::prefix('admin')
         // Apply permission middleware only to users management
         Route::middleware(['can:edit-user-blog-quota'])->group(function () {
             Route::resource('users', UsersController::class)
-                ->only(['index', 'update']);
+                ->only(['index', 'update', 'store']);
         });
     });

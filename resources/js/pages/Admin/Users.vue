@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 // Types
 export type Role = 'admin' | 'blogger' | 'user';
@@ -76,24 +76,94 @@ function saveUser(user: UserRow) {
         preserveState: true,
     });
 }
+
+// User creation
+const newUser = ref<{ name: string; email: string; password: string; role: Role; blog_quota: number | null }>({
+    name: '',
+    email: '',
+    password: '',
+    role: 'user',
+    blog_quota: 0,
+});
+
+const canEditNewQuota = computed(() => props.currentUserIsAdmin && (newUser.value.role === 'blogger' || newUser.value.role === 'admin'));
+
+function submitCreate() {
+    const payload: Record<string, unknown> = {
+        name: newUser.value.name,
+        email: newUser.value.email,
+        password: newUser.value.password,
+        role: newUser.value.role,
+    };
+    if (canEditNewQuota.value) {
+        payload.blog_quota = newUser.value.blog_quota ?? (newUser.value.role === 'blogger' ? 1 : 0);
+    }
+    router.post(route('admin.users.store'), payload, {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: () => {
+            newUser.value = { name: '', email: '', password: '', role: 'user', blog_quota: 0 };
+        },
+    });
+}
 </script>
 
 <template>
-    <Head title="Users" />
+    <Head :title="$t('users.title')" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <div class="relative flex-1 rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border">
-                <h2 class="mb-4 text-lg font-semibold">User Management</h2>
+                <h2 class="mb-4 text-lg font-semibold">{{ $t('users.heading') }}</h2>
+
+                <!-- Create user form -->
+                <div class="mb-6 rounded-md border border-dashed p-4">
+                    <div class="mb-2 text-sm font-medium">{{ $t('users.create.title') }}</div>
+                    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6">
+                        <input
+                            v-model="newUser.name"
+                            :placeholder="$t('users.create.name')"
+                            class="rounded-md border bg-background px-2 py-1 text-foreground"
+                            type="text"
+                        />
+                        <input
+                            v-model="newUser.email"
+                            :placeholder="$t('users.create.email')"
+                            class="rounded-md border bg-background px-2 py-1 text-foreground"
+                            type="email"
+                        />
+                        <input
+                            v-model="newUser.password"
+                            :placeholder="$t('users.create.password')"
+                            class="rounded-md border bg-background px-2 py-1 text-foreground"
+                            type="password"
+                        />
+                        <select v-model="newUser.role" class="rounded-md border bg-background px-2 py-1 text-foreground">
+                            <option v-for="r in roles" :key="r" :value="r">{{ $t('users.roles.' + r) }}</option>
+                        </select>
+                        <input
+                            v-model.number="newUser.blog_quota"
+                            :disabled="!canEditNewQuota"
+                            :placeholder="$t('users.create.blog_quota')"
+                            class="rounded-md border bg-background px-2 py-1 text-foreground"
+                            min="0"
+                            type="number"
+                        />
+                        <div>
+                            <Button size="sm" type="button" variant="constructive" @click="submitCreate">{{ $t('users.actions.create') }}</Button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
                         <thead class="border-b border-sidebar-border/70 text-xs text-muted-foreground uppercase dark:border-sidebar-border">
                             <tr>
-                                <th class="py-2 pr-4">Name</th>
-                                <th class="py-2 pr-4">Email</th>
-                                <th class="py-2 pr-4">Role</th>
-                                <th class="py-2 pr-4">Blog quota</th>
-                                <th class="py-2 pr-4">Actions</th>
+                                <th class="py-2 pr-4">{{ $t('users.table.name') }}</th>
+                                <th class="py-2 pr-4">{{ $t('users.table.email') }}</th>
+                                <th class="py-2 pr-4">{{ $t('users.table.role') }}</th>
+                                <th class="py-2 pr-4">{{ $t('users.table.blog_quota') }}</th>
+                                <th class="py-2 pr-4">{{ $t('users.table.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -106,7 +176,7 @@ function saveUser(user: UserRow) {
                                 <td class="py-2 pr-4">{{ u.email }}</td>
                                 <td class="py-2 pr-4">
                                     <select v-model="u.role" class="rounded-md border bg-background px-2 py-1 text-foreground">
-                                        <option v-for="r in roles" :key="r" :value="r">{{ r }}</option>
+                                        <option v-for="r in roles" :key="r" :value="r">{{ $t('users.roles.' + r) }}</option>
                                     </select>
                                 </td>
                                 <td class="py-2 pr-4">
@@ -126,7 +196,7 @@ function saveUser(user: UserRow) {
                                         type="button"
                                         @click="saveUser(u)"
                                     >
-                                        Save
+                                        {{ $t('users.actions.save') }}
                                     </Button>
                                 </td>
                             </tr>

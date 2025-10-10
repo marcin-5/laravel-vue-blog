@@ -1,0 +1,34 @@
+{
+  "users": {
+    "title": "Users",
+    "heading": "User Management",
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "blog_quota": "Blog quota",
+      "actions": "Actions"
+    },
+    "actions": {
+      "save": "Save",
+      "create": "Create"
+    },
+    "create": {
+      "title": "Create new user",
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "role": "Role",
+      "blog_quota": "Blog quota"
+    },
+    "roles": {
+      "admin": "admin",
+      "blogger": "blogger",
+      "user": "user"
+    },
+    "flash": {
+      "created": "User created successfully.",
+      "updated": "User updated successfully."
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "users": {
+    "title": "Użytkownicy",
+    "heading": "Zarządzanie użytkownikami",
+    "table": {
+      "name": "Imię i nazwisko",
+      "email": "E-mail",
+      "role": "Rola",
+      "blog_quota": "Limit blogów",
+      "actions": "Akcje"
+    },
+    "actions": {
+      "save": "Zapisz",
+      "create": "Utwórz"
+    },
+    "create": {
+      "title": "Utwórz nowego użytkownika",
+      "name": "Imię i nazwisko",
+      "email": "E-mail",
+      "password": "Hasło",
+      "role": "Rola",
+      "blog_quota": "Limit blogów"
+    },
+    "roles": {
+      "admin": "admin",
+      "blogger": "bloger",
+      "user": "użytkownik"
+    },
+    "flash": {
+      "created": "Użytkownik został pomyślnie utworzony.",
+      "updated": "Użytkownik został pomyślnie zaktualizowany."
+    }
+  }
+}
