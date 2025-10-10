@@ -1,7 +1,7 @@
 <script lang="ts" setup>
+import AppLogo from '@/components/AppLogo.vue';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
-import SidebarLogo from '@/components/SidebarLogo.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -103,8 +103,8 @@ const rightNavItems: NavItem[] = [
                     </Sheet>
                 </div>
 
-                <Link :href="route('dashboard')" class="flex items-center gap-x-2">
-                    <SidebarLogo />
+                <Link :href="route('dashboard')" class="hidden items-center gap-x-2 sm:flex">
+                    <AppLogo size="sm" />
                 </Link>
 
                 <!-- Desktop Menu -->

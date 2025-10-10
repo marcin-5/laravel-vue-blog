@@ -1,12 +1,19 @@
 <script lang="ts" setup>
+import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuItem
+} from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import { BookOpen, Folder, LayoutGrid, Users } from 'lucide-vue-next';
-import SidebarLogo from './SidebarLogo.vue';
 
 const mainNavItems: NavItem[] = [
     {
@@ -54,11 +61,9 @@ const footerNavItems: NavItem[] = [
         <SidebarHeader>
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton as-child size="lg">
-                        <Link :href="route('home')">
-                            <SidebarLogo />
-                        </Link>
-                    </SidebarMenuButton>
+                    <Link :href="route('home')" class="flex justify-center py-4 text-center">
+                        <AppLogo class="group-data-[collapsible=icon]:hidden" size="md" />
+                    </Link>
                 </SidebarMenuItem>
             </SidebarMenu>
         </SidebarHeader>
