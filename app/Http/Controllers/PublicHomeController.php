@@ -14,6 +14,7 @@ use ParsedownExtra;
 class PublicHomeController extends Controller
 {
     use LoadsTranslations;
+
     /**
      * Show the welcome page with blogs and categories filter.
      */
@@ -97,7 +98,12 @@ class PublicHomeController extends Controller
                     'author' => $b->user?->name ?? '',
                     'descriptionHtml' => $descriptionHtml,
                     'categories' => $b->categories
-                        ->filter(fn($c) => method_exists($c, 'hasTranslation') ? $c->hasTranslation('name', $blogLocale) : true)
+                        ->filter(
+                            fn($c) => method_exists($c, 'hasTranslation') ? $c->hasTranslation(
+                                'name',
+                                $blogLocale,
+                            ) : true,
+                        )
                         ->map(fn($c) => [
                             'id' => $c->id,
                             'slug' => $c->slug,
@@ -107,17 +113,65 @@ class PublicHomeController extends Controller
             })->values();
         });
 
+        $baseUrl = config('app.url');
+        $canonicalUrl = $baseUrl . (empty($selectedCategoryIds) ? '' : '?categories=' . implode(
+                    ',',
+                    $selectedCategoryIds,
+                ));
+        $ogImage = $baseUrl . '/og-image.png';
+
+        // Get translated SEO text
+        $translations = $this->loadTranslations($locale, ['landing']);
+        $seoTitle = $translations['landing']['meta']['welcomeTitle'] ?? config('app.name');
+        $seoDescription = $translations['landing']['meta']['welcomeDescription'] ?? 'Welcome to ' . config('app.name');
+
         return Inertia::render('Welcome', [
             'locale' => $locale,
             'blogs' => $blogs,
             'categories' => $categories,
             'selectedCategoryIds' => $selectedCategoryIds,
+            // SEO meta data for SSR
+            'seo' => [
+                'title' => $seoTitle,
+                'description' => $seoDescription,
+                'canonicalUrl' => $canonicalUrl,
+                'ogImage' => $ogImage,
+                'ogType' => 'website',
+                'locale' => $locale,
+                'structuredData' => $this->generateHomeStructuredData($blogs, $seoTitle, $seoDescription, $baseUrl),
+            ],
             // Provide translations to avoid async loading flicker on SSR
             'translations' => [
                 'locale' => $locale,
-                'messages' => $this->loadTranslations($locale, ['landing']),
+                'messages' => $translations,
             ],
         ]);
+    }
+
+    /**
+     * Generate structured data for home page.
+     */
+    private function generateHomeStructuredData($blogs, string $title, string $description, string $baseUrl): array
+    {
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'Blog',
+            'name' => $title,
+            'url' => $baseUrl,
+            'description' => $description,
+            'blogPost' => collect($blogs)->slice(0, 10)->map(function ($blog) use ($baseUrl) {
+                return [
+                    '@type' => 'BlogPosting',
+                    'headline' => $blog['name'],
+                    'author' => [
+                        '@type' => 'Person',
+                        'name' => $blog['author'],
+                    ],
+                    'url' => $baseUrl . '/blogs/' . $blog['slug'],
+                    'description' => $blog['descriptionHtml'] ? strip_tags($blog['descriptionHtml']) : null,
+                ];
+            })->all(),
+        ];
     }
 
 }
