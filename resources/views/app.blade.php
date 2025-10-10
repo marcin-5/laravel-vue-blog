@@ -37,6 +37,36 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
+    {{-- SEO Meta Tags for SSR --}}
+    @if(isset($page['props']['seo']))
+        @php($seo = $page['props']['seo'])
+
+        <!-- Primary Meta Tags -->
+        <meta name="description" content="{{ $seo['description'] }}">
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+        <link rel="canonical" href="{{ $seo['canonicalUrl'] }}">
+        <meta http-equiv="content-language" content="{{ $seo['locale'] }}">
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="{{ $seo['ogType'] }}">
+        <meta property="og:title" content="{{ $seo['title'] }}">
+        <meta property="og:description" content="{{ $seo['description'] }}">
+        <meta property="og:url" content="{{ $seo['canonicalUrl'] }}">
+        <!--meta property="og:image" content="{{ $seo['ogImage'] }}"-->
+        <!--meta property="og:image:width" content="1200"-->
+        <!--meta property="og:image:height" content="630"-->
+        <!--meta property="og:locale" content="{{ $seo['locale'] }}"-->
+
+        <!-- Twitter -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ $seo['title'] }}">
+        <meta name="twitter:description" content="{{ $seo['description'] }}">
+        <!--meta name="twitter:image" content="{{ $seo['ogImage'] }}"-->
+
+        <!-- Structured Data -->
+        <script type="application/ld+json">{!! json_encode($seo['structuredData'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+    @endif
+
     @routes
     @vite(['resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
     @inertiaHead
