@@ -285,6 +285,13 @@ class PublicBlogController extends Controller
         $paginator = $this->getPublicPostsPaginated($blog);
         $navigation = $this->getPostNavigation($blog, $post);
 
+        $baseUrl = config('app.url');
+        $canonicalUrl = $baseUrl . '/blogs/' . $blog->slug . '/' . $post->slug;
+        $ogImage = $baseUrl . '/og-image.png';
+
+        // Generate meta description from post content
+        $metaDescription = $post->excerpt ?: $this->generatePostMetaDescription($post->content_html);
+
         return [
             'locale' => app()->getLocale(),
             'blog' => [
@@ -299,12 +306,25 @@ class PublicBlogController extends Controller
                 'slug' => $post->slug,
                 'contentHtml' => $post->content_html,
                 'published_at' => optional($post->published_at)?->toDayDateTimeString(),
+                'excerpt' => $post->excerpt,
             ],
             'posts' => $this->formatPostsForView(collect($paginator->items())),
             'pagination' => $this->formatPagination($paginator),
             'sidebarPosition' => $this->getSidebarPosition($blog),
             'sidebar' => (int)($blog->sidebar ?? 0),
             'navigation' => $navigation,
+            // SEO meta data for SSR
+            'seo' => [
+                'title' => $post->title . ' - ' . $blog->name,
+                'description' => $metaDescription,
+                'canonicalUrl' => $canonicalUrl,
+                'ogImage' => $ogImage,
+                'ogType' => 'article',
+                'locale' => app()->getLocale(),
+                'publishedTime' => optional($post->published_at)?->toIso8601String(),
+                'modifiedTime' => optional($post->updated_at)?->toIso8601String(),
+                'structuredData' => $this->generatePostStructuredData($blog, $post, $baseUrl, $metaDescription),
+            ],
             // Provide translations to avoid async loading flicker on SSR
             'translations' => [
                 'locale' => app()->getLocale(),
@@ -365,6 +385,30 @@ class PublicBlogController extends Controller
     }
 
     /**
+     * Generate meta description from post content.
+     */
+    private function generatePostMetaDescription(string $contentHtml): string
+    {
+        $text = strip_tags($contentHtml);
+        $text = preg_replace('/\s+/', ' ', $text);
+        $text = trim($text);
+
+        $limit = 160;
+        if (mb_strlen($text) <= $limit) {
+            return $text;
+        }
+
+        $text = mb_substr($text, 0, $limit);
+        $cutPosition = mb_strrpos($text, ' ');
+
+        if ($cutPosition !== false && $cutPosition > 80) {
+            $text = mb_substr($text, 0, $cutPosition);
+        }
+
+        return rtrim($text) . '…';
+    }
+
+    /**
      * Determine sidebar placement from landing page settings.
      */
     private function getSidebarPosition(Blog $blog): string
@@ -374,6 +418,34 @@ class PublicBlogController extends Controller
             return LandingPage::SIDEBAR_NONE;
         }
         return ($blog->sidebar ?? 0) < 0 ? LandingPage::SIDEBAR_LEFT : LandingPage::SIDEBAR_RIGHT;
+    }
+
+    /**
+     * Generate structured data for single post page.
+     */
+    private function generatePostStructuredData(Blog $blog, Post $post, string $baseUrl, string $description): array
+    {
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'BlogPosting',
+            'headline' => $post->title,
+            'description' => $description,
+            'url' => $baseUrl . '/blogs/' . $blog->slug . '/' . $post->slug,
+            'datePublished' => optional($post->published_at)?->toIso8601String(),
+            'dateModified' => optional($post->updated_at)?->toIso8601String(),
+            'author' => [
+                '@type' => 'Organization',
+                'name' => $blog->name,
+            ],
+            'publisher' => [
+                '@type' => 'Organization',
+                'name' => $blog->name,
+            ],
+            'mainEntityOfPage' => [
+                '@type' => 'WebPage',
+                '@id' => $baseUrl . '/blogs/' . $blog->slug . '/' . $post->slug,
+            ],
+        ];
     }
 
 }

@@ -52,16 +52,22 @@
         <meta property="og:title" content="{{ $seo['title'] }}">
         <meta property="og:description" content="{{ $seo['description'] }}">
         <meta property="og:url" content="{{ $seo['canonicalUrl'] }}">
-        <!--meta property="og:image" content="{{ $seo['ogImage'] }}"-->
-        <!--meta property="og:image:width" content="1200"-->
-        <!--meta property="og:image:height" content="630"-->
-        <!--meta property="og:locale" content="{{ $seo['locale'] }}"-->
+        <meta property="og:image" content="{{ $seo['ogImage'] }}">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:locale" content="{{ $seo['locale'] }}">
+        @if(isset($seo['publishedTime']) && $seo['publishedTime'])
+            <meta property="article:published_time" content="{{ $seo['publishedTime'] }}">
+        @endif
+        @if(isset($seo['modifiedTime']) && $seo['modifiedTime'])
+            <meta property="article:modified_time" content="{{ $seo['modifiedTime'] }}">
+        @endif
 
         <!-- Twitter -->
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:title" content="{{ $seo['title'] }}">
         <meta name="twitter:description" content="{{ $seo['description'] }}">
-        <!--meta name="twitter:image" content="{{ $seo['ogImage'] }}"-->
+        <meta name="twitter:image" content="{{ $seo['ogImage'] }}">
 
         <!-- Structured Data -->
         <script type="application/ld+json">{!! json_encode($seo['structuredData'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
