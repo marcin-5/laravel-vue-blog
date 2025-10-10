@@ -1,9 +1,12 @@
 <script lang="ts" setup>
 import { Button } from '@/components/ui/button';
+import { useI18nNs } from '@/composables/useI18nNs';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
+
+await useI18nNs('admin');
 
 // Types
 export type Role = 'admin' | 'blogger' | 'user';
