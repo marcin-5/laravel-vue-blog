@@ -25,6 +25,10 @@
                 "next": "Następna"
             }
         },
+        "post": {
+            "author": "Autor:",
+            "published": "Opublikowany:"
+        },
         "meta": {
             "welcomeTitle": "Osobliwy Blog",
             "welcomeDescription": "Witaj na Osobliwy Blog"

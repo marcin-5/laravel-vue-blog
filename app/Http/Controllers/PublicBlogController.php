@@ -304,6 +304,7 @@ class PublicBlogController extends Controller
                 'id' => $post->id,
                 'title' => $post->title,
                 'slug' => $post->slug,
+                'author' => $blog->user->name,
                 'contentHtml' => $post->content_html,
                 'published_at' => optional($post->published_at)?->toDayDateTimeString(),
                 'excerpt' => $post->excerpt,

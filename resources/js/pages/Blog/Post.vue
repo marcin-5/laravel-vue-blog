@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
+import PostContent from '@/components/blog/PostContent.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 interface Blog {
     id: number;
@@ -17,6 +19,7 @@ interface PostDetails {
     id: number;
     title: string;
     slug: string;
+    author: string;
     contentHtml: string;
     published_at?: string | null;
     excerpt?: string | null;
@@ -58,6 +61,10 @@ const props = defineProps<{
     seo?: SEO;
 }>();
 
+const { t } = useI18n();
+const author = computed(() => t('landing.post.author', ''));
+const published = computed(() => t('landing.post.published', 'Published:'));
+
 // SEO helpers - SSR compatible
 const baseUrl = import.meta.env.VITE_APP_URL || 'https://osobliwy.blog';
 const canonicalUrl = computed(() => props.seo?.canonicalUrl || `${baseUrl}/blogs/${props.blog.slug}/${props.post.slug}`);
@@ -66,28 +73,29 @@ const seoDescription = computed(() => props.seo?.description || props.post.excer
 const seoImage = computed(() => props.seo?.ogImage || `${baseUrl}/og-image.png`);
 
 // Structured data for SEO
-const structuredData = computed(() =>
-    props.seo?.structuredData || {
-        '@context': 'https://schema.org',
-        '@type': 'BlogPosting',
-        headline: props.post.title,
-        description: seoDescription.value,
-        url: canonicalUrl.value,
-        datePublished: props.seo?.publishedTime,
-        dateModified: props.seo?.modifiedTime,
-        author: {
-            '@type': 'Organization',
-            name: props.blog.name,
+const structuredData = computed(
+    () =>
+        props.seo?.structuredData || {
+            '@context': 'https://schema.org',
+            '@type': 'BlogPosting',
+            headline: props.post.title,
+            description: seoDescription.value,
+            url: canonicalUrl.value,
+            datePublished: props.seo?.publishedTime,
+            dateModified: props.seo?.modifiedTime,
+            author: {
+                '@type': 'Organization',
+                name: props.blog.name,
+            },
+            publisher: {
+                '@type': 'Organization',
+                name: props.blog.name,
+            },
+            mainEntityOfPage: {
+                '@type': 'WebPage',
+                '@id': canonicalUrl.value,
+            },
         },
-        publisher: {
-            '@type': 'Organization',
-            name: props.blog.name,
-        },
-        mainEntityOfPage: {
-            '@type': 'WebPage',
-            '@id': canonicalUrl.value,
-        },
-    },
 );
 </script>
 
@@ -95,7 +103,7 @@ const structuredData = computed(() =>
     <Head :title="seoTitle">
         <!-- Primary Meta Tags -->
         <meta :content="seoDescription" name="description" />
-        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <meta content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" name="robots" />
         <link :href="canonicalUrl" rel="canonical" />
         <meta v-if="locale" :content="locale" http-equiv="content-language" />
 
@@ -112,7 +120,7 @@ const structuredData = computed(() =>
         <meta v-if="seo?.modifiedTime" :content="seo.modifiedTime" property="article:modified_time" />
 
         <!-- Twitter -->
-        <meta name="twitter:card" content="summary_large_image" />
+        <meta content="summary_large_image" name="twitter:card" />
         <meta :content="seoTitle" name="twitter:title" />
         <meta :content="seoDescription" name="twitter:description" />
         <meta :content="seoImage" name="twitter:image" />
@@ -129,7 +137,8 @@ const structuredData = computed(() =>
 
             <header class="mb-4">
                 <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-400">{{ post.title }}</h1>
-                <p v-if="post.published_at" class="text-sm text-gray-800 italic dark:text-gray-300">Published {{ post.published_at }}</p>
+                <p v-if="post.published_at" class="my-2 text-sm text-gray-800 italic dark:text-gray-300">{{ published }} {{ post.published_at }}</p>
+                <p v-if="post.author" class="text-md text-gray-900 dark:text-gray-200">{{ author }} {{ props.post.author }}</p>
             </header>
 
             <!-- Add separation line under header when no sidebar -->
@@ -139,24 +148,19 @@ const structuredData = computed(() =>
                 <aside class="w-[280px]">
                     <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
                 </aside>
-                <main class="min-w-0 flex-1">
-                    <article class="prose max-w-none" v-html="post.contentHtml" />
-                </main>
+                <PostContent :author="post.author" :content="post.contentHtml" />
             </div>
 
             <div v-else-if="sidebarPosition === 'right'" class="flex items-start gap-8">
-                <main class="min-w-0 flex-1">
-                    <article class="prose max-w-none" v-html="post.contentHtml" />
-                </main>
+                <PostContent :author="post.author" :content="post.contentHtml" />
                 <aside class="w-[280px]">
                     <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
                 </aside>
             </div>
 
             <div v-else>
-                <main class="min-w-0 flex-1">
-                    <article class="prose max-w-none" v-html="post.contentHtml" />
-                </main>
+                <PostContent :author="post.author" :content="post.contentHtml" />
+                <div class="mb-4 border-b border-gray-200 dark:border-gray-700"></div>
                 <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
             </div>
 
