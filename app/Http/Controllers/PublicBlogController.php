@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\FormatsDatesForLocale;
 use App\Http\Controllers\Concerns\LoadsTranslations;
 use App\Models\Blog;
 use App\Models\LandingPage;
@@ -16,7 +17,7 @@ use ParsedownExtra;
 
 class PublicBlogController extends Controller
 {
-    use LoadsTranslations;
+    use LoadsTranslations, FormatsDatesForLocale;
 
     /**
      * Show the public landing page for a blog by slug.
@@ -197,7 +198,7 @@ class PublicBlogController extends Controller
             'title' => $p->title,
             'slug' => $p->slug,
             'excerpt' => $p->excerpt,
-            'published_at' => optional($p->published_at)->toDateString(),
+            'published_at' => $this->formatDateForLocale($p->published_at),
         ])->values();
     }
 
@@ -306,7 +307,7 @@ class PublicBlogController extends Controller
                 'slug' => $post->slug,
                 'author' => $blog->user->name,
                 'contentHtml' => $post->content_html,
-                'published_at' => optional($post->published_at)?->toDayDateTimeString(),
+                'published_at' => $this->formatDateForLocale($post->published_at),
                 'excerpt' => $post->excerpt,
             ],
             'posts' => $this->formatPostsForView(collect($paginator->items())),
