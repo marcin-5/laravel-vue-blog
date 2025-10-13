@@ -4,14 +4,16 @@ use App\Http\Controllers\PublicBlogController;
 use App\Http\Controllers\PublicHomeController;
 use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Middleware\HandleInertiaRequests;
+use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Support\Facades\Route;
 
-// Robots.txt route
-Route::get('robots.txt', [RobotsController::class, 'generate']);
-
-// Sitemap route
-Route::get('sitemap.xml', [SitemapController::class, 'generate'])
-    ->name('sitemap');
+// Robots.txt and Sitemap routes (without Inertia middleware)
+Route::withoutMiddleware([HandleInertiaRequests::class, AddLinkHeadersForPreloadedAssets::class])
+    ->group(function () {
+        Route::get('robots.txt', [RobotsController::class, 'generate']);
+        Route::get('sitemap.xml', [SitemapController::class, 'generate'])->name('sitemap');
+    });
 
 // Keep these at the very end to avoid conflicts.
 Route::get('{blog:slug}/{postSlug}', [PublicBlogController::class, 'post'])
