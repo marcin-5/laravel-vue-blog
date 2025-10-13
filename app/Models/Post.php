@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Observers\SitemapObserver;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +16,6 @@ class Post extends Model
 
     public const VIS_PUBLIC = 'public';
     public const VIS_REGISTERED = 'registered';
-
     protected $fillable = [
         'blog_id',
         'title',
@@ -26,13 +26,19 @@ class Post extends Model
         'visibility',
         'published_at',
     ];
-
     protected $casts = [
         'is_published' => 'boolean',
         'published_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::created(fn() => app(SitemapObserver::class)->regenerateSitemap());
+        static::updated(fn() => app(SitemapObserver::class)->regenerateSitemap());
+        static::deleted(fn() => app(SitemapObserver::class)->regenerateSitemap());
+    }
 
     public function blog(): BelongsTo
     {

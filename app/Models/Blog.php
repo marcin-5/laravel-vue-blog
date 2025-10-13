@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Observers\SitemapObserver;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -53,6 +54,13 @@ class Blog extends Model
     protected $appends = [
         'creation_date',
     ];
+
+    protected static function booted(): void
+    {
+        static::created(fn() => app(SitemapObserver::class)->regenerateSitemap());
+        static::updated(fn() => app(SitemapObserver::class)->regenerateSitemap());
+        static::deleted(fn() => app(SitemapObserver::class)->regenerateSitemap());
+    }
 
     /**
      * The user who owns the blog.
