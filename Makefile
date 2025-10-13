@@ -185,6 +185,8 @@ prod-update: ## Update code from Git and restart services
 	$(DOCKER_COMPOSE_PROD) exec -T app php artisan config:clear
 	$(DOCKER_COMPOSE_PROD) exec -T app php artisan cache:clear
 	$(DOCKER_COMPOSE_PROD) exec -T app php artisan route:clear
+	$(DOCKER_COMPOSE_PROD) exec -T app php artisan view:clear
+	$(DOCKER_COMPOSE_PROD) exec -T app php artisan package:discover --ansi
 	@echo ""
 	@echo "🗄️  Running database migrations..."
 	$(MAKE) prod-migrate
