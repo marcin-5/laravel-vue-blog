@@ -19,6 +19,11 @@ class SitemapController extends Controller
             $this->sitemapService->generate();
         }
 
+        // Check if file exists after generation attempt
+        if (!file_exists($sitemapPath)) {
+            abort(500, 'Sitemap generation failed');
+        }
+
         return response()->file($sitemapPath, [
             'Content-Type' => 'application/xml',
         ]);
