@@ -12,8 +12,15 @@ class SitemapController extends Controller
 
     public function generate()
     {
-        $this->sitemapService->generate();
+        $sitemapPath = public_path('sitemap.xml');
 
-        return response()->json(['message' => 'Sitemap generated successfully']);
+        // Generate if doesn't exist or is older than 1 hour
+        if (!file_exists($sitemapPath) || filemtime($sitemapPath) < now()->subHour()->timestamp) {
+            $this->sitemapService->generate();
+        }
+
+        return response()->file($sitemapPath, [
+            'Content-Type' => 'application/xml',
+        ]);
     }
 }
