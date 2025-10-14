@@ -67,8 +67,9 @@ const translationKeys = computed(() => ({
     close: t('blogs.post_form.close_button'),
     fullPreview: t('blogs.post_form.full_preview_button'),
     splitView: t('blogs.post_form.split_view_button'),
-    horizontal: t('blogs.post_form.horizontal_button'),
-    vertical: t('blogs.post_form.vertical_button'),
+    toggleLayout: previewLayout.value === 'vertical'
+        ? t('blogs.post_form.horizontal_button')
+        : t('blogs.post_form.vertical_button'),
     exitPreview: t('blogs.post_form.exit_preview_button'),
     markdown: t('blogs.post_form.markdown_label'),
     previewLabel: t('blogs.post_form.preview_label'),
@@ -144,8 +145,7 @@ function handleDescriptionInput() {
                     markdownLabel: translationKeys.markdown,
                     previewLabel: translationKeys.previewLabel,
                     previewModeTitle: translationKeys.previewModeTitle,
-                    horizontal: translationKeys.horizontal,
-                    vertical: translationKeys.vertical,
+                    toggleLayout: translationKeys.toggleLayout,
                     closePreview: translationKeys.close,
                     preview: translationKeys.preview,
                     fullPreview: translationKeys.fullPreview,

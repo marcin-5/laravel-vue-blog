@@ -12,8 +12,7 @@ interface TranslationKeys {
     markdownLabel: string;
     previewLabel: string;
     previewModeTitle: string;
-    horizontal: string;
-    vertical: string;
+    toggleLayout: string;
     closePreview: string;
     preview: string;
     fullPreview: string;
@@ -63,8 +62,9 @@ function handleInput(event: Event) {
     emit('input');
 }
 
-function handleLayoutChange(layout: 'horizontal' | 'vertical') {
-    emit('setLayout', layout);
+function handleLayoutToggle() {
+    const newLayout = props.previewLayout === 'vertical' ? 'horizontal' : 'vertical';
+    emit('setLayout', newLayout);
 }
 </script>
 
@@ -81,7 +81,6 @@ function handleLayoutChange(layout: 'horizontal' | 'vertical') {
             :content="props.modelValue"
             :create-button-label="props.translations.create"
             :exit-preview-button-label="props.translations.exitPreview"
-            :horizontal-button-label="props.translations.horizontal"
             :is-edit="props.isEdit"
             :is-processing="props.isProcessing"
             :markdown-label="props.translations.markdownLabel"
@@ -91,11 +90,11 @@ function handleLayoutChange(layout: 'horizontal' | 'vertical') {
             :preview-layout="props.previewLayout"
             :preview-mode-title-label="props.translations.previewModeTitle"
             :save-button-label="props.translations.save"
-            :vertical-button-label="props.translations.vertical"
+            :toggle-layout-button-label="props.translations.toggleLayout"
             @cancel="emit('cancel')"
             @exit="emit('toggleFullPreview')"
             @input="emit('input')"
-            @layout="handleLayoutChange"
+            @layout="(layout: 'horizontal' | 'vertical') => emit('setLayout', layout)"
             @save="emit('submit')"
             @update:content="(value: string) => emit('update:modelValue', value)"
         />
@@ -108,7 +107,7 @@ function handleLayoutChange(layout: 'horizontal' | 'vertical') {
                     <textarea
                         :id="props.id"
                         :placeholder="props.placeholder"
-                        :rows="props.isPreviewMode ? (props.isEdit ? 6 : 8) : props.rows"
+                        :rows="props.isPreviewMode ? (props.isEdit ? 10 : 30) : props.rows"
                         :value="props.modelValue"
                         class="block w-full rounded-md border px-3 py-2"
                         @input="handleInput"
@@ -131,23 +130,8 @@ function handleLayoutChange(layout: 'horizontal' | 'vertical') {
             <Button v-if="props.isPreviewMode" size="sm" type="button" variant="exit" @click="emit('toggleFullPreview')">
                 {{ props.isFullPreview ? props.translations.splitView : props.translations.fullPreview }}
             </Button>
-            <Button
-                v-if="props.isPreviewMode && !props.isFullPreview"
-                size="sm"
-                type="button"
-                variant="toggle"
-                @click="handleLayoutChange('horizontal')"
-            >
-                {{ props.translations.horizontal }}
-            </Button>
-            <Button
-                v-if="props.isPreviewMode && !props.isFullPreview"
-                size="sm"
-                type="button"
-                variant="toggle"
-                @click="handleLayoutChange('vertical')"
-            >
-                {{ props.translations.vertical }}
+            <Button v-if="props.isPreviewMode && !props.isFullPreview" size="sm" type="button" variant="toggle" @click="handleLayoutToggle">
+                {{ props.translations.toggleLayout }}
             </Button>
         </div>
     </div>

@@ -13,8 +13,7 @@ interface Props {
     saveButtonLabel: string;
     createButtonLabel?: string;
     cancelButtonLabel: string;
-    horizontalButtonLabel: string;
-    verticalButtonLabel: string;
+    toggleLayoutButtonLabel: string;
     exitPreviewButtonLabel: string;
     previewModeTitleLabel: string;
     markdownLabel: string;
@@ -56,12 +55,9 @@ function handleInput(event: Event) {
     emit('input', target.value);
 }
 
-function setLayoutHorizontal() {
-    emit('layout', 'horizontal');
-}
-
-function setLayoutVertical() {
-    emit('layout', 'vertical');
+function toggleLayout() {
+    const newLayout = props.previewLayout === 'vertical' ? 'horizontal' : 'vertical';
+    emit('layout', newLayout);
 }
 
 function handleExit() {
@@ -86,11 +82,8 @@ function handleCancel() {
                     {{ props.isEdit ? props.saveButtonLabel : props.createButtonLabel || props.saveButtonLabel }}
                 </Button>
                 <Button type="button" variant="destructive" @click="handleCancel">{{ props.cancelButtonLabel }}</Button>
-                <Button type="button" variant="toggle" @click="setLayoutHorizontal">
-                    {{ props.horizontalButtonLabel }}
-                </Button>
-                <Button type="button" variant="toggle" @click="setLayoutVertical">
-                    {{ props.verticalButtonLabel }}
+                <Button type="button" variant="toggle" @click="toggleLayout">
+                    {{ props.toggleLayoutButtonLabel }}
                 </Button>
                 <Button class="flex items-center gap-2" type="button" variant="toggle" @click="toggleTheme">
                     <SunIcon v-if="isDarkMode" class="h-4 w-4" />

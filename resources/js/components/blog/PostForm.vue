@@ -34,17 +34,8 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<Emits>();
 
 // Preview functionality using composable
-const {
-    isPreviewMode,
-    isFullPreview,
-    previewLayout,
-    previewHtml,
-    renderMarkdown,
-    togglePreview,
-    toggleFullPreview,
-    setLayoutHorizontal,
-    setLayoutVertical,
-} = useMarkdownPreview('markdown.preview');
+const { isPreviewMode, isFullPreview, previewLayout, previewHtml, renderMarkdown, togglePreview, toggleFullPreview, setLayout } =
+    useMarkdownPreview('markdown.preview');
 
 // Use external form if provided, otherwise create internal form
 const form =
@@ -78,8 +69,7 @@ const translationKeys = computed(() => ({
     closePreview: t('blogs.post_form.close_button'),
     fullPreview: t('blogs.post_form.full_preview_button'),
     splitView: t('blogs.post_form.split_view_button'),
-    horizontal: t('blogs.post_form.horizontal_button'),
-    vertical: t('blogs.post_form.vertical_button'),
+    toggleLayout: previewLayout.value === 'vertical' ? t('blogs.post_form.horizontal_button') : t('blogs.post_form.vertical_button'),
     exitPreview: t('blogs.post_form.exit_preview_button'),
     markdownLabel: t('blogs.post_form.markdown_label'),
     previewLabel: t('blogs.post_form.preview_label'),
@@ -142,7 +132,6 @@ function handleToggleFullPreview() {
 function handleContentInput() {
     debouncedRenderMarkdown(form.content);
 }
-
 </script>
 
 <template>
@@ -180,7 +169,7 @@ function handleContentInput() {
                 :placeholder="translationKeys.contentPlaceholder"
                 :preview-html="previewHtml"
                 :preview-layout="previewLayout"
-                :rows="props.isEdit ? 4 : 5"
+                :rows="props.isEdit ? 10 : 15"
                 :translations="{
                     cancel: translationKeys.cancel,
                     create: translationKeys.create,
@@ -189,8 +178,7 @@ function handleContentInput() {
                     markdownLabel: translationKeys.markdownLabel,
                     previewLabel: translationKeys.previewLabel,
                     previewModeTitle: translationKeys.previewModeTitle,
-                    horizontal: translationKeys.horizontal,
-                    vertical: translationKeys.vertical,
+                    toggleLayout: translationKeys.toggleLayout,
                     closePreview: translationKeys.closePreview,
                     preview: translationKeys.preview,
                     fullPreview: translationKeys.fullPreview,
@@ -198,9 +186,8 @@ function handleContentInput() {
                 }"
                 @cancel="handleCancel"
                 @input="handleContentInput"
-                @set-layout-horizontal="setLayoutHorizontal"
-                @set-layout-vertical="setLayoutVertical"
                 @submit="handleSubmit"
+                @set-layout="setLayout"
                 @toggle-full-preview="handleToggleFullPreview"
                 @toggle-preview="handleTogglePreview"
             />
