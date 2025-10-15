@@ -16,6 +16,7 @@ class RobotsController extends Controller
     public function generate(): Response
     {
         $content = "User-agent: *\n";
+        $content .= "Disallow: /dashboard\n";
 
         if (App::environment('production')) {
             $content .= "Allow: /\n\n";
