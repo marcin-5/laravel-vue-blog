@@ -21,6 +21,6 @@ defineProps<{
         <p v-if="displayedMotto" class="mt-2 text-gray-800 italic dark:text-gray-200" style="font-family: 'Noto Serif', serif">
             {{ displayedMotto }}
         </p>
-        <div v-if="blog.descriptionHtml" class="prose prose-slate dark:prose-invert max-w-none" v-html="blog.descriptionHtml" />
+        <div v-if="blog.descriptionHtml" class="prose prose-slate dark:prose-invert max-w-none" v-html="blog.descriptionHtml.replace(/-!-/g, '')" />
     </header>
 </template>

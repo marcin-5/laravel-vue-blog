@@ -28,7 +28,11 @@ const { t } = useI18n();
         <div v-if="props.blog.author" class="text-slate-6 00 mb-2 text-sm dark:text-slate-400">
             {{ t('landing.blog.author', 'Author:') }} {{ props.blog.author }}
         </div>
-        <div v-if="props.blog.descriptionHtml" class="mb-3 text-sm text-slate-600 dark:text-slate-300" v-html="props.blog.descriptionHtml"></div>
+        <div
+            v-if="props.blog.descriptionHtml"
+            class="mb-3 text-sm text-slate-600 dark:text-slate-300"
+            v-html="props.blog.descriptionHtml.replace(/-!-.*-!-/g, '')"
+        ></div>
         <div class="flex flex-wrap gap-2">
             <span
                 v-for="cat in props.blog.categories"
