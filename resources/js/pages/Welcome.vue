@@ -62,7 +62,7 @@ const structuredData = computed(() => ({
             name: blog.author,
         },
         url: `${baseUrl}/blogs/${blog.slug}`,
-        description: blog.descriptionHtml?.replace(/<[^>]*>/g, '').substring(0, 200),
+        description: blog.descriptionHtml?.replace(/<[^>]*>/gms, '').substring(0, 700),
     })),
 }));
 
@@ -93,7 +93,7 @@ function clearFilter() {
     <Head :title="seoTitle">
         <!-- Primary Meta Tags -->
         <meta :content="seoDescription" name="description" />
-        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <meta content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" name="robots" />
         <link :href="canonicalUrl" rel="canonical" />
         <meta v-if="locale" :content="locale" http-equiv="content-language" />
 
@@ -108,7 +108,7 @@ function clearFilter() {
         <meta :content="locale || 'en'" property="og:locale" />
 
         <!-- Twitter -->
-        <meta name="twitter:card" content="summary_large_image" />
+        <meta content="summary_large_image" name="twitter:card" />
         <meta :content="seoTitle" name="twitter:title" />
         <meta :content="seoDescription" name="twitter:description" />
         <meta :content="seoImage" name="twitter:image" />
