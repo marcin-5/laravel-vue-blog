@@ -31,7 +31,7 @@ const { t } = useI18n();
         <div
             v-if="props.blog.descriptionHtml"
             class="mb-3 text-sm text-slate-600 dark:text-slate-300"
-            v-html="props.blog.descriptionHtml.replace(/-!-.*-!-/gm, '')"
+            v-html="props.blog.descriptionHtml.replace(/-!-.*-!-/gms, '')"
         ></div>
         <div class="flex flex-wrap gap-2">
             <span
