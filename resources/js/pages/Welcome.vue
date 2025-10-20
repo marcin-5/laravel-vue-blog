@@ -62,7 +62,7 @@ const structuredData = computed(() => ({
             name: blog.author,
         },
         url: `${baseUrl}/blogs/${blog.slug}`,
-        description: blog.descriptionHtml?.replace(/<[^>]*>/gms, '').substring(0, 700),
+        description: blog.descriptionHtml?.replace(/<[^>]*>/g, '').substring(0, 700),
     })),
 }));
 
