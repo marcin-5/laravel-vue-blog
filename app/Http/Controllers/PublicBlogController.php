@@ -47,6 +47,7 @@ class PublicBlogController extends Controller
         $landing = $blog->landingPage;
         $paginator = $this->getPublicPostsPaginated($blog);
         $descriptionHtml = $this->parseMarkdownToHtml($blog->description);
+        $footerHtml = $this->parseMarkdownToHtml($blog->footer ?? null);
         $metaDescription = $this->generateMetaDescription($blog, $descriptionHtml, $landing);
 
         // Get navigation for landing page with correct disabled states
@@ -66,6 +67,7 @@ class PublicBlogController extends Controller
                 'motto' => $blog->motto,
             ],
             'landingHtml' => $landing?->content_html ?? '',
+            'footerHtml' => $footerHtml,
             'metaDescription' => $metaDescription,
             'posts' => $this->formatPostsForView(collect($paginator->items())),
             'pagination' => $this->formatPagination($paginator),

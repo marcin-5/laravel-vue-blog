@@ -18,13 +18,23 @@ class UpdateBlogRequest extends FormRequest
         return [
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'footer' => ['nullable', 'string'],
             'motto' => ['nullable', 'string'],
             'is_published' => ['sometimes', 'boolean'],
             'categories' => ['sometimes', 'array'],
             'categories.*' => ['integer', 'exists:categories,id'],
             'locale' => ['sometimes', 'string', 'in:' . implode(',', $config['supported_locales'])],
-            'sidebar' => ['sometimes', 'integer', 'between:' . $config['limits']['sidebar']['min'] . ',' . $config['limits']['sidebar']['max']],
-            'page_size' => ['sometimes', 'integer', 'min:' . $config['limits']['page_size']['min'], 'max:' . $config['limits']['page_size']['max']],
+            'sidebar' => [
+                'sometimes',
+                'integer',
+                'between:' . $config['limits']['sidebar']['min'] . ',' . $config['limits']['sidebar']['max']
+            ],
+            'page_size' => [
+                'sometimes',
+                'integer',
+                'min:' . $config['limits']['page_size']['min'],
+                'max:' . $config['limits']['page_size']['max']
+            ],
         ];
     }
 
@@ -39,6 +49,10 @@ class UpdateBlogRequest extends FormRequest
 
         if (array_key_exists('description', $validated)) {
             $data['description'] = $validated['description'];
+        }
+
+        if (array_key_exists('footer', $validated)) {
+            $data['footer'] = $validated['footer'];
         }
 
         if (array_key_exists('motto', $validated)) {
