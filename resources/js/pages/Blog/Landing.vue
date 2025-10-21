@@ -2,6 +2,7 @@
 import BlogHeader from '@/components/blog/BlogHeader.vue';
 import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
+import BorderDivider from '@/components/blog/BorderDivider.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import SeoHead from '@/components/seo/SeoHead.vue';
 import { computed } from 'vue';
@@ -113,12 +114,12 @@ const structuredData = computed(() => ({
     <div class="flex min-h-screen flex-col bg-[#FDFDFC] text-[#1b1b18] dark:bg-[#0a0a0a]">
         <PublicNavbar />
         <div class="mx-auto w-full max-w-[1024px] p-4">
-            <div class="mb-4 border-b border-gray-200 dark:border-gray-700"></div>
+            <BorderDivider class="mb-4" />
 
             <!-- Layout without sidebar -->
             <template v-if="!hasSidebar">
                 <BlogHeader :blog="blog" :displayedMotto="displayedMotto" />
-                <div class="mb-6 border-b border-gray-200 dark:border-gray-700"></div>
+                <BorderDivider class="mb-8" />
                 <main v-if="hasLanding" class="min-w-0 flex-1">
                     <div class="prose max-w-none" v-html="landingHtml" />
                 </main>

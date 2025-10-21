@@ -4,6 +4,7 @@ import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import PostContent from '@/components/blog/PostContent.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import SeoHead from '@/components/seo/SeoHead.vue';
+import BorderDivider from '@/components/blog/BorderDivider.vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -119,7 +120,7 @@ const structuredData = computed(
         <PublicNavbar />
 
         <div class="mx-auto w-full max-w-[1024px] p-4">
-            <div class="mb-4 border-b border-gray-200 dark:border-gray-700"></div>
+            <BorderDivider class="mb-4" />
 
             <header class="mb-4">
                 <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-400">{{ post.title }}</h1>
@@ -128,7 +129,7 @@ const structuredData = computed(
             </header>
 
             <!-- Add separation line under header when no sidebar -->
-            <div v-if="sidebarPosition === 'none'" class="mb-6 border-b border-gray-200 dark:border-gray-700"></div>
+            <BorderDivider v-if="sidebarPosition === 'none'" class="mb-8" />
 
             <div v-if="sidebarPosition === 'left'" class="flex items-start gap-8">
                 <aside class="w-[280px]">
@@ -146,7 +147,7 @@ const structuredData = computed(
 
             <div v-else>
                 <PostContent :author="post.author" :content="post.contentHtml" />
-                <div class="mb-4 border-b border-gray-200 dark:border-gray-700"></div>
+                <BorderDivider class="mb-4" />
                 <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
             </div>
 

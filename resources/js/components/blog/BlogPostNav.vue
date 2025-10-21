@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import BorderDivider from '@/components/blog/BorderDivider.vue';
 import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 
@@ -29,7 +30,8 @@ const backLinkClasses = (isLink: boolean) => [`${BASE_LINK_CLASSES} font-medium`
 </script>
 
 <template>
-    <nav v-if="navigation" :aria-label="t('landing.blog.post_nav.aria')" class="mt-8 border-t border-gray-200 pt-6 dark:border-gray-700">
+    <nav v-if="navigation" :aria-label="t('landing.blog.post_nav.aria')">
+        <BorderDivider class="mt-8 mb-4 pt-6" />
         <div class="flex items-center justify-between gap-4">
             <component :is="navigation.prevPost ? Link : 'span'" :class="navLinkClasses(!!navigation.prevPost)" :href="navigation.prevPost?.url">
                 <span class="text-lg">←</span>
