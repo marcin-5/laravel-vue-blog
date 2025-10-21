@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
+import BorderDivider from '@/components/blog/BorderDivider.vue';
 import PostContent from '@/components/blog/PostContent.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import SeoHead from '@/components/seo/SeoHead.vue';
-import BorderDivider from '@/components/blog/BorderDivider.vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -21,6 +21,7 @@ interface PostDetails {
     title: string;
     slug: string;
     author: string;
+    author_email: string | null;
     contentHtml: string;
     published_at?: string | null;
     excerpt?: string | null;
@@ -125,7 +126,9 @@ const structuredData = computed(
             <header class="mb-4">
                 <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-400">{{ post.title }}</h1>
                 <p v-if="post.published_at" class="my-2 text-sm text-gray-800 italic dark:text-gray-300">{{ published }} {{ post.published_at }}</p>
-                <p v-if="post.author" class="text-md text-gray-900 dark:text-gray-200">{{ author }} {{ props.post.author }}</p>
+                <p v-if="post.author" class="text-md text-gray-900 dark:text-gray-200">
+                    {{ author }} <a :href="`mailto:${post.author_email}`"> {{ post.author }}</a>
+                </p>
             </header>
 
             <!-- Add separation line under header when no sidebar -->

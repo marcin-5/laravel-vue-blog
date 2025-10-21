@@ -50,6 +50,28 @@ class PublicBlogController extends Controller
         $footerHtml = $this->parseMarkdownToHtml($blog->footer ?? null);
         $metaDescription = $this->generateMetaDescription($blog, $descriptionHtml, $landing);
 
+        // Insert the owner's name preceding footnotes, or at the end elsewhere.
+        if ($descriptionHtml !== '') {
+            // Prepare the owner line (escape content to be safe)
+            $ownerName = e(optional($blog->user)->name ?? '');
+            $ownerEmail = e(optional($blog->user)->email ?? '');
+
+            if ($ownerName !== '' && $ownerEmail !== '') {
+                $ownerLine = '<p class="author text-md text-slate-700 dark:text-slate-300 mr-12 text-end" style="font-family: \'Noto Serif\', serif">'
+                    . '<a href="mailto:' . $ownerEmail . '">' . $ownerName . '</a>'
+                    . '</p>';
+
+                $footnotesMarker = '<div class="footnotes">';
+                if (str_contains($descriptionHtml, $footnotesMarker)) {
+                    // Insert right before the footnotes div
+                    $descriptionHtml = str_replace($footnotesMarker, $ownerLine . $footnotesMarker, $descriptionHtml);
+                } else {
+                    // Append after landing content
+                    $descriptionHtml .= $ownerLine;
+                }
+            }
+        }
+
         // Get navigation for landing page with correct disabled states
         $navigation = $this->getLandingNavigation($blog);
 
@@ -310,6 +332,7 @@ class PublicBlogController extends Controller
                 'title' => $post->title,
                 'slug' => $post->slug,
                 'author' => $blog->user->name,
+                'author_email' => $blog->user->email,
                 'contentHtml' => $post->content_html,
                 'published_at' => $this->formatDateForLocale($post->published_at),
                 'excerpt' => $post->excerpt,
