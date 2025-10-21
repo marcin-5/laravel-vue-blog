@@ -45,6 +45,18 @@ cd /var/www/html
 # Ensure Laravel writable directories exist and have correct permissions
 mkdir -p storage bootstrap/cache
 
+# Proactively clear potentially stale Laravel caches (especially package discovery)
+# This avoids boot errors from stale files persisted via mounted volumes.
+if [ -d bootstrap/cache ]; then
+    echo "Clearing stale Laravel cache files in bootstrap/cache..."
+    rm -f \
+        bootstrap/cache/packages.php \
+        bootstrap/cache/config.php \
+        bootstrap/cache/services.php \
+        bootstrap/cache/events.php \
+        bootstrap/cache/routes*.php || true
+fi
+
 # Initialize/sync built assets into mounted volumes if needed
 # 1) Public directory (may be a named volume that masks image files)
 if [ -d /opt/built/public ]; then
