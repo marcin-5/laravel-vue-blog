@@ -82,9 +82,6 @@ services:
         environment:
             - APP_DOMAIN=${APP_DOMAIN:-your-domain.com}
             - APP_DOMAIN_WWW=${APP_DOMAIN_WWW:-www.your-domain.com}
-        sysctls:
-            net.core.rmem_max: 2500000
-            net.core.rmem_default: 2500000
         depends_on:
             - app
         networks:
