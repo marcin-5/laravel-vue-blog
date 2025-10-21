@@ -116,6 +116,13 @@ export async function ensureNamespace(locale: string, namespace: string, i18nIns
 
     const key = `${locale}:${namespace}`;
 
+    // In SSR, avoid network fetches to prevent TLS/network issues.
+    // Let the client load namespaces after hydration or rely on pre-provided messages.
+    if (typeof window === 'undefined') {
+        loadedNamespaces.add(key);
+        return;
+    }
+
     // Skip if already loaded
     if (loadedNamespaces.has(key)) {
         return;
