@@ -5,6 +5,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { App, DefineComponent } from 'vue';
 import { createSSRApp, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
+import { route as ziggyRoute } from 'ziggy-js';
 // IMPORTANT: do NOT import your app's './i18n' here for SSR.
 // Build a minimal SSR-safe i18n instance instead.
 import type { Page } from '@inertiajs/core';
@@ -94,6 +95,18 @@ createServer((page: Page) =>
             const ziggyConfig = getZiggySsrConfig(pageProps);
 
             app.use(plugin).use(ZiggyVue, ziggyConfig).use(i18n);
+
+            // Ensure a global route() is available during SSR for components that reference it directly.
+            if (typeof (globalThis as any).route === 'undefined') {
+                (globalThis as any).route = (name: any, params?: any, absolute?: any) => {
+                    try {
+                        return ziggyRoute(name as any, params as any, absolute as any, ziggyConfig as any);
+                    } catch {
+                        // Fallback to an empty string to prevent SSR from crashing; client will hydrate/correct URLs.
+                        return '' as any;
+                    }
+                };
+            }
 
             // Provide base URL for SSR fetches (if you later need to fetch translations on server)
             (globalThis as any).__ziggyLocation = pageProps.ziggy?.location ?? DEFAULT_ZIGGY_URL;
