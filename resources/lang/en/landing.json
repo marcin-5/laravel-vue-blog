@@ -1,6 +1,7 @@
 {
     "landing": {
         "nav": {
+            "about": "About",
             "dashboard": "Dashboard",
             "logout": "Log out",
             "login": "Log in",
