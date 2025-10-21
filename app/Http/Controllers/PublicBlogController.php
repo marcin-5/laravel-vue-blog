@@ -7,13 +7,13 @@ use App\Http\Controllers\Concerns\LoadsTranslations;
 use App\Models\Blog;
 use App\Models\LandingPage;
 use App\Models\Post;
+use App\Services\MarkdownService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 use Number;
-use ParsedownExtra;
 
 class PublicBlogController extends Controller
 {
@@ -81,7 +81,12 @@ class PublicBlogController extends Controller
                 'ogImage' => $ogImage,
                 'ogType' => 'blog',
                 'locale' => app()->getLocale(),
-                'structuredData' => $this->generateBlogStructuredData($blog, $paginator->items(), $baseUrl),
+                'structuredData' => $this->generateBlogStructuredData(
+                    $blog,
+                    $paginator->items(),
+                    $baseUrl,
+                    $metaDescription,
+                ),
             ],
             // Provide translations to avoid async loading flicker on SSR
             'translations' => [
@@ -116,12 +121,9 @@ class PublicBlogController extends Controller
             return '';
         }
 
-        $parser = new ParsedownExtra();
-        if (method_exists($parser, 'setSafeMode')) {
-            $parser->setSafeMode(true);
-        }
-
-        return $parser->text($markdown);
+        /** @var MarkdownService $md */
+        $md = app(MarkdownService::class);
+        return $md->convertToHtml($markdown);
     }
 
     /**
@@ -232,14 +234,14 @@ class PublicBlogController extends Controller
     /**
      * Generate structured data for blog landing page.
      */
-    private function generateBlogStructuredData(Blog $blog, $posts, string $baseUrl): array
+    private function generateBlogStructuredData(Blog $blog, $posts, string $baseUrl, string $plainDescription): array
     {
         return [
             '@context' => 'https://schema.org',
             '@type' => 'Blog',
             'name' => $blog->name,
             'url' => $baseUrl . '/blogs/' . $blog->slug,
-            'description' => $blog->description,
+            'description' => $plainDescription,
             'author' => [
                 '@type' => 'Organization',
                 'name' => $blog->name,

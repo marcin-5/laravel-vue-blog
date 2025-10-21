@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Inertia\Inertia;
 use Inertia\Response;
-use ParsedownExtra;
 
 class PublicHomeController extends Controller
 {
@@ -83,14 +82,12 @@ class PublicHomeController extends Controller
             return $blogsQuery->orderBy('name')->get()->map(function (Blog $b) {
                 $blogLocale = $b->locale ?: app()->getLocale();
 
-                // Parse markdown description to safe HTML
+                // Parse markdown description to HTML (sanitized via HTML Purifier in MarkdownService)
                 $descriptionHtml = '';
                 if (!empty($b->description)) {
-                    $parser = new ParsedownExtra();
-                    if (method_exists($parser, 'setSafeMode')) {
-                        $parser->setSafeMode(true);
-                    }
-                    $descriptionHtml = $parser->text($b->description);
+                    /** @var MarkdownService $md */
+                    $md = app(MarkdownService::class);
+                    $descriptionHtml = $md->convertToHtml($b->description);
                 }
 
                 return [

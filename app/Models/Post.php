@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 use ParsedownExtra;
+use HTMLPurifier;
+use HTMLPurifier_Config;
 
 class Post extends Model
 {
@@ -56,9 +58,11 @@ class Post extends Model
         }
         $parser = new ParsedownExtra();
         if (method_exists($parser, 'setSafeMode')) {
-            $parser->setSafeMode(true);
+            $parser->setSafeMode(false);
         }
-        return $parser->text($content);
+        $html = $parser->text($content);
+        $purifier = new HTMLPurifier(HTMLPurifier_Config::createDefault());
+        return $purifier->purify($html);
     }
 
     /**
