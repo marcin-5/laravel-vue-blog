@@ -1,11 +1,10 @@
 import { createInertiaApp } from '@inertiajs/vue3';
-import createServer from '@inertiajs/vue3/server';
 import { renderToString } from '@vue/server-renderer';
+import { createServer as createHttpServer } from 'http';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { App, DefineComponent } from 'vue';
 import { createSSRApp, h } from 'vue';
-import { ZiggyVue } from 'ziggy-js';
-import { route as ziggyRoute } from 'ziggy-js';
+import { route as ziggyRoute, ZiggyVue } from 'ziggy-js';
 // IMPORTANT: do NOT import your app's './i18n' here for SSR.
 // Build a minimal SSR-safe i18n instance instead.
 import type { Page } from '@inertiajs/core';
@@ -15,6 +14,7 @@ import type { AppPageProps } from './types';
 // Constants for default values to avoid magic strings and duplication
 const DEFAULT_LOCALE = 'en';
 const DEFAULT_ZIGGY_URL = 'http://localhost';
+const SSR_PORT = Number(process.env.PORT || 13714);
 
 /**
  * Sets up global process error handlers for better SSR error visibility.
@@ -80,7 +80,91 @@ function getZiggySsrConfig(pageProps: AppPageProps) {
 
 setupProcessErrorHandling();
 
-createServer((page: Page) =>
+// Small helper to read request body safely
+function readableToString(req: import('http').IncomingMessage): Promise<string> {
+    return new Promise((resolve, reject) => {
+        let data = '';
+        req.on('data', (chunk) => (data += chunk));
+        req.on('end', () => resolve(data));
+        req.on('error', (err) => reject(err));
+    });
+}
+
+// Our safe SSR server: avoids JSON.parse crashes on empty/invalid bodies
+function startSafeSsrServer(render: (page: Page) => Promise<any>, port: number = SSR_PORT) {
+    console.log(`Starting SSR server on port ${port}...`);
+    const server = createHttpServer(async (request, response) => {
+        try {
+            const url = request.url || '/';
+            response.setHeader('Content-Type', 'application/json');
+            response.setHeader('Server', 'Inertia.js SSR (safe)');
+
+            if (url === '/health') {
+                response.writeHead(200);
+                response.end(JSON.stringify({ status: 'OK', timestamp: Date.now() }));
+                return;
+            }
+            if (url === '/shutdown') {
+                response.writeHead(200);
+                response.end(JSON.stringify({ status: 'SHUTTING_DOWN' }));
+                // Let the response flush before exiting
+                setTimeout(() => process.exit(0), 10);
+                return;
+            }
+            if (url === '/render') {
+                if ((request.method || 'GET').toUpperCase() !== 'POST') {
+                    response.writeHead(405);
+                    response.end(JSON.stringify({ error: 'METHOD_NOT_ALLOWED' }));
+                    return;
+                }
+                let body = '';
+                try {
+                    body = await readableToString(request);
+                } catch (e) {
+                    console.error('SSR read body failed:', e);
+                }
+                if (!body) {
+                    response.writeHead(400);
+                    response.end(JSON.stringify({ error: 'EMPTY_BODY' }));
+                    return;
+                }
+                let page: Page;
+                try {
+                    page = JSON.parse(body) as Page;
+                } catch (e) {
+                    console.error('SSR JSON parse failed:', e);
+                    response.writeHead(400);
+                    response.end(JSON.stringify({ error: 'INVALID_JSON' }));
+                    return;
+                }
+                try {
+                    const result = await render(page);
+                    response.writeHead(200);
+                    response.end(JSON.stringify(result));
+                } catch (e) {
+                    console.error('SSR render failed:', e);
+                    response.writeHead(500);
+                    response.end(JSON.stringify({ error: 'RENDER_FAILED' }));
+                }
+                return;
+            }
+            // Not found
+            response.writeHead(404);
+            response.end(JSON.stringify({ status: 'NOT_FOUND', timestamp: Date.now() }));
+        } catch (e) {
+            console.error('SSR request handler error:', e);
+            try {
+                response.writeHead(500);
+                response.end(JSON.stringify({ error: 'INTERNAL_ERROR' }));
+            } catch {
+                // ignore
+            }
+        }
+    });
+    server.listen(port, () => console.log('Inertia SSR server started.'));
+}
+
+startSafeSsrServer((page: Page) =>
     createInertiaApp({
         page,
         render: renderToString,
