@@ -37,6 +37,8 @@
             "motto_label": "Motto",
             "motto_placeholder": "A short motto or tagline...",
             "motto_tooltip": "You can add multiple mottos separated by double newlines (press Enter twice). One will be randomly displayed on each post page.",
+            "footer_label": "Footer",
+            "footer_placeholder": "Footer content",
             "published_label": "Published",
             "locale_label": "Locale",
             "sidebar_label": "Sidebar position/width",

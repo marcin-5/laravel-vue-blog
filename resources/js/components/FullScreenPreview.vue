@@ -21,6 +21,7 @@ interface Props {
     markdownPlaceholder?: string;
     isEdit: boolean;
     isProcessing?: boolean;
+    hideSaveButton?: boolean;
 }
 
 interface Emits {
@@ -78,7 +79,7 @@ function handleCancel() {
         <div class="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background p-4">
             <h2 class="text-lg font-semibold">{{ props.previewModeTitleLabel }}</h2>
             <div class="flex gap-2">
-                <Button :disabled="props.isProcessing" type="button" variant="constructive" @click="handleSave">
+                <Button v-if="!props.hideSaveButton" :disabled="props.isProcessing" type="button" variant="constructive" @click="handleSave">
                     {{ props.isEdit ? props.saveButtonLabel : props.createButtonLabel || props.saveButtonLabel }}
                 </Button>
                 <Button type="button" variant="destructive" @click="handleCancel">{{ props.cancelButtonLabel }}</Button>

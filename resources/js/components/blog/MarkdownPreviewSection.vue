@@ -34,6 +34,7 @@ interface Props {
     isEdit?: boolean;
     isProcessing?: boolean;
     translations: TranslationKeys;
+    showSaveButton?: boolean;
 }
 
 interface Emits {
@@ -52,6 +53,7 @@ const props = withDefaults(defineProps<Props>(), {
     minHeight: '150px',
     isEdit: false,
     isProcessing: false,
+    showSaveButton: true,
 });
 
 const emit = defineEmits<Emits>();
@@ -81,6 +83,7 @@ function handleLayoutToggle() {
             :content="props.modelValue"
             :create-button-label="props.translations.create"
             :exit-preview-button-label="props.translations.exitPreview"
+            :hide-save-button="!props.showSaveButton"
             :is-edit="props.isEdit"
             :is-processing="props.isProcessing"
             :markdown-label="props.translations.markdownLabel"

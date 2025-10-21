@@ -5,6 +5,8 @@ import { computed, watch } from 'vue';
 interface BlogFormData {
     name: string;
     description: string | null;
+    footer: string | null;
+    motto: string | null;
     is_published: boolean;
     locale: string;
     sidebar: number;
@@ -21,15 +23,19 @@ interface UseBlogFormLogicOptions {
 export function useBlogFormLogic(options: UseBlogFormLogicOptions = {}) {
     const { blog, isEdit = false, externalForm } = options;
 
-    const form = externalForm || useForm<BlogFormData>({
-        name: blog?.name || '',
-        description: blog?.description || null,
-        is_published: blog?.is_published || false,
-        locale: (blog?.locale as string) || 'en',
-        sidebar: (blog?.sidebar as number) ?? 0,
-        page_size: (blog?.page_size as number) ?? 10,
-        categories: (blog?.categories ?? []).map((c) => c.id) as number[],
-    });
+    const form =
+        externalForm ||
+        useForm<BlogFormData>({
+            name: blog?.name || '',
+            description: blog?.description || null,
+            footer: blog?.footer || null,
+            motto: blog?.motto || null,
+            is_published: blog?.is_published || false,
+            locale: (blog?.locale as string) || 'en',
+            sidebar: (blog?.sidebar as number) ?? 0,
+            page_size: (blog?.page_size as number) ?? 10,
+            categories: (blog?.categories ?? []).map((c) => c.id) as number[],
+        });
 
     const fieldIdPrefix = computed(() => {
         const base = isEdit ? 'edit-blog' : 'create-blog';
@@ -40,6 +46,8 @@ export function useBlogFormLogic(options: UseBlogFormLogicOptions = {}) {
     const updateFormFromBlog = (newBlog: Blog) => {
         form.name = newBlog.name;
         form.description = newBlog.description;
+        form.footer = newBlog.footer;
+        form.motto = newBlog.motto;
         form.is_published = newBlog.is_published;
         form.locale = (newBlog.locale as string) || 'en';
         form.sidebar = (newBlog.sidebar as number) ?? 0;
@@ -55,7 +63,7 @@ export function useBlogFormLogic(options: UseBlogFormLogicOptions = {}) {
                     updateFormFromBlog(newBlog);
                 }
             },
-            { immediate: true }
+            { immediate: true },
         );
     }
 

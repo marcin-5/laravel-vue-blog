@@ -45,11 +45,25 @@ const { form, fieldIdPrefix, updateCategories } = useBlogFormLogic({
 const { isPreviewMode, isFullPreview, previewLayout, previewHtml, renderMarkdown, togglePreview, toggleFullPreview, setLayout } =
     useMarkdownPreview('markdown.preview');
 
+// Separate preview state for footer content
+const {
+    isPreviewMode: isFooterPreviewMode,
+    isFullPreview: isFooterFullPreview,
+    previewLayout: footerPreviewLayout,
+    previewHtml: footerPreviewHtml,
+    renderMarkdown: renderFooterMarkdown,
+    togglePreview: toggleFooterPreview,
+    toggleFullPreview: toggleFooterFullPreview,
+    setLayout: setFooterLayout,
+} = useMarkdownPreview('markdown.preview');
+
 const translationKeys = computed(() => ({
     name: t('blogs.form.name_label'),
     namePlaceholder: props.isEdit ? '' : t('blogs.form.name_placeholder'),
     description: t('blogs.form.description_label'),
     descriptionPlaceholder: props.isEdit ? '' : t('blogs.form.description_placeholder'),
+    footer: t('blogs.form.footer_label'),
+    footerPlaceholder: props.isEdit ? '' : t('blogs.form.footer_placeholder'),
     motto: t('blogs.form.motto_label'),
     mottoPlaceholder: props.isEdit ? '' : t('blogs.form.motto_placeholder'),
     mottoTooltip: t('blogs.form.motto_tooltip'),
@@ -67,9 +81,7 @@ const translationKeys = computed(() => ({
     close: t('blogs.post_form.close_button'),
     fullPreview: t('blogs.post_form.full_preview_button'),
     splitView: t('blogs.post_form.split_view_button'),
-    toggleLayout: previewLayout.value === 'vertical'
-        ? t('blogs.post_form.horizontal_button')
-        : t('blogs.post_form.vertical_button'),
+    toggleLayout: previewLayout.value === 'vertical' ? t('blogs.post_form.horizontal_button') : t('blogs.post_form.vertical_button'),
     exitPreview: t('blogs.post_form.exit_preview_button'),
     markdown: t('blogs.post_form.markdown_label'),
     previewLabel: t('blogs.post_form.preview_label'),
@@ -99,6 +111,19 @@ function handleToggleFullPreview() {
 
 function handleDescriptionInput() {
     renderMarkdown(form.description || '');
+}
+
+// Footer handlers
+function handleFooterTogglePreview() {
+    toggleFooterPreview(form.footer || '');
+}
+
+function handleFooterToggleFullPreview() {
+    toggleFooterFullPreview(form.footer || '');
+}
+
+function handleFooterInput() {
+    renderFooterMarkdown(form.footer || '');
 }
 </script>
 
@@ -137,6 +162,7 @@ function handleDescriptionInput() {
                 :placeholder="translationKeys.descriptionPlaceholder"
                 :preview-html="previewHtml"
                 :preview-layout="previewLayout"
+                :show-save-button="false"
                 :translations="{
                     cancel: translationKeys.cancel,
                     create: translationKeys.create,
@@ -153,10 +179,43 @@ function handleDescriptionInput() {
                 }"
                 @cancel="handleCancel"
                 @input="handleDescriptionInput"
-                @submit="handleSubmit"
                 @set-layout="setLayout"
                 @toggle-full-preview="handleToggleFullPreview"
                 @toggle-preview="handleTogglePreview"
+            />
+
+            <MarkdownPreviewSection
+                :id="`${fieldIdPrefix}-footer`"
+                v-model="form.footer"
+                :error="form.errors.footer"
+                :is-edit="props.isEdit"
+                :is-full-preview="isFooterFullPreview"
+                :is-preview-mode="isFooterPreviewMode"
+                :is-processing="form.processing"
+                :label="translationKeys.footer"
+                :placeholder="translationKeys.footerPlaceholder"
+                :preview-html="footerPreviewHtml"
+                :preview-layout="footerPreviewLayout"
+                :show-save-button="false"
+                :translations="{
+                    cancel: translationKeys.cancel,
+                    create: translationKeys.create,
+                    save: translationKeys.save,
+                    exitPreview: translationKeys.exitPreview,
+                    markdownLabel: translationKeys.markdown,
+                    previewLabel: translationKeys.previewLabel,
+                    previewModeTitle: translationKeys.previewModeTitle,
+                    toggleLayout: translationKeys.toggleLayout,
+                    closePreview: translationKeys.close,
+                    preview: translationKeys.preview,
+                    fullPreview: translationKeys.fullPreview,
+                    splitView: translationKeys.splitView,
+                }"
+                @cancel="handleCancel"
+                @input="handleFooterInput"
+                @set-layout="setFooterLayout"
+                @toggle-full-preview="handleFooterToggleFullPreview"
+                @toggle-preview="handleFooterTogglePreview"
             />
 
             <div class="flex flex-wrap items-center gap-3">

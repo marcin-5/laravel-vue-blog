@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import BlogFooter from '@/components/blog/BlogFooter.vue';
 import BlogHeader from '@/components/blog/BlogHeader.vue';
 import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
@@ -49,6 +50,7 @@ interface Navigation {
 const props = defineProps<{
     blog: Blog;
     landingHtml: string;
+    footerHtml?: string;
     posts: PostItem[];
     pagination?: Pagination | null;
     // numeric sidebar value (-50..50).
@@ -58,6 +60,7 @@ const props = defineProps<{
     locale?: string;
 }>();
 const hasLanding = computed(() => !!props.landingHtml);
+const hasFooter = computed(() => !!(props.footerHtml && props.footerHtml.trim()));
 
 function getRandomMotto(motto: string | null | undefined): string | null {
     if (!motto) return null;
@@ -143,6 +146,12 @@ const structuredData = computed(() => ({
 
             <!-- Navigation at bottom -->
             <BlogPostNav :navigation="navigation" />
+
+            <!-- Footer (optional) -->
+            <template v-if="hasFooter">
+                <BorderDivider class="my-4" />
+                <BlogFooter :html="footerHtml || ''" />
+            </template>
         </div>
     </div>
 </template>

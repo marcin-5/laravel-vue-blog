@@ -71,6 +71,7 @@ export interface Blog {
     slug: string;
     description: string | null;
     motto?: string | null;
+    footer?: string | null;
     is_published: boolean;
     locale: string;
     sidebar?: number; // -50..50
