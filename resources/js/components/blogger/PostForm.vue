@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import FormSubmitActions from '@/components/blog/FormSubmitActions.vue';
-import MarkdownPreviewSection from '@/components/blog/MarkdownPreviewSection.vue';
-import PostFormField from '@/components/blog/PostFormField.vue';
+import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
+import MarkdownPreviewSection from '@/components/blogger/MarkdownPreviewSection.vue';
+import PostFormField from '@/components/blogger/PostFormField.vue';
 import { useMarkdownPreview } from '@/composables/useMarkdownPreview';
 import { ensureNamespace } from '@/i18n';
 import type { PostItem } from '@/types';

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import PostForm from '@/components/blog/PostForm.vue';
+import PostForm from '@/components/blogger/PostForm.vue';
 import { Button } from '@/components/ui/button';
 import { ensureNamespace } from '@/i18n';
 import type { PostItem } from '@/types';

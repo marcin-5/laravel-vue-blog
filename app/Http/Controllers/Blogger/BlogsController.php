@@ -15,7 +15,7 @@ use Inertia\Response;
 class BlogsController extends Controller
 {
     public function __construct(
-        private readonly BlogService $blogService
+        private readonly BlogService $blogService,
     ) {
         $this->middleware(['auth', 'verified']);
         $this->authorizeResource(Blog::class, 'blog');
@@ -32,7 +32,7 @@ class BlogsController extends Controller
         $blogs = $this->blogService->getUserBlogs($user);
         $categories = $this->blogService->getCategories();
 
-        return Inertia::render('Blogs', [
+        return Inertia::render('Blogger/Blogs', [
             'blogs' => $blogs,
             'categories' => $categories,
             'canCreate' => $user->canCreateBlog(),

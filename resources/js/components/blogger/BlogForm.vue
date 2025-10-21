@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import CategorySelector from '@/components/CategorySelector.vue';
-import BlogFormCheckboxField from '@/components/blog/BlogFormCheckboxField.vue';
-import BlogFormNumberField from '@/components/blog/BlogFormNumberField.vue';
-import BlogFormSelectField from '@/components/blog/BlogFormSelectField.vue';
-import FormSubmitActions from '@/components/blog/FormSubmitActions.vue';
-import MarkdownPreviewSection from '@/components/blog/MarkdownPreviewSection.vue';
-import PostFormField from '@/components/blog/PostFormField.vue';
+import BlogFormCheckboxField from '@/components/blogger/BlogFormCheckboxField.vue';
+import BlogFormNumberField from '@/components/blogger/BlogFormNumberField.vue';
+import BlogFormSelectField from '@/components/blogger/BlogFormSelectField.vue';
+import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
+import MarkdownPreviewSection from '@/components/blogger/MarkdownPreviewSection.vue';
+import PostFormField from '@/components/blogger/PostFormField.vue';
 import { useBlogFormLogic } from '@/composables/useBlogFormLogic';
 import { useMarkdownPreview } from '@/composables/useMarkdownPreview';
 import { ensureNamespace } from '@/i18n';

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import BlogListItem from '@/components/blog/BlogListItem.vue';
-import CreateBlogSection from '@/components/blog/CreateBlogSection.vue';
+import BlogListItem from '@/components/blogger/BlogListItem.vue';
+import CreateBlogSection from '@/components/blogger/CreateBlogSection.vue';
 import { Button } from '@/components/ui/button';
 import { useBlogForm } from '@/composables/useBlogForm';
 import { usePostForm } from '@/composables/usePostForm';
@@ -8,13 +8,13 @@ import { useUIState } from '@/composables/useUIState';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { Blog, BreadcrumbItem, Category } from '@/types';
 import { Head } from '@inertiajs/vue3';
+import { ensureNamespace } from '@/i18n';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{ blogs: Blog[]; canCreate: boolean; categories: Category[] }>();
 
-import { useI18n } from 'vue-i18n';
 const { t, locale } = useI18n();
-import { ensureNamespace } from '@/i18n'
-await ensureNamespace(locale.value, 'blogs')
+await ensureNamespace(locale.value, 'blogs');
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: t('blogs.breadcrumb.dashboard'), href: '/dashboard' },

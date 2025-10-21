@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import BlogForm from '@/components/blog/BlogForm.vue';
+import BlogForm from '@/components/blogger/BlogForm.vue';
 import { Button } from '@/components/ui/button';
 import { ensureNamespace } from '@/i18n';
 import type { Category } from '@/types';

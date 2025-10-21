@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import BlogForm from '@/components/blog/BlogForm.vue';
-import PostForm from '@/components/blog/PostForm.vue';
-import PostListItem from '@/components/blog/PostListItem.vue';
-import PublishedBadge from '@/components/blog/PublishedBadge.vue';
+import BlogForm from '@/components/blogger/BlogForm.vue';
+import PostForm from '@/components/blogger/PostForm.vue';
+import PostListItem from '@/components/blogger/PostListItem.vue';
+import PublishedBadge from '@/components/blogger/PublishedBadge.vue';
 import { Button } from '@/components/ui/button';
 import { ensureNamespace, i18n } from '@/i18n';
 import type { Blog, Category, PostItem } from '@/types';
