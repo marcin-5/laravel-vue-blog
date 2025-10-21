@@ -17,6 +17,12 @@ const isHomePage = computed(() => page.url === '/');
         <nav :class="['mx-auto flex w-full max-w-[1024px] items-center gap-4', isHomePage ? 'justify-end' : 'justify-between']">
             <HomeButton class="pl-4" />
             <div class="flex items-center gap-4">
+                <Link
+                    :href="route('about')"
+                    class="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#19140035] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
+                >
+                    {{ t('about.nav.about', 'About') }}
+                </Link>
                 <template v-if="$page.props.auth.user">
                     <Link
                         :href="route('dashboard')"

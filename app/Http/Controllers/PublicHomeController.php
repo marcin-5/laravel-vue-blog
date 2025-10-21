@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\LoadsTranslations;
 use App\Models\Blog;
 use App\Models\Category;
+use App\Services\MarkdownService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
 use Inertia\Inertia;
 use Inertia\Response;
 use ParsedownExtra;
@@ -172,6 +174,69 @@ class PublicHomeController extends Controller
                 ];
             })->all(),
         ];
+    }
+
+    /**
+     * Show the About page with SSR and translations.
+     */
+    public function about(MarkdownService $markdown): Response
+    {
+        $locale = app()->getLocale();
+
+        // Load base and namespaced translations (landing for navbar + about page)
+        $messages = [];
+        $baseJson = resource_path("lang/{$locale}.json");
+        if (File::exists($baseJson)) {
+            $base = json_decode(File::get($baseJson), true) ?: [];
+            if (is_array($base)) {
+                $messages = array_merge($messages, $base);
+            }
+        }
+        foreach (["landing", "about"] as $ns) {
+            $nsPath = resource_path("lang/{$locale}/{$ns}.json");
+            if (File::exists($nsPath)) {
+                $nsMsgs = json_decode(File::get($nsPath), true) ?: [];
+                if (is_array($nsMsgs)) {
+                    $messages = array_merge_recursive($messages, $nsMsgs);
+                }
+            }
+        }
+
+        // Parse markdown in about.content to safe HTML
+        $aboutContent = data_get($messages, 'about.content');
+        if (is_string($aboutContent) && $aboutContent !== '') {
+            $html = $markdown->convertToHtml($aboutContent);
+            data_set($messages, 'about.content', $html);
+        }
+
+        $baseUrl = config('app.url');
+        $seoTitle = data_get($messages, 'about.meta.title') ?? 'About';
+        $seoDescription = data_get($messages, 'about.meta.description') ?? 'About this site';
+        $canonicalUrl = rtrim($baseUrl, '/') . '/about';
+        $ogImage = rtrim($baseUrl, '/') . '/og-image.png';
+
+        return Inertia::render('About', [
+            'locale' => $locale,
+            'seo' => [
+                'title' => $seoTitle,
+                'description' => $seoDescription,
+                'canonicalUrl' => $canonicalUrl,
+                'ogImage' => $ogImage,
+                'ogType' => 'website',
+                'locale' => $locale,
+                'structuredData' => [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'AboutPage',
+                    'name' => $seoTitle,
+                    'url' => $canonicalUrl,
+                    'description' => $seoDescription,
+                ],
+            ],
+            'translations' => [
+                'locale' => $locale,
+                'messages' => $messages,
+            ],
+        ]);
     }
 
 }

@@ -24,7 +24,7 @@ Route::get('/lang/{locale}/{namespace}', function (string $locale, string $names
     abort_unless(in_array($locale, ['en', 'pl'], true), 404);
 
     // Whitelist allowed namespaces to avoid arbitrary file reads
-    $allowed = ['blogs', 'appearance', 'landing', 'auth', 'admin'];
+    $allowed = ['blogs', 'appearance', 'landing', 'auth', 'admin', 'about'];
     abort_unless(in_array($namespace, $allowed, true), 404);
 
     $jsonPath = resource_path("lang/{$locale}/{$namespace}.json");

@@ -8,7 +8,9 @@ use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 // Robots.txt and Sitemap routes (without Inertia and appearance middleware)
 Route::withoutMiddleware([
@@ -21,6 +23,9 @@ Route::withoutMiddleware([
         Route::get('robots.txt', [RobotsController::class, 'generate']);
         Route::get('sitemap.xml', [SitemapController::class, 'generate'])->name('sitemap');
     });
+
+// Public About page (SSR): provide translations via props
+Route::get('/about', [PublicHomeController::class, 'about'])->name('about');
 
 // Keep these at the very end to avoid conflicts.
 Route::get('{blog:slug}/{postSlug}', [PublicBlogController::class, 'post'])
