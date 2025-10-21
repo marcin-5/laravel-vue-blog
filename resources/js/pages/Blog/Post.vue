@@ -3,7 +3,7 @@ import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import PostContent from '@/components/blog/PostContent.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
-import { Head } from '@inertiajs/vue3';
+import SeoHead from '@/components/seo/SeoHead.vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -71,6 +71,9 @@ const canonicalUrl = computed(() => props.seo?.canonicalUrl || `${baseUrl}/blogs
 const seoTitle = computed(() => props.seo?.title || `${props.post.title} - ${props.blog.name}`);
 const seoDescription = computed(() => props.seo?.description || props.post.excerpt || props.post.title);
 const seoImage = computed(() => props.seo?.ogImage || `${baseUrl}/og-image.png`);
+const ogType = computed(() => props.seo?.ogType || 'article');
+const publishedTime = computed(() => props.seo?.publishedTime || null);
+const modifiedTime = computed(() => props.seo?.modifiedTime || null);
 
 // Structured data for SEO
 const structuredData = computed(
@@ -100,34 +103,17 @@ const structuredData = computed(
 </script>
 
 <template>
-    <Head :title="seoTitle">
-        <!-- Primary Meta Tags -->
-        <meta :content="seoDescription" name="description" />
-        <meta content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" name="robots" />
-        <link :href="canonicalUrl" rel="canonical" />
-        <meta v-if="locale" :content="locale" http-equiv="content-language" />
-
-        <!-- Open Graph / Facebook -->
-        <meta :content="seo?.ogType || 'article'" property="og:type" />
-        <meta :content="seoTitle" property="og:title" />
-        <meta :content="seoDescription" property="og:description" />
-        <meta :content="canonicalUrl" property="og:url" />
-        <meta :content="seoImage" property="og:image" />
-        <meta content="1200" property="og:image:width" />
-        <meta content="630" property="og:image:height" />
-        <meta :content="locale || 'en'" property="og:locale" />
-        <meta v-if="seo?.publishedTime" :content="seo.publishedTime" property="article:published_time" />
-        <meta v-if="seo?.modifiedTime" :content="seo.modifiedTime" property="article:modified_time" />
-
-        <!-- Twitter -->
-        <meta content="summary_large_image" name="twitter:card" />
-        <meta :content="seoTitle" name="twitter:title" />
-        <meta :content="seoDescription" name="twitter:description" />
-        <meta :content="seoImage" name="twitter:image" />
-
-        <!-- Structured Data -->
-        <component :is="'script'" type="application/ld+json" v-html="JSON.stringify(structuredData)" />
-    </Head>
+    <SeoHead
+        :canonical-url="canonicalUrl"
+        :description="seoDescription"
+        :locale="locale"
+        :modified-time="modifiedTime"
+        :og-image="seoImage"
+        :og-type="ogType"
+        :published-time="publishedTime"
+        :structured-data="structuredData"
+        :title="seoTitle"
+    />
 
     <div class="flex min-h-screen flex-col bg-[#FDFDFC] text-[#1b1b18] dark:bg-[#0a0a0a]">
         <PublicNavbar />

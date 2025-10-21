@@ -3,7 +3,7 @@ import BlogHeader from '@/components/blog/BlogHeader.vue';
 import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
-import { Head } from '@inertiajs/vue3';
+import SeoHead from '@/components/seo/SeoHead.vue';
 import { computed } from 'vue';
 
 interface Blog {
@@ -101,32 +101,15 @@ const structuredData = computed(() => ({
 </script>
 
 <template>
-    <Head :title="seoTitle">
-        <!-- Primary Meta Tags -->
-        <meta :content="seoDescription" name="description" />
-        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-        <link :href="canonicalUrl" rel="canonical" />
-        <meta v-if="locale" :content="locale" http-equiv="content-language" />
-
-        <!-- Open Graph / Facebook -->
-        <meta content="blog" property="og:type" />
-        <meta :content="seoTitle" property="og:title" />
-        <meta :content="seoDescription" property="og:description" />
-        <meta :content="canonicalUrl" property="og:url" />
-        <meta :content="seoImage" property="og:image" />
-        <meta content="1200" property="og:image:width" />
-        <meta content="630" property="og:image:height" />
-        <meta :content="locale || 'en'" property="og:locale" />
-
-        <!-- Twitter -->
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta :content="seoTitle" name="twitter:title" />
-        <meta :content="seoDescription" name="twitter:description" />
-        <meta :content="seoImage" name="twitter:image" />
-
-        <!-- Structured Data -->
-        <component :is="'script'" type="application/ld+json" v-html="JSON.stringify(structuredData)" />
-    </Head>
+    <SeoHead
+        :canonical-url="canonicalUrl"
+        :description="seoDescription"
+        :locale="locale"
+        :og-image="seoImage"
+        :structured-data="structuredData"
+        :title="seoTitle"
+        og-type="blog"
+    />
     <div class="flex min-h-screen flex-col bg-[#FDFDFC] text-[#1b1b18] dark:bg-[#0a0a0a]">
         <PublicNavbar />
         <div class="mx-auto w-full max-w-[1024px] p-4">

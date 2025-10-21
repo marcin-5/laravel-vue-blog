@@ -4,7 +4,8 @@ import BlogsGrid from '@/components/blog/BlogsGrid.vue';
 import CategoriesFilter from '@/components/blog/CategoriesFilter.vue';
 import NoBlogs from '@/components/blog/NoBlogs.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
-import { Head, router } from '@inertiajs/vue3';
+import SeoHead from '@/components/seo/SeoHead.vue';
+import { router } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -90,32 +91,15 @@ function clearFilter() {
 </script>
 
 <template>
-    <Head :title="seoTitle">
-        <!-- Primary Meta Tags -->
-        <meta :content="seoDescription" name="description" />
-        <meta content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" name="robots" />
-        <link :href="canonicalUrl" rel="canonical" />
-        <meta v-if="locale" :content="locale" http-equiv="content-language" />
-
-        <!-- Open Graph / Facebook -->
-        <meta content="website" property="og:type" />
-        <meta :content="seoTitle" property="og:title" />
-        <meta :content="seoDescription" property="og:description" />
-        <meta :content="canonicalUrl" property="og:url" />
-        <meta :content="seoImage" property="og:image" />
-        <meta content="1200" property="og:image:width" />
-        <meta content="630" property="og:image:height" />
-        <meta :content="locale || 'en'" property="og:locale" />
-
-        <!-- Twitter -->
-        <meta content="summary_large_image" name="twitter:card" />
-        <meta :content="seoTitle" name="twitter:title" />
-        <meta :content="seoDescription" name="twitter:description" />
-        <meta :content="seoImage" name="twitter:image" />
-
-        <!-- Structured Data -->
-        <component :is="'script'" type="application/ld+json" v-html="JSON.stringify(structuredData)" />
-    </Head>
+    <SeoHead
+        :canonical-url="canonicalUrl"
+        :description="seoDescription"
+        :locale="locale"
+        :og-image="seoImage"
+        :structured-data="structuredData"
+        :title="seoTitle"
+        og-type="website"
+    />
     <div class="flex min-h-screen flex-col">
         <PublicNavbar />
         <div class="mx-auto w-full max-w-[1024px] p-6 lg:p-8">
