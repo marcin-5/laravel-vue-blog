@@ -1,0 +1,11 @@
+{
+  "common": {
+    "nav": {
+      "about": "O nas",
+      "dashboard": "Panel",
+      "logout": "Wyloguj",
+      "login": "Zaloguj",
+      "register": "Rejestracja"
+    }
+  }
+}

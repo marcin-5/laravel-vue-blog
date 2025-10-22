@@ -21,14 +21,14 @@ const isHomePage = computed(() => page.url === '/');
                     :href="route('about')"
                     class="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#19140035] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
                 >
-                    {{ t('landing.nav.about', 'About') }}
+                    {{ t('common.nav.about', 'About') }}
                 </Link>
                 <template v-if="$page.props.auth.user">
                     <Link
                         :href="route('dashboard')"
                         class="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
                     >
-                        {{ t('landing.nav.dashboard') }}
+                        {{ t('common.nav.dashboard') }}
                     </Link>
                     <Link
                         :href="route('logout')"
@@ -36,7 +36,7 @@ const isHomePage = computed(() => page.url === '/');
                         class="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#19140035] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
                         method="post"
                     >
-                        {{ t('landing.nav.logout') }}
+                        {{ t('common.nav.logout') }}
                     </Link>
                 </template>
                 <template v-else>
@@ -44,13 +44,13 @@ const isHomePage = computed(() => page.url === '/');
                         :href="route('login')"
                         class="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#19140035] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
                     >
-                        {{ t('landing.nav.login') }}
+                        {{ t('common.nav.login') }}
                     </Link>
                     <Link
                         :href="route('register')"
                         class="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
                     >
-                        {{ t('landing.nav.register') }}
+                        {{ t('common.nav.register') }}
                     </Link>
                 </template>
                 <ThemeToggle />

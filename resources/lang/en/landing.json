@@ -1,12 +1,5 @@
 {
     "landing": {
-        "nav": {
-            "about": "About",
-            "dashboard": "Dashboard",
-            "logout": "Log out",
-            "login": "Log in",
-            "register": "Register"
-        },
         "blog": {
             "author": "Author:",
             "posts_list": {

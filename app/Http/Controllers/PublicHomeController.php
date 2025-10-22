@@ -120,7 +120,7 @@ class PublicHomeController extends Controller
         $ogImage = $baseUrl . '/og-image.png';
 
         // Get translated SEO text
-        $translations = $this->loadTranslations($locale, ['landing']);
+        $translations = $this->loadTranslations($locale, ['common', 'landing']);
         $seoTitle = $translations['landing']['meta']['welcomeTitle'] ?? config('app.name');
         $seoDescription = $translations['landing']['meta']['welcomeDescription'] ?? 'Welcome to ' . config('app.name');
 
@@ -189,7 +189,7 @@ class PublicHomeController extends Controller
                 $messages = array_merge($messages, $base);
             }
         }
-        foreach (["landing", "about"] as $ns) {
+        foreach (["common", "landing", "about"] as $ns) {
             $nsPath = resource_path("lang/{$locale}/{$ns}.json");
             if (File::exists($nsPath)) {
                 $nsMsgs = json_decode(File::get($nsPath), true) ?: [];

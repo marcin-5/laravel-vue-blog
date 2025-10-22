@@ -1,0 +1,11 @@
+{
+  "common": {
+    "nav": {
+      "about": "About",
+      "dashboard": "Dashboard",
+      "logout": "Log out",
+      "login": "Log in",
+      "register": "Register"
+    }
+  }
+}
