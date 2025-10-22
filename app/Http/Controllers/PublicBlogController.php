@@ -113,7 +113,7 @@ class PublicBlogController extends Controller
             // Provide translations to avoid async loading flicker on SSR
             'translations' => [
                 'locale' => app()->getLocale(),
-                'messages' => $this->loadTranslations(app()->getLocale(), ['landing']),
+                'messages' => $this->loadTranslations(app()->getLocale(), ['landing', 'about']),
             ],
         ];
     }
@@ -357,7 +357,7 @@ class PublicBlogController extends Controller
             // Provide translations to avoid async loading flicker on SSR
             'translations' => [
                 'locale' => app()->getLocale(),
-                'messages' => $this->loadTranslations(app()->getLocale(), ['landing']),
+                'messages' => $this->loadTranslations(app()->getLocale(), ['landing', 'about']),
             ],
         ];
     }
