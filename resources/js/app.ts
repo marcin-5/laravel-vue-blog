@@ -2,7 +2,7 @@ import '@fontsource-variable/nunito';
 import '@fontsource/noto-serif';
 import '../css/app.css';
 
-import { createInertiaApp } from '@inertiajs/vue3';
+import { createInertiaApp, router } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { DefineComponent } from 'vue';
 import { createApp, h, Suspense } from 'vue';
@@ -35,15 +35,11 @@ createInertiaApp({
 
         const vueApp = createApp({
             render: () =>
-                h(
-                    Suspense,
-                    null,
-                    {
-                        default: () => h(App, props),
-                        // Minimal fallback to satisfy Suspense during async setup
-                        fallback: () => h('div', { class: 'inertia-suspense-fallback' }, 'Loading...'),
-                    }
-                ),
+                h(Suspense, null, {
+                    default: () => h(App, props),
+                    // Minimal fallback to satisfy Suspense during async setup
+                    fallback: () => h('div', { class: 'inertia-suspense-fallback' }, 'Loading...'),
+                }),
         })
             .use(plugin)
             .use(ZiggyVue)
@@ -73,6 +69,35 @@ createInertiaApp({
         }
 
         vueApp.mount(el);
+
+        // Merge server-provided translations on every successful Inertia navigation
+        try {
+            const handlePageTranslations = (page: any) => {
+                const props = page?.props || {};
+                const provided = props?.translations as { locale?: string; messages?: Record<string, any> } | undefined;
+                const nextLocale = (props?.locale as string) || i18n.global.locale.value || 'en';
+                if (provided?.messages) {
+                    const loc = provided.locale || nextLocale;
+                    try {
+                        i18n.global.setLocaleMessage(loc, provided.messages);
+                        i18n.global.locale.value = loc;
+                    } catch (e) {
+                        console.warn('Failed to merge navigation translations, continuing:', e);
+                    }
+                } else if (nextLocale && nextLocale !== i18n.global.locale.value) {
+                    i18n.global.locale.value = nextLocale;
+                }
+                // Keep helper in sync
+                void setLocale(i18n.global.locale.value).catch(() => {});
+            };
+
+            // Prefer 'success' event which exposes the resolved page
+            router.on('success', (event: any) => handlePageTranslations(event.detail.page));
+            // Fallback for older adapters: try 'navigate'
+            router.on('navigate', (event: any) => handlePageTranslations(event.detail.page));
+        } catch (e) {
+            console.warn('Failed to attach Inertia navigation listeners for translations:', e);
+        }
 
         // Return the app instance to satisfy Inertia's expected type
         return vueApp;

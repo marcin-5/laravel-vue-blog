@@ -7,7 +7,6 @@ use App\Models\Category;
 use App\Services\MarkdownService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\File;
 use Inertia\Response;
 
 class PublicHomeController extends BasePublicController
@@ -118,7 +117,9 @@ class PublicHomeController extends BasePublicController
         // Pull messages for SEO from the service (home page type)
         $messages = $this->translations->getPageTranslations('home');
         $seoTitle = data_get($messages, 'landing.meta.welcomeTitle') ?? config('app.name');
-        $seoDescription = data_get($messages, 'landing.meta.welcomeDescription') ?? ('Welcome to ' . config('app.name'));
+        $seoDescription = data_get($messages, 'landing.meta.welcomeDescription') ?? ('Welcome to ' . config(
+                'app.name',
+            ));
 
         return $this->renderWithTranslations('Welcome', 'home', [
             'locale' => $locale,
@@ -191,6 +192,10 @@ class PublicHomeController extends BasePublicController
 
         return $this->renderWithTranslations('About', 'about', [
             'locale' => $locale,
+            // Pass preprocessed translations (about.content already converted to HTML)
+            'translations' => [
+                'messages' => $messages,
+            ],
             'seo' => [
                 'title' => $seoTitle,
                 'description' => $seoDescription,
