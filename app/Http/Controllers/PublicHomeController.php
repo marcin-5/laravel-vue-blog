@@ -2,20 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Concerns\LoadsTranslations;
 use App\Models\Blog;
 use App\Models\Category;
 use App\Services\MarkdownService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
-use Inertia\Inertia;
 use Inertia\Response;
 
-class PublicHomeController extends Controller
+class PublicHomeController extends BasePublicController
 {
-    use LoadsTranslations;
-
     /**
      * Show the welcome page with blogs and categories filter.
      */
@@ -119,12 +115,12 @@ class PublicHomeController extends Controller
                 ));
         $ogImage = $baseUrl . '/og-image.png';
 
-        // Get translated SEO text
-        $translations = $this->loadTranslations($locale, ['common', 'landing']);
-        $seoTitle = $translations['landing']['meta']['welcomeTitle'] ?? config('app.name');
-        $seoDescription = $translations['landing']['meta']['welcomeDescription'] ?? 'Welcome to ' . config('app.name');
+        // Pull messages for SEO from the service (home page type)
+        $messages = $this->translations->getPageTranslations('home');
+        $seoTitle = data_get($messages, 'landing.meta.welcomeTitle') ?? config('app.name');
+        $seoDescription = data_get($messages, 'landing.meta.welcomeDescription') ?? ('Welcome to ' . config('app.name'));
 
-        return Inertia::render('Welcome', [
+        return $this->renderWithTranslations('Welcome', 'home', [
             'locale' => $locale,
             'blogs' => $blogs,
             'categories' => $categories,
@@ -138,11 +134,6 @@ class PublicHomeController extends Controller
                 'ogType' => 'website',
                 'locale' => $locale,
                 'structuredData' => $this->generateHomeStructuredData($blogs, $seoTitle, $seoDescription, $baseUrl),
-            ],
-            // Provide translations to avoid async loading flicker on SSR
-            'translations' => [
-                'locale' => $locale,
-                'messages' => $translations,
             ],
         ]);
     }
@@ -174,32 +165,18 @@ class PublicHomeController extends Controller
     }
 
     /**
-     * Show the About page with SSR and translations.
+     * About page (SSR) — stays scoped to public controllers only.
+     * If you also need `about` group messages, you can augment them here without
+     * changing the service mapping, or keep the original logic if preferred.
      */
     public function about(MarkdownService $markdown): Response
     {
         $locale = app()->getLocale();
 
-        // Load base and namespaced translations (landing for navbar + about page)
-        $messages = [];
-        $baseJson = resource_path("lang/{$locale}.json");
-        if (File::exists($baseJson)) {
-            $base = json_decode(File::get($baseJson), true) ?: [];
-            if (is_array($base)) {
-                $messages = array_merge($messages, $base);
-            }
-        }
-        foreach (["common", "landing", "about"] as $ns) {
-            $nsPath = resource_path("lang/{$locale}/{$ns}.json");
-            if (File::exists($nsPath)) {
-                $nsMsgs = json_decode(File::get($nsPath), true) ?: [];
-                if (is_array($nsMsgs)) {
-                    $messages = array_merge_recursive($messages, $nsMsgs);
-                }
-            }
-        }
+        // Start with about page messages from the service
+        $messages = $this->translations->getPageTranslations('about');
 
-        // Parse markdown in about.content to safe HTML
+        // Convert about.content markdown to HTML if present
         $aboutContent = data_get($messages, 'about.content');
         if (is_string($aboutContent) && $aboutContent !== '') {
             $html = $markdown->convertToHtml($aboutContent);
@@ -212,7 +189,7 @@ class PublicHomeController extends Controller
         $canonicalUrl = rtrim($baseUrl, '/') . '/about';
         $ogImage = rtrim($baseUrl, '/') . '/og-image.png';
 
-        return Inertia::render('About', [
+        return $this->renderWithTranslations('About', 'about', [
             'locale' => $locale,
             'seo' => [
                 'title' => $seoTitle,
@@ -229,10 +206,8 @@ class PublicHomeController extends Controller
                     'description' => $seoDescription,
                 ],
             ],
-            'translations' => [
-                'locale' => $locale,
-                'messages' => $messages,
-            ],
+            // Optionally expose pre-rendered about messages if your front-end expects them under a specific prop
+            // 'aboutMessages' => data_get($messages, 'about'),
         ]);
     }
 

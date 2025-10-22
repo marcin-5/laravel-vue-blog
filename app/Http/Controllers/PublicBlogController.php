@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\FormatsDatesForLocale;
-use App\Http\Controllers\Concerns\LoadsTranslations;
 use App\Models\Blog;
 use App\Models\LandingPage;
 use App\Models\Post;
@@ -11,13 +10,12 @@ use App\Services\MarkdownService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Inertia\Inertia;
 use Inertia\Response;
 use Number;
 
-class PublicBlogController extends Controller
+class PublicBlogController extends BasePublicController
 {
-    use LoadsTranslations, FormatsDatesForLocale;
+    use FormatsDatesForLocale;
 
     /**
      * Show the public landing page for a blog by slug.
@@ -27,7 +25,7 @@ class PublicBlogController extends Controller
     {
         $this->preparePublicBlog($blog);
 
-        return Inertia::render('Blog/Landing', $this->getLandingViewProps($blog));
+        return $this->renderWithTranslations('Blog/Landing', 'blog', $this->getLandingViewProps($blog));
     }
 
     /**
@@ -109,11 +107,6 @@ class PublicBlogController extends Controller
                     $baseUrl,
                     $metaDescription,
                 ),
-            ],
-            // Provide translations to avoid async loading flicker on SSR
-            'translations' => [
-                'locale' => app()->getLocale(),
-                'messages' => $this->loadTranslations(app()->getLocale(), ['common', 'landing', 'about']),
             ],
         ];
     }
@@ -289,7 +282,7 @@ class PublicBlogController extends Controller
         $this->preparePublicBlog($blog);
         $post = $this->getPublicPost($blog, $postSlug);
 
-        return Inertia::render('Blog/Post', $this->getPostViewProps($blog, $post));
+        return $this->renderWithTranslations('Blog/Post', 'post', $this->getPostViewProps($blog, $post));
     }
 
     /**
@@ -353,11 +346,6 @@ class PublicBlogController extends Controller
                 'publishedTime' => optional($post->published_at)?->toIso8601String(),
                 'modifiedTime' => optional($post->updated_at)?->toIso8601String(),
                 'structuredData' => $this->generatePostStructuredData($blog, $post, $baseUrl, $metaDescription),
-            ],
-            // Provide translations to avoid async loading flicker on SSR
-            'translations' => [
-                'locale' => app()->getLocale(),
-                'messages' => $this->loadTranslations(app()->getLocale(), ['common', 'landing', 'about']),
             ],
         ];
     }
