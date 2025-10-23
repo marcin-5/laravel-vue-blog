@@ -35,7 +35,7 @@ const { t, tm } = useI18n();
 
 const selected = computed<number[]>(() => props.selectedCategoryIds ?? []);
 
-const slogans = tm('landing.slogans') as string[];
+const slogans = tm('slogans') as string[];
 const randomSlogan = slogans[Math.floor(Math.random() * slogans.length)] || '';
 
 // SEO helpers - SSR compatible
@@ -44,8 +44,8 @@ const canonicalUrl = computed(() => {
     const categoryParam = selected.value.length > 0 ? `?categories=${selected.value.join(',')}` : '';
     return `${baseUrl}${categoryParam}`;
 });
-const seoTitle = computed(() => t('landing.meta.welcomeTitle', 'Welcome'));
-const seoDescription = computed(() => t('landing.meta.welcomeDescription', 'Welcome to Osobliwy Blog'));
+const seoTitle = computed(() => t('meta.welcomeTitle', 'Welcome'));
+const seoDescription = computed(() => t('meta.welcomeDescription', 'Welcome to Osobliwy Blog'));
 const seoImage = computed(() => `${baseUrl}/og-image.png`);
 
 // Structured data for SEO
@@ -111,7 +111,7 @@ function clearFilter() {
             <!-- Categories Filter -->
             <CategoriesFilter
                 :categories="categories"
-                :clear-label="t('landing.actions.clear', 'Clear filter')"
+                :clear-label="t('actions.clear', 'Clear filter')"
                 :selected-ids="selected"
                 class="mb-6"
                 @clear="clearFilter"

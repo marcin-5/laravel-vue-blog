@@ -7,7 +7,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t, locale } = useI18n();
-await ensureNamespace(locale.value, 'blogs');
+await ensureNamespace(locale.value, 'blogger');
 
 interface Props {
     post: PostItem;
@@ -25,7 +25,7 @@ const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 const editButtonVariant = computed(() => (props.isEditing ? 'exit' : 'toggle'));
-const editButtonLabel = computed(() => (props.isEditing ? t('blogs.post_item.close_button') : t('blogs.post_item.edit_button')));
+const editButtonLabel = computed(() => (props.isEditing ? t('blogger.post_item.close_button') : t('blogger.post_item.edit_button')));
 </script>
 
 <template>

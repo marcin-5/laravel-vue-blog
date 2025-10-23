@@ -11,7 +11,7 @@ import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { locale, t } = useI18n();
-await ensureNamespace(locale.value, 'blogs');
+await ensureNamespace(locale.value, 'blogger');
 
 interface Props {
     post?: PostItem;
@@ -52,28 +52,28 @@ const fieldIdPrefix = computed(() => props.idPrefix);
 
 // Consolidated translation keys
 const translationKeys = computed(() => ({
-    title: props.isEdit ? t('blogs.post_form.title_label') : t('blogs.post_form.post_title_label'),
-    titlePlaceholder: props.isEdit ? '' : t('blogs.post_form.title_placeholder'),
-    excerpt: t('blogs.post_form.excerpt_label'),
-    excerptPlaceholder: props.isEdit ? '' : t('blogs.post_form.excerpt_placeholder'),
-    content: t('blogs.post_form.content_label'),
-    contentPlaceholder: props.isEdit ? '' : t('blogs.post_form.content_placeholder'),
-    published: props.isEdit ? t('blogs.post_form.published_label') : t('blogs.post_form.publish_now_label'),
-    cancel: t('blogs.post_form.cancel_button'),
-    create: t('blogs.post_form.create_post_button'),
-    creating: t('blogs.post_form.creating_button'),
-    save: t('blogs.post_form.save_post_button'),
-    saving: t('blogs.post_form.saving_button'),
+    title: props.isEdit ? t('post_form.title_label') : t('post_form.post_title_label'),
+    titlePlaceholder: props.isEdit ? '' : t('post_form.title_placeholder'),
+    excerpt: t('post_form.excerpt_label'),
+    excerptPlaceholder: props.isEdit ? '' : t('post_form.excerpt_placeholder'),
+    content: t('post_form.content_label'),
+    contentPlaceholder: props.isEdit ? '' : t('post_form.content_placeholder'),
+    published: props.isEdit ? t('post_form.published_label') : t('post_form.publish_now_label'),
+    cancel: t('post_form.cancel_button'),
+    create: t('post_form.create_post_button'),
+    creating: t('post_form.creating_button'),
+    save: t('post_form.save_post_button'),
+    saving: t('post_form.saving_button'),
     // Preview-related translations for MarkdownPreviewSection
-    preview: t('blogs.post_form.preview_button'),
-    closePreview: t('blogs.post_form.close_button'),
-    fullPreview: t('blogs.post_form.full_preview_button'),
-    splitView: t('blogs.post_form.split_view_button'),
-    toggleLayout: previewLayout.value === 'vertical' ? t('blogs.post_form.horizontal_button') : t('blogs.post_form.vertical_button'),
-    exitPreview: t('blogs.post_form.exit_preview_button'),
-    markdownLabel: t('blogs.post_form.markdown_label'),
-    previewLabel: t('blogs.post_form.preview_label'),
-    previewModeTitle: t('blogs.post_form.preview_mode_title'),
+    preview: t('post_form.preview_button'),
+    closePreview: t('post_form.close_button'),
+    fullPreview: t('post_form.full_preview_button'),
+    splitView: t('post_form.split_view_button'),
+    toggleLayout: previewLayout.value === 'vertical' ? t('post_form.horizontal_button') : t('post_form.vertical_button'),
+    exitPreview: t('post_form.exit_preview_button'),
+    markdownLabel: t('post_form.markdown_label'),
+    previewLabel: t('post_form.preview_label'),
+    previewModeTitle: t('post_form.preview_mode_title'),
 }));
 
 const updateFormFromPost = (post: PostItem) => {

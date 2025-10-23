@@ -6,8 +6,8 @@ import { useI18n } from 'vue-i18n';
  * DRY helper for Vue i18n namespace loading in .vue files.
  *
  * Usage in <script setup>:
- *   const { t, ready } = await useI18nNs('landing')
- *   // or multiple: await useI18nNs(['landing', 'blogs'])
+ *   const { t, ready } = await useI18nNs('welcome')
+ *   // or multiple: await useI18nNs(['welcome', 'blog'])
  */
 export async function useI18nNs(ns: string | string[]) {
     const namespaces = Array.isArray(ns) ? ns : [ns];

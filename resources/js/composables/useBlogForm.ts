@@ -42,7 +42,7 @@ export function useBlogForm() {
     }
 
     function submitCreate() {
-        createForm.post(route('blogs.store'), {
+        createForm.post(route('blogger.store'), {
             onSuccess: () => {
                 closeCreateForm();
             },
@@ -75,7 +75,7 @@ export function useBlogForm() {
     }
 
     function submitEdit(blog: Blog) {
-        editForm.patch(route('blogs.update', blog.id), {
+        editForm.patch(route('blogger.update', blog.id), {
             preserveScroll: true,
             onSuccess: () => {
                 editingId.value = null;

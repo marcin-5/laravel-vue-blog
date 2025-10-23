@@ -13,8 +13,8 @@ interface PostItem {
 }
 
 const { t, locale } = useI18n();
-// Ensure "landing" namespace is loaded for current locale (supports SSR via Suspense)
-await ensureNamespace(locale.value, 'landing');
+// Ensure "blog" namespace is loaded for current locale (supports SSR via Suspense)
+await ensureNamespace(locale.value, 'blog');
 
 const props = defineProps<{
     posts: PostItem[];
@@ -36,8 +36,8 @@ function translateLabel(raw: string): string {
     if (/^\d+$/.test(txt)) return txt;
     // Laravel may return 'Previous' or 'Next'
     const lower = txt.toLowerCase();
-    if (lower === 'previous') return t('landing.blog.pagination.previous');
-    if (lower === 'next') return t('landing.blog.pagination.next');
+    if (lower === 'previous') return t('blog.pagination.previous');
+    if (lower === 'next') return t('blog.pagination.next');
     // Fallback to original text
     return txt;
 }
@@ -46,9 +46,9 @@ const links = computed(() => props.pagination?.links ?? []);
 </script>
 
 <template>
-    <section :aria-label="t('landing.blog.posts_list.aria')">
-        <h2 class="mb-2 text-xl font-semibold text-slate-700 dark:text-slate-500">{{ t('landing.blog.posts_list.title') }}</h2>
-        <p v-if="!posts || posts.length === 0">{{ t('landing.blog.posts_list.empty') }}</p>
+    <section :aria-label="t('blog.posts_list.aria')">
+        <h2 class="mb-2 text-xl font-semibold text-slate-700 dark:text-slate-500">{{ t('blog.posts_list.title') }}</h2>
+        <p v-if="!posts || posts.length === 0">{{ t('blog.posts_list.empty') }}</p>
         <ul v-else class="space-y-3">
             <li v-for="p in posts" :key="p.id">
                 <Link
@@ -62,7 +62,7 @@ const links = computed(() => props.pagination?.links ?? []);
             </li>
         </ul>
 
-        <nav v-if="links.length" :aria-label="t('landing.blog.pagination.aria')" class="mt-4 flex items-center gap-1">
+        <nav v-if="links.length" :aria-label="t('blog.pagination.aria')" class="mt-4 flex items-center gap-1">
             <Link
                 v-for="(lnk, idx) in links"
                 :key="idx"

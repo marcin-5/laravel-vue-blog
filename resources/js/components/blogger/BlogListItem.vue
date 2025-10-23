@@ -9,7 +9,7 @@ import type { Blog, Category, PostItem } from '@/types';
 import { useI18n } from 'vue-i18n';
 
 const { locale } = useI18n();
-await ensureNamespace(locale.value, 'blogs');
+await ensureNamespace(locale.value, 'blogger');
 
 interface Props {
     blog: Blog;
@@ -105,14 +105,14 @@ function localizedName(name: string | Record<string, string>): string {
             <div class="flex items-center gap-2">
                 <PublishedBadge :published="blog.is_published" />
                 <Button size="sm" type="button" variant="toggle" @click="handleEdit">{{
-                    isEditing ? $t('blogs.actions.close') : $t('blogs.actions.edit')
+                    isEditing ? $t('actions.close') : $t('actions.edit')
                 }}</Button>
                 <Button size="sm" type="button" variant="toggle" @click="handleTogglePosts">
-                    <span v-if="isPostsExpanded">{{ $t('blogs.actions.hide_posts') }}</span>
-                    <span v-else>{{ $t('blogs.actions.show_posts') }}</span>
+                    <span v-if="isPostsExpanded">{{ $t('actions.hide_posts') }}</span>
+                    <span v-else>{{ $t('actions.show_posts') }}</span>
                 </Button>
                 <Button :variant="isCreatingPost ? 'exit' : 'constructive'" size="sm" type="button" @click="handleCreatePost">{{
-                    isCreatingPost ? $t('blogs.actions.close') : $t('blogs.actions.add_post')
+                    isCreatingPost ? $t('actions.close') : $t('actions.add_post')
                 }}</Button>
             </div>
         </div>
@@ -131,7 +131,7 @@ function localizedName(name: string | Record<string, string>): string {
                     @cancel-edit="handleCancelEditPost"
                 />
             </div>
-            <div v-else class="text-sm text-muted-foreground">{{ $t('blogs.posts.empty') }}</div>
+            <div v-else class="text-sm text-muted-foreground">{{ $t('posts.empty') }}</div>
         </div>
 
         <!-- Inline Edit Form -->

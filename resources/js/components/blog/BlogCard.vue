@@ -26,7 +26,7 @@ const { t } = useI18n();
             <a :href="`/${props.blog.slug}`" class="hover:underline">{{ props.blog.name }}</a>
         </h2>
         <div v-if="props.blog.author" class="text-slate-6 00 mb-2 text-sm dark:text-slate-400">
-            {{ t('landing.blog.author', 'Author:') }} {{ props.blog.author }}
+            {{ t('blog.author', 'Author:') }} {{ props.blog.author }}
         </div>
         <div
             v-if="props.blog.descriptionHtml"

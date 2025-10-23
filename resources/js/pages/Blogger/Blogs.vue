@@ -5,20 +5,20 @@ import { Button } from '@/components/ui/button';
 import { useBlogForm } from '@/composables/useBlogForm';
 import { usePostForm } from '@/composables/usePostForm';
 import { useUIState } from '@/composables/useUIState';
+import { ensureNamespace } from '@/i18n';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { Blog, BreadcrumbItem, Category } from '@/types';
 import { Head } from '@inertiajs/vue3';
-import { ensureNamespace } from '@/i18n';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{ blogs: Blog[]; canCreate: boolean; categories: Category[] }>();
 
 const { t, locale } = useI18n();
-await ensureNamespace(locale.value, 'blogs');
+await ensureNamespace(locale.value, 'blogger');
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: t('blogs.breadcrumb.dashboard'), href: '/dashboard' },
-    { title: t('blogs.breadcrumb.index'), href: '/blogs' },
+    { title: t('breadcrumb.dashboard'), href: '/dashboard' },
+    { title: t('breadcrumb.index'), href: '/blogs' },
 ];
 
 // Use composables for state management
@@ -95,7 +95,7 @@ function handleToggleCreate() {
 </script>
 
 <template>
-    <Head :title="$t('blogs.title')" />
+    <Head :title="$t('title')" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
             <CreateBlogSection
@@ -135,8 +135,8 @@ function handleToggleCreate() {
                 />
 
                 <div v-if="props.blogs.length === 0" class="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
-                    {{ $t('blogs.empty') }}
-                    <span :title="!props.canCreate ? $t('blogs.limit_reached_hint') : ''">
+                    {{ $t('bloger.empty') }}
+                    <span :title="!props.canCreate ? $t('limit_reached_hint') : ''">
                         <Button
                             :disabled="!props.canCreate"
                             :variant="!props.canCreate ? 'muted' : 'link'"
@@ -144,7 +144,7 @@ function handleToggleCreate() {
                             type="button"
                             @click="openCreateForm"
                         >
-                            {{ $t('blogs.empty_cta') }}
+                            {{ $t('empty_cta') }}
                         </Button>
                     </span>
                 </div>

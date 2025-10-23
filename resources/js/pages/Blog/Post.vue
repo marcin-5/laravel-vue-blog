@@ -64,8 +64,8 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const author = computed(() => t('landing.post.author', ''));
-const published = computed(() => t('landing.post.published', 'Published:'));
+const author = computed(() => t('blog.post.author', ''));
+const published = computed(() => t('blog.post.published', 'Published:'));
 
 // SEO helpers - SSR compatible
 const baseUrl = import.meta.env.VITE_APP_URL || 'https://osobliwy.blog';

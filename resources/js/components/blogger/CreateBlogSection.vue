@@ -6,7 +6,7 @@ import type { Category } from '@/types';
 import { useI18n } from 'vue-i18n';
 
 const { t, locale } = useI18n();
-await ensureNamespace(locale.value, 'blogs');
+await ensureNamespace(locale.value, 'blogger');
 
 interface Props {
     canCreate: boolean;
@@ -40,16 +40,16 @@ function handleCancelCreate() {
 <template>
     <div class="space-y-6">
         <div class="flex items-center justify-between">
-            <h1 class="text-xl font-semibold">{{ t('blogs.create_section.title') }}</h1>
-            <div :title="!props.canCreate ? t('blogs.create_section.quota_reached_tooltip') : ''">
+            <h1 class="text-xl font-semibold">{{ t('create_section.title') }}</h1>
+            <div :title="!props.canCreate ? t('create_section.quota_reached_tooltip') : ''">
                 <Button
                     :disabled="!props.canCreate"
                     :variant="!props.canCreate ? 'muted' : showCreate ? 'exit' : 'constructive'"
                     type="button"
                     @click="handleToggleCreate"
                 >
-                    <span v-if="showCreate">{{ t('blogs.create_section.close_button') }}</span>
-                    <span v-else>{{ t('blogs.create_section.create_button') }}</span>
+                    <span v-if="showCreate">{{ t('create_section.close_button') }}</span>
+                    <span v-else>{{ t('create_section.create_button') }}</span>
                 </Button>
             </div>
         </div>

@@ -116,8 +116,8 @@ class PublicHomeController extends BasePublicController
 
         // Pull messages for SEO from the service (home page type)
         $messages = $this->translations->getPageTranslations('home');
-        $seoTitle = data_get($messages, 'landing.meta.welcomeTitle') ?? config('app.name');
-        $seoDescription = data_get($messages, 'landing.meta.welcomeDescription') ?? ('Welcome to ' . config(
+        $seoTitle = data_get($messages, 'meta.welcomeTitle') ?? config('app.name');
+        $seoDescription = data_get($messages, 'meta.welcomeDescription') ?? ('Welcome to ' . config(
                 'app.name',
             ));
 

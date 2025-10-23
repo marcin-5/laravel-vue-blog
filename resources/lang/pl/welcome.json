@@ -1,0 +1,14 @@
+{
+    "meta": {
+        "welcomeTitle": "Osobliwy Blog",
+        "welcomeDescription": "Witaj na Osobliwy Blog"
+    },
+    "slogans": [
+        "Rzeczy, o których istnieniu wie zbyt mało ludzi. Odkryjesz je?",
+        "Osobliwości, które mogą wprawić Cię w zdumienie. Zajrzysz, aby je zgłębić?",
+        "Świat jest pełen osobliwości. Wejdziesz, by je odkryć?"
+    ],
+    "actions": {
+        "clear": "Wyczyść filtr"
+    }
+}

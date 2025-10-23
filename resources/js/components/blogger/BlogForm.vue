@@ -14,7 +14,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { locale, t } = useI18n();
-await ensureNamespace(locale.value, 'blogs');
+await ensureNamespace(locale.value, 'blogger');
 
 interface Props {
     blog?: Blog;
@@ -58,34 +58,34 @@ const {
 } = useMarkdownPreview('markdown.preview');
 
 const translationKeys = computed(() => ({
-    name: t('blogs.form.name_label'),
-    namePlaceholder: props.isEdit ? '' : t('blogs.form.name_placeholder'),
-    description: t('blogs.form.description_label'),
-    descriptionPlaceholder: props.isEdit ? '' : t('blogs.form.description_placeholder'),
-    footer: t('blogs.form.footer_label'),
-    footerPlaceholder: props.isEdit ? '' : t('blogs.form.footer_placeholder'),
-    motto: t('blogs.form.motto_label'),
-    mottoPlaceholder: props.isEdit ? '' : t('blogs.form.motto_placeholder'),
-    mottoTooltip: t('blogs.form.motto_tooltip'),
-    published: t('blogs.form.published_label'),
-    locale: t('blogs.form.locale_label'),
-    sidebar: t('blogs.form.sidebar_label'),
-    sidebarHint: t('blogs.form.sidebar_hint'),
-    pageSize: t('blogs.form.page_size_label'),
-    cancel: t('blogs.form.cancel_button'),
-    create: t('blogs.form.create_button'),
-    save: t('blogs.form.save_button'),
-    saving: t('blogs.form.saving_button'),
-    creating: t('blogs.form.creating_button'),
-    preview: t('blogs.post_form.preview_button'),
-    close: t('blogs.post_form.close_button'),
-    fullPreview: t('blogs.post_form.full_preview_button'),
-    splitView: t('blogs.post_form.split_view_button'),
-    toggleLayout: previewLayout.value === 'vertical' ? t('blogs.post_form.horizontal_button') : t('blogs.post_form.vertical_button'),
-    exitPreview: t('blogs.post_form.exit_preview_button'),
-    markdown: t('blogs.post_form.markdown_label'),
-    previewLabel: t('blogs.post_form.preview_label'),
-    previewModeTitle: t('blogs.post_form.preview_mode_title'),
+    name: t('form.name_label'),
+    namePlaceholder: props.isEdit ? '' : t('form.name_placeholder'),
+    description: t('form.description_label'),
+    descriptionPlaceholder: props.isEdit ? '' : t('form.description_placeholder'),
+    footer: t('form.footer_label'),
+    footerPlaceholder: props.isEdit ? '' : t('form.footer_placeholder'),
+    motto: t('form.motto_label'),
+    mottoPlaceholder: props.isEdit ? '' : t('form.motto_placeholder'),
+    mottoTooltip: t('form.motto_tooltip'),
+    published: t('form.published_label'),
+    locale: t('form.locale_label'),
+    sidebar: t('form.sidebar_label'),
+    sidebarHint: t('form.sidebar_hint'),
+    pageSize: t('form.page_size_label'),
+    cancel: t('form.cancel_button'),
+    create: t('form.create_button'),
+    save: t('form.save_button'),
+    saving: t('form.saving_button'),
+    creating: t('form.creating_button'),
+    preview: t('post_form.preview_button'),
+    close: t('post_form.close_button'),
+    fullPreview: t('post_form.full_preview_button'),
+    splitView: t('post_form.split_view_button'),
+    toggleLayout: previewLayout.value === 'vertical' ? t('post_form.horizontal_button') : t('post_form.vertical_button'),
+    exitPreview: t('post_form.exit_preview_button'),
+    markdown: t('post_form.markdown_label'),
+    previewLabel: t('post_form.preview_label'),
+    previewModeTitle: t('post_form.preview_mode_title'),
 }));
 
 const localeOptions = computed(() => [
