@@ -25,7 +25,7 @@ const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 const editButtonVariant = computed(() => (props.isEditing ? 'exit' : 'toggle'));
-const editButtonLabel = computed(() => (props.isEditing ? t('blogger.post_item.close_button') : t('blogger.post_item.edit_button')));
+const editButtonLabel = computed(() => (props.isEditing ? t('post_item.close_button') : t('post_item.edit_button')));
 </script>
 
 <template>
