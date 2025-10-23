@@ -4,8 +4,9 @@ return [
     // Map page types used by public routes to translation groups.
     // These groups are merged in order. Missing files are skipped silently.
     'page_groups' => [
-        'home' => ['home', 'common'],
-        'about' => ['about', 'common'],
+        // Include 'landing' so Welcome.vue can access landing.slogans via tm('landing.slogans')
+        'home' => ['landing', 'common'],
+        'about' => ['about', 'landing', 'common'],
         'blog' => ['blog', 'common'],
         'post' => ['blog', 'common'],
     ],
