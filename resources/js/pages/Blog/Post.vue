@@ -150,7 +150,7 @@ const structuredData = computed(
 
             <div v-else>
                 <PostContent :author="post.author" :content="post.contentHtml" />
-                <BorderDivider class="mb-4" />
+                <BorderDivider class="mt-12 mb-4" />
                 <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
             </div>
 
