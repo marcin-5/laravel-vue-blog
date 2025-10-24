@@ -58,7 +58,7 @@ const links = computed(() => props.pagination?.links ?? []);
                     {{ p.title }}
                 </Link>
                 <small v-if="p.published_at" class="text-gray-700 dark:text-gray-400"> · {{ p.published_at }}</small>
-                <div v-if="p.excerpt" class="text-slate-800 dark:text-slate-400">{{ p.excerpt }}</div>
+                <div v-if="p.excerpt" class="prose dark:prose-invert -mt-3 max-w-none text-slate-800 dark:text-slate-400" v-html="p.excerpt"></div>
             </li>
         </ul>
 

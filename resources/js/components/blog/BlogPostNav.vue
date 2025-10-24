@@ -31,7 +31,7 @@ const backLinkClasses = (isLink: boolean) => [`${BASE_LINK_CLASSES} font-medium`
 
 <template>
     <nav v-if="navigation" :aria-label="t('blog.post_nav.aria')">
-        <BorderDivider class="mt-8 mb-4 pt-6" />
+        <BorderDivider class="my-4 pt-2" />
         <div class="flex items-center justify-between gap-4">
             <component :is="navigation.prevPost ? Link : 'span'" :class="navLinkClasses(!!navigation.prevPost)" :href="navigation.prevPost?.url">
                 <span class="text-lg">←</span>

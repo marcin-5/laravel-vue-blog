@@ -216,7 +216,8 @@ class PublicBlogController extends BasePublicController
             'id' => $p->id,
             'title' => $p->title,
             'slug' => $p->slug,
-            'excerpt' => $p->excerpt,
+            // Convert excerpt markdown to sanitized HTML for display
+            'excerpt' => $this->parseMarkdownToHtml($p->excerpt),
             'published_at' => $this->formatDateForLocale($p->published_at),
         ])->values();
     }
