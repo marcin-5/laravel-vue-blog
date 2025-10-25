@@ -2,33 +2,28 @@
 import AppLogo from '@/components/AppLogo.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import SeoHead from '@/components/seo/SeoHead.vue';
+import { SEO } from '@/types/blog';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-interface SeoProps {
-    title?: string | null;
-    description?: string | null;
-    canonicalUrl?: string | null;
-    ogImage?: string | null;
-    ogType?: string | null;
-    locale?: string | null;
-    structuredData?: Record<string, any> | null;
-}
-
 const props = defineProps<{
     locale?: string | null;
-    seo?: SeoProps | null;
+    seo?: Partial<SEO> | null;
 }>();
 
 const { t } = useI18n();
 
-const title = computed(() => props.seo?.title ?? t('about.meta.title', 'About'));
-const description = computed(() => props.seo?.description ?? t('about.meta.description', 'About this site'));
-const canonicalUrl = computed(() => props.seo?.canonicalUrl ?? '');
-const ogImage = computed(() => props.seo?.ogImage ?? null);
-const ogType = computed(() => props.seo?.ogType ?? 'website');
-const locale = computed(() => props.seo?.locale ?? props.locale ?? 'en');
-const structuredData = computed(() => props.seo?.structuredData ?? null);
+const getSeoProperty = <T,>(key: keyof SEO, fallback: T): T => {
+    return (props.seo?.[key] as T) ?? fallback;
+};
+
+const title = computed(() => getSeoProperty('title', t('about.meta.title', 'About')));
+const description = computed(() => getSeoProperty('description', t('about.meta.description', 'About this site')));
+const canonicalUrl = computed(() => getSeoProperty('canonicalUrl', ''));
+const ogImage = computed(() => getSeoProperty('ogImage', null));
+const ogType = computed(() => getSeoProperty('ogType', 'website'));
+const locale = computed(() => getSeoProperty('locale', props.locale ?? 'en'));
+const structuredData = computed(() => getSeoProperty('structuredData', null));
 </script>
 
 <template>
@@ -43,7 +38,6 @@ const structuredData = computed(() => props.seo?.structuredData ?? null);
     />
     <div class="flex min-h-screen flex-col">
         <PublicNavbar />
-
         <main class="mx-auto w-full max-w-[1024px] p-6 lg:p-8">
             <div class="mb-8 text-center text-primary">
                 <AppLogo :size="'md'" />
