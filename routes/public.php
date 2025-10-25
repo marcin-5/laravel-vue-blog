@@ -8,9 +8,7 @@ use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 // Robots.txt and Sitemap routes (without Inertia and appearance middleware)
 Route::withoutMiddleware([
@@ -26,6 +24,12 @@ Route::withoutMiddleware([
 
 // Public About page (SSR): provide translations via props
 Route::get('/about', [PublicHomeController::class, 'about'])->name('about');
+
+// Public Contact page (SSR)
+Route::get('/contact', [PublicHomeController::class, 'contact'])->name('contact');
+Route::post('/contact', [PublicHomeController::class, 'submit'])
+    ->name('public.contact.submit')
+    ->middleware(['throttle:6,1']); // rate-limit to reduce spam
 
 // Keep these at the very end to avoid conflicts.
 Route::get('{blog:slug}/{postSlug}', [PublicBlogController::class, 'post'])

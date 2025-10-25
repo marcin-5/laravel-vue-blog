@@ -23,6 +23,12 @@ const isHomePage = computed(() => page.url === '/');
                 >
                     {{ t('common.nav.about', 'About') }}
                 </Link>
+                <Link
+                    :href="route('contact')"
+                    class="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#19140035] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
+                >
+                    {{ t('common.nav.contact', 'Contact') }}
+                </Link>
                 <template v-if="$page.props.auth.user">
                     <Link
                         :href="route('dashboard')"

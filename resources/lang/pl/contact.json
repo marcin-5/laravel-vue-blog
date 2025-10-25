@@ -1,0 +1,23 @@
+{
+    "contact": {
+        "meta": {
+            "title": "Kontakt",
+            "description": "Skontaktuj się z nami"
+        },
+        "heading": "Kontakt",
+        "form": {
+            "name": "Imię i nazwisko",
+            "email": "Email",
+            "subject": "Temat",
+            "message": "Wiadomość",
+            "submit": "Wyślij wiadomość",
+            "submitted": "Twoja wiadomość została wysłana.",
+            "placeholders": {
+                "name": "Twoje imię i nazwisko",
+                "email": "Twój email",
+                "subject": "Temat",
+                "message": "Napisz swoją wiadomość..."
+            }
+        }
+    }
+}

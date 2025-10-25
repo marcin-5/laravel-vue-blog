@@ -2,6 +2,7 @@
   "common": {
     "nav": {
       "about": "O nas",
+      "contact": "Kontakt",
       "dashboard": "Panel",
       "logout": "Wyloguj",
       "login": "Zaloguj",

@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ContactMessageMail;
 use App\Models\Blog;
 use App\Models\Category;
 use App\Services\MarkdownService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Response;
 
 class PublicHomeController extends BasePublicController
@@ -216,4 +218,59 @@ class PublicHomeController extends BasePublicController
         ]);
     }
 
+    /**
+     * Contact page (SSR).
+     */
+    public function contact(): Response
+    {
+        $locale = app()->getLocale();
+
+        $messages = $this->translations->getPageTranslations('contact');
+
+        $baseUrl = config('app.url');
+        $seoTitle = data_get($messages, 'contact.meta.title') ?? 'Contact';
+        $seoDescription = data_get($messages, 'contact.meta.description') ?? 'Get in touch';
+        $canonicalUrl = rtrim($baseUrl, '/') . '/contact';
+        $ogImage = rtrim($baseUrl, '/') . '/og-image.png';
+
+        return $this->renderWithTranslations('Contact', 'contact', [
+            'locale' => $locale,
+            'translations' => [
+                'messages' => $messages,
+            ],
+            'seo' => [
+                'title' => $seoTitle,
+                'description' => $seoDescription,
+                'canonicalUrl' => $canonicalUrl,
+                'ogImage' => $ogImage,
+                'ogType' => 'website',
+                'locale' => $locale,
+                'structuredData' => [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'ContactPage',
+                    'name' => $seoTitle,
+                    'url' => $canonicalUrl,
+                    'description' => $seoDescription,
+                ],
+            ],
+        ]);
+    }
+
+    public function submit(Request $request)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'email' => ['required', 'email', 'max:255'],
+            'subject' => ['required', 'string', 'max:180'],
+            'message' => ['required', 'string', 'max:5000'],
+        ]);
+
+        // Send the email (synchronous). If you want to queue, see notes below.
+        Mail::to(config('mail.contact_to'))
+            ->send(new ContactMessageMail($data));
+
+        return response()->json([
+            'message' => 'Thanks for your message. We will get back to you soon.'
+        ]);
+    }
 }

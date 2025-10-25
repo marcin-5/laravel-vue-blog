@@ -6,6 +6,7 @@ return [
     'page_groups' => [
         'home' => ['welcome', 'common'],
         'about' => ['about', 'welcome', 'common'],
+        'contact' => ['contact', 'common'],
         'blog' => ['blog', 'common'],
         'post' => ['blog', 'common'],
     ],

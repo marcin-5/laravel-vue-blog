@@ -2,6 +2,7 @@
   "common": {
     "nav": {
       "about": "About",
+      "contact": "Contact",
       "dashboard": "Dashboard",
       "logout": "Log out",
       "login": "Log in",
