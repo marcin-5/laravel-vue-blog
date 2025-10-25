@@ -5,28 +5,15 @@ import CategoriesFilter from '@/components/blog/CategoriesFilter.vue';
 import NoBlogs from '@/components/blog/NoBlogs.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import SeoHead from '@/components/seo/SeoHead.vue';
+import type { BlogItem, CategoryItem } from '@/types/blog';
+import { DEFAULT_APP_URL, stripHtmlTags } from '@/types/blog';
 import { router } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-interface Category {
-    id: number;
-    slug: string;
-    name: string;
-}
-
-interface BlogItem {
-    id: number;
-    name: string;
-    slug: string;
-    author: string;
-    descriptionHtml?: string | null;
-    categories: Category[];
-}
-
 const props = defineProps<{
     blogs: BlogItem[];
-    categories: Category[];
+    categories: CategoryItem[];
     selectedCategoryIds?: number[];
     locale?: string;
 }>();
@@ -39,7 +26,7 @@ const slogans = tm('slogans') as string[];
 const randomSlogan = slogans[Math.floor(Math.random() * slogans.length)] || '';
 
 // SEO helpers - SSR compatible
-const baseUrl = import.meta.env.VITE_APP_URL || 'https://osobliwy.blog';
+const baseUrl = import.meta.env.VITE_APP_URL || DEFAULT_APP_URL;
 const canonicalUrl = computed(() => {
     const categoryParam = selected.value.length > 0 ? `?categories=${selected.value.join(',')}` : '';
     return `${baseUrl}${categoryParam}`;
@@ -63,7 +50,7 @@ const structuredData = computed(() => ({
             name: blog.author,
         },
         url: `${baseUrl}/blogs/${blog.slug}`,
-        description: blog.descriptionHtml?.replace(/<[^>]*>/g, '').substring(0, 700),
+        description: blog.descriptionHtml ? stripHtmlTags(blog.descriptionHtml).substring(0, 700) : undefined,
     })),
 }));
 
