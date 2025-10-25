@@ -1,47 +1,49 @@
 <script lang="ts" setup>
 import { Card } from '@/components/ui/card';
+import { BlogItem, cutMarkedSection, getCategoryDisplayName } from '@/types/blog';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-interface CategoryItem {
-    id: number;
-    name: string | Record<string, string>;
-    slug?: string;
-}
-interface BlogItem {
-    id: number;
-    name: string;
-    slug: string;
-    author: string;
-    descriptionHtml?: string | null;
-    categories: CategoryItem[];
-}
-
 const props = defineProps<{ blog: BlogItem }>();
+
 const { t } = useI18n();
+
+// Computed properties
+const blogUrl = computed(() => `/${props.blog.slug}`);
+const authorLabel = computed(() => t('blog.author', 'Author:'));
+const hasAuthor = computed(() => !!props.blog.author);
+const hasDescription = computed(() => !!props.blog.descriptionHtml);
+const hasCategories = computed(() => props.blog.categories.length > 0);
+const cleanedDescription = computed(() => (props.blog.descriptionHtml ? cutMarkedSection(props.blog.descriptionHtml) : ''));
+
+// CSS Classes
+const CARD_CLASSES = 'border-gray-200 bg-white p-4 hover:shadow-md dark:border-gray-800 dark:bg-slate-900';
+const TITLE_CLASSES = 'mb-1 text-xl font-semibold text-slate-800 dark:text-slate-100';
+const LINK_CLASSES = 'hover:underline';
+const AUTHOR_CLASSES = 'text-slate-600 mb-2 text-sm dark:text-slate-400';
+const DESCRIPTION_CLASSES = 'mb-3 text-sm text-slate-600 dark:text-slate-300';
+const CATEGORY_CONTAINER_CLASSES = 'flex flex-wrap gap-2';
+const CATEGORY_BADGE_CLASSES = 'rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700 dark:bg-slate-800 dark:text-slate-200';
 </script>
 
 <template>
-    <Card class="border-gray-200 bg-white p-4 hover:shadow-md dark:border-gray-800 dark:bg-slate-900">
-        <h2 class="mb-1 text-xl font-semibold text-slate-800 dark:text-slate-100">
-            <a :href="`/${props.blog.slug}`" class="hover:underline">{{ props.blog.name }}</a>
+    <Card :class="CARD_CLASSES">
+        <h2 :class="TITLE_CLASSES">
+            <a :class="LINK_CLASSES" :href="blogUrl">
+                {{ blog.name }}
+            </a>
         </h2>
-        <div v-if="props.blog.author" class="text-slate-6 00 mb-2 text-sm dark:text-slate-400">
-            {{ t('blog.author', 'Author:') }} {{ props.blog.author }}
-        </div>
-        <div
-            v-if="props.blog.descriptionHtml"
-            class="mb-3 text-sm text-slate-600 dark:text-slate-300"
-            v-html="props.blog.descriptionHtml.replace(/-!-.*-!-/gms, '')"
-        ></div>
-        <div class="flex flex-wrap gap-2">
-            <span
-                v-for="cat in props.blog.categories"
-                :key="cat.id"
-                class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700 dark:bg-slate-800 dark:text-slate-200"
-            >
-                {{ typeof cat.name === 'string' ? cat.name : '' }}
+
+        <div v-if="hasAuthor" :class="AUTHOR_CLASSES">{{ authorLabel }} {{ blog.author }}</div>
+
+        <div v-if="hasDescription" :class="DESCRIPTION_CLASSES" v-html="cleanedDescription" />
+
+        <div v-if="hasCategories" :class="CATEGORY_CONTAINER_CLASSES">
+            <span v-for="category in blog.categories" :key="category.id" :class="CATEGORY_BADGE_CLASSES">
+                {{ getCategoryDisplayName(category) }}
             </span>
         </div>
+
         <slot />
     </Card>
 </template>

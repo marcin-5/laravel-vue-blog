@@ -92,3 +92,7 @@ export function stripCutMarkers(html: string): string {
 export function cutMarkedSection(html: string): string {
     return html.replace(/-!-.*-!-/gms, '');
 }
+
+export function getCategoryDisplayName(category: CategoryItem): string {
+    return typeof category.name === 'string' ? category.name : '';
+}
