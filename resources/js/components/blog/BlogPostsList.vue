@@ -1,82 +1,110 @@
 <script lang="ts" setup>
 import { ensureNamespace } from '@/i18n';
+import type { Pagination, PostItem } from '@/types/blog';
 import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-interface PostItem {
-    id: number;
-    title: string;
-    slug: string;
-    excerpt?: string | null;
-    published_at?: string | null;
-}
-
-const { t, locale } = useI18n();
-// Ensure "blog" namespace is loaded for current locale (supports SSR via Suspense)
-await ensureNamespace(locale.value, 'blog');
-
 const props = defineProps<{
     posts: PostItem[];
     blogSlug: string;
-    pagination?: {
-        links: { url: string | null; label: string; active: boolean }[];
-        prevUrl: string | null;
-        nextUrl: string | null;
-    } | null;
+    pagination?: Pagination | null;
 }>();
 
-function translateLabel(raw: string): string {
+const { t, locale } = useI18n();
+
+// Ensure "blog" namespace is loaded for current locale (supports SSR via Suspense)
+await ensureNamespace(locale.value, 'blog');
+
+// Translation helper
+function translatePaginationLabel(rawLabel: string): string {
     // Strip HTML entities like &laquo; and &raquo; and trim
-    const txt = raw
+    const cleanedLabel = rawLabel
         .replace(/&laquo;|«/g, '')
         .replace(/&raquo;|»/g, '')
         .trim();
+
     // If numeric (page number) return as-is
-    if (/^\d+$/.test(txt)) return txt;
+    if (/^\d+$/.test(cleanedLabel)) {
+        return cleanedLabel;
+    }
+
     // Laravel may return 'Previous' or 'Next'
-    const lower = txt.toLowerCase();
-    if (lower === 'previous') return t('blog.pagination.previous');
-    if (lower === 'next') return t('blog.pagination.next');
+    const lowerCaseLabel = cleanedLabel.toLowerCase();
+    if (lowerCaseLabel === 'previous') {
+        return t('blog.pagination.previous');
+    }
+    if (lowerCaseLabel === 'next') {
+        return t('blog.pagination.next');
+    }
+
     // Fallback to original text
-    return txt;
+    return cleanedLabel;
 }
 
-const links = computed(() => props.pagination?.links ?? []);
+// Computed properties
+const paginationLinks = computed(() => props.pagination?.links ?? []);
+const hasPosts = computed(() => props.posts && props.posts.length > 0);
+const hasPagination = computed(() => paginationLinks.value.length > 0);
+
+// CSS classes
+const LINK_BASE_CLASSES = 'rounded border px-2 py-1 text-sm';
+const LINK_ACTIVE_CLASSES = 'border-slate-500 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800';
+const LINK_INACTIVE_CLASSES = 'border border-gray-200 text-gray-500 dark:border-gray-700 dark:text-gray-600';
+const LINK_HOVER_CLASSES = 'hover:bg-gray-50 dark:hover:bg-gray-800';
+const LINK_DISABLED_CLASSES = 'pointer-events-none opacity-50';
+
+function getPaginationLinkClasses(link: { active: boolean; url: string | null }): string[] {
+    const classes = [LINK_BASE_CLASSES];
+
+    if (link.active) {
+        classes.push(LINK_ACTIVE_CLASSES);
+    } else {
+        classes.push(LINK_INACTIVE_CLASSES);
+    }
+
+    if (!link.url) {
+        classes.push(LINK_DISABLED_CLASSES);
+    } else {
+        classes.push(LINK_HOVER_CLASSES);
+    }
+
+    return classes;
+}
 </script>
 
 <template>
     <section :aria-label="t('blog.posts_list.aria')">
-        <h2 class="mb-2 text-xl font-semibold text-slate-700 dark:text-slate-500">{{ t('blog.posts_list.title') }}</h2>
-        <p v-if="!posts || posts.length === 0">{{ t('blog.posts_list.empty') }}</p>
+        <h2 class="mb-2 text-xl font-semibold text-slate-700 dark:text-slate-500">
+            {{ t('blog.posts_list.title') }}
+        </h2>
+
+        <p v-if="!hasPosts">
+            {{ t('blog.posts_list.empty') }}
+        </p>
+
         <ul v-else class="space-y-3">
-            <li v-for="p in posts" :key="p.id">
+            <li v-for="post in posts" :key="post.id">
                 <Link
-                    :href="route('blog.public.post', { blog: blogSlug, postSlug: p.slug })"
+                    :href="route('blog.public.post', { blog: blogSlug, postSlug: post.slug })"
                     class="font-semibold text-teal-900 hover:underline dark:font-normal dark:text-sky-200"
                 >
-                    {{ p.title }}
+                    {{ post.title }}
                 </Link>
-                <small v-if="p.published_at" class="text-gray-700 dark:text-gray-400"> · {{ p.published_at }}</small>
-                <div v-if="p.excerpt" class="prose dark:prose-invert -mt-3 max-w-none text-slate-800 dark:text-slate-400" v-html="p.excerpt"></div>
+                <small v-if="post.published_at" class="text-gray-700 dark:text-gray-400"> · {{ post.published_at }} </small>
+                <div v-if="post.excerpt" class="prose dark:prose-invert -mt-3 max-w-none text-slate-800 dark:text-slate-400" v-html="post.excerpt" />
             </li>
         </ul>
 
-        <nav v-if="links.length" :aria-label="t('blog.pagination.aria')" class="mt-4 flex items-center gap-1">
+        <nav v-if="hasPagination" :aria-label="t('blog.pagination.aria')" class="mt-4 flex items-center gap-1">
             <Link
-                v-for="(lnk, idx) in links"
-                :key="idx"
-                :class="[
-                    'rounded border px-2 py-1 text-sm',
-                    lnk.active
-                        ? 'border-slate-500 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800'
-                        : 'border border-gray-200 text-gray-500 dark:border-gray-700 dark:text-gray-600',
-                    !lnk.url ? 'pointer-events-none opacity-50' : 'hover:bg-gray-50 dark:hover:bg-gray-800',
-                ]"
-                :href="lnk.url || ''"
+                v-for="(link, index) in paginationLinks"
+                :key="index"
+                :class="getPaginationLinkClasses(link)"
+                :href="link.url || ''"
                 preserve-scroll
             >
-                <span>{{ translateLabel(String(lnk.label)) }}</span>
+                <span>{{ translatePaginationLabel(String(link.label)) }}</span>
             </Link>
         </nav>
     </section>

@@ -1,26 +1,24 @@
 <script lang="ts" setup>
+import type { Blog } from '@/types/blog';
+import { stripCutMarkers } from '@/types/blog';
 import '@fontsource/noto-serif';
-
-interface Blog {
-    id: number;
-    name: string;
-    slug: string;
-    descriptionHtml?: string | null;
-    motto?: string | null;
-}
 
 defineProps<{
     blog: Blog;
     displayedMotto: string | null;
 }>();
+
+const NOTO_SERIF_FONT = "'Noto Serif', serif";
 </script>
 
 <template>
     <header class="mb-4">
-        <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-400">{{ blog.name }}</h1>
-        <p v-if="displayedMotto" class="mt-2 text-gray-800 italic dark:text-gray-200" style="font-family: 'Noto Serif', serif">
+        <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-400">
+            {{ blog.name }}
+        </h1>
+        <p v-if="displayedMotto" :style="{ fontFamily: NOTO_SERIF_FONT }" class="mt-2 text-gray-800 italic dark:text-gray-200">
             {{ displayedMotto }}
         </p>
-        <div v-if="blog.descriptionHtml" class="prose prose-slate dark:prose-invert max-w-none" v-html="blog.descriptionHtml.replace(/-!-/g, '')" />
+        <div v-if="blog.descriptionHtml" class="prose prose-slate dark:prose-invert max-w-none" v-html="stripCutMarkers(blog.descriptionHtml)" />
     </header>
 </template>
