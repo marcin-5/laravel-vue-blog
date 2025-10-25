@@ -6,46 +6,9 @@ import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import SeoHead from '@/components/seo/SeoHead.vue';
+import type { Blog, Navigation, Pagination, PostItem } from '@/types/blog';
+import { DEFAULT_APP_URL, EXCERPT_MAX_LENGTH, SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import { computed } from 'vue';
-
-interface Blog {
-    id: number;
-    name: string;
-    slug: string;
-    descriptionHtml?: string | null;
-    motto?: string | null;
-}
-
-interface PostItem {
-    id: number;
-    title: string;
-    slug: string;
-    excerpt?: string | null;
-    published_at?: string | null;
-}
-
-interface PaginationLink {
-    url: string | null;
-    label: string;
-    active: boolean;
-}
-
-interface Pagination {
-    links: PaginationLink[];
-}
-
-interface NavPost {
-    title: string;
-    slug: string;
-    url: string;
-}
-
-interface Navigation {
-    prevPost?: NavPost | null;
-    nextPost?: NavPost | null;
-    landingUrl: string;
-    isLandingPage?: boolean;
-}
 
 const props = defineProps<{
     blog: Blog;
@@ -59,59 +22,76 @@ const props = defineProps<{
     navigation?: Navigation;
     locale?: string;
 }>();
-const hasLanding = computed(() => !!props.landingHtml);
-const hasFooter = computed(() => !!(props.footerHtml && props.footerHtml.trim()));
 
-function getRandomMotto(motto: string | null | undefined): string | null {
-    if (!motto) return null;
-    const mottos = motto.split('\n\n').filter((m) => m.trim());
-    if (mottos.length === 0) return null;
-    return mottos[Math.floor(Math.random() * mottos.length)].trim();
+// Content availability checks
+const hasLandingContent = computed(() => !!props.landingHtml);
+const hasFooterContent = computed(() => !!(props.footerHtml && props.footerHtml.trim()));
+
+// Motto selection
+function selectRandomMottoFromList(mottoText: string | null | undefined): string | null {
+    if (!mottoText) return null;
+
+    const mottoList = mottoText.split('\n\n').filter((motto) => motto.trim());
+    if (mottoList.length === 0) return null;
+
+    const randomIndex = Math.floor(Math.random() * mottoList.length);
+    return mottoList[randomIndex].trim();
 }
 
-const displayedMotto = getRandomMotto(props.blog.motto);
-// Compute sidebar layout values
-const sidebarValue = computed(() => props.sidebar ?? 0);
-const sidebarWidth = computed(() => Math.min(50, Math.max(0, Math.abs(sidebarValue.value))));
-const hasSidebar = computed(() => sidebarWidth.value > 0);
-const isSidebarRight = computed(() => sidebarValue.value > 0);
+const displayedMotto = selectRandomMottoFromList(props.blog.motto);
 
-// SEO helpers - SSR compatible
-const baseUrl = import.meta.env.VITE_APP_URL || 'https://osobliwy.blog';
-const canonicalUrl = computed(() => `${baseUrl}/blogs/${props.blog.slug}`);
-const seoTitle = computed(() => props.blog.name);
-const seoDescription = computed(() => props.metaDescription || props.blog.name);
-const seoImage = computed(() => `${baseUrl}/og-image.png`);
+// Sidebar layout calculations
+const sidebarPercentage = computed(() => props.sidebar ?? 0);
+const normalizedSidebarWidth = computed(() => Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, Math.abs(sidebarPercentage.value))));
+const hasSidebarLayout = computed(() => normalizedSidebarWidth.value > SIDEBAR_MIN_WIDTH);
+const isSidebarPositionedRight = computed(() => sidebarPercentage.value > 0);
+const mainContentWidth = computed(() => 100 - normalizedSidebarWidth.value);
+
+// SEO configuration
+const applicationBaseUrl = import.meta.env.VITE_APP_URL || DEFAULT_APP_URL;
+const blogCanonicalUrl = computed(() => `${applicationBaseUrl}/blogs/${props.blog.slug}`);
+const blogSeoTitle = computed(() => props.blog.name);
+const blogSeoDescription = computed(() => props.metaDescription || props.blog.name);
+const blogSeoImage = computed(() => `${applicationBaseUrl}/og-image.png`);
+
+// Utility functions
+function stripHtmlTags(html: string): string {
+    return html.replace(/<[^>]*>/g, '');
+}
+
+function createBlogPostUrl(postSlug: string): string {
+    return `${applicationBaseUrl}/blogs/${props.blog.slug}/${postSlug}`;
+}
 
 // Structured data for SEO
-const structuredData = computed(() => ({
+const blogStructuredData = computed(() => ({
     '@context': 'https://schema.org',
     '@type': 'Blog',
-    name: seoTitle.value,
-    url: canonicalUrl.value,
-    description: seoDescription.value,
+    name: blogSeoTitle.value,
+    url: blogCanonicalUrl.value,
+    description: blogSeoDescription.value,
     author: {
         '@type': 'Organization',
-        name: seoTitle.value,
+        name: blogSeoTitle.value,
     },
     blogPost: props.posts.map((post) => ({
         '@type': 'BlogPosting',
         headline: post.title,
-        url: `${baseUrl}/blogs/${props.blog.slug}/${post.slug}`,
+        url: createBlogPostUrl(post.slug),
         datePublished: post.published_at,
-        description: post.excerpt?.replace(/<[^>]*>/g, '').substring(0, 200),
+        description: post.excerpt ? stripHtmlTags(post.excerpt).substring(0, EXCERPT_MAX_LENGTH) : undefined,
     })),
 }));
 </script>
 
 <template>
     <SeoHead
-        :canonical-url="canonicalUrl"
-        :description="seoDescription"
+        :canonical-url="blogCanonicalUrl"
+        :description="blogSeoDescription"
         :locale="locale"
-        :og-image="seoImage"
-        :structured-data="structuredData"
-        :title="seoTitle"
+        :og-image="blogSeoImage"
+        :structured-data="blogStructuredData"
+        :title="blogSeoTitle"
         og-type="blog"
     />
     <div class="flex min-h-screen flex-col bg-[#FDFDFC] text-[#1b1b18] dark:bg-[#0a0a0a]">
@@ -120,27 +100,36 @@ const structuredData = computed(() => ({
             <BorderDivider class="mb-4" />
 
             <!-- Layout without sidebar -->
-            <template v-if="!hasSidebar">
+            <template v-if="!hasSidebarLayout">
                 <BlogHeader :blog="blog" :displayedMotto="displayedMotto" />
                 <BorderDivider class="mb-8" />
-                <main v-if="hasLanding" class="min-w-0 flex-1">
+                <main v-if="hasLandingContent" class="min-w-0 flex-1">
                     <div class="prose max-w-none" v-html="landingHtml" />
                 </main>
-                <BlogPostsList :blogSlug="blog.slug" :class="{ 'mt-6': hasLanding }" :pagination="pagination" :posts="posts" />
+                <BlogPostsList :blogSlug="blog.slug" :class="{ 'mt-6': hasLandingContent }" :pagination="pagination" :posts="posts" />
             </template>
 
             <!-- Layout with sidebar -->
             <div v-else class="flex items-start gap-8">
-                <aside :class="{ 'order-2': isSidebarRight }" :style="{ width: sidebarWidth + '%', flex: '0 0 ' + sidebarWidth + '%' }">
+                <aside
+                    :class="{ 'order-2': isSidebarPositionedRight }"
+                    :style="{
+                        width: normalizedSidebarWidth + '%',
+                        flex: '0 0 ' + normalizedSidebarWidth + '%',
+                    }"
+                >
                     <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
                 </aside>
                 <main
-                    :class="{ 'order-1': isSidebarRight }"
-                    :style="{ width: 100 - sidebarWidth + '%', flex: '1 1 ' + (100 - sidebarWidth) + '%' }"
+                    :class="{ 'order-1': isSidebarPositionedRight }"
+                    :style="{
+                        width: mainContentWidth + '%',
+                        flex: '1 1 ' + mainContentWidth + '%',
+                    }"
                     class="min-w-0 flex-1"
                 >
                     <BlogHeader :blog="blog" :displayedMotto="displayedMotto" />
-                    <div v-if="hasLanding" class="prose max-w-none" v-html="landingHtml" />
+                    <div v-if="hasLandingContent" class="prose max-w-none" v-html="landingHtml" />
                 </main>
             </div>
 
@@ -148,7 +137,7 @@ const structuredData = computed(() => ({
             <BlogPostNav :navigation="navigation" />
 
             <!-- Footer (optional) -->
-            <template v-if="hasFooter">
+            <template v-if="hasFooterContent">
                 <BorderDivider class="my-4" />
                 <BlogFooter :html="footerHtml || ''" />
             </template>
