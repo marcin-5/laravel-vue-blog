@@ -5,7 +5,7 @@ import { InfoIcon } from 'lucide-vue-next';
 interface Props {
     id: string;
     label: string;
-    modelValue: string;
+    modelValue: string | null;
     error?: string;
     placeholder?: string;
     type?: 'input' | 'textarea';
@@ -47,7 +47,7 @@ function handleInput(event: Event) {
             :id="props.id"
             :placeholder="props.placeholder"
             :required="props.required"
-            :value="props.modelValue"
+            :value="props.modelValue ?? ''"
             class="block w-full rounded-md border px-3 py-2"
             type="text"
             @input="handleInput"
@@ -57,7 +57,7 @@ function handleInput(event: Event) {
             :id="props.id"
             :placeholder="props.placeholder"
             :rows="props.rows"
-            :value="props.modelValue"
+            :value="props.modelValue ?? ''"
             class="block w-full rounded-md border px-3 py-2"
             @input="handleInput"
         />

@@ -1,5 +1,5 @@
+import type { AdminBlog as Blog } from '@/types/blog.types';
 import { ref } from 'vue';
-import type { Blog } from '@/types';
 
 export function useUIState() {
     const expandedPostsForId = ref<number | null>(null);

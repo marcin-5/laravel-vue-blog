@@ -2,7 +2,7 @@
 import BlogForm from '@/components/blogger/BlogForm.vue';
 import { Button } from '@/components/ui/button';
 import { ensureNamespace } from '@/i18n';
-import type { Category } from '@/types';
+import type { Category } from '@/types/blog.types';
 import { useI18n } from 'vue-i18n';
 
 const { t, locale } = useI18n();

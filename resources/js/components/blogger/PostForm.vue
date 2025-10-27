@@ -4,7 +4,7 @@ import MarkdownPreviewSection from '@/components/blogger/MarkdownPreviewSection.
 import PostFormField from '@/components/blogger/PostFormField.vue';
 import { useMarkdownPreview } from '@/composables/useMarkdownPreview';
 import { ensureNamespace } from '@/i18n';
-import type { PostItem } from '@/types';
+import type { AdminPostItem as PostItem } from '@/types/blog.types';
 import { useForm } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
 import { computed, watch } from 'vue';

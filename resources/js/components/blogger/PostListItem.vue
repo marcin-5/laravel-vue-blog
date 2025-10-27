@@ -2,7 +2,7 @@
 import PostForm from '@/components/blogger/PostForm.vue';
 import { Button } from '@/components/ui/button';
 import { ensureNamespace } from '@/i18n';
-import type { PostItem } from '@/types';
+import type { AdminPostItem as PostItem } from '@/types/blog.types';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 

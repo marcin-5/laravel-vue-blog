@@ -2,7 +2,7 @@
 import AppLogo from '@/components/AppLogo.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import SeoHead from '@/components/seo/SeoHead.vue';
-import { SEO } from '@/types/blog';
+import { SEO } from '@/types';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 

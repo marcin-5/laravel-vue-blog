@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { BlogItem } from '@/types/blog';
+import type { BlogItem } from '@/types/blog.types';
 import { computed } from 'vue';
 import BlogCard from './BlogCard.vue';
 

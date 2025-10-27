@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { Category } from '@/types';
 import { i18n } from '@/i18n';
+import type { Category } from '@/types/blog.types';
 
 interface Props {
     categories: Category[];

@@ -1,4 +1,4 @@
-import type { Blog, PostItem } from '@/types';
+import type { AdminBlog as Blog, AdminPostItem as PostItem } from '@/types/blog.types';
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 

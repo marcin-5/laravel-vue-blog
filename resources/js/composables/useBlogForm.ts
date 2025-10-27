@@ -1,4 +1,4 @@
-import type { Blog } from '@/types';
+import type { AdminBlog as Blog } from '@/types/blog.types';
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -42,7 +42,7 @@ export function useBlogForm() {
     }
 
     function submitCreate() {
-        createForm.post(route('blogger.store'), {
+        createForm.post(route('blogs.store'), {
             onSuccess: () => {
                 closeCreateForm();
             },
@@ -75,7 +75,7 @@ export function useBlogForm() {
     }
 
     function submitEdit(blog: Blog) {
-        editForm.patch(route('blogger.update', blog.id), {
+        editForm.patch(route('blogs.update', blog.id), {
             preserveScroll: true,
             onSuccess: () => {
                 editingId.value = null;

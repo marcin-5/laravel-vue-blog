@@ -6,8 +6,8 @@ import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import SeoHead from '@/components/seo/SeoHead.vue';
-import type { Blog, Navigation, Pagination, PostItem } from '@/types/blog';
 import { DEFAULT_APP_URL, EXCERPT_MAX_LENGTH, SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
+import type { Blog, Navigation, Pagination, PostItem } from '@/types/blog.types';
 import { computed } from 'vue';
 
 const props = defineProps<{

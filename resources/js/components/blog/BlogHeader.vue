@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { Blog } from '@/types/blog';
 import { stripCutMarkers } from '@/types/blog';
+import type { Blog } from '@/types/blog.types';
 import '@fontsource/noto-serif';
 
 defineProps<{

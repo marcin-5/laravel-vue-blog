@@ -5,8 +5,9 @@ import BorderDivider from '@/components/blog/BorderDivider.vue';
 import PostContent from '@/components/blog/PostContent.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import SeoHead from '@/components/seo/SeoHead.vue';
-import type { Blog, Navigation, Pagination, PostDetails, PostItem, SEO } from '@/types/blog';
+import type { SEO } from '@/types';
 import { DEFAULT_APP_URL } from '@/types/blog';
+import type { Blog, Navigation, Pagination, PostDetails, PostItem } from '@/types/blog.types';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 

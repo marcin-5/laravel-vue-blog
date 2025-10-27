@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import SeoHead from '@/components/seo/SeoHead.vue';
-import type { SEO } from '@/types/blog';
+import type { SEO } from '@/types';
 import { useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';

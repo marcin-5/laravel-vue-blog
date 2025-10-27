@@ -22,7 +22,7 @@ interface TranslationKeys {
 interface Props {
     id: string;
     label: string;
-    modelValue: string;
+    modelValue: string | null;
     error?: string;
     placeholder?: string;
     isPreviewMode: boolean;
@@ -80,7 +80,7 @@ function handleLayoutToggle() {
         <FullScreenPreview
             v-if="props.isFullPreview"
             :cancel-button-label="props.translations.cancel"
-            :content="props.modelValue"
+            :content="props.modelValue ?? ''"
             :create-button-label="props.translations.create"
             :exit-preview-button-label="props.translations.exitPreview"
             :hide-save-button="!props.showSaveButton"

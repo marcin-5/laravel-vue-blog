@@ -7,7 +7,8 @@ import { usePostForm } from '@/composables/usePostForm';
 import { useUIState } from '@/composables/useUIState';
 import { ensureNamespace } from '@/i18n';
 import AppLayout from '@/layouts/AppLayout.vue';
-import type { Blog, BreadcrumbItem, Category } from '@/types';
+import type { BreadcrumbItem } from '@/types';
+import type { AdminBlog as Blog, Category } from '@/types/blog.types';
 import { Head } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 

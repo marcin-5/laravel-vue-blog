@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ensureNamespace } from '@/i18n';
-import type { Pagination, PostItem } from '@/types/blog';
+import type { Pagination, PostItem } from '@/types/blog.types';
 import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';

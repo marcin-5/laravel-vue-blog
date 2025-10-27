@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { Card } from '@/components/ui/card';
-import { BlogItem, cutMarkedSection, getCategoryDisplayName } from '@/types/blog';
+import { cutMarkedSection, getCategoryDisplayName } from '@/types/blog';
+import type { BlogItem } from '@/types/blog.types';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 

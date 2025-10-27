@@ -5,7 +5,7 @@ import PostListItem from '@/components/blogger/PostListItem.vue';
 import PublishedBadge from '@/components/blogger/PublishedBadge.vue';
 import { Button } from '@/components/ui/button';
 import { ensureNamespace, i18n } from '@/i18n';
-import type { Blog, Category, PostItem } from '@/types';
+import type { AdminBlog as Blog, AdminPostItem as PostItem, Category } from '@/types/blog.types';
 import { useI18n } from 'vue-i18n';
 
 const { locale } = useI18n();

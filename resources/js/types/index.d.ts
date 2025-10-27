@@ -44,39 +44,16 @@ export interface User {
     updated_at: string;
 }
 
-export type BreadcrumbItemType = BreadcrumbItem;
-
-export interface Category {
-    id: number;
-    name: string | Record<string, string>;
-    slug?: string;
-}
-
-export interface PostItem {
-    id: number;
-    blog_id: number;
+export interface SEO {
     title: string;
-    excerpt: string | null;
-    content?: string | null;
-    is_published: boolean;
-    visibility?: string;
-    published_at?: string | null;
-    created_at?: string | null;
+    description: string;
+    canonicalUrl: string;
+    ogImage: string;
+    ogType: string;
+    locale: string;
+    publishedTime?: string | null;
+    modifiedTime?: string | null;
+    structuredData: Record<string, any>;
 }
 
-export interface Blog {
-    id: number;
-    user_id: number;
-    name: string;
-    slug: string;
-    description: string | null;
-    motto?: string | null;
-    footer?: string | null;
-    is_published: boolean;
-    locale: string;
-    sidebar?: number; // -50..50
-    page_size?: number; // default 10
-    creation_date?: string | null;
-    categories?: Category[];
-    posts?: PostItem[];
-}
+export type BreadcrumbItemType = BreadcrumbItem;

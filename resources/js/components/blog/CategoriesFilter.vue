@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useI18nGate } from '@/composables/useI18nGate';
-import type { Category } from '@/types';
+import type { Category } from '@/types/blog.types';
 import { computed } from 'vue';
 import CategoryPill from './CategoryPill.vue';
 
