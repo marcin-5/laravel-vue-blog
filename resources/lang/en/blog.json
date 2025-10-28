@@ -19,7 +19,8 @@
         },
         "post": {
             "author": "Author:",
-            "published": "Published:"
+            "published": "Published:",
+            "updated": "Updated:"
         }
     }
 }

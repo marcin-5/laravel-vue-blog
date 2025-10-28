@@ -24,14 +24,33 @@ const props = defineProps<{
 
 const { t } = useI18n();
 
-// Internationalization
-const authorLabel = computed(() => t('blog.post.author', ''));
-const publishedLabel = computed(() => t('blog.post.published', 'Published:'));
-
-// Configuration
+// Constants
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const applicationBaseUrl = import.meta.env.VITE_APP_URL || DEFAULT_APP_URL;
 
-// SEO URL builders
+// Helper functions
+function isValidDate(dateString: string | null | undefined): boolean {
+    if (!dateString) return false;
+    const date = new Date(dateString);
+    return !isNaN(date.getTime());
+}
+
+function formatDate(dateString: string | null | undefined, locale?: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return String(dateString);
+
+    try {
+        return new Intl.DateTimeFormat(locale || undefined, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        }).format(date);
+    } catch {
+        return date.toLocaleDateString();
+    }
+}
+
 function createPostUrl(blogSlug: string, postSlug: string): string {
     return `${applicationBaseUrl}/blogs/${blogSlug}/${postSlug}`;
 }
@@ -40,18 +59,66 @@ function createDefaultOgImage(): string {
     return `${applicationBaseUrl}/og-image.png`;
 }
 
+function shouldShowUpdatedDate(publishedTime: string | null | undefined, modifiedTime: string | null | undefined): boolean {
+    if (!isValidDate(publishedTime) || !isValidDate(modifiedTime)) return false;
+
+    const published = new Date(publishedTime!);
+    const modified = new Date(modifiedTime!);
+
+    return Math.abs(modified.getTime() - published.getTime()) > ONE_DAY_MS;
+}
+
+function createBlogPostingStructuredData(
+    post: PostDetails,
+    blog: Blog,
+    seoValues: {
+        description: string;
+        canonicalUrl: string;
+        publishedTime: string | null;
+        modifiedTime: string | null;
+    },
+) {
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: post.title,
+        description: seoValues.description,
+        url: seoValues.canonicalUrl,
+        datePublished: seoValues.publishedTime,
+        dateModified: seoValues.modifiedTime,
+        author: {
+            '@type': 'Organization',
+            name: blog.name,
+        },
+        publisher: {
+            '@type': 'Organization',
+            name: blog.name,
+        },
+        mainEntityOfPage: {
+            '@type': 'WebPage',
+            '@id': seoValues.canonicalUrl,
+        },
+    };
+}
+
+// Internationalization
+const authorLabel = computed(() => t('blog.post.author', ''));
+const publishedLabel = computed(() => t('blog.post.published', 'Published:'));
+const updatedLabel = computed(() => t('blog.post.updated', 'Updated:'));
+
 // SEO computed properties
 const postCanonicalUrl = computed(() => props.seo?.canonicalUrl || createPostUrl(props.blog.slug, props.post.slug));
-
 const postSeoTitle = computed(() => props.seo?.title || `${props.post.title} - ${props.blog.name}`);
-
 const postSeoDescription = computed(() => props.seo?.description || props.post.excerpt || props.post.title);
-
 const postSeoImage = computed(() => props.seo?.ogImage || createDefaultOgImage());
-
 const postOgType = computed(() => props.seo?.ogType || 'article');
 const postPublishedTime = computed(() => props.seo?.publishedTime || null);
 const postModifiedTime = computed(() => props.seo?.modifiedTime || null);
+
+// Date display computed properties
+const showUpdated = computed(() => shouldShowUpdatedDate(postPublishedTime.value, postModifiedTime.value));
+
+const formattedUpdatedDate = computed(() => formatDate(postModifiedTime.value, props.locale));
 
 // Layout checks
 const hasSidebar = computed(() => props.sidebarPosition !== 'none');
@@ -61,27 +128,13 @@ const isRightSidebar = computed(() => props.sidebarPosition === 'right');
 // Structured data for SEO
 const postStructuredData = computed(
     () =>
-        props.seo?.structuredData || {
-            '@context': 'https://schema.org',
-            '@type': 'BlogPosting',
-            headline: props.post.title,
+        props.seo?.structuredData ||
+        createBlogPostingStructuredData(props.post, props.blog, {
             description: postSeoDescription.value,
-            url: postCanonicalUrl.value,
-            datePublished: props.seo?.publishedTime,
-            dateModified: props.seo?.modifiedTime,
-            author: {
-                '@type': 'Organization',
-                name: props.blog.name,
-            },
-            publisher: {
-                '@type': 'Organization',
-                name: props.blog.name,
-            },
-            mainEntityOfPage: {
-                '@type': 'WebPage',
-                '@id': postCanonicalUrl.value,
-            },
-        },
+            canonicalUrl: postCanonicalUrl.value,
+            publishedTime: postPublishedTime.value,
+            modifiedTime: postModifiedTime.value,
+        }),
 );
 </script>
 
@@ -108,6 +161,9 @@ const postStructuredData = computed(
                 <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-400">{{ post.title }}</h1>
                 <p v-if="post.published_at" class="my-2 text-sm text-gray-800 italic dark:text-gray-300">
                     {{ publishedLabel }} {{ post.published_at }}
+                </p>
+                <p v-if="showUpdated" class="-mt-1 mb-2 text-xs text-gray-600 italic dark:text-gray-400">
+                    {{ updatedLabel }} {{ formattedUpdatedDate }}
                 </p>
                 <p v-if="post.author" class="text-md text-gray-900 dark:text-gray-200">
                     {{ authorLabel }}
