@@ -68,6 +68,9 @@
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
+
+    --color-breadcrumb-link: var(--breadcrumb-link);
+    --color-breadcrumb-link-active: var(--breadcrumb-link-active);
 }
 
 @layer utilities {
@@ -122,6 +125,8 @@
     --sidebar-border: hsl(0 0% 91%);
     --sidebar-ring: hsl(217.2 91.2% 59.8%);
     --sidebar: hsl(0 0% 98%);
+    --breadcrumb-link: #534432ee;
+    --breadcrumb-link-active: #403020;
 }
 
 .dark {
@@ -168,6 +173,8 @@
     --sidebar-border: hsl(0 0% 15.9%);
     --sidebar-ring: hsl(217.2 91.2% 59.8%);
     --sidebar: hsl(240 5.9% 10%);
+    --breadcrumb-link: #ccbb55aa;
+    --breadcrumb-link-active: #bbaa55dd;
 }
 
 @layer base {

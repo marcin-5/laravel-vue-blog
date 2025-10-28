@@ -49,11 +49,17 @@ export interface NavPost {
     url: string;
 }
 
+export interface BreadcrumbItem {
+    label: string;
+    url?: string | null;
+}
+
 export interface Navigation {
     prevPost?: NavPost | null;
     nextPost?: NavPost | null;
     landingUrl: string;
     isLandingPage?: boolean;
+    breadcrumbs?: BreadcrumbItem[];
 }
 
 export interface CategoryItem {

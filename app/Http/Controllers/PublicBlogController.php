@@ -194,6 +194,9 @@ class PublicBlogController extends BasePublicController
             ->select(['id', 'title', 'slug'])
             ->first();
 
+        $appName = config('app.name');
+        $baseUrl = config('app.url');
+
         return [
             'prevPost' => null, // Always disabled on landing page
             'nextPost' => $latestPost ? [
@@ -203,6 +206,16 @@ class PublicBlogController extends BasePublicController
             ] : null,
             'landingUrl' => route('blog.public.landing', ['blog' => $blog->slug]),
             'isLandingPage' => true, // Flag to indicate this is landing page navigation
+            'breadcrumbs' => [
+                [
+                    'label' => $appName,
+                    'url' => $baseUrl,
+                ],
+                [
+                    'label' => $blog->name,
+                    'url' => route('blog.public.landing', ['blog' => $blog->slug]),
+                ],
+            ],
         ];
     }
 
@@ -252,11 +265,13 @@ class PublicBlogController extends BasePublicController
      */
     private function generateBlogStructuredData(Blog $blog, $posts, string $baseUrl, string $plainDescription): array
     {
+        $blogUrl = $baseUrl . '/blogs/' . $blog->slug;
+
         return [
             '@context' => 'https://schema.org',
             '@type' => 'Blog',
             'name' => $blog->name,
-            'url' => $baseUrl . '/blogs/' . $blog->slug,
+            'url' => $blogUrl,
             'description' => $plainDescription,
             'author' => [
                 '@type' => 'Organization',
@@ -271,6 +286,27 @@ class PublicBlogController extends BasePublicController
                     'description' => $post->excerpt ? strip_tags($post->excerpt) : null,
                 ];
             })->all(),
+            'breadcrumb' => [
+                '@type' => 'BreadcrumbList',
+                'itemListElement' => [
+                    [
+                        '@type' => 'ListItem',
+                        'position' => 1,
+                        'item' => [
+                            '@id' => $baseUrl,
+                            'name' => config('app.name'),
+                        ],
+                    ],
+                    [
+                        '@type' => 'ListItem',
+                        'position' => 2,
+                        'item' => [
+                            '@id' => $blogUrl,
+                            'name' => $blog->name,
+                        ],
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -366,11 +402,28 @@ class PublicBlogController extends BasePublicController
             'url' => route('blog.public.post', ['blog' => $blog->slug, 'postSlug' => $p->slug]),
         ];
 
+        $appName = config('app.name');
+        $baseUrl = config('app.url');
+
         return [
             'prevPost' => $prevPost ? $formatUrl($prevPost) : null,
             'nextPost' => $nextPost ? $formatUrl($nextPost) : null,
             'landingUrl' => route('blog.public.landing', ['blog' => $blog->slug]),
             'isLandingPage' => false,
+            'breadcrumbs' => [
+                [
+                    'label' => $appName,
+                    'url' => $baseUrl,
+                ],
+                [
+                    'label' => $blog->name,
+                    'url' => route('blog.public.landing', ['blog' => $blog->slug]),
+                ],
+                [
+                    'label' => $post->title,
+                    'url' => null,
+                ],
+            ],
         ];
     }
 
@@ -443,12 +496,15 @@ class PublicBlogController extends BasePublicController
      */
     private function generatePostStructuredData(Blog $blog, Post $post, string $baseUrl, string $description): array
     {
+        $blogUrl = $baseUrl . '/blogs/' . $blog->slug;
+        $postUrl = $blogUrl . '/' . $post->slug;
+
         return [
             '@context' => 'https://schema.org',
             '@type' => 'BlogPosting',
             'headline' => $post->title,
             'description' => $description,
-            'url' => $baseUrl . '/blogs/' . $blog->slug . '/' . $post->slug,
+            'url' => $postUrl,
             'datePublished' => optional($post->published_at)?->toIso8601String(),
             'dateModified' => optional($post->updated_at)?->toIso8601String(),
             'author' => [
@@ -461,7 +517,36 @@ class PublicBlogController extends BasePublicController
             ],
             'mainEntityOfPage' => [
                 '@type' => 'WebPage',
-                '@id' => $baseUrl . '/blogs/' . $blog->slug . '/' . $post->slug,
+                '@id' => $postUrl,
+            ],
+            'breadcrumb' => [
+                '@type' => 'BreadcrumbList',
+                'itemListElement' => [
+                    [
+                        '@type' => 'ListItem',
+                        'position' => 1,
+                        'item' => [
+                            '@id' => $baseUrl,
+                            'name' => config('app.name'),
+                        ],
+                    ],
+                    [
+                        '@type' => 'ListItem',
+                        'position' => 2,
+                        'item' => [
+                            '@id' => $blogUrl,
+                            'name' => $blog->name,
+                        ],
+                    ],
+                    [
+                        '@type' => 'ListItem',
+                        'position' => 3,
+                        'item' => [
+                            '@id' => $postUrl,
+                            'name' => $post->title,
+                        ],
+                    ],
+                ],
             ],
         ];
     }

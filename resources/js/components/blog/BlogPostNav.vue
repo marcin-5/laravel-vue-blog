@@ -1,24 +1,13 @@
 <script lang="ts" setup>
 import BorderDivider from '@/components/blog/BorderDivider.vue';
+import type { Navigation } from '@/types/blog.types';
 import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 
-interface PostLink {
-    title: string;
-    slug: string;
-    url: string;
-}
-
-interface NavInfo {
-    prevPost?: PostLink | null;
-    nextPost?: PostLink | null;
-    landingUrl: string;
-    isLandingPage?: boolean;
-}
-
 defineProps<{
-    navigation?: NavInfo;
+    navigation?: Navigation;
 }>();
+
 const { t } = useI18n();
 
 const BASE_LINK_CLASSES = 'inline-flex items-center rounded-sm px-3 py-2 text-sm';
@@ -32,6 +21,30 @@ const backLinkClasses = (isLink: boolean) => [`${BASE_LINK_CLASSES} font-medium`
 <template>
     <nav v-if="navigation" :aria-label="t('blog.post_nav.aria')">
         <BorderDivider class="my-4 pt-2" />
+
+        <!-- Breadcrumbs -->
+        <ol v-if="navigation.breadcrumbs && navigation.breadcrumbs.length" aria-label="Breadcrumb" class="flex flex-wrap items-center gap-1 text-sm">
+            <li v-for="(crumb, index) in navigation.breadcrumbs" :key="index" class="flex items-center font-semibold">
+                <component
+                    :is="index < navigation.breadcrumbs.length - 1 && crumb.url ? Link : 'span'"
+                    :aria-current="index === navigation.breadcrumbs.length - 1 ? 'page' : undefined"
+                    :class="[
+                        {
+                            'text-breadcrumb-link-active': index === navigation.breadcrumbs.length - 1,
+                            'text-breadcrumb-link': index < navigation.breadcrumbs.length - 1,
+                        },
+                        'hover:underline',
+                    ]"
+                    :href="index < navigation.breadcrumbs.length - 1 ? crumb.url || undefined : undefined"
+                >
+                    {{ crumb.label }}
+                </component>
+                <span v-if="index < navigation.breadcrumbs.length - 1" class="mx-2 text-breadcrumb-link opacity-60">/</span>
+            </li>
+        </ol>
+
+        <BorderDivider class="mt-2 mb-4 pt-2" />
+
         <div class="flex items-center justify-between gap-4">
             <component :is="navigation.prevPost ? Link : 'span'" :class="navLinkClasses(!!navigation.prevPost)" :href="navigation.prevPost?.url">
                 <span class="text-lg">←</span>
