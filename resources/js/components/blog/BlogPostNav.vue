@@ -19,7 +19,7 @@ const backLinkClasses = (isLink: boolean) => [`${BASE_LINK_CLASSES} font-medium`
 </script>
 
 <template>
-    <nav v-if="navigation" :aria-label="t('blog.post_nav.aria')">
+    <nav v-if="navigation" :aria-label="t('blog.post_nav.aria')" style="font-family: roboto, sans-serif">
         <BorderDivider class="my-4 pt-2" />
 
         <!-- Breadcrumbs -->

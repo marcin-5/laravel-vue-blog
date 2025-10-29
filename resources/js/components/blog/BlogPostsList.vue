@@ -74,7 +74,7 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
 </script>
 
 <template>
-    <section :aria-label="t('blog.posts_list.aria')">
+    <section :aria-label="t('blog.posts_list.aria')" style="font-family: 'Inter', sans-serif">
         <h2 class="mb-2 text-xl font-semibold text-slate-700 dark:text-slate-500">
             {{ t('blog.posts_list.title') }}
         </h2>

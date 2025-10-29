@@ -1,4 +1,6 @@
 import '@fontsource-variable/nunito';
+import '@fontsource-variable/roboto';
+import '@fontsource/inter';
 import '@fontsource/noto-serif';
 import '../css/app.css';
 
