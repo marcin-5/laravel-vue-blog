@@ -21,6 +21,7 @@ class RobotsController extends Controller
         if (App::environment('production')) {
             $content .= "Allow: /\n\n";
             $content .= "Sitemap: " . URL::to('/sitemap.xml') . "\n";
+            $content .= "Host: " . URL::to('/') . "\n";
         } else {
             $content .= "Disallow: /\n";
         }
