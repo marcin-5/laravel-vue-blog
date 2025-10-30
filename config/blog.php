@@ -1,36 +1,29 @@
 <?php
 
 return [
-    'defaults' => [
-        'locale' => 'en',
-        'sidebar' => 0,
-        'page_size' => 10,
-    ],
 
-    'limits' => [
-        'sidebar' => [
-            'min' => -50,
-            'max' => 50,
-        ],
-        'page_size' => [
-            'min' => 1,
-            'max' => 100,
-        ],
-    ],
+    /*
+    |--------------------------------------------------------------------------
+    | Meta Description Settings
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for generating meta descriptions from content.
+    |
+    */
 
-    'supported_locales' => ['en', 'pl'],
+    'meta_description_length' => 160,
+    'meta_description_min_cut_position' => 80,
 
-    'posts' => [
-        'defaults' => [
-            'is_published' => false,
-            'visibility' => 'public',
-        ],
+    /*
+    |--------------------------------------------------------------------------
+    | Pagination Settings
+    |--------------------------------------------------------------------------
+    |
+    | Default and maximum page sizes for blog post listings.
+    |
+    */
 
-        'allowed_visibility' => ['public', 'registered'],
+    'default_page_size' => 10,
+    'max_page_size' => 100,
 
-        'limits' => [
-            'excerpt_max_length' => 500,
-            'title_max_length' => 255,
-        ],
-    ],
 ];

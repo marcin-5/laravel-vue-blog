@@ -14,7 +14,7 @@ class StoreBlogRequest extends FormRequest
 
     public function rules(): array
     {
-        $config = config('blog');
+        $config = config('blogger');
 
         return [
             'description' => ['nullable', 'string'],
@@ -41,7 +41,7 @@ class StoreBlogRequest extends FormRequest
     public function getBlogData(): array
     {
         $validated = $this->validated();
-        $config = config('blog.defaults');
+        $config = config('blogger.defaults');
 
         return [
             'user_id' => $this->user()->id,

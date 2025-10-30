@@ -24,7 +24,7 @@ class StorePostRequest extends FormRequest
 
     public function rules(): array
     {
-        $config = config('blog.posts', []);
+        $config = config('blogger.posts', []);
 
         return [
             'blog_id' => ['required', 'integer', 'exists:blogs,id'],
@@ -43,7 +43,7 @@ class StorePostRequest extends FormRequest
     public function getPostData(): array
     {
         $validated = $this->validated();
-        $config = config('blog.posts.defaults', []);
+        $config = config('blogger.posts.defaults', []);
 
         return [
             'blog_id' => $validated['blog_id'],

@@ -19,7 +19,7 @@ class UpdatePostRequest extends FormRequest
 
     public function rules(): array
     {
-        $config = config('blog.posts', []);
+        $config = config('blogger.posts', []);
 
         return [
             'title' => ['sometimes', 'required', 'string', 'max:255'],

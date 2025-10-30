@@ -3,21 +3,16 @@
 namespace App\Models;
 
 use App\Observers\SitemapObserver;
+use HTMLPurifier;
+use HTMLPurifier_Config;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 use ParsedownExtra;
-use HTMLPurifier;
-use HTMLPurifier_Config;
 
 class Post extends Model
 {
-    use HasFactory;
-
-    public const VIS_PUBLIC = 'public';
-    public const VIS_REGISTERED = 'registered';
     protected $fillable = [
         'blog_id',
         'title',
@@ -77,55 +72,56 @@ class Post extends Model
     }
 
     /**
-     * Scope: only published posts (is_published = true and published_at <= now or null).
+     * Scope to only published posts (published_at is set and not in the future)
      */
     public function scopePublished(Builder $query): Builder
     {
-        return $query->where('is_published', true)
-            ->where(function ($q) {
-                $q->whereNull('published_at')->orWhere('published_at', '<=', now());
-            });
+        return $query->whereNotNull('published_at')
+            ->where('published_at', '<=', now());
     }
 
     /**
-     * Scope: visible to the public (non-registered).
+     * Scope to only public posts (is_public = true)
      */
     public function scopePublic(Builder $query): Builder
     {
-        return $query->where('visibility', self::VIS_PUBLIC);
+        return $query->where('is_public', true);
     }
 
     /**
-     * Scope: visible only to registered users.
+     * Scope to order by publication date (published_at, then created_at)
      */
-    public function scopeRegistered(Builder $query): Builder
+    public function scopeOrderByPublicationDate(Builder $query, string $direction = 'desc'): Builder
     {
-        return $query->where('visibility', self::VIS_REGISTERED);
+        return $query->orderBy('published_at', $direction)
+            ->orderBy('created_at', $direction);
     }
 
     /**
-     * Scope: posts belonging to blogs owned by a specific user.
+     * Composite scope: published + public + ordered
      */
-    public function scopeOwnedBy(Builder $query, int $userId): Builder
+    public function scopeForPublicView(Builder $query): Builder
     {
-        return $query->whereHas('blog', function ($q) use ($userId) {
-            $q->where('user_id', $userId);
-        });
+        return $query->published()
+            ->public()
+            ->orderByPublicationDate();
     }
 
     /**
-     * Scope: posts for a specific blog with ownership validation.
+     * Scope for public listing views (includes common select fields)
      */
-    public function scopeForBlog(Builder $query, int $blogId, int $userId): Builder
+    public function scopeForPublicListing(Builder $query): Builder
     {
-        $query->where('blog_id', $blogId);
+        return $query->forPublicView()
+            ->select(['id', 'blog_id', 'title', 'slug', 'excerpt', 'published_at', 'created_at']);
+    }
 
-        if ($userId) {
-            $query->whereHas('blog', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
-            });
-        }
-
-        return $query;
+    /**
+     * Scope to find post by slug within published public posts
+     */
+    public function scopeFindBySlugForPublic(Builder $query, string $slug): Builder
+    {
+        return $query->forPublicView()
+            ->where('slug', $slug);
     }
 }
