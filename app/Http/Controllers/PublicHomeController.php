@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\DataTransferObjects\SeoData;
+use App\Http\Resources\WelcomeBlogResource;
 use App\Mail\ContactMessageMail;
 use App\Models\Blog;
 use App\Models\Category;
 use App\Services\MarkdownService;
+use App\Services\SeoService;
+use App\Services\TranslationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -14,6 +18,14 @@ use Inertia\Response;
 
 class PublicHomeController extends BasePublicController
 {
+    public function __construct(
+        private readonly MarkdownService $markdown,
+        private readonly SeoService $seoService,
+        protected TranslationService $translations,
+    ) {
+        parent::__construct($translations);
+    }
+
     /**
      * Show the welcome page with blogs and categories filter.
      */
@@ -33,7 +45,7 @@ class PublicHomeController extends BasePublicController
             'blogs' => $blogs,
             'categories' => $categories,
             'selectedCategoryIds' => $selectedCategoryIds,
-            'seo' => $seoData,
+            'seo' => $seoData->toArray(),
         ]);
     }
 
@@ -86,49 +98,14 @@ class PublicHomeController extends BasePublicController
                             ->from('posts')
                             ->whereColumn('posts.blog_id', 'blogs.id')
                             ->where('is_published', true);
-                    }
+                    },
                 ])
                 ->orderByDesc('latest_post_at')
                 ->orderBy('name')
                 ->get()
-                ->map(fn(Blog $b) => $this->transformBlogForWelcomePage($b))
+                ->map(fn(Blog $b) => (new WelcomeBlogResource($b))->resolve())
                 ->values();
         });
-    }
-
-    /**
-     * Transform a blog model into an array for the welcome page.
-     */
-    private function transformBlogForWelcomePage(Blog $blog): array
-    {
-        $blogLocale = $blog->locale ?: app()->getLocale();
-        $descriptionHtml = '';
-
-        if (!empty($blog->description)) {
-            /** @var MarkdownService $md */
-            $md = app(MarkdownService::class);
-            $descriptionHtml = $md->convertToHtml($blog->description);
-        }
-
-        return [
-            'id' => $blog->id,
-            'name' => $blog->name,
-            'slug' => $blog->slug,
-            'author' => $blog->user?->name ?? '',
-            'descriptionHtml' => $descriptionHtml,
-            'categories' => $blog->categories
-                ->filter(
-                    fn($c) => method_exists($c, 'hasTranslation') ? $c->hasTranslation(
-                        'name',
-                        $blogLocale,
-                    ) : true,
-                )
-                ->map(fn($c) => [
-                    'id' => $c->id,
-                    'slug' => $c->slug,
-                    'name' => $c->getTranslation('name', $blogLocale) ?? $c->slug,
-                ])->values(),
-        ];
     }
 
     /**
@@ -160,7 +137,7 @@ class PublicHomeController extends BasePublicController
         array $selectedCategoryIds,
         Collection $blogs,
         string $locale,
-    ): array {
+    ): SeoData {
         $canonicalUrl = $baseUrl . (empty($selectedCategoryIds) ? '' : '?categories=' . implode(
                     ',',
                     $selectedCategoryIds,
@@ -172,41 +149,20 @@ class PublicHomeController extends BasePublicController
         $seoTitle = data_get($messages, 'meta.welcomeTitle') ?? config('app.name');
         $seoDescription = data_get($messages, 'meta.welcomeDescription') ?? ('Welcome to ' . config('app.name'));
 
-        return [
-            'title' => $seoTitle,
-            'description' => $seoDescription,
-            'canonicalUrl' => $canonicalUrl,
-            'ogImage' => $ogImage,
-            'ogType' => 'website',
-            'locale' => $locale,
-            'structuredData' => $this->generateHomeStructuredData($blogs, $seoTitle, $seoDescription, $baseUrl),
-        ];
-    }
-
-    /**
-     * Generate structured data for home page.
-     */
-    private function generateHomeStructuredData($blogs, string $title, string $description, string $baseUrl): array
-    {
-        return [
-            '@context' => 'https://schema.org',
-            '@type' => 'Blog',
-            'name' => $title,
-            'url' => $baseUrl,
-            'description' => $description,
-            'blogPost' => collect($blogs)->slice(0, 10)->map(function ($blog) use ($baseUrl) {
-                return [
-                    '@type' => 'BlogPosting',
-                    'headline' => $blog['name'],
-                    'author' => [
-                        '@type' => 'Person',
-                        'name' => $blog['author'],
-                    ],
-                    'url' => $baseUrl . '/blogs/' . $blog['slug'],
-                    'description' => $blog['descriptionHtml'] ? strip_tags($blog['descriptionHtml']) : null,
-                ];
-            })->all(),
-        ];
+        return new SeoData(
+            title: $seoTitle,
+            description: $seoDescription,
+            canonicalUrl: $canonicalUrl,
+            ogImage: $ogImage,
+            ogType: 'website',
+            locale: $locale,
+            structuredData: $this->seoService->generateHomeStructuredData(
+                $blogs->toArray(),
+                $seoTitle,
+                $seoDescription,
+                $baseUrl,
+            ),
+        );
     }
 
     /**
@@ -214,7 +170,7 @@ class PublicHomeController extends BasePublicController
      * If you also need `about` group messages, you can augment them here without
      * changing the service mapping, or keep the original logic if preferred.
      */
-    public function about(MarkdownService $markdown): Response
+    public function about(): Response
     {
         $locale = app()->getLocale();
 
@@ -224,7 +180,7 @@ class PublicHomeController extends BasePublicController
         // Convert about.content markdown to HTML if present
         $aboutContent = data_get($messages, 'about.content');
         if (is_string($aboutContent) && $aboutContent !== '') {
-            $html = $markdown->convertToHtml($aboutContent);
+            $html = $this->markdown->convertToHtml($aboutContent);
             data_set($messages, 'about.content', $html);
         }
 
@@ -234,27 +190,29 @@ class PublicHomeController extends BasePublicController
         $canonicalUrl = rtrim($baseUrl, '/') . '/about';
         $ogImage = rtrim($baseUrl, '/') . '/og-image.png';
 
+        $seoData = new SeoData(
+            title: $seoTitle,
+            description: $seoDescription,
+            canonicalUrl: $canonicalUrl,
+            ogImage: $ogImage,
+            ogType: 'website',
+            locale: $locale,
+            structuredData: [
+                '@context' => 'https://schema.org',
+                '@type' => 'AboutPage',
+                'name' => $seoTitle,
+                'url' => $canonicalUrl,
+                'description' => $seoDescription,
+            ],
+        );
+
         return $this->renderWithTranslations('About', 'about', [
             'locale' => $locale,
             // Pass preprocessed translations (about.content already converted to HTML)
             'translations' => [
                 'messages' => $messages,
             ],
-            'seo' => [
-                'title' => $seoTitle,
-                'description' => $seoDescription,
-                'canonicalUrl' => $canonicalUrl,
-                'ogImage' => $ogImage,
-                'ogType' => 'website',
-                'locale' => $locale,
-                'structuredData' => [
-                    '@context' => 'https://schema.org',
-                    '@type' => 'AboutPage',
-                    'name' => $seoTitle,
-                    'url' => $canonicalUrl,
-                    'description' => $seoDescription,
-                ],
-            ],
+            'seo' => $seoData->toArray(),
             // Optionally expose pre-rendered about messages if your front-end expects them under a specific prop
             // 'aboutMessages' => data_get($messages, 'about'),
         ]);
@@ -275,26 +233,28 @@ class PublicHomeController extends BasePublicController
         $canonicalUrl = rtrim($baseUrl, '/') . '/contact';
         $ogImage = rtrim($baseUrl, '/') . '/og-image.png';
 
+        $seoData = new SeoData(
+            title: $seoTitle,
+            description: $seoDescription,
+            canonicalUrl: $canonicalUrl,
+            ogImage: $ogImage,
+            ogType: 'website',
+            locale: $locale,
+            structuredData: [
+                '@context' => 'https://schema.org',
+                '@type' => 'ContactPage',
+                'name' => $seoTitle,
+                'url' => $canonicalUrl,
+                'description' => $seoDescription,
+            ],
+        );
+
         return $this->renderWithTranslations('Contact', 'contact', [
             'locale' => $locale,
             'translations' => [
                 'messages' => $messages,
             ],
-            'seo' => [
-                'title' => $seoTitle,
-                'description' => $seoDescription,
-                'canonicalUrl' => $canonicalUrl,
-                'ogImage' => $ogImage,
-                'ogType' => 'website',
-                'locale' => $locale,
-                'structuredData' => [
-                    '@context' => 'https://schema.org',
-                    '@type' => 'ContactPage',
-                    'name' => $seoTitle,
-                    'url' => $canonicalUrl,
-                    'description' => $seoDescription,
-                ],
-            ],
+            'seo' => $seoData->toArray(),
         ]);
     }
 
@@ -312,7 +272,7 @@ class PublicHomeController extends BasePublicController
             ->send(new ContactMessageMail($data));
 
         return response()->json([
-            'message' => 'Thanks for your message. We will get back to you soon.'
+            'message' => 'Thanks for your message. We will get back to you soon.',
         ]);
     }
 }

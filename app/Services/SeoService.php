@@ -140,4 +140,27 @@ class SeoService
             ),
         ];
     }
+
+    public function generateHomeStructuredData(array $blogs, string $title, string $description, string $baseUrl): array
+    {
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'Blog',
+            'name' => $title,
+            'url' => $baseUrl,
+            'description' => $description,
+            'blogPost' => collect($blogs)->slice(0, 10)->map(function ($blog) use ($baseUrl) {
+                return [
+                    '@type' => 'BlogPosting',
+                    'headline' => $blog['name'],
+                    'author' => [
+                        '@type' => 'Person',
+                        'name' => $blog['author'],
+                    ],
+                    'url' => $baseUrl . '/blogs/' . $blog['slug'],
+                    'description' => !empty($blog['descriptionHtml']) ? strip_tags($blog['descriptionHtml']) : null,
+                ];
+            })->all(),
+        ];
+    }
 }
