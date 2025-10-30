@@ -7,6 +7,7 @@ use App\Models\Blog;
 use App\Models\Category;
 use App\Services\MarkdownService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Response;
@@ -19,28 +20,125 @@ class PublicHomeController extends BasePublicController
     public function welcome(Request $request): Response
     {
         $locale = app()->getLocale();
+        $selectedCategoryIds = $this->getSelectedCategoryIds($request);
 
-        // Read selected categories from query: supports CSV string or array
-        $selected = $request->query('categories');
+        $blogs = $this->getWelcomeBlogs($selectedCategoryIds, $locale);
+        $categories = $this->getWelcomeCategories($locale);
+
+        $baseUrl = config('app.url');
+        $seoData = $this->prepareSeoData($baseUrl, $selectedCategoryIds, $blogs, $locale);
+
+        return $this->renderWithTranslations('Welcome', 'home', [
+            'locale' => $locale,
+            'blogs' => $blogs,
+            'categories' => $categories,
+            'selectedCategoryIds' => $selectedCategoryIds,
+            'seo' => $seoData,
+        ]);
+    }
+
+    /**
+     * Get category IDs from the request query.
+     */
+    private function getSelectedCategoryIds(Request $request): array
+    {
+        $selected = $request->query('categories', []);
+
         if (is_string($selected)) {
-            $selectedCategoryIds = collect(explode(',', $selected))
-                ->map(fn($v) => (int)trim($v))
-                ->filter()
-                ->values()
-                ->all();
-        } elseif (is_array($selected)) {
-            $selectedCategoryIds = collect($selected)
-                ->map(fn($v) => (int)$v)
-                ->filter()
-                ->values()
-                ->all();
-        } else {
-            $selectedCategoryIds = [];
+            $selected = explode(',', $selected);
         }
 
-        // Load categories (localized name) with Redis cache
+        return collect($selected)
+            ->map(fn($value) => (int)trim($value))
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Get blogs for the welcome page, using cache.
+     */
+    private function getWelcomeBlogs(array $selectedCategoryIds, string $locale): Collection
+    {
+        $categoryFilter = empty($selectedCategoryIds) ? 'all' : implode(',', $selectedCategoryIds);
+        $blogsCacheKey = "welcome_blogs_{$locale}_{$categoryFilter}";
+        $ttl = app()->isLocal() ? 5 : 3600;
+
+        return Cache::remember($blogsCacheKey, $ttl, function () use ($selectedCategoryIds) {
+            $blogsQuery = Blog::query()
+                ->where('is_published', true)
+                ->with([
+                    'categories' => fn($q) => $q->select(['categories.id', 'categories.slug', 'categories.name']),
+                    'user' => fn($q) => $q->select(['id', 'name']),
+                ])
+                ->select(['id', 'name', 'slug', 'description', 'locale', 'user_id']);
+
+            if (!empty($selectedCategoryIds)) {
+                $blogsQuery->whereHas('categories', function ($q) use ($selectedCategoryIds) {
+                    $q->whereIn('categories.id', $selectedCategoryIds);
+                });
+            }
+
+            return $blogsQuery
+                ->addSelect([
+                    'latest_post_at' => function ($query) {
+                        $query->selectRaw('COALESCE(MAX(COALESCE(published_at, created_at)), NULL)')
+                            ->from('posts')
+                            ->whereColumn('posts.blog_id', 'blogs.id')
+                            ->where('is_published', true);
+                    }
+                ])
+                ->orderByDesc('latest_post_at')
+                ->orderBy('name')
+                ->get()
+                ->map(fn(Blog $b) => $this->transformBlogForWelcomePage($b))
+                ->values();
+        });
+    }
+
+    /**
+     * Transform a blog model into an array for the welcome page.
+     */
+    private function transformBlogForWelcomePage(Blog $blog): array
+    {
+        $blogLocale = $blog->locale ?: app()->getLocale();
+        $descriptionHtml = '';
+
+        if (!empty($blog->description)) {
+            /** @var MarkdownService $md */
+            $md = app(MarkdownService::class);
+            $descriptionHtml = $md->convertToHtml($blog->description);
+        }
+
+        return [
+            'id' => $blog->id,
+            'name' => $blog->name,
+            'slug' => $blog->slug,
+            'author' => $blog->user?->name ?? '',
+            'descriptionHtml' => $descriptionHtml,
+            'categories' => $blog->categories
+                ->filter(
+                    fn($c) => method_exists($c, 'hasTranslation') ? $c->hasTranslation(
+                        'name',
+                        $blogLocale,
+                    ) : true,
+                )
+                ->map(fn($c) => [
+                    'id' => $c->id,
+                    'slug' => $c->slug,
+                    'name' => $c->getTranslation('name', $blogLocale) ?? $c->slug,
+                ])->values(),
+        ];
+    }
+
+    /**
+     * Get categories for the welcome page, using cache.
+     */
+    private function getWelcomeCategories(string $locale): Collection
+    {
         $cacheKey = "welcome_categories_{$locale}";
-        $categories = Cache::remember($cacheKey, 3600, function () use ($locale) {
+
+        return Cache::remember($cacheKey, 3600, function () use ($locale) {
             return Category::query()
                 ->select(['id', 'slug', 'name'])
                 ->orderBy('name->' . $locale)
@@ -52,64 +150,17 @@ class PublicHomeController extends BasePublicController
                 ])
                 ->values();
         });
+    }
 
-        // Load blogs with categories; filter when categories selected - with Redis cache
-        $categoryFilter = empty($selectedCategoryIds) ? 'all' : implode(',', $selectedCategoryIds);
-        $blogsCacheKey = "welcome_blogs_{$locale}_{$categoryFilter}";
-
-        $blogs = Cache::remember($blogsCacheKey, 3600, function () use ($selectedCategoryIds, $locale) {
-            $blogsQuery = Blog::query()
-                ->where('is_published', true)
-                ->with([
-                    'categories' => function ($q) use ($locale) {
-                        $q->select(['categories.id', 'categories.slug', 'categories.name']);
-                    },
-                    'user' => function ($q) {
-                        $q->select(['id', 'name']);
-                    }
-                ])
-                ->select(['id', 'name', 'slug', 'description', 'locale', 'user_id']);
-
-            if (!empty($selectedCategoryIds)) {
-                $blogsQuery->whereHas('categories', function ($q) use ($selectedCategoryIds) {
-                    $q->whereIn('categories.id', $selectedCategoryIds);
-                });
-            }
-
-            return $blogsQuery->orderBy('name')->get()->map(function (Blog $b) {
-                $blogLocale = $b->locale ?: app()->getLocale();
-
-                // Parse markdown description to HTML (sanitized via HTML Purifier in MarkdownService)
-                $descriptionHtml = '';
-                if (!empty($b->description)) {
-                    /** @var MarkdownService $md */
-                    $md = app(MarkdownService::class);
-                    $descriptionHtml = $md->convertToHtml($b->description);
-                }
-
-                return [
-                    'id' => $b->id,
-                    'name' => $b->name,
-                    'slug' => $b->slug,
-                    'author' => $b->user?->name ?? '',
-                    'descriptionHtml' => $descriptionHtml,
-                    'categories' => $b->categories
-                        ->filter(
-                            fn($c) => method_exists($c, 'hasTranslation') ? $c->hasTranslation(
-                                'name',
-                                $blogLocale,
-                            ) : true,
-                        )
-                        ->map(fn($c) => [
-                            'id' => $c->id,
-                            'slug' => $c->slug,
-                            'name' => $c->getTranslation('name', $blogLocale) ?? $c->slug,
-                        ])->values(),
-                ];
-            })->values();
-        });
-
-        $baseUrl = config('app.url');
+    /**
+     * Prepare SEO metadata for the welcome page.
+     */
+    private function prepareSeoData(
+        string $baseUrl,
+        array $selectedCategoryIds,
+        Collection $blogs,
+        string $locale,
+    ): array {
         $canonicalUrl = $baseUrl . (empty($selectedCategoryIds) ? '' : '?categories=' . implode(
                     ',',
                     $selectedCategoryIds,
@@ -119,26 +170,17 @@ class PublicHomeController extends BasePublicController
         // Pull messages for SEO from the service (home page type)
         $messages = $this->translations->getPageTranslations('home');
         $seoTitle = data_get($messages, 'meta.welcomeTitle') ?? config('app.name');
-        $seoDescription = data_get($messages, 'meta.welcomeDescription') ?? ('Welcome to ' . config(
-                'app.name',
-            ));
+        $seoDescription = data_get($messages, 'meta.welcomeDescription') ?? ('Welcome to ' . config('app.name'));
 
-        return $this->renderWithTranslations('Welcome', 'home', [
+        return [
+            'title' => $seoTitle,
+            'description' => $seoDescription,
+            'canonicalUrl' => $canonicalUrl,
+            'ogImage' => $ogImage,
+            'ogType' => 'website',
             'locale' => $locale,
-            'blogs' => $blogs,
-            'categories' => $categories,
-            'selectedCategoryIds' => $selectedCategoryIds,
-            // SEO meta data for SSR
-            'seo' => [
-                'title' => $seoTitle,
-                'description' => $seoDescription,
-                'canonicalUrl' => $canonicalUrl,
-                'ogImage' => $ogImage,
-                'ogType' => 'website',
-                'locale' => $locale,
-                'structuredData' => $this->generateHomeStructuredData($blogs, $seoTitle, $seoDescription, $baseUrl),
-            ],
-        ]);
+            'structuredData' => $this->generateHomeStructuredData($blogs, $seoTitle, $seoDescription, $baseUrl),
+        ];
     }
 
     /**
