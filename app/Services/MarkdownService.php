@@ -9,11 +9,12 @@ use ParsedownExtra;
 class MarkdownService
 {
     private ParsedownExtra $parsedown;
+
     private HTMLPurifier $purifier;
 
     public function __construct()
     {
-        $this->parsedown = new ParsedownExtra();
+        $this->parsedown = new ParsedownExtra;
         // Allow raw HTML in Markdown (we will sanitize with HTMLPurifier afterwards)
         if (method_exists($this->parsedown, 'setSafeMode')) {
             $this->parsedown->setSafeMode(false);
@@ -38,9 +39,14 @@ class MarkdownService
         ];
     }
 
-    public function convertToHtml(string $markdown): string
+    public function convertToHtml(?string $markdown): string
     {
+        if ($markdown === null) {
+            return '';
+        }
+
         $html = $this->parsedown->text($markdown);
+
         return $this->purifier->purify($html);
     }
 }
