@@ -13,6 +13,10 @@ use ParsedownExtra;
 
 class Post extends Model
 {
+    public const VIS_PUBLIC = 'public';
+
+    public const VIS_REGISTERED = 'registered';
+
     protected $fillable = [
         'blog_id',
         'title',
@@ -23,6 +27,7 @@ class Post extends Model
         'visibility',
         'published_at',
     ];
+
     protected $casts = [
         'is_published' => 'boolean',
         'published_at' => 'datetime',
@@ -32,9 +37,9 @@ class Post extends Model
 
     protected static function booted(): void
     {
-        static::created(fn() => app(SitemapObserver::class)->regenerateSitemap());
-        static::updated(fn() => app(SitemapObserver::class)->regenerateSitemap());
-        static::deleted(fn() => app(SitemapObserver::class)->regenerateSitemap());
+        static::created(fn () => app(SitemapObserver::class)->regenerateSitemap());
+        static::updated(fn () => app(SitemapObserver::class)->regenerateSitemap());
+        static::deleted(fn () => app(SitemapObserver::class)->regenerateSitemap());
     }
 
     public function blog(): BelongsTo
@@ -47,16 +52,17 @@ class Post extends Model
      */
     public function getContentHtmlAttribute(): string
     {
-        $content = (string)($this->content ?? '');
+        $content = (string) ($this->content ?? '');
         if ($content === '') {
             return '';
         }
-        $parser = new ParsedownExtra();
+        $parser = new ParsedownExtra;
         if (method_exists($parser, 'setSafeMode')) {
             $parser->setSafeMode(false);
         }
         $html = $parser->text($content);
         $purifier = new HTMLPurifier(HTMLPurifier_Config::createDefault());
+
         return $purifier->purify($html);
     }
 
@@ -81,11 +87,11 @@ class Post extends Model
     }
 
     /**
-     * Scope to only public posts (is_public = true)
+     * Scope to only public posts (visibility = 'public')
      */
     public function scopePublic(Builder $query): Builder
     {
-        return $query->where('is_public', true);
+        return $query->where('visibility', self::VIS_PUBLIC);
     }
 
     /**
