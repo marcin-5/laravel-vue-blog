@@ -7,7 +7,7 @@ import PublicNavbar from '@/components/PublicNavbar.vue';
 import SeoHead from '@/components/seo/SeoHead.vue';
 import { DEFAULT_APP_URL, stripHtmlTags } from '@/types/blog';
 import type { BlogItem, CategoryItem } from '@/types/blog.types';
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -19,11 +19,21 @@ const props = defineProps<{
 }>();
 
 const { t, tm } = useI18n();
+const page = usePage();
 
 const selected = computed<number[]>(() => props.selectedCategoryIds ?? []);
 
-const slogans = tm('slogans') as string[];
-const randomSlogan = slogans[Math.floor(Math.random() * slogans.length)] || '';
+// Make motto selection reactive to page URL to ensure it recalculates on navigation
+const randomSlogan = computed(() => {
+    // Use current URL as dependency to trigger re-computation on navigation
+    const currentUrl = page.url;
+    const slogans = tm('slogans') as string[];
+
+    // Create a seed from the URL to ensure deterministic yet varied selection per page visit
+    // Using URL length and random to pick different motto on each navigation
+    const urlSeed = currentUrl.length + Math.random();
+    return slogans[Math.floor(urlSeed * slogans.length) % slogans.length] || '';
+});
 
 // SEO helpers - SSR compatible
 const baseUrl = import.meta.env.VITE_APP_URL || DEFAULT_APP_URL;
