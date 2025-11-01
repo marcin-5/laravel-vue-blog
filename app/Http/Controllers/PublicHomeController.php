@@ -103,7 +103,7 @@ class PublicHomeController extends BasePublicController
                 ->orderByDesc('latest_post_at')
                 ->orderBy('name')
                 ->get()
-                ->map(fn(Blog $b) => (new WelcomeBlogResource($b))->resolve())
+                ->map(fn(Blog $b) => new WelcomeBlogResource($b)->resolve())
                 ->values();
         });
     }

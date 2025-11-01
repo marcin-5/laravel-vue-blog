@@ -8,7 +8,6 @@ use App\Http\Resources\PublicBlogResource;
 use App\Http\Resources\PublicPostResource;
 use App\Models\Blog;
 use App\Models\LandingPage;
-use App\Services\BlogContentService;
 use App\Services\BlogNavigationService;
 use App\Services\MarkdownService;
 use App\Services\SeoService;
@@ -25,7 +24,6 @@ class PublicBlogController extends BasePublicController
         private readonly MarkdownService $markdown,
         private readonly SeoService $seo,
         private readonly BlogNavigationService $navigation,
-        private readonly BlogContentService $content,
         protected TranslationService $translations,
     ) {
         parent::__construct($translations);
@@ -42,8 +40,8 @@ class PublicBlogController extends BasePublicController
         $landing = $blog->landingPage;
         $paginator = $this->getPaginatedPosts($blog);
 
-        $descriptionHtml = $this->markdown->convertToHtml($blog->description);
-        $descriptionHtml = $this->content->enrichDescriptionWithAuthor($descriptionHtml, $blog);
+        // Remove strip markers from the description
+        $descriptionHtml = str_replace('-!-', '', $this->markdown->convertToHtml($blog->description));
 
         $metaDescription = $this->seo->generateMetaDescription(
             $descriptionHtml ?: $landing?->content_html ?: $blog->name,
@@ -67,8 +65,10 @@ class PublicBlogController extends BasePublicController
 
         return $this->renderWithTranslations('Blog/Landing', 'blog', [
             'locale' => app()->getLocale(),
-            'blog' => (new PublicBlogResource($blog))->toArray($request) + [
+            'blog' => new PublicBlogResource($blog)->toArray($request) + [
                     'descriptionHtml' => $descriptionHtml,
+                    'authorName' => $blog->user?->name,
+                    'authorEmail' => $blog->user?->email,
                 ],
             'landingHtml' => $landing?->content_html ?? '',
             'footerHtml' => $this->markdown->convertToHtml($blog->footer),

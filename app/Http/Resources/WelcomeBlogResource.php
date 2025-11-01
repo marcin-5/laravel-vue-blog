@@ -14,7 +14,11 @@ class WelcomeBlogResource extends JsonResource
         $descriptionHtml = '';
 
         if (!empty($this->description)) {
-            $descriptionHtml = app(MarkdownService::class)->convertToHtml($this->description);
+            $descriptionHtml = preg_replace(
+                '/(-!-).*(-!-)/',
+                '',
+                app(MarkdownService::class)->convertToHtml($this->description),
+            );
         }
 
         return [

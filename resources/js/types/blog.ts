@@ -10,14 +10,6 @@ export function stripHtmlTags(html: string): string {
     return html.replace(/<[^>]*>/g, '');
 }
 
-export function stripCutMarkers(html: string): string {
-    return html.replace(/-!-/g, '');
-}
-
-export function cutMarkedSection(html: string): string {
-    return html.replace(/-!-.*-!-/gms, '');
-}
-
 import type { CategoryItem } from './blog.types';
 
 export function getCategoryDisplayName(category: CategoryItem): string {
