@@ -15,7 +15,7 @@ class WelcomeBlogResource extends JsonResource
 
         if (!empty($this->description)) {
             $descriptionHtml = preg_replace(
-                '/(-!-).*(-!-)/',
+                '/(-!-).*(-!-)/s',
                 '',
                 app(MarkdownService::class)->convertToHtml($this->description),
             );
