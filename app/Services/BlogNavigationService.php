@@ -75,7 +75,8 @@ class BlogNavigationService
         $order = $direction === 'next' ? 'desc' : 'asc';
 
         return $blog->posts()
-            ->forPublicView()
+            ->published()
+            ->public()
             ->select(['id', 'title', 'slug', 'published_at', 'created_at'])
             ->where(function ($query) use ($post, $compare) {
                 $query->where('published_at', $compare, $post->published_at)

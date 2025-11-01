@@ -6,6 +6,7 @@ use App\Observers\SitemapObserver;
 use HTMLPurifier;
 use HTMLPurifier_Config;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
@@ -13,6 +14,8 @@ use ParsedownExtra;
 
 class Post extends Model
 {
+    use HasFactory;
+
     public const VIS_PUBLIC = 'public';
 
     public const VIS_REGISTERED = 'registered';
@@ -71,9 +74,10 @@ class Post extends Model
      */
     public function setSlugAttribute(?string $value): void
     {
-        $slug = $value ?: ($this->attributes['title'] ?? null);
-        if ($slug) {
-            $this->attributes['slug'] = Str::slug($slug);
+        if ($value) {
+            $this->attributes['slug'] = $value;
+        } elseif (isset($this->attributes['title'])) {
+            $this->attributes['slug'] = Str::slug($this->attributes['title']);
         }
     }
 
