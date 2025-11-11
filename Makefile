@@ -202,6 +202,21 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 	$(MAKE) prod-maintenance-off
 
 # =============================
+# Rebuild Postgres & Redis (production)
+# =============================
+prod-rebuild-pg-redis: ## Recreate postgres and redis services with zero-502 maintenance window
+	@echo "🛠️  Enabling maintenance mode..."
+	$(MAKE) prod-maintenance-on
+	@echo "⬇️  Pulling latest images for postgres and redis (if available)..."
+	$(DOCKER_COMPOSE_PROD) pull postgres redis || true
+	@echo "♻️  Recreating postgres and redis containers without touching other services..."
+	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps postgres redis
+	@echo "⏳ Giving services a moment to start..."
+	sleep 5
+	@echo "✅ Postgres and Redis have been recreated. Disabling maintenance mode..."
+	$(MAKE) prod-maintenance-off
+
+# =============================
 # Production maintenance helpers
 # =============================
 
