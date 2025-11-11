@@ -1,0 +1,14 @@
+{$APP_DOMAIN}, {$APP_DOMAIN_WWW} {
+  @www host {$APP_DOMAIN_WWW}
+  redir @www https://{$APP_DOMAIN}{uri} permanent
+
+  root * /var/www/html/public
+  encode zstd gzip
+  file_server
+
+  # Always serve static maintenance page; return 503 if not found
+  handle {
+    try_files /maintenance.html
+    respond "Maintenance" 503
+  }
+}

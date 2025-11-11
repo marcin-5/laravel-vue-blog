@@ -110,7 +110,8 @@ DOCKER_COMPOSE_PROD = docker compose $(COMPOSE_FILES_PROD)
 PROJECT_NAME = $(notdir $(CURDIR))
 
 .PHONY: prod-up prod-down prod-restart prod-build prod-logs \
-        prod-migrate prod-optimize prod-deploy prod-update prod-wait
+        prod-migrate prod-optimize prod-deploy prod-update prod-wait \
+        prod-maintenance-on prod-maintenance-off prod-rebuild-pg-redis
 
 prod-up: ## Start production services
 	$(DOCKER_COMPOSE_PROD) up -d
@@ -159,17 +160,14 @@ prod-deploy: ## Build/Start prod, run optimizations & migrations
 	$(MAKE) prod-migrate
 
 # Shorthand target to update code and restart services
-prod-update: ## Update code from Git and restart services
+prod-update: ## Update code from Git and restart selected services with zero-502 maintenance
+	$(MAKE) prod-maintenance-on
 	git fetch --all
 	git pull --ff-only
-	$(DOCKER_COMPOSE_PROD) down
-	@echo "🗑️  Removing old named volumes for assets (public_files and ssr_assets)..."
-	-docker volume rm $(PROJECT_NAME)_ssr_assets 2>/dev/null || true
-	-docker volume rm $(PROJECT_NAME)_public_files 2>/dev/null || true
-	@echo "🔨 Building fresh images (no cache)..."
-	$(DOCKER_COMPOSE_PROD) build --no-cache --pull
-	@echo "🚀 Starting services..."
-	$(DOCKER_COMPOSE_PROD) up -d --force-recreate
+	@echo "🔨 Building fresh images for core services (app, ssr, queue)..."
+	$(DOCKER_COMPOSE_PROD) build --no-cache --pull app ssr queue
+	@echo "🚀 Recreating core services without touching caddy..."
+	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps app ssr queue
 	$(MAKE) prod-wait
 	@echo ""
 	@echo "🔍 Checking if SSR bundle was built in the image..."
@@ -201,3 +199,20 @@ prod-update: ## Update code from Git and restart services
 	@echo "✅ Production update complete."
 	@echo ""
 	@echo "If SSR still doesn't work, check your Dockerfile to ensure 'npm run build' creates bootstrap/ssr/"
+	$(MAKE) prod-maintenance-off
+
+# =============================
+# Production maintenance helpers
+# =============================
+
+prod-maintenance-on: ## Enable Caddy maintenance mode (serve static maintenance.html)
+	# Ensure maintenance.html exists inside the app's writable public volume
+	$(DOCKER_COMPOSE_PROD) exec -T app sh -lc 'test -f /var/www/html/public/maintenance.html || printf %s "<!doctype html><title>Maintenance</title><h1>Trwa aktualizacja…</h1>" > /var/www/html/public/maintenance.html'
+	# Copy the alternative Caddy config into the running caddy container
+	docker cp docker/Caddyfile.maintenance $$($(DOCKER_COMPOSE_PROD) ps -q caddy):/etc/caddy/Caddyfile.maintenance
+	# Reload Caddy to use the maintenance config
+	$(DOCKER_COMPOSE_PROD) exec -T caddy caddy reload --config /etc/caddy/Caddyfile.maintenance
+
+prod-maintenance-off: ## Disable Caddy maintenance mode (restore normal config)
+	# Reload Caddy back to the default config
+	$(DOCKER_COMPOSE_PROD) exec -T caddy caddy reload --config /etc/caddy/Caddyfile
