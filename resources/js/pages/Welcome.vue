@@ -4,8 +4,6 @@ import BlogsGrid from '@/components/blog/BlogsGrid.vue';
 import CategoriesFilter from '@/components/blog/CategoriesFilter.vue';
 import NoBlogs from '@/components/blog/NoBlogs.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
-import SeoHead from '@/components/seo/SeoHead.vue';
-import { DEFAULT_APP_URL, stripHtmlTags } from '@/types/blog';
 import type { BlogItem, CategoryItem } from '@/types/blog.types';
 import { router, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -35,35 +33,6 @@ const randomSlogan = computed(() => {
     return slogans[Math.floor(urlSeed * slogans.length) % slogans.length] || '';
 });
 
-// SEO helpers - SSR compatible
-const baseUrl = import.meta.env.VITE_APP_URL || DEFAULT_APP_URL;
-const canonicalUrl = computed(() => {
-    const categoryParam = selected.value.length > 0 ? `?categories=${selected.value.join(',')}` : '';
-    return `${baseUrl}${categoryParam}`;
-});
-const seoTitle = computed(() => t('meta.welcomeTitle', 'Welcome'));
-const seoDescription = computed(() => t('meta.welcomeDescription', 'Welcome to Osobliwy Blog'));
-const seoImage = computed(() => `${baseUrl}/og-image.png`);
-
-// Structured data for SEO
-const structuredData = computed(() => ({
-    '@context': 'https://schema.org',
-    '@type': 'Blog',
-    name: seoTitle.value,
-    url: baseUrl,
-    description: seoDescription.value,
-    blogPost: props.blogs.slice(0, 10).map((blog) => ({
-        '@type': 'BlogPosting',
-        headline: blog.name,
-        author: {
-            '@type': 'Person',
-            name: blog.author,
-        },
-        url: `${baseUrl}/blogs/${blog.slug}`,
-        description: blog.descriptionHtml ? stripHtmlTags(blog.descriptionHtml).substring(0, 700) : undefined,
-    })),
-}));
-
 function toggleCategory(id: number) {
     const set = new Set(selected.value);
     if (set.has(id)) set.delete(id);
@@ -88,15 +57,6 @@ function clearFilter() {
 </script>
 
 <template>
-    <SeoHead
-        :canonical-url="canonicalUrl"
-        :description="seoDescription"
-        :locale="locale"
-        :og-image="seoImage"
-        :structured-data="structuredData"
-        :title="seoTitle"
-        og-type="website"
-    />
     <div class="flex min-h-screen flex-col">
         <PublicNavbar />
         <div class="mx-auto w-full max-w-[1024px] p-6 lg:p-8">

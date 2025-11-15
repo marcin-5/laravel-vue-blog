@@ -33,7 +33,11 @@
     </style>
 
     {{-- noinspection HtmlUnknownAttribute --}}
-    <title inertia>{{ config('app.name', 'Laravel') }}</title>
+    @if(isset($page['props']['seo']['title']))
+        <title inertia>{{ $page['props']['seo']['title'] }}</title>
+    @else
+        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+    @endif
 
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -72,7 +76,8 @@
         <meta name="twitter:image" content="{{ $seo['ogImage'] }}">
 
         <!-- Structured Data -->
-        <script type="application/ld+json">{!! json_encode($seo['structuredData'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+        <script
+            type="application/ld+json">{!! json_encode($seo['structuredData'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
     @endif
 
     @routes

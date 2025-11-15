@@ -5,8 +5,7 @@ import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
-import SeoHead from '@/components/seo/SeoHead.vue';
-import { DEFAULT_APP_URL, EXCERPT_MAX_LENGTH, SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
+import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { Blog, Navigation, Pagination, PostItem } from '@/types/blog.types';
 import { computed } from 'vue';
 
@@ -46,54 +45,9 @@ const normalizedSidebarWidth = computed(() => Math.min(SIDEBAR_MAX_WIDTH, Math.m
 const hasSidebarLayout = computed(() => normalizedSidebarWidth.value > SIDEBAR_MIN_WIDTH);
 const isSidebarPositionedRight = computed(() => sidebarPercentage.value > 0);
 const mainContentWidth = computed(() => 100 - normalizedSidebarWidth.value);
-
-// SEO configuration
-const applicationBaseUrl = import.meta.env.VITE_APP_URL || DEFAULT_APP_URL;
-const blogCanonicalUrl = computed(() => `${applicationBaseUrl}/blogs/${props.blog.slug}`);
-const blogSeoTitle = computed(() => props.blog.name);
-const blogSeoDescription = computed(() => props.metaDescription || props.blog.name);
-const blogSeoImage = computed(() => `${applicationBaseUrl}/og-image.png`);
-
-// Utility functions
-function stripHtmlTags(html: string): string {
-    return html.replace(/<[^>]*>/g, '');
-}
-
-function createBlogPostUrl(postSlug: string): string {
-    return `${applicationBaseUrl}/blogs/${props.blog.slug}/${postSlug}`;
-}
-
-// Structured data for SEO
-const blogStructuredData = computed(() => ({
-    '@context': 'https://schema.org',
-    '@type': 'Blog',
-    name: blogSeoTitle.value,
-    url: blogCanonicalUrl.value,
-    description: blogSeoDescription.value,
-    author: {
-        '@type': 'Organization',
-        name: blogSeoTitle.value,
-    },
-    blogPost: props.posts.map((post) => ({
-        '@type': 'BlogPosting',
-        headline: post.title,
-        url: createBlogPostUrl(post.slug),
-        datePublished: post.published_at,
-        description: post.excerpt ? stripHtmlTags(post.excerpt).substring(0, EXCERPT_MAX_LENGTH) : undefined,
-    })),
-}));
 </script>
 
 <template>
-    <SeoHead
-        :canonical-url="blogCanonicalUrl"
-        :description="blogSeoDescription"
-        :locale="locale"
-        :og-image="blogSeoImage"
-        :structured-data="blogStructuredData"
-        :title="blogSeoTitle"
-        og-type="blog"
-    />
     <div class="flex min-h-screen flex-col bg-[#FDFDFC] text-[#1b1b18] dark:bg-[#0a0a0a]">
         <PublicNavbar />
         <div class="mx-auto w-full max-w-[1024px] p-4">

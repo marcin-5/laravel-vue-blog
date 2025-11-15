@@ -1,25 +1,9 @@
 <script lang="ts" setup>
 import PublicNavbar from '@/components/PublicNavbar.vue';
-import SeoHead from '@/components/seo/SeoHead.vue';
-import type { SEO } from '@/types';
 import { useForm } from '@inertiajs/vue3';
-import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-const props = defineProps<{
-    locale?: string | null;
-    seo?: Partial<SEO> | null;
-}>();
-
 const { t } = useI18n();
-
-const title = computed(() => props.seo?.title ?? t('contact.meta.title', 'Contact'));
-const description = computed(() => props.seo?.description ?? t('contact.meta.description', 'Get in touch'));
-const canonicalUrl = computed(() => props.seo?.canonicalUrl ?? '');
-const ogImage = computed(() => props.seo?.ogImage ?? null);
-const ogType = computed(() => props.seo?.ogType ?? 'website');
-const locale = computed(() => props.seo?.locale ?? props.locale ?? 'en');
-const structuredData = computed(() => props.seo?.structuredData ?? null);
 
 const INPUT_CLASSES =
     'w-full rounded-md border border-[#19140035] bg-white/70 p-2 text-sm text-[#1b1b18] placeholder:text-[#686862] focus:ring-2 focus:ring-[#19140035] focus:outline-none dark:border-[#3E3E3A] dark:bg-[#262622] dark:text-[#EDEDEC] dark:placeholder:text-[#A1A1A1]';
@@ -55,15 +39,6 @@ function submit() {
 </script>
 
 <template>
-    <SeoHead
-        :canonical-url="canonicalUrl"
-        :description="description"
-        :locale="locale"
-        :og-image="ogImage"
-        :og-type="ogType"
-        :structured-data="structuredData"
-        :title="title"
-    />
     <div class="flex min-h-screen flex-col">
         <PublicNavbar />
         <main class="mx-auto w-full max-w-[768px] p-6 lg:p-8">
