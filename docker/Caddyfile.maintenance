@@ -4,11 +4,12 @@
 
     root * /var/www/html/public
     encode zstd gzip
-    file_server
-
-    # Always serve static maintenance page; return 503 if not found
+    # Always serve the static maintenance page when maintenance mode is enabled.
+    # If the file exists, it will be served; otherwise Caddy will fall back to a
+    # simple text response defined in the main Caddyfile (if any).
     handle {
+        # Rewrite every request to the maintenance file and let file_server serve it.
         try_files /maintenance.html
-        respond "Maintenance" 503
+        file_server
     }
 }
