@@ -40,9 +40,9 @@ class Post extends Model
 
     protected static function booted(): void
     {
-        static::created(fn () => app(SitemapObserver::class)->regenerateSitemap());
-        static::updated(fn () => app(SitemapObserver::class)->regenerateSitemap());
-        static::deleted(fn () => app(SitemapObserver::class)->regenerateSitemap());
+        static::created(fn() => app(SitemapObserver::class)->regenerateSitemap());
+        static::updated(fn() => app(SitemapObserver::class)->regenerateSitemap());
+        static::deleted(fn() => app(SitemapObserver::class)->regenerateSitemap());
     }
 
     public function blog(): BelongsTo
@@ -55,7 +55,7 @@ class Post extends Model
      */
     public function getContentHtmlAttribute(): string
     {
-        $content = (string) ($this->content ?? '');
+        $content = (string)($this->content ?? '');
         if ($content === '') {
             return '';
         }
@@ -74,11 +74,15 @@ class Post extends Model
      */
     public function setSlugAttribute(?string $value): void
     {
-        if ($value) {
-            $this->attributes['slug'] = $value;
-        } elseif (isset($this->attributes['title'])) {
-            $this->attributes['slug'] = Str::slug($this->attributes['title']);
+        $source = $value ?: ($this->attributes['title'] ?? null);
+
+        if ($source === null) {
+            $this->attributes['slug'] = null;
+
+            return;
         }
+
+        $this->attributes['slug'] = Str::slug($source);
     }
 
     /**
