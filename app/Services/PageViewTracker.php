@@ -102,10 +102,44 @@ readonly class PageViewTracker
             return null;
         }
 
+        $ipBucket = $this->normalizeIpToBucket($ip);
+
         return hash('sha256', implode('|', [
-            $ip,
+            $ipBucket,
             $ua,
             $acceptLang,
         ]));
+    }
+
+    /**
+     * Brings the IP to a more stable "bucket":
+     * - IPv4: /24 (e.g., 192.168.1.123 → 192.168.1.0)
+     * - IPv6: first 4 hextets (example)
+     */
+    private function normalizeIpToBucket(?string $ip): string
+    {
+        if ($ip === null || $ip === '') {
+            return 'ip:none';
+        }
+
+        // Simple detection of IPv4/IPv6 by format
+        if (str_contains($ip, ':')) {
+            // IPv6 – we take the first 4 "hextets" as an approximate prefix
+            $parts = explode(':', $ip);
+            $bucket = implode(':', array_slice($parts, 0, 4));
+
+            return 'ipv6:' . $bucket;
+        }
+
+        // IPv4 – collapsing to /24
+        $octets = explode('.', $ip);
+        if (count($octets) !== 4) {
+            return 'ipv4:invalid';
+        }
+
+        // 192.168.1.123 -> 192.168.1.0
+        [$o1, $o2, $o3] = $octets;
+
+        return sprintf('ipv4:%s.%s.%s.0', $o1, $o2, $o3);
     }
 }
