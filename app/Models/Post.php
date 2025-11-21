@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Observers\SitemapObserver;
+use App\Viewable;
 use HTMLPurifier;
 use HTMLPurifier_Config;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,6 +16,7 @@ use ParsedownExtra;
 class Post extends Model
 {
     use HasFactory;
+    use Viewable;
 
     public const VIS_PUBLIC = 'public';
 
