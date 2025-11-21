@@ -2,26 +2,39 @@
 
 namespace App\Jobs;
 
+use App\Models\PageView;
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Cache;
+
+use function sprintf;
 
 class StorePageView implements ShouldQueue
 {
+    use Dispatchable;
+    use InteractsWithQueue;
     use Queueable;
+    use SerializesModels;
 
-    /**
-     * Create a new job instance.
-     */
-    public function __construct()
-    {
-        //
+    public function __construct(
+        private readonly array $data,
+    ) {
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
-        //
+        $pageView = PageView::create($this->data);
+
+        // counter update in Redis
+        $key = sprintf(
+            'page_views:count:%s:%d',
+            $pageView->viewable_type,
+            $pageView->viewable_id,
+        );
+
+        Cache::store('redis')->increment($key);
     }
 }

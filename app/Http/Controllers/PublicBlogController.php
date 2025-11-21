@@ -12,6 +12,7 @@ use App\Services\BlogNavigationService;
 use App\Services\MarkdownService;
 use App\Services\SeoService;
 use App\Services\TranslationService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Inertia\Response;
 use Number;
@@ -78,6 +79,9 @@ class PublicBlogController extends BasePublicController
             'sidebar' => (int)($blog->sidebar ?? 0),
             'navigation' => $this->navigation->getLandingNavigation($blog),
             'seo' => $seoData->toArray(),
+            'viewStats' => [
+                'total' => $blog->view_count,
+            ],
         ]);
     }
 
@@ -135,6 +139,7 @@ class PublicBlogController extends BasePublicController
     /**
      * Show a single post by slug for a blog by slug.
      * Route: /{blog:slug}/{post:slug}
+     * @throws ModelNotFoundException
      */
     public function post(Request $request, Blog $blog, string $postSlug): Response
     {
@@ -179,6 +184,9 @@ class PublicBlogController extends BasePublicController
             'sidebar' => (int)($blog->sidebar ?? 0),
             'navigation' => $this->navigation->getPostNavigation($blog, $post),
             'seo' => $seoData->toArray(),
+            'viewStats' => [
+                'total' => $post->view_count,
+            ],
         ]);
     }
 

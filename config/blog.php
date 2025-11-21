@@ -26,4 +26,6 @@ return [
     'default_page_size' => 10,
     'max_page_size' => 100,
 
+    // Time block for repeated view from the same device/user/page combination
+    'page_view_block_seconds' => env('PAGE_VIEW_BLOCK_SECONDS', 3600),
 ];

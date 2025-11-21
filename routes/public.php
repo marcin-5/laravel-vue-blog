@@ -33,9 +33,11 @@ Route::post('/contact', [PublicHomeController::class, 'submit'])
 
 // Keep these at the very end to avoid conflicts.
 Route::get('{blog:slug}/{postSlug}', [PublicBlogController::class, 'post'])
-    ->name('blog.public.post');
+    ->name('blog.public.post')
+    ->middleware('track-page-views');
 
 Route::get('{blog:slug}', [PublicBlogController::class, 'landing'])
-    ->name('blog.public.landing');
+    ->name('blog.public.landing')
+    ->middleware('track-page-views');
 
 Route::get('/', [PublicHomeController::class, 'welcome'])->name('home');
