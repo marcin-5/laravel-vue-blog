@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import { Button } from '@/components/ui/button';
+import { useI18nNs } from '@/composables/useI18nNs';
 import { onMounted, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
+const { t } = await useI18nNs('common');
 const show = ref(false);
 
 onMounted(() => {

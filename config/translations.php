@@ -9,6 +9,7 @@ return [
         'contact' => ['contact', 'common'],
         'blog' => ['blog', 'common'],
         'post' => ['blog', 'common'],
+        'auth' => ['auth', 'common'],
     ],
 
     // When true, also merge base messages from resources/lang/{locale}.json
