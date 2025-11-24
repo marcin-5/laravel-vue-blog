@@ -1,4 +1,4 @@
-{$APP_DOMAIN},{$APP_DOMAIN_WWW} {
+{$APP_DOMAIN}, {$APP_DOMAIN_WWW} {
     @www host {$APP_DOMAIN_WWW}
     redir @www https://{$APP_DOMAIN}{uri} permanent
 
