@@ -1,12 +1,11 @@
-{$APP_DOMAIN}, {$APP_DOMAIN_WWW} {
+{$APP_DOMAIN},{$APP_DOMAIN_WWW} {
     @www host {$APP_DOMAIN_WWW}
     redir @www https://{$APP_DOMAIN}{uri} permanent
 
     root * /var/www/html/public
     encode zstd gzip
     # Always serve the static maintenance page when maintenance mode is enabled.
-    # If the file exists, it will be served; otherwise Caddy will fall back to a
-    # simple text response defined in the main Caddyfile (if any).
+    # If the file exists, it will be served.
     handle {
         # Rewrite every request to the maintenance file and let file_server serve it.
         rewrite * /maintenance.html
