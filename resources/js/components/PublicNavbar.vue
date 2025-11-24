@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import HomeButton from '@/components/HomeButton.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
+import CookieConsent from '@/components/CookieConsent.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { Menu, X } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
@@ -109,5 +110,6 @@ watch(
                 </div>
             </div>
         </div>
+        <CookieConsent />
     </header>
 </template>

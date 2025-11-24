@@ -1,4 +1,5 @@
-<script setup lang="ts">
+<script lang="ts" setup>
+import CookieConsent from '@/components/CookieConsent.vue';
 import AuthLayout from '@/layouts/auth/AuthSimpleLayout.vue';
 
 defineProps<{
@@ -8,7 +9,8 @@ defineProps<{
 </script>
 
 <template>
-    <AuthLayout :title="title" :description="description">
+    <AuthLayout :description="description" :title="title">
         <slot />
     </AuthLayout>
+    <CookieConsent />
 </template>

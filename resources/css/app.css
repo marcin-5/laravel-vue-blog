@@ -50,6 +50,9 @@
     --color-toggle-hover: var(--toggle-hover);
     --color-toggle-foreground: var(--toggle-foreground);
 
+    --color-warning: var(--warning);
+    --color-warning-foreground: var(--warning-foreground);
+
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
@@ -107,6 +110,8 @@
     --toggle: hsl(102 21% 75%);
     --toggle-hover: hsl(102 20% 61%);
     --toggle-foreground: hsl(102 75% 5%);
+    --warning: #eddaaede;
+    --warning-foreground: #222010;
     --border: hsl(0 0% 92.8%);
     --input: hsl(0 0% 89.8%);
     --ring: hsl(0 0% 3.9%);
@@ -156,6 +161,8 @@
     --toggle: hsl(102 21% 12%);
     --toggle-hover: hsl(102 20% 25%);
     --toggle-foreground: hsl(102 75% 93%);
+    --warning: #0c1716de;
+    --warning-foreground: #eece7e;
     --border: hsl(0 0% 14.9%);
     --input: hsl(0 0% 14.9%);
     --ring: hsl(0 0% 83.1%);

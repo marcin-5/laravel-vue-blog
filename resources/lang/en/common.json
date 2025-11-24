@@ -1,12 +1,16 @@
 {
-  "common": {
-    "nav": {
-      "about": "About",
-      "contact": "Contact",
-      "dashboard": "Dashboard",
-      "logout": "Log out",
-      "login": "Log in",
-      "register": "Register"
+    "common": {
+        "nav": {
+            "about": "About",
+            "contact": "Contact",
+            "dashboard": "Dashboard",
+            "logout": "Log out",
+            "login": "Log in",
+            "register": "Register"
+        },
+        "cookie_notice": {
+            "message": "This site uses cookies and local data storage required for proper operation and visit analytics.",
+            "button": "OK, I understand"
+        }
     }
-  }
 }
