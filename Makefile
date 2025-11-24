@@ -225,9 +225,50 @@ prod-maintenance-on: ## Enable Caddy maintenance mode (serve static maintenance.
 	$(DOCKER_COMPOSE_PROD) exec -T app sh -lc 'test -f /var/www/html/public/maintenance.html || printf %s "<!doctype html><title>Maintenance</title><h1>Trwa aktualizacja…</h1>" > /var/www/html/public/maintenance.html'
 	# Copy the alternative Caddy config into the running caddy container
 	docker cp docker/Caddyfile.maintenance $$($(DOCKER_COMPOSE_PROD) ps -q caddy):/etc/caddy/Caddyfile.maintenance
-	# Reload Caddy to use the maintenance config
-	$(DOCKER_COMPOSE_PROD) exec -T caddy caddy reload --config /etc/caddy/Caddyfile.maintenance
+	# Reload Caddy to use the maintenance config, but be robust if the container is
+	# in a restarting state. We wait briefly for it to become running and, if it
+	# never does, we log a warning but do not fail the whole deployment.
+	@cid=$$($(DOCKER_COMPOSE_PROD) ps -q caddy); \
+	if [ -z "$$cid" ]; then \
+	  echo "[prod-maintenance-on] Caddy container not found; skipping reload."; \
+	else \
+	  echo "[prod-maintenance-on] Waiting for Caddy container ($$cid) to be running..."; \
+	  for i in $$(seq 1 10); do \
+	    if docker inspect -f '{{.State.Running}}' $$cid 2>/dev/null | grep -q true; then \
+	      echo "[prod-maintenance-on] Caddy is running, reloading maintenance config..."; \
+	      if ! $(DOCKER_COMPOSE_PROD) exec -T caddy caddy reload --config /etc/caddy/Caddyfile.maintenance; then \
+	        echo "[prod-maintenance-on] Warning: failed to reload Caddy into maintenance mode."; \
+	      fi; \
+	      break; \
+	    fi; \
+	    echo "[prod-maintenance-on] Caddy not running yet ($$i/10); waiting..."; \
+	    sleep 2; \
+	    if [ $$i -eq 10 ]; then \
+	      echo "[prod-maintenance-on] Caddy failed to become running; continuing without reload."; \
+	    fi; \
+	  done; \
+	fi
 
 prod-maintenance-off: ## Disable Caddy maintenance mode (restore normal config)
-	# Reload Caddy back to the default config
-	$(DOCKER_COMPOSE_PROD) exec -T caddy caddy reload --config /etc/caddy/Caddyfile
+	# Reload Caddy back to the default config. Similar to prod-maintenance-on,
+	# be tolerant if the Caddy container is starting up or restarting.
+	@cid=$$($(DOCKER_COMPOSE_PROD) ps -q caddy); \
+	if [ -z "$$cid" ]; then \
+	  echo "[prod-maintenance-off] Caddy container not found; skipping reload."; \
+	else \
+	  echo "[prod-maintenance-off] Waiting for Caddy container ($$cid) to be running..."; \
+	  for i in $$(seq 1 10); do \
+	    if docker inspect -f '{{.State.Running}}' $$cid 2>/dev/null | grep -q true; then \
+	      echo "[prod-maintenance-off] Caddy is running, reloading default config..."; \
+	      if ! $(DOCKER_COMPOSE_PROD) exec -T caddy caddy reload --config /etc/caddy/Caddyfile; then \
+	        echo "[prod-maintenance-off] Warning: failed to reload Caddy back to default config."; \
+	      fi; \
+	      break; \
+	    fi; \
+	    echo "[prod-maintenance-off] Caddy not running yet ($$i/10); waiting..."; \
+	    sleep 2; \
+	    if [ $$i -eq 10 ]; then \
+	      echo "[prod-maintenance-off] Caddy failed to become running; continuing without reload."; \
+	    fi; \
+	  done; \
+	fi
