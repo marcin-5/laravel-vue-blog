@@ -20,6 +20,9 @@ const props = defineProps<{
     metaDescription: string;
     navigation?: Navigation;
     locale?: string;
+    viewStats: {
+        total: number;
+    };
 }>();
 
 // Content availability checks
@@ -55,7 +58,7 @@ const mainContentWidth = computed(() => 100 - normalizedSidebarWidth.value);
 
             <!-- Layout without sidebar -->
             <template v-if="!hasSidebarLayout">
-                <BlogHeader :blog="blog" :displayedMotto="displayedMotto" />
+                <BlogHeader :blog="blog" :displayedMotto="displayedMotto" :viewStats="viewStats" />
                 <BorderDivider class="mb-8" />
                 <main v-if="hasLandingContent" class="min-w-0 flex-1">
                     <div class="prose max-w-none" v-html="landingHtml" />
@@ -82,7 +85,7 @@ const mainContentWidth = computed(() => 100 - normalizedSidebarWidth.value);
                     }"
                     class="min-w-0 flex-1"
                 >
-                    <BlogHeader :blog="blog" :displayedMotto="displayedMotto" />
+                    <BlogHeader :blog="blog" :displayedMotto="displayedMotto" :viewStats="viewStats" />
                     <div v-if="hasLandingContent" class="prose max-w-none" v-html="landingHtml" />
                 </main>
             </div>

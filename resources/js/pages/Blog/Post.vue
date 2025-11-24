@@ -18,6 +18,9 @@ const props = defineProps<{
     navigation?: Navigation;
     locale?: string;
     seo?: SEO;
+    viewStats: {
+        total: number;
+    };
 }>();
 
 const { t } = useI18n();
@@ -85,9 +88,10 @@ const isRightSidebar = computed(() => props.sidebarPosition === 'right');
 
             <header class="mb-4">
                 <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-400">{{ post.title }}</h1>
-                <p v-if="post.published_at" class="my-2 text-sm text-gray-800 italic dark:text-gray-300">
-                    {{ publishedLabel }} {{ post.published_at }}
-                </p>
+                <div class="my-2 inline-flex items-center gap-x-5 text-sm font-medium text-gray-800 dark:text-gray-300">
+                    <p v-if="post.published_at" class="italic">{{ publishedLabel }} {{ post.published_at }}</p>
+                    <span>Odsłony: {{ viewStats.total.toLocaleString() }}</span>
+                </div>
                 <p v-if="showUpdated" class="-mt-1 mb-2 text-xs text-gray-600 italic dark:text-gray-400">
                     {{ updatedLabel }} {{ formattedUpdatedDate }}
                 </p>

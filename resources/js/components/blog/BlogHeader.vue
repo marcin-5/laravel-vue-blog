@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import ViewStats from '@/components/blog/ViewStats.vue';
 import type { Blog } from '@/types/blog.types';
 import '@fontsource/noto-serif';
 
@@ -8,14 +9,20 @@ defineProps<{
         authorEmail?: string;
     };
     displayedMotto: string | null;
+    viewStats: {
+        total: number;
+    };
 }>();
 </script>
 
 <template>
     <header class="mb-4">
-        <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-400">
-            {{ blog.name }}
-        </h1>
+        <div class="flex items-center justify-between">
+            <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-400">
+                {{ blog.name }}
+            </h1>
+            <ViewStats :total="viewStats.total"></ViewStats>
+        </div>
         <p v-if="displayedMotto" class="mt-2 mb-12 font-serif text-gray-800 italic dark:text-gray-200">
             {{ displayedMotto }}
         </p>
