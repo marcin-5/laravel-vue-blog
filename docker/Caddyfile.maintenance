@@ -9,7 +9,7 @@
     # simple text response defined in the main Caddyfile (if any).
     handle {
         # Rewrite every request to the maintenance file and let file_server serve it.
-        try_files /maintenance.html
+        rewrite * /maintenance.html
         file_server
     }
 }
