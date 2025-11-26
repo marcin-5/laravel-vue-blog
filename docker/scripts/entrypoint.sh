@@ -73,6 +73,15 @@ if [ -d /opt/built/public ]; then
         mkdir -p /var/www/html/public
         cp -a /opt/built/public/build /var/www/html/public/
     fi
+
+    # Sync specific static files that might have changed in the image
+    # This ensures that if we update these files in the repo, the volume gets updated
+    for file in favicon.ico favicon.svg maintenance.html og-image.png apple-touch-icon.png; do
+        if [ -f "/opt/built/public/$file" ]; then
+             echo "Syncing $file..."
+             cp "/opt/built/public/$file" "/var/www/html/public/$file"
+        fi
+    done
 fi
 
 # 2) SSR bundle
