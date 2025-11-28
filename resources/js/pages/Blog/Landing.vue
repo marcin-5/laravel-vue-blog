@@ -8,6 +8,7 @@ import PublicNavbar from '@/components/PublicNavbar.vue';
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { Blog, Navigation, Pagination, PostItem } from '@/types/blog.types';
 import { computed } from 'vue';
+import { hasContent } from '@/lib/utils';
 
 const props = defineProps<{
     blog: Blog;
@@ -26,8 +27,8 @@ const props = defineProps<{
 }>();
 
 // Content availability checks
-const hasLandingContent = computed(() => !!props.landingHtml);
-const hasFooterContent = computed(() => !!(props.footerHtml && props.footerHtml.trim()));
+const hasLandingContent = computed(() => hasContent(props.landingHtml));
+const hasFooterContent = computed(() => hasContent(props.footerHtml));
 
 // Motto selection
 function selectRandomMottoFromList(mottoText: string | null | undefined): string | null {

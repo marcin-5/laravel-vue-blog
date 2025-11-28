@@ -4,6 +4,7 @@ import { getCategoryDisplayName } from '@/types/blog';
 import type { BlogItem } from '@/types/blog.types';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { hasContent } from '@/lib/utils';
 
 const props = defineProps<{ blog: BlogItem }>();
 
@@ -12,8 +13,8 @@ const { t } = useI18n();
 // Computed properties
 const blogUrl = computed(() => `/${props.blog.slug}`);
 const authorLabel = computed(() => t('blog.author', 'Author:'));
-const hasAuthor = computed(() => !!props.blog.author);
-const hasDescription = computed(() => !!props.blog.descriptionHtml);
+const hasAuthor = computed(() => hasContent(props.blog.author));
+const hasDescription = computed(() => hasContent(props.blog.descriptionHtml));
 const hasCategories = computed(() => props.blog.categories.length > 0);
 
 // CSS Classes
