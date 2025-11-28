@@ -1,10 +1,12 @@
 <script lang="ts" setup>
 import { Button } from '@/components/ui/button';
+import UserCreateForm from '@/components/admin/UserCreateForm.vue';
 import { useI18nNs } from '@/composables/useI18nNs';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
+import { useUserPermissions, type UserWithQuota } from '@/composables/useUserPermissions';
 import { Head, router } from '@inertiajs/vue3';
-import { computed, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 
 await useI18nNs('admin');
 
@@ -34,7 +36,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const editableUsers = ref<UserRow[]>(props.users ? props.users.map((u) => ({ ...u })) : []);
-const originalById = ref(new Map<number, UserRow>());
+const originalById = ref(new Map<number, UserWithQuota>());
 function setOriginals(users?: UserRow[]) {
     originalById.value = new Map((users ?? []).map((u) => [u.id, { ...u }]));
 }
@@ -49,11 +51,10 @@ watch(
 
 const roles: Role[] = ['admin', 'blogger', 'user'];
 
-function canEditQuota(user: UserRow): boolean {
-    if (!props.currentUserIsAdmin) return false;
-    const original = originalById.value.get(user.id);
-    return !!original && (original.role === 'blogger' || original.role === 'admin');
-}
+const { canEditQuota } = useUserPermissions({
+    currentUserIsAdmin: props.currentUserIsAdmin,
+    originalsById: originalById,
+});
 
 function isChanged(user: UserRow): boolean {
     const original = originalById.value.get(user.id);
@@ -79,36 +80,6 @@ function saveUser(user: UserRow) {
         preserveState: true,
     });
 }
-
-// User creation
-const newUser = ref<{ name: string; email: string; password: string; role: Role; blog_quota: number | null }>({
-    name: '',
-    email: '',
-    password: '',
-    role: 'user',
-    blog_quota: 0,
-});
-
-const canEditNewQuota = computed(() => props.currentUserIsAdmin && (newUser.value.role === 'blogger' || newUser.value.role === 'admin'));
-
-function submitCreate() {
-    const payload: Record<string, unknown> = {
-        name: newUser.value.name,
-        email: newUser.value.email,
-        password: newUser.value.password,
-        role: newUser.value.role,
-    };
-    if (canEditNewQuota.value) {
-        payload.blog_quota = newUser.value.blog_quota ?? (newUser.value.role === 'blogger' ? 1 : 0);
-    }
-    router.post(route('admin.users.store'), payload, {
-        preserveScroll: true,
-        preserveState: true,
-        onSuccess: () => {
-            newUser.value = { name: '', email: '', password: '', role: 'user', blog_quota: 0 };
-        },
-    });
-}
 </script>
 
 <template>
@@ -120,43 +91,7 @@ function submitCreate() {
                 <h2 class="mb-4 text-lg font-semibold">{{ $t('users.heading') }}</h2>
 
                 <!-- Create user form -->
-                <div class="mb-6 rounded-md border border-dashed p-4">
-                    <div class="mb-2 text-sm font-medium">{{ $t('users.create.title') }}</div>
-                    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6">
-                        <input
-                            v-model="newUser.name"
-                            :placeholder="$t('users.create.name')"
-                            class="rounded-md border bg-background px-2 py-1 text-foreground"
-                            type="text"
-                        />
-                        <input
-                            v-model="newUser.email"
-                            :placeholder="$t('users.create.email')"
-                            class="rounded-md border bg-background px-2 py-1 text-foreground"
-                            type="email"
-                        />
-                        <input
-                            v-model="newUser.password"
-                            :placeholder="$t('users.create.password')"
-                            class="rounded-md border bg-background px-2 py-1 text-foreground"
-                            type="password"
-                        />
-                        <select v-model="newUser.role" class="rounded-md border bg-background px-2 py-1 text-foreground">
-                            <option v-for="r in roles" :key="r" :value="r">{{ $t('users.roles.' + r) }}</option>
-                        </select>
-                        <input
-                            v-model.number="newUser.blog_quota"
-                            :disabled="!canEditNewQuota"
-                            :placeholder="$t('users.create.blog_quota')"
-                            class="rounded-md border bg-background px-2 py-1 text-foreground"
-                            min="0"
-                            type="number"
-                        />
-                        <div>
-                            <Button size="sm" type="button" variant="constructive" @click="submitCreate">{{ $t('users.actions.create') }}</Button>
-                        </div>
-                    </div>
-                </div>
+                <UserCreateForm :current-user-is-admin="props.currentUserIsAdmin" :roles="roles" />
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
