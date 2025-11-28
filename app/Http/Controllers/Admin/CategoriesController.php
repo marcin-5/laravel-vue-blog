@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\ValidatesLocale;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
@@ -11,6 +12,8 @@ use Inertia\Response;
 
 class CategoriesController extends Controller
 {
+    use ValidatesLocale;
+
     public function __construct()
     {
         $this->middleware(['auth', 'verified']);
@@ -45,10 +48,7 @@ class CategoriesController extends Controller
             'locale' => ['nullable', 'in:en,pl'],
         ]);
 
-        $locale = $validated['locale'] ?? app()->getLocale();
-        if (!in_array($locale, ['en', 'pl'], true)) {
-            $locale = 'en';
-        }
+        $locale = $this->validateAndGetLocale($validated['locale'] ?? null);
 
         // Set the translated name for chosen locale
         Category::create([
@@ -70,10 +70,7 @@ class CategoriesController extends Controller
             'locale' => ['nullable', 'in:en,pl'],
         ]);
 
-        $locale = $validated['locale'] ?? app()->getLocale();
-        if (!in_array($locale, ['en', 'pl'], true)) {
-            $locale = 'en';
-        }
+        $locale = $this->validateAndGetLocale($validated['locale'] ?? null);
 
         $category->setTranslation('name', $locale, $validated['name']);
         // Slug will be auto-adjusted by observer if name changed
