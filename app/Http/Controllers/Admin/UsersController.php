@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\UserManagementService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -11,6 +12,8 @@ use Inertia\Response;
 
 class UsersController extends Controller
 {
+    public function __construct(private readonly UserManagementService $userManagementService) {}
+
     /**
      * Display a listing of users (admin only).
      */
@@ -45,20 +48,7 @@ class UsersController extends Controller
             'blog_quota' => ['nullable', 'integer', 'min:0'],
         ]);
 
-        // Determine blog_quota based on selected role
-        $role = $validated['role'];
-        $blogQuota = 0;
-        if (in_array($role, [User::ROLE_BLOGGER, User::ROLE_ADMIN], true)) {
-            $blogQuota = (int)($validated['blog_quota'] ?? ($role === User::ROLE_BLOGGER ? 1 : 0));
-        }
-
-        User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => $validated['password'], // hashed via casts()
-            'role' => $role,
-            'blog_quota' => $blogQuota,
-        ]);
+        $this->userManagementService->createUser($validated);
 
         return back()->with('success', 'User created successfully.');
     }
@@ -79,20 +69,7 @@ class UsersController extends Controller
             'blog_quota' => ['nullable', 'integer', 'min:0'],
         ]);
 
-        $user->role = $validated['role'];
-
-        // Only allow blog_quota modifications when:
-        //  - the authenticated user is admin (already checked), and
-        //  - the target user's original DB role was blogger or admin.
-        if ($request->user()?->isAdmin() && in_array(
-                $originalRole,
-                [User::ROLE_BLOGGER, User::ROLE_ADMIN],
-                true,
-            ) && array_key_exists('blog_quota', $validated)) {
-            $user->blog_quota = $validated['blog_quota'] ?? 0;
-        }
-
-        $user->save();
+        $this->userManagementService->updateUser($user, $validated, $originalRole);
 
         return back()->with('success', 'User updated successfully.');
     }
