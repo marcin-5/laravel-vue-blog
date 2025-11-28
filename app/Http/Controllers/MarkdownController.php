@@ -6,12 +6,12 @@ use App\Services\MarkdownService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class MarkdownController extends Controller
+class MarkdownController extends AuthenticatedController
 {
     public function __construct(
-        private readonly MarkdownService $markdownService
+        private readonly MarkdownService $markdownService,
     ) {
-        $this->middleware(['auth', 'verified']);
+        parent::__construct();
     }
 
     /**

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Blogger;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\AuthenticatedController;
 use App\Http\Requests\StoreBlogRequest;
 use App\Http\Requests\UpdateBlogRequest;
 use App\Models\Blog;
@@ -12,12 +12,12 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class BlogsController extends Controller
+class BlogsController extends AuthenticatedController
 {
     public function __construct(
         private readonly BlogService $blogService,
     ) {
-        $this->middleware(['auth', 'verified']);
+        parent::__construct();
         $this->authorizeResource(Blog::class, 'blog');
     }
 
@@ -64,5 +64,4 @@ class BlogsController extends Controller
 
         return back()->with('success', __('blogs.messages.blog_updated'));
     }
-
 }

@@ -2,23 +2,23 @@
 
 namespace App\Http\Controllers\Blogger;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\AuthenticatedController;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Models\Post;
 use App\Services\PostService;
 use Illuminate\Http\RedirectResponse;
 
-class PostsController extends Controller
+class PostsController extends AuthenticatedController
 {
     public function __construct(
         private readonly PostService $postService,
     ) {
-        $this->middleware(['auth', 'verified']);
+        parent::__construct();
         // Only authorize existing post resources (show, update, delete)
         // Don't use authorizeResource for 'store' since it's handled in StorePostRequest
         $this->authorizeResource(Post::class, 'post', [
-            'except' => ['store']
+            'except' => ['store'],
         ]);
     }
 
@@ -46,5 +46,4 @@ class PostsController extends Controller
 
         return back()->with('success', __('blogs.messages.post_updated'));
     }
-
 }

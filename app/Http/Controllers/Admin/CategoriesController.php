@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\AuthenticatedController;
 use App\Http\Controllers\Concerns\ValidatesLocale;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreCategoryRequest;
 use App\Http\Requests\Admin\UpdateCategoryRequest;
 use App\Models\Category;
@@ -12,21 +12,16 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class CategoriesController extends Controller
+class CategoriesController extends AuthenticatedController
 {
     use ValidatesLocale;
-
-    public function __construct()
-    {
-        $this->middleware(['auth', 'verified']);
-    }
 
     /**
      * Display a listing of categories with blog counts (admin only).
      */
     public function index(Request $request): Response
     {
-        $this->authorize('viewAny', \App\Models\Category::class);
+        $this->authorize('viewAny', Category::class);
 
         $categories = Category::query()
             ->withCount('blogs')
