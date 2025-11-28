@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Concerns\ValidatesLocale;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreCategoryRequest;
+use App\Http\Requests\Admin\UpdateCategoryRequest;
 use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,14 +41,9 @@ class CategoriesController extends Controller
     /**
      * Store a newly created category.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreCategoryRequest $request): RedirectResponse
     {
-        $this->authorize('create', Category::class);
-
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'locale' => ['nullable', 'in:en,pl'],
-        ]);
+        $validated = $request->validated();
 
         $locale = $this->validateAndGetLocale($validated['locale'] ?? null);
 
@@ -61,14 +58,9 @@ class CategoriesController extends Controller
     /**
      * Update the specified category.
      */
-    public function update(Request $request, Category $category): RedirectResponse
+    public function update(UpdateCategoryRequest $request, Category $category): RedirectResponse
     {
-        $this->authorize('update', $category);
-
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'locale' => ['nullable', 'in:en,pl'],
-        ]);
+        $validated = $request->validated();
 
         $locale = $this->validateAndGetLocale($validated['locale'] ?? null);
 
