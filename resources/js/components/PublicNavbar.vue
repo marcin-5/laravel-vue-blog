@@ -1,7 +1,7 @@
 <script lang="ts" setup>
+import CookieConsent from '@/components/CookieConsent.vue';
 import HomeButton from '@/components/HomeButton.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
-import CookieConsent from '@/components/CookieConsent.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { Menu, X } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
@@ -50,8 +50,8 @@ watch(
 );
 </script>
 <template>
-    <header class="w-full px-4 pt-4 text-sm sm:px-6 lg:px-8">
-        <nav :class="['mx-auto flex w-full max-w-[1024px] items-center gap-4', isHomePage ? 'justify-end' : 'justify-between']">
+    <header class="w-full pt-4 text-sm">
+        <nav :class="['mx-auto flex w-full max-w-[1024px] items-center gap-4 sm:px-12 md:px-16', isHomePage ? 'justify-end' : 'justify-between']">
             <HomeButton class="pl-4" />
             <div class="flex items-center gap-3">
                 <!-- Desktop navigation -->
