@@ -132,7 +132,11 @@ services:
 
 volumes:
     postgres_data:
+        external: true
+        name: docker_postgres_data
     redis_data:
+        external: true
+        name: docker_redis_data
     caddy_data:
     caddy_config:
 

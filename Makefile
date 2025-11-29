@@ -1,9 +1,16 @@
 # Use a variable for the compose files to avoid repetition
 COMPOSE_FILES = -f docker/docker-compose.yml -f docker/docker-compose.dev.yml
-DOCKER_COMPOSE = docker compose $(COMPOSE_FILES)
+# Derive Docker Compose project name from current directory to keep it consistent
+PROJECT_NAME = $(notdir $(CURDIR))
+# Always pass a fixed project name so we don't end up with multiple sets (e.g. running inside ./docker)
+DOCKER_COMPOSE = docker compose -p $(PROJECT_NAME) $(COMPOSE_FILES)
 
 # Default command to run when no target is specified
 .DEFAULT_GOAL := help
+
+# Use one shell per recipe to avoid multiline if/for syntax issues
+.ONESHELL:
+SHELL := /bin/sh
 
 # By default, `up` does not have any dependencies. This makes it fast.
 BUILD_DEPENDENCY =
@@ -38,11 +45,20 @@ dev: up ## 🚀 Start Vite dev server for hot-reloading (run after 'init')
 # ====================================================================================
 
 up: $(BUILD_DEPENDENCY) ## ⬆️  Start development containers if they are not running
-	@if [ -n "$$($(DOCKER_COMPOSE) ps -q)" ]; then \
+	@running="$$($(DOCKER_COMPOSE) ps -q)"; \
+	if [ -n "$$running" ]; then \
 		echo "Containers are already running."; \
 	else \
 		echo "Containers are not running. Starting them now..."; \
-		$(DOCKER_COMPOSE) up -d; \
+		# Proactively remove any leftover dev containers that could conflict with fixed container_name values \
+		for s in app queue ssr caddy postgres redis; do \
+		  name="$(PROJECT_NAME)-$$s-dev"; \
+		  if docker ps -a --format '{{.Names}}' | grep -qx "$$name"; then \
+		    echo "Removing conflicting container $$name ..."; \
+		    docker rm -f "$$name" >/dev/null 2>&1 || true; \
+		  fi; \
+		done; \
+		$(DOCKER_COMPOSE) up -d --remove-orphans; \
 		echo "Waiting for services to be ready..."; \
 		sleep 5; \
 	fi
@@ -105,9 +121,8 @@ setup-env: ## 📝 Create .env file from .env.example if it doesn't exist
 # Production Docker Compose
 # =============================
 COMPOSE_FILES_PROD = -f docker/docker-compose.yml -f docker/docker-compose.prod.yml
-DOCKER_COMPOSE_PROD = docker compose $(COMPOSE_FILES_PROD)
-# Derive Docker Compose project name from current directory to compute named volumes
-PROJECT_NAME = $(notdir $(CURDIR))
+# Use the same explicit project name for production invocations
+DOCKER_COMPOSE_PROD = docker compose -p $(PROJECT_NAME) $(COMPOSE_FILES_PROD)
 
 .PHONY: prod-up prod-down prod-restart prod-build prod-logs \
         prod-migrate prod-optimize prod-deploy prod-update prod-wait \
