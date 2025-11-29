@@ -87,7 +87,12 @@ const { hasSidebar, isLeftSidebar, isRightSidebar, asideStyle, mainStyle } = use
     <div class="flex min-h-screen flex-col bg-[#FDFDFC] text-[#1b1b18] dark:bg-[#0a0a0a]">
         <PublicNavbar />
 
-        <div :class="['mx-auto w-full p-4', hasSidebar ? 'max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl' : 'max-w-[1024px]']">
+        <div
+            :class="[
+                'mx-auto w-full p-4 sm:px-12 md:px-16',
+                hasSidebar ? 'max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl' : 'max-w-[1024px]',
+            ]"
+        >
             <BorderDivider class="mb-4" />
 
             <header class="mb-4">
