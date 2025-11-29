@@ -9,6 +9,7 @@ import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { Blog, Navigation, Pagination, PostItem } from '@/types/blog.types';
 import { computed } from 'vue';
 import { hasContent } from '@/lib/utils';
+import { useSidebarLayout } from '@/composables/useSidebarLayout';
 
 const props = defineProps<{
     blog: Blog;
@@ -43,12 +44,14 @@ function selectRandomMottoFromList(mottoText: string | null | undefined): string
 
 const displayedMotto = selectRandomMottoFromList(props.blog.motto);
 
-// Sidebar layout calculations
+// Sidebar layout calculations (percent-based)
 const sidebarPercentage = computed(() => props.sidebar ?? 0);
-const normalizedSidebarWidth = computed(() => Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, Math.abs(sidebarPercentage.value))));
-const hasSidebarLayout = computed(() => normalizedSidebarWidth.value > SIDEBAR_MIN_WIDTH);
-const isSidebarPositionedRight = computed(() => sidebarPercentage.value > 0);
-const mainContentWidth = computed(() => 100 - normalizedSidebarWidth.value);
+const { hasSidebar: hasSidebarLayout, asideStyle, mainStyle, asideOrderClass, mainOrderClass } = useSidebarLayout({
+    mode: 'percent',
+    sidebar: sidebarPercentage.value,
+    minPercent: SIDEBAR_MIN_WIDTH,
+    maxPercent: SIDEBAR_MAX_WIDTH,
+});
 </script>
 
 <template>
@@ -69,23 +72,10 @@ const mainContentWidth = computed(() => 100 - normalizedSidebarWidth.value);
 
             <!-- Layout with sidebar -->
             <div v-else class="flex items-start gap-8">
-                <aside
-                    :class="{ 'order-2': isSidebarPositionedRight }"
-                    :style="{
-                        width: normalizedSidebarWidth + '%',
-                        flex: '0 0 ' + normalizedSidebarWidth + '%',
-                    }"
-                >
+                <aside :class="asideOrderClass" :style="asideStyle">
                     <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
                 </aside>
-                <main
-                    :class="{ 'order-1': isSidebarPositionedRight }"
-                    :style="{
-                        width: mainContentWidth + '%',
-                        flex: '1 1 ' + mainContentWidth + '%',
-                    }"
-                    class="min-w-0 flex-1"
-                >
+                <main :class="['min-w-0 flex-1', mainOrderClass]" :style="mainStyle">
                     <BlogHeader :blog="blog" :displayedMotto="displayedMotto" :viewStats="viewStats" />
                     <div v-if="hasLandingContent" class="prose max-w-none" v-html="landingHtml" />
                 </main>

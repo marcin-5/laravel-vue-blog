@@ -8,6 +8,7 @@ import type { SEO } from '@/types';
 import type { Blog, Navigation, Pagination, PostDetails, PostItem } from '@/types/blog.types';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useSidebarLayout } from '@/composables/useSidebarLayout';
 
 const props = defineProps<{
     blog: Blog;
@@ -73,10 +74,11 @@ const showUpdated = computed(() => shouldShowUpdatedDate(postPublishedTime.value
 
 const formattedUpdatedDate = computed(() => formatDate(postModifiedTime.value, props.locale));
 
-// Layout checks
-const hasSidebar = computed(() => props.sidebarPosition !== 'none');
-const isLeftSidebar = computed(() => props.sidebarPosition === 'left');
-const isRightSidebar = computed(() => props.sidebarPosition === 'right');
+// Sidebar layout (fixed width)
+const { hasSidebar, isLeftSidebar, isRightSidebar, asideStyle, mainStyle } = useSidebarLayout({
+    mode: 'fixed',
+    sidebarPosition: props.sidebarPosition,
+});
 </script>
 
 <template>
@@ -106,16 +108,20 @@ const isRightSidebar = computed(() => props.sidebarPosition === 'right');
 
             <!-- Left sidebar layout -->
             <div v-if="isLeftSidebar" class="flex items-start gap-8">
-                <aside class="w-[280px]">
+                <aside :style="asideStyle">
                     <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
                 </aside>
-                <PostContent :author="post.author" :content="post.contentHtml" />
+                <div :style="mainStyle" class="min-w-0 flex-1">
+                    <PostContent :author="post.author" :content="post.contentHtml" />
+                </div>
             </div>
 
             <!-- Right sidebar layout -->
             <div v-else-if="isRightSidebar" class="flex items-start gap-8">
-                <PostContent :author="post.author" :content="post.contentHtml" />
-                <aside class="w-[280px]">
+                <div :style="mainStyle" class="min-w-0 flex-1">
+                    <PostContent :author="post.author" :content="post.contentHtml" />
+                </div>
+                <aside :style="asideStyle">
                     <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
                 </aside>
             </div>
