@@ -4,17 +4,18 @@ import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import PostContent from '@/components/blog/PostContent.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
+import { useSidebarLayout } from '@/composables/useSidebarLayout';
 import type { SEO } from '@/types';
+import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { Blog, Navigation, Pagination, PostDetails, PostItem } from '@/types/blog.types';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useSidebarLayout } from '@/composables/useSidebarLayout';
 
 const props = defineProps<{
     blog: Blog;
     post: PostDetails;
     posts: PostItem[];
-    sidebarPosition: 'left' | 'right' | 'none';
+    sidebar?: number; // numeric sidebar value (-50..50). Sign indicates side: negative -> left, positive -> right, 0 -> no sidebar
     pagination?: Pagination | null;
     navigation?: Navigation;
     locale?: string;
@@ -74,10 +75,11 @@ const showUpdated = computed(() => shouldShowUpdatedDate(postPublishedTime.value
 
 const formattedUpdatedDate = computed(() => formatDate(postModifiedTime.value, props.locale));
 
-// Sidebar layout (fixed width)
+// Sidebar layout
 const { hasSidebar, isLeftSidebar, isRightSidebar, asideStyle, mainStyle } = useSidebarLayout({
-    mode: 'fixed',
-    sidebarPosition: props.sidebarPosition,
+    sidebar: props.sidebar,
+    minPercent: SIDEBAR_MIN_WIDTH,
+    maxPercent: SIDEBAR_MAX_WIDTH,
 });
 </script>
 
@@ -85,7 +87,7 @@ const { hasSidebar, isLeftSidebar, isRightSidebar, asideStyle, mainStyle } = use
     <div class="flex min-h-screen flex-col bg-[#FDFDFC] text-[#1b1b18] dark:bg-[#0a0a0a]">
         <PublicNavbar />
 
-        <div class="mx-auto w-full max-w-[1024px] p-4">
+        <div :class="['mx-auto w-full p-4', hasSidebar ? 'max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl' : 'max-w-[1024px]']">
             <BorderDivider class="mb-4" />
 
             <header class="mb-4">
@@ -107,24 +109,44 @@ const { hasSidebar, isLeftSidebar, isRightSidebar, asideStyle, mainStyle } = use
             <BorderDivider v-if="!hasSidebar" class="mb-8" />
 
             <!-- Left sidebar layout -->
-            <div v-if="isLeftSidebar" class="flex items-start gap-8">
-                <aside :style="asideStyle">
-                    <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
-                </aside>
-                <div :style="mainStyle" class="min-w-0 flex-1">
+            <template v-if="isLeftSidebar">
+                <!-- Mobile/tablet layout (<xl): no sidebar -->
+                <div class="xl:hidden">
                     <PostContent :author="post.author" :content="post.contentHtml" />
+                    <BorderDivider class="mt-12 mb-4" />
+                    <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
                 </div>
-            </div>
+
+                <!-- Desktop layout (xl+): with left sidebar -->
+                <div class="hidden items-start gap-8 xl:flex">
+                    <aside :style="asideStyle">
+                        <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
+                    </aside>
+                    <div :style="mainStyle" class="min-w-0 flex-1">
+                        <PostContent :author="post.author" :content="post.contentHtml" />
+                    </div>
+                </div>
+            </template>
 
             <!-- Right sidebar layout -->
-            <div v-else-if="isRightSidebar" class="flex items-start gap-8">
-                <div :style="mainStyle" class="min-w-0 flex-1">
+            <template v-else-if="isRightSidebar">
+                <!-- Mobile/tablet layout (<xl): no sidebar -->
+                <div class="xl:hidden">
                     <PostContent :author="post.author" :content="post.contentHtml" />
+                    <BorderDivider class="mt-12 mb-4" />
+                    <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
                 </div>
-                <aside :style="asideStyle">
-                    <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
-                </aside>
-            </div>
+
+                <!-- Desktop layout (xl+): with right sidebar -->
+                <div class="hidden items-start gap-8 xl:flex">
+                    <div :style="mainStyle" class="min-w-0 flex-1">
+                        <PostContent :author="post.author" :content="post.contentHtml" />
+                    </div>
+                    <aside :style="asideStyle">
+                        <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
+                    </aside>
+                </div>
+            </template>
 
             <!-- No sidebar layout -->
             <div v-else>
