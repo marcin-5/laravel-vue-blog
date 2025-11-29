@@ -7,6 +7,15 @@ import { Menu, X } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+const props = withDefaults(
+    defineProps<{
+        maxWidth?: string;
+    }>(),
+    {
+        maxWidth: 'max-w-[1024px]',
+    },
+);
+
 // Use translations already injected via props (hydrated in app.ts/ssr.ts)
 const { t } = useI18n();
 const page = usePage();
@@ -51,7 +60,7 @@ watch(
 </script>
 <template>
     <header class="w-full pt-4 text-sm">
-        <nav :class="['mx-auto flex w-full max-w-[1024px] items-center gap-4 sm:px-12 md:px-16', isHomePage ? 'justify-end' : 'justify-between']">
+        <nav :class="['mx-auto flex w-full items-center gap-4 sm:px-12 md:px-16', props.maxWidth, isHomePage ? 'justify-end' : 'justify-between']">
             <HomeButton class="pl-4" />
             <div class="flex items-center gap-3">
                 <!-- Desktop navigation -->
@@ -90,7 +99,7 @@ watch(
         </nav>
         <!-- Mobile menu panel -->
         <div v-if="mobileOpen" id="mobile-menu" class="md:hidden">
-            <div class="mx-auto w-full max-w-[1024px] px-4 pt-3 sm:px-6 lg:px-8">
+            <div :class="['mx-auto w-full px-4 pt-3 sm:px-6 lg:px-8', props.maxWidth]">
                 <div class="flex flex-col gap-2 border-t border-[#19140035] pt-3 dark:border-[#3E3E3A]">
                     <Link
                         v-for="link in navLinks"

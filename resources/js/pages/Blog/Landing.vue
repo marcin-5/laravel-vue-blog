@@ -56,11 +56,14 @@ const {
     minPercent: SIDEBAR_MIN_WIDTH,
     maxPercent: SIDEBAR_MAX_WIDTH,
 });
+
+// Navbar max-width class based on sidebar layout
+const navbarMaxWidth = computed(() => (hasSidebarLayout.value ? 'max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl' : 'max-w-[1024px]'));
 </script>
 
 <template>
     <div class="flex min-h-screen flex-col bg-[#FDFDFC] text-[#1b1b18] dark:bg-[#0a0a0a]">
-        <PublicNavbar />
+        <PublicNavbar :maxWidth="navbarMaxWidth" />
         <div
             :class="[
                 'mx-auto w-full p-4 sm:px-12 md:px-16',
