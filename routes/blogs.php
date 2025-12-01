@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Blogger\BlogsController;
 use App\Http\Controllers\Blogger\PostsController;
+use App\Http\Controllers\Blogger\StatsController as BloggerStatsController;
 use App\Http\Controllers\MarkdownController;
 use Illuminate\Support\Facades\Route;
 
@@ -9,6 +10,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('blogs', BlogsController::class)
         ->only(['index', 'store', 'update']);
+
+    // Blogger stats
+    Route::get('blogs/stats', [BloggerStatsController::class, 'index'])->name('blogger.stats.index');
 
     // Posts routes
     Route::post('posts', [PostsController::class, 'store'])->name('posts.store');

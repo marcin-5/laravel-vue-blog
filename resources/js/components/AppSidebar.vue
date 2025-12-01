@@ -6,7 +6,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, Users } from 'lucide-vue-next';
+import { BarChart3, BookOpen, Folder, LayoutGrid, Users } from 'lucide-vue-next';
 
 const mainNavItems: NavItem[] = [
     {
@@ -28,10 +28,22 @@ const mainNavItems: NavItem[] = [
         roles: ['admin'], // only admins see this
     },
     {
+        title: 'Statistics',
+        href: '/admin/stats',
+        icon: BarChart3,
+        roles: ['admin'],
+    },
+    {
         title: 'Blogs',
         href: '/blogs',
         icon: BookOpen,
         roles: ['admin', 'blogger'],
+    },
+    {
+        title: 'Statistics',
+        href: '/blogs/stats',
+        icon: BarChart3,
+        roles: ['blogger'],
     },
 ];
 
