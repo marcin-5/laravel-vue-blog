@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { router } from '@inertiajs/vue3';
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import StatsFilters from './StatsFilters.vue';
 import StatsTable from './StatsTable.vue';
 
@@ -36,15 +36,82 @@ const props = withDefaults(defineProps<Props>(), {
     blogFilterLabel: 'All',
 });
 
-const selectedRange = ref<Range>(props.filters.range ?? 'week');
-const selectedSize = ref<number>(props.filters.size ?? 5);
-const selectedSort = ref<string>(props.filters.sort ?? 'views_desc');
-const selectedBlogger = ref<number | null | undefined>(props.filters.blogger_id ?? null);
-const selectedBlog = ref<number | null | undefined>(props.filters.blog_id ?? null);
+// Storage key for localStorage
+const STORAGE_KEY = `stats_filters_${props.routeName}`;
+
+// Load saved filters from localStorage or use server defaults
+function loadSavedFilters(): Filters {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            return {
+                range: parsed.range ?? props.filters.range ?? 'week',
+                sort: parsed.sort ?? props.filters.sort ?? 'views_desc',
+                size: parsed.size ?? props.filters.size ?? 5,
+                blogger_id: parsed.blogger_id ?? props.filters.blogger_id ?? null,
+                blog_id: parsed.blog_id ?? props.filters.blog_id ?? null,
+            };
+        }
+    } catch (e) {
+        console.error('Failed to load saved filters:', e);
+    }
+    // No saved data - use defaults with size explicitly set to 5
+    return {
+        range: props.filters.range ?? 'week',
+        sort: props.filters.sort ?? 'views_desc',
+        size: 5, // Always default to 5 on first visit
+        blogger_id: props.filters.blogger_id ?? null,
+        blog_id: props.filters.blog_id ?? null,
+    };
+}
+
+// Save filters to localStorage
+function saveFilters() {
+    try {
+        const toSave = {
+            range: selectedRange.value,
+            sort: selectedSort.value,
+            size: selectedSize.value,
+            blogger_id: selectedBlogger.value,
+            blog_id: selectedBlog.value,
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+    } catch (e) {
+        console.error('Failed to save filters:', e);
+    }
+}
+
+const savedFilters = loadSavedFilters();
+
+const selectedRange = ref<Range>(savedFilters.range);
+const selectedSize = ref<number>(savedFilters.size);
+const selectedSort = ref<string>(savedFilters.sort);
+const selectedBlogger = ref<number | null | undefined>(savedFilters.blogger_id);
+const selectedBlog = ref<number | null | undefined>(savedFilters.blog_id);
 
 // When blogger changes, reset blog filter to avoid stale selection
 watch(selectedBlogger, () => {
     selectedBlog.value = null;
+});
+
+// Auto-refresh on filter changes
+watch([selectedRange, selectedSize, selectedSort, selectedBlogger, selectedBlog], () => {
+    saveFilters();
+    applyFilters();
+});
+
+// Load initial data if saved filters differ from server defaults
+onMounted(() => {
+    if (
+        savedFilters.range !== props.filters.range ||
+        savedFilters.sort !== props.filters.sort ||
+        savedFilters.size !== props.filters.size ||
+        savedFilters.blogger_id !== props.filters.blogger_id ||
+        savedFilters.blog_id !== props.filters.blog_id
+    ) {
+        applyFilters();
+    }
 });
 
 const blogColumns = computed(() => [
@@ -86,7 +153,6 @@ function applyFilters() {
             :blog-options="blogOptions"
             :bloggers="bloggers"
             :show-blogger-filter="showBloggerFilter"
-            @apply="applyFilters"
         />
 
         <StatsTable :columns="blogColumns" :data="blogs" row-key="blog_id" title="Blog views" />

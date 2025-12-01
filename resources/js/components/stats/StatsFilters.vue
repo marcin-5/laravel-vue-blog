@@ -25,7 +25,6 @@ const emit = defineEmits<{
     'update:selectedSize': [value: number];
     'update:selectedBlogger': [value: number | null | undefined];
     'update:selectedBlog': [value: number | null | undefined];
-    apply: [];
 }>();
 
 const ranges: { value: Range; label: string }[] = [
@@ -36,7 +35,7 @@ const ranges: { value: Range; label: string }[] = [
 ];
 
 const sizes = [
-    { value: 5, label: '5 (default)' },
+    { value: 5, label: '5' },
     { value: 10, label: '10' },
     { value: 20, label: '20' },
     { value: 0, label: 'All' },
@@ -86,9 +85,5 @@ const sorts = [
             min-width="min-w-48"
             @update:model-value="emit('update:selectedBlog', $event as number | null | undefined)"
         />
-
-        <div class="ml-auto">
-            <button class="rounded-md bg-primary px-3 py-1.5 text-primary-foreground" type="button" @click="emit('apply')">Apply</button>
-        </div>
     </div>
 </template>
