@@ -7,5 +7,7 @@ Route::prefix('admin')
     ->middleware(['auth', 'verified'])
     ->name('admin.')
     ->group(function () {
-        Route::get('stats', [StatsController::class, 'index'])->name('stats.index');
+        Route::get('stats', [StatsController::class, 'index'])
+            ->middleware('can:view-admin-stats')
+            ->name('stats.index');
     });
