@@ -121,8 +121,16 @@ setup-env: ## 📝 Create .env file from .env.example if it doesn't exist
 # Production Docker Compose
 # =============================
 COMPOSE_FILES_PROD = -f docker/docker-compose.yml -f docker/docker-compose.prod.yml
-# Use the same explicit project name for production invocations
-DOCKER_COMPOSE_PROD = docker compose -p $(PROJECT_NAME) $(COMPOSE_FILES_PROD)
+# Compatibility note:
+# We intentionally pin the Docker Compose project name used for PRODUCTION targets
+# to "docker" to preserve existing container and volume names on live servers
+# (e.g. docker_public_files, docker_ssr_assets, docker_caddy_*), avoiding data
+# loss or downtime from new, empty volumes being created when the repository
+# directory name changes. If you intentionally plan to migrate names, override
+# DOCKER_PROJECT_NAME_PROD at invocation time: `make DOCKER_PROJECT_NAME_PROD=laravel-vue-blog prod-update`.
+DOCKER_PROJECT_NAME_PROD ?= docker
+# DOCKER_COMPOSE_PROD = docker compose -p $(PROJECT_NAME) $(COMPOSE_FILES_PROD)
+DOCKER_COMPOSE_PROD = docker compose -p $(DOCKER_PROJECT_NAME_PROD) $(COMPOSE_FILES_PROD)
 
 .PHONY: prod-up prod-down prod-restart prod-build prod-logs \
         prod-migrate prod-optimize prod-deploy prod-update prod-wait \
