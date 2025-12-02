@@ -11,8 +11,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Psr\SimpleCache\InvalidArgumentException;
 
-use function hash;
-use function implode;
 use function sprintf;
 
 /**
@@ -24,6 +22,7 @@ readonly class PageViewTracker
     public function __construct(
         private Guard $auth,
         private CacheRepository $cache,
+        private FingerprintGenerator $fingerprintGenerator,
     ) {
     }
 
@@ -38,7 +37,7 @@ readonly class PageViewTracker
 
         $visitorId = $this->resolveVisitorId($request);
         $sessionId = $request->session()->getId();
-        $fingerprint = $this->makeFingerprint($request);
+        $fingerprint = $this->fingerprintGenerator->generate($request);
 
         $blockTtl = (int)config('blog.page_view_block_seconds', 3600);
 
@@ -51,9 +50,13 @@ readonly class PageViewTracker
             $keysToCheck[] = $baseKey . ':fingerprint:' . $fingerprint;
         }
 
+        // Always add both user and visitor keys when available to ensure
+        // blocking works correctly across login/logout transitions
         if ($userId !== null) {
             $keysToCheck[] = $baseKey . ':user:' . $userId;
-        } elseif ($visitorId !== null) {
+        }
+
+        if ($visitorId !== null) {
             $keysToCheck[] = $baseKey . ':visitor:' . $visitorId;
         }
 
@@ -90,56 +93,5 @@ readonly class PageViewTracker
 
         // Generate a new one (only for logic purposes; middleware handles cookie writing)
         return (string)Str::uuid();
-    }
-
-    private function makeFingerprint(Request $request): ?string
-    {
-        $ip = $request->ip();
-        $ua = (string)$request->header('User-Agent', '');
-        $acceptLang = (string)$request->header('Accept-Language', '');
-
-        if ($ip === null && $ua === '' && $acceptLang === '') {
-            return null;
-        }
-
-        $ipBucket = $this->normalizeIpToBucket($ip);
-
-        return hash('sha256', implode('|', [
-            $ipBucket,
-            $ua,
-            $acceptLang,
-        ]));
-    }
-
-    /**
-     * Brings the IP to a more stable "bucket":
-     * - IPv4: /24 (e.g., 192.168.1.123 → 192.168.1.0)
-     * - IPv6: first 4 hextets (example)
-     */
-    private function normalizeIpToBucket(?string $ip): string
-    {
-        if ($ip === null || $ip === '') {
-            return 'ip:none';
-        }
-
-        // Simple detection of IPv4/IPv6 by format
-        if (str_contains($ip, ':')) {
-            // IPv6 – we take the first 4 "hextets" as an approximate prefix
-            $parts = explode(':', $ip);
-            $bucket = implode(':', array_slice($parts, 0, 4));
-
-            return 'ipv6:' . $bucket;
-        }
-
-        // IPv4 – collapsing to /24
-        $octets = explode('.', $ip);
-        if (count($octets) !== 4) {
-            return 'ipv4:invalid';
-        }
-
-        // 192.168.1.123 -> 192.168.1.0
-        [$o1, $o2, $o3] = $octets;
-
-        return sprintf('ipv4:%s.%s.%s.0', $o1, $o2, $o3);
     }
 }

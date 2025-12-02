@@ -3,15 +3,18 @@
 namespace App\Http\Middleware;
 
 use App\Models\PageView;
+use App\Services\FingerprintGenerator;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-use function hash;
-use function implode;
-
-class UpdateVisitorOnLogin
+readonly class UpdateVisitorOnLogin
 {
+    public function __construct(
+        private FingerprintGenerator $fingerprintGenerator,
+    ) {
+    }
+
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
@@ -28,15 +31,7 @@ class UpdateVisitorOnLogin
         }
 
         $visitorId = (string)$request->cookie('visitor_id', '');
-
-        $ip = $request->ip();
-        $ua = (string)$request->header('User-Agent', '');
-        $acceptLang = (string)$request->header('Accept-Language', '');
-
-        $fingerprint = null;
-        if ($ip !== null || $ua !== '' || $acceptLang !== '') {
-            $fingerprint = hash('sha256', implode('|', [$ip, $ua, $acceptLang]));
-        }
+        $fingerprint = $this->fingerprintGenerator->generate($request);
 
         PageView::query()
             ->whereNull('user_id')
