@@ -10,6 +10,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
 
+use Redis;
+
 use function sprintf;
 
 class StorePageView implements ShouldQueue
@@ -27,6 +29,10 @@ class StorePageView implements ShouldQueue
     public function handle(): void
     {
         $pageView = PageView::create($this->data);
+
+        if (!class_exists(Redis::class)) {
+            return;
+        }
 
         // counter update in Redis
         $key = sprintf(
