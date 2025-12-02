@@ -10,7 +10,7 @@ type PostRow = { post_id: number; title: string; views: number };
 type UserOption = { id: number; name: string };
 type BlogOption = { id: number; name: string };
 
-interface Filters {
+interface FilterState {
     range: Range;
     sort: string;
     size: number;
@@ -19,11 +19,13 @@ interface Filters {
 }
 
 interface Props {
-    filters: Filters;
+    blogFilters: FilterState;
+    postFilters: FilterState;
     blogs: BlogRow[];
     posts: PostRow[];
     bloggers?: UserOption[];
     blogOptions: BlogOption[];
+    postBlogOptions?: BlogOption[];
     routeName: string;
     showBloggerFilter?: boolean;
     showBloggerColumn?: boolean;
@@ -34,85 +36,97 @@ const props = withDefaults(defineProps<Props>(), {
     showBloggerFilter: false,
     showBloggerColumn: false,
     blogFilterLabel: 'All',
+    postBlogOptions: undefined,
 });
 
-// Storage key for localStorage
-const STORAGE_KEY = `stats_filters_${props.routeName}`;
+// Storage keys
+const BLOG_STORAGE_KEY = `stats_blog_filters_${props.routeName}`;
+const POST_STORAGE_KEY = `stats_post_filters_${props.routeName}`;
 
-// Load saved filters from localStorage or use server defaults
-function loadSavedFilters(): Filters {
+function getInitialState(key: string, serverState: FilterState): FilterState {
     try {
-        const saved = localStorage.getItem(STORAGE_KEY);
+        const saved = localStorage.getItem(key);
         if (saved) {
             const parsed = JSON.parse(saved);
             return {
-                range: parsed.range ?? props.filters.range ?? 'week',
-                sort: parsed.sort ?? props.filters.sort ?? 'views_desc',
-                size: parsed.size ?? props.filters.size ?? 5,
-                blogger_id: parsed.blogger_id ?? props.filters.blogger_id ?? null,
-                blog_id: parsed.blog_id ?? props.filters.blog_id ?? null,
+                range: parsed.range ?? serverState.range,
+                sort: parsed.sort ?? serverState.sort,
+                size: parsed.size ?? serverState.size,
+                blogger_id: parsed.blogger_id ?? serverState.blogger_id,
+                blog_id: parsed.blog_id ?? serverState.blog_id,
             };
         }
     } catch (e) {
-        console.error('Failed to load saved filters:', e);
+        console.error(`Failed to load filters for ${key}`, e);
     }
-    // No saved data - use defaults with size explicitly set to 5
-    return {
-        range: props.filters.range ?? 'week',
-        sort: props.filters.sort ?? 'views_desc',
-        size: 5, // Always default to 5 on first visit
-        blogger_id: props.filters.blogger_id ?? null,
-        blog_id: props.filters.blog_id ?? null,
-    };
+    return { ...serverState };
 }
 
-// Save filters to localStorage
-function saveFilters() {
+const blogState = ref<FilterState>(getInitialState(BLOG_STORAGE_KEY, props.blogFilters));
+const postState = ref<FilterState>(getInitialState(POST_STORAGE_KEY, props.postFilters));
+
+// Watchers to reset child filters
+watch(
+    () => blogState.value.blogger_id,
+    () => {
+        blogState.value.blog_id = null;
+    },
+);
+watch(
+    () => postState.value.blogger_id,
+    () => {
+        postState.value.blog_id = null;
+    },
+);
+
+// Persistence and Application
+function saveState(key: string, state: FilterState) {
     try {
-        const toSave = {
-            range: selectedRange.value,
-            sort: selectedSort.value,
-            size: selectedSize.value,
-            blogger_id: selectedBlogger.value,
-            blog_id: selectedBlog.value,
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+        localStorage.setItem(key, JSON.stringify(state));
     } catch (e) {
-        console.error('Failed to save filters:', e);
+        console.error(e);
     }
 }
 
-const savedFilters = loadSavedFilters();
+watch(
+    [blogState, postState],
+    () => {
+        saveState(BLOG_STORAGE_KEY, blogState.value);
+        saveState(POST_STORAGE_KEY, postState.value);
+        applyFilters();
+    },
+    { deep: true },
+);
 
-const selectedRange = ref<Range>(savedFilters.range);
-const selectedSize = ref<number>(savedFilters.size);
-const selectedSort = ref<string>(savedFilters.sort);
-const selectedBlogger = ref<number | null | undefined>(savedFilters.blogger_id);
-const selectedBlog = ref<number | null | undefined>(savedFilters.blog_id);
-
-// When blogger changes, reset blog filter to avoid stale selection
-watch(selectedBlogger, () => {
-    selectedBlog.value = null;
-});
-
-// Auto-refresh on filter changes
-watch([selectedRange, selectedSize, selectedSort, selectedBlogger, selectedBlog], () => {
-    saveFilters();
-    applyFilters();
-});
-
-// Load initial data if saved filters differ from server defaults
 onMounted(() => {
-    if (
-        savedFilters.range !== props.filters.range ||
-        savedFilters.sort !== props.filters.sort ||
-        savedFilters.size !== props.filters.size ||
-        savedFilters.blogger_id !== props.filters.blogger_id ||
-        savedFilters.blog_id !== props.filters.blog_id
-    ) {
+    // Check if we need to apply initial state (from localStorage) that differs from server props
+    const blogChanged = JSON.stringify(blogState.value) !== JSON.stringify(props.blogFilters);
+    const postChanged = JSON.stringify(postState.value) !== JSON.stringify(props.postFilters);
+
+    if (blogChanged || postChanged) {
         applyFilters();
     }
 });
+
+function applyFilters() {
+    const query: Record<string, any> = {
+        // Blog params
+        range: blogState.value.range,
+        sort: blogState.value.sort,
+        size: blogState.value.size === 0 ? undefined : blogState.value.size,
+        blogger_id: props.showBloggerFilter && blogState.value.blogger_id ? blogState.value.blogger_id : undefined,
+        blog_id: blogState.value.blog_id,
+
+        // Post params (prefixed)
+        posts_range: postState.value.range,
+        posts_sort: postState.value.sort,
+        posts_size: postState.value.size === 0 ? undefined : postState.value.size,
+        posts_blogger_id: props.showBloggerFilter && postState.value.blogger_id ? postState.value.blogger_id : undefined,
+        posts_blog_id: postState.value.blog_id,
+    };
+
+    router.get(route(props.routeName), query, { preserveScroll: true, preserveState: true });
+}
 
 const blogColumns = computed(() => [
     { key: 'name', label: 'Blog' },
@@ -125,38 +139,61 @@ const postColumns = [
     { key: 'views', label: 'Views' },
 ];
 
-const query = computed(() => {
-    const q: Record<string, unknown> = {
-        range: selectedRange.value,
-        sort: selectedSort.value,
-        size: selectedSize.value === 0 ? undefined : selectedSize.value,
-    };
-    if (props.showBloggerFilter && selectedBlogger.value) q.blogger_id = selectedBlogger.value;
-    if (selectedBlog.value) q.blog_id = selectedBlog.value;
-    return q;
-});
+const effectivePostBlogOptions = computed(() => (props.postBlogOptions !== undefined ? props.postBlogOptions : props.blogOptions));
 
-function applyFilters() {
-    router.get(route(props.routeName), query.value as any, { preserveScroll: true, preserveState: true });
-}
+const blogSortOptions = [
+    { value: 'views_desc', label: 'Views ↓' },
+    { value: 'views_asc', label: 'Views ↑' },
+    { value: 'name_asc', label: 'Name A→Z' },
+    { value: 'name_desc', label: 'Name Z→A' },
+];
+
+const postSortOptions = [
+    { value: 'views_desc', label: 'Views ↓' },
+    { value: 'views_asc', label: 'Views ↑' },
+    { value: 'title_asc', label: 'Title A→Z' },
+    { value: 'title_desc', label: 'Title Z→A' },
+];
 </script>
 
 <template>
     <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
-        <StatsFilters
-            v-model:selected-blog="selectedBlog"
-            v-model:selected-blogger="selectedBlogger"
-            v-model:selected-range="selectedRange"
-            v-model:selected-size="selectedSize"
-            v-model:selected-sort="selectedSort"
-            :blog-filter-label="blogFilterLabel"
-            :blog-options="blogOptions"
-            :bloggers="bloggers"
-            :show-blogger-filter="showBloggerFilter"
-        />
+        <!-- Blog Stats Section -->
+        <div class="flex flex-col gap-4">
+            <h2 class="text-lg font-medium text-sidebar-foreground">Blog Views</h2>
+            <StatsFilters
+                v-model:selected-blogger="blogState.blogger_id"
+                v-model:selected-range="blogState.range"
+                v-model:selected-size="blogState.size"
+                v-model:selected-sort="blogState.sort"
+                :blog-filter-label="blogFilterLabel"
+                :blog-options="blogOptions"
+                :bloggers="bloggers"
+                :show-blog-filter="false"
+                :show-blogger-filter="showBloggerFilter"
+                :sort-options="blogSortOptions"
+            />
+            <StatsTable :columns="blogColumns" :data="blogs" row-key="blog_id" />
+        </div>
 
-        <StatsTable :columns="blogColumns" :data="blogs" row-key="blog_id" title="Blog views" />
+        <div class="h-px w-full bg-sidebar-border/70 dark:bg-sidebar-border"></div>
 
-        <StatsTable v-if="filters.blog_id" :columns="postColumns" :data="posts" row-key="post_id" title="Post views" />
+        <!-- Post Stats Section -->
+        <div class="flex flex-col gap-4">
+            <h2 class="text-lg font-medium text-sidebar-foreground">Post Views</h2>
+            <StatsFilters
+                v-model:selected-blog="postState.blog_id"
+                v-model:selected-blogger="postState.blogger_id"
+                v-model:selected-range="postState.range"
+                v-model:selected-size="postState.size"
+                v-model:selected-sort="postState.sort"
+                :blog-filter-label="blogFilterLabel"
+                :blog-options="effectivePostBlogOptions"
+                :bloggers="bloggers"
+                :show-blogger-filter="showBloggerFilter"
+                :sort-options="postSortOptions"
+            />
+            <StatsTable :columns="postColumns" :data="posts" row-key="post_id" />
+        </div>
     </div>
 </template>

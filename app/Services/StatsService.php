@@ -15,7 +15,7 @@ class StatsService
     /**
      * Returns aggregated views for blogs within the given period.
      *
-     * @param string $range One of: week, month, half_year, year
+     * @param string $range One of: today, week, month, half_year, year
      * @param int|null $bloggerId Optional user ID to filter blogs by owner
      * @param int|null $blogId Optional single blog filter
      * @param int|null $limit Limit number of rows (null = all)
@@ -31,7 +31,7 @@ class StatsService
     ): Collection {
         [$from, $to] = $this->periodBounds($range);
 
-        $blogClass = (new Blog())->getMorphClass();
+        $blogClass = new Blog()->getMorphClass();
 
         $query = PageView::query()
             ->selectRaw(
@@ -74,6 +74,7 @@ class StatsService
     {
         $to = CarbonImmutable::now();
         return match ($range) {
+            'today' => [$to->subDay(), $to],
             'week' => [$to->subWeek(), $to],
             'month' => [$to->subMonth(), $to],
             'half_year' => [$to->subMonths(6), $to],
@@ -99,14 +100,16 @@ class StatsService
      * Returns aggregated views for posts within a blog and period.
      *
      * @param string $range One of: week, month, half_year, year
-     * @param int $blogId Blog ID required
+     * @param int|null $bloggerId Optional user ID to filter posts by blog owner
+     * @param int|null $blogId Optional blog ID filter
      * @param int|null $limit Limit number of rows (null = all)
      * @param string $sort One of: views_desc, views_asc, title_asc, title_desc
      * @return Collection<int, array{post_id:int,title:string,views:int}>
      */
     public function postViews(
         string $range,
-        int $blogId,
+        ?int $bloggerId = null,
+        ?int $blogId = null,
         ?int $limit = 5,
         string $sort = 'views_desc',
     ): Collection {
@@ -120,7 +123,11 @@ class StatsService
                 $j->on('posts.id', '=', 'page_views.viewable_id')
                     ->where('page_views.viewable_type', '=', $postClass);
             })
-            ->where('posts.blog_id', $blogId)
+            ->when($blogId, fn($q) => $q->where('posts.blog_id', $blogId))
+            ->when($bloggerId, function ($q) use ($bloggerId) {
+                $q->join('blogs', 'blogs.id', '=', 'posts.blog_id')
+                    ->where('blogs.user_id', $bloggerId);
+            })
             ->whereBetween('page_views.created_at', [$from, $to])
             ->groupBy('posts.id', 'posts.title');
 
@@ -144,8 +151,9 @@ class StatsService
 
     /**
      * @param Builder|QueryBuilderContract $query
+     * @param string $sort
      */
-    private function applyPostSort($query, string $sort): void
+    private function applyPostSort(QueryBuilderContract|Builder $query, string $sort): void
     {
         match ($sort) {
             'views_asc' => $query->orderBy('views', 'asc'),

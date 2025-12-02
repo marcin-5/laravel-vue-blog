@@ -10,18 +10,22 @@ type PostRow = { post_id: number; title: string; views: number };
 type UserOption = { id: number; name: string };
 type BlogOption = { id: number; name: string };
 
+interface FilterState {
+    range: Range;
+    sort: string;
+    size: number;
+    blogger_id?: number | null;
+    blog_id?: number | null;
+}
+
 interface Props {
-    filters: {
-        range: Range;
-        sort: string;
-        size: number;
-        blogger_id?: number | null;
-        blog_id?: number | null;
-    };
+    blogFilters: FilterState;
+    postFilters: FilterState;
     blogs: BlogRow[];
     posts: PostRow[];
     bloggers: UserOption[];
     blogOptions: BlogOption[];
+    postBlogOptions: BlogOption[];
 }
 
 defineProps<Props>();
@@ -39,10 +43,12 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: 'Statistics', href: '/admin/stat
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <StatsPage
+            :blog-filters="blogFilters"
             :blog-options="blogOptions"
             :bloggers="bloggers"
             :blogs="blogs"
-            :filters="filters"
+            :post-blog-options="postBlogOptions"
+            :post-filters="postFilters"
             :posts="posts"
             :show-blogger-column="true"
             :show-blogger-filter="true"

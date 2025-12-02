@@ -23,13 +23,17 @@ class StatsController extends AuthenticatedController
     public function index(Request $request): Response
     {
         $user = Auth::user();
-        $filters = $this->parseStatsFilters($request);
-        ['range' => $range, 'sort' => $sort, 'limit' => $limit] = $filters;
 
-        $blogId = $request->has('blog_id') ? (int)$request->query('blog_id') : null;
+        $blogFilters = $this->parseStatsFilters($request);
+        ['range' => $range, 'sort' => $sort, 'limit' => $limit, 'blog_id' => $blogId] = $blogFilters;
 
         // Stats for current blogger: blogs they own
         $blogs = $this->stats->blogViews($range, $user->id, $blogId, $limit, $sort);
+
+        $postFilters = $this->parseStatsFilters($request, 'posts_');
+        ['range' => $postRange, 'sort' => $postSort, 'limit' => $postLimit, 'blog_id' => $postBlogId] = $postFilters;
+
+        $posts = $this->getPostViews($postRange, $postLimit, $postSort, $user->id, $postBlogId);
 
         $blogOptions = Blog::query()
             ->where('user_id', $user->id)
@@ -37,16 +41,9 @@ class StatsController extends AuthenticatedController
             ->orderBy('name')
             ->get();
 
-        $posts = [];
-        if ($blogId && $this->userOwnsBlog($blogId, $user->id)) {
-            $posts = $this->getPostViews($blogId, $range, $limit, $sort);
-        }
-
         return Inertia::render('Blogger/Stats', [
-            'filters' => array_merge(
-                $this->formatFiltersForResponse($filters, $limit),
-                ['blog_id' => $blogId],
-            ),
+            'blogFilters' => $this->formatFiltersForResponse($blogFilters, $limit),
+            'postFilters' => $this->formatFiltersForResponse($postFilters, $postLimit),
             'blogs' => $blogs,
             'posts' => $posts,
             'blogOptions' => $blogOptions,

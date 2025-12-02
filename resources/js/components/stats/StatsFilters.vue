@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import FilterSelect from './FilterSelect.vue';
 
-type Range = 'week' | 'month' | 'half_year' | 'year';
+type Range = 'today' | 'week' | 'month' | 'half_year' | 'year';
 type UserOption = { id: number; name: string };
 type BlogOption = { id: number; name: string };
 
@@ -14,10 +14,20 @@ interface Props {
     bloggers?: UserOption[];
     blogOptions: BlogOption[];
     showBloggerFilter?: boolean;
+    showBlogFilter?: boolean;
     blogFilterLabel?: string;
+    sortOptions?: { value: string; label: string }[];
 }
 
-defineProps<Props>();
+withDefaults(defineProps<Props>(), {
+    showBlogFilter: true,
+    sortOptions: () => [
+        { value: 'views_desc', label: 'Views ↓' },
+        { value: 'views_asc', label: 'Views ↑' },
+        { value: 'name_asc', label: 'Name A→Z' },
+        { value: 'name_desc', label: 'Name Z→A' },
+    ],
+});
 
 const emit = defineEmits<{
     'update:selectedRange': [value: Range];
@@ -28,6 +38,7 @@ const emit = defineEmits<{
 }>();
 
 const ranges: { value: Range; label: string }[] = [
+    { value: 'today', label: 'Today' },
     { value: 'week', label: 'Last week' },
     { value: 'month', label: 'Last month' },
     { value: 'half_year', label: 'Last 6 months' },
@@ -40,13 +51,6 @@ const sizes = [
     { value: 20, label: '20' },
     { value: 0, label: 'All' },
 ];
-
-const sorts = [
-    { value: 'views_desc', label: 'Views ↓' },
-    { value: 'views_asc', label: 'Views ↑' },
-    { value: 'name_asc', label: 'Name A→Z' },
-    { value: 'name_desc', label: 'Name Z→A' },
-];
 </script>
 
 <template>
@@ -58,7 +62,12 @@ const sorts = [
             @update:model-value="emit('update:selectedRange', $event as Range)"
         />
 
-        <FilterSelect :model-value="selectedSort" :options="sorts" label="Sort" @update:model-value="emit('update:selectedSort', $event as string)" />
+        <FilterSelect
+            :model-value="selectedSort"
+            :options="sortOptions"
+            label="Sort"
+            @update:model-value="emit('update:selectedSort', $event as string)"
+        />
 
         <FilterSelect
             :model-value="selectedSize"
@@ -78,6 +87,7 @@ const sorts = [
         />
 
         <FilterSelect
+            v-if="showBlogFilter"
             :model-value="selectedBlog"
             :options="blogOptions.map((b) => ({ value: b.id, label: b.name }))"
             :placeholder="blogFilterLabel"

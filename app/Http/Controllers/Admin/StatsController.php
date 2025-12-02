@@ -22,13 +22,27 @@ class StatsController extends AuthenticatedController
 
     public function index(Request $request): Response
     {
-        $filters = $this->parseStatsFilters($request);
-        ['range' => $range, 'sort' => $sort, 'limit' => $limit] = $filters;
-
-        $bloggerId = $request->has('blogger_id') ? (int)$request->query('blogger_id') : null;
-        $blogId = $request->has('blog_id') ? (int)$request->query('blog_id') : null;
+        $blogFilters = $this->parseStatsFilters($request);
+        [
+            'range' => $range,
+            'sort' => $sort,
+            'limit' => $limit,
+            'blogger_id' => $bloggerId,
+            'blog_id' => $blogId
+        ] = $blogFilters;
 
         $blogs = $this->stats->blogViews($range, $bloggerId, $blogId, $limit, $sort);
+
+        $postFilters = $this->parseStatsFilters($request, 'posts_');
+        [
+            'range' => $postRange,
+            'sort' => $postSort,
+            'limit' => $postLimit,
+            'blogger_id' => $postBloggerId,
+            'blog_id' => $postBlogId
+        ] = $postFilters;
+
+        $posts = $this->getPostViews($postRange, $postLimit, $postSort, $postBloggerId, $postBlogId);
 
         $bloggers = User::query()
             ->where('role', User::ROLE_BLOGGER)
@@ -42,20 +56,20 @@ class StatsController extends AuthenticatedController
             ->when($bloggerId, fn($query) => $query->where('user_id', $bloggerId))
             ->get();
 
-        $posts = $blogId ? $this->getPostViews($blogId, $range, $limit, $sort) : [];
+        $postBlogOptions = Blog::query()
+            ->select(['id', 'name'])
+            ->orderBy('name')
+            ->when($postBloggerId, fn($query) => $query->where('user_id', $postBloggerId))
+            ->get();
 
         return Inertia::render('Admin/Stats', [
-            'filters' => array_merge(
-                $this->formatFiltersForResponse($filters, $limit),
-                [
-                    'blogger_id' => $bloggerId,
-                    'blog_id' => $blogId,
-                ],
-            ),
+            'blogFilters' => $this->formatFiltersForResponse($blogFilters, $limit),
+            'postFilters' => $this->formatFiltersForResponse($postFilters, $postLimit),
             'blogs' => $blogs,
             'posts' => $posts,
             'bloggers' => $bloggers,
             'blogOptions' => $blogOptions,
+            'postBlogOptions' => $postBlogOptions,
         ]);
     }
 }

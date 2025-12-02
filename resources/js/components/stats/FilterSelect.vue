@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import { computed } from 'vue';
-
 interface Option {
     value: string | number;
     label: string;
@@ -14,19 +12,14 @@ interface Props {
     minWidth?: string;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-    placeholder: 'Select...',
+withDefaults(defineProps<Props>(), {
+    placeholder: undefined,
     minWidth: 'auto',
 });
 
 defineEmits<{
     'update:modelValue': [value: string | number | null | undefined];
 }>();
-
-// Check if current value is actually selected
-const hasValue = computed(() => {
-    return props.modelValue !== null && props.modelValue !== undefined;
-});
 </script>
 
 <template>
@@ -45,7 +38,7 @@ const hasValue = computed(() => {
                 )
             "
         >
-            <option v-if="placeholder && !hasValue" value="">{{ placeholder }}</option>
+            <option v-if="placeholder" value="">{{ placeholder }}</option>
             <option v-for="opt in options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
         </select>
     </div>

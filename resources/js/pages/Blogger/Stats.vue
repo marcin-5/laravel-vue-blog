@@ -9,13 +9,17 @@ type BlogRow = { blog_id: number; name: string; owner_id: number; owner_name: st
 type PostRow = { post_id: number; title: string; views: number };
 type BlogOption = { id: number; name: string };
 
+interface FilterState {
+    range: Range;
+    sort: string;
+    size: number;
+    blogger_id?: number | null;
+    blog_id?: number | null;
+}
+
 interface Props {
-    filters: {
-        range: Range;
-        sort: string;
-        size: number;
-        blog_id?: number | null;
-    };
+    blogFilters: FilterState;
+    postFilters: FilterState;
     blogs: BlogRow[];
     posts: PostRow[];
     blogOptions: BlogOption[];
@@ -36,9 +40,10 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: 'Statistics', href: '/blogger/st
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <StatsPage
+            :blog-filters="blogFilters"
             :blog-options="blogOptions"
             :blogs="blogs"
-            :filters="filters"
+            :post-filters="postFilters"
             :posts="posts"
             blog-filter-label="All my blogs"
             route-name="blogger.stats.index"
