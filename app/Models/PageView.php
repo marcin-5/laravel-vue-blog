@@ -10,10 +10,6 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class PageView extends Model
 {
     use HasFactory;
-
-    public mixed $post_id;
-    public mixed $title;
-    public mixed $views;
     protected $fillable = [
         'user_id',
         'visitor_id',
