@@ -58,7 +58,7 @@ class User extends Authenticatable
                 // If switching to blogger, default to 1 (unless explicitly set in code)
                 if ($user->role === self::ROLE_BLOGGER && $user->getOriginal('role') !== self::ROLE_BLOGGER) {
                     // Only set when not explicitly provided by code performing the update
-                    if ($user->blog_quota === null || $user->blog_quota === $user->getOriginal('blog_quota')) {
+                    if ($user->blog_quota === null) {
                         $user->blog_quota = 1;
                     }
                 }
