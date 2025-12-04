@@ -78,9 +78,8 @@ it('aggregates blog views and post views with default sorting and limits', funct
     expect($first['blog_id'])->toBe($blog1->id)
         ->and($first['owner_id'])->toBe($owner1->id)
         ->and($first['views'])->toBe(2)
-        // blog1 has two own post views plus one view of post2 from blog2 in our setup,
-        // so aggregated post_views for blog1 is 4
-        ->and($first['post_views'])->toBe(4)
+        // blog1 has two post views from post1
+        ->and($first['post_views'])->toBe(2)
         ->and($second['blog_id'])->toBe($blog2->id)
         ->and($second['owner_id'])->toBe($owner2->id)
         ->and($second['views'])->toBe(1)
@@ -256,4 +255,61 @@ it('applies title sorting and respects post limit', function () {
     expect($results)->toHaveCount(2)
         ->and($results[0]['title'])->toBe('Alpha')
         ->and($results[1]['title'])->toBe('Beta');
+});
+
+it('correctly counts post views when blog has multiple blog views', function () {
+    Carbon::setTestNow('2025-01-15 12:00:00');
+
+    [$owner, $blog] = createBlogWithOwner();
+
+    // Create 2 posts with different view counts
+    $post1 = Post::factory()->create(['blog_id' => $blog->id, 'title' => 'Post 1']);
+    $post2 = Post::factory()->create(['blog_id' => $blog->id, 'title' => 'Post 2']);
+
+    // Create 4 views for post1
+    $postMorph = $post1->getMorphClass();
+    for ($i = 0; $i < 4; $i++) {
+        PageView::create([
+            'viewable_type' => $postMorph,
+            'viewable_id' => $post1->id,
+            'ip_address' => '127.0.0.1',
+            'session_id' => 'sess' . $i,
+            'user_agent' => 'test',
+        ]);
+    }
+
+    // Create 2 views for post2
+    for ($i = 0; $i < 2; $i++) {
+        PageView::create([
+            'viewable_type' => $postMorph,
+            'viewable_id' => $post2->id,
+            'ip_address' => '127.0.0.1',
+            'session_id' => 'sess_post2_' . $i,
+            'user_agent' => 'test',
+        ]);
+    }
+
+    // Create 3 direct blog views (this should not affect post_views count)
+    $blogMorph = $blog->getMorphClass();
+    for ($i = 0; $i < 3; $i++) {
+        PageView::create([
+            'viewable_type' => $blogMorph,
+            'viewable_id' => $blog->id,
+            'ip_address' => '127.0.0.1',
+            'session_id' => 'blog_sess_' . $i,
+            'user_agent' => 'test',
+        ]);
+    }
+
+    $service = new StatsService;
+    $criteria = new StatsCriteria(range: StatsRange::Week);
+
+    $results = $service->blogViews($criteria);
+
+    expect($results)->toHaveCount(1);
+
+    $blogStats = $results[0];
+    expect($blogStats['blog_id'])->toBe($blog->id)
+        ->and($blogStats['views'])->toBe(3) // 3 direct blog views
+        ->and($blogStats['post_views'])->toBe(6); // 4 + 2 = 6 post views total
 });

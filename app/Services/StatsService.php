@@ -64,18 +64,18 @@ class StatsService
             ->selectRaw(
                 'blogs.id as blog_id, blogs.name, blogs.user_id as owner_id, users.name as owner_name,' .
                 ' COALESCE(COUNT(blog_views.id), 0) as views,' .
-                ' COALESCE(SUM(post_views_agg.views), 0) as post_views',
+                ' COALESCE(post_views_agg.views, 0) as post_views',
             )
             ->leftJoin('users', 'users.id', '=', 'blogs.user_id')
+            ->leftJoinSub($postViewsSubquery, 'post_views_agg', function ($join) {
+                $join->on('post_views_agg.blog_id', '=', 'blogs.id');
+            })
             ->leftJoin('page_views as blog_views', function ($join) use ($blogClass, $from, $to) {
                 $join->on('blogs.id', '=', 'blog_views.viewable_id')
                     ->where('blog_views.viewable_type', '=', $blogClass)
                     ->whereBetween('blog_views.created_at', [$from, $to]);
             })
-            ->leftJoinSub($postViewsSubquery, 'post_views_agg', function ($join) {
-                $join->on('post_views_agg.blog_id', '=', 'blogs.id');
-            })
-            ->groupBy('blogs.id', 'blogs.name', 'blogs.user_id', 'users.name');
+            ->groupBy('blogs.id', 'blogs.name', 'blogs.user_id', 'users.name', 'post_views_agg.views');
     }
 
     /**
