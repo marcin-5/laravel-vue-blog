@@ -5,7 +5,7 @@ import StatsFilters from './StatsFilters.vue';
 import StatsTable from './StatsTable.vue';
 
 type Range = 'week' | 'month' | 'half_year' | 'year';
-type BlogRow = { blog_id: number; name: string; owner_id: number; owner_name: string; views: number };
+type BlogRow = { blog_id: number; name: string; owner_id: number; owner_name: string; views: number; post_views: number };
 type PostRow = { post_id: number; title: string; views: number };
 type UserOption = { id: number; name: string };
 type BlogOption = { id: number; name: string };
@@ -131,7 +131,8 @@ function applyFilters() {
 const blogColumns = computed(() => [
     { key: 'name', label: 'Blog' },
     { key: 'owner_name', label: 'Blogger', visible: props.showBloggerColumn },
-    { key: 'views', label: 'Views' },
+    { key: 'views', label: 'Blog views' },
+    { key: 'post_views', label: 'Post views' },
 ]);
 
 const postColumns = [

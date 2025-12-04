@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Blogger;
 
+use App\Enums\StatsRange;
+use App\Enums\StatsSort;
 use App\Http\Controllers\AuthenticatedController;
 use App\Http\Controllers\Concerns\HandlesStatsFilters;
 use App\Models\Blog;
+use App\Services\StatsCriteria;
 use App\Services\StatsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,8 +30,16 @@ class StatsController extends AuthenticatedController
         $blogFilters = $this->parseStatsFilters($request);
         ['range' => $range, 'sort' => $sort, 'limit' => $limit, 'blog_id' => $blogId] = $blogFilters;
 
+        $blogCriteria = new StatsCriteria(
+            range: StatsRange::from($range),
+            bloggerId: $user->id,
+            blogId: $blogId,
+            limit: $limit,
+            sort: StatsSort::from($sort),
+        );
+
         // Stats for current blogger: blogs they own
-        $blogs = $this->stats->blogViews($range, $user->id, $blogId, $limit, $sort);
+        $blogs = $this->stats->blogViews($blogCriteria);
 
         $postFilters = $this->parseStatsFilters($request, 'posts_');
         ['range' => $postRange, 'sort' => $postSort, 'limit' => $postLimit, 'blog_id' => $postBlogId] = $postFilters;

@@ -5,7 +5,7 @@ import type { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 
 type Range = 'week' | 'month' | 'half_year' | 'year';
-type BlogRow = { blog_id: number; name: string; owner_id: number; owner_name: string; views: number };
+type BlogRow = { blog_id: number; name: string; owner_id: number; owner_name: string; views: number; post_views: number };
 type PostRow = { post_id: number; title: string; views: number };
 type BlogOption = { id: number; name: string };
 

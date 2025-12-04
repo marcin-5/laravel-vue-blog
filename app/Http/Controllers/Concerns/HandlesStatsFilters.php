@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Concerns;
 
+use App\Enums\StatsRange;
+use App\Enums\StatsSort;
+use App\Services\StatsCriteria;
 use Illuminate\Http\Request;
 
 trait HandlesStatsFilters
@@ -34,7 +37,15 @@ trait HandlesStatsFilters
         ?int $bloggerId = null,
         ?int $blogId = null,
     ) {
-        return $this->stats->postViews($range, $bloggerId, $blogId, $limit, $sort);
+        $criteria = new StatsCriteria(
+            range: StatsRange::from($range),
+            bloggerId: $bloggerId,
+            blogId: $blogId,
+            limit: $limit,
+            sort: StatsSort::from($sort),
+        );
+
+        return $this->stats->postViews($criteria);
     }
 
     protected function formatFiltersForResponse(array $filters, ?int $limit): array
