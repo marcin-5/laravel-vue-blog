@@ -16,7 +16,7 @@ interface Props {
     showBloggerFilter?: boolean;
     showBlogFilter?: boolean;
     blogFilterLabel?: string;
-    sortOptions?: { value: string; label: string }[];
+    sortOptions: { value: string; label: string }[];
 }
 
 withDefaults(defineProps<Props>(), {

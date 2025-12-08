@@ -1,31 +1,22 @@
 <script lang="ts" setup>
-import { router } from '@inertiajs/vue3';
-import { computed, onMounted, ref, watch } from 'vue';
+import { useStatsFilters } from '@/composables/useStatsFilters';
+import { BLOG_SORT_OPTIONS, POST_SORT_OPTIONS, VISITOR_SORT_OPTIONS } from '@/constants/stats';
+import type { BlogOption, BlogRow, FilterState, PostRow, UserOption, VisitorRow } from '@/types/stats';
+import { computed } from 'vue';
 import StatsFilters from './StatsFilters.vue';
 import StatsTable from './StatsTable.vue';
-
-type Range = 'week' | 'month' | 'half_year' | 'year';
-type BlogRow = { blog_id: number; name: string; owner_id: number; owner_name: string; views: number; post_views: number };
-type PostRow = { post_id: number; title: string; views: number };
-type UserOption = { id: number; name: string };
-type BlogOption = { id: number; name: string };
-
-interface FilterState {
-    range: Range;
-    sort: string;
-    size: number;
-    blogger_id?: number | null;
-    blog_id?: number | null;
-}
 
 interface Props {
     blogFilters: FilterState;
     postFilters: FilterState;
+    visitorFilters?: FilterState;
     blogs: BlogRow[];
     posts: PostRow[];
+    visitors?: VisitorRow[];
     bloggers?: UserOption[];
     blogOptions: BlogOption[];
     postBlogOptions?: BlogOption[];
+    visitorBlogOptions?: BlogOption[];
     routeName: string;
     showBloggerFilter?: boolean;
     showBloggerColumn?: boolean;
@@ -37,96 +28,23 @@ const props = withDefaults(defineProps<Props>(), {
     showBloggerColumn: false,
     blogFilterLabel: 'All',
     postBlogOptions: undefined,
+    visitorBlogOptions: undefined,
+    visitorFilters: undefined,
+    visitors: () => [],
 });
 
-// Storage keys
-const BLOG_STORAGE_KEY = `stats_blog_filters_${props.routeName}`;
-const POST_STORAGE_KEY = `stats_post_filters_${props.routeName}`;
-
-function getInitialState(key: string, serverState: FilterState): FilterState {
-    try {
-        const saved = localStorage.getItem(key);
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            return {
-                range: parsed.range ?? serverState.range,
-                sort: parsed.sort ?? serverState.sort,
-                size: parsed.size ?? serverState.size,
-                blogger_id: parsed.blogger_id ?? serverState.blogger_id,
-                blog_id: parsed.blog_id ?? serverState.blog_id,
-            };
-        }
-    } catch (e) {
-        console.error(`Failed to load filters for ${key}`, e);
-    }
-    return { ...serverState };
-}
-
-const blogState = ref<FilterState>(getInitialState(BLOG_STORAGE_KEY, props.blogFilters));
-const postState = ref<FilterState>(getInitialState(POST_STORAGE_KEY, props.postFilters));
-
-// Watchers to reset child filters
-watch(
-    () => blogState.value.blogger_id,
-    () => {
-        blogState.value.blog_id = null;
+const { blogState, postState, visitorState } = useStatsFilters(
+    {
+        blog: props.blogFilters,
+        post: props.postFilters,
+        visitor: props.visitorFilters ?? props.blogFilters,
+    },
+    {
+        routeName: props.routeName,
+        storageKeyPrefix: props.routeName,
+        showBloggerFilter: props.showBloggerFilter,
     },
 );
-watch(
-    () => postState.value.blogger_id,
-    () => {
-        postState.value.blog_id = null;
-    },
-);
-
-// Persistence and Application
-function saveState(key: string, state: FilterState) {
-    try {
-        localStorage.setItem(key, JSON.stringify(state));
-    } catch (e) {
-        console.error(e);
-    }
-}
-
-watch(
-    [blogState, postState],
-    () => {
-        saveState(BLOG_STORAGE_KEY, blogState.value);
-        saveState(POST_STORAGE_KEY, postState.value);
-        applyFilters();
-    },
-    { deep: true },
-);
-
-onMounted(() => {
-    // Check if we need to apply initial state (from localStorage) that differs from server props
-    const blogChanged = JSON.stringify(blogState.value) !== JSON.stringify(props.blogFilters);
-    const postChanged = JSON.stringify(postState.value) !== JSON.stringify(props.postFilters);
-
-    if (blogChanged || postChanged) {
-        applyFilters();
-    }
-});
-
-function applyFilters() {
-    const query: Record<string, any> = {
-        // Blog params
-        range: blogState.value.range,
-        sort: blogState.value.sort,
-        size: blogState.value.size === 0 ? undefined : blogState.value.size,
-        blogger_id: props.showBloggerFilter && blogState.value.blogger_id ? blogState.value.blogger_id : undefined,
-        blog_id: blogState.value.blog_id,
-
-        // Post params (prefixed)
-        posts_range: postState.value.range,
-        posts_sort: postState.value.sort,
-        posts_size: postState.value.size === 0 ? undefined : postState.value.size,
-        posts_blogger_id: props.showBloggerFilter && postState.value.blogger_id ? postState.value.blogger_id : undefined,
-        posts_blog_id: postState.value.blog_id,
-    };
-
-    router.get(route(props.routeName), query, { preserveScroll: true, preserveState: true });
-}
 
 const blogColumns = computed(() => [
     { key: 'name', label: 'Blog' },
@@ -140,21 +58,18 @@ const postColumns = [
     { key: 'views', label: 'Views' },
 ];
 
+const visitorColumns = [
+    { key: 'visitor_label', label: 'Visitor' },
+    { key: 'blog_views', label: 'Blog views' },
+    { key: 'post_views', label: 'Post views' },
+];
+
 const effectivePostBlogOptions = computed(() => (props.postBlogOptions !== undefined ? props.postBlogOptions : props.blogOptions));
+const effectiveVisitorBlogOptions = computed(() => (props.visitorBlogOptions !== undefined ? props.visitorBlogOptions : props.blogOptions));
 
-const blogSortOptions = [
-    { value: 'views_desc', label: 'Views ↓' },
-    { value: 'views_asc', label: 'Views ↑' },
-    { value: 'name_asc', label: 'Name A→Z' },
-    { value: 'name_desc', label: 'Name Z→A' },
-];
-
-const postSortOptions = [
-    { value: 'views_desc', label: 'Views ↓' },
-    { value: 'views_asc', label: 'Views ↑' },
-    { value: 'title_asc', label: 'Title A→Z' },
-    { value: 'title_desc', label: 'Title Z→A' },
-];
+const blogSortOptions = [...BLOG_SORT_OPTIONS];
+const postSortOptions = [...POST_SORT_OPTIONS];
+const visitorSortOptions = [...VISITOR_SORT_OPTIONS];
 </script>
 
 <template>
@@ -195,6 +110,25 @@ const postSortOptions = [
                 :sort-options="postSortOptions"
             />
             <StatsTable :columns="postColumns" :data="posts" row-key="post_id" />
+        </div>
+
+        <div class="h-px w-full bg-sidebar-border/70 dark:bg-sidebar-border"></div>
+
+        <!-- Visitor Stats Section -->
+        <div class="flex flex-col gap-4">
+            <h2 class="text-lg font-medium text-sidebar-foreground">Visitor Views</h2>
+            <StatsFilters
+                v-model:selected-blog="visitorState.blog_id"
+                v-model:selected-range="visitorState.range"
+                v-model:selected-size="visitorState.size"
+                v-model:selected-sort="visitorState.sort"
+                :blog-filter-label="blogFilterLabel"
+                :blog-options="effectiveVisitorBlogOptions"
+                :show-blog-filter="true"
+                :show-blogger-filter="false"
+                :sort-options="visitorSortOptions"
+            />
+            <StatsTable :columns="visitorColumns" :data="visitors" row-key="visitor_label" />
         </div>
     </div>
 </template>

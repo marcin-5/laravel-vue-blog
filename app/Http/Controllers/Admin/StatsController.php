@@ -2,13 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\StatsRange;
-use App\Enums\StatsSort;
 use App\Http\Controllers\AuthenticatedController;
 use App\Http\Controllers\Concerns\HandlesStatsFilters;
-use App\Models\Blog;
 use App\Models\User;
-use App\Services\StatsCriteria;
 use App\Services\StatsService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -26,34 +22,16 @@ class StatsController extends AuthenticatedController
     public function index(Request $request): Response
     {
         $blogFilters = $this->parseStatsFilters($request);
-        [
-            'range' => $range,
-            'sort' => $sort,
-            'limit' => $limit,
-            'blogger_id' => $bloggerId,
-            'blog_id' => $blogId,
-        ] = $blogFilters;
-
-        $blogCriteria = new StatsCriteria(
-            range: StatsRange::from($range),
-            bloggerId: $bloggerId,
-            blogId: $blogId,
-            limit: $limit,
-            sort: StatsSort::from($sort),
-        );
-
+        $blogCriteria = $this->createCriteria($blogFilters);
         $blogs = $this->stats->blogViews($blogCriteria);
 
         $postFilters = $this->parseStatsFilters($request, 'posts_');
-        [
-            'range' => $postRange,
-            'sort' => $postSort,
-            'limit' => $postLimit,
-            'blogger_id' => $postBloggerId,
-            'blog_id' => $postBlogId
-        ] = $postFilters;
+        $postCriteria = $this->createCriteria($postFilters);
+        $posts = $this->stats->postViews($postCriteria);
 
-        $posts = $this->getPostViews($postRange, $postLimit, $postSort, $postBloggerId, $postBlogId);
+        $visitorFilters = $this->parseStatsFilters($request, 'visitors_');
+        $visitorCriteria = $this->createCriteria($visitorFilters);
+        $visitors = $this->stats->visitorViews($visitorCriteria);
 
         $bloggers = User::query()
             ->where('role', User::ROLE_BLOGGER)
@@ -61,26 +39,17 @@ class StatsController extends AuthenticatedController
             ->orderBy('name')
             ->get();
 
-        $blogOptions = Blog::query()
-            ->select(['id', 'name'])
-            ->orderBy('name')
-            ->when($bloggerId, fn($query) => $query->where('user_id', $bloggerId))
-            ->get();
-
-        $postBlogOptions = Blog::query()
-            ->select(['id', 'name'])
-            ->orderBy('name')
-            ->when($postBloggerId, fn($query) => $query->where('user_id', $postBloggerId))
-            ->get();
-
         return Inertia::render('Admin/Stats', [
-            'blogFilters' => $this->formatFiltersForResponse($blogFilters, $limit),
-            'postFilters' => $this->formatFiltersForResponse($postFilters, $postLimit),
+            'blogFilters' => $this->formatFiltersForResponse($blogFilters, $blogFilters['limit']),
+            'postFilters' => $this->formatFiltersForResponse($postFilters, $postFilters['limit']),
             'blogs' => $blogs,
             'posts' => $posts,
+            'visitorFilters' => $this->formatFiltersForResponse($visitorFilters, $visitorFilters['limit']),
+            'visitors' => $visitors,
             'bloggers' => $bloggers,
-            'blogOptions' => $blogOptions,
-            'postBlogOptions' => $postBlogOptions,
+            'blogOptions' => $this->getBlogOptions($blogFilters['blogger_id']),
+            'postBlogOptions' => $this->getBlogOptions($postFilters['blogger_id']),
+            'visitorBlogOptions' => $this->getBlogOptions(),
         ]);
     }
 }

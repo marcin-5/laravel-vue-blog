@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Concerns;
 
 use App\Enums\StatsRange;
 use App\Enums\StatsSort;
+use App\Models\Blog;
 use App\Services\StatsCriteria;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 trait HandlesStatsFilters
 {
@@ -28,6 +30,26 @@ trait HandlesStatsFilters
             'blogger_id' => $bloggerId,
             'blog_id' => $blogId,
         ];
+    }
+
+    protected function createCriteria(array $filters, ?int $forceBloggerId = null): StatsCriteria
+    {
+        return new StatsCriteria(
+            range: StatsRange::from($filters['range']),
+            bloggerId: $forceBloggerId ?? $filters['blogger_id'],
+            blogId: $filters['blog_id'],
+            limit: $filters['limit'],
+            sort: StatsSort::from($filters['sort']),
+        );
+    }
+
+    protected function getBlogOptions(?int $bloggerId = null): Collection
+    {
+        return Blog::query()
+            ->select(['id', 'name'])
+            ->orderBy('name')
+            ->when($bloggerId, fn($q) => $q->where('user_id', $bloggerId))
+            ->get();
     }
 
     protected function getPostViews(

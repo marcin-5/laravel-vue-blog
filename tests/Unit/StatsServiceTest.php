@@ -21,6 +21,17 @@ function createBlogWithOwner(string $role = User::ROLE_BLOGGER, array $blogAttri
     return [$owner, $blog];
 }
 
+function createPageView(string $viewableType, int $viewableId, array $extra = []): PageView
+{
+    return PageView::create(array_merge([
+        'viewable_type' => $viewableType,
+        'viewable_id' => $viewableId,
+        'ip_address' => '127.0.0.1',
+        'session_id' => 'sess_'.uniqid(),
+        'user_agent' => 'test',
+    ], $extra));
+}
+
 it('aggregates blog views and post views with default sorting and limits', function () {
     Carbon::setTestNow('2025-01-15 12:00:00');
 
@@ -273,7 +284,7 @@ it('correctly counts post views when blog has multiple blog views', function () 
             'viewable_type' => $postMorph,
             'viewable_id' => $post1->id,
             'ip_address' => '127.0.0.1',
-            'session_id' => 'sess' . $i,
+            'session_id' => 'sess'.$i,
             'user_agent' => 'test',
         ]);
     }
@@ -284,7 +295,7 @@ it('correctly counts post views when blog has multiple blog views', function () 
             'viewable_type' => $postMorph,
             'viewable_id' => $post2->id,
             'ip_address' => '127.0.0.1',
-            'session_id' => 'sess_post2_' . $i,
+            'session_id' => 'sess_post2_'.$i,
             'user_agent' => 'test',
         ]);
     }
@@ -296,7 +307,7 @@ it('correctly counts post views when blog has multiple blog views', function () 
             'viewable_type' => $blogMorph,
             'viewable_id' => $blog->id,
             'ip_address' => '127.0.0.1',
-            'session_id' => 'blog_sess_' . $i,
+            'session_id' => 'blog_sess_'.$i,
             'user_agent' => 'test',
         ]);
     }
@@ -312,4 +323,81 @@ it('correctly counts post views when blog has multiple blog views', function () 
     expect($blogStats['blog_id'])->toBe($blog->id)
         ->and($blogStats['views'])->toBe(3) // 3 direct blog views
         ->and($blogStats['post_views'])->toBe(6); // 4 + 2 = 6 post views total
+});
+
+it('aggregates visitor views with blog filter and sorts by post views', function () {
+    Carbon::setTestNow('2025-01-15 12:00:00');
+
+    [$owner1, $blog1] = createBlogWithOwner(blogAttributes: ['name' => 'Alpha']);
+    [, $blog2] = createBlogWithOwner(blogAttributes: ['name' => 'Beta']);
+
+    $userAlice = User::factory()->create(['name' => 'Alice']);
+    $userBob = User::factory()->create(['name' => 'Bob']);
+
+    $postBlog1 = Post::factory()->create(['blog_id' => $blog1->id]);
+    $postBlog2 = Post::factory()->create(['blog_id' => $blog2->id]);
+
+    $blogMorph = $blog1->getMorphClass();
+    $postMorph = $postBlog1->getMorphClass();
+
+    // Visitor 1 (Alice):
+    // - 2 blog views for blog1
+    // - 3 post views for blog1's post
+    for ($i = 0; $i < 2; $i++) {
+        PageView::create([
+            'user_id' => $userAlice->id,
+            'viewable_type' => $blogMorph,
+            'viewable_id' => $blog1->id,
+            'ip_address' => '127.0.0.1',
+            'session_id' => 'alice_blog_'.$i,
+            'user_agent' => 'test',
+        ]);
+    }
+
+    for ($i = 0; $i < 3; $i++) {
+        PageView::create([
+            'user_id' => $userAlice->id,
+            'viewable_type' => $postMorph,
+            'viewable_id' => $postBlog1->id,
+            'ip_address' => '127.0.0.1',
+            'session_id' => 'alice_post_'.$i,
+            'user_agent' => 'test',
+        ]);
+    }
+
+    // Visitor 2 (Bob): some views but mostly on blog2 so blog1 filter should exclude most
+    PageView::create([
+        'user_id' => $userBob->id,
+        'viewable_type' => $blogMorph,
+        'viewable_id' => $blog2->id,
+        'ip_address' => '127.0.0.1',
+        'session_id' => 'bob_blog_other',
+        'user_agent' => 'test',
+    ]);
+
+    PageView::create([
+        'user_id' => $userBob->id,
+        'viewable_type' => $postMorph,
+        'viewable_id' => $postBlog2->id,
+        'ip_address' => '127.0.0.1',
+        'session_id' => 'bob_post_other',
+        'user_agent' => 'test',
+    ]);
+
+    $service = new StatsService;
+    $criteria = new StatsCriteria(
+        range: StatsRange::Week,
+        blogId: $blog1->id,
+        limit: 10,
+        sort: StatsSort::ViewsDesc,
+    );
+
+    $results = $service->visitorViews($criteria);
+
+    expect($results)->toHaveCount(1);
+
+    $row = $results[0];
+    expect($row['visitor_label'])->toBe('Alice')
+        ->and($row['blog_views'])->toBe(2)
+        ->and($row['post_views'])->toBe(3);
 });

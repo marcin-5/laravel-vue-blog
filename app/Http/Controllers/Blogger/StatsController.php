@@ -2,12 +2,8 @@
 
 namespace App\Http\Controllers\Blogger;
 
-use App\Enums\StatsRange;
-use App\Enums\StatsSort;
 use App\Http\Controllers\AuthenticatedController;
 use App\Http\Controllers\Concerns\HandlesStatsFilters;
-use App\Models\Blog;
-use App\Services\StatsCriteria;
 use App\Services\StatsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,44 +24,25 @@ class StatsController extends AuthenticatedController
         $user = Auth::user();
 
         $blogFilters = $this->parseStatsFilters($request);
-        ['range' => $range, 'sort' => $sort, 'limit' => $limit, 'blog_id' => $blogId] = $blogFilters;
-
-        $blogCriteria = new StatsCriteria(
-            range: StatsRange::from($range),
-            bloggerId: $user->id,
-            blogId: $blogId,
-            limit: $limit,
-            sort: StatsSort::from($sort),
-        );
-
-        // Stats for current blogger: blogs they own
+        $blogCriteria = $this->createCriteria($blogFilters, $user->id);
         $blogs = $this->stats->blogViews($blogCriteria);
 
         $postFilters = $this->parseStatsFilters($request, 'posts_');
-        ['range' => $postRange, 'sort' => $postSort, 'limit' => $postLimit, 'blog_id' => $postBlogId] = $postFilters;
+        $postCriteria = $this->createCriteria($postFilters, $user->id);
+        $posts = $this->stats->postViews($postCriteria);
 
-        $posts = $this->getPostViews($postRange, $postLimit, $postSort, $user->id, $postBlogId);
-
-        $blogOptions = Blog::query()
-            ->where('user_id', $user->id)
-            ->select(['id', 'name'])
-            ->orderBy('name')
-            ->get();
+        $visitorFilters = $this->parseStatsFilters($request, 'visitors_');
+        $visitorCriteria = $this->createCriteria($visitorFilters, $user->id);
+        $visitors = $this->stats->visitorViews($visitorCriteria);
 
         return Inertia::render('Blogger/Stats', [
-            'blogFilters' => $this->formatFiltersForResponse($blogFilters, $limit),
-            'postFilters' => $this->formatFiltersForResponse($postFilters, $postLimit),
+            'blogFilters' => $this->formatFiltersForResponse($blogFilters, $blogFilters['limit']),
+            'postFilters' => $this->formatFiltersForResponse($postFilters, $postFilters['limit']),
+            'visitorFilters' => $this->formatFiltersForResponse($visitorFilters, $visitorFilters['limit']),
             'blogs' => $blogs,
             'posts' => $posts,
-            'blogOptions' => $blogOptions,
+            'visitors' => $visitors,
+            'blogOptions' => $this->getBlogOptions($user->id),
         ]);
-    }
-
-    private function userOwnsBlog(int $blogId, int $userId): bool
-    {
-        return Blog::query()
-            ->where('id', $blogId)
-            ->where('user_id', $userId)
-            ->exists();
     }
 }

@@ -2,30 +2,20 @@
 import StatsPage from '@/components/stats/StatsPage.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
+import type { BlogOption, BlogRow, FilterState, PostRow, UserOption, VisitorRow } from '@/types/stats';
 import { Head } from '@inertiajs/vue3';
-
-type Range = 'week' | 'month' | 'half_year' | 'year';
-type BlogRow = { blog_id: number; name: string; owner_id: number; owner_name: string; views: number; post_views: number };
-type PostRow = { post_id: number; title: string; views: number };
-type UserOption = { id: number; name: string };
-type BlogOption = { id: number; name: string };
-
-interface FilterState {
-    range: Range;
-    sort: string;
-    size: number;
-    blogger_id?: number | null;
-    blog_id?: number | null;
-}
 
 interface Props {
     blogFilters: FilterState;
     postFilters: FilterState;
+    visitorFilters: FilterState;
     blogs: BlogRow[];
     posts: PostRow[];
+    visitors: VisitorRow[];
     bloggers: UserOption[];
     blogOptions: BlogOption[];
     postBlogOptions: BlogOption[];
+    visitorBlogOptions: BlogOption[];
 }
 
 defineProps<Props>();
@@ -52,6 +42,9 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: 'Statistics', href: '/admin/stat
             :posts="posts"
             :show-blogger-column="true"
             :show-blogger-filter="true"
+            :visitor-blog-options="visitorBlogOptions"
+            :visitor-filters="visitorFilters"
+            :visitors="visitors"
             blog-filter-label="All"
             route-name="admin.stats.index"
         />

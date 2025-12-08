@@ -13,6 +13,12 @@ use Illuminate\Support\Collection;
 
 class StatsService
 {
+    private const string CONTEXT_BLOG = 'blog';
+
+    private const string CONTEXT_POST = 'post';
+
+    private const string CONTEXT_VISITOR = 'visitor';
+
     /**
      * Returns aggregated views for blogs within the given period.
      *
@@ -27,11 +33,8 @@ class StatsService
             ->when($criteria->bloggerId, fn(Builder $q) => $q->where('blogs.user_id', $criteria->bloggerId))
             ->when($criteria->blogId, fn(Builder $q) => $q->where('blogs.id', $criteria->blogId));
 
-        $this->applyBlogSort($query, $criteria->sort);
-
-        if ($criteria->limit !== null) {
-            $query->limit(max(1, (int)$criteria->limit));
-        }
+        $this->applySort($query, $criteria->sort, self::CONTEXT_BLOG);
+        $this->applyLimit($query, $criteria->limit);
 
         /** @var Collection<int, array{blog_id:int,name:string,owner_id:int,owner_name:string,views:int,post_views:int}> $rows */
         $rows = collect($query->get()->map($this->formatBlogStatsRow(...)));
@@ -44,6 +47,7 @@ class StatsService
         DateTimeInterface $to,
     ): QueryBuilder|Builder {
         $postClass = new Post()->getMorphClass();
+
         return PageView::query()
             ->selectRaw('posts.blog_id, COUNT(page_views.id) as views')
             ->join('posts', function ($join) use ($postClass, $from, $to) {
@@ -60,6 +64,7 @@ class StatsService
         QueryBuilder|Builder $postViewsSubquery,
     ): Builder {
         $blogClass = new Blog()->getMorphClass();
+
         return Blog::query()
             ->selectRaw(
                 'blogs.id as blog_id, blogs.name, blogs.user_id as owner_id, users.name as owner_name,' .
@@ -78,18 +83,27 @@ class StatsService
             ->groupBy('blogs.id', 'blogs.name', 'blogs.user_id', 'users.name', 'post_views_agg.views');
     }
 
-    /**
-     * @param Builder|QueryBuilder $query
-     * @param StatsSort $sort
-     */
-    private function applyBlogSort(Builder|QueryBuilder $query, StatsSort $sort): void
+    private function applySort(Builder|QueryBuilder $query, StatsSort $sort, string $context): void
     {
-        match ($sort) {
-            StatsSort::ViewsAsc => $query->orderBy('views', 'asc'),
-            StatsSort::NameAsc => $query->orderBy('blogs.name', 'asc'),
-            StatsSort::NameDesc => $query->orderBy('blogs.name', 'desc'),
-            default => $query->orderBy('views', 'desc'),
+        $columnMap = match ($context) {
+            self::CONTEXT_BLOG => ['name' => 'blogs.name', 'views' => 'views'],
+            self::CONTEXT_POST => ['name' => 'posts.title', 'views' => 'views'],
+            self::CONTEXT_VISITOR => ['name' => 'visitor_label', 'views' => 'post_views'],
         };
+
+        match ($sort) {
+            StatsSort::ViewsAsc => $query->orderBy($columnMap['views'], 'asc'),
+            StatsSort::NameAsc, StatsSort::TitleAsc => $query->orderBy($columnMap['name'], 'asc'),
+            StatsSort::NameDesc, StatsSort::TitleDesc => $query->orderBy($columnMap['name'], 'desc'),
+            default => $query->orderBy($columnMap['views'], 'desc'),
+        };
+    }
+
+    private function applyLimit(Builder|QueryBuilder $query, ?int $limit): void
+    {
+        if ($limit !== null) {
+            $query->limit(max(1, $limit));
+        }
     }
 
     /**
@@ -116,11 +130,8 @@ class StatsService
             ->whereBetween('page_views.created_at', [$from, $to])
             ->groupBy('posts.id', 'posts.title');
 
-        $this->applyPostSort($query, $criteria->sort);
-
-        if ($criteria->limit !== null) {
-            $query->limit(max(1, (int)$criteria->limit));
-        }
+        $this->applySort($query, $criteria->sort, self::CONTEXT_POST);
+        $this->applyLimit($query, $criteria->limit);
 
         /** @var Collection<int, array{post_id:int,title:string,views:int}> $rows */
         $rows = collect($query->get()->map(function ($row) {
@@ -134,14 +145,135 @@ class StatsService
         return $rows;
     }
 
-    private function applyPostSort(QueryBuilder|Builder $query, StatsSort $sort): void
+    /**
+     * Returns aggregated views by visitor, split into blog and post views.
+     *
+     * @return Collection<int, array{visitor_label:string,blog_views:int,post_views:int,views:int}>
+     */
+    public function visitorViews(StatsCriteria $criteria): Collection
     {
-        match ($sort) {
-            StatsSort::ViewsAsc => $query->orderBy('views', 'asc'),
-            StatsSort::TitleAsc => $query->orderBy('posts.title', 'asc'),
-            StatsSort::TitleDesc => $query->orderBy('posts.title', 'desc'),
-            default => $query->orderBy('views', 'desc'),
-        };
+        [$startDate, $endDate] = $criteria->range->bounds();
+        $blogMorphClass = (new Blog)->getMorphClass();
+        $postMorphClass = (new Post)->getMorphClass();
+
+        $query = $this->buildBaseQuery($criteria, $blogMorphClass, $postMorphClass, $startDate, $endDate);
+        $this->applySelectClause($query, $criteria, $blogMorphClass, $postMorphClass);
+        $this->applyHavingClause($query, $criteria, $blogMorphClass, $postMorphClass);
+        $this->applySort($query, $criteria->sort, self::CONTEXT_VISITOR);
+        $this->applyLimit($query, $criteria->limit);
+
+        /** @var Collection<int, array{visitor_label:string,blog_views:int,post_views:int,views:int}> $rows */
+        $rows = collect(
+            $query->get()->map(static function ($row) {
+                return [
+                    'visitor_label' => (string)$row->visitor_label,
+                    'blog_views' => (int)$row->blog_views,
+                    'post_views' => (int)$row->post_views,
+                    'views' => (int)$row->views,
+                ];
+            }),
+        );
+
+        return $rows;
+    }
+
+    private function buildBaseQuery(
+        StatsCriteria $criteria,
+        string $blogMorphClass,
+        string $postMorphClass,
+        string $startDate,
+        string $endDate,
+    ): Builder {
+        $query = PageView::query()
+            ->leftJoin('users', 'users.id', '=', 'page_views.user_id')
+            ->leftJoin('posts', function ($join) use ($postMorphClass) {
+                $join->on('posts.id', '=', 'page_views.viewable_id')
+                    ->where('page_views.viewable_type', '=', $postMorphClass);
+            })
+            ->whereBetween('page_views.created_at', [$startDate, $endDate])
+            ->when($criteria->bloggerId, function (Builder $query) use ($criteria, $blogMorphClass, $postMorphClass) {
+                $query->where(function (Builder $innerQuery) use ($criteria, $blogMorphClass, $postMorphClass) {
+                    $innerQuery
+                        ->whereExists(function (QueryBuilder $existsQuery) use ($criteria, $blogMorphClass) {
+                            $existsQuery
+                                ->from('blogs')
+                                ->whereColumn('blogs.id', 'page_views.viewable_id')
+                                ->where('page_views.viewable_type', '=', $blogMorphClass)
+                                ->where('blogs.user_id', '=', $criteria->bloggerId);
+                        })
+                        ->orWhereExists(function (QueryBuilder $existsQuery) use ($criteria, $postMorphClass) {
+                            $existsQuery
+                                ->from('blogs')
+                                ->join('posts', 'posts.blog_id', '=', 'blogs.id')
+                                ->whereColumn('posts.id', 'page_views.viewable_id')
+                                ->where('page_views.viewable_type', '=', $postMorphClass)
+                                ->where('blogs.user_id', '=', $criteria->bloggerId);
+                        });
+                });
+            })
+            ->groupBy('visitor_label');
+
+        return $query;
+    }
+
+    private function applySelectClause(
+        Builder $query,
+        StatsCriteria $criteria,
+        string $blogMorphClass,
+        string $postMorphClass,
+    ): void {
+        if ($criteria->blogId === null) {
+            // No blog filter: count all blog and post views per visitor.
+            $query->selectRaw(
+                'COALESCE(users.name, page_views.visitor_id) as visitor_label,' .
+                ' SUM(CASE WHEN page_views.viewable_type = ? THEN 1 ELSE 0 END) as blog_views,' .
+                ' SUM(CASE WHEN page_views.viewable_type = ? THEN 1 ELSE 0 END) as post_views,' .
+                ' COUNT(page_views.id) as views',
+                [
+                    $blogMorphClass,
+                    $postMorphClass,
+                ],
+            );
+        } else {
+            // With blog filter: restrict counts (and rows) to the selected blog.
+            $query->selectRaw(
+                'COALESCE(users.name, page_views.visitor_id) as visitor_label,' .
+                ' SUM(CASE WHEN page_views.viewable_type = ?' .
+                ' AND page_views.viewable_id = ? THEN 1 ELSE 0 END) as blog_views,' .
+                ' SUM(CASE WHEN page_views.viewable_type = ?' .
+                ' AND posts.blog_id = ? THEN 1 ELSE 0 END) as post_views,' .
+                ' COUNT(page_views.id) as views',
+                [
+                    $blogMorphClass,
+                    $criteria->blogId,
+                    $postMorphClass,
+                    $criteria->blogId,
+                ],
+            );
+        }
+    }
+
+    private function applyHavingClause(
+        Builder $query,
+        StatsCriteria $criteria,
+        string $blogMorphClass,
+        string $postMorphClass,
+    ): void {
+        if ($criteria->blogId !== null) {
+            // Only keep visitors who have at least one matching blog or post view for that blog.
+            $query->havingRaw(
+                'SUM(CASE WHEN page_views.viewable_type = ?' .
+                ' AND page_views.viewable_id = ? THEN 1 ELSE 0 END) > 0' .
+                ' OR SUM(CASE WHEN page_views.viewable_type = ?' .
+                ' AND posts.blog_id = ? THEN 1 ELSE 0 END) > 0',
+                [
+                    $blogMorphClass,
+                    $criteria->blogId,
+                    $postMorphClass,
+                    $criteria->blogId,
+                ],
+            );
+        }
     }
 
     private function formatBlogStatsRow(object $row): array
