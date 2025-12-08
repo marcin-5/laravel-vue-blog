@@ -57,20 +57,23 @@ export function useStatsFilters(serverFilters: { blog: FilterState; post: Filter
             sort: blogState.value.sort,
             size: blogState.value.size === 0 ? undefined : blogState.value.size,
             blogger_id: options.showBloggerFilter && blogState.value.blogger_id ? blogState.value.blogger_id : undefined,
-            blog_id: blogState.value.blog_id,
+            // blog_id only when a specific blog is selected
+            ...(blogState.value.blog_id != null ? { blog_id: blogState.value.blog_id } : {}),
 
             // Post params (prefixed)
             posts_range: postState.value.range,
             posts_sort: postState.value.sort,
             posts_size: postState.value.size === 0 ? undefined : postState.value.size,
             posts_blogger_id: options.showBloggerFilter && postState.value.blogger_id ? postState.value.blogger_id : undefined,
-            posts_blog_id: postState.value.blog_id,
+            // posts_blog_id only when a specific blog is selected
+            ...(postState.value.blog_id != null ? { posts_blog_id: postState.value.blog_id } : {}),
 
             // Visitor params (prefixed)
             visitors_range: visitorState.value.range,
             visitors_sort: visitorState.value.sort,
             visitors_size: visitorState.value.size === 0 ? undefined : visitorState.value.size,
-            visitors_blog_id: visitorState.value.blog_id,
+            // visitors_blog_id only when a specific blog is selected
+            ...(visitorState.value.blog_id != null ? { visitors_blog_id: visitorState.value.blog_id } : {}),
         };
 
         router.get(route(options.routeName), query, { preserveScroll: true, preserveState: true });
