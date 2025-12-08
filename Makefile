@@ -50,14 +50,6 @@ up: $(BUILD_DEPENDENCY) ## ⬆️  Start development containers if they are not 
 		echo "Containers are already running."; \
 	else \
 		echo "Containers are not running. Starting them now..."; \
-		# Proactively remove any leftover dev containers that could conflict with fixed container_name values \
-		for s in app queue ssr caddy postgres redis; do \
-		  name="$(PROJECT_NAME)-$$s-dev"; \
-		  if docker ps -a --format '{{.Names}}' | grep -qx "$$name"; then \
-		    echo "Removing conflicting container $$name ..."; \
-		    docker rm -f "$$name" >/dev/null 2>&1 || true; \
-		  fi; \
-		done; \
 		$(DOCKER_COMPOSE) up -d --remove-orphans; \
 		echo "Waiting for services to be ready..."; \
 		sleep 5; \
