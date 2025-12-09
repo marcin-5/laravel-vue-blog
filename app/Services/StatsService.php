@@ -19,6 +19,10 @@ class StatsService
 
     private const string CONTEXT_VISITOR = 'visitor';
 
+    private ?string $blogMorphClass = null;
+
+    private ?string $postMorphClass = null;
+
     /**
      * Returns aggregated views for blogs within the given period.
      *
@@ -46,7 +50,7 @@ class StatsService
         DateTimeInterface $from,
         DateTimeInterface $to,
     ): QueryBuilder|Builder {
-        $postClass = new Post()->getMorphClass();
+        $postClass = $this->getPostMorphClass();
 
         return PageView::query()
             ->selectRaw('posts.blog_id, COUNT(page_views.id) as views')
@@ -58,12 +62,17 @@ class StatsService
             ->groupBy('posts.blog_id');
     }
 
+    private function getPostMorphClass(): string
+    {
+        return $this->postMorphClass ??= (new Post)->getMorphClass();
+    }
+
     private function buildBlogStatsQuery(
         DateTimeInterface $from,
         DateTimeInterface $to,
         QueryBuilder|Builder $postViewsSubquery,
     ): Builder {
-        $blogClass = new Blog()->getMorphClass();
+        $blogClass = $this->getBlogMorphClass();
 
         return Blog::query()
             ->selectRaw(
@@ -81,6 +90,11 @@ class StatsService
                     ->whereBetween('blog_views.created_at', [$from, $to]);
             })
             ->groupBy('blogs.id', 'blogs.name', 'blogs.user_id', 'users.name', 'post_views_agg.views');
+    }
+
+    private function getBlogMorphClass(): string
+    {
+        return $this->blogMorphClass ??= (new Blog)->getMorphClass();
     }
 
     private function applySort(Builder|QueryBuilder $query, StatsSort $sort, string $context): void
@@ -114,7 +128,7 @@ class StatsService
     public function postViews(StatsCriteria $criteria): Collection
     {
         [$from, $to] = $criteria->range->bounds();
-        $postClass = (new Post)->getMorphClass();
+        $postClass = $this->getPostMorphClass();
 
         $query = PageView::query()
             ->selectRaw('posts.id as post_id, posts.title, COUNT(page_views.id) as views')
@@ -153,8 +167,8 @@ class StatsService
     public function visitorViews(StatsCriteria $criteria): Collection
     {
         [$startDate, $endDate] = $criteria->range->bounds();
-        $blogMorphClass = (new Blog)->getMorphClass();
-        $postMorphClass = (new Post)->getMorphClass();
+        $blogMorphClass = $this->getBlogMorphClass();
+        $postMorphClass = $this->getPostMorphClass();
 
         $query = $this->buildBaseQuery($criteria, $blogMorphClass, $postMorphClass, $startDate, $endDate);
         $this->applySelectClause($query, $criteria, $blogMorphClass, $postMorphClass);
