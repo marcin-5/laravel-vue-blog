@@ -27,7 +27,7 @@ function createPageView(string $viewableType, int $viewableId, array $extra = []
         'viewable_type' => $viewableType,
         'viewable_id' => $viewableId,
         'ip_address' => '127.0.0.1',
-        'session_id' => 'sess_'.uniqid(),
+        'session_id' => 'sess_' . uniqid(),
         'user_agent' => 'test',
     ], $extra));
 }
@@ -50,12 +50,7 @@ it('aggregates blog views and post views with default sorting and limits', funct
             ['viewable_id' => $blog2->id],
         ] as $data
     ) {
-        PageView::create(array_merge([
-            'viewable_type' => $blogMorph,
-            'ip_address' => '127.0.0.1',
-            'session_id' => 'sess',
-            'user_agent' => 'test',
-        ], $data));
+        createPageView($blogMorph, $data['viewable_id']);
     }
 
     // Post views
@@ -67,12 +62,7 @@ it('aggregates blog views and post views with default sorting and limits', funct
             ['viewable_id' => $post2->id],
         ] as $data
     ) {
-        PageView::create(array_merge([
-            'viewable_type' => $postMorph,
-            'ip_address' => '127.0.0.1',
-            'session_id' => 'sess',
-            'user_agent' => 'test',
-        ], $data));
+        createPageView($postMorph, $data['viewable_id']);
     }
 
     $service = new StatsService;
@@ -112,12 +102,7 @@ it('filters blog stats by blogger and blog and applies name sorting', function (
             ['viewable_id' => $blog2->id],
         ] as $data
     ) {
-        PageView::create(array_merge([
-            'viewable_type' => $blogMorph,
-            'ip_address' => '127.0.0.1',
-            'session_id' => 'sess',
-            'user_agent' => 'test',
-        ], $data));
+        createPageView($blogMorph, $data['viewable_id']);
     }
 
     $service = new StatsService;
@@ -152,12 +137,7 @@ it('limits number of returned blogs to at least one when size is small positive'
             ['viewable_id' => $blog2->id],
         ] as $data
     ) {
-        PageView::create(array_merge([
-            'viewable_type' => $blogMorph,
-            'ip_address' => '127.0.0.1',
-            'session_id' => 'sess',
-            'user_agent' => 'test',
-        ], $data));
+        createPageView($blogMorph, $data['viewable_id']);
     }
 
     $service = new StatsService;
@@ -189,22 +169,11 @@ it('aggregates post views with blogger, blog, range and sorting', function () {
             ['viewable_id' => $otherPost->id],
         ] as $data
     ) {
-        PageView::create(array_merge([
-            'viewable_type' => $postMorph,
-            'ip_address' => '127.0.0.1',
-            'session_id' => 'sess',
-            'user_agent' => 'test',
-        ], $data));
+        createPageView($postMorph, $data['viewable_id']);
     }
 
     // one old view outside of Week range
-    $oldView = PageView::create([
-        'viewable_type' => $postMorph,
-        'viewable_id' => $post1->id,
-        'ip_address' => '127.0.0.1',
-        'session_id' => 'old',
-        'user_agent' => 'test',
-    ]);
+    $oldView = createPageView($postMorph, $post1->id, ['session_id' => 'old']);
     $oldView->forceFill(['created_at' => now()->subMonths(2)])->save();
 
     $service = new StatsService;
@@ -243,13 +212,7 @@ it('applies title sorting and respects post limit', function () {
 
     // One view for each post
     foreach ([$postA, $postB, $postC] as $post) {
-        PageView::create([
-            'viewable_type' => $postMorph,
-            'viewable_id' => $post->id,
-            'ip_address' => '127.0.0.1',
-            'session_id' => 'sess',
-            'user_agent' => 'test',
-        ]);
+        createPageView($postMorph, $post->id);
     }
 
     $service = new StatsService;
@@ -280,36 +243,18 @@ it('correctly counts post views when blog has multiple blog views', function () 
     // Create 4 views for post1
     $postMorph = $post1->getMorphClass();
     for ($i = 0; $i < 4; $i++) {
-        PageView::create([
-            'viewable_type' => $postMorph,
-            'viewable_id' => $post1->id,
-            'ip_address' => '127.0.0.1',
-            'session_id' => 'sess'.$i,
-            'user_agent' => 'test',
-        ]);
+        createPageView($postMorph, $post1->id);
     }
 
     // Create 2 views for post2
     for ($i = 0; $i < 2; $i++) {
-        PageView::create([
-            'viewable_type' => $postMorph,
-            'viewable_id' => $post2->id,
-            'ip_address' => '127.0.0.1',
-            'session_id' => 'sess_post2_'.$i,
-            'user_agent' => 'test',
-        ]);
+        createPageView($postMorph, $post2->id);
     }
 
     // Create 3 direct blog views (this should not affect post_views count)
     $blogMorph = $blog->getMorphClass();
     for ($i = 0; $i < 3; $i++) {
-        PageView::create([
-            'viewable_type' => $blogMorph,
-            'viewable_id' => $blog->id,
-            'ip_address' => '127.0.0.1',
-            'session_id' => 'blog_sess_'.$i,
-            'user_agent' => 'test',
-        ]);
+        createPageView($blogMorph, $blog->id);
     }
 
     $service = new StatsService;
@@ -344,45 +289,17 @@ it('aggregates visitor views with blog filter and sorts by post views', function
     // - 2 blog views for blog1
     // - 3 post views for blog1's post
     for ($i = 0; $i < 2; $i++) {
-        PageView::create([
-            'user_id' => $userAlice->id,
-            'viewable_type' => $blogMorph,
-            'viewable_id' => $blog1->id,
-            'ip_address' => '127.0.0.1',
-            'session_id' => 'alice_blog_'.$i,
-            'user_agent' => 'test',
-        ]);
+        createPageView($blogMorph, $blog1->id, ['user_id' => $userAlice->id]);
     }
 
     for ($i = 0; $i < 3; $i++) {
-        PageView::create([
-            'user_id' => $userAlice->id,
-            'viewable_type' => $postMorph,
-            'viewable_id' => $postBlog1->id,
-            'ip_address' => '127.0.0.1',
-            'session_id' => 'alice_post_'.$i,
-            'user_agent' => 'test',
-        ]);
+        createPageView($postMorph, $postBlog1->id, ['user_id' => $userAlice->id]);
     }
 
     // Visitor 2 (Bob): some views but mostly on blog2 so blog1 filter should exclude most
-    PageView::create([
-        'user_id' => $userBob->id,
-        'viewable_type' => $blogMorph,
-        'viewable_id' => $blog2->id,
-        'ip_address' => '127.0.0.1',
-        'session_id' => 'bob_blog_other',
-        'user_agent' => 'test',
-    ]);
+    createPageView($blogMorph, $blog2->id, ['user_id' => $userBob->id]);
 
-    PageView::create([
-        'user_id' => $userBob->id,
-        'viewable_type' => $postMorph,
-        'viewable_id' => $postBlog2->id,
-        'ip_address' => '127.0.0.1',
-        'session_id' => 'bob_post_other',
-        'user_agent' => 'test',
-    ]);
+    createPageView($postMorph, $postBlog2->id, ['user_id' => $userBob->id]);
 
     $service = new StatsService;
     $criteria = new StatsCriteria(
