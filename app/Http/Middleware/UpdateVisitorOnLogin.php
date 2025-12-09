@@ -43,11 +43,14 @@ readonly class UpdateVisitorOnLogin
         PageView::query()
             ->whereNull('user_id')
             ->where(function (Builder $query) use ($visitorId, $fingerprint) {
+                $has = false;
                 if ($visitorId !== '') {
                     $query->where('visitor_id', $visitorId);
+                    $has = true;
                 }
                 if ($fingerprint !== null) {
-                    $query->orWhere('fingerprint', $fingerprint);
+                    $has ? $query->orWhere('fingerprint', $fingerprint)
+                        : $query->where('fingerprint', $fingerprint);
                 }
             })
             ->update(['user_id' => $user->getAuthIdentifier()]);
