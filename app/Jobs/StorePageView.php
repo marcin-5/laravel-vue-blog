@@ -3,13 +3,13 @@
 namespace App\Jobs;
 
 use App\Models\PageView;
+use App\Models\VisitorLink;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
-
 use Redis;
 
 use function sprintf;
@@ -28,7 +28,35 @@ class StorePageView implements ShouldQueue
 
     public function handle(): void
     {
-        $pageView = PageView::create($this->data);
+        // Resolve effective identity: prefer user_id; if absent but visitor maps to a user, use that user_id.
+        $data = $this->data;
+        $userId = $data['user_id'] ?? null;
+        $visitorId = $data['visitor_id'] ?? null;
+
+        if ($userId === null && $visitorId) {
+            $link = VisitorLink::query()->where('visitor_id', $visitorId)->first();
+            if ($link !== null) {
+                $userId = $link->user_id;
+                $data['user_id'] = $userId;
+            }
+        }
+
+        // Check if a unique row already exists for this identity and viewable.
+        $existsQuery = PageView::query()
+            ->where('viewable_type', $data['viewable_type'])
+            ->where('viewable_id', $data['viewable_id']);
+
+        if ($userId !== null) {
+            $existsQuery->where('user_id', $userId);
+        } else {
+            $existsQuery->whereNull('user_id')->where('visitor_id', $visitorId);
+        }
+
+        if ($existsQuery->exists()) {
+            return; // do not double count unique view
+        }
+
+        $pageView = PageView::create($data);
 
         if (!class_exists(Redis::class)) {
             return;

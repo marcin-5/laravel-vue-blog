@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\PageView;
+use App\Models\VisitorLink;
 use App\Services\FingerprintGenerator;
 use Closure;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -40,6 +41,14 @@ readonly class UpdateVisitorOnLogin
             return;
         }
 
+        // Persist mapping visitor_id -> user_id for future requests
+        if ($visitorId !== '') {
+            VisitorLink::query()->updateOrCreate(
+                ['visitor_id' => $visitorId],
+                ['user_id' => $user->getAuthIdentifier()],
+            );
+        }
+
         PageView::query()
             ->whereNull('user_id')
             ->where(function (Builder $query) use ($visitorId, $fingerprint) {
@@ -54,6 +63,9 @@ readonly class UpdateVisitorOnLogin
                 }
             })
             ->update(['user_id' => $user->getAuthIdentifier()]);
+
+        // Do not prune duplicates here to preserve historical records as per existing tests.
+        // Future duplicates are prevented by the storage path and unique constraints.
 
         $request->session()->put('page_views_synced_for_user', true);
     }

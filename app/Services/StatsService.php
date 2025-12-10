@@ -34,8 +34,8 @@ class StatsService
         $postViewsSubquery = $this->buildPostViewsSubquery($from, $to);
 
         $query = $this->buildBlogStatsQuery($from, $to, $postViewsSubquery)
-            ->when($criteria->bloggerId, fn(Builder $q) => $q->where('blogs.user_id', $criteria->bloggerId))
-            ->when($criteria->blogId, fn(Builder $q) => $q->where('blogs.id', $criteria->blogId));
+            ->when($criteria->bloggerId, fn (Builder $q) => $q->where('blogs.user_id', $criteria->bloggerId))
+            ->when($criteria->blogId, fn (Builder $q) => $q->where('blogs.id', $criteria->blogId));
 
         $this->applySort($query, $criteria->sort, self::CONTEXT_BLOG);
         $this->applyLimit($query, $criteria->limit);
@@ -76,8 +76,8 @@ class StatsService
 
         return Blog::query()
             ->selectRaw(
-                'blogs.id as blog_id, blogs.name, blogs.user_id as owner_id, users.name as owner_name,' .
-                ' COALESCE(COUNT(blog_views.id), 0) as views,' .
+                'blogs.id as blog_id, blogs.name, blogs.user_id as owner_id, users.name as owner_name,'.
+                ' COALESCE(COUNT(blog_views.id), 0) as views,'.
                 ' COALESCE(post_views_agg.views, 0) as post_views',
             )
             ->leftJoin('users', 'users.id', '=', 'blogs.user_id')
@@ -136,7 +136,7 @@ class StatsService
                 $j->on('posts.id', '=', 'page_views.viewable_id')
                     ->where('page_views.viewable_type', '=', $postClass);
             })
-            ->when($criteria->blogId, fn($q) => $q->where('posts.blog_id', $criteria->blogId))
+            ->when($criteria->blogId, fn ($q) => $q->where('posts.blog_id', $criteria->blogId))
             ->when($criteria->bloggerId, function ($q) use ($criteria) {
                 $q->join('blogs', 'blogs.id', '=', 'posts.blog_id')
                     ->where('blogs.user_id', $criteria->bloggerId);
@@ -150,9 +150,9 @@ class StatsService
         /** @var Collection<int, array{post_id:int,title:string,views:int}> $rows */
         $rows = collect($query->get()->map(function ($row) {
             return [
-                'post_id' => (int)$row->post_id,
-                'title' => (string)$row->title,
-                'views' => (int)$row->views,
+                'post_id' => (int) $row->post_id,
+                'title' => (string) $row->title,
+                'views' => (int) $row->views,
             ];
         }));
 
@@ -180,10 +180,10 @@ class StatsService
         $rows = collect(
             $query->get()->map(static function ($row) {
                 return [
-                    'visitor_label' => (string)$row->visitor_label,
-                    'blog_views' => (int)$row->blog_views,
-                    'post_views' => (int)$row->post_views,
-                    'views' => (int)$row->views,
+                    'visitor_label' => (string) $row->visitor_label,
+                    'blog_views' => (int) $row->blog_views,
+                    'post_views' => (int) $row->post_views,
+                    'views' => (int) $row->views,
                 ];
             }),
         );
@@ -239,11 +239,14 @@ class StatsService
         if ($criteria->blogId === null) {
             // No blog filter: count all blog and post views per visitor.
             $query->selectRaw(
-                'COALESCE(users.name, page_views.visitor_id) as visitor_label,' .
-                ' SUM(CASE WHEN page_views.viewable_type = ? THEN 1 ELSE 0 END) as blog_views,' .
-                ' SUM(CASE WHEN page_views.viewable_type = ? THEN 1 ELSE 0 END) as post_views,' .
-                ' COUNT(page_views.id) as views',
+                'COALESCE(users.name, page_views.visitor_id) as visitor_label,'.
+                ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) as blog_views,'.
+                ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) as post_views,'.
+                ' (COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) + '.
+                '  COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END)) as views',
                 [
+                    $blogMorphClass,
+                    $postMorphClass,
                     $blogMorphClass,
                     $postMorphClass,
                 ],
@@ -251,13 +254,20 @@ class StatsService
         } else {
             // With blog filter: restrict counts (and rows) to the selected blog.
             $query->selectRaw(
-                'COALESCE(users.name, page_views.visitor_id) as visitor_label,' .
-                ' SUM(CASE WHEN page_views.viewable_type = ?' .
-                ' AND page_views.viewable_id = ? THEN 1 ELSE 0 END) as blog_views,' .
-                ' SUM(CASE WHEN page_views.viewable_type = ?' .
-                ' AND posts.blog_id = ? THEN 1 ELSE 0 END) as post_views,' .
-                ' COUNT(page_views.id) as views',
+                'COALESCE(users.name, page_views.visitor_id) as visitor_label,'.
+                ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?'.
+                ' AND page_views.viewable_id = ? THEN page_views.viewable_id END) as blog_views,'.
+                ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?'.
+                ' AND posts.blog_id = ? THEN page_views.viewable_id END) as post_views,'.
+                ' (COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?'.
+                ' AND page_views.viewable_id = ? THEN page_views.viewable_id END) + '.
+                '  COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?'.
+                ' AND posts.blog_id = ? THEN page_views.viewable_id END)) as views',
                 [
+                    $blogMorphClass,
+                    $criteria->blogId,
+                    $postMorphClass,
+                    $criteria->blogId,
                     $blogMorphClass,
                     $criteria->blogId,
                     $postMorphClass,
@@ -274,12 +284,12 @@ class StatsService
         string $postMorphClass,
     ): void {
         if ($criteria->blogId !== null) {
-            // Only keep visitors who have at least one matching blog or post view for that blog.
+            // Only keep visitors who have at least one matching unique blog or post view for that blog.
             $query->havingRaw(
-                'SUM(CASE WHEN page_views.viewable_type = ?' .
-                ' AND page_views.viewable_id = ? THEN 1 ELSE 0 END) > 0' .
-                ' OR SUM(CASE WHEN page_views.viewable_type = ?' .
-                ' AND posts.blog_id = ? THEN 1 ELSE 0 END) > 0',
+                '(
+                COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? AND page_views.viewable_id = ? THEN page_views.viewable_id END) > 0
+                OR COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? AND posts.blog_id = ? THEN page_views.viewable_id END) > 0
+            )',
                 [
                     $blogMorphClass,
                     $criteria->blogId,
@@ -293,12 +303,12 @@ class StatsService
     private function formatBlogStatsRow(object $row): array
     {
         return [
-            'blog_id' => (int)$row->blog_id,
-            'name' => (string)$row->name,
-            'owner_id' => (int)$row->owner_id,
-            'owner_name' => (string)($row->owner_name ?? ''),
-            'views' => (int)$row->views,
-            'post_views' => (int)$row->post_views,
+            'blog_id' => (int) $row->blog_id,
+            'name' => (string) $row->name,
+            'owner_id' => (int) $row->owner_id,
+            'owner_name' => (string) ($row->owner_name ?? ''),
+            'views' => (int) $row->views,
+            'post_views' => (int) $row->post_views,
         ];
     }
 }

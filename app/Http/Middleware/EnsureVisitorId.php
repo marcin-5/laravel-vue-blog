@@ -11,27 +11,33 @@ class EnsureVisitorId
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $response = $next($request);
-
+        // Try to read the decrypted cookie value first
         $visitorId = (string)$request->cookie('visitor_id', '');
 
+        // If missing, generate and ensure both the current request and response carry it
         if ($visitorId === '') {
             $visitorId = (string)Str::uuid();
 
-            $response->headers->setCookie(
-                cookie(
-                    'visitor_id',
-                    $visitorId,
-                    60 * 24 * 365, // 1 year
-                    null,
-                    null,
-                    false,
-                    true,
-                    false,
-                    'Strict',
-                ),
-            );
+            // Make it available to subsequent middleware/handlers in this request
+            $request->cookies->set('visitor_id', $visitorId);
         }
+
+        $response = $next($request);
+
+        // Always ensure the persistent cookie is set (refresh max-age)
+        $response->headers->setCookie(
+            cookie(
+                'visitor_id',
+                $visitorId,
+                60 * 24 * 365, // 1 year
+                null,
+                null,
+                false,
+                true,
+                false,
+                'Strict',
+            ),
+        );
 
         return $response;
     }
