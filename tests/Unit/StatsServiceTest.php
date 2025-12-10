@@ -315,6 +315,6 @@ it('aggregates visitor views with blog filter and sorts by post views', function
 
     $row = $results[0];
     expect($row['visitor_label'])->toBe('Alice')
-        ->and($row['blog_views'])->toBe(2)
-        ->and($row['post_views'])->toBe(3);
+        ->and($row['blog_views'])->toBe(1) // distinct blog pages visited within range
+        ->and($row['post_views'])->toBe(1); // distinct posts visited within range
 });
