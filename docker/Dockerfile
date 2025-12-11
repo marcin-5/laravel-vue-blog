@@ -39,16 +39,16 @@ ENV TZ=$TZ
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Install common PHP extensions
+# Note: Do NOT include `pdo` here — it's built into PHP core and trying to
+# "install" it will fail on PHP 8.5 with: `cp: can't stat 'modules/*'`.
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
-        pdo \
         pdo_pgsql \
         pgsql \
         gd \
         zip \
         intl \
-        mbstring \
-        opcache
+        mbstring
 
 # Install Redis extension via PECL
 RUN pecl install redis \
@@ -58,6 +58,13 @@ RUN pecl install redis \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
+
+# Composer runs as root in containers; silence the warning and allow operations
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
+# Fix Git "dubious ownership" when the workdir is owned by a different UID
+RUN apk add --no-cache git
+RUN git config --global --add safe.directory /var/www/html
 
 COPY composer.json composer.lock ./
 
@@ -78,7 +85,8 @@ FROM base AS production
 COPY . .
 
 # Install production PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer config platform.php 8.4.13 \
+    && composer install --no-dev --optimize-autoloader --no-interaction
 
 # Copy built assets from node builder
 COPY --from=node-builder /app/public/build ./public/build
@@ -109,7 +117,6 @@ FROM base AS development
 
 # Install development-specific system tools
 RUN apk add --no-cache \
-    git \
     fish \
     fzf \
     bash \
@@ -123,7 +130,8 @@ COPY --from=node-builder /app/public/build ./public/build
 COPY --from=node-builder /app/bootstrap/ssr ./bootstrap/ssr
 
 # Install all PHP dependencies, including dev
-RUN composer install --no-interaction
+RUN composer config platform.php 8.4.13 \
+    && composer install --no-interaction
 
 # Set up fish plugins and configuration for development
 ENV FISH_CONFIG_DIR /root/.config/fish
