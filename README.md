@@ -6,7 +6,7 @@ static pages, and a blog with landing and post pages.
 
 ## Features
 
-- Laravel 12 backend (PHP 8.4)
+- Laravel 12 backend (PHP 8.5)
 - Inertia v2 + Vue 3 frontend with TypeScript
 - Vite 7 for dev server and builds; Tailwind CSS v4
 - SSR rendering pipeline for Inertia (see `resources/js/ssr.ts`)
@@ -22,7 +22,7 @@ Choose your setup:
 
 - Docker (recommended): Docker Engine and Docker Compose plugin
 - Or local tools:
-    - PHP 8.4+
+    - PHP 8.5+
     - Composer 2.6+
     - Node.js 18+ and npm 9+
     - A database (MySQL/MariaDB/PostgreSQL) or SQLite

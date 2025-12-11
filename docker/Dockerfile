@@ -10,7 +10,7 @@ COPY . .
 RUN npm run build:ssr
 
 # Stage 2: Base PHP image with common dependencies
-FROM php:8.4-fpm-alpine AS base
+FROM php:8.5-fpm-alpine AS base
 
 ARG APP_NAME=laravel-app
 ARG TZ=UTC
