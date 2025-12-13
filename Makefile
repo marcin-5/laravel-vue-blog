@@ -126,7 +126,8 @@ DOCKER_COMPOSE_PROD = docker compose -p $(DOCKER_PROJECT_NAME_PROD) $(COMPOSE_FI
 
 .PHONY: prod-up prod-down prod-restart prod-build prod-logs \
         prod-migrate prod-optimize prod-deploy prod-update prod-wait \
-        prod-maintenance-on prod-maintenance-off prod-rebuild-pg-redis
+        prod-maintenance-on prod-maintenance-off prod-rebuild-pg-redis \
+        prod-versions
 
 prod-up: ## Start production services
 	$(DOCKER_COMPOSE_PROD) up -d
@@ -175,6 +176,17 @@ prod-deploy: ## Build/Start prod, run optimizations & migrations
 	$(MAKE) prod-migrate
 
 # Shorthand target to update code and restart services
+prod-versions: ## Show runtime versions for debugging (Node/NPM in SSR container, PHP in app)
+	@echo ""
+	@echo "🔎 Runtime versions:"
+	@echo " - app:  PHP"
+	$(DOCKER_COMPOSE_PROD) exec -T app php -v | head -n 1 || true
+	@echo " - ssr:  Node / npm"
+	$(DOCKER_COMPOSE_PROD) exec -T ssr node -v || true
+	$(DOCKER_COMPOSE_PROD) exec -T ssr npm -v || true
+	@echo ""
+
+# Shorthand target to update code and restart selected services
 prod-update: ## Update code from Git and restart selected services with zero-502 maintenance
 	$(MAKE) prod-maintenance-on
 	git fetch --all
@@ -184,6 +196,7 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 	@echo "🚀 Recreating core services without touching caddy..."
 	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps app ssr queue
 	$(MAKE) prod-wait
+	$(MAKE) prod-versions
 	@echo ""
 	@echo "🔍 Checking if SSR bundle was built in the image..."
 	$(DOCKER_COMPOSE_PROD) exec -T ssr ls -lah /var/www/html/bootstrap/ssr/ || echo "❌ No SSR assets in SSR container!"
