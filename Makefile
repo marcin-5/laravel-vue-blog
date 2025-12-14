@@ -1,7 +1,7 @@
 # Use a variable for the compose files to avoid repetition
 COMPOSE_FILES = -f docker/docker-compose.yml -f docker/docker-compose.dev.yml
 # Derive Docker Compose project name from current directory to keep it consistent
-PROJECT_NAME = $(notdir $(CURDIR))
+PROJECT_NAME = $(notdir $(CURDIR))-v2
 # Always pass a fixed project name so we don't end up with multiple sets (e.g. running inside ./docker)
 DOCKER_COMPOSE = docker compose -p $(PROJECT_NAME) $(COMPOSE_FILES)
 

@@ -3,9 +3,12 @@
     "laravel-boost": {
       "command": "docker",
       "args": [
+        "compose",
+        "-p",
+        "laravel-blog-v2",
         "exec",
-        "-i",
-        "laravel-blog-dev",
+        "-T",
+        "app",
         "php",
         "/var/www/html/artisan",
         "boost:mcp"
