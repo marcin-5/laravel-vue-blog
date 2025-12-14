@@ -127,7 +127,7 @@ DOCKER_COMPOSE_PROD = docker compose -p $(DOCKER_PROJECT_NAME_PROD) $(COMPOSE_FI
 .PHONY: prod-up prod-down prod-restart prod-build prod-logs \
         prod-migrate prod-optimize prod-deploy prod-update prod-wait \
         prod-maintenance-on prod-maintenance-off prod-rebuild-pg-redis \
-        prod-versions
+        prod-versions prod-check-assets
 
 prod-up: ## Start production services
 	$(DOCKER_COMPOSE_PROD) up -d
@@ -163,6 +163,26 @@ prod-optimize: ## Cache config/routes/views and generate Ziggy
 	-$(DOCKER_COMPOSE_PROD) exec -T app sh -lc "[ -d resources/views ] && php artisan view:cache || echo 'Skipping view:cache: resources/views not found'"
 	-$(DOCKER_COMPOSE_PROD) exec -T app php artisan ziggy:generate
 
+prod-check-assets: ## Verify built assets exist (prints only failures)
+	@$(DOCKER_COMPOSE_PROD) exec -T ssr sh -lc '\
+		if [ -d /var/www/html/bootstrap/ssr ] && [ "$$(ls -A /var/www/html/bootstrap/ssr 2>/dev/null)" ]; then \
+			:; \
+		else \
+			echo "❌ No SSR assets in SSR container!"; \
+		fi'
+	@$(DOCKER_COMPOSE_PROD) exec -T app sh -lc '\
+		if [ -d /var/www/html/bootstrap/ssr ] && [ "$$(ls -A /var/www/html/bootstrap/ssr 2>/dev/null)" ]; then \
+			:; \
+		else \
+			echo "❌ No SSR assets in app container!"; \
+		fi'
+	@$(DOCKER_COMPOSE_PROD) exec -T app sh -lc '\
+		if [ -d /var/www/html/public/build ] && [ "$$(ls -A /var/www/html/public/build 2>/dev/null)" ]; then \
+			:; \
+		else \
+			echo "❌ No Vite build assets in app container!"; \
+		fi'
+
 # Full deployment flow: pull code/images, rebuild, wait for app, optimize, migrate
 prod-deploy: ## Build/Start prod, run optimizations & migrations
 	# If building from source on the server, ensure latest code first:
@@ -170,12 +190,14 @@ prod-deploy: ## Build/Start prod, run optimizations & migrations
 	git pull --ff-only
 	$(DOCKER_COMPOSE_PROD) up -d --build
 	$(MAKE) prod-wait
+	$(MAKE) prod-versions
+	$(MAKE) prod-check-assets
 	# Optional: use healthchecks and wait for healthy
 	# $(DOCKER_COMPOSE_PROD) up -d --build --wait || true
 	$(MAKE) prod-optimize
 	$(MAKE) prod-migrate
 
-# Shorthand target to update code and restart services
+# Shorthand target to update code and restart selected services
 prod-versions: ## Show runtime versions for debugging (Node/NPM in SSR container, PHP in app)
 	@echo ""
 	@echo "🔎 Runtime versions:"
@@ -198,20 +220,11 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 	$(MAKE) prod-wait
 	$(MAKE) prod-versions
 	@echo ""
-	@echo "🔍 Checking if SSR bundle was built in the image..."
-	$(DOCKER_COMPOSE_PROD) exec -T ssr ls -lah /var/www/html/bootstrap/ssr/ || echo "❌ No SSR assets in SSR container!"
-	@echo ""
-	@echo "🔍 Checking if SSR bundle is in app container..."
-	$(DOCKER_COMPOSE_PROD) exec -T app ls -lah /var/www/html/bootstrap/ssr/ || echo "❌ No SSR assets in app container!"
-	@echo ""
-	@echo "🔍 Checking if Vite client bundle is in app container..."
-	$(DOCKER_COMPOSE_PROD) exec -T app ls -lah /var/www/html/public/build/ || echo "❌ No Vite build assets in app container!"
+	@echo "🔍 Checking production assets..."
+	$(MAKE) prod-check-assets
 	@echo ""
 	@echo "🔧 Clearing all Laravel caches..."
-	$(DOCKER_COMPOSE_PROD) exec -T app php artisan config:clear
-	$(DOCKER_COMPOSE_PROD) exec -T app php artisan cache:clear
-	$(DOCKER_COMPOSE_PROD) exec -T app php artisan route:clear
-	$(DOCKER_COMPOSE_PROD) exec -T app php artisan view:clear
+	$(DOCKER_COMPOSE_PROD) exec -T app php artisan optimize:clear
 	$(DOCKER_COMPOSE_PROD) exec -T app php artisan package:discover --ansi
 	@echo ""
 	@echo "🗄️  Running database migrations..."
