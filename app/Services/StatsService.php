@@ -19,6 +19,8 @@ class StatsService
 
     private const string CONTEXT_VISITOR = 'visitor';
 
+    private const string NON_EMPTY_STRING_SQL = "IS NOT NULL AND %s <> ''";
+
     private ?string $blogMorphClass = null;
 
     private ?string $postMorphClass = null;
@@ -26,7 +28,7 @@ class StatsService
     /**
      * Returns aggregated views for blogs within the given period.
      *
-     * @return Collection<int, array{blog_id:int,name:string,owner_id:int,owner_name:string,views:int,post_views:int}>
+     * @return Collection<int, array{blog_id:int,name:string,owner_id:int,owner_name:string,views:int,unique_views:int,post_views:int,unique_post_views:int}>
      */
     public function blogViews(StatsCriteria $criteria): Collection
     {
@@ -34,13 +36,13 @@ class StatsService
         $postViewsSubquery = $this->buildPostViewsSubquery($from, $to);
 
         $query = $this->buildBlogStatsQuery($from, $to, $postViewsSubquery)
-            ->when($criteria->bloggerId, fn (Builder $q) => $q->where('blogs.user_id', $criteria->bloggerId))
-            ->when($criteria->blogId, fn (Builder $q) => $q->where('blogs.id', $criteria->blogId));
+            ->when($criteria->bloggerId, fn(Builder $q) => $q->where('blogs.user_id', $criteria->bloggerId))
+            ->when($criteria->blogId, fn(Builder $q) => $q->where('blogs.id', $criteria->blogId));
 
         $this->applySort($query, $criteria->sort, self::CONTEXT_BLOG);
         $this->applyLimit($query, $criteria->limit);
 
-        /** @var Collection<int, array{blog_id:int,name:string,owner_id:int,owner_name:string,views:int,post_views:int}> $rows */
+        /** @var Collection<int, array{blog_id:int,name:string,owner_id:int,owner_name:string,views:int,unique_views:int,post_views:int,unique_post_views:int}> $rows */
         $rows = collect($query->get()->map($this->formatBlogStatsRow(...)));
 
         return $rows;
@@ -51,9 +53,12 @@ class StatsService
         DateTimeInterface $to,
     ): QueryBuilder|Builder {
         $postClass = $this->getPostMorphClass();
+        $uniqueViewerKeySql = $this->uniqueViewerKeySql('page_views');
 
         return PageView::query()
-            ->selectRaw('posts.blog_id, COUNT(page_views.id) as views')
+            ->selectRaw(
+                "posts.blog_id, COUNT(page_views.id) as views, COUNT(DISTINCT ($uniqueViewerKeySql)) as unique_views",
+            )
             ->join('posts', function ($join) use ($postClass, $from, $to) {
                 $join->on('posts.id', '=', 'page_views.viewable_id')
                     ->where('page_views.viewable_type', '=', $postClass)
@@ -67,18 +72,38 @@ class StatsService
         return $this->postMorphClass ??= (new Post)->getMorphClass();
     }
 
+    private function uniqueViewerKeySql(string $tableAlias): string
+    {
+        $visitorIdPresent = sprintf(self::NON_EMPTY_STRING_SQL, $tableAlias . '.visitor_id');
+        $fingerprintPresent = sprintf(self::NON_EMPTY_STRING_SQL, $tableAlias . '.fingerprint');
+        $sessionIdPresent = sprintf(self::NON_EMPTY_STRING_SQL, $tableAlias . '.session_id');
+
+        return "(
+            CASE
+              WHEN {$tableAlias}.user_id IS NOT NULL THEN CONCAT('U:', {$tableAlias}.user_id)
+              WHEN {$tableAlias}.visitor_id {$visitorIdPresent} THEN CONCAT('V:', {$tableAlias}.visitor_id)
+              WHEN {$tableAlias}.fingerprint {$fingerprintPresent} THEN CONCAT('F:', {$tableAlias}.fingerprint)
+              WHEN {$tableAlias}.session_id {$sessionIdPresent} THEN CONCAT('S:', {$tableAlias}.session_id)
+              ELSE CONCAT('I:', COALESCE({$tableAlias}.ip_address, ''))
+            END
+        )";
+    }
+
     private function buildBlogStatsQuery(
         DateTimeInterface $from,
         DateTimeInterface $to,
         QueryBuilder|Builder $postViewsSubquery,
     ): Builder {
         $blogClass = $this->getBlogMorphClass();
+        $uniqueViewerKeySql = $this->uniqueViewerKeySql('blog_views');
 
         return Blog::query()
             ->selectRaw(
-                'blogs.id as blog_id, blogs.name, blogs.user_id as owner_id, users.name as owner_name,'.
-                ' COALESCE(COUNT(blog_views.id), 0) as views,'.
-                ' COALESCE(post_views_agg.views, 0) as post_views',
+                'blogs.id as blog_id, blogs.name, blogs.user_id as owner_id, users.name as owner_name,' .
+                ' COALESCE(COUNT(blog_views.id), 0) as views,' .
+                " COALESCE(COUNT(DISTINCT ($uniqueViewerKeySql)), 0) as unique_views," .
+                ' COALESCE(post_views_agg.views, 0) as post_views,' .
+                ' COALESCE(post_views_agg.unique_views, 0) as unique_post_views',
             )
             ->leftJoin('users', 'users.id', '=', 'blogs.user_id')
             ->leftJoinSub($postViewsSubquery, 'post_views_agg', function ($join) {
@@ -89,7 +114,14 @@ class StatsService
                     ->where('blog_views.viewable_type', '=', $blogClass)
                     ->whereBetween('blog_views.created_at', [$from, $to]);
             })
-            ->groupBy('blogs.id', 'blogs.name', 'blogs.user_id', 'users.name', 'post_views_agg.views');
+            ->groupBy(
+                'blogs.id',
+                'blogs.name',
+                'blogs.user_id',
+                'users.name',
+                'post_views_agg.views',
+                'post_views_agg.unique_views',
+            );
     }
 
     private function getBlogMorphClass(): string
@@ -123,20 +155,23 @@ class StatsService
     /**
      * Returns aggregated views for posts within a blog and period.
      *
-     * @return Collection<int, array{post_id:int,title:string,views:int}>
+     * @return Collection<int, array{post_id:int,title:string,views:int,unique_views:int}>
      */
     public function postViews(StatsCriteria $criteria): Collection
     {
         [$from, $to] = $criteria->range->bounds();
         $postClass = $this->getPostMorphClass();
+        $uniqueViewerKeySql = $this->uniqueViewerKeySql('page_views');
 
         $query = PageView::query()
-            ->selectRaw('posts.id as post_id, posts.title, COUNT(page_views.id) as views')
+            ->selectRaw(
+                "posts.id as post_id, posts.title, COUNT(page_views.id) as views, COUNT(DISTINCT ($uniqueViewerKeySql)) as unique_views",
+            )
             ->join('posts', function ($j) use ($postClass) {
                 $j->on('posts.id', '=', 'page_views.viewable_id')
                     ->where('page_views.viewable_type', '=', $postClass);
             })
-            ->when($criteria->blogId, fn ($q) => $q->where('posts.blog_id', $criteria->blogId))
+            ->when($criteria->blogId, fn($q) => $q->where('posts.blog_id', $criteria->blogId))
             ->when($criteria->bloggerId, function ($q) use ($criteria) {
                 $q->join('blogs', 'blogs.id', '=', 'posts.blog_id')
                     ->where('blogs.user_id', $criteria->bloggerId);
@@ -147,12 +182,13 @@ class StatsService
         $this->applySort($query, $criteria->sort, self::CONTEXT_POST);
         $this->applyLimit($query, $criteria->limit);
 
-        /** @var Collection<int, array{post_id:int,title:string,views:int}> $rows */
+        /** @var Collection<int, array{post_id:int,title:string,views:int,unique_views:int}> $rows */
         $rows = collect($query->get()->map(function ($row) {
             return [
-                'post_id' => (int) $row->post_id,
-                'title' => (string) $row->title,
-                'views' => (int) $row->views,
+                'post_id' => (int)$row->post_id,
+                'title' => (string)$row->title,
+                'views' => (int)$row->views,
+                'unique_views' => (int)$row->unique_views,
             ];
         }));
 
@@ -180,10 +216,10 @@ class StatsService
         $rows = collect(
             $query->get()->map(static function ($row) {
                 return [
-                    'visitor_label' => (string) $row->visitor_label,
-                    'blog_views' => (int) $row->blog_views,
-                    'post_views' => (int) $row->post_views,
-                    'views' => (int) $row->views,
+                    'visitor_label' => (string)$row->visitor_label,
+                    'blog_views' => (int)$row->blog_views,
+                    'post_views' => (int)$row->post_views,
+                    'views' => (int)$row->views,
                 ];
             }),
         );
@@ -239,10 +275,10 @@ class StatsService
         if ($criteria->blogId === null) {
             // No blog filter: count all blog and post views per visitor.
             $query->selectRaw(
-                'COALESCE(users.name, page_views.visitor_id) as visitor_label,'.
-                ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) as blog_views,'.
-                ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) as post_views,'.
-                ' (COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) + '.
+                'COALESCE(users.name, page_views.visitor_id) as visitor_label,' .
+                ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) as blog_views,' .
+                ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) as post_views,' .
+                ' (COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) + ' .
                 '  COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END)) as views',
                 [
                     $blogMorphClass,
@@ -254,14 +290,14 @@ class StatsService
         } else {
             // With blog filter: restrict counts (and rows) to the selected blog.
             $query->selectRaw(
-                'COALESCE(users.name, page_views.visitor_id) as visitor_label,'.
-                ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?'.
-                ' AND page_views.viewable_id = ? THEN page_views.viewable_id END) as blog_views,'.
-                ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?'.
-                ' AND posts.blog_id = ? THEN page_views.viewable_id END) as post_views,'.
-                ' (COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?'.
-                ' AND page_views.viewable_id = ? THEN page_views.viewable_id END) + '.
-                '  COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?'.
+                'COALESCE(users.name, page_views.visitor_id) as visitor_label,' .
+                ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?' .
+                ' AND page_views.viewable_id = ? THEN page_views.viewable_id END) as blog_views,' .
+                ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?' .
+                ' AND posts.blog_id = ? THEN page_views.viewable_id END) as post_views,' .
+                ' (COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?' .
+                ' AND page_views.viewable_id = ? THEN page_views.viewable_id END) + ' .
+                '  COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?' .
                 ' AND posts.blog_id = ? THEN page_views.viewable_id END)) as views',
                 [
                     $blogMorphClass,
@@ -303,12 +339,14 @@ class StatsService
     private function formatBlogStatsRow(object $row): array
     {
         return [
-            'blog_id' => (int) $row->blog_id,
-            'name' => (string) $row->name,
-            'owner_id' => (int) $row->owner_id,
-            'owner_name' => (string) ($row->owner_name ?? ''),
-            'views' => (int) $row->views,
-            'post_views' => (int) $row->post_views,
+            'blog_id' => (int)$row->blog_id,
+            'name' => (string)$row->name,
+            'owner_id' => (int)$row->owner_id,
+            'owner_name' => (string)($row->owner_name ?? ''),
+            'views' => (int)$row->views,
+            'unique_views' => (int)($row->unique_views ?? 0),
+            'post_views' => (int)$row->post_views,
+            'unique_post_views' => (int)($row->unique_post_views ?? 0),
         ];
     }
 }
