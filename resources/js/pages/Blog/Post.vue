@@ -22,6 +22,7 @@ const props = defineProps<{
     seo?: SEO;
     viewStats: {
         total: number;
+        unique?: number;
     };
 }>();
 
@@ -102,7 +103,10 @@ const navbarMaxWidth = computed(() => (hasSidebar.value ? 'max-w-screen-lg xl:ma
                 <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-400">{{ post.title }}</h1>
                 <div class="my-2 inline-flex items-center gap-x-5 text-sm font-medium text-gray-800 dark:text-gray-300">
                     <p v-if="post.published_at" class="italic">{{ publishedLabel }} {{ post.published_at }}</p>
-                    <span>Odsłony: {{ viewStats.total.toLocaleString() }}</span>
+                    <span>
+                        Odsłony: {{ viewStats.total.toLocaleString() }}
+                        <template v-if="viewStats.unique !== undefined"> (unikalne: {{ Number(viewStats.unique).toLocaleString() }}) </template>
+                    </span>
                 </div>
                 <p v-if="showUpdated" class="-mt-1 mb-2 text-xs text-gray-600 italic dark:text-gray-400">
                     {{ updatedLabel }} {{ formattedUpdatedDate }}

@@ -24,6 +24,7 @@ const props = defineProps<{
     locale?: string;
     viewStats: {
         total: number;
+        unique?: number;
     };
 }>();
 

@@ -8,6 +8,8 @@ use App\Http\Resources\PublicBlogResource;
 use App\Http\Resources\PublicPostResource;
 use App\Models\Blog;
 use App\Models\LandingPage;
+use App\Models\PageView;
+use App\Models\Post;
 use App\Services\BlogNavigationService;
 use App\Services\MarkdownService;
 use App\Services\SeoService;
@@ -81,6 +83,7 @@ class PublicBlogController extends BasePublicController
             'seo' => $seoData->toArray(),
             'viewStats' => [
                 'total' => $blog->view_count,
+                'unique' => $this->countUniqueViews((new Blog)->getMorphClass(), $blog->id),
             ],
         ]);
     }
@@ -136,9 +139,34 @@ class PublicBlogController extends BasePublicController
         ];
     }
 
+    private function countUniqueViews(string $morphClass, int $id): int
+    {
+        // Build CASE expression identical to StatsService::uniqueViewerKeySql()
+        $table = 'page_views';
+        $sql = "(
+            CASE
+              WHEN {$table}.user_id IS NOT NULL THEN CONCAT('U:', {$table}.user_id)
+              WHEN {$table}.visitor_id IS NOT NULL AND {$table}.visitor_id <> '' THEN CONCAT('V:', {$table}.visitor_id)
+              WHEN {$table}.fingerprint IS NOT NULL AND {$table}.fingerprint <> '' THEN CONCAT('F:', {$table}.fingerprint)
+              WHEN {$table}.session_id IS NOT NULL AND {$table}.session_id <> '' THEN CONCAT('S:', {$table}.session_id)
+              ELSE CONCAT('I:', COALESCE({$table}.ip_address, ''))
+            END
+        )";
+
+        /** @var int $count */
+        $count = PageView::query()
+            ->where('viewable_type', $morphClass)
+            ->where('viewable_id', $id)
+            ->selectRaw("COUNT(DISTINCT ($sql)) as cnt")
+            ->value('cnt');
+
+        return (int)$count;
+    }
+
     /**
      * Show a single post by slug for a blog by slug.
      * Route: /{blog:slug}/{post:slug}
+     *
      * @throws ModelNotFoundException
      */
     public function post(Request $request, Blog $blog, string $postSlug): Response
@@ -186,6 +214,7 @@ class PublicBlogController extends BasePublicController
             'seo' => $seoData->toArray(),
             'viewStats' => [
                 'total' => $post->view_count,
+                'unique' => $this->countUniqueViews((new Post)->getMorphClass(), $post->id),
             ],
         ]);
     }

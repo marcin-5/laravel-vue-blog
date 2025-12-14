@@ -11,6 +11,7 @@ defineProps<{
     displayedMotto: string | null;
     viewStats: {
         total: number;
+        unique?: number;
     };
 }>();
 </script>
@@ -21,7 +22,7 @@ defineProps<{
             <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-400">
                 {{ blog.name }}
             </h1>
-            <ViewStats :total="viewStats.total"></ViewStats>
+            <ViewStats :total="viewStats.total" :unique="viewStats.unique"></ViewStats>
         </div>
         <p v-if="displayedMotto" class="mt-2 mb-12 font-serif text-gray-800 italic dark:text-gray-200">
             {{ displayedMotto }}
