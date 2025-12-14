@@ -59,7 +59,7 @@ const {
 });
 
 // Navbar max-width class based on sidebar layout
-const navbarMaxWidth = computed(() => (hasSidebarLayout.value ? 'max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl' : 'max-w-[1024px]'));
+const navbarMaxWidth = computed(() => (hasSidebarLayout.value ? 'max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl' : 'max-w-screen-lg'));
 </script>
 
 <template>
@@ -68,7 +68,7 @@ const navbarMaxWidth = computed(() => (hasSidebarLayout.value ? 'max-w-screen-lg
         <div
             :class="[
                 'mx-auto w-full p-4 sm:px-12 md:px-16',
-                hasSidebarLayout ? 'max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl' : 'max-w-[1024px]',
+                hasSidebarLayout ? 'max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl' : 'max-w-screen-lg',
             ]"
         >
             <BorderDivider class="mb-4" />
