@@ -12,6 +12,10 @@ DOCKER_COMPOSE = docker compose -p $(PROJECT_NAME) $(COMPOSE_FILES)
 .ONESHELL:
 SHELL := /bin/sh
 
+# Make output readability:
+# - suppress "Entering/Leaving directory" even when make invokes make
+MAKEFLAGS += --no-print-directory
+
 # By default, `up` does not have any dependencies. This makes it fast.
 BUILD_DEPENDENCY =
 
@@ -262,54 +266,47 @@ prod-rebuild-pg-redis: ## Recreate postgres and redis services with zero-502 mai
 # =============================
 
 prod-maintenance-on: ## Enable Caddy maintenance mode (serve static maintenance.html)
-	# Ensure maintenance.html exists inside the app's writable public volume
-	$(DOCKER_COMPOSE_PROD) exec -T app sh -lc 'test -f /var/www/html/public/maintenance.html || printf %s "<!doctype html><title>Maintenance</title><h1>Trwa aktualizacja…</h1>" > /var/www/html/public/maintenance.html'
-	# Copy the alternative Caddy config into the running caddy container
-	docker cp docker/Caddyfile.maintenance $$($(DOCKER_COMPOSE_PROD) ps -q caddy):/etc/caddy/Caddyfile.maintenance
-	# Reload Caddy to use the maintenance config, but be robust if the container is
-	# in a restarting state. We wait briefly for it to become running and, if it
-	# never does, we log a warning but do not fail the whole deployment.
+	@printf '%s\n' '[prod-maintenance-on] Ensuring maintenance.html exists...'
+	@$(DOCKER_COMPOSE_PROD) exec -T app sh -lc 'test -f /var/www/html/public/maintenance.html || printf %s "<!doctype html><title>Maintenance</title><h1>Trwa aktualizacja…</h1>" > /var/www/html/public/maintenance.html'
+
+	@printf '%s\n' '[prod-maintenance-on] Copying maintenance Caddyfile into container...'
+	@docker cp docker/Caddyfile.maintenance $$($(DOCKER_COMPOSE_PROD) ps -q caddy):/etc/caddy/Caddyfile.maintenance
+
 	@cid=$$($(DOCKER_COMPOSE_PROD) ps -q caddy); \
 	if [ -z "$$cid" ]; then \
-	  echo "[prod-maintenance-on] Caddy container not found; skipping reload."; \
+	  printf '%s\n' '[prod-maintenance-on] Caddy container not found; skipping reload.'; \
 	else \
-	  echo "[prod-maintenance-on] Waiting for Caddy container ($$cid) to be running..."; \
+	  printf '%s\n' "[prod-maintenance-on] Waiting for Caddy container ($$cid) to be running..."; \
 	  for i in $$(seq 1 10); do \
 	    if docker inspect -f '{{.State.Running}}' $$cid 2>/dev/null | grep -q true; then \
-	      echo "[prod-maintenance-on] Caddy is running, reloading maintenance config..."; \
+	      printf '%s\n' '[prod-maintenance-on] Caddy is running; reloading maintenance config...'; \
 	      if ! $(DOCKER_COMPOSE_PROD) exec -T caddy caddy reload --config /etc/caddy/Caddyfile.maintenance; then \
-	        echo "[prod-maintenance-on] Warning: failed to reload Caddy into maintenance mode."; \
+	        printf '%s\n' '[prod-maintenance-on] Warning: failed to reload Caddy into maintenance mode.'; \
 	      fi; \
-	      break; \
+	      exit 0; \
 	    fi; \
-	    echo "[prod-maintenance-on] Caddy not running yet ($$i/10); waiting..."; \
+	    printf '%s\n' "[prod-maintenance-on] Caddy not running yet ($$i/10); waiting..."; \
 	    sleep 2; \
-	    if [ $$i -eq 10 ]; then \
-	      echo "[prod-maintenance-on] Caddy failed to become running; continuing without reload."; \
-	    fi; \
 	  done; \
+	  printf '%s\n' '[prod-maintenance-on] Caddy failed to become running; continuing without reload.'; \
 	fi
 
 prod-maintenance-off: ## Disable Caddy maintenance mode (restore normal config)
-	# Reload Caddy back to the default config. Similar to prod-maintenance-on,
-	# be tolerant if the Caddy container is starting up or restarting.
 	@cid=$$($(DOCKER_COMPOSE_PROD) ps -q caddy); \
 	if [ -z "$$cid" ]; then \
-	  echo "[prod-maintenance-off] Caddy container not found; skipping reload."; \
+	  printf '%s\n' '[prod-maintenance-off] Caddy container not found; skipping reload.'; \
 	else \
-	  echo "[prod-maintenance-off] Waiting for Caddy container ($$cid) to be running..."; \
+	  printf '%s\n' "[prod-maintenance-off] Waiting for Caddy container ($$cid) to be running..."; \
 	  for i in $$(seq 1 10); do \
 	    if docker inspect -f '{{.State.Running}}' $$cid 2>/dev/null | grep -q true; then \
-	      echo "[prod-maintenance-off] Caddy is running, reloading default config..."; \
+	      printf '%s\n' '[prod-maintenance-off] Caddy is running; reloading default config...'; \
 	      if ! $(DOCKER_COMPOSE_PROD) exec -T caddy caddy reload --config /etc/caddy/Caddyfile; then \
-	        echo "[prod-maintenance-off] Warning: failed to reload Caddy back to default config."; \
+	        printf '%s\n' '[prod-maintenance-off] Warning: failed to reload Caddy back to default config.'; \
 	      fi; \
-	      break; \
+	      exit 0; \
 	    fi; \
-	    echo "[prod-maintenance-off] Caddy not running yet ($$i/10); waiting..."; \
+	    printf '%s\n' "[prod-maintenance-off] Caddy not running yet ($$i/10); waiting..."; \
 	    sleep 2; \
-	    if [ $$i -eq 10 ]; then \
-	      echo "[prod-maintenance-off] Caddy failed to become running; continuing without reload."; \
-	    fi; \
 	  done; \
+	  printf '%s\n' '[prod-maintenance-off] Caddy failed to become running; continuing without reload.'; \
 	fi
