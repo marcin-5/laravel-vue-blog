@@ -28,7 +28,7 @@ class CategoriesController extends AuthenticatedController
             ->orderBy('slug')
             ->get(['id', 'name', 'slug']);
 
-        return Inertia::render('Admin/Categories', [
+        return Inertia::render('app/admin/Categories', [
             'categories' => $categories,
         ]);
     }

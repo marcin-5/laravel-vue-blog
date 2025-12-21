@@ -14,7 +14,9 @@ use Inertia\Response;
 
 class UsersController extends Controller
 {
-    public function __construct(private readonly UserManagementService $userManagementService) {}
+    public function __construct(private readonly UserManagementService $userManagementService)
+    {
+    }
 
     /**
      * Display a listing of users (admin only).
@@ -29,7 +31,7 @@ class UsersController extends Controller
             ->orderBy('name')
             ->get();
 
-        return Inertia::render('Admin/Users', [
+        return Inertia::render('app/admin/Users', [
             'users' => $users,
             'currentUserIsAdmin' => $request->user()?->isAdmin() ?? false,
         ]);

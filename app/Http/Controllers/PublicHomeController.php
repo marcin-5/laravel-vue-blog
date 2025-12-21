@@ -40,7 +40,7 @@ class PublicHomeController extends BasePublicController
         $baseUrl = config('app.url');
         $seoData = $this->prepareSeoData($baseUrl, $selectedCategoryIds, $blogs, $locale);
 
-        return $this->renderWithTranslations('Welcome', 'home', [
+        return $this->renderWithTranslations('public/Welcome', 'home', [
             'locale' => $locale,
             'blogs' => $blogs,
             'categories' => $categories,
@@ -206,7 +206,7 @@ class PublicHomeController extends BasePublicController
             ],
         );
 
-        return $this->renderWithTranslations('About', 'about', [
+        return $this->renderWithTranslations('public/About', 'about', [
             'locale' => $locale,
             // Pass preprocessed translations (about.content already converted to HTML)
             'translations' => [
@@ -249,7 +249,7 @@ class PublicHomeController extends BasePublicController
             ],
         );
 
-        return $this->renderWithTranslations('Contact', 'contact', [
+        return $this->renderWithTranslations('public/Contact', 'contact', [
             'locale' => $locale,
             'translations' => [
                 'messages' => $messages,

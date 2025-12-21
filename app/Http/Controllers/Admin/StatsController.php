@@ -39,7 +39,7 @@ class StatsController extends AuthenticatedController
             ->orderBy('name')
             ->get();
 
-        return Inertia::render('Admin/Stats', [
+        return Inertia::render('app/admin/Stats', [
             'blogFilters' => $this->formatFiltersForResponse($blogFilters, $blogFilters['limit']),
             'postFilters' => $this->formatFiltersForResponse($postFilters, $postFilters['limit']),
             'blogs' => $blogs,

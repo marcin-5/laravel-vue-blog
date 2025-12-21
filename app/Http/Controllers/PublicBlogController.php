@@ -66,7 +66,7 @@ class PublicBlogController extends BasePublicController
             ),
         );
 
-        return $this->renderWithTranslations('Blog/Landing', 'blog', [
+        return $this->renderWithTranslations('public/blog/Landing', 'blog', [
             'locale' => app()->getLocale(),
             'blog' => new PublicBlogResource($blog)->toArray($request) + [
                     'descriptionHtml' => $descriptionHtml,
@@ -193,7 +193,7 @@ class PublicBlogController extends BasePublicController
             modifiedTime: $post->updated_at?->toIso8601String(),
         );
 
-        return $this->renderWithTranslations('Blog/Post', 'post', [
+        return $this->renderWithTranslations('public/blog/Post', 'post', [
             'locale' => app()->getLocale(),
             'blog' => new PublicBlogResource($blog)->toArray($request),
             'post' => [

@@ -35,7 +35,7 @@ class StatsController extends AuthenticatedController
         $visitorCriteria = $this->createCriteria($visitorFilters, $user->id);
         $visitors = $this->stats->visitorViews($visitorCriteria);
 
-        return Inertia::render('Blogger/Stats', [
+        return Inertia::render('app/blogger/Stats', [
             'blogFilters' => $this->formatFiltersForResponse($blogFilters, $blogFilters['limit']),
             'postFilters' => $this->formatFiltersForResponse($postFilters, $postFilters['limit']),
             'visitorFilters' => $this->formatFiltersForResponse($visitorFilters, $visitorFilters['limit']),

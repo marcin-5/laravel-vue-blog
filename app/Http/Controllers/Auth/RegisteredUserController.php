@@ -47,7 +47,7 @@ class RegisteredUserController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('auth/Register', [
+        return Inertia::render('app/auth/Register', [
             'registrationEnabled' => (bool)config('REGISTRATION_ENABLED', false),
         ]);
     }

@@ -32,7 +32,7 @@ class BlogsController extends AuthenticatedController
         $blogs = $this->blogService->getUserBlogs($user);
         $categories = $this->blogService->getCategories();
 
-        return Inertia::render('Blogger/Blogs', [
+        return Inertia::render('app/blogger/Blogs', [
             'blogs' => $blogs,
             'categories' => $categories,
             'canCreate' => $user->canCreateBlog(),
