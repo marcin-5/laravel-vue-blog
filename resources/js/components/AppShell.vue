@@ -1,5 +1,6 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { Toaster } from '@/components/ui/toast';
 import { usePage } from '@inertiajs/vue3';
 
 interface Props {
@@ -18,4 +19,5 @@ const isOpen = usePage().props.sidebarOpen;
     <SidebarProvider v-else :default-open="isOpen">
         <slot />
     </SidebarProvider>
+    <Toaster />
 </template>
