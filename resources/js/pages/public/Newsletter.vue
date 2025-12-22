@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Toaster } from '@/components/ui/toast';
+import { useToast } from '@/composables/useToast';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -37,11 +39,26 @@ const toggleBlogSelection = (blogId: number | string, checked: boolean | string)
     toggleBlogState(newsletterForm.blog_ids, Number(blogId), checked);
 };
 
+const { toast } = useToast();
+
 const submit = () => {
     if (hasSelectedBlogs.value) {
         newsletterForm.post(route('newsletter.store'), {
             onSuccess: () => {
-                // Toast logic handled globally or by flash message
+                toast({
+                    title: 'Sukces!',
+                    description: 'Twoje zgłoszenie do newslettera zostało zapisane.',
+                    variant: 'success',
+                    size: 'sm',
+                });
+            },
+            onError: () => {
+                toast({
+                    title: 'Błąd!',
+                    description: 'Wystąpił problem podczas zapisywania do newslettera.',
+                    variant: 'destructive',
+                    size: 'sm',
+                });
             },
         });
     }
@@ -52,6 +69,7 @@ const submit = () => {
     <Head title="Newsletter" />
     <div class="flex min-h-screen flex-col bg-primary-foreground text-primary">
         <PublicNavbar maxWidth="max-w-screen-lg" />
+        <Toaster />
 
         <main class="mx-auto w-full max-w-screen-lg p-4 sm:px-12 md:px-16">
             <div class="mx-auto max-w-2xl py-12">
