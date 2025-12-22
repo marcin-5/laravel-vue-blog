@@ -9,6 +9,7 @@ import { useSidebarLayout } from '@/composables/useSidebarLayout';
 import { hasContent } from '@/lib/utils';
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { Blog, Navigation, Pagination, PostItem } from '@/types/blog.types';
+import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -108,6 +109,15 @@ const navbarMaxWidth = computed(() => (hasSidebarLayout.value ? 'max-w-screen-lg
             </template>
 
             <!-- Navigation at bottom -->
+            <div class="mt-8 flex justify-center">
+                <Link
+                    :href="route('newsletter.index', { blog_id: blog.id })"
+                    class="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                >
+                    Zapisz się do newslettera
+                </Link>
+            </div>
+
             <BlogPostNav :navigation="navigation" />
 
             <!-- Footer (optional) -->

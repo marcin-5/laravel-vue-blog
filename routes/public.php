@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\PublicBlogController;
 use App\Http\Controllers\PublicHomeController;
 use App\Http\Controllers\RobotsController;
@@ -30,6 +31,10 @@ Route::get('/contact', [PublicHomeController::class, 'contact'])->name('contact'
 Route::post('/contact', [PublicHomeController::class, 'submit'])
     ->name('public.contact.submit')
     ->middleware(['throttle:6,1']); // rate-limit to reduce spam
+
+// Newsletter
+Route::get('/newsletter', [NewsletterController::class, 'index'])->name('newsletter.index');
+Route::post('/newsletter', [NewsletterController::class, 'store'])->name('newsletter.store');
 
 // Keep these at the very end to avoid conflicts.
 Route::get('{blog:slug}/{postSlug}', [PublicBlogController::class, 'post'])

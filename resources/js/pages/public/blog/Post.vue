@@ -8,6 +8,7 @@ import { useSidebarLayout } from '@/composables/useSidebarLayout';
 import type { SEO } from '@/types';
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { Blog, Navigation, Pagination, PostDetails, PostItem } from '@/types/blog.types';
+import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -165,6 +166,16 @@ const navbarMaxWidth = computed(() => (hasSidebar.value ? 'max-w-screen-lg xl:ma
                 <PostContent :author="post.author" :content="post.contentHtml" />
                 <BorderDivider class="mt-12 mb-4" />
                 <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
+            </div>
+
+            <!-- Newsletter link -->
+            <div class="mt-8 flex justify-center">
+                <Link
+                    :href="route('newsletter.index', { blog_id: blog.id })"
+                    class="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                >
+                    Zapisz się do newslettera
+                </Link>
             </div>
 
             <!-- Post Navigation at bottom -->
