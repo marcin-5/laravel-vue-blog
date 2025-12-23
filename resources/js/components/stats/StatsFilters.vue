@@ -11,16 +11,19 @@ interface Props {
     selectedSize: number;
     selectedBlogger?: number | null;
     selectedBlog?: number | null;
+    selectedGroupBy?: 'visitor_id' | 'fingerprint';
     bloggers?: UserOption[];
     blogOptions: BlogOption[];
     showBloggerFilter?: boolean;
     showBlogFilter?: boolean;
+    showGroupByFilter?: boolean;
     blogFilterLabel?: string;
     sortOptions: { value: string; label: string }[];
 }
 
 withDefaults(defineProps<Props>(), {
     showBlogFilter: true,
+    showGroupByFilter: false,
     sortOptions: () => [
         { value: 'views_desc', label: 'Views ↓' },
         { value: 'views_asc', label: 'Views ↑' },
@@ -35,6 +38,7 @@ const emit = defineEmits<{
     'update:selectedSize': [value: number];
     'update:selectedBlogger': [value: number | null | undefined];
     'update:selectedBlog': [value: number | null | undefined];
+    'update:selectedGroupBy': [value: 'visitor_id' | 'fingerprint'];
 }>();
 
 const ranges: { value: Range; label: string }[] = [
@@ -50,6 +54,11 @@ const sizes = [
     { value: 10, label: '10' },
     { value: 20, label: '20' },
     { value: 0, label: 'All' },
+];
+
+const groupOptions = [
+    { value: 'visitor_id', label: 'Visitor ID' },
+    { value: 'fingerprint', label: 'Fingerprint' },
 ];
 </script>
 
@@ -94,6 +103,14 @@ const sizes = [
             label="Blog"
             min-width="min-w-48"
             @update:model-value="emit('update:selectedBlog', $event as number | null | undefined)"
+        />
+
+        <FilterSelect
+            v-if="showGroupByFilter"
+            :model-value="selectedGroupBy"
+            :options="groupOptions"
+            label="Identify by"
+            @update:model-value="emit('update:selectedGroupBy', $event as 'visitor_id' | 'fingerprint')"
         />
     </div>
 </template>

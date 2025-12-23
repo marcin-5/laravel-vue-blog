@@ -25,6 +25,7 @@ function getInitialState(key: string, serverState: FilterState): FilterState {
                 size: parsed.size != null ? Number(parsed.size) : serverState.size,
                 blogger_id: parsed.blogger_id != null ? Number(parsed.blogger_id) || null : serverState.blogger_id,
                 blog_id: parsed.blog_id != null ? Number(parsed.blog_id) || null : serverState.blog_id,
+                group_by: parsed.group_by ?? serverState.group_by,
             };
         }
     } catch (e) {
@@ -72,6 +73,7 @@ export function useStatsFilters(serverFilters: { blog: FilterState; post: Filter
             visitors_range: visitorState.value.range,
             visitors_sort: visitorState.value.sort,
             visitors_size: visitorState.value.size === 0 ? undefined : visitorState.value.size,
+            visitors_group_by: visitorState.value.group_by,
             // visitors_blog_id only when a specific blog is selected
             ...(visitorState.value.blog_id != null ? { visitors_blog_id: visitorState.value.blog_id } : {}),
         };

@@ -234,6 +234,10 @@ class StatsService
         string $startDate,
         string $endDate,
     ): Builder {
+        $visitorLabelColumn = $criteria->visitorGroupBy === 'fingerprint'
+            ? 'page_views.fingerprint'
+            : 'page_views.visitor_id';
+
         $query = PageView::query()
             ->leftJoin('users', 'users.id', '=', 'page_views.user_id')
             ->leftJoin('posts', function ($join) use ($postMorphClass) {
@@ -261,7 +265,7 @@ class StatsService
                         });
                 });
             })
-            ->groupBy('visitor_label');
+            ->groupBy('visitor_label', $visitorLabelColumn);
 
         return $query;
     }
@@ -272,10 +276,14 @@ class StatsService
         string $blogMorphClass,
         string $postMorphClass,
     ): void {
+        $visitorLabelColumn = $criteria->visitorGroupBy === 'fingerprint'
+            ? 'page_views.fingerprint'
+            : 'page_views.visitor_id';
+
         if ($criteria->blogId === null) {
             // No blog filter: count all blog and post views per visitor.
             $query->selectRaw(
-                'COALESCE(users.name, page_views.visitor_id) as visitor_label,' .
+                "COALESCE(users.name, $visitorLabelColumn) as visitor_label," .
                 ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) as blog_views,' .
                 ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) as post_views,' .
                 ' (COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) + ' .
@@ -290,7 +298,7 @@ class StatsService
         } else {
             // With blog filter: restrict counts (and rows) to the selected blog.
             $query->selectRaw(
-                'COALESCE(users.name, page_views.visitor_id) as visitor_label,' .
+                "COALESCE(users.name, $visitorLabelColumn) as visitor_label," .
                 ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?' .
                 ' AND page_views.viewable_id = ? THEN page_views.viewable_id END) as blog_views,' .
                 ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?' .

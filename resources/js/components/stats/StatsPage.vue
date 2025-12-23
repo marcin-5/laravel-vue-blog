@@ -58,11 +58,11 @@ const postColumns = [
     { key: 'views', label: 'Views' },
 ];
 
-const visitorColumns = [
-    { key: 'visitor_label', label: 'Visitor' },
+const visitorColumns = computed(() => [
+    { key: 'visitor_label', label: visitorState.value.group_by === 'fingerprint' ? 'Fingerprint' : 'Visitor' },
     { key: 'blog_views', label: 'Blog views' },
     { key: 'post_views', label: 'Post views' },
-];
+]);
 
 const effectivePostBlogOptions = computed(() => (props.postBlogOptions !== undefined ? props.postBlogOptions : props.blogOptions));
 const effectiveVisitorBlogOptions = computed(() => (props.visitorBlogOptions !== undefined ? props.visitorBlogOptions : props.blogOptions));
@@ -119,6 +119,7 @@ const visitorSortOptions = [...VISITOR_SORT_OPTIONS];
             <h2 class="text-lg font-medium text-sidebar-foreground">Visitor Views</h2>
             <StatsFilters
                 v-model:selected-blog="visitorState.blog_id"
+                v-model:selected-group-by="visitorState.group_by"
                 v-model:selected-range="visitorState.range"
                 v-model:selected-size="visitorState.size"
                 v-model:selected-sort="visitorState.sort"
@@ -126,6 +127,7 @@ const visitorSortOptions = [...VISITOR_SORT_OPTIONS];
                 :blog-options="effectiveVisitorBlogOptions"
                 :show-blog-filter="true"
                 :show-blogger-filter="false"
+                :show-group-by-filter="true"
                 :sort-options="visitorSortOptions"
             />
             <StatsTable :columns="visitorColumns" :data="visitors" row-key="visitor_label" />

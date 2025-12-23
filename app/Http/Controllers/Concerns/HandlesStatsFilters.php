@@ -21,6 +21,7 @@ trait HandlesStatsFilters
         $limit = $size === 0 ? null : (in_array($size, [5, 10, 20], true) ? $size : 5);
         $bloggerId = $request->has($prefix . 'blogger_id') ? (int)$request->query($prefix . 'blogger_id') : null;
         $blogId = $request->has($prefix . 'blog_id') ? (int)$request->query($prefix . 'blog_id') : null;
+        $groupBy = (string)$request->query($prefix . 'group_by', 'visitor_id');
 
         return [
             'range' => $range,
@@ -29,6 +30,7 @@ trait HandlesStatsFilters
             'limit' => $limit,
             'blogger_id' => $bloggerId,
             'blog_id' => $blogId,
+            'group_by' => $groupBy,
         ];
     }
 
@@ -40,6 +42,7 @@ trait HandlesStatsFilters
             blogId: $filters['blog_id'],
             limit: $filters['limit'],
             sort: StatsSort::from($filters['sort']),
+            visitorGroupBy: $filters['group_by'] ?? 'visitor_id',
         );
     }
 
@@ -78,6 +81,7 @@ trait HandlesStatsFilters
             'size' => $filters['size'] === 0 ? 0 : ($limit ?? 5),
             'blogger_id' => $filters['blogger_id'],
             'blog_id' => $filters['blog_id'],
+            'group_by' => $filters['group_by'] ?? 'visitor_id',
         ];
     }
 }

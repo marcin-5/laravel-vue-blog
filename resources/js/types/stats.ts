@@ -31,4 +31,5 @@ export interface FilterState {
     size: number;
     blogger_id?: number | null;
     blog_id?: number | null;
+    group_by?: 'visitor_id' | 'fingerprint';
 }

@@ -318,3 +318,32 @@ it('aggregates visitor views with blog filter and sorts by post views', function
         ->and($row['blog_views'])->toBe(1) // distinct blog pages visited within range
         ->and($row['post_views'])->toBe(1); // distinct posts visited within range
 });
+
+it('aggregates visitor views by fingerprint', function () {
+    Carbon::setTestNow('2025-01-15 12:00:00');
+
+    [, $blog] = createBlogWithOwner();
+    $blogMorph = $blog->getMorphClass();
+
+    // Two different visitor_ids but same fingerprint
+    createPageView($blogMorph, $blog->id, ['visitor_id' => 'v1', 'fingerprint' => 'f1']);
+    createPageView($blogMorph, $blog->id, ['visitor_id' => 'v2', 'fingerprint' => 'f1']);
+
+    // Another fingerprint
+    createPageView($blogMorph, $blog->id, ['visitor_id' => 'v3', 'fingerprint' => 'f2']);
+
+    $service = new StatsService;
+
+    // Group by visitor_id (default)
+    $criteria1 = new StatsCriteria(range: StatsRange::Week, visitorGroupBy: 'visitor_id');
+    $results1 = $service->visitorViews($criteria1);
+    expect($results1)->toHaveCount(3);
+
+    // Group by fingerprint
+    $criteria2 = new StatsCriteria(range: StatsRange::Week, visitorGroupBy: 'fingerprint');
+    $results2 = $service->visitorViews($criteria2);
+    expect($results2)->toHaveCount(2);
+
+    $labels = $results2->pluck('visitor_label')->toArray();
+    expect($labels)->toContain('f1')->toContain('f2');
+});

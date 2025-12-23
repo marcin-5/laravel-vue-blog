@@ -13,6 +13,7 @@ readonly class StatsCriteria
         public ?int $blogId = null,
         public ?int $limit = 5,
         public StatsSort $sort = StatsSort::ViewsDesc,
+        public string $visitorGroupBy = 'visitor_id',
     ) {
     }
 }
