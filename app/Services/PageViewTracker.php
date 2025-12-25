@@ -23,6 +23,7 @@ readonly class PageViewTracker
         private Guard $auth,
         private CacheRepository $cache,
         private FingerprintGenerator $fingerprintGenerator,
+        private BotDetector $botDetector,
     ) {
     }
 
@@ -32,6 +33,10 @@ readonly class PageViewTracker
      */
     public function track(Model $viewable, Request $request): void
     {
+        if ($this->botDetector->isBot($request)) {
+            return;
+        }
+
         $user = $this->auth->user();
         $userId = $user?->getAuthIdentifier();
 
