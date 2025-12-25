@@ -36,7 +36,7 @@ it('exposes unique view count for post page via Inertia props', function () {
 
     $response->assertOk();
     $response->assertInertia(fn($page) => $page
-        ->component('Blog/Post')
+        ->component('public/blog/Post')
         ->where('viewStats.unique', 2), // 1 logged-in + 1 anon
     );
 });

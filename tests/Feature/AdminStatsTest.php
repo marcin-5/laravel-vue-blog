@@ -34,7 +34,7 @@ class AdminStatsTest extends TestCase
             ->get(route('admin.stats.index'))
             ->assertOk()
             ->assertInertia(fn(Assert $page) => $page
-                ->component('Admin/Stats')
+                ->component('app/admin/Stats')
                 ->has('posts', 1)
                 ->where('posts.0.title', 'Top Post')
                 ->where('posts.0.views', 1),
@@ -64,7 +64,7 @@ class AdminStatsTest extends TestCase
             ->get(route('admin.stats.index'))
             ->assertOk()
             ->assertInertia(fn(Assert $page) => $page
-                ->component('Admin/Stats')
+                ->component('app/admin/Stats')
                 ->has('posts', 0),
             );
 
@@ -73,7 +73,7 @@ class AdminStatsTest extends TestCase
             ->get(route('admin.stats.index', ['posts_range' => 'month']))
             ->assertOk()
             ->assertInertia(fn(Assert $page) => $page
-                ->component('Admin/Stats')
+                ->component('app/admin/Stats')
                 ->has('posts', 1)
                 ->where('posts.0.title', 'Filtered Post')
                 ->where('blogFilters.range', 'week')
@@ -89,7 +89,7 @@ class AdminStatsTest extends TestCase
             ->get(route('admin.stats.index'))
             ->assertOk()
             ->assertInertia(fn(Assert $page) => $page
-                ->component('Admin/Stats')
+                ->component('app/admin/Stats')
                 ->where('blogFilters.size', 5)
                 ->where('postFilters.size', 5),
             );
@@ -108,7 +108,7 @@ class AdminStatsTest extends TestCase
             )
             ->assertOk()
             ->assertInertia(fn(Assert $page) => $page
-                ->component('Admin/Stats')
+                ->component('app/admin/Stats')
                 ->where('blogFilters.size', 0)
                 ->where('postFilters.size', 0),
             );
