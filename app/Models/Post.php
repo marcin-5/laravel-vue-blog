@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use ParsedownExtra;
 
@@ -50,6 +51,11 @@ class Post extends Model
     public function blog(): BelongsTo
     {
         return $this->belongsTo(Blog::class);
+    }
+
+    public function newsletterLogs(): HasMany
+    {
+        return $this->hasMany(NewsletterLog::class);
     }
 
     /**
