@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\Blog;
+use App\Models\NewsletterSubscription;
 use App\Models\Post;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -19,11 +20,10 @@ class NewsletterPostNotification extends Mailable
     /**
      * Create a new message instance.
      *
-     * @param Collection<int, Post> $posts
+     * @param Collection<int, array{subscription: NewsletterSubscription, blog: Blog, posts: Collection<int, Post>}> $data
      */
     public function __construct(
-        public Blog $blog,
-        public Collection $posts,
+        public Collection $data,
     ) {
         //
     }
@@ -34,7 +34,7 @@ class NewsletterPostNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Nowe wpisy na blogu: {$this->blog->name}",
+            subject: 'Nowe wpisy na Twoich subskrybowanych blogach',
         );
     }
 

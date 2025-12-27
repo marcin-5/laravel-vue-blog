@@ -49,8 +49,8 @@ it('sends daily newsletter with only new posts', function () {
 
     Mail::assertSent(NewsletterPostNotification::class, function ($mail) use ($subscription, $newPost) {
         return $mail->hasTo($subscription->email) &&
-            $mail->posts->count() === 1 &&
-            $mail->posts->first()->id === $newPost->id;
+            $mail->data->first()['posts']->count() === 1 &&
+            $mail->data->first()['posts']->first()->id === $newPost->id;
     });
 
     expect(NewsletterLog::count())->toBe(2); // old one + new one

@@ -13,7 +13,14 @@ it('renders the newsletter email without errors', function () {
         'blog_id' => $blog->id,
     ]);
 
-    $mailable = new NewsletterPostNotification($blog, $posts);
+    $data = collect([
+        [
+            'blog' => $blog,
+            'posts' => $posts,
+        ],
+    ]);
+
+    $mailable = new NewsletterPostNotification($data);
 
     $mailable->assertSeeInHtml($posts->first()->title);
     $mailable->assertDontSeeInHtml('<code>');

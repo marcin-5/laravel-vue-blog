@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Mail\NewsletterPostNotification;
+use App\Models\Blog;
 use App\Models\NewsletterLog;
 use App\Models\NewsletterSubscription;
 use App\Models\Post;
@@ -18,11 +19,11 @@ class SendNewsletterNotification implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param Collection<int, Post> $posts
+     * @param Collection<int, array{subscription: NewsletterSubscription, blog: Blog, posts: Collection<int, Post>}> $data
      */
     public function __construct(
-        public NewsletterSubscription $subscription,
-        public Collection $posts,
+        public string $email,
+        public Collection $data,
     ) {
         //
     }
@@ -32,25 +33,27 @@ class SendNewsletterNotification implements ShouldQueue
      */
     public function handle(): void
     {
-        if ($this->posts->isEmpty()) {
+        if ($this->data->isEmpty()) {
             return;
         }
 
-        Mail::to($this->subscription->email)->send(
-            new NewsletterPostNotification($this->subscription->blog, $this->posts),
+        Mail::to($this->email)->send(
+            new NewsletterPostNotification($this->data),
         );
 
         $sentAt = now();
-        foreach ($this->posts as $post) {
-            NewsletterLog::query()->updateOrCreate(
-                [
-                    'newsletter_subscription_id' => $this->subscription->id,
-                    'post_id' => $post->id,
-                ],
-                [
-                    'sent_at' => $sentAt,
-                ],
-            );
+        foreach ($this->data as $item) {
+            foreach ($item['posts'] as $post) {
+                NewsletterLog::query()->updateOrCreate(
+                    [
+                        'newsletter_subscription_id' => $item['subscription']->id,
+                        'post_id' => $post->id,
+                    ],
+                    [
+                        'sent_at' => $sentAt,
+                    ],
+                );
+            }
         }
     }
 }

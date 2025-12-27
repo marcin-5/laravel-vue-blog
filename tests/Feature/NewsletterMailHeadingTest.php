@@ -7,30 +7,44 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('renders headings correctly without leading spaces', function () {
-    $blog = Blog::factory()->create(['name' => 'Test Blog']);
-    $posts = Post::factory()->count(1)->create([
-        'blog_id' => $blog->id,
-        'title' => 'Test Post Title',
-        'excerpt' => 'Test Excerpt',
+it('renders headings correctly for multiple posts in the same blog', function () {
+    $blog1 = Blog::factory()->create(['name' => 'Test Blog 1']);
+
+    $post1 = Post::factory()->create([
+        'blog_id' => $blog1->id,
+        'title' => 'First Post Title',
+        'excerpt' => 'First Excerpt',
     ]);
 
-    $mailable = new NewsletterPostNotification($blog, $posts);
+    $post2 = Post::factory()->create([
+        'blog_id' => $blog1->id,
+        'title' => 'Second Post Title',
+        'excerpt' => 'Second Excerpt',
+    ]);
+
+    $data = collect([
+        [
+            'blog' => $blog1,
+            'posts' => collect([$post1, $post2]),
+        ],
+    ]);
+
+    $mailable = new NewsletterPostNotification($data);
 
     $html = $mailable->render();
 
-    // Check if the headings have indentations (in the rendered HTML, they should be h1, h2, etc. tags)
-    // But in markdown, the problem is that spaces at the beginning of the line can change the interpretation.
-    // If there are spaces before #, then Laravel Mail Components may not parse this as headings.
+    // Check if "# ", "## " and "### " are not present in the rendered HTML
+    // and there are appropriate HTML tags
+    expect($html)->not->toContain('# ')
+        ->and($html)->not->toContain('## ')
+        ->and($html)->not->toContain('### ')
+        ->and($html)->toContain('<h2')
+        ->and($html)->toContain('Blog: Test Blog 1')
+        ->and($html)->toContain('<h3')
+        ->and($html)->toContain('First Post Title')
+        ->and($html)->toContain('Second Post Title');
 
-    // Check if the rendered HTML contains literal "# " or "## " (which would indicate they were not parsed).
-    expect($html)->not->toContain('# Test Blog')
-        ->and($html)->not->toContain('## Test Post Title');
-
-    // Check if there are appropriate HTML tags
-    expect($html)->toContain('<h1>Nowe wpisy na blogu: Test Blog</h1>')
-        ->and($html)->toContain('<h2>Test Post Title</h2>');
-
-    // Check if <br> is visible (it should not be as text)
-    expect($html)->not->toContain('&lt;br&gt;');
+    // Count <h3> occurrences - should be 2
+    $h3Count = substr_count($html, '<h3');
+    expect($h3Count)->toBe(2);
 });

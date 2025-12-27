@@ -40,25 +40,39 @@ class SendNewsletter extends Command
 
         $this->info("Przetwarzanie {$subscriptions->count()} subskrypcji...");
 
-        foreach ($subscriptions as $subscription) {
-            $posts = Post::query()
-                ->where('blog_id', $subscription->blog_id)
-                ->forPublicView()
-                ->whereDoesntHave('newsletterLogs', function ($query) use ($subscription) {
-                    $query->where('newsletter_subscription_id', $subscription->id);
-                })
-                ->when($subscription->frequency === 'daily', function ($query) {
-                    $query->where('published_at', '>=', now()->subDay());
-                })
-                ->when($subscription->frequency === 'weekly', function ($query) {
-                    $query->where('published_at', '>=', now()->subWeek());
-                })
-                ->latest('published_at')
-                ->get();
+        $groupedSubscriptions = $subscriptions->groupBy('email');
 
-            if ($posts->isNotEmpty()) {
-                dispatch(new SendNewsletterNotification($subscription, $posts));
-                $this->line("Zakolejkowano newsletter dla {$subscription->email} ({$posts->count()} nowych wpisów).");
+        foreach ($groupedSubscriptions as $email => $userSubscriptions) {
+            $data = collect();
+
+            foreach ($userSubscriptions as $subscription) {
+                $posts = Post::query()
+                    ->where('blog_id', $subscription->blog_id)
+                    ->forPublicView()
+                    ->whereDoesntHave('newsletterLogs', function ($query) use ($subscription) {
+                        $query->where('newsletter_subscription_id', $subscription->id);
+                    })
+                    ->when($subscription->frequency === 'daily', function ($query) {
+                        $query->where('published_at', '>=', now()->subDay());
+                    })
+                    ->when($subscription->frequency === 'weekly', function ($query) {
+                        $query->where('published_at', '>=', now()->subWeek());
+                    })
+                    ->latest('published_at')
+                    ->get();
+
+                if ($posts->isNotEmpty()) {
+                    $data->push([
+                        'subscription' => $subscription,
+                        'blog' => $subscription->blog,
+                        'posts' => $posts,
+                    ]);
+                }
+            }
+
+            if ($data->isNotEmpty()) {
+                dispatch(new SendNewsletterNotification($email, $data));
+                $this->line("Zakolejkowano skonsolidowany newsletter dla {$email} ({$data->count()} blogów).");
             }
         }
 
