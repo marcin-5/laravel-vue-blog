@@ -10,8 +10,11 @@ Artisan::command('inspire', function () {
 
 Schedule::command('newsletter:send daily')
     ->weekdays()
-    ->dailyAt('14:14');
+    ->dailyAt(config('newsletter.daily_weekday_time', '14:14'));
 Schedule::command('newsletter:send daily')
     ->weekends()
-    ->dailyAt('08:08');
-Schedule::command('newsletter:send weekly')->weeklyOn(5, '09:09');
+    ->dailyAt(config('newsletter.daily_weekend_time', '08:08'));
+Schedule::command('newsletter:send weekly')->weeklyOn(
+    config('newsletter.weekly_day', 5),
+    config('newsletter.weekly_time', '09:09'),
+);
