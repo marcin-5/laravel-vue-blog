@@ -18,6 +18,13 @@ services:
       # Queue also needs access to the new SSR assets
       - ssr_assets:/var/www/html/bootstrap/ssr
 
+  scheduler:
+    volumes:
+      - /srv/laravel-blog/storage:/var/www/html/storage
+      - /srv/laravel-blog/bootstrap_cache:/var/www/html/bootstrap/cache
+      # Scheduler also needs access to the new SSR assets
+      - ssr_assets:/var/www/html/bootstrap/ssr
+
 volumes:
   public_files:
   ssr_assets:

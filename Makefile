@@ -217,10 +217,10 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 	$(MAKE) prod-maintenance-on
 	git fetch --all
 	git pull --ff-only
-	@echo "🔨 Building fresh images for core services (app, ssr, queue)..."
-	$(DOCKER_COMPOSE_PROD) build --no-cache --pull app ssr queue
+	@echo "🔨 Building fresh images for core services (app, ssr, queue, scheduler)..."
+	$(DOCKER_COMPOSE_PROD) build --no-cache --pull app ssr queue scheduler
 	@echo "🚀 Recreating core services without touching caddy..."
-	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps app ssr queue
+	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps app ssr queue scheduler
 	$(MAKE) prod-wait
 	$(MAKE) prod-versions
 	@echo ""

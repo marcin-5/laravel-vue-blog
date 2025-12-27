@@ -67,6 +67,40 @@ services:
         networks:
             - laravel-network
 
+    scheduler:
+        build:
+            context: ..
+            dockerfile: docker/Dockerfile
+            target: production
+            args:
+                - APP_NAME=${APP_NAME:-laravel-scheduler}
+                - TZ=${TZ:-UTC}
+        container_name: ${APP_NAME:-laravel-app}-scheduler
+        command: php artisan schedule:work
+        restart: unless-stopped
+        working_dir: /var/www/html
+        environment:
+            - APP_ENV=production
+            - APP_DEBUG=false
+            - APP_NAME=${APP_NAME:-laravel-scheduler}
+            - TZ=${TZ:-UTC}
+            - DB_CONNECTION=pgsql
+            - DB_HOST=postgres
+            - DB_PORT=5432
+            - DB_DATABASE=${DB_DATABASE:-laravel}
+            - DB_USERNAME=${DB_USERNAME:-laravel}
+            - DB_PASSWORD=${DB_PASSWORD:-password}
+            - QUEUE_CONNECTION=redis
+            - REDIS_HOST=redis
+            - INERTIA_SSR_ENABLED=true
+            - INERTIA_SSR_URL=http://ssr:13714
+        depends_on:
+            - postgres
+            - redis
+            - ssr
+        networks:
+            - laravel-network
+
     caddy:
         image: caddy:alpine
         container_name: ${APP_NAME:-laravel-app}-caddy
