@@ -22,4 +22,8 @@ Czytaj więcej
 
 Dziękujemy, że jesteś z nami!
 {{ config('app.name') }}
+
+---
+Jeśli chcesz zmienić ustawienia subskrypcji lub z niej zrezygnować, kliknij poniższy link:
+[Zarządzaj subskrypcją]({{ $manageUrl }})
 </x-mail::message>

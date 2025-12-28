@@ -35,6 +35,9 @@ Route::post('/contact', [PublicHomeController::class, 'submit'])
 // Newsletter
 Route::get('/newsletter', [NewsletterController::class, 'index'])->name('newsletter.index');
 Route::post('/newsletter', [NewsletterController::class, 'store'])->name('newsletter.store');
+Route::get('/newsletter/manage', [NewsletterController::class, 'manage'])->name('newsletter.manage');
+Route::post('/newsletter/update', [NewsletterController::class, 'update'])->name('newsletter.update');
+Route::post('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
 // Keep these at the very end to avoid conflicts.
 Route::get('{blog:slug}/{postSlug}', [PublicBlogController::class, 'post'])

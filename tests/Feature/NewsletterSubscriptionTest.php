@@ -62,3 +62,80 @@ test('validates newsletter subscription request', function () {
 
     $response->assertSessionHasErrors(['email', 'blog_ids', 'frequency']);
 });
+
+test('newsletter management page requires valid signature', function () {
+    $response = $this->get(route('newsletter.manage', ['email' => 'test@example.com']));
+
+    $response->assertStatus(403);
+});
+
+test('newsletter management page renders with valid signature', function () {
+    $blog = Blog::factory()->create(['is_published' => true]);
+    NewsletterSubscription::factory()->create([
+        'email' => 'test@example.com',
+        'blog_id' => $blog->id,
+        'frequency' => 'weekly',
+    ]);
+
+    $url = URL::signedRoute('newsletter.manage', ['email' => 'test@example.com']);
+
+    $response = $this->get($url);
+
+    $response->assertStatus(200);
+    $response->assertInertia(fn($page) => $page
+        ->component('public/NewsletterManage')
+        ->where('email', 'test@example.com')
+        ->where('frequency', 'weekly')
+        ->has('currentSubscriptions', 1)
+        ->where('currentSubscriptions.0', $blog->id)
+        ->has('updateUrl')
+        ->has('unsubscribeUrl'),
+    );
+});
+
+test('can update newsletter subscriptions via management page', function () {
+    $blog1 = Blog::factory()->create(['is_published' => true]);
+    $blog2 = Blog::factory()->create(['is_published' => true]);
+    NewsletterSubscription::factory()->create([
+        'email' => 'test@example.com',
+        'blog_id' => $blog1->id,
+        'frequency' => 'daily',
+    ]);
+
+    $url = URL::signedRoute('newsletter.manage', ['email' => 'test@example.com']);
+    $manageResponse = $this->get($url);
+    $updateUrl = $manageResponse->inertiaPage()['props']['updateUrl'];
+
+    $response = $this->post($updateUrl, [
+        'email' => 'test@example.com',
+        'blog_ids' => [$blog2->id],
+        'frequency' => 'weekly',
+    ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHas('message', 'Ustawienia newslettera zostały zaktualizowane.');
+
+    expect(NewsletterSubscription::where('email', 'test@example.com')->count())->toBe(1);
+    $subscription = NewsletterSubscription::where('email', 'test@example.com')->first();
+    expect($subscription->blog_id)->toBe($blog2->id)
+        ->and($subscription->frequency)->toBe('weekly');
+});
+
+test('can unsubscribe from all via management page', function () {
+    $blog = Blog::factory()->create(['is_published' => true]);
+    NewsletterSubscription::factory()->create([
+        'email' => 'test@example.com',
+        'blog_id' => $blog->id,
+    ]);
+
+    $url = URL::signedRoute('newsletter.manage', ['email' => 'test@example.com']);
+    $manageResponse = $this->get($url);
+    $unsubscribeUrl = $manageResponse->inertiaPage()['props']['unsubscribeUrl'];
+
+    $response = $this->post($unsubscribeUrl, ['email' => 'test@example.com']);
+
+    $response->assertRedirect(route('home'));
+    $response->assertSessionHas('message', 'Zostałeś wypisany z newslettera.');
+
+    expect(NewsletterSubscription::where('email', 'test@example.com')->count())->toBe(0);
+});

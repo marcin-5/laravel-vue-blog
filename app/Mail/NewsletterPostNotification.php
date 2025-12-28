@@ -12,6 +12,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\URL;
 
 class NewsletterPostNotification extends Mailable
 {
@@ -43,8 +44,13 @@ class NewsletterPostNotification extends Mailable
      */
     public function content(): Content
     {
+        $email = $this->data->first()['subscription']->email;
+
         return new Content(
             markdown: 'emails.newsletter.posts',
+            with: [
+                'manageUrl' => URL::signedRoute('newsletter.manage', ['email' => $email]),
+            ],
         );
     }
 
