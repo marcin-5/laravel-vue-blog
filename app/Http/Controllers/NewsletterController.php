@@ -33,6 +33,7 @@ class NewsletterController extends BasePublicController
             'blogs' => $blogs,
             'selectedBlogId' => $selectedBlogId,
             'userEmail' => $request->user()?->email,
+            'mode' => 'subscribe',
         ]);
     }
 
@@ -73,13 +74,14 @@ class NewsletterController extends BasePublicController
             ->orderBy('name')
             ->get(['id', 'name', 'slug']);
 
-        return $this->renderWithTranslations('public/NewsletterManage', 'newsletter', [
+        return $this->renderWithTranslations('public/Newsletter', 'newsletter', [
             'blogs' => $blogs,
             'email' => $email,
             'currentSubscriptions' => $subscriptions->pluck('blog_id'),
             'frequency' => $subscriptions->first()?->frequency ?? 'daily',
             'updateUrl' => URL::signedRoute('newsletter.update', ['email' => $email]),
             'unsubscribeUrl' => URL::signedRoute('newsletter.unsubscribe', ['email' => $email]),
+            'mode' => 'manage',
         ]);
     }
 

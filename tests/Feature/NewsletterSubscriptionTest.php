@@ -83,7 +83,8 @@ test('newsletter management page renders with valid signature', function () {
 
     $response->assertStatus(200);
     $response->assertInertia(fn($page) => $page
-        ->component('public/NewsletterManage')
+        ->component('public/Newsletter')
+        ->where('mode', 'manage')
         ->where('email', 'test@example.com')
         ->where('frequency', 'weekly')
         ->has('currentSubscriptions', 1)
