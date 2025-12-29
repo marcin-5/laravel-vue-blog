@@ -1,13 +1,6 @@
 <script lang="ts" setup>
 import SubscriptionInfoTooltip from '@/components/admin/SubscriptionInfoTooltip.vue';
-
-interface NewsletterSubscription {
-    email: string;
-    subscriptions: {
-        blog: string;
-        frequency: string;
-    }[];
-}
+import { NewsletterSubscription } from '@/types/admin.types';
 
 defineProps<{
     subscriptions: NewsletterSubscription[];
