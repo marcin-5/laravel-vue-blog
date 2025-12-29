@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import DashboardViewSwitcher from '@/components/app/DashboardViewSwitcher.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -23,6 +24,9 @@ withDefaults(
             <template v-if="breadcrumbs && breadcrumbs.length > 0">
                 <Breadcrumbs :breadcrumbs="breadcrumbs" />
             </template>
+        </div>
+        <div class="flex flex-1 items-center justify-center">
+            <DashboardViewSwitcher />
         </div>
         <div class="ml-auto">
             <ThemeToggle />

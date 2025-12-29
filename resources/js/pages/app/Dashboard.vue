@@ -1,21 +1,17 @@
 <script lang="ts" setup>
-import RecentSubscriptions from '@/components/admin/RecentSubscriptions.vue';
+import AdminDashboard from '@/components/admin/AdminDashboard.vue';
+import UserDashboard from '@/components/app/UserDashboard.vue';
+import BloggerDashboard from '@/components/blogger/BloggerDashboard.vue';
+import { useDashboardView } from '@/composables/useDashboardView';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem, type NewsletterSubscription } from '@/types/admin.types';
 import { Head } from '@inertiajs/vue3';
-import PlaceholderPattern from '../../components/PlaceholderPattern.vue';
-
-interface NewsletterSubscription {
-    email: string;
-    subscriptions: {
-        blog: string;
-        frequency: string;
-    }[];
-}
 
 defineProps<{
     newsletterSubscriptions?: NewsletterSubscription[];
 }>();
+
+const { currentView } = useDashboardView();
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: '/dashboard' }];
 </script>
@@ -24,27 +20,8 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: '/dashboard' 
     <Head title="Dashboard" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-            <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-                <div
-                    v-if="newsletterSubscriptions"
-                    class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border"
-                >
-                    <RecentSubscriptions :subscriptions="newsletterSubscriptions" />
-                </div>
-                <div v-else class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                    <PlaceholderPattern />
-                </div>
-                <div class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                    <PlaceholderPattern />
-                </div>
-                <div class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                    <PlaceholderPattern />
-                </div>
-            </div>
-            <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                <PlaceholderPattern />
-            </div>
-        </div>
+        <AdminDashboard v-if="currentView === 'admin'" :newsletter-subscriptions="newsletterSubscriptions" />
+        <BloggerDashboard v-else-if="currentView === 'blogger'" />
+        <UserDashboard v-else />
     </AppLayout>
 </template>
