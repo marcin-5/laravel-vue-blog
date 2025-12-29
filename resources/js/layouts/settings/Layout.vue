@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -8,26 +8,26 @@ import { Link, usePage } from '@inertiajs/vue3';
 const sidebarNavItems: NavItem[] = [
     {
         title: 'Profile',
-        href: '/settings/profile',
+        href: route('profile.edit'),
     },
     {
         title: 'Password',
-        href: '/settings/password',
+        href: route('password.edit'),
     },
     {
         title: 'Appearance',
-        href: '/settings/appearance',
+        href: route('appearance'),
     },
 ];
 
 const page = usePage();
 
-const currentPath = page.props.ziggy?.location ? new URL(page.props.ziggy.location).pathname : '';
+const currentPath = page.url;
 </script>
 
 <template>
     <div class="px-4 py-6">
-        <Heading title="Settings" description="Manage your profile and account settings" />
+        <Heading description="Manage your profile and account settings" title="Settings" />
 
         <div class="flex flex-col lg:flex-row lg:space-x-12">
             <aside class="w-full max-w-xl lg:w-48">
@@ -35,9 +35,9 @@ const currentPath = page.props.ziggy?.location ? new URL(page.props.ziggy.locati
                     <Button
                         v-for="item in sidebarNavItems"
                         :key="item.href"
-                        variant="ghost"
                         :class="['w-full justify-start', { 'bg-muted': currentPath === item.href }]"
                         as-child
+                        variant="ghost"
                     >
                         <Link :href="item.href">
                             {{ item.title }}
