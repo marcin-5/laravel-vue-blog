@@ -33,3 +33,12 @@ export interface FilterState {
     blog_id?: number | null;
     group_by?: 'visitor_id' | 'fingerprint';
 }
+
+export interface BlogStats {
+    id: number;
+    name: string;
+    posts_count: number;
+    total_views: number;
+    daily_subscriptions_count: number;
+    weekly_subscriptions_count: number;
+}

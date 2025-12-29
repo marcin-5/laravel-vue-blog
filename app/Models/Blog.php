@@ -99,6 +99,14 @@ class Blog extends Model
     }
 
     /**
+     * Newsletter subscriptions for this blog.
+     */
+    public function newsletterSubscriptions(): HasMany
+    {
+        return $this->hasMany(NewsletterSubscription::class);
+    }
+
+    /**
      * Accessor: returns the date portion of created_at as YYYY-MM-DD.
      */
     public function getCreationDateAttribute(): ?string

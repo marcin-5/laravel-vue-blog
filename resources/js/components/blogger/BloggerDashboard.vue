@@ -1,5 +1,11 @@
 <script lang="ts" setup>
+import type { BlogStats } from '@/types/stats';
 import PlaceholderPattern from '../PlaceholderPattern.vue';
+import BloggerStats from './BloggerStats.vue';
+
+defineProps<{
+    blogStats: BlogStats[];
+}>();
 </script>
 
 <template>
@@ -15,6 +21,7 @@ import PlaceholderPattern from '../PlaceholderPattern.vue';
                 <PlaceholderPattern />
             </div>
         </div>
+        <BloggerStats :stats="blogStats" />
         <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
             <PlaceholderPattern />
         </div>
