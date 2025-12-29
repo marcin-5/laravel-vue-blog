@@ -4,12 +4,14 @@ namespace App\Services;
 
 use App\Enums\StatsSort;
 use App\Models\Blog;
+use App\Models\NewsletterSubscription;
 use App\Models\PageView;
 use App\Models\Post;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class StatsService
 {
@@ -240,6 +242,13 @@ class StatsService
 
         $query = PageView::query()
             ->leftJoin('users', 'users.id', '=', 'page_views.user_id')
+            ->leftJoinSub(
+                NewsletterSubscription::select('visitor_id', DB::raw('MAX(email) as email'))->groupBy('visitor_id'),
+                'ns',
+                'page_views.visitor_id',
+                '=',
+                'ns.visitor_id',
+            )
             ->leftJoin('posts', function ($join) use ($postMorphClass) {
                 $join->on('posts.id', '=', 'page_views.viewable_id')
                     ->where('page_views.viewable_type', '=', $postMorphClass);
@@ -283,7 +292,7 @@ class StatsService
         if ($criteria->blogId === null) {
             // No blog filter: count all blog and post views per visitor.
             $query->selectRaw(
-                "COALESCE(users.name, $visitorLabelColumn) as visitor_label," .
+                "COALESCE(users.name, ns.email, $visitorLabelColumn) as visitor_label," .
                 ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) as blog_views,' .
                 ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) as post_views,' .
                 ' (COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) + ' .
@@ -298,7 +307,7 @@ class StatsService
         } else {
             // With blog filter: restrict counts (and rows) to the selected blog.
             $query->selectRaw(
-                "COALESCE(users.name, $visitorLabelColumn) as visitor_label," .
+                "COALESCE(users.name, ns.email, $visitorLabelColumn) as visitor_label," .
                 ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?' .
                 ' AND page_views.viewable_id = ? THEN page_views.viewable_id END) as blog_views,' .
                 ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?' .
