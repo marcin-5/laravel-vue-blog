@@ -23,7 +23,7 @@ function createBlogWithOwner(string $role = User::ROLE_BLOGGER, array $blogAttri
 
 function createPageView(string $viewableType, int $viewableId, array $extra = []): PageView
 {
-    return PageView::create(array_merge([
+    return PageView::factory()->create(array_merge([
         'viewable_type' => $viewableType,
         'viewable_id' => $viewableId,
         'ip_address' => '127.0.0.1',
@@ -288,18 +288,20 @@ it('aggregates visitor views with blog filter and sorts by post views', function
     // Visitor 1 (Alice):
     // - 2 blog views for blog1
     // - 3 post views for blog1's post
+    $visitorIdAlice = 'alice_visitor';
     for ($i = 0; $i < 2; $i++) {
-        createPageView($blogMorph, $blog1->id, ['user_id' => $userAlice->id]);
+        createPageView($blogMorph, $blog1->id, ['user_id' => $userAlice->id, 'visitor_id' => $visitorIdAlice]);
     }
 
     for ($i = 0; $i < 3; $i++) {
-        createPageView($postMorph, $postBlog1->id, ['user_id' => $userAlice->id]);
+        createPageView($postMorph, $postBlog1->id, ['user_id' => $userAlice->id, 'visitor_id' => $visitorIdAlice]);
     }
 
     // Visitor 2 (Bob): some views but mostly on blog2 so blog1 filter should exclude most
-    createPageView($blogMorph, $blog2->id, ['user_id' => $userBob->id]);
+    $visitorIdBob = 'bob_visitor';
+    createPageView($blogMorph, $blog2->id, ['user_id' => $userBob->id, 'visitor_id' => $visitorIdBob]);
 
-    createPageView($postMorph, $postBlog2->id, ['user_id' => $userBob->id]);
+    createPageView($postMorph, $postBlog2->id, ['user_id' => $userBob->id, 'visitor_id' => $visitorIdBob]);
 
     $service = new StatsService;
     $criteria = new StatsCriteria(

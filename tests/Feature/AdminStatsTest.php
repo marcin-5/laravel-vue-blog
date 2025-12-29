@@ -22,7 +22,7 @@ class AdminStatsTest extends TestCase
         $post = Post::factory()->create(['blog_id' => $blog->id, 'title' => 'Top Post']);
 
         // Create view
-        PageView::create([
+        PageView::factory()->create([
             'viewable_type' => $post->getMorphClass(),
             'viewable_id' => $post->id,
             'ip_address' => '127.0.0.1',
@@ -49,15 +49,14 @@ class AdminStatsTest extends TestCase
         $post = Post::factory()->create(['blog_id' => $blog->id, 'title' => 'Filtered Post']);
 
         // Create a view from 2 weeks ago
-        $view = PageView::create([
+        PageView::factory()->create([
             'viewable_type' => $post->getMorphClass(),
             'viewable_id' => $post->id,
             'ip_address' => '127.0.0.1',
             'session_id' => 'sess_old',
             'user_agent' => 'test',
+            'created_at' => now()->subDays(10),
         ]);
-        $view->created_at = now()->subDays(10);
-        $view->save();
 
         // Default request (range=week) -> should see 0 posts
         $this->actingAs($admin)
