@@ -31,21 +31,21 @@ const submit = () => {
 </script>
 
 <template>
-    <Head :title="t('register.title')" />
+    <Head :title="t('auth.register.title')" />
 
     <AuthBase
-        :description="props.registrationEnabled ? t('register.description') : t('register.unavailable_description')"
-        :title="props.registrationEnabled ? t('register.title') : t('register.unavailable_title')"
+        :description="props.registrationEnabled ? t('auth.register.description') : t('auth.register.unavailable_description')"
+        :title="props.registrationEnabled ? t('auth.register.title') : t('auth.register.unavailable_title')"
     >
         <template v-if="props.registrationEnabled">
             <form class="flex flex-col gap-6" @submit.prevent="submit">
                 <div class="grid gap-6">
                     <div class="grid gap-2">
-                        <Label for="name">{{ t('register.name') }}</Label>
+                        <Label for="name">{{ t('auth.register.name') }}</Label>
                         <Input
                             id="name"
                             v-model="form.name"
-                            :placeholder="t('register.name_placeholder')"
+                            :placeholder="t('auth.register.name_placeholder')"
                             :tabindex="1"
                             autofocus
                             required
@@ -55,17 +55,24 @@ const submit = () => {
                     </div>
 
                     <div class="grid gap-2">
-                        <Label for="email">{{ t('register.email') }}</Label>
-                        <Input id="email" v-model="form.email" :placeholder="t('register.email_placeholder')" :tabindex="2" required type="email" />
+                        <Label for="email">{{ t('auth.register.email') }}</Label>
+                        <Input
+                            id="email"
+                            v-model="form.email"
+                            :placeholder="t('auth.register.email_placeholder')"
+                            :tabindex="2"
+                            required
+                            type="email"
+                        />
                         <InputError :message="form.errors.email" />
                     </div>
 
                     <div class="grid gap-2">
-                        <Label for="password">{{ t('register.password') }}</Label>
+                        <Label for="password">{{ t('auth.register.password') }}</Label>
                         <Input
                             id="password"
                             v-model="form.password"
-                            :placeholder="t('register.password_placeholder')"
+                            :placeholder="t('auth.register.password_placeholder')"
                             :tabindex="3"
                             required
                             type="password"
@@ -74,11 +81,11 @@ const submit = () => {
                     </div>
 
                     <div class="grid gap-2">
-                        <Label for="password_confirmation">{{ t('register.password_confirmation') }}</Label>
+                        <Label for="password_confirmation">{{ t('auth.register.password_confirmation') }}</Label>
                         <Input
                             id="password_confirmation"
                             v-model="form.password_confirmation"
-                            :placeholder="t('register.password_confirmation_placeholder')"
+                            :placeholder="t('auth.register.password_confirmation_placeholder')"
                             :tabindex="4"
                             required
                             type="password"
@@ -88,14 +95,14 @@ const submit = () => {
 
                     <Button :disabled="form.processing" class="mt-2 w-full" tabindex="5" type="submit">
                         <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
-                        {{ t('register.submit') }}
+                        {{ t('auth.register.submit') }}
                     </Button>
                 </div>
 
                 <div class="text-center text-sm text-muted-foreground">
-                    {{ t('register.already_have_account') }}
+                    {{ t('auth.register.already_have_account') }}
                     <TextLink :href="route('login')" :tabindex="6" class="underline underline-offset-4">
-                        {{ t('register.login_link') }}
+                        {{ t('auth.register.login_link') }}
                     </TextLink>
                 </div>
             </form>
@@ -103,13 +110,13 @@ const submit = () => {
         <template v-else>
             <div class="flex flex-col gap-2 text-center text-sm text-muted-foreground">
                 <div>
-                    {{ t('register.already_have_account') }}
+                    {{ t('auth.register.already_have_account') }}
                     <TextLink :href="route('login')" class="font-light underline underline-offset-4">
-                        {{ t('register.login_link') }}
+                        {{ t('auth.register.login_link') }}
                     </TextLink>
                 </div>
                 <TextLink :href="route('home')" class="mt-4 underline underline-offset-4">
-                    {{ t('register.home_page_link') }}
+                    {{ t('auth.register.home_page_link') }}
                 </TextLink>
             </div>
         </template>

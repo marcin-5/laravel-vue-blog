@@ -1,13 +1,14 @@
 {
-  "settings": {
+    "settings": {
+        "appearance": {
+            "title": "Appearance settings",
+            "description": "Update your account's appearance settings"
+        }
+    },
     "appearance": {
-      "title": "Appearance settings",
-      "description": "Update your account's appearance settings"
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System",
+        "language": "Language"
     }
-  },
-  "appearance": {
-    "light": "Light",
-    "dark": "Dark",
-    "system": "System"
-  }
 }

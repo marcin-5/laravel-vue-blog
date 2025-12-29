@@ -1,0 +1,28 @@
+{
+    "settings": {
+        "profile": {
+            "title": "Profile settings",
+            "description": "Update your account's profile information and email address",
+            "info_title": "Profile information",
+            "info_description": "Update your name and email address",
+            "name": "Name",
+            "name_placeholder": "Full name",
+            "email": "Email address",
+            "email_placeholder": "Email address",
+            "unverified_email": "Your email address is unverified.",
+            "resend_verification": "Click here to resend the verification email.",
+            "verification_sent": "A new verification link has been sent to your email address.",
+            "save_button": "Save",
+            "saved_message": "Saved.",
+            "delete_account": {
+                "title": "Delete Account",
+                "description": "Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.",
+                "button": "Delete Account",
+                "confirm_title": "Are you sure you want to delete your account?",
+                "confirm_description": "Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.",
+                "password_placeholder": "Password",
+                "cancel_button": "Cancel"
+            }
+        }
+    }
+}

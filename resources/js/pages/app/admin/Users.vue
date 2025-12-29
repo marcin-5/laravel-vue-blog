@@ -1,14 +1,14 @@
 <script lang="ts" setup>
-import { Button } from '@/components/ui/button';
 import UserCreateForm from '@/components/admin/UserCreateForm.vue';
+import { Button } from '@/components/ui/button';
 import { useI18nNs } from '@/composables/useI18nNs';
+import { type UserWithQuota, useUserPermissions } from '@/composables/useUserPermissions';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { useUserPermissions, type UserWithQuota } from '@/composables/useUserPermissions';
 import { Head, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 
-await useI18nNs('admin');
+const { t } = await useI18nNs('admin');
 
 // Types
 export type Role = 'admin' | 'blogger' | 'user';
@@ -30,7 +30,7 @@ const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Users',
+        title: t('admin.users.breadcrumb'),
         href: '/admin/users',
     },
 ];
@@ -83,12 +83,12 @@ function saveUser(user: UserRow) {
 </script>
 
 <template>
-    <Head :title="$t('users.title')" />
+    <Head :title="$t('admin.users.title')" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <div class="relative flex-1 rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border">
-                <h2 class="mb-4 text-lg font-semibold">{{ $t('users.heading') }}</h2>
+                <h2 class="mb-4 text-lg font-semibold">{{ $t('admin.users.heading') }}</h2>
 
                 <!-- Create user form -->
                 <UserCreateForm :current-user-is-admin="props.currentUserIsAdmin" :roles="roles" />
@@ -97,11 +97,11 @@ function saveUser(user: UserRow) {
                     <table class="w-full text-left text-sm">
                         <thead class="border-b border-sidebar-border/70 text-xs text-muted-foreground uppercase dark:border-sidebar-border">
                             <tr>
-                                <th class="py-2 pr-4">{{ $t('users.table.name') }}</th>
-                                <th class="py-2 pr-4">{{ $t('users.table.email') }}</th>
-                                <th class="py-2 pr-4">{{ $t('users.table.role') }}</th>
-                                <th class="py-2 pr-4">{{ $t('users.table.blog_quota') }}</th>
-                                <th class="py-2 pr-4">{{ $t('users.table.actions') }}</th>
+                                <th class="py-2 pr-4">{{ $t('admin.users.table.name') }}</th>
+                                <th class="py-2 pr-4">{{ $t('admin.users.table.email') }}</th>
+                                <th class="py-2 pr-4">{{ $t('admin.users.table.role') }}</th>
+                                <th class="py-2 pr-4">{{ $t('admin.users.table.blog_quota') }}</th>
+                                <th class="py-2 pr-4">{{ $t('admin.users.table.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -114,7 +114,7 @@ function saveUser(user: UserRow) {
                                 <td class="py-2 pr-4">{{ u.email }}</td>
                                 <td class="py-2 pr-4">
                                     <select v-model="u.role" class="rounded-md border bg-background px-2 py-1 text-foreground">
-                                        <option v-for="r in roles" :key="r" :value="r">{{ $t('users.roles.' + r) }}</option>
+                                        <option v-for="r in roles" :key="r" :value="r">{{ $t('admin.users.roles.' + r) }}</option>
                                     </select>
                                 </td>
                                 <td class="py-2 pr-4">
@@ -134,7 +134,7 @@ function saveUser(user: UserRow) {
                                         type="button"
                                         @click="saveUser(u)"
                                     >
-                                        {{ $t('users.actions.save') }}
+                                        {{ $t('admin.users.actions.save') }}
                                     </Button>
                                 </td>
                             </tr>

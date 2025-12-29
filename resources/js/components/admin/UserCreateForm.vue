@@ -50,13 +50,13 @@ function submitCreate() {
 
 <template>
     <div class="mb-6 rounded-md border border-dashed p-4">
-        <div class="mb-2 text-sm font-medium">{{ $t('users.create.title') }}</div>
+        <div class="mb-2 text-sm font-medium">{{ $t('admin.users.create.title') }}</div>
         <form class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6" @submit.prevent="submitCreate">
             <div>
                 <input
                     id="new-name"
                     v-model="createForm.name"
-                    :placeholder="$t('users.create.name')"
+                    :placeholder="$t('admin.users.create.name')"
                     class="w-full rounded-md border bg-background px-2 py-1 text-foreground"
                     required
                     type="text"
@@ -67,7 +67,7 @@ function submitCreate() {
                 <input
                     id="new-email"
                     v-model="createForm.email"
-                    :placeholder="$t('users.create.email')"
+                    :placeholder="$t('admin.users.create.email')"
                     class="w-full rounded-md border bg-background px-2 py-1 text-foreground"
                     required
                     type="email"
@@ -78,7 +78,7 @@ function submitCreate() {
                 <input
                     id="new-password"
                     v-model="createForm.password"
-                    :placeholder="$t('users.create.password')"
+                    :placeholder="$t('admin.users.create.password')"
                     class="w-full rounded-md border bg-background px-2 py-1 text-foreground"
                     required
                     type="password"
@@ -87,7 +87,7 @@ function submitCreate() {
             </div>
             <div>
                 <select v-model="createForm.role" class="w-full rounded-md border bg-background px-2 py-1 text-foreground">
-                    <option v-for="r in roles" :key="r" :value="r">{{ $t('users.roles.' + r) }}</option>
+                    <option v-for="r in roles" :key="r" :value="r">{{ $t('admin.users.roles.' + r) }}</option>
                 </select>
                 <InputError :message="createForm.errors.role" />
             </div>
@@ -96,7 +96,7 @@ function submitCreate() {
                     id="new-blog-quota"
                     v-model.number="createForm.blog_quota"
                     :disabled="!canEditNewQuota"
-                    :placeholder="$t('users.create.blog_quota')"
+                    :placeholder="$t('admin.users.create.blog_quota')"
                     class="w-full rounded-md border bg-background px-2 py-1 text-foreground"
                     min="0"
                     type="number"
@@ -105,7 +105,7 @@ function submitCreate() {
             </div>
             <div class="flex items-center">
                 <Button :disabled="createForm.processing" size="sm" type="submit" variant="constructive">
-                    {{ $t('users.actions.create') }}
+                    {{ $t('admin.users.actions.create') }}
                 </Button>
             </div>
         </form>

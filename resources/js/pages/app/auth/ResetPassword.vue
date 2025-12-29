@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,49 +34,49 @@ const submit = () => {
 </script>
 
 <template>
-    <AuthLayout :title="t('reset_password.title')" :description="t('reset_password.description')">
-        <Head :title="t('reset_password.title')" />
+    <AuthLayout :description="t('auth.reset_password.description')" :title="t('auth.reset_password.title')">
+        <Head :title="t('auth.reset_password.title')" />
 
         <form @submit.prevent="submit">
             <div class="grid gap-6">
                 <div class="grid gap-2">
-                    <Label for="email">{{ t('reset_password.email') }}</Label>
-                    <Input id="email" type="email" name="email" autocomplete="email" v-model="form.email" class="mt-1 block w-full" readonly />
+                    <Label for="email">{{ t('auth.reset_password.email') }}</Label>
+                    <Input id="email" v-model="form.email" autocomplete="email" class="mt-1 block w-full" name="email" readonly type="email" />
                     <InputError :message="form.errors.email" class="mt-2" />
                 </div>
 
                 <div class="grid gap-2">
-                    <Label for="password">{{ t('reset_password.password') }}</Label>
+                    <Label for="password">{{ t('auth.reset_password.password') }}</Label>
                     <Input
                         id="password"
-                        type="password"
-                        name="password"
-                        autocomplete="new-password"
                         v-model="form.password"
-                        class="mt-1 block w-full"
+                        :placeholder="t('auth.reset_password.password')"
+                        autocomplete="new-password"
                         autofocus
-                        :placeholder="t('reset_password.password')"
+                        class="mt-1 block w-full"
+                        name="password"
+                        type="password"
                     />
                     <InputError :message="form.errors.password" />
                 </div>
 
                 <div class="grid gap-2">
-                    <Label for="password_confirmation">{{ t('reset_password.password_confirmation') }}</Label>
+                    <Label for="password_confirmation">{{ t('auth.reset_password.password_confirmation') }}</Label>
                     <Input
                         id="password_confirmation"
-                        type="password"
-                        name="password_confirmation"
-                        autocomplete="new-password"
                         v-model="form.password_confirmation"
+                        :placeholder="t('auth.reset_password.password_confirmation')"
+                        autocomplete="new-password"
                         class="mt-1 block w-full"
-                        :placeholder="t('reset_password.password_confirmation')"
+                        name="password_confirmation"
+                        type="password"
                     />
                     <InputError :message="form.errors.password_confirmation" />
                 </div>
 
-                <Button type="submit" class="mt-4 w-full" :disabled="form.processing">
+                <Button :disabled="form.processing" class="mt-4 w-full" type="submit">
                     <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
-                    {{ t('reset_password.submit') }}
+                    {{ t('auth.reset_password.submit') }}
                 </Button>
             </div>
         </form>

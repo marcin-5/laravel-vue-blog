@@ -5,6 +5,10 @@ import type { BreadcrumbItem } from '@/types';
 import type { BlogOption, BlogRow, FilterState, PostRow, VisitorRow } from '@/types/stats';
 import { Head } from '@inertiajs/vue3';
 
+import { useI18nNs } from '@/composables/useI18nNs';
+
+const { t } = await useI18nNs(['blogger', 'common']);
+
 interface Props {
     blogFilters: FilterState;
     postFilters: FilterState;
@@ -18,11 +22,11 @@ interface Props {
 
 defineProps<Props>();
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Statistics', href: '/blogger/stats' }];
+const breadcrumbs: BreadcrumbItem[] = [{ title: t('blogger.stats_title'), href: '/blogger/stats' }];
 </script>
 
 <template>
-    <Head title="Statistics">
+    <Head :title="t('blogger.stats_title')">
         <!-- Prevent indexing for non-public pages -->
         <template>
             <meta content="noindex, nofollow" name="robots" />
@@ -31,6 +35,7 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: 'Statistics', href: '/blogger/st
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <StatsPage
+            :blog-filter-label="t('blogger.all_my_blogs')"
             :blog-filters="blogFilters"
             :blog-options="blogOptions"
             :blogs="blogs"
@@ -39,7 +44,6 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: 'Statistics', href: '/blogger/st
             :visitor-blog-options="visitorBlogOptions"
             :visitor-filters="visitorFilters"
             :visitors="visitors"
-            blog-filter-label="All my blogs"
             route-name="blogger.stats.index"
         />
     </AppLayout>

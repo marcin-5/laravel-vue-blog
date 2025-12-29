@@ -11,6 +11,12 @@
         "cookie_notice": {
             "message": "Ta strona używa ciasteczek i lokalnego przechowywania danych potrzebnych do prawidłowego działania i analityki odwiedzin.",
             "button": "OK, rozumiem"
-        }
+        },
+        "warning": "Ostrzeżenie",
+        "caution_message": "Proszę postępować ostrożnie, tego nie można cofnąć.",
+        "cancel": "Anuluj",
+        "save": "Zapisz",
+        "delete": "Usuń",
+        "all": "Wszystkie"
     }
 }

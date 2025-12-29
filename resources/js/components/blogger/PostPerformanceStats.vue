@@ -1,8 +1,11 @@
 <script lang="ts" setup>
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useI18nNs } from '@/composables/useI18nNs';
 import type { PostPerformanceEntry } from '@/types/stats';
 import { computed, ref } from 'vue';
+
+const { t } = await useI18nNs('blogger');
 
 type SortOrder = 'best' | 'worst';
 
@@ -26,8 +29,8 @@ function setSortOrder(order: SortOrder) {
 <template>
     <Card class="flex h-full flex-col">
         <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle class="text-sm font-medium">Wydajność wpisów</CardTitle>
-            <span class="text-[10px] text-muted-foreground uppercase">wyświetleń/dzień</span>
+            <CardTitle class="text-sm font-medium">{{ t('blogger.stats.performance_title') }}</CardTitle>
+            <span class="text-[10px] text-muted-foreground uppercase">{{ t('blogger.stats.views_per_day') }}</span>
             <div class="flex gap-1">
                 <Button
                     v-for="order in ['best', 'worst'] as const"
@@ -37,13 +40,15 @@ function setSortOrder(order: SortOrder) {
                     variant="ghost"
                     @click="setSortOrder(order)"
                 >
-                    {{ order === 'best' ? 'Najlepsze' : 'Najgorsze' }}
+                    {{ t(`blogger.stats.${order}`) }}
                 </Button>
             </div>
         </CardHeader>
 
         <CardContent class="flex-1">
-            <div v-if="displayPosts.length === 0" class="flex h-full items-center justify-center text-sm text-muted-foreground">Brak danych</div>
+            <div v-if="displayPosts.length === 0" class="flex h-full items-center justify-center text-sm text-muted-foreground">
+                {{ t('blogger.stats.no_data') }}
+            </div>
             <ul v-else class="space-y-3">
                 <li v-for="post in displayPosts" :key="post.id" class="flex items-center justify-between text-sm">
                     <span :title="post.title" class="truncate pr-2 font-medium">{{ post.title }}</span>

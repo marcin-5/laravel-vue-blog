@@ -1,12 +1,10 @@
 <script lang="ts" setup>
 import BlogForm from '@/components/blogger/BlogForm.vue';
 import { Button } from '@/components/ui/button';
-import { ensureNamespace } from '@/i18n';
+import { useI18nNs } from '@/composables/useI18nNs';
 import type { Category } from '@/types/blog.types';
-import { useI18n } from 'vue-i18n';
 
-const { t, locale } = useI18n();
-await ensureNamespace(locale.value, 'blogger');
+const { t } = await useI18nNs('blogger');
 
 interface Props {
     canCreate: boolean;
@@ -40,16 +38,16 @@ function handleCancelCreate() {
 <template>
     <div class="space-y-6">
         <div class="flex items-center justify-between">
-            <h1 class="text-xl font-semibold">{{ t('create_section.title') }}</h1>
-            <div :title="!props.canCreate ? t('create_section.quota_reached_tooltip') : ''">
+            <h1 class="text-xl font-semibold">{{ t('blogger.create_section.title') }}</h1>
+            <div :title="!props.canCreate ? t('blogger.create_section.quota_reached_tooltip') : ''">
                 <Button
                     :disabled="!props.canCreate"
                     :variant="!props.canCreate ? 'muted' : showCreate ? 'exit' : 'constructive'"
                     type="button"
                     @click="handleToggleCreate"
                 >
-                    <span v-if="showCreate">{{ t('create_section.close_button') }}</span>
-                    <span v-else>{{ t('create_section.create_button') }}</span>
+                    <span v-if="showCreate">{{ t('blogger.create_section.close_button') }}</span>
+                    <span v-else>{{ t('blogger.create_section.create_button') }}</span>
                 </Button>
             </div>
         </div>

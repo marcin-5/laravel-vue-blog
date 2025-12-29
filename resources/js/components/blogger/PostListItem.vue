@@ -1,13 +1,11 @@
 <script lang="ts" setup>
 import PostForm from '@/components/blogger/PostForm.vue';
 import { Button } from '@/components/ui/button';
-import { ensureNamespace } from '@/i18n';
+import { useI18nNs } from '@/composables/useI18nNs';
 import type { AdminPostItem as PostItem } from '@/types/blog.types';
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 
-const { t, locale } = useI18n();
-await ensureNamespace(locale.value, 'blogger');
+const { t } = await useI18nNs('blogger');
 
 interface Props {
     post: PostItem;
@@ -25,7 +23,7 @@ const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 const editButtonVariant = computed(() => (props.isEditing ? 'exit' : 'toggle'));
-const editButtonLabel = computed(() => (props.isEditing ? t('post_item.close_button') : t('post_item.edit_button')));
+const editButtonLabel = computed(() => (props.isEditing ? t('blogger.post_item.close_button') : t('blogger.post_item.edit_button')));
 </script>
 
 <template>

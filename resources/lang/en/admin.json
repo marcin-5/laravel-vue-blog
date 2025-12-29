@@ -1,34 +1,62 @@
 {
-  "users": {
-    "title": "Users",
-    "heading": "User Management",
-    "table": {
-      "name": "Name",
-      "email": "Email",
-      "role": "Role",
-      "blog_quota": "Blog quota",
-      "actions": "Actions"
-    },
-    "actions": {
-      "save": "Save",
-      "create": "Create"
-    },
-    "create": {
-      "title": "Create new user",
-      "name": "Name",
-      "email": "Email",
-      "password": "Password",
-      "role": "Role",
-      "blog_quota": "Blog quota"
-    },
-    "roles": {
-      "admin": "admin",
-      "blogger": "blogger",
-      "user": "user"
-    },
-    "flash": {
-      "created": "User created successfully.",
-      "updated": "User updated successfully."
+    "admin": {
+        "stats": {
+            "title": "Statistics"
+        },
+        "dashboard": {
+            "recent_subscriptions": "Recent subscriptions",
+            "no_subscriptions": "No subscriptions"
+        },
+        "categories": {
+            "title": "Categories",
+            "breadcrumb": "Categories",
+            "create_heading": "Create Category",
+            "language_label": "Language",
+            "name_label": "Name",
+            "create_button": "Create",
+            "creating_button": "Creating…",
+            "table": {
+                "name": "Name",
+                "locale": "Language",
+                "slug": "Slug",
+                "blogs": "Blogs",
+                "actions": "Actions"
+            },
+            "delete_confirm": "Delete category \"{name}\"? This will remove it from all blogs.",
+            "saving_button": "Saving…"
+        },
+        "users": {
+            "title": "Users",
+            "breadcrumb": "Users",
+            "heading": "User Management",
+            "table": {
+                "name": "Name",
+                "email": "Email",
+                "role": "Role",
+                "blog_quota": "Blog quota",
+                "actions": "Actions"
+            },
+            "actions": {
+                "save": "Save",
+                "create": "Create"
+            },
+            "create": {
+                "title": "Create new user",
+                "name": "Name",
+                "email": "Email",
+                "password": "Password",
+                "role": "Role",
+                "blog_quota": "Blog quota"
+            },
+            "roles": {
+                "admin": "admin",
+                "blogger": "blogger",
+                "user": "user"
+            },
+            "flash": {
+                "created": "User created successfully.",
+                "updated": "User updated successfully."
+            }
+        }
     }
-  }
 }

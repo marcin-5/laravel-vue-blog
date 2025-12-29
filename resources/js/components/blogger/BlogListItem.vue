@@ -4,12 +4,11 @@ import PostForm from '@/components/blogger/PostForm.vue';
 import PostListItem from '@/components/blogger/PostListItem.vue';
 import PublishedBadge from '@/components/blogger/PublishedBadge.vue';
 import { Button } from '@/components/ui/button';
-import { ensureNamespace, i18n } from '@/i18n';
+import { useI18nNs } from '@/composables/useI18nNs';
+import { i18n } from '@/i18n';
 import type { AdminBlog as Blog, AdminPostItem as PostItem, Category } from '@/types/blog.types';
-import { useI18n } from 'vue-i18n';
 
-const { locale } = useI18n();
-await ensureNamespace(locale.value, 'blogger');
+const { t } = await useI18nNs('blogger');
 
 interface Props {
     blog: Blog;
@@ -105,14 +104,14 @@ function localizedName(name: string | Record<string, string>): string {
             <div class="flex items-center gap-2">
                 <PublishedBadge :published="blog.is_published" />
                 <Button size="sm" type="button" variant="toggle" @click="handleEdit">{{
-                    isEditing ? $t('actions.close') : $t('actions.edit')
+                    isEditing ? t('blogger.actions.close') : t('blogger.actions.edit')
                 }}</Button>
                 <Button size="sm" type="button" variant="toggle" @click="handleTogglePosts">
-                    <span v-if="isPostsExpanded">{{ $t('actions.hide_posts') }}</span>
-                    <span v-else>{{ $t('actions.show_posts') }}</span>
+                    <span v-if="isPostsExpanded">{{ t('blogger.actions.hide_posts') }}</span>
+                    <span v-else>{{ t('blogger.actions.show_posts') }}</span>
                 </Button>
                 <Button :variant="isCreatingPost ? 'exit' : 'constructive'" size="sm" type="button" @click="handleCreatePost">{{
-                    isCreatingPost ? $t('actions.close') : $t('actions.add_post')
+                    isCreatingPost ? t('blogger.actions.close') : t('blogger.actions.add_post')
                 }}</Button>
             </div>
         </div>
@@ -131,7 +130,7 @@ function localizedName(name: string | Record<string, string>): string {
                     @cancel-edit="handleCancelEditPost"
                 />
             </div>
-            <div v-else class="text-sm text-muted-foreground">{{ $t('posts.empty') }}</div>
+            <div v-else class="text-sm text-muted-foreground">{{ t('blogger.posts.empty') }}</div>
         </div>
 
         <!-- Inline Edit Form -->

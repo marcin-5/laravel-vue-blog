@@ -1,9 +1,15 @@
 <script lang="ts" setup>
+import { useI18nNs } from '@/composables/useI18nNs';
 import PlaceholderPattern from '../PlaceholderPattern.vue';
+
+const { t } = await useI18nNs('dashboard');
 </script>
 
 <template>
     <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+        <div class="mb-4">
+            <h1 class="text-2xl font-bold">{{ t('dashboard.welcome') }}</h1>
+        </div>
         <div class="grid auto-rows-min gap-4 md:grid-cols-3">
             <div class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
                 <PlaceholderPattern />

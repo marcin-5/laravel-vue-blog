@@ -3,23 +3,21 @@ import BlogListItem from '@/components/blogger/BlogListItem.vue';
 import CreateBlogSection from '@/components/blogger/CreateBlogSection.vue';
 import { Button } from '@/components/ui/button';
 import { useBlogForm } from '@/composables/useBlogForm';
+import { useI18nNs } from '@/composables/useI18nNs';
 import { usePostForm } from '@/composables/usePostForm';
 import { useUIState } from '@/composables/useUIState';
-import { ensureNamespace } from '@/i18n';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import type { AdminBlog as Blog, Category } from '@/types/blog.types';
 import { Head } from '@inertiajs/vue3';
-import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{ blogs: Blog[]; canCreate: boolean; categories: Category[] }>();
 
-const { t, locale } = useI18n();
-await ensureNamespace(locale.value, 'blogger');
+const { t } = await useI18nNs('blogger');
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: t('breadcrumb.dashboard'), href: '/dashboard' },
-    { title: t('breadcrumb.index'), href: '/blogs' },
+    { title: t('blogger.breadcrumb.dashboard'), href: '/dashboard' },
+    { title: t('blogger.breadcrumb.index'), href: '/blogs' },
 ];
 
 // Use composables for state management
@@ -96,7 +94,7 @@ function handleToggleCreate() {
 </script>
 
 <template>
-    <Head :title="$t('title')" />
+    <Head :title="$t('blogger.title')" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
             <CreateBlogSection
@@ -136,8 +134,8 @@ function handleToggleCreate() {
                 />
 
                 <div v-if="props.blogs.length === 0" class="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
-                    {{ $t('bloger.empty') }}
-                    <span :title="!props.canCreate ? $t('limit_reached_hint') : ''">
+                    {{ $t('blogger.empty') }}
+                    <span :title="!props.canCreate ? $t('blogger.limit_reached_hint') : ''">
                         <Button
                             :disabled="!props.canCreate"
                             :variant="!props.canCreate ? 'muted' : 'link'"
@@ -145,7 +143,7 @@ function handleToggleCreate() {
                             type="button"
                             @click="openCreateForm"
                         >
-                            {{ $t('empty_cta') }}
+                            {{ $t('blogger.empty_cta') }}
                         </Button>
                     </span>
                 </div>

@@ -1,13 +1,14 @@
 {
-  "settings": {
+    "settings": {
+        "appearance": {
+            "title": "Ustawienia wyglądu",
+            "description": "Zaktualizuj ustawienia wyglądu swojego konta"
+        }
+    },
     "appearance": {
-      "title": "Ustawienia wyglądu",
-      "description": "Zaktualizuj ustawienia wyglądu swojego konta"
+        "light": "Jasny",
+        "dark": "Ciemny",
+        "system": "Systemowy",
+        "language": "Język"
     }
-  },
-  "appearance": {
-    "light": "Jasny",
-    "dark": "Ciemny",
-    "system": "Systemowy"
-  }
 }

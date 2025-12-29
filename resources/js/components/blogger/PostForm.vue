@@ -2,16 +2,14 @@
 import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
 import MarkdownPreviewSection from '@/components/blogger/MarkdownPreviewSection.vue';
 import PostFormField from '@/components/blogger/PostFormField.vue';
+import { useI18nNs } from '@/composables/useI18nNs';
 import { useMarkdownPreview } from '@/composables/useMarkdownPreview';
-import { ensureNamespace } from '@/i18n';
 import type { AdminPostItem as PostItem } from '@/types/blog.types';
 import { useForm } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
 import { computed, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
 
-const { locale, t } = useI18n();
-await ensureNamespace(locale.value, 'blogger');
+const { t } = await useI18nNs('blogger');
 
 interface Props {
     post?: PostItem;
@@ -52,28 +50,28 @@ const fieldIdPrefix = computed(() => props.idPrefix);
 
 // Consolidated translation keys
 const translationKeys = computed(() => ({
-    title: props.isEdit ? t('post_form.title_label') : t('post_form.post_title_label'),
-    titlePlaceholder: props.isEdit ? '' : t('post_form.title_placeholder'),
-    excerpt: t('post_form.excerpt_label'),
-    excerptPlaceholder: props.isEdit ? '' : t('post_form.excerpt_placeholder'),
-    content: t('post_form.content_label'),
-    contentPlaceholder: props.isEdit ? '' : t('post_form.content_placeholder'),
-    published: props.isEdit ? t('post_form.published_label') : t('post_form.publish_now_label'),
-    cancel: t('post_form.cancel_button'),
-    create: t('post_form.create_post_button'),
-    creating: t('post_form.creating_button'),
-    save: t('post_form.save_post_button'),
-    saving: t('post_form.saving_button'),
+    title: props.isEdit ? t('blogger.post_form.title_label') : t('blogger.post_form.post_title_label'),
+    titlePlaceholder: props.isEdit ? '' : t('blogger.post_form.title_placeholder'),
+    excerpt: t('blogger.post_form.excerpt_label'),
+    excerptPlaceholder: props.isEdit ? '' : t('blogger.post_form.excerpt_placeholder'),
+    content: t('blogger.post_form.content_label'),
+    contentPlaceholder: props.isEdit ? '' : t('blogger.post_form.content_placeholder'),
+    published: props.isEdit ? t('blogger.post_form.published_label') : t('blogger.post_form.publish_now_label'),
+    cancel: t('blogger.post_form.cancel_button'),
+    create: t('blogger.post_form.create_post_button'),
+    creating: t('blogger.post_form.creating_button'),
+    save: t('blogger.post_form.save_post_button'),
+    saving: t('blogger.post_form.saving_button'),
     // Preview-related translations for MarkdownPreviewSection
-    preview: t('post_form.preview_button'),
-    closePreview: t('post_form.close_button'),
-    fullPreview: t('post_form.full_preview_button'),
-    splitView: t('post_form.split_view_button'),
-    toggleLayout: previewLayout.value === 'vertical' ? t('post_form.horizontal_button') : t('post_form.vertical_button'),
-    exitPreview: t('post_form.exit_preview_button'),
-    markdownLabel: t('post_form.markdown_label'),
-    previewLabel: t('post_form.preview_label'),
-    previewModeTitle: t('post_form.preview_mode_title'),
+    preview: t('blogger.post_form.preview_button'),
+    closePreview: t('blogger.post_form.close_button'),
+    fullPreview: t('blogger.post_form.full_preview_button'),
+    splitView: t('blogger.post_form.split_view_button'),
+    toggleLayout: previewLayout.value === 'vertical' ? t('blogger.post_form.horizontal_button') : t('blogger.post_form.vertical_button'),
+    exitPreview: t('blogger.post_form.exit_preview_button'),
+    markdownLabel: t('blogger.post_form.markdown_label'),
+    previewLabel: t('blogger.post_form.preview_label'),
+    previewModeTitle: t('blogger.post_form.preview_mode_title'),
 }));
 
 const updateFormFromPost = (post: PostItem) => {

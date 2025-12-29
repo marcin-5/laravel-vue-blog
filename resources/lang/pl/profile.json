@@ -1,0 +1,28 @@
+{
+    "settings": {
+        "profile": {
+            "title": "Ustawienia profilu",
+            "description": "Zaktualizuj informacje o profilu swojego konta i adres e-mail",
+            "info_title": "Informacje o profilu",
+            "info_description": "Zaktualizuj swoje imię i nazwisko oraz adres e-mail",
+            "name": "Imię i nazwisko",
+            "name_placeholder": "Pełne imię i nazwisko",
+            "email": "Adres e-mail",
+            "email_placeholder": "Adres e-mail",
+            "unverified_email": "Twój adres e-mail jest niezweryfikowany.",
+            "resend_verification": "Kliknij tutaj, aby ponownie wysłać e-mail weryfikacyjny.",
+            "verification_sent": "Nowy link weryfikacyjny został wysłany na Twój adres e-mail.",
+            "save_button": "Zapisz",
+            "saved_message": "Zapisano.",
+            "delete_account": {
+                "title": "Usuń konto",
+                "description": "Po usunięciu konta wszystkie jego zasoby i dane zostaną trwale usunięte. Przed usunięciem konta pobierz wszelkie dane lub informacje, które chcesz zachować.",
+                "button": "Usuń konto",
+                "confirm_title": "Czy na pewno chcesz usunąć swoje konto?",
+                "confirm_description": "Po usunięciu konta wszystkie jego zasoby i dane zostaną trwale usunięte. Wprowadź hasło, aby potwierdzić, że chcesz trwale usunąć swoje konto.",
+                "password_placeholder": "Hasło",
+                "cancel_button": "Anuluj"
+            }
+        }
+    }
+}

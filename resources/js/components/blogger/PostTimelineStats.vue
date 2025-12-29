@@ -2,21 +2,24 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useI18nNs } from '@/composables/useI18nNs';
 import type { PostTimelineEntry } from '@/types/stats';
 import { Info } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+
+const { t } = await useI18nNs('blogger');
 
 type SortOrder = 'newest' | 'oldest';
 
 const MAX_POSTS_DISPLAYED = 5;
 
 const VIEW_METRICS = [
-    { label: 'Łącznie', key: 'total' },
-    { label: 'Ostatni rok', key: 'year' },
-    { label: 'Pół roku', key: 'half_year' },
-    { label: 'Miesiąc', key: 'month' },
-    { label: 'Tydzień', key: 'week' },
-    { label: 'Dzień', key: 'day' },
+    { label: 'total', key: 'total' },
+    { label: 'year', key: 'year' },
+    { label: 'half_year', key: 'half_year' },
+    { label: 'month', key: 'month' },
+    { label: 'week', key: 'week' },
+    { label: 'day', key: 'day' },
 ] as const;
 
 const props = defineProps<{
@@ -44,7 +47,7 @@ function setSortOrder(order: SortOrder) {
 <template>
     <Card class="flex h-full flex-col">
         <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle class="text-sm font-medium">Oś czasu wpisów</CardTitle>
+            <CardTitle class="text-sm font-medium">{{ t('blogger.stats.timeline_title') }}</CardTitle>
             <div class="flex gap-1">
                 <Button
                     v-for="order in ['newest', 'oldest'] as const"
@@ -55,12 +58,14 @@ function setSortOrder(order: SortOrder) {
                     variant="ghost"
                     @click="setSortOrder(order)"
                 >
-                    {{ order === 'newest' ? 'Najnowsze' : 'Najstarsze' }}
+                    {{ t(`blogger.stats.${order}`) }}
                 </Button>
             </div>
         </CardHeader>
         <CardContent class="flex-1">
-            <div v-if="sortedPosts.length === 0" class="flex h-full items-center justify-center text-sm text-muted-foreground">Brak wpisów</div>
+            <div v-if="sortedPosts.length === 0" class="flex h-full items-center justify-center text-sm text-muted-foreground">
+                {{ t('blogger.stats.no_posts') }}
+            </div>
             <ul v-else class="space-y-3">
                 <li v-for="post in sortedPosts" :key="post.id" class="flex items-center justify-between text-sm">
                     <div class="flex items-center gap-2 overflow-hidden">
@@ -72,10 +77,10 @@ function setSortOrder(order: SortOrder) {
                                 </TooltipTrigger>
                                 <TooltipContent>
                                     <div class="text-xs">
-                                        <p class="mb-1 border-b pb-1 font-bold">Wyświetlenia:</p>
+                                        <p class="mb-1 border-b pb-1 font-bold">{{ t('blogger.stats.views') }}:</p>
                                         <div class="grid grid-cols-2 gap-x-4">
                                             <template v-for="metric in VIEW_METRICS" :key="metric.key">
-                                                <span>{{ metric.label }}:</span>
+                                                <span>{{ t(`blogger.stats.metrics.${metric.label}`) }}:</span>
                                                 <span class="text-right">{{ post.views[metric.key] }}</span>
                                             </template>
                                         </div>

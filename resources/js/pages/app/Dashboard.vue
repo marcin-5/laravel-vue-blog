@@ -9,6 +9,10 @@ import { type NewsletterSubscription } from '@/types/admin.types';
 import { type BlogStats, type PostsStats } from '@/types/stats';
 import { Head } from '@inertiajs/vue3';
 
+import { useI18nNs } from '@/composables/useI18nNs';
+
+const { t } = await useI18nNs(['dashboard', 'common']);
+
 defineProps<{
     newsletterSubscriptions?: NewsletterSubscription[];
     blogStats?: BlogStats[];
@@ -17,11 +21,11 @@ defineProps<{
 
 const { currentView } = useDashboardView();
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: '/dashboard' }];
+const breadcrumbs: BreadcrumbItem[] = [{ title: t('dashboard.title'), href: '/dashboard' }];
 </script>
 
 <template>
-    <Head title="Dashboard" />
+    <Head :title="t('dashboard.title')" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <AdminDashboard v-if="currentView === 'admin'" :newsletter-subscriptions="newsletterSubscriptions" />

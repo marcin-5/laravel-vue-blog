@@ -1,34 +1,62 @@
 {
-  "users": {
-    "title": "Użytkownicy",
-    "heading": "Zarządzanie użytkownikami",
-    "table": {
-      "name": "Imię i nazwisko",
-      "email": "E-mail",
-      "role": "Rola",
-      "blog_quota": "Limit blogów",
-      "actions": "Akcje"
-    },
-    "actions": {
-      "save": "Zapisz",
-      "create": "Utwórz"
-    },
-    "create": {
-      "title": "Utwórz nowego użytkownika",
-      "name": "Imię i nazwisko",
-      "email": "E-mail",
-      "password": "Hasło",
-      "role": "Rola",
-      "blog_quota": "Limit blogów"
-    },
-    "roles": {
-      "admin": "admin",
-      "blogger": "bloger",
-      "user": "użytkownik"
-    },
-    "flash": {
-      "created": "Użytkownik został pomyślnie utworzony.",
-      "updated": "Użytkownik został pomyślnie zaktualizowany."
+    "admin": {
+        "stats": {
+            "title": "Statystyki"
+        },
+        "dashboard": {
+            "recent_subscriptions": "Najnowsze subskrypcje",
+            "no_subscriptions": "Brak subskrypcji"
+        },
+        "categories": {
+            "title": "Kategorie",
+            "breadcrumb": "Kategorie",
+            "create_heading": "Utwórz kategorię",
+            "language_label": "Język",
+            "name_label": "Nazwa",
+            "create_button": "Utwórz",
+            "creating_button": "Tworzenie…",
+            "table": {
+                "name": "Nazwa",
+                "locale": "Język",
+                "slug": "Slug",
+                "blogs": "Blogi",
+                "actions": "Akcje"
+            },
+            "delete_confirm": "Usunąć kategorię \"{name}\"? Zostanie ona usunięta ze wszystkich blogów.",
+            "saving_button": "Zapisywanie…"
+        },
+        "users": {
+            "title": "Użytkownicy",
+            "breadcrumb": "Użytkownicy",
+            "heading": "Zarządzanie użytkownikami",
+            "table": {
+                "name": "Imię i nazwisko",
+                "email": "E-mail",
+                "role": "Rola",
+                "blog_quota": "Limit blogów",
+                "actions": "Akcje"
+            },
+            "actions": {
+                "save": "Zapisz",
+                "create": "Utwórz"
+            },
+            "create": {
+                "title": "Utwórz nowego użytkownika",
+                "name": "Imię i nazwisko",
+                "email": "E-mail",
+                "password": "Hasło",
+                "role": "Rola",
+                "blog_quota": "Limit blogów"
+            },
+            "roles": {
+                "admin": "admin",
+                "blogger": "bloger",
+                "user": "użytkownik"
+            },
+            "flash": {
+                "created": "Użytkownik został pomyślnie utworzony.",
+                "updated": "Użytkownik został pomyślnie zaktualizowany."
+            }
+        }
     }
-  }
 }

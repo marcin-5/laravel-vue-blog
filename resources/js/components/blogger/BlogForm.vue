@@ -7,14 +7,12 @@ import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
 import MarkdownPreviewSection from '@/components/blogger/MarkdownPreviewSection.vue';
 import PostFormField from '@/components/blogger/PostFormField.vue';
 import { useBlogFormLogic } from '@/composables/useBlogFormLogic';
+import { useI18nNs } from '@/composables/useI18nNs';
 import { useMarkdownPreview } from '@/composables/useMarkdownPreview';
-import { ensureNamespace } from '@/i18n';
 import type { AdminBlog as Blog, Category } from '@/types/blog.types';
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 
-const { locale, t } = useI18n();
-await ensureNamespace(locale.value, 'blogger');
+const { t } = await useI18nNs('blogger');
 
 interface Props {
     blog?: Blog;
@@ -58,34 +56,34 @@ const {
 } = useMarkdownPreview('markdown.preview');
 
 const translationKeys = computed(() => ({
-    name: t('form.name_label'),
-    namePlaceholder: props.isEdit ? '' : t('form.name_placeholder'),
-    description: t('form.description_label'),
-    descriptionPlaceholder: props.isEdit ? '' : t('form.description_placeholder'),
-    footer: t('form.footer_label'),
-    footerPlaceholder: props.isEdit ? '' : t('form.footer_placeholder'),
-    motto: t('form.motto_label'),
-    mottoPlaceholder: props.isEdit ? '' : t('form.motto_placeholder'),
-    mottoTooltip: t('form.motto_tooltip'),
-    published: t('form.published_label'),
-    locale: t('form.locale_label'),
-    sidebar: t('form.sidebar_label'),
-    sidebarHint: t('form.sidebar_hint'),
-    pageSize: t('form.page_size_label'),
-    cancel: t('form.cancel_button'),
-    create: t('form.create_button'),
-    save: t('form.save_button'),
-    saving: t('form.saving_button'),
-    creating: t('form.creating_button'),
-    preview: t('post_form.preview_button'),
-    close: t('post_form.close_button'),
-    fullPreview: t('post_form.full_preview_button'),
-    splitView: t('post_form.split_view_button'),
-    toggleLayout: previewLayout.value === 'vertical' ? t('post_form.horizontal_button') : t('post_form.vertical_button'),
-    exitPreview: t('post_form.exit_preview_button'),
-    markdown: t('post_form.markdown_label'),
-    previewLabel: t('post_form.preview_label'),
-    previewModeTitle: t('post_form.preview_mode_title'),
+    name: t('blogger.form.name_label'),
+    namePlaceholder: props.isEdit ? '' : t('blogger.form.name_placeholder'),
+    description: t('blogger.form.description_label'),
+    descriptionPlaceholder: props.isEdit ? '' : t('blogger.form.description_placeholder'),
+    footer: t('blogger.form.footer_label'),
+    footerPlaceholder: props.isEdit ? '' : t('blogger.form.footer_placeholder'),
+    motto: t('blogger.form.motto_label'),
+    mottoPlaceholder: props.isEdit ? '' : t('blogger.form.motto_placeholder'),
+    mottoTooltip: t('blogger.form.motto_tooltip'),
+    published: t('blogger.form.published_label'),
+    locale: t('blogger.form.locale_label'),
+    sidebar: t('blogger.form.sidebar_label'),
+    sidebarHint: t('blogger.form.sidebar_hint'),
+    pageSize: t('blogger.form.page_size_label'),
+    cancel: t('blogger.form.cancel_button'),
+    create: t('blogger.form.create_button'),
+    save: t('blogger.form.save_button'),
+    saving: t('blogger.form.saving_button'),
+    creating: t('blogger.form.creating_button'),
+    preview: t('blogger.post_form.preview_button'),
+    close: t('blogger.post_form.close_button'),
+    fullPreview: t('blogger.post_form.full_preview_button'),
+    splitView: t('blogger.post_form.split_view_button'),
+    toggleLayout: previewLayout.value === 'vertical' ? t('blogger.post_form.horizontal_button') : t('blogger.post_form.vertical_button'),
+    exitPreview: t('blogger.post_form.exit_preview_button'),
+    markdown: t('blogger.post_form.markdown_label'),
+    previewLabel: t('blogger.post_form.preview_label'),
+    previewModeTitle: t('blogger.post_form.preview_mode_title'),
 }));
 
 const localeOptions = computed(() => [
