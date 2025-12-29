@@ -42,3 +42,28 @@ export interface BlogStats {
     daily_subscriptions_count: number;
     weekly_subscriptions_count: number;
 }
+
+export interface PostTimelineEntry {
+    id: number;
+    title: string;
+    published_at: string;
+    views: {
+        total: number;
+        year: number;
+        half_year: number;
+        month: number;
+        week: number;
+        day: number;
+    };
+}
+
+export interface PostPerformanceEntry {
+    id: number;
+    title: string;
+    ratio: number;
+}
+
+export interface PostsStats {
+    timeline: PostTimelineEntry[];
+    performance: PostPerformanceEntry[];
+}

@@ -11,10 +11,10 @@ test('blogger sees their blog statistics', function () {
     $blog = Blog::factory()->create(['user_id' => $user->id]);
 
     // Create posts
-    Post::factory()->count(3)->create(['blog_id' => $blog->id]);
+    Post::factory()->count(3)->create(['blog_id' => $blog->id, 'published_at' => now()->subDays(10)]);
 
     // Create views for posts
-    $post = Post::factory()->create(['blog_id' => $blog->id]);
+    $post = Post::factory()->create(['blog_id' => $blog->id, 'published_at' => now()]);
     PageView::factory()->count(5)->create([
         'viewable_type' => (new Post)->getMorphClass(),
         'viewable_id' => $post->id,
@@ -41,6 +41,11 @@ test('blogger sees their blog statistics', function () {
         ->where('blogStats.0.posts_count', 4)
         ->where('blogStats.0.total_views', 5)
         ->where('blogStats.0.daily_subscriptions_count', 2)
-        ->where('blogStats.0.weekly_subscriptions_count', 3),
+        ->where('blogStats.0.weekly_subscriptions_count', 3)
+        ->has('postsStats.timeline')
+        ->has('postsStats.performance')
+        ->where('postsStats.timeline.0.title', $post->title)
+        ->where('postsStats.timeline.0.views.total', 5)
+        ->where('postsStats.performance.0.title', $post->title),
     );
 });

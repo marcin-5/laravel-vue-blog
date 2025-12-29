@@ -17,6 +17,7 @@ class DashboardController extends Controller
         $user = $request->user();
         $newsletterSubscriptions = [];
         $blogStats = [];
+        $postsStats = [];
 
         if ($user->isAdmin()) {
             $newsletterSubscriptions = NewsletterSubscription::with('blog')
@@ -69,11 +70,45 @@ class DashboardController extends Controller
                         'weekly_subscriptions_count' => $blog->weekly_subscriptions_count,
                     ];
                 });
+
+            $posts = Post::query()
+                ->whereIn('blog_id', $user->blogs()->pluck('id'))
+                ->get();
+
+            $postsStats = [
+                'timeline' => $posts->map(function (Post $post) {
+                    return [
+                        'id' => $post->id,
+                        'title' => $post->title,
+                        'published_at' => $post->published_at?->toIso8601String() ?? $post->created_at->toIso8601String(
+                            ),
+                        'views' => [
+                            'total' => $post->pageViews()->count(),
+                            'year' => $post->pageViews()->where('created_at', '>=', now()->subYear())->count(),
+                            'half_year' => $post->pageViews()->where('created_at', '>=', now()->subMonths(6))->count(),
+                            'month' => $post->pageViews()->where('created_at', '>=', now()->subMonth())->count(),
+                            'week' => $post->pageViews()->where('created_at', '>=', now()->subWeek())->count(),
+                            'day' => $post->pageViews()->where('created_at', '>=', now()->subDay())->count(),
+                        ],
+                    ];
+                })->sortByDesc('published_at')->values(),
+                'performance' => $posts->map(function (Post $post) {
+                    $daysSincePublished = max(1, now()->diffInDays($post->published_at ?? $post->created_at));
+                    $views = $post->pageViews()->count();
+
+                    return [
+                        'id' => $post->id,
+                        'title' => $post->title,
+                        'ratio' => round($views / $daysSincePublished, 2),
+                    ];
+                })->sortByDesc('ratio')->values(),
+            ];
         }
 
         return Inertia::render('app/Dashboard', [
             'newsletterSubscriptions' => $newsletterSubscriptions,
             'blogStats' => $blogStats,
+            'postsStats' => $postsStats,
         ]);
     }
 }
