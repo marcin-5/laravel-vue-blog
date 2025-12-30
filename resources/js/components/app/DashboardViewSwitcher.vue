@@ -4,16 +4,18 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { type DashboardView, useDashboardView } from '@/composables/useDashboardView';
 import { ChevronDown } from 'lucide-vue-next';
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const { currentView, availableViews, setView } = useDashboardView();
 
 const viewLabels: Record<DashboardView, string> = {
-    admin: 'Admin Dashboard',
-    blogger: 'Blogger Dashboard',
-    user: 'User Dashboard',
+    admin: t('dashboard.view_switcher.admin'),
+    blogger: t('dashboard.view_switcher.blogger'),
+    user: t('dashboard.view_switcher.user'),
 };
 
-const currentLabel = computed(() => (currentView.value ? viewLabels[currentView.value] : 'Select View'));
+const currentLabel = computed(() => (currentView.value ? viewLabels[currentView.value] : t('dashboard.view_switcher.select')));
 </script>
 
 <template>
