@@ -9,6 +9,8 @@
         "light": "Light",
         "dark": "Dark",
         "system": "System",
-        "language": "Language"
+        "language": "Language",
+        "en": "English",
+        "pl": "Polish"
     }
 }

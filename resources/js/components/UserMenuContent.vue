@@ -1,11 +1,7 @@
 <script lang="ts" setup>
 import UserInfo from '@/components/UserInfo.vue';
-import {
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator
-} from '@/components/ui/dropdown-menu';
+import { DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { useI18nNs } from '@/composables/useI18nNs';
 import type { User } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import { LogOut, Settings } from 'lucide-vue-next';
@@ -15,6 +11,8 @@ interface Props {
 }
 
 defineProps<Props>();
+
+const { t } = await useI18nNs(['common']);
 </script>
 
 <template>
@@ -28,7 +26,7 @@ defineProps<Props>();
         <DropdownMenuItem :as-child="true">
             <Link :href="route('profile.edit')" class="flex w-full items-center" prefetch>
                 <Settings class="mr-2 h-4 w-4" />
-                Settings
+                {{ t('common.nav.settings') }}
             </Link>
         </DropdownMenuItem>
     </DropdownMenuGroup>
@@ -36,7 +34,7 @@ defineProps<Props>();
     <DropdownMenuItem :as-child="true">
         <Link :href="route('logout')" as="button" class="flex w-full items-center" method="post">
             <LogOut class="mr-2 h-4 w-4" />
-            Log out
+            {{ t('common.nav.logout') }}
         </Link>
     </DropdownMenuItem>
 </template>

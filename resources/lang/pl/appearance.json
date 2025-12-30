@@ -9,6 +9,8 @@
         "light": "Jasny",
         "dark": "Ciemny",
         "system": "Systemowy",
-        "language": "Język"
+        "language": "Język",
+        "en": "Angielski",
+        "pl": "Polski"
     }
 }

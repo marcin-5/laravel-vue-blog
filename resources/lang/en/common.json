@@ -6,7 +6,8 @@
             "dashboard": "Dashboard",
             "logout": "Log out",
             "login": "Log in",
-            "register": "Register"
+            "register": "Register",
+            "settings": "Settings"
         },
         "cookie_notice": {
             "message": "This site uses cookies and local data storage required for proper operation and visit analytics.",

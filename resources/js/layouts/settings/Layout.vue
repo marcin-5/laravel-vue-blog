@@ -2,21 +2,24 @@
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { useI18nNs } from '@/composables/useI18nNs';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
+const { t } = await useI18nNs(['profile', 'password', 'appearance', 'common']);
+
 const sidebarNavItems: NavItem[] = [
     {
-        title: 'Profile',
+        title: t('settings.profile.title'),
         href: route('profile.edit'),
     },
     {
-        title: 'Password',
+        title: t('settings.password.title'),
         href: route('password.edit'),
     },
     {
-        title: 'Appearance',
+        title: t('settings.appearance.title'),
         href: route('appearance'),
     },
 ];
@@ -28,7 +31,7 @@ const currentPath = computed(() => page.url);
 
 <template>
     <div class="px-4 py-6">
-        <Heading description="Manage your profile and account settings" title="Settings" />
+        <Heading :description="t('settings.profile.description')" :title="t('common.nav.settings')" />
 
         <div class="flex flex-col lg:flex-row lg:space-x-12">
             <aside class="w-full max-w-xl lg:w-48">

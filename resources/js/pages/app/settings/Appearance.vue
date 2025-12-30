@@ -53,8 +53,8 @@ function onLocaleChange(newLocale: string) {
                         class="mt-1 block w-48 rounded-md border-neutral-300 bg-white py-1.5 pr-10 pl-3 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100"
                         @change="onLocaleChange(($event.target as HTMLSelectElement).value)"
                     >
-                        <option :selected="$page.props.locale === 'en'" value="en">English</option>
-                        <option :selected="$page.props.locale === 'pl'" value="pl">Polski</option>
+                        <option :selected="$page.props.locale === 'en'" value="en">{{ t('appearance.en') }}</option>
+                        <option :selected="$page.props.locale === 'pl'" value="pl">{{ t('appearance.pl') }}</option>
                     </select>
                 </div>
             </div>
