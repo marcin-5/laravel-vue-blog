@@ -93,7 +93,8 @@ class DashboardController extends Controller
                     ];
                 })->sortByDesc('published_at')->values(),
                 'performance' => $posts->map(function (Post $post) {
-                    $daysSincePublished = max(1, now()->diffInDays($post->published_at ?? $post->created_at));
+                    $publishedAt = $post->published_at ?? $post->created_at;
+                    $daysSincePublished = (int)max(1, abs(now()->diffInDays($publishedAt)));
                     $views = $post->pageViews()->count();
 
                     return [
