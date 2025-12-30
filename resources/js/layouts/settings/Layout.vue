@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 const sidebarNavItems: NavItem[] = [
     {
@@ -22,7 +23,7 @@ const sidebarNavItems: NavItem[] = [
 
 const page = usePage();
 
-const currentPath = page.url;
+const currentPath = computed(() => page.url);
 </script>
 
 <template>
