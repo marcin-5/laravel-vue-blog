@@ -4,6 +4,8 @@ import Breadcrumbs from '@/components/Breadcrumbs.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import type { BreadcrumbItemType } from '@/types';
+import { usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 withDefaults(
     defineProps<{
@@ -13,6 +15,9 @@ withDefaults(
         breadcrumbs: () => [],
     },
 );
+
+const page = usePage();
+const isDashboard = computed(() => page.url === '/dashboard');
 </script>
 
 <template>
@@ -26,7 +31,7 @@ withDefaults(
             </template>
         </div>
         <div class="flex flex-1 items-center justify-center">
-            <DashboardViewSwitcher />
+            <DashboardViewSwitcher v-if="isDashboard" />
         </div>
         <div class="ml-auto">
             <ThemeToggle />
