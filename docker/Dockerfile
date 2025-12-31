@@ -1,5 +1,5 @@
 # Stage 1: Build frontend assets
-FROM node:24-alpine AS node-builder
+FROM node:25-alpine AS node-builder
 WORKDIR /app
 
 # It's better to install all dependencies for building
@@ -162,7 +162,7 @@ EXPOSE 9000
 CMD ["php-fpm"]
 
 # Stage 5: SSR runtime image for running Inertia SSR server
-FROM node:24-alpine AS ssr-runtime
+FROM node:25-alpine AS ssr-runtime
 WORKDIR /var/www/html
 # Install only runtime Node dependencies required by the SSR server
 COPY package*.json ./
