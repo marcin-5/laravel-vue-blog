@@ -4,11 +4,11 @@ return [
     // Map page types used by public routes to translation groups.
     // These groups are merged in order. Missing files are skipped silently.
     'page_groups' => [
-        'home' => ['welcome', 'common'],
-        'about' => ['about', 'welcome', 'common'],
-        'contact' => ['contact', 'common'],
-        'blog' => ['blog', 'common'],
-        'post' => ['blog', 'common'],
+        'home' => ['public', 'common'],
+        'about' => ['public', 'common'],
+        'contact' => ['public', 'common'],
+        'blog' => ['public', 'common'],
+        'post' => ['public', 'common'],
         'auth' => ['auth', 'common'],
     ],
 

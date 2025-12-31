@@ -25,13 +25,16 @@ class HandleTranslations
                 $commonPath = resource_path("lang/{$locale}/common.json");
                 $common = file_exists($commonPath) ? json_decode(file_get_contents($commonPath), true) : [];
 
+                $authPath = resource_path("lang/{$locale}/auth.json");
+                $auth = file_exists($authPath) ? json_decode(file_get_contents($authPath), true) : [];
+
                 if (Auth::check()) {
                     $appPath = resource_path("lang/{$locale}/app.json");
                     $app = file_exists($appPath) ? json_decode(file_get_contents($appPath), true) : [];
 
                     return [
                         'locale' => $locale,
-                        'messages' => array_merge($common, $app),
+                        'messages' => array_merge($common, $app, $auth),
                     ];
                 }
 
@@ -40,7 +43,7 @@ class HandleTranslations
 
                 return [
                     'locale' => $locale,
-                    'messages' => array_merge($common, $public),
+                    'messages' => array_merge($common, $public, $auth),
                 ];
             },
         ]);
