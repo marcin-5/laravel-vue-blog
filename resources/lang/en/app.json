@@ -4,7 +4,13 @@
     },
     "admin": {
         "stats": {
-            "title": "Statistics"
+            "title": "Statistics",
+            "user_agents": {
+                "title": "Last User Agents",
+                "unique_label": "Visits",
+                "added_label": "Registered",
+                "no_data": "No data"
+            }
         },
         "dashboard": {
             "recent_subscriptions": "Recent subscriptions",

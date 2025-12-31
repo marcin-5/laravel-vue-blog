@@ -4,7 +4,13 @@
     },
     "admin": {
         "stats": {
-            "title": "Statystyki"
+            "title": "Statystyki",
+            "user_agents": {
+                "title": "Najnowsze User Agents",
+                "unique_label": "Odwiedziny",
+                "added_label": "Zarejestrowane",
+                "no_data": "Brak danych"
+            }
         },
         "dashboard": {
             "recent_subscriptions": "Najnowsze subskrypcje",

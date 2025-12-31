@@ -67,3 +67,13 @@ export interface PostsStats {
     timeline: PostTimelineEntry[];
     performance: PostPerformanceEntry[];
 }
+
+export interface UserAgentEntry {
+    id: number;
+    name: string;
+}
+
+export interface UserAgentStats {
+    last_unique: UserAgentEntry[];
+    last_added: UserAgentEntry[];
+}

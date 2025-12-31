@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class PageView extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'user_id',
         'visitor_id',
@@ -18,6 +19,7 @@ class PageView extends Model
         'viewable_id',
         'ip_address',
         'user_agent',
+        'user_agent_id',
         'fingerprint',
     ];
 
@@ -28,6 +30,11 @@ class PageView extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function userAgent(): BelongsTo
+    {
+        return $this->belongsTo(UserAgent::class);
     }
 
     public function viewable(): MorphTo
