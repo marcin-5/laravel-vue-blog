@@ -46,5 +46,6 @@ return [
         'XING-contenttabreceiver',
         'Chrome-Lighthouse',
         'TelegramBot',
+        'meta-externalagent',
     ],
 ];
