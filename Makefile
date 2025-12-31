@@ -28,7 +28,7 @@ init: migrate ## ✨ First-time project setup (builds, installs, migrates)
 	@echo "➡️ Run 'make dev' to start the Vite HMR server or 'make fish' to get a shell."
 
 # Phony targets are not files.
-.PHONY: init dev build up down restart logs migrate key-gen npm-install composer-install fish setup-env help db-reset
+.PHONY: init dev build up down restart logs migrate key-gen npm-install composer-install fish setup-env help db-reset cache-clear
 
 # ====================================================================================
 # Main Commands
@@ -101,6 +101,10 @@ npm-install: composer-install ## 📦 Install JS dependencies with NPM
 composer-install: up ## 📦 Install PHP dependencies with Composer
 	@echo "Installing Composer dependencies..."
 	$(DOCKER_COMPOSE) exec app composer install
+
+cache-clear: up ## 🧹 Clear all Laravel caches
+	@echo "Clearing all Laravel caches..."
+	$(DOCKER_COMPOSE) exec app php artisan optimize:clear
 
 fish: up ## 🐟 Enter the app container with an interactive fish shell
 	@echo "Entering the app container with fish shell..."
