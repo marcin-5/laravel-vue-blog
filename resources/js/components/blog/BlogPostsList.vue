@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { ensureNamespace } from '@/i18n';
 import type { Pagination, PostItem } from '@/types/blog.types';
 import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -11,10 +10,7 @@ const props = defineProps<{
     pagination?: Pagination | null;
 }>();
 
-const { t, locale } = useI18n();
-
-// Ensure "blog" namespace is loaded for current locale (supports SSR via Suspense)
-await ensureNamespace(locale.value, 'blog');
+const { t } = useI18n();
 
 // Translation helper
 function translatePaginationLabel(rawLabel: string): string {

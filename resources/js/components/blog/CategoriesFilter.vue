@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { useI18nGate } from '@/composables/useI18nGate';
 import type { Category } from '@/types/blog.types';
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import CategoryPill from './CategoryPill.vue';
 
 interface Emits {
@@ -18,7 +18,7 @@ const props = defineProps<{
 
 const emit = defineEmits<Emits>();
 
-const { ready: i18nReady, t } = await useI18nGate('welcome');
+const { t } = useI18n();
 
 const selected = computed<number[]>(() => props.selectedIds ?? []);
 </script>
@@ -34,7 +34,7 @@ const selected = computed<number[]>(() => props.selectedIds ?? []);
         />
 
         <button
-            v-if="selected.length > 0 && i18nReady"
+            v-if="selected.length > 0"
             class="ml-2 rounded-full border border-gray-300 px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:bg-slate-800 dark:text-slate-200"
             type="button"
             @click="emit('clear')"

@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import CategoryRow from '@/components/admin/CategoryRow.vue';
-import { useI18nNs } from '@/composables/useI18nNs';
 import { i18n } from '@/i18n';
 import type { CategoryRow as CategoryRowType } from '@/types/admin.types';
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-const { t } = await useI18nNs('admin');
+const { t } = useI18n();
 
 const props = defineProps<{
     categories: CategoryRowType[];

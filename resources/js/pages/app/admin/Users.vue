@@ -1,14 +1,14 @@
 <script lang="ts" setup>
 import UserCreateForm from '@/components/admin/UserCreateForm.vue';
 import { Button } from '@/components/ui/button';
-import { useI18nNs } from '@/composables/useI18nNs';
 import { type UserWithQuota, useUserPermissions } from '@/composables/useUserPermissions';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-const { t } = await useI18nNs('admin');
+const { t } = useI18n();
 
 // Types
 export type Role = 'admin' | 'blogger' | 'user';

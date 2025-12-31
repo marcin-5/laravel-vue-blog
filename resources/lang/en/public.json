@@ -1,0 +1,67 @@
+{
+    "about": {
+        "meta": {
+            "title": "About Osobliwy Blog",
+            "description": "A place where the written word inspires, encourages reflection and discovery, and becomes the starting point for conversation."
+        },
+        "heading": "About",
+        "content": "***\"Osobliwy.blog\"*** is more than just a collection of posts; it's a place where the written word is a starting point for reflection and discovery. Here you will find articles that are not afraid to pose bold theses, as well as texts with one main feature – to inspire.\n\n###A Space for Thoughts, Questions, and Inspiration\n\nOur core belief is that no text is a final, indisputable monologue. We treat them rather as the beginning of a conversation. Even the most thoughtful article can become an inspiration for you to challenge one of its theses – and that's a good thing! We are open to such dialogue and believe that through critique, we can all broaden our horizons.\n\n###Your Voice in Our Community\n\nWe value every constructive opinion. Although the direct ability to comment posts is currently in the works, we already encourage you to share your thoughts, especially critical ones, via our email address. If you give us your consent, we will be happy to publish your comment under the respective article, making it a lively and multifaceted one."
+    },
+    "contact": {
+        "meta": {
+            "title": "Contact",
+            "description": "Get in touch with us"
+        },
+        "heading": "Contact",
+        "form": {
+            "name": "Name",
+            "email": "Email",
+            "subject": "Subject",
+            "message": "Message",
+            "submit": "Send message",
+            "submitted": "Your message has been sent.",
+            "placeholders": {
+                "name": "Your name",
+                "email": "Your email",
+                "subject": "Subject",
+                "message": "Write your message..."
+            }
+        }
+    },
+    "meta": {
+        "welcomeTitle": "Portal Osobliwy Blog",
+        "welcomeDescription": "The website osobliwy.blog offers a place where writing prompts introspection and new insights. We present bold theses to inspire your own explorations. For us, every article is not a monologue, but the start of a conversation – we encourage your voice, your questions, and your critical perspective. We believe it's the only way we can truly expand our horizons together."
+    },
+    "slogans": [
+        "Things that too few people know exist.Care to discover them?",
+        "Curiosities that might just astonish you. Ready to delve deeper?",
+        "The world is full of curiosities. Dare to explore them?"
+    ],
+    "actions": {
+        "clear": "Clear filter"
+    },
+    "blog": {
+        "author": "Author:",
+        "posts_list": {
+            "aria": "Posts list",
+            "title": "Posts:",
+            "empty": "No posts yet."
+        },
+        "post_nav": {
+            "aria": "Post navigation",
+            "previous": "Previous",
+            "next": "Next",
+            "back_to_blog": "Back to blog"
+        },
+        "pagination": {
+            "aria": "Pagination",
+            "previous": "Previous",
+            "next": "Next"
+        },
+        "post": {
+            "author": "Author:",
+            "published": "Published:",
+            "updated": "Updated:"
+        }
+    }
+}

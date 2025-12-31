@@ -5,12 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useI18nGate } from '@/composables/useI18nGate';
 import AuthBase from '@/layouts/AuthLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
 
-const { t } = await useI18nGate('auth');
+const { t } = useI18n();
 
 defineProps<{
     status?: string;

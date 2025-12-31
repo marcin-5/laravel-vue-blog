@@ -1,0 +1,295 @@
+{
+    "actions": {
+        "clear": "Wyczyść"
+    },
+    "admin": {
+        "stats": {
+            "title": "Statystyki"
+        },
+        "dashboard": {
+            "recent_subscriptions": "Najnowsze subskrypcje",
+            "no_subscriptions": "Brak subskrypcji"
+        },
+        "categories": {
+            "title": "Kategorie",
+            "breadcrumb": "Kategorie",
+            "create_heading": "Utwórz kategorię",
+            "language_label": "Język",
+            "name_label": "Nazwa",
+            "create_button": "Utwórz",
+            "creating_button": "Tworzenie…",
+            "table": {
+                "name": "Nazwa",
+                "locale": "Język",
+                "slug": "Slug",
+                "blogs": "Blogi",
+                "actions": "Akcje"
+            },
+            "delete_confirm": "Usunąć kategorię \"{name}\"? Zostanie ona usunięta ze wszystkich blogów.",
+            "saving_button": "Zapisywanie…"
+        },
+        "users": {
+            "title": "Użytkownicy",
+            "breadcrumb": "Użytkownicy",
+            "heading": "Zarządzanie użytkownikami",
+            "table": {
+                "name": "Imię i nazwisko",
+                "email": "E-mail",
+                "role": "Rola",
+                "blog_quota": "Limit blogów",
+                "actions": "Akcje"
+            },
+            "actions": {
+                "save": "Zapisz",
+                "create": "Utwórz"
+            },
+            "create": {
+                "title": "Utwórz nowego użytkownika",
+                "name": "Imię i nazwisko",
+                "email": "E-mail",
+                "password": "Hasło",
+                "role": "Rola",
+                "blog_quota": "Limit blogów"
+            },
+            "roles": {
+                "admin": "admin",
+                "blogger": "bloger",
+                "user": "użytkownik"
+            },
+            "flash": {
+                "created": "Użytkownik został pomyślnie utworzony.",
+                "updated": "Użytkownik został pomyślnie zaktualizowany."
+            }
+        }
+    },
+    "auth": {
+        "register": {
+            "title": "Utwórz konto",
+            "description": "Wprowadź swoje dane, aby utworzyć konto",
+            "unavailable_title": "Rejestracja niedostępna",
+            "unavailable_description": "Rejestracja jest obecnie wyłączona. Spróbuj ponownie później.",
+            "name": "Imię i nazwisko",
+            "name_placeholder": "Imię i nazwisko",
+            "email": "Adres e-mail",
+            "email_placeholder": "email@example.com",
+            "password": "Hasło",
+            "password_placeholder": "Hasło",
+            "password_confirmation": "Potwierdź hasło",
+            "password_confirmation_placeholder": "Potwierdź hasło",
+            "submit": "Utwórz konto",
+            "already_have_account": "Masz już konto?",
+            "login_link": "Zaloguj się",
+            "home_page_link": "Strona główna"
+        },
+        "login": {
+            "title": "Zaloguj się",
+            "description": "Wprowadź swoje dane, aby uzyskać dostęp do konta",
+            "email": "Adres e-mail",
+            "password": "Hasło",
+            "remember": "Zapamiętaj mnie",
+            "forgot_password": "Nie pamiętasz hasła?",
+            "submit": "Zaloguj się",
+            "no_account": "Nie masz konta?",
+            "signup": "Zarejestruj się"
+        },
+        "forgot_password": {
+            "title": "Zresetuj hasło",
+            "description": "Zapomniałeś hasła? Nie ma problemu. Podaj nam swój adres e-mail, a my wyślemy Ci link do resetowania hasła, który pozwoli Ci wybrać nowe.",
+            "email": "Adres e-mail",
+            "submit": "Wyślij link do resetowania hasła",
+            "login_link": "Powrót do logowania"
+        },
+        "reset_password": {
+            "title": "Ustaw nowe hasło",
+            "description": "Wprowadź nowe hasło poniżej",
+            "email": "Adres e-mail",
+            "password": "Hasło",
+            "password_confirmation": "Potwierdź hasło",
+            "password_confirmation_placeholder": "Potwierdź hasło",
+            "submit": "Zresetuj hasło"
+        },
+        "verify_email": {
+            "title": "Zweryfikuj adres e-mail",
+            "description": "Dziękujemy za rejestrację! Przed rozpoczęciem, czy mógłbyś zweryfikować swój adres e-mail, klikając w link, który właśnie wysłaliśmy do Ciebie? Jeśli nie otrzymałeś wiadomości e-mail, z przyjemnością wyślemy kolejną.",
+            "verification_link_sent": "Nowy link weryfikacyjny został wysłany na adres e-mail podany podczas rejestracji.",
+            "resend": "Wyślij ponownie e-mail weryfikacyjny",
+            "logout": "Wyloguj się"
+        },
+        "confirm_password": {
+            "title": "Potwierdź hasło",
+            "description": "To bezpieczny obszar aplikacji. Potwierdź swoje hasło przed kontynuowaniem.",
+            "password": "Hasło",
+            "submit": "Potwierdź"
+        }
+    },
+    "settings": {
+        "profile": {
+            "title": "Profil",
+            "description": "Zaktualizuj informacje o profilu swojego konta i adres e-mail",
+            "info_title": "Informacje o profilu",
+            "info_description": "Zaktualizuj swoje imię i nazwisko oraz adres e-mail",
+            "name": "Imię i nazwisko",
+            "name_placeholder": "Pełne imię i nazwisko",
+            "email": "Adres e-mail",
+            "email_placeholder": "Adres e-mail",
+            "unverified_email": "Twój adres e-mail jest niezweryfikowany.",
+            "resend_verification": "Kliknij tutaj, aby ponownie wysłać e-mail weryfikacyjny.",
+            "verification_sent": "Nowy link weryfikacyjny został wysłany na Twój adres e-mail.",
+            "save_button": "Zapisz",
+            "saved_message": "Zapisano.",
+            "delete_account": {
+                "title": "Usuń konto",
+                "description": "Po usunięciu konta wszystkie jego zasoby i dane zostaną trwale usunięte. Przed usunięciem konta pobierz wszelkie dane lub informacje, które chcesz zachować.",
+                "button": "Usuń konto",
+                "confirm_title": "Czy na pewno chcesz usunąć swoje konto?",
+                "confirm_description": "Po usunięciu konta wszystkie jego zasoby i dane zostaną trwale usunięte. Wprowadź hasło, aby potwierdzić, że chcesz trwale usunąć swoje konto.",
+                "password_placeholder": "Hasło",
+                "cancel_button": "Anuluj"
+            }
+        },
+        "password": {
+            "title": "Hasło",
+            "update_title": "Aktualizuj hasło",
+            "update_description": "Upewnij się, że Twoje konto używa długiego, losowego hasła, aby pozostać bezpiecznym.",
+            "current_password": "Obecne hasło",
+            "new_password": "Nowe hasło",
+            "confirm_password": "Potwierdź hasło",
+            "save_button": "Zapisz",
+            "saved_message": "Zaktualizowano."
+        },
+        "appearance": {
+            "title": "Wygląd",
+            "description": "Zarządzaj ustawieniami wyglądu swojego konta"
+        }
+    },
+    "appearance": {
+        "light": "Jasny",
+        "dark": "Ciemny",
+        "system": "Systemowy",
+        "language": "Język",
+        "en": "Angielski",
+        "pl": "Polski"
+    },
+    "blogger": {
+        "title": "Blogi",
+        "stats_title": "Statystyki",
+        "all_my_blogs": "Wszystkie moje blogi",
+        "breadcrumb": {
+            "dashboard": "Panel",
+            "index": "Blogi",
+            "stats": "Statystyki"
+        },
+        "posts_list": {
+            "aria": "Lista wpisów",
+            "title": "Posty",
+            "empty": "Brak wpisów."
+        },
+        "create_section": {
+            "title": "Twoje Blogi",
+            "create_button": "Utwórz Nowy Blog",
+            "close_button": "Zamknij",
+            "quota_reached_tooltip": "Osiągnięto maksymalną liczbę blogów. Skontaktuj się z administratorem, aby zwiększyć limit."
+        },
+        "actions": {
+            "edit": "Edytuj",
+            "close": "Zamknij",
+            "hide_posts": "Ukryj Posty",
+            "show_posts": "Pokaż Posty",
+            "add_post": "Dodaj Post"
+        },
+        "posts": {
+            "empty": "Brak postów"
+        },
+        "empty": "Nie znaleziono blogów.",
+        "empty_cta": "Utwórz swój pierwszy blog",
+        "limit_reached_hint": "Osiągnięto limit blogów",
+        "form": {
+            "name_label": "Nazwa",
+            "name_placeholder": "Mój Wspaniały Blog",
+            "description_label": "Opis",
+            "description_placeholder": "O czym jest ten blog?",
+            "motto_label": "Motto",
+            "motto_placeholder": "Krótkie motto lub hasło...",
+            "motto_tooltip": "Możesz dodać wiele mott rozdzielonych podwójnym enterem (naciśnij Enter dwa razy). Jedno z nich będzie losowo wyświetlane na każdej stronie posta.",
+            "footer_label": "Stopka",
+            "footer_placeholder": "Stopka bloga",
+            "published_label": "Opublikowany",
+            "locale_label": "Język",
+            "sidebar_label": "Pozycja\/szerokość paska bocznego",
+            "sidebar_hint": "-50..-1 = lewo (% szerokości), 0 = brak, 1..50 = prawo (% szerokości)",
+            "page_size_label": "Postów na stronę",
+            "save_button": "Zapisz",
+            "create_button": "Utwórz",
+            "cancel_button": "Anuluj",
+            "saving_button": "Zapisywanie…",
+            "creating_button": "Tworzenie…"
+        },
+        "stats": {
+            "posts": "Posty",
+            "views": "Wyświetlenia",
+            "daily_subs": "Subskrypcje (D)",
+            "weekly_subs": "Subskrypcje (T)",
+            "no_active_blogs": "Brak aktywnych blogów do wyświetlenia statystyk.",
+            "timeline_title": "Oś czasu wpisów",
+            "performance_title": "Wydajność wpisów",
+            "views_per_day": "wyświetleń\/dzień",
+            "best": "Najlepsze",
+            "worst": "Najgorsze",
+            "newest": "Najnowsze",
+            "oldest": "Najstarsze",
+            "no_data": "Brak danych",
+            "no_posts": "Brak wpisów",
+            "metrics": {
+                "total": "Łącznie",
+                "year": "Ostatni rok",
+                "half_year": "Pół roku",
+                "month": "Miesiąc",
+                "week": "Tydzień",
+                "day": "Dzień"
+            }
+        },
+        "post_form": {
+            "title_label": "Tytuł",
+            "post_title_label": "Tytuł posta",
+            "title_placeholder": "Mój pierwszy post",
+            "excerpt_label": "Zajawka",
+            "excerpt_placeholder": "Krótkie podsumowanie",
+            "content_label": "Treść",
+            "content_placeholder": "Napisz swój post...",
+            "markdown_placeholder": "Napisz swój markdown tutaj...",
+            "published_label": "Opublikowany",
+            "publish_now_label": "Opublikuj teraz",
+            "preview_mode_title": "Tryb Podglądu",
+            "markdown_label": "Markdown",
+            "preview_label": "Podgląd",
+            "save_button": "Zapisz",
+            "create_button": "Utwórz",
+            "cancel_button": "Anuluj",
+            "saving_button": "Zapisywanie…",
+            "creating_button": "Tworzenie…",
+            "save_post_button": "Zapisz Post",
+            "create_post_button": "Utwórz Post",
+            "close_button": "Zamknij",
+            "preview_button": "Podgląd",
+            "exit_preview_button": "Wyjdź z Podglądu",
+            "full_preview_button": "Pełny Podgląd",
+            "split_view_button": "Widok Podzielony",
+            "horizontal_button": "Poziomy",
+            "vertical_button": "Pionowy"
+        },
+        "post_item": {
+            "close_button": "Zamknij",
+            "edit_button": "Edytuj"
+        }
+    },
+    "dashboard": {
+        "title": "Panel główny",
+        "welcome": "Witaj w swoim panelu głównym!",
+        "view_switcher": {
+            "admin": "Panel administratora",
+            "blogger": "Panel blogera",
+            "user": "Panel użytkownika",
+            "select": "Wybierz widok"
+        }
+    }
+}

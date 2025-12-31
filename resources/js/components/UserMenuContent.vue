@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import UserInfo from '@/components/UserInfo.vue';
 import { DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { useI18nNs } from '@/composables/useI18nNs';
 import type { User } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import { LogOut, Settings } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
 
 interface Props {
     user: User;
@@ -12,7 +12,7 @@ interface Props {
 
 defineProps<Props>();
 
-const { t } = await useI18nNs(['common']);
+const { t } = useI18n();
 </script>
 
 <template>

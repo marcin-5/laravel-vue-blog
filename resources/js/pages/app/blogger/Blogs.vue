@@ -3,17 +3,17 @@ import BlogListItem from '@/components/blogger/BlogListItem.vue';
 import CreateBlogSection from '@/components/blogger/CreateBlogSection.vue';
 import { Button } from '@/components/ui/button';
 import { useBlogForm } from '@/composables/useBlogForm';
-import { useI18nNs } from '@/composables/useI18nNs';
 import { usePostForm } from '@/composables/usePostForm';
 import { useUIState } from '@/composables/useUIState';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import type { AdminBlog as Blog, Category } from '@/types/blog.types';
 import { Head } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{ blogs: Blog[]; canCreate: boolean; categories: Category[] }>();
 
-const { t } = await useI18nNs('blogger');
+const { t } = useI18n();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: t('blogger.breadcrumb.dashboard'), href: '/dashboard' },

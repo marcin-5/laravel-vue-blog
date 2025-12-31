@@ -2,7 +2,7 @@
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
-import { useI18nNs } from '@/composables/useI18nNs';
+import { useI18n } from 'vue-i18n';
 // Components
 import HeadingSmall from '@/components/HeadingSmall.vue';
 import InputError from '@/components/InputError.vue';
@@ -20,7 +20,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-const { t } = await useI18nNs(['profile', 'common']);
+const { t } = useI18n();
 
 const passwordInput = ref<HTMLInputElement | null>(null);
 

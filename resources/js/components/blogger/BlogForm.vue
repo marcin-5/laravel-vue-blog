@@ -7,12 +7,12 @@ import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
 import MarkdownPreviewSection from '@/components/blogger/MarkdownPreviewSection.vue';
 import PostFormField from '@/components/blogger/PostFormField.vue';
 import { useBlogFormLogic } from '@/composables/useBlogFormLogic';
-import { useI18nNs } from '@/composables/useI18nNs';
 import { useMarkdownPreview } from '@/composables/useMarkdownPreview';
 import type { AdminBlog as Blog, Category } from '@/types/blog.types';
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-const { t } = await useI18nNs('blogger');
+const { t } = useI18n();
 
 interface Props {
     blog?: Blog;

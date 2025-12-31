@@ -8,10 +8,10 @@ import { type BreadcrumbItem } from '@/types';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 
-import { useI18nNs } from '@/composables/useI18nNs';
 import { setLocale as setI18nLocale } from '@/i18n';
+import { useI18n } from 'vue-i18n';
 
-const { t } = await useI18nNs(['appearance', 'common']);
+const { t } = useI18n();
 
 const breadcrumbItems: BreadcrumbItem[] = [
     {
@@ -29,7 +29,6 @@ function onLocaleChange(newLocale: string) {
             preserveState: true,
             onSuccess: async () => {
                 await setI18nLocale(newLocale);
-                // useI18nNs will handle ensuring namespace for the new locale via its watch
             },
         },
     );

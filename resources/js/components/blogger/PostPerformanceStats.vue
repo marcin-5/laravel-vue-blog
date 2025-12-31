@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useI18nNs } from '@/composables/useI18nNs';
 import type { PostPerformanceEntry } from '@/types/stats';
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-const { t } = await useI18nNs('blogger');
+const { t } = useI18n();
 
 type SortOrder = 'best' | 'worst';
 

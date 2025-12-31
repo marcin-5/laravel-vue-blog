@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import PostForm from '@/components/blogger/PostForm.vue';
 import { Button } from '@/components/ui/button';
-import { useI18nNs } from '@/composables/useI18nNs';
+import { useI18n } from 'vue-i18n';
 import type { AdminPostItem as PostItem } from '@/types/blog.types';
 import { computed } from 'vue';
 
-const { t } = await useI18nNs('blogger');
+const { t } = useI18n();
 
 interface Props {
     post: PostItem;

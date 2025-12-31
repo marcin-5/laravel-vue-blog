@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 
-import { useI18nNs } from '@/composables/useI18nNs';
 import DeleteUser from '@/components/DeleteUser.vue';
 import HeadingSmall from '@/components/HeadingSmall.vue';
 import InputError from '@/components/InputError.vue';
@@ -11,8 +10,9 @@ import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { type BreadcrumbItem, type User } from '@/types';
+import { useI18n } from 'vue-i18n';
 
-const { t } = await useI18nNs(['profile', 'common']);
+const { t } = useI18n();
 
 interface Props {
     mustVerifyEmail: boolean;

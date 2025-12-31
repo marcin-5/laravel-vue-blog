@@ -1,0 +1,67 @@
+{
+    "about": {
+        "meta": {
+            "title": "O Osobliwy Blogu",
+            "description": "Miejsce, gdzie słowo pisane inspiruje, skłania do refleksji, odkryć i staje się początkiem konwersacji."
+        },
+        "heading": "O nas",
+        "content": "***„Osobliwy.blog”*** to więcej niż tylko zbiór wpisów, to miejsce, gdzie słowo pisane jest punktem wyjścia do refleksji i odkryć. Znajdziesz tu artykuły, które nie boją się stawiać odważnych tez, a także teksty mające jedną główną cechę – inspirować.\n\n###Przestrzeń dla myśli, pytań i inspiracji\n\nNaszym założeniem jest to, że żaden tekst nie jest ostatecznym, niepodważalnym monologiem. Traktujemy je raczej jako początek rozmowy. Nawet najbardziej przemyślany artykuł może stać się dla Ciebie inspiracją do podważenia którejś z tez – i bardzo dobrze! Jesteśmy otwarci na taki dialog i wierzymy, że dzięki krytyce wszyscy możemy poszerzać swoje horyzonty.\n\n###Głos naszej społeczności\n\nDoceniamy każdą konstruktywną opinię. Chociaż bezpośrednia możliwość komentowania pod wpisami jest w tej chwili w przygotowaniu, już teraz zachęcamy do dzielenia się swoimi przemyśleniami, zwłaszcza tymi krytycznymi, poprzez nasz adres e-mail. Jeśli tylko wyrazisz na to zgodę, z chęcią opublikujemy Twój komentarz pod danym artykułem, czyniąc go żywym i wielogłosowym."
+    },
+    "contact": {
+        "meta": {
+            "title": "Kontakt",
+            "description": "Skontaktuj się z nami"
+        },
+        "heading": "Kontakt",
+        "form": {
+            "name": "Imię i nazwisko",
+            "email": "Email",
+            "subject": "Temat",
+            "message": "Wiadomość",
+            "submit": "Wyślij wiadomość",
+            "submitted": "Twoja wiadomość została wysłana.",
+            "placeholders": {
+                "name": "Twoje imię i nazwisko",
+                "email": "Twój email",
+                "subject": "Temat",
+                "message": "Napisz swoją wiadomość..."
+            }
+        }
+    },
+    "meta": {
+        "welcomeTitle": "Portal Osobliwy Blog",
+        "welcomeDescription": "Portal osobliwy.blog to przestrzeń, gdzie słowo pisane zaprasza do refleksji i odkryć. Stawiamy odważne tezy, by inspirować Cię do własnych poszukiwań. Dla nas każdy artykuł to nie monolog, a początek rozmowy – liczymy na Twój głos, pytania i krytyczne spojrzenie. Wierzymy, że tylko w ten sposób możemy wspólnie poszerzać horyzonty."
+    },
+    "slogans": [
+        "Rzeczy, o których istnieniu wie zbyt mało ludzi. Odkryjesz je?",
+        "Osobliwości, które mogą wprawić Cię w zdumienie. Zajrzysz, aby je zgłębić?",
+        "Świat jest pełen osobliwości. Wejdziesz, by je odkryć?"
+    ],
+    "actions": {
+        "clear": "Wyczyść filtr"
+    },
+    "blog": {
+        "author": "Autor:",
+        "posts_list": {
+            "aria": "Lista wpisów",
+            "title": "Wpisy na blogu:",
+            "empty": "Brak wpisów."
+        },
+        "post_nav": {
+            "aria": "Nawigacja między postami",
+            "previous": "Poprzedni",
+            "next": "Następny",
+            "back_to_blog": "Powrót do bloga"
+        },
+        "pagination": {
+            "aria": "Stronicowanie",
+            "previous": "Poprzednia",
+            "next": "Następna"
+        },
+        "post": {
+            "author": "Autor:",
+            "published": "Opublikowany:",
+            "updated": "Zaktualizowano:"
+        }
+    }
+}

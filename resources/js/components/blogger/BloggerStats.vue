@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { useI18nNs } from '@/composables/useI18nNs';
+import { useI18n } from 'vue-i18n';
 import type { BlogStats } from '@/types/stats';
 import { BookOpen, Calendar, Eye, Mail } from 'lucide-vue-next';
 
-const { t } = await useI18nNs('blogger');
+const { t } = useI18n();
 
 defineProps<{
     stats: BlogStats[];

@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import SubscriptionInfoTooltip from '@/components/admin/SubscriptionInfoTooltip.vue';
-import { useI18nNs } from '@/composables/useI18nNs';
 import { NewsletterSubscription } from '@/types/admin.types';
+import { useI18n } from 'vue-i18n';
 
-const { t } = await useI18nNs('admin');
+const { t } = useI18n();
 
 defineProps<{
     subscriptions: NewsletterSubscription[];

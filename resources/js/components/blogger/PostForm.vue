@@ -2,14 +2,14 @@
 import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
 import MarkdownPreviewSection from '@/components/blogger/MarkdownPreviewSection.vue';
 import PostFormField from '@/components/blogger/PostFormField.vue';
-import { useI18nNs } from '@/composables/useI18nNs';
 import { useMarkdownPreview } from '@/composables/useMarkdownPreview';
 import type { AdminPostItem as PostItem } from '@/types/blog.types';
 import { useForm } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
 import { computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-const { t } = await useI18nNs('blogger');
+const { t } = useI18n();
 
 interface Props {
     post?: PostItem;

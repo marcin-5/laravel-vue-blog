@@ -9,9 +9,9 @@ import { type NewsletterSubscription } from '@/types/admin.types';
 import { type BlogStats, type PostsStats } from '@/types/stats';
 import { Head } from '@inertiajs/vue3';
 
-import { useI18nNs } from '@/composables/useI18nNs';
+import { useI18n } from 'vue-i18n';
 
-const { t } = await useI18nNs(['dashboard', 'common']);
+const { t } = useI18n();
 
 defineProps<{
     newsletterSubscriptions?: NewsletterSubscription[];

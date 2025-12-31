@@ -2,12 +2,12 @@
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { useI18nNs } from '@/composables/useI18nNs';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-const { t } = await useI18nNs(['profile', 'password', 'appearance', 'common']);
+const { t } = useI18n();
 
 const sidebarNavItems: NavItem[] = [
     {

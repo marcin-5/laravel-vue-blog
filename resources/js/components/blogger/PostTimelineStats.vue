@@ -2,12 +2,12 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useI18nNs } from '@/composables/useI18nNs';
 import type { PostTimelineEntry } from '@/types/stats';
 import { Info } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-const { t } = await useI18nNs('blogger');
+const { t } = useI18n();
 
 type SortOrder = 'newest' | 'oldest';
 

@@ -78,9 +78,11 @@ createInertiaApp({
                 const props = page?.props || {};
                 const provided = props?.translations as { locale?: string; messages?: Record<string, any> } | undefined;
                 const nextLocale = (props?.locale as string) || i18n.global.locale.value || 'en';
+
                 if (provided?.messages) {
                     const loc = provided.locale || nextLocale;
                     try {
+                        // Clear previous messages to ensure we only have what is needed for this part of the app
                         i18n.global.setLocaleMessage(loc, provided.messages);
                         i18n.global.locale.value = loc;
                     } catch (e) {

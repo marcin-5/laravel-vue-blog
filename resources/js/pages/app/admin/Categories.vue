@@ -6,9 +6,9 @@ import type { BreadcrumbItem } from '@/types';
 import type { CategoryRow } from '@/types/admin.types';
 import { Head } from '@inertiajs/vue3';
 
-import { useI18nNs } from '@/composables/useI18nNs';
+import { useI18n } from 'vue-i18n';
 
-const { t } = await useI18nNs(['admin', 'common']);
+const { t } = useI18n();
 
 const props = defineProps<{ categories: CategoryRow[] }>();
 

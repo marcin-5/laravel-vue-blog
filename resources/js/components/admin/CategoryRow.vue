@@ -1,13 +1,13 @@
 <script lang="ts" setup>
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
-import { useI18nNs } from '@/composables/useI18nNs';
 import { i18n } from '@/i18n';
 import type { CategoryRow } from '@/types/admin.types';
 import { router, useForm } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-const { t } = await useI18nNs('admin');
+const { t } = useI18n();
 
 const props = defineProps<{
     category: CategoryRow;

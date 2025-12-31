@@ -3,12 +3,12 @@ import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useI18nGate } from '@/composables/useI18nGate';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
 
-const { t } = await useI18nGate('auth');
+const { t } = useI18n();
 
 interface Props {
     token: string;

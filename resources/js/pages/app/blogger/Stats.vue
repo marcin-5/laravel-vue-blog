@@ -5,9 +5,9 @@ import type { BreadcrumbItem } from '@/types';
 import type { BlogOption, BlogRow, FilterState, PostRow, VisitorRow } from '@/types/stats';
 import { Head } from '@inertiajs/vue3';
 
-import { useI18nNs } from '@/composables/useI18nNs';
+import { useI18n } from 'vue-i18n';
 
-const { t } = await useI18nNs(['blogger', 'common']);
+const { t } = useI18n();
 
 interface Props {
     blogFilters: FilterState;

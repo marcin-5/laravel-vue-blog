@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import BlogForm from '@/components/blogger/BlogForm.vue';
 import { Button } from '@/components/ui/button';
-import { useI18nNs } from '@/composables/useI18nNs';
 import type { Category } from '@/types/blog.types';
+import { useI18n } from 'vue-i18n';
 
-const { t } = await useI18nNs('blogger');
+const { t } = useI18n();
 
 interface Props {
     canCreate: boolean;
