@@ -59,7 +59,7 @@ const postColumns = [
 ];
 
 const visitorColumns = computed(() => [
-    { key: 'visitor_label', label: visitorState.value.group_by === 'fingerprint' ? 'Fingerprint' : 'Visitor' },
+    { key: 'visitor_label', label: visitorState.value.group_by === 'fingerprint' ? 'Fingerprint' : 'Visitor', hasInfo: true },
     { key: 'blog_views', label: 'Blog views' },
     { key: 'post_views', label: 'Post views' },
 ]);
@@ -130,7 +130,7 @@ const visitorSortOptions = [...VISITOR_SORT_OPTIONS];
                 :show-group-by-filter="true"
                 :sort-options="visitorSortOptions"
             />
-            <StatsTable :columns="visitorColumns" :data="visitors" row-key="visitor_label" />
+            <StatsTable :columns="visitorColumns" :data="visitors" info-key="user_agent" row-key="visitor_label" />
         </div>
     </div>
 </template>

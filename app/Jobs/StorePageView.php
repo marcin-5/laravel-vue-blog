@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\PageView;
+use App\Models\UserAgent;
 use App\Models\VisitorLink;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -39,6 +40,12 @@ class StorePageView implements ShouldQueue
                 $userId = $link->user_id;
                 $data['user_id'] = $userId;
             }
+        }
+
+        // Handle unique UserAgent
+        if (isset($data['user_agent']) && $data['user_agent'] !== '') {
+            $userAgent = UserAgent::firstOrCreate(['name' => $data['user_agent']]);
+            $data['user_agent_id'] = $userAgent->id;
         }
 
         // Check if a unique row already exists for this identity and viewable.
