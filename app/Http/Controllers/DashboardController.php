@@ -6,6 +6,7 @@ use App\Models\Blog;
 use App\Models\NewsletterSubscription;
 use App\Models\PageView;
 use App\Models\Post;
+use App\Models\UserAgent;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -18,6 +19,7 @@ class DashboardController extends Controller
         $newsletterSubscriptions = [];
         $blogStats = [];
         $postsStats = [];
+        $userAgentStats = null;
 
         if ($user->isAdmin()) {
             $newsletterSubscriptions = NewsletterSubscription::with('blog')
@@ -37,6 +39,33 @@ class DashboardController extends Controller
                     ];
                 })
                 ->values();
+
+            $lastUniqueAgents = PageView::query()
+                ->whereNotNull('user_agent_id')
+                ->with('userAgent')
+                ->latest()
+                ->get()
+                ->unique('user_agent_id')
+                ->take(5)
+                ->map(fn($pv) => [
+                    'id' => $pv->userAgent->id,
+                    'name' => $pv->userAgent->name,
+                ])
+                ->values();
+
+            $lastAddedAgents = UserAgent::query()
+                ->latest()
+                ->take(5)
+                ->get()
+                ->map(fn($ua) => [
+                    'id' => $ua->id,
+                    'name' => $ua->name,
+                ]);
+
+            $userAgentStats = [
+                'last_unique' => $lastUniqueAgents,
+                'last_added' => $lastAddedAgents,
+            ];
         }
 
         if ($user->isBlogger() || $user->isAdmin()) {
@@ -110,6 +139,7 @@ class DashboardController extends Controller
             'newsletterSubscriptions' => $newsletterSubscriptions,
             'blogStats' => $blogStats,
             'postsStats' => $postsStats,
+            'userAgentStats' => $userAgentStats,
         ]);
     }
 }
