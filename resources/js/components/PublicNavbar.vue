@@ -29,6 +29,7 @@ interface NavLink {
     method?: 'post';
     as?: 'button';
     emphasized?: boolean;
+    prefetch?: boolean;
 }
 
 const commonLinks = computed<NavLink[]>(() => [
@@ -37,7 +38,7 @@ const commonLinks = computed<NavLink[]>(() => [
 ]);
 
 const authLinks = computed<NavLink[]>(() => [
-    { route: 'dashboard', label: t('common.nav.dashboard'), emphasized: true },
+    { route: 'dashboard', label: t('common.nav.dashboard'), emphasized: true, prefetch: true },
     { route: 'logout', label: t('common.nav.logout'), method: 'post', as: 'button' },
 ]);
 
@@ -77,6 +78,7 @@ watch(
                         ]"
                         :href="route(link.route)"
                         :method="link.method"
+                        :prefetch="link.prefetch"
                     >
                         {{ link.label }}
                     </Link>
@@ -113,6 +115,7 @@ watch(
                         ]"
                         :href="route(link.route)"
                         :method="link.method"
+                        :prefetch="link.prefetch"
                     >
                         {{ link.label }}
                     </Link>

@@ -7,12 +7,17 @@ use App\Models\NewsletterSubscription;
 use App\Models\PageView;
 use App\Models\Post;
 use App\Models\UserAgent;
+use App\Services\TranslationService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
+    public function __construct(protected TranslationService $translations)
+    {
+    }
+
     public function index(Request $request): Response
     {
         $user = $request->user();
@@ -39,6 +44,10 @@ class DashboardController extends Controller
             'blogStats' => $blogStats,
             'postsStats' => $postsStats,
             'userAgentStats' => $userAgentStats,
+            'translations' => [
+                'locale' => app()->getLocale(),
+                'messages' => $this->translations->getPageTranslations('dashboard'),
+            ],
         ]);
     }
 

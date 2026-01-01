@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Concerns\ManagesAuthSession;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Services\TranslationService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,6 +17,10 @@ class ProfileController extends Controller
 {
     use ManagesAuthSession;
 
+    public function __construct(protected TranslationService $translations)
+    {
+    }
+
     /**
      * Show the user's profile settings page.
      */
@@ -24,6 +29,10 @@ class ProfileController extends Controller
         return Inertia::render('app/settings/Profile', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
+            'translations' => [
+                'locale' => app()->getLocale(),
+                'messages' => $this->translations->getPageTranslations('profile'),
+            ],
         ]);
     }
 

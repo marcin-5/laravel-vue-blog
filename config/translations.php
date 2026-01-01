@@ -10,6 +10,8 @@ return [
         'blog' => ['public', 'common'],
         'post' => ['public', 'common'],
         'auth' => ['auth', 'common'],
+        'dashboard' => ['common'],
+        'profile' => ['common'],
     ],
 
     // When true, also merge base messages from resources/lang/{locale}.json
