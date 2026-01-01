@@ -2,6 +2,7 @@
 
 use App\Mail\NewsletterPostNotification;
 use App\Models\Blog;
+use App\Models\NewsletterSubscription;
 use App\Models\Post;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -9,6 +10,9 @@ uses(RefreshDatabase::class);
 
 it('renders headings correctly for multiple posts in the same blog', function () {
     $blog1 = Blog::factory()->create(['name' => 'Test Blog 1']);
+    $subscription = NewsletterSubscription::factory()->create([
+        'blog_id' => $blog1->id,
+    ]);
 
     $post1 = Post::factory()->create([
         'blog_id' => $blog1->id,
@@ -24,6 +28,7 @@ it('renders headings correctly for multiple posts in the same blog', function ()
 
     $data = collect([
         [
+            'subscription' => $subscription,
             'blog' => $blog1,
             'posts' => collect([$post1, $post2]),
         ],
