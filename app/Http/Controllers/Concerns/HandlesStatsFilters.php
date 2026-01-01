@@ -11,6 +11,39 @@ use Illuminate\Support\Collection;
 
 trait HandlesStatsFilters
 {
+    protected function getBlogOptions(?int $bloggerId = null): Collection
+    {
+        return Blog::query()
+            ->select(['id', 'name'])
+            ->orderBy('name')
+            ->when($bloggerId, fn($q) => $q->where('user_id', $bloggerId))
+            ->get();
+    }
+
+    protected function getStatsData(Request $request, ?int $forceBloggerId = null): array
+    {
+        $blogFilters = $this->parseStatsFilters($request);
+        $blogCriteria = $this->createCriteria($blogFilters, $forceBloggerId);
+        $blogs = $this->stats->blogViews($blogCriteria);
+
+        $postFilters = $this->parseStatsFilters($request, 'posts_');
+        $postCriteria = $this->createCriteria($postFilters, $forceBloggerId);
+        $posts = $this->stats->postViews($postCriteria);
+
+        $visitorFilters = $this->parseStatsFilters($request, 'visitors_');
+        $visitorCriteria = $this->createCriteria($visitorFilters, $forceBloggerId);
+        $visitors = $this->stats->visitorViews($visitorCriteria);
+
+        return [
+            'blogFilters' => $this->formatFiltersForResponse($blogFilters, $blogFilters['limit']),
+            'postFilters' => $this->formatFiltersForResponse($postFilters, $postFilters['limit']),
+            'visitorFilters' => $this->formatFiltersForResponse($visitorFilters, $visitorFilters['limit']),
+            'blogs' => $blogs,
+            'posts' => $posts,
+            'visitors' => $visitors,
+        ];
+    }
+
     protected function parseStatsFilters(Request $request, string $prefix = ''): array
     {
         $range = (string)$request->query($prefix . 'range', 'week');
@@ -44,33 +77,6 @@ trait HandlesStatsFilters
             sort: StatsSort::from($filters['sort']),
             visitorGroupBy: $filters['group_by'] ?? 'visitor_id',
         );
-    }
-
-    protected function getBlogOptions(?int $bloggerId = null): Collection
-    {
-        return Blog::query()
-            ->select(['id', 'name'])
-            ->orderBy('name')
-            ->when($bloggerId, fn($q) => $q->where('user_id', $bloggerId))
-            ->get();
-    }
-
-    protected function getPostViews(
-        string $range,
-        ?int $limit,
-        string $sort,
-        ?int $bloggerId = null,
-        ?int $blogId = null,
-    ) {
-        $criteria = new StatsCriteria(
-            range: StatsRange::from($range),
-            bloggerId: $bloggerId,
-            blogId: $blogId,
-            limit: $limit,
-            sort: StatsSort::from($sort),
-        );
-
-        return $this->stats->postViews($criteria);
     }
 
     protected function formatFiltersForResponse(array $filters, ?int $limit): array

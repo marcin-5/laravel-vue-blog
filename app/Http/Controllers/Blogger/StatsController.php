@@ -22,27 +22,10 @@ class StatsController extends AuthenticatedController
     public function index(Request $request): Response
     {
         $user = Auth::user();
+        $statsData = $this->getStatsData($request, $user->id);
 
-        $blogFilters = $this->parseStatsFilters($request);
-        $blogCriteria = $this->createCriteria($blogFilters, $user->id);
-        $blogs = $this->stats->blogViews($blogCriteria);
-
-        $postFilters = $this->parseStatsFilters($request, 'posts_');
-        $postCriteria = $this->createCriteria($postFilters, $user->id);
-        $posts = $this->stats->postViews($postCriteria);
-
-        $visitorFilters = $this->parseStatsFilters($request, 'visitors_');
-        $visitorCriteria = $this->createCriteria($visitorFilters, $user->id);
-        $visitors = $this->stats->visitorViews($visitorCriteria);
-
-        return Inertia::render('app/blogger/Stats', [
-            'blogFilters' => $this->formatFiltersForResponse($blogFilters, $blogFilters['limit']),
-            'postFilters' => $this->formatFiltersForResponse($postFilters, $postFilters['limit']),
-            'visitorFilters' => $this->formatFiltersForResponse($visitorFilters, $visitorFilters['limit']),
-            'blogs' => $blogs,
-            'posts' => $posts,
-            'visitors' => $visitors,
+        return Inertia::render('app/blogger/Stats', array_merge($statsData, [
             'blogOptions' => $this->getBlogOptions($user->id),
-        ]);
+        ]));
     }
 }

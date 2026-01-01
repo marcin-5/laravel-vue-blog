@@ -21,17 +21,7 @@ class StatsController extends AuthenticatedController
 
     public function index(Request $request): Response
     {
-        $blogFilters = $this->parseStatsFilters($request);
-        $blogCriteria = $this->createCriteria($blogFilters);
-        $blogs = $this->stats->blogViews($blogCriteria);
-
-        $postFilters = $this->parseStatsFilters($request, 'posts_');
-        $postCriteria = $this->createCriteria($postFilters);
-        $posts = $this->stats->postViews($postCriteria);
-
-        $visitorFilters = $this->parseStatsFilters($request, 'visitors_');
-        $visitorCriteria = $this->createCriteria($visitorFilters);
-        $visitors = $this->stats->visitorViews($visitorCriteria);
+        $statsData = $this->getStatsData($request);
 
         $bloggers = User::query()
             ->where('role', User::ROLE_BLOGGER)
@@ -39,17 +29,11 @@ class StatsController extends AuthenticatedController
             ->orderBy('name')
             ->get();
 
-        return Inertia::render('app/admin/Stats', [
-            'blogFilters' => $this->formatFiltersForResponse($blogFilters, $blogFilters['limit']),
-            'postFilters' => $this->formatFiltersForResponse($postFilters, $postFilters['limit']),
-            'blogs' => $blogs,
-            'posts' => $posts,
-            'visitorFilters' => $this->formatFiltersForResponse($visitorFilters, $visitorFilters['limit']),
-            'visitors' => $visitors,
+        return Inertia::render('app/admin/Stats', array_merge($statsData, [
             'bloggers' => $bloggers,
-            'blogOptions' => $this->getBlogOptions($blogFilters['blogger_id']),
-            'postBlogOptions' => $this->getBlogOptions($postFilters['blogger_id']),
+            'blogOptions' => $this->getBlogOptions($statsData['blogFilters']['blogger_id']),
+            'postBlogOptions' => $this->getBlogOptions($statsData['postFilters']['blogger_id']),
             'visitorBlogOptions' => $this->getBlogOptions(),
-        ]);
+        ]));
     }
 }
