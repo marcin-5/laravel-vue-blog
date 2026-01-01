@@ -22,117 +22,16 @@ class DashboardController extends Controller
         $userAgentStats = null;
 
         if ($user->isAdmin()) {
-            $newsletterSubscriptions = NewsletterSubscription::with('blog')
-                ->latest()
-                ->get()
-                ->groupBy('email')
-                ->take(5)
-                ->map(function ($group, $email) {
-                    return [
-                        'email' => $email,
-                        'subscriptions' => $group->map(function ($sub) {
-                            return [
-                                'blog' => $sub->blog->name,
-                                'frequency' => $sub->frequency,
-                            ];
-                        })->values()->all(),
-                    ];
-                })
-                ->values();
-
-            $lastUniqueAgents = PageView::query()
-                ->whereNotNull('user_agent_id')
-                ->with('userAgent')
-                ->latest()
-                ->get()
-                ->unique('user_agent_id')
-                ->take(5)
-                ->map(fn($pv) => [
-                    'id' => $pv->userAgent->id,
-                    'name' => $pv->userAgent->name,
-                ])
-                ->values();
-
-            $lastAddedAgents = UserAgent::query()
-                ->latest()
-                ->take(5)
-                ->get()
-                ->map(fn($ua) => [
-                    'id' => $ua->id,
-                    'name' => $ua->name,
-                ]);
-
+            $newsletterSubscriptions = $this->getNewsletterSubscriptions();
             $userAgentStats = [
-                'last_unique' => $lastUniqueAgents,
-                'last_added' => $lastAddedAgents,
+                'last_unique' => $this->getLastUniqueUserAgents(),
+                'last_added' => $this->getLastAddedUserAgents(),
             ];
         }
 
         if ($user->isBlogger() || $user->isAdmin()) {
-            $blogStats = Blog::query()
-                ->where('user_id', $user->id)
-                ->withCount('posts')
-                ->withCount([
-                    'newsletterSubscriptions as daily_subscriptions_count' => function ($query) {
-                        $query->where('frequency', 'daily');
-                    }
-                ])
-                ->withCount([
-                    'newsletterSubscriptions as weekly_subscriptions_count' => function ($query) {
-                        $query->where('frequency', 'weekly');
-                    }
-                ])
-                ->get()
-                ->map(function (Blog $blog) {
-                    $postMorphClass = (new Post)->getMorphClass();
-                    $totalViews = PageView::query()
-                        ->where('viewable_type', $postMorphClass)
-                        ->whereIn('viewable_id', $blog->posts()->pluck('id'))
-                        ->count();
-
-                    return [
-                        'id' => $blog->id,
-                        'name' => $blog->name,
-                        'posts_count' => $blog->posts_count,
-                        'total_views' => $totalViews,
-                        'daily_subscriptions_count' => $blog->daily_subscriptions_count,
-                        'weekly_subscriptions_count' => $blog->weekly_subscriptions_count,
-                    ];
-                });
-
-            $posts = Post::query()
-                ->whereIn('blog_id', $user->blogs()->pluck('id'))
-                ->get();
-
-            $postsStats = [
-                'timeline' => $posts->map(function (Post $post) {
-                    return [
-                        'id' => $post->id,
-                        'title' => $post->title,
-                        'published_at' => $post->published_at?->toIso8601String() ?? $post->created_at->toIso8601String(
-                            ),
-                        'views' => [
-                            'total' => $post->pageViews()->count(),
-                            'year' => $post->pageViews()->where('created_at', '>=', now()->subYear())->count(),
-                            'half_year' => $post->pageViews()->where('created_at', '>=', now()->subMonths(6))->count(),
-                            'month' => $post->pageViews()->where('created_at', '>=', now()->subMonth())->count(),
-                            'week' => $post->pageViews()->where('created_at', '>=', now()->subWeek())->count(),
-                            'day' => $post->pageViews()->where('created_at', '>=', now()->subDay())->count(),
-                        ],
-                    ];
-                })->sortByDesc('published_at')->values(),
-                'performance' => $posts->map(function (Post $post) {
-                    $publishedAt = $post->published_at ?? $post->created_at;
-                    $daysSincePublished = (int)max(1, abs(now()->diffInDays($publishedAt)));
-                    $views = $post->pageViews()->count();
-
-                    return [
-                        'id' => $post->id,
-                        'title' => $post->title,
-                        'ratio' => round($views / $daysSincePublished, 2),
-                    ];
-                })->sortByDesc('ratio')->values(),
-            ];
+            $blogStats = $this->getBlogStats($user);
+            $postsStats = $this->getPostsStats($user);
         }
 
         return Inertia::render('app/Dashboard', [
@@ -141,5 +40,122 @@ class DashboardController extends Controller
             'postsStats' => $postsStats,
             'userAgentStats' => $userAgentStats,
         ]);
+    }
+
+    private function getNewsletterSubscriptions()
+    {
+        return NewsletterSubscription::with('blog')
+            ->latest()
+            ->get()
+            ->groupBy('email')
+            ->take(5)
+            ->map(function ($group, $email) {
+                return [
+                    'email' => $email,
+                    'subscriptions' => $group->map(function ($sub) {
+                        return [
+                            'blog' => $sub->blog->name,
+                            'frequency' => $sub->frequency,
+                        ];
+                    })->values()->all(),
+                ];
+            })
+            ->values();
+    }
+
+    private function getLastUniqueUserAgents()
+    {
+        return PageView::query()
+            ->whereNotNull('user_agent_id')
+            ->with('userAgent')
+            ->latest()
+            ->get()
+            ->unique('user_agent_id')
+            ->take(5)
+            ->map(fn($pv) => [
+                'id' => $pv->userAgent->id,
+                'name' => $pv->userAgent->name,
+            ])
+            ->values();
+    }
+
+    private function getLastAddedUserAgents()
+    {
+        return UserAgent::query()
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(fn($ua) => [
+                'id' => $ua->id,
+                'name' => $ua->name,
+            ]);
+    }
+
+    private function getBlogStats($user)
+    {
+        return Blog::query()
+            ->where('user_id', $user->id)
+            ->withCount('posts')
+            ->withCount([
+                'newsletterSubscriptions as daily_subscriptions_count' => function ($query) {
+                    $query->where('frequency', 'daily');
+                }
+            ])
+            ->withCount([
+                'newsletterSubscriptions as weekly_subscriptions_count' => function ($query) {
+                    $query->where('frequency', 'weekly');
+                }
+            ])
+            ->get()
+            ->map(function (Blog $blog) {
+                $postMorphClass = (new Post)->getMorphClass();
+                $totalViews = PageView::query()
+                    ->where('viewable_type', $postMorphClass)
+                    ->whereIn('viewable_id', $blog->posts()->pluck('id'))
+                    ->count();
+                return [
+                    'id' => $blog->id,
+                    'name' => $blog->name,
+                    'posts_count' => $blog->posts_count,
+                    'total_views' => $totalViews,
+                    'daily_subscriptions_count' => $blog->daily_subscriptions_count,
+                    'weekly_subscriptions_count' => $blog->weekly_subscriptions_count,
+                ];
+            });
+    }
+
+    private function getPostsStats($user)
+    {
+        $posts = Post::query()
+            ->whereIn('blog_id', $user->blogs()->pluck('id'))
+            ->get();
+
+        return [
+            'timeline' => $posts->map(function (Post $post) {
+                return [
+                    'id' => $post->id,
+                    'title' => $post->title,
+                    'published_at' => $post->published_at?->toIso8601String() ?? $post->created_at->toIso8601String(),
+                    'views' => [
+                        'total' => $post->pageViews()->count(),
+                        'year' => $post->pageViews()->where('created_at', '>=', now()->subYear())->count(),
+                        'half_year' => $post->pageViews()->where('created_at', '>=', now()->subMonths(6))->count(),
+                        'month' => $post->pageViews()->where('created_at', '>=', now()->subMonth())->count(),
+                        'week' => $post->pageViews()->where('created_at', '>=', now()->subWeek())->count(),
+                        'day' => $post->pageViews()->where('created_at', '>=', now()->subDay())->count(),
+                    ],
+                ];
+            })->sortByDesc('published_at')->values(),
+            'performance' => $posts->map(function (Post $post) {
+                $publishedAt = $post->published_at ?? $post->created_at;
+                $daysSincePublished = (int)max(1, abs(now()->diffInDays($publishedAt)));
+                $views = $post->pageViews()->count();
+                return [
+                    'id' => $post->id,
+                    'title' => $post->title,
+                    'ratio' => round($views / $daysSincePublished, 2),
+                ];
+            })->sortByDesc('ratio')->values(),
+        ];
     }
 }
