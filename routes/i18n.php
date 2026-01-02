@@ -27,6 +27,7 @@ Route::get('/lang/{locale}/{namespace}', function (string $locale, string $names
     $allowed = [
         'about',
         'admin',
+        'app',
         'appearance',
         'auth',
         'blog',

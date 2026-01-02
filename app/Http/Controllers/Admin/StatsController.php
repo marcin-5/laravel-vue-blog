@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthenticatedController;
 use App\Http\Controllers\Concerns\HandlesStatsFilters;
 use App\Models\User;
 use App\Services\StatsService;
+use App\Services\TranslationService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -14,8 +15,10 @@ class StatsController extends AuthenticatedController
 {
     use HandlesStatsFilters;
 
-    public function __construct(private readonly StatsService $stats)
-    {
+    public function __construct(
+        private readonly StatsService $stats,
+        protected TranslationService $translations,
+    ) {
         parent::__construct();
     }
 
@@ -34,6 +37,10 @@ class StatsController extends AuthenticatedController
             'blogOptions' => $this->getBlogOptions($statsData['blogFilters']['blogger_id']),
             'postBlogOptions' => $this->getBlogOptions($statsData['postFilters']['blogger_id']),
             'visitorBlogOptions' => $this->getBlogOptions(),
+            'translations' => [
+                'locale' => app()->getLocale(),
+                'messages' => $this->translations->getPageTranslations('stats'),
+            ],
         ]));
     }
 }

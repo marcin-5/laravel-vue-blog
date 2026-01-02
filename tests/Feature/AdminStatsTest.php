@@ -37,7 +37,9 @@ class AdminStatsTest extends TestCase
                 ->component('app/admin/Stats')
                 ->has('posts', 1)
                 ->where('posts.0.title', 'Top Post')
-                ->where('posts.0.views', 1),
+                ->where('posts.0.views', 1)
+                ->has('translations')
+                ->where('translations.messages.blogger.stats.timeline_title', 'Posts Timeline'),
             );
     }
 
