@@ -49,7 +49,7 @@ class NewsletterPostNotification extends Mailable
         return new Content(
             markdown: 'emails.newsletter.posts',
             with: [
-                'manageUrl' => URL::signedRoute('newsletter.manage', ['email' => $email]),
+                'manageUrl' => url(URL::signedRoute('newsletter.manage', ['email' => $email], absolute: false)),
             ],
         );
     }

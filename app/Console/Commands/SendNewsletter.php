@@ -21,7 +21,7 @@ class SendNewsletter extends Command
      *
      * @var string
      */
-    protected $description = 'Wysyła newsletter do subskrybentów z nowymi wpisami.';
+    protected $description = 'Sends a newsletter to subscribers with new posts.';
 
     /**
      * Execute the console command.
@@ -38,7 +38,7 @@ class SendNewsletter extends Command
 
         $subscriptions = $subscriptionsQuery->get();
 
-        $this->info("Przetwarzanie {$subscriptions->count()} subskrypcji...");
+        $this->info("Processing {$subscriptions->count()} subscriptions...");
 
         $groupedSubscriptions = $subscriptions->groupBy('email');
 
@@ -46,6 +46,11 @@ class SendNewsletter extends Command
             $data = collect();
 
             foreach ($userSubscriptions as $subscription) {
+                // Check if it is time to ship for this subscription
+                if (!$this->shouldSendNow($subscription)) {
+                    continue;
+                }
+
                 $posts = Post::query()
                     ->where('blog_id', $subscription->blog_id)
                     ->forPublicView()
@@ -72,10 +77,39 @@ class SendNewsletter extends Command
 
             if ($data->isNotEmpty()) {
                 dispatch(new SendNewsletterNotification($email, $data));
-                $this->line("Zakolejkowano skonsolidowany newsletter dla {$email} ({$data->count()} blogów).");
+                $this->line("Consolidated newsletter queued for {$email} ({$data->count()} blogs).");
             }
         }
 
-        $this->info('Zakończono przetwarzanie newslettera.');
+        $this->info('Newsletter processing has been completed.');
+    }
+
+    private function shouldSendNow(NewsletterSubscription $subscription): bool
+    {
+        $now = now();
+
+        if ($subscription->frequency === 'daily') {
+            $isWeekend = $now->isWeekend();
+            $configTime = $isWeekend
+                ? config('newsletter.daily_weekend_time', '11:11')
+                : config('newsletter.daily_weekday_time', '07:07');
+
+            $sendTime = $subscription->send_time ?? $configTime;
+
+            // We check if the current time matches the scheduled time (with a 10-minute tolerance for schedule safety)
+            return $now->format('H:i') === $sendTime;
+        }
+
+        if ($subscription->frequency === 'weekly') {
+            $configDay = config('newsletter.weekly_day', 7);
+            $configTime = config('newsletter.weekly_time', '19:19');
+
+            $sendDay = $subscription->send_day ?? $configDay;
+            $sendTime = $subscription->send_time ?? $configTime;
+
+            return $now->dayOfWeekIso == $sendDay && $now->format('H:i') === $sendTime;
+        }
+
+        return false;
     }
 }

@@ -17,6 +17,7 @@ it('sends daily newsletter with only new posts', function () {
     $subscription = NewsletterSubscription::factory()->create([
         'blog_id' => $blog->id,
         'frequency' => 'daily',
+        'send_time' => now()->format('H:i'),
     ]);
 
     // Post sent before
@@ -44,7 +45,7 @@ it('sends daily newsletter with only new posts', function () {
     ]);
 
     $this->artisan('newsletter:send daily')
-        ->expectsOutputToContain('Przetwarzanie 1 subskrypcji...')
+        ->expectsOutputToContain('Processing 1 subscriptions...')
         ->assertSuccessful();
 
     Mail::assertSent(NewsletterPostNotification::class, function ($mail) use ($subscription, $newPost) {
@@ -63,10 +64,11 @@ it('does not send newsletter if no new posts', function () {
     NewsletterSubscription::factory()->create([
         'blog_id' => $blog->id,
         'frequency' => 'daily',
+        'send_time' => now()->format('H:i'),
     ]);
 
     $this->artisan('newsletter:send daily')
-        ->expectsOutputToContain('Przetwarzanie 1 subskrypcji...')
+        ->expectsOutputToContain('Processing 1 subscriptions...')
         ->assertSuccessful();
 
     Mail::assertNothingSent();
@@ -79,6 +81,7 @@ it('filters posts by frequency', function () {
     $subscription = NewsletterSubscription::factory()->create([
         'blog_id' => $blog->id,
         'frequency' => 'daily',
+        'send_time' => now()->format('H:i'),
     ]);
 
     // Post older than a day

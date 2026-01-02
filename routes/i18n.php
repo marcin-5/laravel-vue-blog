@@ -35,6 +35,7 @@ Route::get('/lang/{locale}/{namespace}', function (string $locale, string $names
         'common',
         'contact',
         'dashboard',
+        'newsletter',
         'password',
         'profile',
         'welcome'

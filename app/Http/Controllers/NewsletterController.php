@@ -34,6 +34,7 @@ class NewsletterController extends BasePublicController
             'selectedBlogId' => $selectedBlogId,
             'userEmail' => $request->user()?->email,
             'mode' => 'subscribe',
+            'config' => config('newsletter'),
         ]);
     }
 
@@ -42,14 +43,16 @@ class NewsletterController extends BasePublicController
         $visitorId = $this->identityResolver->resolvedVisitorId($request);
         $data = $request->validated();
 
-        foreach ($data['blog_ids'] as $blogId) {
+        foreach ($data['subscriptions'] as $sub) {
             NewsletterSubscription::query()->updateOrCreate(
                 [
                     'email' => $data['email'],
-                    'blog_id' => $blogId,
+                    'blog_id' => $sub['blog_id'],
                 ],
                 [
-                    'frequency' => $data['frequency'],
+                    'frequency' => $sub['frequency'],
+                    'send_time' => $sub['send_time'] ?? null,
+                    'send_day' => $sub['send_day'] ?? null,
                     'visitor_id' => $visitorId,
                 ],
             );
@@ -60,7 +63,7 @@ class NewsletterController extends BasePublicController
 
     public function manage(Request $request): Response
     {
-        if (!$request->hasValidSignature()) {
+        if (!$request->hasValidSignature(false)) {
             abort(403, 'Link do zarządzania subskrypcją wygasł lub jest nieprawidłowy.');
         }
 
@@ -77,40 +80,49 @@ class NewsletterController extends BasePublicController
         return $this->renderWithTranslations('public/Newsletter', 'newsletter', [
             'blogs' => $blogs,
             'email' => $email,
-            'currentSubscriptions' => $subscriptions->pluck('blog_id'),
-            'frequency' => $subscriptions->first()?->frequency ?? 'daily',
-            'updateUrl' => URL::signedRoute('newsletter.update', ['email' => $email]),
-            'unsubscribeUrl' => URL::signedRoute('newsletter.unsubscribe', ['email' => $email]),
+            'currentSubscriptions' => $subscriptions->map(fn($s) => [
+                'blog_id' => $s->blog_id,
+                'frequency' => $s->frequency,
+                'send_time' => $s->send_time,
+                'send_day' => $s->send_day,
+            ]),
+            'updateUrl' => url(URL::signedRoute('newsletter.update', ['email' => $email], absolute: false)),
+            'unsubscribeUrl' => url(URL::signedRoute('newsletter.unsubscribe', ['email' => $email], absolute: false)),
             'mode' => 'manage',
+            'config' => config('newsletter'),
         ]);
     }
 
     public function update(StoreNewsletterSubscriptionRequest $request): RedirectResponse
     {
-        if (!$request->hasValidSignature()) {
+        if (!$request->hasValidSignature(false)) {
             abort(403);
         }
 
         $data = $request->validated();
         $email = $data['email'];
 
+        $blogIds = collect($data['subscriptions'])->pluck('blog_id');
+
         // Remove subscriptions not in the list
         NewsletterSubscription::query()
             ->where('email', $email)
-            ->whereNotIn('blog_id', $data['blog_ids'])
+            ->whereNotIn('blog_id', $blogIds)
             ->delete();
 
         $visitorId = $this->identityResolver->resolvedVisitorId($request);
 
         // Update or create subscriptions
-        foreach ($data['blog_ids'] as $blogId) {
+        foreach ($data['subscriptions'] as $sub) {
             NewsletterSubscription::query()->updateOrCreate(
                 [
                     'email' => $email,
-                    'blog_id' => $blogId,
+                    'blog_id' => $sub['blog_id'],
                 ],
                 [
-                    'frequency' => $data['frequency'],
+                    'frequency' => $sub['frequency'],
+                    'send_time' => $sub['send_time'] ?? null,
+                    'send_day' => $sub['send_day'] ?? null,
                     'visitor_id' => $visitorId,
                 ],
             );
@@ -121,7 +133,7 @@ class NewsletterController extends BasePublicController
 
     public function unsubscribe(Request $request): RedirectResponse
     {
-        if (!$request->hasValidSignature()) {
+        if (!$request->hasValidSignature(false)) {
             abort(403);
         }
 

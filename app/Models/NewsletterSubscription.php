@@ -16,6 +16,8 @@ class NewsletterSubscription extends Model
         'blog_id',
         'frequency',
         'visitor_id',
+        'send_time',
+        'send_day',
     ];
 
     public function blog(): BelongsTo

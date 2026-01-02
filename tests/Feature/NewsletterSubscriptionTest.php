@@ -38,8 +38,10 @@ test('can subscribe to newsletter', function () {
     $response = $this->withCookie('visitor_id', 'test-visitor')
         ->post(route('newsletter.store'), [
             'email' => 'test@example.com',
-            'blog_ids' => [$blog1->id, $blog2->id],
-            'frequency' => 'weekly',
+            'subscriptions' => [
+                ['blog_id' => $blog1->id, 'frequency' => 'weekly', 'send_time' => '12:00', 'send_day' => 1],
+                ['blog_id' => $blog2->id, 'frequency' => 'daily'],
+            ],
         ]);
 
     $response->assertRedirect();
@@ -50,17 +52,18 @@ test('can subscribe to newsletter', function () {
     $subscription = NewsletterSubscription::where('blog_id', $blog1->id)->first();
     expect($subscription->email)->toBe('test@example.com')
         ->and($subscription->frequency)->toBe('weekly')
+        ->and($subscription->send_time)->toBe('12:00')
+        ->and($subscription->send_day)->toBe(1)
         ->and($subscription->visitor_id)->toBe('test-visitor');
 });
 
 test('validates newsletter subscription request', function () {
     $response = $this->post(route('newsletter.store'), [
         'email' => 'invalid-email',
-        'blog_ids' => [],
-        'frequency' => 'invalid',
+        'subscriptions' => [],
     ]);
 
-    $response->assertSessionHasErrors(['email', 'blog_ids', 'frequency']);
+    $response->assertSessionHasErrors(['email', 'subscriptions']);
 });
 
 test('newsletter management page requires valid signature', function () {
@@ -75,9 +78,11 @@ test('newsletter management page renders with valid signature', function () {
         'email' => 'test@example.com',
         'blog_id' => $blog->id,
         'frequency' => 'weekly',
+        'send_time' => '19:19',
+        'send_day' => 7,
     ]);
 
-    $url = URL::signedRoute('newsletter.manage', ['email' => 'test@example.com']);
+    $url = url(URL::signedRoute('newsletter.manage', ['email' => 'test@example.com'], absolute: false));
 
     $response = $this->get($url);
 
@@ -86,9 +91,11 @@ test('newsletter management page renders with valid signature', function () {
         ->component('public/Newsletter')
         ->where('mode', 'manage')
         ->where('email', 'test@example.com')
-        ->where('frequency', 'weekly')
         ->has('currentSubscriptions', 1)
-        ->where('currentSubscriptions.0', $blog->id)
+        ->where('currentSubscriptions.0.blog_id', $blog->id)
+        ->where('currentSubscriptions.0.frequency', 'weekly')
+        ->where('currentSubscriptions.0.send_time', '19:19')
+        ->where('currentSubscriptions.0.send_day', 7)
         ->has('updateUrl')
         ->has('unsubscribeUrl'),
     );
@@ -103,14 +110,15 @@ test('can update newsletter subscriptions via management page', function () {
         'frequency' => 'daily',
     ]);
 
-    $url = URL::signedRoute('newsletter.manage', ['email' => 'test@example.com']);
+    $url = url(URL::signedRoute('newsletter.manage', ['email' => 'test@example.com'], absolute: false));
     $manageResponse = $this->get($url);
     $updateUrl = $manageResponse->inertiaPage()['props']['updateUrl'];
 
     $response = $this->post($updateUrl, [
         'email' => 'test@example.com',
-        'blog_ids' => [$blog2->id],
-        'frequency' => 'weekly',
+        'subscriptions' => [
+            ['blog_id' => $blog2->id, 'frequency' => 'weekly', 'send_time' => '10:00', 'send_day' => 2],
+        ],
     ]);
 
     $response->assertRedirect();
@@ -119,7 +127,9 @@ test('can update newsletter subscriptions via management page', function () {
     expect(NewsletterSubscription::where('email', 'test@example.com')->count())->toBe(1);
     $subscription = NewsletterSubscription::where('email', 'test@example.com')->first();
     expect($subscription->blog_id)->toBe($blog2->id)
-        ->and($subscription->frequency)->toBe('weekly');
+        ->and($subscription->frequency)->toBe('weekly')
+        ->and($subscription->send_time)->toBe('10:00')
+        ->and($subscription->send_day)->toBe(2);
 });
 
 test('can unsubscribe from all via management page', function () {
@@ -129,7 +139,7 @@ test('can unsubscribe from all via management page', function () {
         'blog_id' => $blog->id,
     ]);
 
-    $url = URL::signedRoute('newsletter.manage', ['email' => 'test@example.com']);
+    $url = url(URL::signedRoute('newsletter.manage', ['email' => 'test@example.com'], absolute: false));
     $manageResponse = $this->get($url);
     $unsubscribeUrl = $manageResponse->inertiaPage()['props']['unsubscribeUrl'];
 
