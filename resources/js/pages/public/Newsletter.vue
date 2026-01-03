@@ -39,7 +39,7 @@ const getInitialSub = (blogId: number) => {
             blog_id: blogId,
             selected: true,
             frequency: existing.frequency,
-            send_time: existing.send_time || props.config.weekly_time,
+            send_time: existing.send_time || (existing.frequency === 'daily' ? props.config.daily_weekday_time : props.config.weekly_time),
             send_day: existing.send_day || props.config.weekly_day,
         };
     }
@@ -164,7 +164,12 @@ const unsubscribe = () => {
                                 <tbody class="divide-y divide-border">
                                     <tr v-for="sub in newsletterForm.subscriptions" :key="sub.blog_id" class="hover:bg-muted/30">
                                         <td class="px-4 py-3">
-                                            <Checkbox :id="'blog-' + sub.blog_id" v-model:checked="sub.selected" class="text-primary" />
+                                            <Checkbox
+                                                :id="'blog-' + sub.blog_id"
+                                                :model-value="sub.selected"
+                                                class="text-primary"
+                                                @update:model-value="sub.selected = $event"
+                                            />
                                         </td>
                                         <td class="px-4 py-3 font-medium">
                                             <label :for="'blog-' + sub.blog_id" class="cursor-pointer">
@@ -182,8 +187,14 @@ const unsubscribe = () => {
                                             </select>
                                         </td>
                                         <td class="px-4 py-3">
-                                            <div v-if="sub.selected && sub.frequency === 'weekly'" class="flex items-center gap-2">
+                                            <div v-if="sub.selected" class="flex items-center gap-2">
+                                                <input
+                                                    v-model="sub.send_time"
+                                                    class="w-20 rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+                                                    type="time"
+                                                />
                                                 <select
+                                                    v-if="sub.frequency === 'weekly'"
                                                     v-model="sub.send_day"
                                                     class="rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
                                                 >
@@ -195,13 +206,8 @@ const unsubscribe = () => {
                                                     <option :value="6">{{ t.form.saturday }}</option>
                                                     <option :value="7">{{ t.form.sunday }}</option>
                                                 </select>
-                                                <input
-                                                    v-model="sub.send_time"
-                                                    class="w-20 rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
-                                                    type="time"
-                                                />
                                             </div>
-                                            <span v-else-if="sub.selected && sub.frequency === 'daily'" class="text-xs text-slate-500"> - </span>
+                                            <span v-else class="text-xs text-slate-500"> - </span>
                                         </td>
                                     </tr>
                                 </tbody>
