@@ -46,6 +46,7 @@ class SendNewsletter extends Command
 
         foreach ($groupedSubscriptions as $email => $userSubscriptions) {
             $data = collect();
+            $processedSubscriptions = collect();
 
             foreach ($userSubscriptions as $subscription) {
                 $posts = Post::query()
@@ -69,11 +70,18 @@ class SendNewsletter extends Command
                         'blog' => $subscription->blog,
                         'posts' => $posts,
                     ]);
+                    $processedSubscriptions->push($subscription);
                 }
             }
 
             if ($data->isNotEmpty()) {
                 dispatch(new SendNewsletterNotification($email, $data));
+
+                $sentAt = now();
+                foreach ($processedSubscriptions as $subscription) {
+                    $subscription->update(['last_sent_at' => $sentAt]);
+                }
+
                 $this->line("Consolidated newsletter queued for {$email} ({$data->count()} blogs).");
             }
         }
@@ -84,6 +92,10 @@ class SendNewsletter extends Command
     private function shouldSendNow(NewsletterSubscription $subscription): bool
     {
         $now = now();
+
+        if ($subscription->last_sent_at && $subscription->last_sent_at->isSameMinute($now)) {
+            return false;
+        }
 
         if ($subscription->frequency === 'daily') {
             $isWeekend = $now->isWeekend();

@@ -19,6 +19,7 @@ class NewsletterSubscription extends Model
         'send_time',
         'send_time_weekend',
         'send_day',
+        'last_sent_at',
     ];
 
     public function blog(): BelongsTo
@@ -29,5 +30,12 @@ class NewsletterSubscription extends Model
     public function newsletterLogs(): HasMany
     {
         return $this->hasMany(NewsletterLog::class, 'newsletter_subscription_id');
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'last_sent_at' => 'datetime',
+        ];
     }
 }
