@@ -64,22 +64,22 @@ const hasSelectedBlogs = computed(() => newsletterForm.subscriptions.some((s) =>
 
 const { toast } = useToast();
 
+const t = computed(() => props.translations.messages);
+
 const submitUrl = computed(() => (isManageMode.value ? props.updateUrl! : route('newsletter.store')));
 const submitText = computed(() =>
     isManageMode.value
         ? newsletterForm.processing
-            ? props.translations.form.submitting
-            : props.translations.form.submit_manage
+            ? t.value.form.submitting
+            : t.value.form.submit_manage
         : newsletterForm.processing
-          ? props.translations.form.submitting
-          : props.translations.form.submit_subscribe,
+          ? t.value.form.submitting
+          : t.value.form.submit_subscribe,
 );
-const title = computed(() => (isManageMode.value ? props.translations.title.manage : props.translations.title.subscribe));
-const desc = computed(() =>
-    isManageMode.value ? props.translations.description.manage.replace('{email}', displayEmail.value) : props.translations.description.subscribe,
-);
-const blogLabel = computed(() => props.translations.form.blog_label);
-const successDesc = computed(() => (isManageMode.value ? props.translations.messages.success_manage : props.translations.messages.success_subscribe));
+const title = computed(() => (isManageMode.value ? t.value.title.manage : t.value.title.subscribe));
+const desc = computed(() => (isManageMode.value ? t.value.description.manage.replace('{email}', displayEmail.value) : t.value.description.subscribe));
+const blogLabel = computed(() => t.value.form.blog_label);
+const successDesc = computed(() => (isManageMode.value ? t.value.messages.success_manage : t.value.messages.success_subscribe));
 
 const submit = () => {
     if (hasSelectedBlogs.value || isManageMode.value) {
@@ -93,7 +93,7 @@ const submit = () => {
             onSuccess: () => {
                 newsletterForm.subscriptions = originalSubscriptions;
                 toast({
-                    title: props.translations.messages.success_title,
+                    title: t.value.messages.success_title,
                     description: successDesc.value,
                     variant: 'success',
                     size: 'sm',
@@ -102,8 +102,8 @@ const submit = () => {
             onError: () => {
                 newsletterForm.subscriptions = originalSubscriptions;
                 toast({
-                    title: props.translations.messages.error_title,
-                    description: isManageMode.value ? props.translations.messages.error_manage : props.translations.messages.error_subscribe,
+                    title: t.value.messages.error_title,
+                    description: isManageMode.value ? t.value.messages.error_manage : t.value.messages.error_subscribe,
                     variant: 'destructive',
                     size: 'sm',
                 });
@@ -113,12 +113,12 @@ const submit = () => {
 };
 
 const unsubscribe = () => {
-    if (confirm(props.translations.form.unsubscribe_confirm)) {
+    if (confirm(t.value.form.unsubscribe_confirm)) {
         unsubscribeForm.post(props.unsubscribeUrl!, {
             onSuccess: () => {
                 toast({
-                    title: props.translations.messages.unsubscribed_title,
-                    description: props.translations.messages.unsubscribed,
+                    title: t.value.messages.unsubscribed_title,
+                    description: t.value.messages.unsubscribed,
                     variant: 'success',
                     size: 'sm',
                 });
@@ -143,7 +143,7 @@ const unsubscribe = () => {
                 <form class="space-y-8" @submit.prevent="submit">
                     <!-- Email sekcja tylko w subscribe -->
                     <div v-if="!isManageMode" class="space-y-2">
-                        <Label class="text-slate-700 dark:text-slate-300" for="email">{{ translations.form.email_label }}</Label>
+                        <Label class="text-slate-700 dark:text-slate-300" for="email">{{ t.form.email_label }}</Label>
                         <Input id="email" v-model="newsletterForm.email" placeholder="email@example.com" required type="email" />
                         <p v-if="newsletterForm.errors.email" class="text-sm text-error">{{ newsletterForm.errors.email }}</p>
                     </div>
@@ -156,9 +156,9 @@ const unsubscribe = () => {
                                 <thead class="border-b border-border bg-muted/50 text-xs text-slate-500 uppercase dark:text-slate-400">
                                     <tr>
                                         <th class="px-4 py-3 font-medium"></th>
-                                        <th class="px-4 py-3 font-medium">{{ translations.form.blog_name }}</th>
-                                        <th class="px-4 py-3 font-medium">{{ translations.form.frequency }}</th>
-                                        <th class="px-4 py-3 font-medium">{{ translations.form.schedule }}</th>
+                                        <th class="px-4 py-3 font-medium">{{ t.form.blog_name }}</th>
+                                        <th class="px-4 py-3 font-medium">{{ t.form.frequency }}</th>
+                                        <th class="px-4 py-3 font-medium">{{ t.form.schedule }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-border">
@@ -177,8 +177,8 @@ const unsubscribe = () => {
                                                 :disabled="!sub.selected"
                                                 class="rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:opacity-50"
                                             >
-                                                <option value="daily">{{ translations.form.daily }}</option>
-                                                <option value="weekly">{{ translations.form.weekly }}</option>
+                                                <option value="daily">{{ t.form.daily }}</option>
+                                                <option value="weekly">{{ t.form.weekly }}</option>
                                             </select>
                                         </td>
                                         <td class="px-4 py-3">
@@ -187,13 +187,13 @@ const unsubscribe = () => {
                                                     v-model="sub.send_day"
                                                     class="rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
                                                 >
-                                                    <option :value="1">{{ translations.form.monday }}</option>
-                                                    <option :value="2">{{ translations.form.tuesday }}</option>
-                                                    <option :value="3">{{ translations.form.wednesday }}</option>
-                                                    <option :value="4">{{ translations.form.thursday }}</option>
-                                                    <option :value="5">{{ translations.form.friday }}</option>
-                                                    <option :value="6">{{ translations.form.saturday }}</option>
-                                                    <option :value="7">{{ translations.form.sunday }}</option>
+                                                    <option :value="1">{{ t.form.monday }}</option>
+                                                    <option :value="2">{{ t.form.tuesday }}</option>
+                                                    <option :value="3">{{ t.form.wednesday }}</option>
+                                                    <option :value="4">{{ t.form.thursday }}</option>
+                                                    <option :value="5">{{ t.form.friday }}</option>
+                                                    <option :value="6">{{ t.form.saturday }}</option>
+                                                    <option :value="7">{{ t.form.sunday }}</option>
                                                 </select>
                                                 <input
                                                     v-model="sub.send_time"
@@ -227,7 +227,7 @@ const unsubscribe = () => {
                             variant="ghost"
                             @click="unsubscribe"
                         >
-                            {{ translations.form.unsubscribe }}
+                            {{ t.form.unsubscribe }}
                         </Button>
                     </div>
                 </form>

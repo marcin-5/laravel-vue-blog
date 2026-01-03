@@ -13,6 +13,7 @@ return [
         'dashboard' => ['app', 'common'],
         'profile' => ['app', 'common'],
         'stats' => ['app', 'common'],
+        'newsletter' => ['newsletter', 'common'],
     ],
 
     // When true, also merge base messages from resources/lang/{locale}.json
