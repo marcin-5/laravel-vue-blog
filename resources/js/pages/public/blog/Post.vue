@@ -89,7 +89,7 @@ const navbarMaxWidth = computed(() => (hasSidebar.value ? 'max-w-screen-lg xl:ma
 </script>
 
 <template>
-    <div class="flex min-h-screen flex-col bg-[#FDFDFC] text-[#1b1b18] dark:bg-[#0a0a0a]">
+    <div class="flex min-h-screen flex-col bg-background text-primary">
         <PublicNavbar :maxWidth="navbarMaxWidth" />
 
         <div
