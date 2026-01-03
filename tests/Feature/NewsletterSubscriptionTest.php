@@ -82,7 +82,7 @@ test('newsletter management page renders with valid signature', function () {
         'send_day' => 7,
     ]);
 
-    $url = url(URL::signedRoute('newsletter.manage', ['email' => 'test@example.com'], absolute: false));
+    $url = URL::signedRoute('newsletter.manage', ['email' => 'test@example.com']);
 
     $response = $this->get($url);
 
@@ -110,7 +110,7 @@ test('can update newsletter subscriptions via management page', function () {
         'frequency' => 'daily',
     ]);
 
-    $url = url(URL::signedRoute('newsletter.manage', ['email' => 'test@example.com'], absolute: false));
+    $url = URL::signedRoute('newsletter.manage', ['email' => 'test@example.com']);
     $manageResponse = $this->get($url);
     $updateUrl = $manageResponse->inertiaPage()['props']['updateUrl'];
 
@@ -139,7 +139,7 @@ test('can unsubscribe from all via management page', function () {
         'blog_id' => $blog->id,
     ]);
 
-    $url = url(URL::signedRoute('newsletter.manage', ['email' => 'test@example.com'], absolute: false));
+    $url = URL::signedRoute('newsletter.manage', ['email' => 'test@example.com']);
     $manageResponse = $this->get($url);
     $unsubscribeUrl = $manageResponse->inertiaPage()['props']['unsubscribeUrl'];
 

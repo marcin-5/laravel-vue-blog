@@ -18,7 +18,13 @@ const props = defineProps<{
     userEmail?: string;
     // manage
     email?: string;
-    currentSubscriptions?: Array<{ blog_id: number; frequency: string; send_time: string | null; send_day: number | null }>;
+    currentSubscriptions?: Array<{
+        blog_id: number;
+        frequency: string;
+        send_time: string | null;
+        send_time_weekend: string | null;
+        send_day: number | null;
+    }>;
     updateUrl?: string;
     unsubscribeUrl?: string;
     config: {
@@ -40,6 +46,7 @@ const getInitialSub = (blogId: number) => {
             selected: true,
             frequency: existing.frequency,
             send_time: existing.send_time || (existing.frequency === 'daily' ? props.config.daily_weekday_time : props.config.weekly_time),
+            send_time_weekend: existing.send_time_weekend || (existing.frequency === 'daily' ? props.config.daily_weekend_time : null),
             send_day: existing.send_day || props.config.weekly_day,
         };
     }
@@ -49,6 +56,7 @@ const getInitialSub = (blogId: number) => {
         selected: !!isInitiallySelected,
         frequency: 'weekly',
         send_time: props.config.weekly_time,
+        send_time_weekend: null,
         send_day: props.config.weekly_day,
     };
 };
@@ -181,31 +189,58 @@ const unsubscribe = () => {
                                                 v-model="sub.frequency"
                                                 :disabled="!sub.selected"
                                                 class="rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:opacity-50"
+                                                @change="
+                                                    sub.frequency === 'daily' && !sub.send_time_weekend
+                                                        ? (sub.send_time_weekend = props.config.daily_weekend_time)
+                                                        : null
+                                                "
                                             >
                                                 <option value="daily">{{ t.form.daily }}</option>
                                                 <option value="weekly">{{ t.form.weekly }}</option>
                                             </select>
                                         </td>
                                         <td class="px-4 py-3">
-                                            <div v-if="sub.selected" class="flex items-center gap-2">
-                                                <input
-                                                    v-model="sub.send_time"
-                                                    class="w-20 rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
-                                                    type="time"
-                                                />
-                                                <select
-                                                    v-if="sub.frequency === 'weekly'"
-                                                    v-model="sub.send_day"
-                                                    class="rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
-                                                >
-                                                    <option :value="1">{{ t.form.monday }}</option>
-                                                    <option :value="2">{{ t.form.tuesday }}</option>
-                                                    <option :value="3">{{ t.form.wednesday }}</option>
-                                                    <option :value="4">{{ t.form.thursday }}</option>
-                                                    <option :value="5">{{ t.form.friday }}</option>
-                                                    <option :value="6">{{ t.form.saturday }}</option>
-                                                    <option :value="7">{{ t.form.sunday }}</option>
-                                                </select>
+                                            <div v-if="sub.selected" class="flex flex-col gap-2">
+                                                <!-- Daily schedule -->
+                                                <template v-if="sub.frequency === 'daily'">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="w-24 text-xs text-slate-500">{{ t.form.weekday }}:</span>
+                                                        <input
+                                                            v-model="sub.send_time"
+                                                            class="w-20 rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+                                                            type="time"
+                                                        />
+                                                    </div>
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="w-24 text-xs text-slate-500">{{ t.form.weekend }}:</span>
+                                                        <input
+                                                            v-model="sub.send_time_weekend"
+                                                            class="w-20 rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+                                                            type="time"
+                                                        />
+                                                    </div>
+                                                </template>
+
+                                                <!-- Weekly schedule -->
+                                                <div v-if="sub.frequency === 'weekly'" class="flex items-center gap-2">
+                                                    <input
+                                                        v-model="sub.send_time"
+                                                        class="w-20 rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+                                                        type="time"
+                                                    />
+                                                    <select
+                                                        v-model="sub.send_day"
+                                                        class="rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+                                                    >
+                                                        <option :value="1">{{ t.form.monday }}</option>
+                                                        <option :value="2">{{ t.form.tuesday }}</option>
+                                                        <option :value="3">{{ t.form.wednesday }}</option>
+                                                        <option :value="4">{{ t.form.thursday }}</option>
+                                                        <option :value="5">{{ t.form.friday }}</option>
+                                                        <option :value="6">{{ t.form.saturday }}</option>
+                                                        <option :value="7">{{ t.form.sunday }}</option>
+                                                    </select>
+                                                </div>
                                             </div>
                                             <span v-else class="text-xs text-slate-500"> - </span>
                                         </td>

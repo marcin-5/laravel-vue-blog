@@ -17,6 +17,7 @@ class NewsletterSubscription extends Model
         'frequency',
         'visitor_id',
         'send_time',
+        'send_time_weekend',
         'send_day',
     ];
 

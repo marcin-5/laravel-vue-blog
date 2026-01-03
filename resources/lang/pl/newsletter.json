@@ -19,6 +19,8 @@
         "unsubscribe": "Zrezygnuj z subskrypcji",
         "unsubscribe_confirm": "Czy na pewno chcesz zrezygnować z subskrypcji wszystkich blogów?",
         "daily": "Codziennie",
+        "weekday": "W dni robocze",
+        "weekend": "W weekendy",
         "weekly": "Tygodniowo",
         "monday": "Poniedziałek",
         "tuesday": "Wtorek",

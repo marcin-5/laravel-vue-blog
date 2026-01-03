@@ -19,6 +19,8 @@
         "unsubscribe": "Unsubscribe",
         "unsubscribe_confirm": "Are you sure you want to unsubscribe from all blogs?",
         "daily": "Daily",
+        "weekday": "Weekdays",
+        "weekend": "Weekends",
         "weekly": "Weekly",
         "monday": "Monday",
         "tuesday": "Tuesday",

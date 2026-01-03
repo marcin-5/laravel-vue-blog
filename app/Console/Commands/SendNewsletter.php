@@ -40,17 +40,14 @@ class SendNewsletter extends Command
 
         $this->info("Processing {$subscriptions->count()} subscriptions...");
 
-        $groupedSubscriptions = $subscriptions->groupBy('email');
+        $activeSubscriptions = $subscriptions->filter(fn($subscription) => $this->shouldSendNow($subscription));
+
+        $groupedSubscriptions = $activeSubscriptions->groupBy('email');
 
         foreach ($groupedSubscriptions as $email => $userSubscriptions) {
             $data = collect();
 
             foreach ($userSubscriptions as $subscription) {
-                // Check if it is time to ship for this subscription
-                if (!$this->shouldSendNow($subscription)) {
-                    continue;
-                }
-
                 $posts = Post::query()
                     ->where('blog_id', $subscription->blog_id)
                     ->forPublicView()
@@ -90,13 +87,15 @@ class SendNewsletter extends Command
 
         if ($subscription->frequency === 'daily') {
             $isWeekend = $now->isWeekend();
-            $configTime = $isWeekend
-                ? config('newsletter.daily_weekend_time', '11:11')
-                : config('newsletter.daily_weekday_time', '07:07');
 
-            $sendTime = $subscription->send_time ?? $configTime;
+            if ($isWeekend) {
+                $configTime = config('newsletter.daily_weekend_time', '11:11');
+                $sendTime = $subscription->send_time_weekend ?? $configTime;
+            } else {
+                $configTime = config('newsletter.daily_weekday_time', '07:07');
+                $sendTime = $subscription->send_time ?? $configTime;
+            }
 
-            // We check if the current time matches the scheduled time (with a 10-minute tolerance for schedule safety)
             return $now->format('H:i') === $sendTime;
         }
 

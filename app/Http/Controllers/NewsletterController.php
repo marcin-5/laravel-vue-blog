@@ -52,6 +52,7 @@ class NewsletterController extends BasePublicController
                 [
                     'frequency' => $sub['frequency'],
                     'send_time' => $sub['send_time'] ?? null,
+                    'send_time_weekend' => $sub['send_time_weekend'] ?? null,
                     'send_day' => $sub['send_day'] ?? null,
                     'visitor_id' => $visitorId,
                 ],
@@ -63,7 +64,7 @@ class NewsletterController extends BasePublicController
 
     public function manage(Request $request): Response
     {
-        if (!$request->hasValidSignature(false)) {
+        if (!$request->hasValidSignature()) {
             abort(403, 'Link do zarządzania subskrypcją wygasł lub jest nieprawidłowy.');
         }
 
@@ -84,10 +85,11 @@ class NewsletterController extends BasePublicController
                 'blog_id' => $s->blog_id,
                 'frequency' => $s->frequency,
                 'send_time' => $s->send_time,
+                'send_time_weekend' => $s->send_time_weekend,
                 'send_day' => $s->send_day,
             ]),
-            'updateUrl' => url(URL::signedRoute('newsletter.update', ['email' => $email], absolute: false)),
-            'unsubscribeUrl' => url(URL::signedRoute('newsletter.unsubscribe', ['email' => $email], absolute: false)),
+            'updateUrl' => URL::signedRoute('newsletter.update', ['email' => $email]),
+            'unsubscribeUrl' => URL::signedRoute('newsletter.unsubscribe', ['email' => $email]),
             'mode' => 'manage',
             'config' => config('newsletter'),
         ]);
@@ -95,7 +97,7 @@ class NewsletterController extends BasePublicController
 
     public function update(StoreNewsletterSubscriptionRequest $request): RedirectResponse
     {
-        if (!$request->hasValidSignature(false)) {
+        if (!$request->hasValidSignature()) {
             abort(403);
         }
 
@@ -122,6 +124,7 @@ class NewsletterController extends BasePublicController
                 [
                     'frequency' => $sub['frequency'],
                     'send_time' => $sub['send_time'] ?? null,
+                    'send_time_weekend' => $sub['send_time_weekend'] ?? null,
                     'send_day' => $sub['send_day'] ?? null,
                     'visitor_id' => $visitorId,
                 ],
@@ -133,7 +136,7 @@ class NewsletterController extends BasePublicController
 
     public function unsubscribe(Request $request): RedirectResponse
     {
-        if (!$request->hasValidSignature(false)) {
+        if (!$request->hasValidSignature()) {
             abort(403);
         }
 

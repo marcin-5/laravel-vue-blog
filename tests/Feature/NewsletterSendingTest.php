@@ -18,6 +18,7 @@ it('sends daily newsletter with only new posts', function () {
         'blog_id' => $blog->id,
         'frequency' => 'daily',
         'send_time' => now()->format('H:i'),
+        'send_time_weekend' => now()->format('H:i'),
     ]);
 
     // Post sent before
@@ -90,8 +91,52 @@ it('filters posts by frequency', function () {
         'published_at' => now()->subDays(2),
     ]);
 
+    Mail::assertNothingSent();
+});
+
+it('does not send duplicate emails when user has multiple subscriptions for the same time', function () {
+    Mail::fake();
+
+    $email = 'duplicate@example.com';
+    $now = now();
+    $time = $now->format('H:i');
+
+    $blog1 = Blog::factory()->create(['name' => 'Blog 1']);
+    $blog2 = Blog::factory()->create(['name' => 'Blog 2']);
+
+    NewsletterSubscription::factory()->create([
+        'email' => $email,
+        'blog_id' => $blog1->id,
+        'frequency' => 'daily',
+        'send_time' => $time,
+        'send_time_weekend' => $time,
+    ]);
+
+    NewsletterSubscription::factory()->create([
+        'email' => $email,
+        'blog_id' => $blog2->id,
+        'frequency' => 'daily',
+        'send_time' => $time,
+        'send_time_weekend' => $time,
+    ]);
+
+    Post::factory()->create([
+        'blog_id' => $blog1->id,
+        'published_at' => $now->copy()->subMinutes(10),
+    ]);
+
+    Post::factory()->create([
+        'blog_id' => $blog2->id,
+        'published_at' => $now->copy()->subMinutes(10),
+    ]);
+
     $this->artisan('newsletter:send daily')
         ->assertSuccessful();
 
-    Mail::assertNothingSent();
+    // Assert that only ONE email was sent to this address
+    Mail::assertSent(NewsletterPostNotification::class, 1);
+
+    Mail::assertSent(NewsletterPostNotification::class, function ($mail) use ($email) {
+        return $mail->hasTo($email) && $mail->data->count() === 2;
+    });
 });
