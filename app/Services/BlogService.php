@@ -28,6 +28,7 @@ class BlogService
                 'locale',
                 'sidebar',
                 'page_size',
+                'theme',
                 'created_at'
             ]);
     }
