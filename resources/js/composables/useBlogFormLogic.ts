@@ -1,65 +1,28 @@
-import type { AdminBlog as Blog, BlogFormData, UseBlogFormLogicOptions } from '@/types/blog.types';
+import type { BlogFormData, UseBlogFormLogicOptions } from '@/types/blog.types';
 import { useForm } from '@inertiajs/vue3';
 import { computed, watch } from 'vue';
+import { createFormDataFromBlog, ensureThemeStructure, populateFormFromBlog } from './blogFormUtils';
 
 export function useBlogFormLogic(options: UseBlogFormLogicOptions = {}) {
     const { isEdit = false, externalForm } = options;
 
-    const form =
-        externalForm ||
-        useForm<BlogFormData>({
-            name: options.blog?.name || '',
-            description: options.blog?.description || null,
-            footer: options.blog?.footer || null,
-            motto: options.blog?.motto || null,
-            is_published: options.blog?.is_published || false,
-            locale: (options.blog?.locale as string) || 'en',
-            sidebar: (options.blog?.sidebar as number) ?? 0,
-            page_size: (options.blog?.page_size as number) ?? 10,
-            categories: (options.blog?.categories ?? []).map((c) => c.id) as number[],
-            theme: options.blog?.theme ?? null,
-        });
+    const form = externalForm || useForm<BlogFormData>(createFormDataFromBlog(options.blog));
 
     const fieldIdPrefix = computed(() => {
         const base = isEdit ? 'edit-blog' : 'create-blog';
-        const suffix = options.blog?.id || 'new';
+        const suffix = options.blog?.id ?? 'new';
         return `${base}-${suffix}`;
     });
 
-    const updateFormFromBlog = (newBlog: Blog) => {
-        form.name = newBlog.name;
-        form.description = newBlog.description;
-        form.footer = newBlog.footer ?? null;
-        form.motto = newBlog.motto ?? null;
-        form.is_published = newBlog.is_published;
-        form.locale = (newBlog.locale as string) || 'en';
-        form.sidebar = (newBlog.sidebar as number) ?? 0;
-        form.page_size = (newBlog.page_size as number) ?? 10;
-        form.categories = (newBlog.categories ?? []).map((c) => c.id);
-        form.theme = newBlog.theme ?? null;
-        if (!form.theme) {
-            // Ensure objects exist for binding
-            (form as any).theme = { light: {}, dark: {} };
-        } else {
-            (form as any).theme.light = (form as any).theme.light ?? {};
-            (form as any).theme.dark = (form as any).theme.dark ?? {};
-        }
-    };
-
     // Ensure theme structure exists for new forms
-    if (!form.theme) {
-        (form as any).theme = { light: {}, dark: {} };
-    } else {
-        (form as any).theme.light = (form as any).theme.light ?? {};
-        (form as any).theme.dark = (form as any).theme.dark ?? {};
-    }
+    form.theme = ensureThemeStructure(form.theme);
 
     if (!externalForm) {
         watch(
             () => options.blog,
             (newBlog) => {
                 if (newBlog) {
-                    updateFormFromBlog(newBlog);
+                    populateFormFromBlog(form, newBlog);
                 }
             },
             { immediate: true },
@@ -73,7 +36,6 @@ export function useBlogFormLogic(options: UseBlogFormLogicOptions = {}) {
     return {
         form,
         fieldIdPrefix,
-        updateFormFromBlog,
         updateCategories,
     };
 }
