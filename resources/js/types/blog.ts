@@ -1,3 +1,5 @@
+import type { CategoryItem } from './blog.types';
+
 // Constants
 export const SIDEBAR_MIN_WIDTH = 0;
 export const SIDEBAR_MAX_WIDTH = 50;
@@ -9,8 +11,6 @@ export const FIXED_SIDEBAR_WIDTH = 280;
 export function stripHtmlTags(html: string): string {
     return html.replace(/<[^>]*>/g, '');
 }
-
-import type { CategoryItem } from './blog.types';
 
 export function getCategoryDisplayName(category: CategoryItem): string {
     return typeof category.name === 'string' ? category.name : '';

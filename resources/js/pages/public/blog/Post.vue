@@ -4,13 +4,13 @@ import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import PostContent from '@/components/blog/PostContent.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
-import { useAppearance } from '@/composables/useAppearance';
+import { useBlogTheme } from '@/composables/useBlogTheme';
 import { useSidebarLayout } from '@/composables/useSidebarLayout';
 import type { SEO } from '@/types';
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { Blog, Navigation, Pagination, PostDetails, PostItem } from '@/types/blog.types';
+import { formatDate, shouldShowUpdatedDate } from '@/utils/dateUtils';
 import { Link } from '@inertiajs/vue3';
-import { useMediaQuery } from '@vueuse/core';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -30,41 +30,6 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-
-// Constants
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-
-// Helper functions
-function isValidDate(dateString: string | null | undefined): boolean {
-    if (!dateString) return false;
-    const date = new Date(dateString);
-    return !isNaN(date.getTime());
-}
-
-function formatDate(dateString: string | null | undefined, locale?: string): string {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return String(dateString);
-
-    try {
-        return new Intl.DateTimeFormat(locale || undefined, {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-        }).format(date);
-    } catch {
-        return date.toLocaleDateString();
-    }
-}
-
-function shouldShowUpdatedDate(publishedTime: string | null | undefined, modifiedTime: string | null | undefined): boolean {
-    if (!isValidDate(publishedTime) || !isValidDate(modifiedTime)) return false;
-
-    const published = new Date(publishedTime!);
-    const modified = new Date(modifiedTime!);
-
-    return Math.abs(modified.getTime() - published.getTime()) > ONE_DAY_MS;
-}
 
 // Internationalization
 const authorLabel = computed(() => t('blog.post.author', ''));
@@ -89,15 +54,8 @@ const { hasSidebar, isLeftSidebar, isRightSidebar, asideStyle, mainStyle } = use
 // Navbar max-width class based on sidebar layout
 const navbarMaxWidth = computed(() => (hasSidebar.value ? 'max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl' : 'max-w-screen-lg'));
 
-// Theme handling based on ThemeToggle state
-const { appearance } = useAppearance();
-const isSystemDark = useMediaQuery('(prefers-color-scheme: dark)');
-const isDark = computed(() => appearance.value === 'dark' || (appearance.value === 'system' && isSystemDark.value));
-const lightThemeStyle = computed(() => props.blog.theme?.light ?? {});
-const darkThemeStyle = computed(() => props.blog.theme?.dark ?? {});
-const mergedThemeStyle = computed<Record<string, string>>(() => {
-    return isDark.value ? { ...lightThemeStyle.value, ...darkThemeStyle.value } : { ...lightThemeStyle.value };
-});
+// Theme handling
+const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
 </script>
 
 <template>

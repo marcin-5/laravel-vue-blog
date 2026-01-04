@@ -5,13 +5,12 @@ import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
-import { useAppearance } from '@/composables/useAppearance';
+import { useBlogTheme } from '@/composables/useBlogTheme';
 import { useSidebarLayout } from '@/composables/useSidebarLayout';
 import { hasContent } from '@/lib/utils';
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { Blog, Navigation, Pagination, PostItem } from '@/types/blog.types';
 import { Link } from '@inertiajs/vue3';
-import { useMediaQuery } from '@vueuse/core';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -64,15 +63,8 @@ const {
 // Navbar max-width class based on sidebar layout
 const navbarMaxWidth = computed(() => (hasSidebarLayout.value ? 'max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl' : 'max-w-screen-lg'));
 
-// Theme handling based on ThemeToggle state
-const { appearance } = useAppearance();
-const isSystemDark = useMediaQuery('(prefers-color-scheme: dark)');
-const isDark = computed(() => appearance.value === 'dark' || (appearance.value === 'system' && isSystemDark.value));
-const lightThemeStyle = computed(() => props.blog.theme?.light ?? {});
-const darkThemeStyle = computed(() => props.blog.theme?.dark ?? {});
-const mergedThemeStyle = computed<Record<string, string>>(() => {
-    return isDark.value ? { ...lightThemeStyle.value, ...darkThemeStyle.value } : { ...lightThemeStyle.value };
-});
+// Theme handling
+const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
 </script>
 
 <template>

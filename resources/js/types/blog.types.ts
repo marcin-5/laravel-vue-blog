@@ -8,6 +8,8 @@ export type BlogTheme = {
     dark?: Record<string, string>;
 };
 
+export type ThemeColors = Record<string, string>;
+
 export interface Blog {
     id: number;
     name: string;
