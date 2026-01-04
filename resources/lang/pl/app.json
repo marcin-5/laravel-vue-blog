@@ -170,7 +170,7 @@
             "saving_button": "Zapisywanie…",
             "creating_button": "Tworzenie…",
             "theme_title": "Motyw",
-            "theme_description": "Zdefiniuj zmienne kolorów CSS dla poszczególnych blogów. Pozostaw puste, aby użyć domyślnych ustawień aplikacji. Wartości powinny być prawidłowymi kolorami CSS (np. #ffffff lub hsl()).",
+            "theme_description": "Zdefiniuj zmienne kolorów CSS dla tego bloga. Pozostaw puste, aby użyć domyślnych ustawień aplikacji. Wartości powinny być prawidłowymi kolorami CSS (np. #ffffff lub hsl()).",
             "theme_light": "Jasny",
             "theme_dark": "Ciemny",
             "theme_advanced_hint": "Zaawansowane: możesz dodać dowolne inne zmienne CSS używane przez aplikację (np. --accent, --muted, --border), edytując dane JSON przez API.",

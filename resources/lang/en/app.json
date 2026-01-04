@@ -170,7 +170,7 @@
             "saving_button": "Saving…",
             "creating_button": "Creating…",
             "theme_title": "Theme",
-            "theme_description": "Define per-blog CSS color variables. Leave empty to use application defaults. Values should be valid CSS colors (e.g., #ffffff or hsl()).",
+            "theme_description": "Define CSS color variables for this blog. Leave empty to use application defaults. Values should be valid CSS colors (e.g., #ffffff or hsl()).",
             "theme_light": "Light",
             "theme_dark": "Dark",
             "theme_advanced_hint": "Advanced: you may add any other CSS variables used by the app (e.g., --accent, --muted, --border) by editing JSON payload via API.",
