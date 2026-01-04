@@ -5,11 +5,13 @@ import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
+import { useAppearance } from '@/composables/useAppearance';
 import { useSidebarLayout } from '@/composables/useSidebarLayout';
 import { hasContent } from '@/lib/utils';
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { Blog, Navigation, Pagination, PostItem } from '@/types/blog.types';
 import { Link } from '@inertiajs/vue3';
+import { useMediaQuery } from '@vueuse/core';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -61,10 +63,20 @@ const {
 
 // Navbar max-width class based on sidebar layout
 const navbarMaxWidth = computed(() => (hasSidebarLayout.value ? 'max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl' : 'max-w-screen-lg'));
+
+// Theme handling based on ThemeToggle state
+const { appearance } = useAppearance();
+const isSystemDark = useMediaQuery('(prefers-color-scheme: dark)');
+const isDark = computed(() => appearance.value === 'dark' || (appearance.value === 'system' && isSystemDark.value));
+const lightThemeStyle = computed(() => props.blog.theme?.light ?? {});
+const darkThemeStyle = computed(() => props.blog.theme?.dark ?? {});
+const mergedThemeStyle = computed<Record<string, string>>(() => {
+    return isDark.value ? { ...lightThemeStyle.value, ...darkThemeStyle.value } : { ...lightThemeStyle.value };
+});
 </script>
 
 <template>
-    <div class="flex min-h-screen flex-col bg-background text-primary">
+    <div :style="mergedThemeStyle" class="flex min-h-screen flex-col bg-background text-foreground">
         <PublicNavbar :maxWidth="navbarMaxWidth" />
         <div
             :class="[
@@ -110,10 +122,7 @@ const navbarMaxWidth = computed(() => (hasSidebarLayout.value ? 'max-w-screen-lg
 
             <!-- Navigation at bottom -->
             <div class="mt-8 flex justify-center">
-                <Link
-                    :href="route('newsletter.index', { blog_id: blog.id })"
-                    class="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
-                >
+                <Link :href="route('newsletter.index', { blog_id: blog.id })" class="text-sm font-medium text-muted-foreground hover:text-foreground">
                     Zapisz się do newslettera
                 </Link>
             </div>

@@ -255,6 +255,142 @@ function handleFooterInput() {
                 />
             </div>
 
+            <!-- Theme editor (per-blog colors) -->
+            <div class="mt-4 rounded-md border border-border p-4">
+                <h3 class="mb-3 text-lg font-semibold">Theme</h3>
+                <p class="mb-3 text-sm text-muted-foreground">
+                    Define per-blog CSS color variables. Leave empty to use application defaults. Values should be valid CSS colors (e.g., #ffffff or
+                    hsl()).
+                </p>
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                        <h4 class="mb-2 text-sm font-medium opacity-80">Light</h4>
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <PostFormField :id="`${fieldIdPrefix}-theme-light-background`" :error="form.errors['theme.light']" label="--background">
+                                <input
+                                    v-model="form.theme.light['--background']"
+                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
+                                    placeholder="#ffffff"
+                                    type="text"
+                                />
+                            </PostFormField>
+                            <PostFormField :id="`${fieldIdPrefix}-theme-light-foreground`" :error="form.errors['theme.light']" label="--foreground">
+                                <input
+                                    v-model="form.theme.light['--foreground']"
+                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
+                                    placeholder="#0a0a0a"
+                                    type="text"
+                                />
+                            </PostFormField>
+                            <PostFormField :id="`${fieldIdPrefix}-theme-light-primary`" :error="form.errors['theme.light']" label="--primary">
+                                <input
+                                    v-model="form.theme.light['--primary']"
+                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
+                                    placeholder="#111111"
+                                    type="text"
+                                />
+                            </PostFormField>
+                            <PostFormField
+                                :id="`${fieldIdPrefix}-theme-light-primary-fg`"
+                                :error="form.errors['theme.light']"
+                                label="--primary-foreground"
+                            >
+                                <input
+                                    v-model="form.theme.light['--primary-foreground']"
+                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
+                                    placeholder="#fafafa"
+                                    type="text"
+                                />
+                            </PostFormField>
+                            <PostFormField :id="`${fieldIdPrefix}-theme-light-secondary`" :error="form.errors['theme.light']" label="--secondary">
+                                <input
+                                    v-model="form.theme.light['--secondary']"
+                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
+                                    placeholder="#ececec"
+                                    type="text"
+                                />
+                            </PostFormField>
+                            <PostFormField
+                                :id="`${fieldIdPrefix}-theme-light-secondary-fg`"
+                                :error="form.errors['theme.light']"
+                                label="--secondary-foreground"
+                            >
+                                <input
+                                    v-model="form.theme.light['--secondary-foreground']"
+                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
+                                    placeholder="#111111"
+                                    type="text"
+                                />
+                            </PostFormField>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="mb-2 text-sm font-medium opacity-80">Dark</h4>
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <PostFormField :id="`${fieldIdPrefix}-theme-dark-background`" :error="form.errors['theme.dark']" label="--background">
+                                <input
+                                    v-model="form.theme.dark['--background']"
+                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
+                                    placeholder="#0a0a0a"
+                                    type="text"
+                                />
+                            </PostFormField>
+                            <PostFormField :id="`${fieldIdPrefix}-theme-dark-foreground`" :error="form.errors['theme.dark']" label="--foreground">
+                                <input
+                                    v-model="form.theme.dark['--foreground']"
+                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
+                                    placeholder="#f7f7f7"
+                                    type="text"
+                                />
+                            </PostFormField>
+                            <PostFormField :id="`${fieldIdPrefix}-theme-dark-primary`" :error="form.errors['theme.dark']" label="--primary">
+                                <input
+                                    v-model="form.theme.dark['--primary']"
+                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
+                                    placeholder="#f7f7f7"
+                                    type="text"
+                                />
+                            </PostFormField>
+                            <PostFormField
+                                :id="`${fieldIdPrefix}-theme-dark-primary-fg`"
+                                :error="form.errors['theme.dark']"
+                                label="--primary-foreground"
+                            >
+                                <input
+                                    v-model="form.theme.dark['--primary-foreground']"
+                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
+                                    placeholder="#111111"
+                                    type="text"
+                                />
+                            </PostFormField>
+                            <PostFormField :id="`${fieldIdPrefix}-theme-dark-secondary`" :error="form.errors['theme.dark']" label="--secondary">
+                                <input
+                                    v-model="form.theme.dark['--secondary']"
+                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
+                                    placeholder="#222222"
+                                    type="text"
+                                />
+                            </PostFormField>
+                            <PostFormField
+                                :id="`${fieldIdPrefix}-theme-dark-secondary-fg`"
+                                :error="form.errors['theme.dark']"
+                                label="--secondary-foreground"
+                            >
+                                <input
+                                    v-model="form.theme.dark['--secondary-foreground']"
+                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
+                                    placeholder="#fafafa"
+                                    type="text"
+                                />
+                            </PostFormField>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-2 text-xs text-muted-foreground">
+                    Advanced: you may add any other CSS variables used by the app (e.g., --accent, --muted, --border) by editing JSON payload via API.
+                </div>
+            </div>
+
             <CategorySelector
                 :categories="props.categories"
                 :id-prefix="`${fieldIdPrefix}-cat`"

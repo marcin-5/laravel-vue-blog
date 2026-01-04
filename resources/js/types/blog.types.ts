@@ -3,6 +3,11 @@
 // Public blog types (from resources/js/types/blog.ts)
 import { useForm } from '@inertiajs/vue3';
 
+export type BlogTheme = {
+    light?: Record<string, string>;
+    dark?: Record<string, string>;
+};
+
 export interface Blog {
     id: number;
     name: string;
@@ -10,6 +15,7 @@ export interface Blog {
     description?: string | null;
     descriptionHtml?: string | null;
     motto?: string | null;
+    theme?: BlogTheme;
 }
 
 export interface BlogItem extends Blog {
@@ -104,6 +110,7 @@ export interface AdminBlog {
     creation_date?: string | null;
     categories?: Category[];
     posts?: AdminPostItem[];
+    theme?: BlogTheme;
 }
 
 // ===== Blog form/composable shared types =====
@@ -117,6 +124,7 @@ export interface BlogFormData {
     sidebar: number;
     page_size: number;
     categories: number[];
+    theme?: BlogTheme | null;
     [key: string]: any;
 }
 

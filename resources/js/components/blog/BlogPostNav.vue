@@ -11,8 +11,8 @@ defineProps<{
 const { t } = useI18n();
 
 const BASE_LINK_CLASSES = 'inline-flex items-center rounded-sm px-3 py-2 text-sm';
-const ACTIVE_LINK_CLASSES = 'border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800';
-const INACTIVE_LINK_CLASSES = 'border border-gray-200 dark:border-gray-700 dark:text-gray-600 text-gray-500';
+const ACTIVE_LINK_CLASSES = 'border border-border text-foreground hover:bg-muted';
+const INACTIVE_LINK_CLASSES = 'border border-border text-muted-foreground';
 
 const navLinkClasses = (postExists: boolean) => [`${BASE_LINK_CLASSES} gap-2`, postExists ? ACTIVE_LINK_CLASSES : INACTIVE_LINK_CLASSES];
 const backLinkClasses = (isLink: boolean) => [`${BASE_LINK_CLASSES} font-medium`, isLink ? ACTIVE_LINK_CLASSES : INACTIVE_LINK_CLASSES];

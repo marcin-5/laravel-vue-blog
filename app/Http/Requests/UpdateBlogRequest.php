@@ -35,6 +35,9 @@ class UpdateBlogRequest extends FormRequest
                 'min:' . $config['limits']['page_size']['min'],
                 'max:' . $config['limits']['page_size']['max']
             ],
+            'theme' => ['nullable', 'array'],
+            'theme.light' => ['nullable', 'array'],
+            'theme.dark' => ['nullable', 'array'],
         ];
     }
 
@@ -73,6 +76,10 @@ class UpdateBlogRequest extends FormRequest
 
         if (array_key_exists('page_size', $validated)) {
             $data['page_size'] = (int)$validated['page_size'];
+        }
+
+        if (array_key_exists('theme', $validated)) {
+            $data['theme'] = $validated['theme'];
         }
 
         return $data;

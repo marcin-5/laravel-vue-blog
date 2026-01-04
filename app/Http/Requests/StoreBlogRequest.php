@@ -35,6 +35,9 @@ class StoreBlogRequest extends FormRequest
                 'min:' . $config['limits']['page_size']['min'],
                 'max:' . $config['limits']['page_size']['max']
             ],
+            'theme' => ['nullable', 'array'],
+            'theme.light' => ['nullable', 'array'],
+            'theme.dark' => ['nullable', 'array'],
         ];
     }
 
@@ -53,6 +56,7 @@ class StoreBlogRequest extends FormRequest
             'locale' => $validated['locale'] ?? app()->getLocale() ?? $config['locale'],
             'sidebar' => (int)($validated['sidebar'] ?? $config['sidebar']),
             'page_size' => (int)($validated['page_size'] ?? $config['page_size']),
+            'theme' => $validated['theme'] ?? null,
         ];
     }
 

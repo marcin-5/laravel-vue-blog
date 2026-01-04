@@ -17,6 +17,7 @@ export function useBlogFormLogic(options: UseBlogFormLogicOptions = {}) {
             sidebar: (options.blog?.sidebar as number) ?? 0,
             page_size: (options.blog?.page_size as number) ?? 10,
             categories: (options.blog?.categories ?? []).map((c) => c.id) as number[],
+            theme: options.blog?.theme ?? null,
         });
 
     const fieldIdPrefix = computed(() => {
@@ -35,7 +36,23 @@ export function useBlogFormLogic(options: UseBlogFormLogicOptions = {}) {
         form.sidebar = (newBlog.sidebar as number) ?? 0;
         form.page_size = (newBlog.page_size as number) ?? 10;
         form.categories = (newBlog.categories ?? []).map((c) => c.id);
+        form.theme = newBlog.theme ?? null;
+        if (!form.theme) {
+            // Ensure objects exist for binding
+            (form as any).theme = { light: {}, dark: {} };
+        } else {
+            (form as any).theme.light = (form as any).theme.light ?? {};
+            (form as any).theme.dark = (form as any).theme.dark ?? {};
+        }
     };
+
+    // Ensure theme structure exists for new forms
+    if (!form.theme) {
+        (form as any).theme = { light: {}, dark: {} };
+    } else {
+        (form as any).theme.light = (form as any).theme.light ?? {};
+        (form as any).theme.dark = (form as any).theme.dark ?? {};
+    }
 
     if (!externalForm) {
         watch(

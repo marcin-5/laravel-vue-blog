@@ -49,11 +49,13 @@ class Blog extends Model
         'locale',
         'sidebar',
         'page_size',
+        'theme',
     ];
     protected $casts = [
         'is_published' => 'boolean',
         'sidebar' => 'integer',
         'page_size' => 'integer',
+        'theme' => 'array',
     ];
     protected $appends = [
         'creation_date',

@@ -14,6 +14,7 @@ class PublicBlogResource extends JsonResource
             'name' => $this->name,
             'slug' => $this->slug,
             'motto' => $this->motto,
+            'theme' => $this->theme,
         ];
     }
 }

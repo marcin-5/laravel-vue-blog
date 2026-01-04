@@ -5,5 +5,5 @@ defineProps<{
 </script>
 
 <template>
-    <div :class="['border-b border-gray-400 dark:border-gray-700', $props.class]"></div>
+    <div :class="['border-b border-border', $props.class]"></div>
 </template>

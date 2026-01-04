@@ -4,11 +4,13 @@ import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import PostContent from '@/components/blog/PostContent.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
+import { useAppearance } from '@/composables/useAppearance';
 import { useSidebarLayout } from '@/composables/useSidebarLayout';
 import type { SEO } from '@/types';
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { Blog, Navigation, Pagination, PostDetails, PostItem } from '@/types/blog.types';
 import { Link } from '@inertiajs/vue3';
+import { useMediaQuery } from '@vueuse/core';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -86,10 +88,20 @@ const { hasSidebar, isLeftSidebar, isRightSidebar, asideStyle, mainStyle } = use
 
 // Navbar max-width class based on sidebar layout
 const navbarMaxWidth = computed(() => (hasSidebar.value ? 'max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl' : 'max-w-screen-lg'));
+
+// Theme handling based on ThemeToggle state
+const { appearance } = useAppearance();
+const isSystemDark = useMediaQuery('(prefers-color-scheme: dark)');
+const isDark = computed(() => appearance.value === 'dark' || (appearance.value === 'system' && isSystemDark.value));
+const lightThemeStyle = computed(() => props.blog.theme?.light ?? {});
+const darkThemeStyle = computed(() => props.blog.theme?.dark ?? {});
+const mergedThemeStyle = computed<Record<string, string>>(() => {
+    return isDark.value ? { ...lightThemeStyle.value, ...darkThemeStyle.value } : { ...lightThemeStyle.value };
+});
 </script>
 
 <template>
-    <div class="flex min-h-screen flex-col bg-background text-primary">
+    <div :style="mergedThemeStyle" class="flex min-h-screen flex-col bg-background text-foreground">
         <PublicNavbar :maxWidth="navbarMaxWidth" />
 
         <div
@@ -101,18 +113,16 @@ const navbarMaxWidth = computed(() => (hasSidebar.value ? 'max-w-screen-lg xl:ma
             <BorderDivider class="mb-4" />
 
             <header class="mb-4">
-                <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-400">{{ post.title }}</h1>
-                <div class="my-2 inline-flex items-center gap-x-5 text-sm font-medium text-gray-800 dark:text-gray-300">
+                <h1 class="text-2xl font-bold text-foreground">{{ post.title }}</h1>
+                <div class="my-2 inline-flex items-center gap-x-5 text-sm font-medium text-muted-foreground">
                     <p v-if="post.published_at" class="italic">{{ publishedLabel }} {{ post.published_at }}</p>
                     <span>
                         Odsłony: {{ viewStats.total.toLocaleString() }}
                         <template v-if="viewStats.unique !== undefined"> (unikalne: {{ Number(viewStats.unique).toLocaleString() }}) </template>
                     </span>
                 </div>
-                <p v-if="showUpdated" class="-mt-1 mb-2 text-xs text-gray-600 italic dark:text-gray-400">
-                    {{ updatedLabel }} {{ formattedUpdatedDate }}
-                </p>
-                <p v-if="post.author" class="text-md text-gray-900 dark:text-gray-200">
+                <p v-if="showUpdated" class="-mt-1 mb-2 text-xs text-muted-foreground italic">{{ updatedLabel }} {{ formattedUpdatedDate }}</p>
+                <p v-if="post.author" class="text-md text-foreground">
                     {{ authorLabel }}
                     <a :href="`mailto:${post.author_email}`">{{ post.author }}</a>
                 </p>
@@ -170,10 +180,7 @@ const navbarMaxWidth = computed(() => (hasSidebar.value ? 'max-w-screen-lg xl:ma
 
             <!-- Newsletter link -->
             <div class="mt-8 flex justify-center">
-                <Link
-                    :href="route('newsletter.index', { blog_id: blog.id })"
-                    class="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
-                >
+                <Link :href="route('newsletter.index', { blog_id: blog.id })" class="text-sm font-medium text-muted-foreground hover:text-foreground">
                     Zapisz się do newslettera
                 </Link>
             </div>
