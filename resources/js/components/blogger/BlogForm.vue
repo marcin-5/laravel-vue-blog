@@ -8,7 +8,7 @@ import MarkdownPreviewSection from '@/components/blogger/MarkdownPreviewSection.
 import PostFormField from '@/components/blogger/PostFormField.vue';
 import { useBlogFormLogic } from '@/composables/useBlogFormLogic';
 import { useMarkdownPreview } from '@/composables/useMarkdownPreview';
-import type { AdminBlog as Blog, Category } from '@/types/blog.types';
+import type { AdminBlog as Blog, BlogFormData, Category } from '@/types/blog.types';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -19,7 +19,7 @@ interface Props {
     categories: Category[];
     isEdit?: boolean;
     idPrefix?: string;
-    form?: any;
+    form?: BlogFormData;
 }
 
 interface Emits {
@@ -266,60 +266,94 @@ function handleFooterInput() {
                     <div>
                         <h4 class="mb-2 text-sm font-medium opacity-80">Light</h4>
                         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <PostFormField :id="`${fieldIdPrefix}-theme-light-background`" :error="form.errors['theme.light']" label="--background">
+                            <PostFormField
+                                :id="`${fieldIdPrefix}-theme-light-background`"
+                                v-model="form.theme!.light!['--background']"
+                                :error="form.errors['theme.light']"
+                                label="--background"
+                                type="custom"
+                            >
                                 <input
-                                    v-model="form.theme.light['--background']"
+                                    :value="form.theme?.light?.['--background']"
                                     class="w-full rounded border border-border bg-background p-2 text-foreground"
                                     placeholder="#ffffff"
                                     type="text"
+                                    @input="form.theme!.light!['--background'] = ($event.target as HTMLInputElement).value"
                                 />
                             </PostFormField>
-                            <PostFormField :id="`${fieldIdPrefix}-theme-light-foreground`" :error="form.errors['theme.light']" label="--foreground">
+                            <PostFormField
+                                :id="`${fieldIdPrefix}-theme-light-foreground`"
+                                v-model="form.theme!.light!['--foreground']"
+                                :error="form.errors['theme.light']"
+                                label="--foreground"
+                                type="custom"
+                            >
                                 <input
-                                    v-model="form.theme.light['--foreground']"
+                                    :value="form.theme?.light?.['--foreground']"
                                     class="w-full rounded border border-border bg-background p-2 text-foreground"
                                     placeholder="#0a0a0a"
                                     type="text"
+                                    @input="form.theme!.light!['--foreground'] = ($event.target as HTMLInputElement).value"
                                 />
                             </PostFormField>
-                            <PostFormField :id="`${fieldIdPrefix}-theme-light-primary`" :error="form.errors['theme.light']" label="--primary">
+                            <PostFormField
+                                :id="`${fieldIdPrefix}-theme-light-primary`"
+                                v-model="form.theme!.light!['--primary']"
+                                :error="form.errors['theme.light']"
+                                label="--primary"
+                                type="custom"
+                            >
                                 <input
-                                    v-model="form.theme.light['--primary']"
+                                    :value="form.theme?.light?.['--primary']"
                                     class="w-full rounded border border-border bg-background p-2 text-foreground"
                                     placeholder="#111111"
                                     type="text"
+                                    @input="form.theme!.light!['--primary'] = ($event.target as HTMLInputElement).value"
                                 />
                             </PostFormField>
                             <PostFormField
                                 :id="`${fieldIdPrefix}-theme-light-primary-fg`"
+                                v-model="form.theme!.light!['--primary-foreground']"
                                 :error="form.errors['theme.light']"
                                 label="--primary-foreground"
+                                type="custom"
                             >
                                 <input
-                                    v-model="form.theme.light['--primary-foreground']"
+                                    :value="form.theme?.light?.['--primary-foreground']"
                                     class="w-full rounded border border-border bg-background p-2 text-foreground"
                                     placeholder="#fafafa"
                                     type="text"
+                                    @input="form.theme!.light!['--primary-foreground'] = ($event.target as HTMLInputElement).value"
                                 />
                             </PostFormField>
-                            <PostFormField :id="`${fieldIdPrefix}-theme-light-secondary`" :error="form.errors['theme.light']" label="--secondary">
+                            <PostFormField
+                                :id="`${fieldIdPrefix}-theme-light-secondary`"
+                                v-model="form.theme!.light!['--secondary']"
+                                :error="form.errors['theme.light']"
+                                label="--secondary"
+                                type="custom"
+                            >
                                 <input
-                                    v-model="form.theme.light['--secondary']"
+                                    :value="form.theme?.light?.['--secondary']"
                                     class="w-full rounded border border-border bg-background p-2 text-foreground"
                                     placeholder="#ececec"
                                     type="text"
+                                    @input="form.theme!.light!['--secondary'] = ($event.target as HTMLInputElement).value"
                                 />
                             </PostFormField>
                             <PostFormField
                                 :id="`${fieldIdPrefix}-theme-light-secondary-fg`"
+                                v-model="form.theme!.light!['--secondary-foreground']"
                                 :error="form.errors['theme.light']"
                                 label="--secondary-foreground"
+                                type="custom"
                             >
                                 <input
-                                    v-model="form.theme.light['--secondary-foreground']"
+                                    :value="form.theme?.light?.['--secondary-foreground']"
                                     class="w-full rounded border border-border bg-background p-2 text-foreground"
                                     placeholder="#111111"
                                     type="text"
+                                    @input="form.theme!.light!['--secondary-foreground'] = ($event.target as HTMLInputElement).value"
                                 />
                             </PostFormField>
                         </div>
@@ -327,60 +361,94 @@ function handleFooterInput() {
                     <div>
                         <h4 class="mb-2 text-sm font-medium opacity-80">Dark</h4>
                         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <PostFormField :id="`${fieldIdPrefix}-theme-dark-background`" :error="form.errors['theme.dark']" label="--background">
+                            <PostFormField
+                                :id="`${fieldIdPrefix}-theme-dark-background`"
+                                v-model="form.theme!.dark!['--background']"
+                                :error="form.errors['theme.dark']"
+                                label="--background"
+                                type="custom"
+                            >
                                 <input
-                                    v-model="form.theme.dark['--background']"
+                                    :value="form.theme?.dark?.['--background']"
                                     class="w-full rounded border border-border bg-background p-2 text-foreground"
                                     placeholder="#0a0a0a"
                                     type="text"
+                                    @input="form.theme!.dark!['--background'] = ($event.target as HTMLInputElement).value"
                                 />
                             </PostFormField>
-                            <PostFormField :id="`${fieldIdPrefix}-theme-dark-foreground`" :error="form.errors['theme.dark']" label="--foreground">
+                            <PostFormField
+                                :id="`${fieldIdPrefix}-theme-dark-foreground`"
+                                v-model="form.theme!.dark!['--foreground']"
+                                :error="form.errors['theme.dark']"
+                                label="--foreground"
+                                type="custom"
+                            >
                                 <input
-                                    v-model="form.theme.dark['--foreground']"
+                                    :value="form.theme?.dark?.['--foreground']"
                                     class="w-full rounded border border-border bg-background p-2 text-foreground"
                                     placeholder="#f7f7f7"
                                     type="text"
+                                    @input="form.theme!.dark!['--foreground'] = ($event.target as HTMLInputElement).value"
                                 />
                             </PostFormField>
-                            <PostFormField :id="`${fieldIdPrefix}-theme-dark-primary`" :error="form.errors['theme.dark']" label="--primary">
+                            <PostFormField
+                                :id="`${fieldIdPrefix}-theme-dark-primary`"
+                                v-model="form.theme!.dark!['--primary']"
+                                :error="form.errors['theme.dark']"
+                                label="--primary"
+                                type="custom"
+                            >
                                 <input
-                                    v-model="form.theme.dark['--primary']"
+                                    :value="form.theme?.dark?.['--primary']"
                                     class="w-full rounded border border-border bg-background p-2 text-foreground"
                                     placeholder="#f7f7f7"
                                     type="text"
+                                    @input="form.theme!.dark!['--primary'] = ($event.target as HTMLInputElement).value"
                                 />
                             </PostFormField>
                             <PostFormField
                                 :id="`${fieldIdPrefix}-theme-dark-primary-fg`"
+                                v-model="form.theme!.dark!['--primary-foreground']"
                                 :error="form.errors['theme.dark']"
                                 label="--primary-foreground"
+                                type="custom"
                             >
                                 <input
-                                    v-model="form.theme.dark['--primary-foreground']"
+                                    :value="form.theme?.dark?.['--primary-foreground']"
                                     class="w-full rounded border border-border bg-background p-2 text-foreground"
                                     placeholder="#111111"
                                     type="text"
+                                    @input="form.theme!.dark!['--primary-foreground'] = ($event.target as HTMLInputElement).value"
                                 />
                             </PostFormField>
-                            <PostFormField :id="`${fieldIdPrefix}-theme-dark-secondary`" :error="form.errors['theme.dark']" label="--secondary">
+                            <PostFormField
+                                :id="`${fieldIdPrefix}-theme-dark-secondary`"
+                                v-model="form.theme!.dark!['--secondary']"
+                                :error="form.errors['theme.dark']"
+                                label="--secondary"
+                                type="custom"
+                            >
                                 <input
-                                    v-model="form.theme.dark['--secondary']"
+                                    :value="form.theme?.dark?.['--secondary']"
                                     class="w-full rounded border border-border bg-background p-2 text-foreground"
                                     placeholder="#222222"
                                     type="text"
+                                    @input="form.theme!.dark!['--secondary'] = ($event.target as HTMLInputElement).value"
                                 />
                             </PostFormField>
                             <PostFormField
                                 :id="`${fieldIdPrefix}-theme-dark-secondary-fg`"
+                                v-model="form.theme!.dark!['--secondary-foreground']"
                                 :error="form.errors['theme.dark']"
                                 label="--secondary-foreground"
+                                type="custom"
                             >
                                 <input
-                                    v-model="form.theme.dark['--secondary-foreground']"
+                                    :value="form.theme?.dark?.['--secondary-foreground']"
                                     class="w-full rounded border border-border bg-background p-2 text-foreground"
                                     placeholder="#fafafa"
                                     type="text"
+                                    @input="form.theme!.dark!['--secondary-foreground'] = ($event.target as HTMLInputElement).value"
                                 />
                             </PostFormField>
                         </div>

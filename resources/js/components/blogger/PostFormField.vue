@@ -8,7 +8,7 @@ interface Props {
     modelValue: string | null;
     error?: string;
     placeholder?: string;
-    type?: 'input' | 'textarea';
+    type?: 'input' | 'textarea' | 'custom';
     rows?: number;
     required?: boolean;
     tooltip?: string;
@@ -53,7 +53,7 @@ function handleInput(event: Event) {
             @input="handleInput"
         />
         <textarea
-            v-else
+            v-else-if="props.type === 'textarea'"
             :id="props.id"
             :placeholder="props.placeholder"
             :rows="props.rows"
@@ -61,6 +61,7 @@ function handleInput(event: Event) {
             class="block w-full rounded-md border px-3 py-2"
             @input="handleInput"
         />
+        <slot v-else />
         <InputError :message="props.error" />
     </div>
 </template>
