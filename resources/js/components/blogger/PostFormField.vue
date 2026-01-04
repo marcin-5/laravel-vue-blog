@@ -5,7 +5,6 @@ import { InfoIcon } from 'lucide-vue-next';
 interface Props {
     id: string;
     label: string;
-    modelValue: string | null;
     error?: string;
     placeholder?: string;
     type?: 'input' | 'textarea' | 'custom';
@@ -14,22 +13,18 @@ interface Props {
     tooltip?: string;
 }
 
-interface Emits {
-    (e: 'update:modelValue', value: string): void;
-    (e: 'input'): void;
-}
-
 const props = withDefaults(defineProps<Props>(), {
     type: 'input',
     rows: 2,
     required: false,
 });
 
-const emit = defineEmits<Emits>();
+const modelValue = defineModel<string | null>({ required: false, default: '' });
+const emit = defineEmits<{ input: [] }>();
 
 function handleInput(event: Event) {
     const target = event.target as HTMLInputElement | HTMLTextAreaElement;
-    emit('update:modelValue', target.value);
+    modelValue.value = target.value;
     emit('input');
 }
 </script>
@@ -47,7 +42,7 @@ function handleInput(event: Event) {
             :id="props.id"
             :placeholder="props.placeholder"
             :required="props.required"
-            :value="props.modelValue ?? ''"
+            :value="modelValue ?? ''"
             class="block w-full rounded-md border px-3 py-2"
             type="text"
             @input="handleInput"
@@ -57,7 +52,7 @@ function handleInput(event: Event) {
             :id="props.id"
             :placeholder="props.placeholder"
             :rows="props.rows"
-            :value="props.modelValue ?? ''"
+            :value="modelValue ?? ''"
             class="block w-full rounded-md border px-3 py-2"
             @input="handleInput"
         />

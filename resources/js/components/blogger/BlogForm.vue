@@ -1,15 +1,16 @@
 <script lang="ts" setup>
 import CategorySelector from '@/components/CategorySelector.vue';
 import BlogFormCheckboxField from '@/components/blogger/BlogFormCheckboxField.vue';
-import BlogFormColorField from '@/components/blogger/BlogFormColorField.vue';
 import BlogFormNumberField from '@/components/blogger/BlogFormNumberField.vue';
 import BlogFormSelectField from '@/components/blogger/BlogFormSelectField.vue';
+import BlogFormThemeSection from '@/components/blogger/BlogFormThemeSection.vue';
 import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
 import MarkdownPreviewSection from '@/components/blogger/MarkdownPreviewSection.vue';
 import PostFormField from '@/components/blogger/PostFormField.vue';
 import { useBlogFormLogic } from '@/composables/useBlogFormLogic';
 import { useMarkdownPreview } from '@/composables/useMarkdownPreview';
 import type { AdminBlog as Blog, BlogFormData, Category } from '@/types/blog.types';
+import { InertiaForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -20,7 +21,7 @@ interface Props {
     categories: Category[];
     isEdit?: boolean;
     idPrefix?: string;
-    form?: BlogFormData;
+    form?: InertiaForm<BlogFormData>;
 }
 
 interface Emits {
@@ -56,7 +57,7 @@ const {
     setLayout: setFooterLayout,
 } = useMarkdownPreview('markdown.preview');
 
-const translationKeys = computed(() => ({
+const baseTranslations = computed(() => ({
     name: t('blogger.form.name_label'),
     namePlaceholder: props.isEdit ? '' : t('blogger.form.name_placeholder'),
     description: t('blogger.form.description_label'),
@@ -71,11 +72,17 @@ const translationKeys = computed(() => ({
     sidebar: t('blogger.form.sidebar_label'),
     sidebarHint: t('blogger.form.sidebar_hint'),
     pageSize: t('blogger.form.page_size_label'),
+}));
+
+const actionTranslations = computed(() => ({
     cancel: t('blogger.form.cancel_button'),
     create: t('blogger.form.create_button'),
     save: t('blogger.form.save_button'),
     saving: t('blogger.form.saving_button'),
     creating: t('blogger.form.creating_button'),
+}));
+
+const previewTranslations = computed(() => ({
     preview: t('blogger.post_form.preview_button'),
     close: t('blogger.post_form.close_button'),
     fullPreview: t('blogger.post_form.full_preview_button'),
@@ -85,29 +92,61 @@ const translationKeys = computed(() => ({
     markdown: t('blogger.post_form.markdown_label'),
     previewLabel: t('blogger.post_form.preview_label'),
     previewModeTitle: t('blogger.post_form.preview_mode_title'),
-    themeTitle: t('blogger.form.theme_title'),
-    themeDescription: t('blogger.form.theme_description'),
-    themeLight: t('blogger.form.theme_light'),
-    themeDark: t('blogger.form.theme_dark'),
-    themeAdvancedHint: t('blogger.form.theme_advanced_hint'),
-    themeColorBackground: t('blogger.form.theme_color_background'),
-    themeColorBackgroundTooltip: t('blogger.form.theme_color_background_tooltip'),
-    themeColorForeground: t('blogger.form.theme_color_foreground'),
-    themeColorForegroundTooltip: t('blogger.form.theme_color_foreground_tooltip'),
-    themeColorPrimary: t('blogger.form.theme_color_primary'),
-    themeColorPrimaryTooltip: t('blogger.form.theme_color_primary_tooltip'),
-    themeColorPrimaryForeground: t('blogger.form.theme_color_primary_foreground'),
-    themeColorPrimaryForegroundTooltip: t('blogger.form.theme_color_primary_foreground_tooltip'),
-    themeColorSecondary: t('blogger.form.theme_color_secondary'),
-    themeColorSecondaryTooltip: t('blogger.form.theme_color_secondary_tooltip'),
-    themeColorSecondaryForeground: t('blogger.form.theme_color_secondary_foreground'),
-    themeColorSecondaryForegroundTooltip: t('blogger.form.theme_color_secondary_foreground_tooltip'),
+}));
+
+const themeSectionTranslations = computed(() => ({
+    title: t('blogger.form.theme_title'),
+    description: t('blogger.form.theme_description'),
+    light: t('blogger.form.theme_light'),
+    dark: t('blogger.form.theme_dark'),
+    advancedHint: t('blogger.form.theme_advanced_hint'),
+    colorBackground: t('blogger.form.theme_color_background'),
+    colorBackgroundTooltip: t('blogger.form.theme_color_background_tooltip'),
+    colorForeground: t('blogger.form.theme_color_foreground'),
+    colorForegroundTooltip: t('blogger.form.theme_color_foreground_tooltip'),
+    colorPrimary: t('blogger.form.theme_color_primary'),
+    colorPrimaryTooltip: t('blogger.form.theme_color_primary_tooltip'),
+    colorPrimaryForeground: t('blogger.form.theme_color_primary_foreground'),
+    colorPrimaryForegroundTooltip: t('blogger.form.theme_color_primary_foreground_tooltip'),
+    colorSecondary: t('blogger.form.theme_color_secondary'),
+    colorSecondaryTooltip: t('blogger.form.theme_color_secondary_tooltip'),
+    colorSecondaryForeground: t('blogger.form.theme_color_secondary_foreground'),
+    colorSecondaryForegroundTooltip: t('blogger.form.theme_color_secondary_foreground_tooltip'),
 }));
 
 const localeOptions = computed(() => [
     { value: 'en', label: 'EN' },
     { value: 'pl', label: 'PL' },
 ]);
+
+const themeTranslations = computed(() => ({
+    background: themeSectionTranslations.value.colorBackground,
+    backgroundTooltip: themeSectionTranslations.value.colorBackgroundTooltip,
+    foreground: themeSectionTranslations.value.colorForeground,
+    foregroundTooltip: themeSectionTranslations.value.colorForegroundTooltip,
+    primary: themeSectionTranslations.value.colorPrimary,
+    primaryTooltip: themeSectionTranslations.value.colorPrimaryTooltip,
+    primaryForeground: themeSectionTranslations.value.colorPrimaryForeground,
+    primaryForegroundTooltip: themeSectionTranslations.value.colorPrimaryForegroundTooltip,
+    secondary: themeSectionTranslations.value.colorSecondary,
+    secondaryTooltip: themeSectionTranslations.value.colorSecondaryTooltip,
+    secondaryForeground: themeSectionTranslations.value.colorSecondaryForeground,
+    secondaryForegroundTooltip: themeSectionTranslations.value.colorSecondaryForegroundTooltip,
+}));
+
+function filterErrorsByPrefix(errors: Record<string, string>, prefix: string): Record<string, string> {
+    const filtered: Record<string, string> = {};
+    for (const key of Object.keys(errors)) {
+        if (key.startsWith(prefix)) {
+            filtered[key.replace(prefix, '')] = errors[key];
+        }
+    }
+    return filtered;
+}
+
+const themeLightErrors = computed(() => filterErrorsByPrefix(form.errors, 'theme.light.'));
+
+const themeDarkErrors = computed(() => filterErrorsByPrefix(form.errors, 'theme.dark.'));
 
 function handleSubmit() {
     emit('submit', form);
@@ -150,8 +189,8 @@ function handleFooterInput() {
                 :id="`${fieldIdPrefix}-name`"
                 v-model="form.name"
                 :error="form.errors.name"
-                :label="translationKeys.name"
-                :placeholder="translationKeys.namePlaceholder"
+                :label="baseTranslations.name"
+                :placeholder="baseTranslations.namePlaceholder"
                 required
                 type="input"
             />
@@ -160,9 +199,9 @@ function handleFooterInput() {
                 :id="`${fieldIdPrefix}-motto`"
                 v-model="form.motto"
                 :error="form.errors.motto"
-                :label="translationKeys.motto"
-                :placeholder="translationKeys.mottoPlaceholder"
-                :tooltip="translationKeys.mottoTooltip"
+                :label="baseTranslations.motto"
+                :placeholder="baseTranslations.mottoPlaceholder"
+                :tooltip="baseTranslations.mottoTooltip"
                 type="textarea"
             />
 
@@ -174,24 +213,24 @@ function handleFooterInput() {
                 :is-full-preview="isFullPreview"
                 :is-preview-mode="isPreviewMode"
                 :is-processing="form.processing"
-                :label="translationKeys.description"
-                :placeholder="translationKeys.descriptionPlaceholder"
+                :label="baseTranslations.description"
+                :placeholder="baseTranslations.descriptionPlaceholder"
                 :preview-html="previewHtml"
                 :preview-layout="previewLayout"
                 :show-save-button="false"
                 :translations="{
-                    cancel: translationKeys.cancel,
-                    create: translationKeys.create,
-                    save: translationKeys.save,
-                    exitPreview: translationKeys.exitPreview,
-                    markdownLabel: translationKeys.markdown,
-                    previewLabel: translationKeys.previewLabel,
-                    previewModeTitle: translationKeys.previewModeTitle,
-                    toggleLayout: translationKeys.toggleLayout,
-                    closePreview: translationKeys.close,
-                    preview: translationKeys.preview,
-                    fullPreview: translationKeys.fullPreview,
-                    splitView: translationKeys.splitView,
+                    cancel: actionTranslations.cancel,
+                    create: actionTranslations.create,
+                    save: actionTranslations.save,
+                    exitPreview: previewTranslations.exitPreview,
+                    markdownLabel: previewTranslations.markdown,
+                    previewLabel: previewTranslations.previewLabel,
+                    previewModeTitle: previewTranslations.previewModeTitle,
+                    toggleLayout: previewTranslations.toggleLayout,
+                    closePreview: previewTranslations.close,
+                    preview: previewTranslations.preview,
+                    fullPreview: previewTranslations.fullPreview,
+                    splitView: previewTranslations.splitView,
                 }"
                 @cancel="handleCancel"
                 @input="handleDescriptionInput"
@@ -208,24 +247,24 @@ function handleFooterInput() {
                 :is-full-preview="isFooterFullPreview"
                 :is-preview-mode="isFooterPreviewMode"
                 :is-processing="form.processing"
-                :label="translationKeys.footer"
-                :placeholder="translationKeys.footerPlaceholder"
+                :label="baseTranslations.footer"
+                :placeholder="baseTranslations.footerPlaceholder"
                 :preview-html="footerPreviewHtml"
                 :preview-layout="footerPreviewLayout"
                 :show-save-button="false"
                 :translations="{
-                    cancel: translationKeys.cancel,
-                    create: translationKeys.create,
-                    save: translationKeys.save,
-                    exitPreview: translationKeys.exitPreview,
-                    markdownLabel: translationKeys.markdown,
-                    previewLabel: translationKeys.previewLabel,
-                    previewModeTitle: translationKeys.previewModeTitle,
-                    toggleLayout: translationKeys.toggleLayout,
-                    closePreview: translationKeys.close,
-                    preview: translationKeys.preview,
-                    fullPreview: translationKeys.fullPreview,
-                    splitView: translationKeys.splitView,
+                    cancel: actionTranslations.cancel,
+                    create: actionTranslations.create,
+                    save: actionTranslations.save,
+                    exitPreview: previewTranslations.exitPreview,
+                    markdownLabel: previewTranslations.markdown,
+                    previewLabel: previewTranslations.previewLabel,
+                    previewModeTitle: previewTranslations.previewModeTitle,
+                    toggleLayout: previewTranslations.toggleLayout,
+                    closePreview: previewTranslations.close,
+                    preview: previewTranslations.preview,
+                    fullPreview: previewTranslations.fullPreview,
+                    splitView: previewTranslations.splitView,
                 }"
                 @cancel="handleCancel"
                 @input="handleFooterInput"
@@ -240,14 +279,14 @@ function handleFooterInput() {
                     v-model="form.is_published"
                     :additional-info="props.isEdit && props.blog ? `/${props.blog.slug}` : undefined"
                     :error="form.errors.is_published"
-                    :label="translationKeys.published"
+                    :label="baseTranslations.published"
                 />
                 <div class="ml-auto">
                     <BlogFormSelectField
                         :id="`${fieldIdPrefix}-locale`"
                         v-model="form.locale"
                         :error="form.errors.locale"
-                        :label="translationKeys.locale"
+                        :label="baseTranslations.locale"
                         :options="localeOptions"
                     />
                 </div>
@@ -258,8 +297,8 @@ function handleFooterInput() {
                     :id="`${fieldIdPrefix}-sidebar`"
                     v-model="form.sidebar"
                     :error="form.errors.sidebar"
-                    :hint="translationKeys.sidebarHint"
-                    :label="translationKeys.sidebar"
+                    :hint="baseTranslations.sidebarHint"
+                    :label="baseTranslations.sidebar"
                     :max="50"
                     :min="-50"
                 />
@@ -267,7 +306,7 @@ function handleFooterInput() {
                     :id="`${fieldIdPrefix}-page_size`"
                     v-model="form.page_size"
                     :error="form.errors.page_size"
-                    :label="translationKeys.pageSize"
+                    :label="baseTranslations.pageSize"
                     :max="100"
                     :min="1"
                 />
@@ -275,120 +314,28 @@ function handleFooterInput() {
 
             <!-- Theme editor (per-blog colors) -->
             <div class="mt-4 rounded-md border border-border p-4">
-                <h3 class="mb-3 text-lg font-semibold">{{ translationKeys.themeTitle }}</h3>
+                <h3 class="mb-3 text-lg font-semibold">{{ themeSectionTranslations.title }}</h3>
                 <p class="mb-3 text-sm text-muted-foreground">
-                    {{ translationKeys.themeDescription }}
+                    {{ themeSectionTranslations.description }}
                 </p>
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div>
-                        <h4 class="mb-2 text-sm font-medium opacity-80">{{ translationKeys.themeLight }}</h4>
-                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <BlogFormColorField
-                                :id="`${fieldIdPrefix}-theme-light-background`"
-                                v-model="form.theme!.light!['--background']"
-                                :error="form.errors['theme.light']"
-                                :label="translationKeys.themeColorBackground"
-                                :tooltip="translationKeys.themeColorBackgroundTooltip"
-                                placeholder="#ffffff"
-                            />
-                            <BlogFormColorField
-                                :id="`${fieldIdPrefix}-theme-light-foreground`"
-                                v-model="form.theme!.light!['--foreground']"
-                                :error="form.errors['theme.light']"
-                                :label="translationKeys.themeColorForeground"
-                                :tooltip="translationKeys.themeColorForegroundTooltip"
-                                placeholder="#0a0a0a"
-                            />
-                            <BlogFormColorField
-                                :id="`${fieldIdPrefix}-theme-light-primary`"
-                                v-model="form.theme!.light!['--primary']"
-                                :error="form.errors['theme.light']"
-                                :label="translationKeys.themeColorPrimary"
-                                :tooltip="translationKeys.themeColorPrimaryTooltip"
-                                placeholder="#111111"
-                            />
-                            <BlogFormColorField
-                                :id="`${fieldIdPrefix}-theme-light-primary-fg`"
-                                v-model="form.theme!.light!['--primary-foreground']"
-                                :error="form.errors['theme.light']"
-                                :label="translationKeys.themeColorPrimaryForeground"
-                                :tooltip="translationKeys.themeColorPrimaryForegroundTooltip"
-                                placeholder="#fafafa"
-                            />
-                            <BlogFormColorField
-                                :id="`${fieldIdPrefix}-theme-light-secondary`"
-                                v-model="form.theme!.light!['--secondary']"
-                                :error="form.errors['theme.light']"
-                                :label="translationKeys.themeColorSecondary"
-                                :tooltip="translationKeys.themeColorSecondaryTooltip"
-                                placeholder="#ececec"
-                            />
-                            <BlogFormColorField
-                                :id="`${fieldIdPrefix}-theme-light-secondary-fg`"
-                                v-model="form.theme!.light!['--secondary-foreground']"
-                                :error="form.errors['theme.light']"
-                                :label="translationKeys.themeColorSecondaryForeground"
-                                :tooltip="translationKeys.themeColorSecondaryForegroundTooltip"
-                                placeholder="#111111"
-                            />
-                        </div>
-                    </div>
-                    <div>
-                        <h4 class="mb-2 text-sm font-medium opacity-80">{{ translationKeys.themeDark }}</h4>
-                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <BlogFormColorField
-                                :id="`${fieldIdPrefix}-theme-dark-background`"
-                                v-model="form.theme!.dark!['--background']"
-                                :error="form.errors['theme.dark']"
-                                :label="translationKeys.themeColorBackground"
-                                :tooltip="translationKeys.themeColorBackgroundTooltip"
-                                placeholder="#0a0a0a"
-                            />
-                            <BlogFormColorField
-                                :id="`${fieldIdPrefix}-theme-dark-foreground`"
-                                v-model="form.theme!.dark!['--foreground']"
-                                :error="form.errors['theme.dark']"
-                                :label="translationKeys.themeColorForeground"
-                                :tooltip="translationKeys.themeColorForegroundTooltip"
-                                placeholder="#f7f7f7"
-                            />
-                            <BlogFormColorField
-                                :id="`${fieldIdPrefix}-theme-dark-primary`"
-                                v-model="form.theme!.dark!['--primary']"
-                                :error="form.errors['theme.dark']"
-                                :label="translationKeys.themeColorPrimary"
-                                :tooltip="translationKeys.themeColorPrimaryTooltip"
-                                placeholder="#f7f7f7"
-                            />
-                            <BlogFormColorField
-                                :id="`${fieldIdPrefix}-theme-dark-primary-fg`"
-                                v-model="form.theme!.dark!['--primary-foreground']"
-                                :error="form.errors['theme.dark']"
-                                :label="translationKeys.themeColorPrimaryForeground"
-                                :tooltip="translationKeys.themeColorPrimaryForegroundTooltip"
-                                placeholder="#111111"
-                            />
-                            <BlogFormColorField
-                                :id="`${fieldIdPrefix}-theme-dark-secondary`"
-                                v-model="form.theme!.dark!['--secondary']"
-                                :error="form.errors['theme.dark']"
-                                :label="translationKeys.themeColorSecondary"
-                                :tooltip="translationKeys.themeColorSecondaryTooltip"
-                                placeholder="#222222"
-                            />
-                            <BlogFormColorField
-                                :id="`${fieldIdPrefix}-theme-dark-secondary-fg`"
-                                v-model="form.theme!.dark!['--secondary-foreground']"
-                                :error="form.errors['theme.dark']"
-                                :label="translationKeys.themeColorSecondaryForeground"
-                                :tooltip="translationKeys.themeColorSecondaryForegroundTooltip"
-                                placeholder="#fafafa"
-                            />
-                        </div>
-                    </div>
+                    <BlogFormThemeSection
+                        v-model:colors="form.theme!.light!"
+                        :errors="themeLightErrors"
+                        :id-prefix="`${fieldIdPrefix}-theme-light`"
+                        :title="themeSectionTranslations.light"
+                        :translations="themeTranslations"
+                    />
+                    <BlogFormThemeSection
+                        v-model:colors="form.theme!.dark!"
+                        :errors="themeDarkErrors"
+                        :id-prefix="`${fieldIdPrefix}-theme-dark`"
+                        :title="themeSectionTranslations.dark"
+                        :translations="themeTranslations"
+                    />
                 </div>
                 <div class="mt-2 text-xs text-muted-foreground">
-                    {{ translationKeys.themeAdvancedHint }}
+                    {{ themeSectionTranslations.advancedHint }}
                 </div>
             </div>
 
@@ -406,11 +353,11 @@ function handleFooterInput() {
                 :is-edit="props.isEdit"
                 :is-processing="form.processing"
                 :translations="{
-                    cancel: translationKeys.cancel,
-                    create: translationKeys.create,
-                    save: translationKeys.save,
-                    creating: translationKeys.creating,
-                    saving: translationKeys.saving,
+                    cancel: actionTranslations.cancel,
+                    create: actionTranslations.create,
+                    save: actionTranslations.save,
+                    creating: actionTranslations.creating,
+                    saving: actionTranslations.saving,
                 }"
                 @cancel="handleCancel"
                 @submit="handleSubmit"
