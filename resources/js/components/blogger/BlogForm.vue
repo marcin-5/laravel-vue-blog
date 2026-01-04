@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import CategorySelector from '@/components/CategorySelector.vue';
 import BlogFormCheckboxField from '@/components/blogger/BlogFormCheckboxField.vue';
+import BlogFormColorField from '@/components/blogger/BlogFormColorField.vue';
 import BlogFormNumberField from '@/components/blogger/BlogFormNumberField.vue';
 import BlogFormSelectField from '@/components/blogger/BlogFormSelectField.vue';
 import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
@@ -84,6 +85,23 @@ const translationKeys = computed(() => ({
     markdown: t('blogger.post_form.markdown_label'),
     previewLabel: t('blogger.post_form.preview_label'),
     previewModeTitle: t('blogger.post_form.preview_mode_title'),
+    themeTitle: t('blogger.form.theme_title'),
+    themeDescription: t('blogger.form.theme_description'),
+    themeLight: t('blogger.form.theme_light'),
+    themeDark: t('blogger.form.theme_dark'),
+    themeAdvancedHint: t('blogger.form.theme_advanced_hint'),
+    themeColorBackground: t('blogger.form.theme_color_background'),
+    themeColorBackgroundTooltip: t('blogger.form.theme_color_background_tooltip'),
+    themeColorForeground: t('blogger.form.theme_color_foreground'),
+    themeColorForegroundTooltip: t('blogger.form.theme_color_foreground_tooltip'),
+    themeColorPrimary: t('blogger.form.theme_color_primary'),
+    themeColorPrimaryTooltip: t('blogger.form.theme_color_primary_tooltip'),
+    themeColorPrimaryForeground: t('blogger.form.theme_color_primary_foreground'),
+    themeColorPrimaryForegroundTooltip: t('blogger.form.theme_color_primary_foreground_tooltip'),
+    themeColorSecondary: t('blogger.form.theme_color_secondary'),
+    themeColorSecondaryTooltip: t('blogger.form.theme_color_secondary_tooltip'),
+    themeColorSecondaryForeground: t('blogger.form.theme_color_secondary_foreground'),
+    themeColorSecondaryForegroundTooltip: t('blogger.form.theme_color_secondary_foreground_tooltip'),
 }));
 
 const localeOptions = computed(() => [
@@ -257,205 +275,120 @@ function handleFooterInput() {
 
             <!-- Theme editor (per-blog colors) -->
             <div class="mt-4 rounded-md border border-border p-4">
-                <h3 class="mb-3 text-lg font-semibold">Theme</h3>
+                <h3 class="mb-3 text-lg font-semibold">{{ translationKeys.themeTitle }}</h3>
                 <p class="mb-3 text-sm text-muted-foreground">
-                    Define per-blog CSS color variables. Leave empty to use application defaults. Values should be valid CSS colors (e.g., #ffffff or
-                    hsl()).
+                    {{ translationKeys.themeDescription }}
                 </p>
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
-                        <h4 class="mb-2 text-sm font-medium opacity-80">Light</h4>
+                        <h4 class="mb-2 text-sm font-medium opacity-80">{{ translationKeys.themeLight }}</h4>
                         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <PostFormField
+                            <BlogFormColorField
                                 :id="`${fieldIdPrefix}-theme-light-background`"
                                 v-model="form.theme!.light!['--background']"
                                 :error="form.errors['theme.light']"
-                                label="--background"
-                                type="custom"
-                            >
-                                <input
-                                    :value="form.theme?.light?.['--background']"
-                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
-                                    placeholder="#ffffff"
-                                    type="text"
-                                    @input="form.theme!.light!['--background'] = ($event.target as HTMLInputElement).value"
-                                />
-                            </PostFormField>
-                            <PostFormField
+                                :label="translationKeys.themeColorBackground"
+                                :tooltip="translationKeys.themeColorBackgroundTooltip"
+                                placeholder="#ffffff"
+                            />
+                            <BlogFormColorField
                                 :id="`${fieldIdPrefix}-theme-light-foreground`"
                                 v-model="form.theme!.light!['--foreground']"
                                 :error="form.errors['theme.light']"
-                                label="--foreground"
-                                type="custom"
-                            >
-                                <input
-                                    :value="form.theme?.light?.['--foreground']"
-                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
-                                    placeholder="#0a0a0a"
-                                    type="text"
-                                    @input="form.theme!.light!['--foreground'] = ($event.target as HTMLInputElement).value"
-                                />
-                            </PostFormField>
-                            <PostFormField
+                                :label="translationKeys.themeColorForeground"
+                                :tooltip="translationKeys.themeColorForegroundTooltip"
+                                placeholder="#0a0a0a"
+                            />
+                            <BlogFormColorField
                                 :id="`${fieldIdPrefix}-theme-light-primary`"
                                 v-model="form.theme!.light!['--primary']"
                                 :error="form.errors['theme.light']"
-                                label="--primary"
-                                type="custom"
-                            >
-                                <input
-                                    :value="form.theme?.light?.['--primary']"
-                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
-                                    placeholder="#111111"
-                                    type="text"
-                                    @input="form.theme!.light!['--primary'] = ($event.target as HTMLInputElement).value"
-                                />
-                            </PostFormField>
-                            <PostFormField
+                                :label="translationKeys.themeColorPrimary"
+                                :tooltip="translationKeys.themeColorPrimaryTooltip"
+                                placeholder="#111111"
+                            />
+                            <BlogFormColorField
                                 :id="`${fieldIdPrefix}-theme-light-primary-fg`"
                                 v-model="form.theme!.light!['--primary-foreground']"
                                 :error="form.errors['theme.light']"
-                                label="--primary-foreground"
-                                type="custom"
-                            >
-                                <input
-                                    :value="form.theme?.light?.['--primary-foreground']"
-                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
-                                    placeholder="#fafafa"
-                                    type="text"
-                                    @input="form.theme!.light!['--primary-foreground'] = ($event.target as HTMLInputElement).value"
-                                />
-                            </PostFormField>
-                            <PostFormField
+                                :label="translationKeys.themeColorPrimaryForeground"
+                                :tooltip="translationKeys.themeColorPrimaryForegroundTooltip"
+                                placeholder="#fafafa"
+                            />
+                            <BlogFormColorField
                                 :id="`${fieldIdPrefix}-theme-light-secondary`"
                                 v-model="form.theme!.light!['--secondary']"
                                 :error="form.errors['theme.light']"
-                                label="--secondary"
-                                type="custom"
-                            >
-                                <input
-                                    :value="form.theme?.light?.['--secondary']"
-                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
-                                    placeholder="#ececec"
-                                    type="text"
-                                    @input="form.theme!.light!['--secondary'] = ($event.target as HTMLInputElement).value"
-                                />
-                            </PostFormField>
-                            <PostFormField
+                                :label="translationKeys.themeColorSecondary"
+                                :tooltip="translationKeys.themeColorSecondaryTooltip"
+                                placeholder="#ececec"
+                            />
+                            <BlogFormColorField
                                 :id="`${fieldIdPrefix}-theme-light-secondary-fg`"
                                 v-model="form.theme!.light!['--secondary-foreground']"
                                 :error="form.errors['theme.light']"
-                                label="--secondary-foreground"
-                                type="custom"
-                            >
-                                <input
-                                    :value="form.theme?.light?.['--secondary-foreground']"
-                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
-                                    placeholder="#111111"
-                                    type="text"
-                                    @input="form.theme!.light!['--secondary-foreground'] = ($event.target as HTMLInputElement).value"
-                                />
-                            </PostFormField>
+                                :label="translationKeys.themeColorSecondaryForeground"
+                                :tooltip="translationKeys.themeColorSecondaryForegroundTooltip"
+                                placeholder="#111111"
+                            />
                         </div>
                     </div>
                     <div>
-                        <h4 class="mb-2 text-sm font-medium opacity-80">Dark</h4>
+                        <h4 class="mb-2 text-sm font-medium opacity-80">{{ translationKeys.themeDark }}</h4>
                         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <PostFormField
+                            <BlogFormColorField
                                 :id="`${fieldIdPrefix}-theme-dark-background`"
                                 v-model="form.theme!.dark!['--background']"
                                 :error="form.errors['theme.dark']"
-                                label="--background"
-                                type="custom"
-                            >
-                                <input
-                                    :value="form.theme?.dark?.['--background']"
-                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
-                                    placeholder="#0a0a0a"
-                                    type="text"
-                                    @input="form.theme!.dark!['--background'] = ($event.target as HTMLInputElement).value"
-                                />
-                            </PostFormField>
-                            <PostFormField
+                                :label="translationKeys.themeColorBackground"
+                                :tooltip="translationKeys.themeColorBackgroundTooltip"
+                                placeholder="#0a0a0a"
+                            />
+                            <BlogFormColorField
                                 :id="`${fieldIdPrefix}-theme-dark-foreground`"
                                 v-model="form.theme!.dark!['--foreground']"
                                 :error="form.errors['theme.dark']"
-                                label="--foreground"
-                                type="custom"
-                            >
-                                <input
-                                    :value="form.theme?.dark?.['--foreground']"
-                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
-                                    placeholder="#f7f7f7"
-                                    type="text"
-                                    @input="form.theme!.dark!['--foreground'] = ($event.target as HTMLInputElement).value"
-                                />
-                            </PostFormField>
-                            <PostFormField
+                                :label="translationKeys.themeColorForeground"
+                                :tooltip="translationKeys.themeColorForegroundTooltip"
+                                placeholder="#f7f7f7"
+                            />
+                            <BlogFormColorField
                                 :id="`${fieldIdPrefix}-theme-dark-primary`"
                                 v-model="form.theme!.dark!['--primary']"
                                 :error="form.errors['theme.dark']"
-                                label="--primary"
-                                type="custom"
-                            >
-                                <input
-                                    :value="form.theme?.dark?.['--primary']"
-                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
-                                    placeholder="#f7f7f7"
-                                    type="text"
-                                    @input="form.theme!.dark!['--primary'] = ($event.target as HTMLInputElement).value"
-                                />
-                            </PostFormField>
-                            <PostFormField
+                                :label="translationKeys.themeColorPrimary"
+                                :tooltip="translationKeys.themeColorPrimaryTooltip"
+                                placeholder="#f7f7f7"
+                            />
+                            <BlogFormColorField
                                 :id="`${fieldIdPrefix}-theme-dark-primary-fg`"
                                 v-model="form.theme!.dark!['--primary-foreground']"
                                 :error="form.errors['theme.dark']"
-                                label="--primary-foreground"
-                                type="custom"
-                            >
-                                <input
-                                    :value="form.theme?.dark?.['--primary-foreground']"
-                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
-                                    placeholder="#111111"
-                                    type="text"
-                                    @input="form.theme!.dark!['--primary-foreground'] = ($event.target as HTMLInputElement).value"
-                                />
-                            </PostFormField>
-                            <PostFormField
+                                :label="translationKeys.themeColorPrimaryForeground"
+                                :tooltip="translationKeys.themeColorPrimaryForegroundTooltip"
+                                placeholder="#111111"
+                            />
+                            <BlogFormColorField
                                 :id="`${fieldIdPrefix}-theme-dark-secondary`"
                                 v-model="form.theme!.dark!['--secondary']"
                                 :error="form.errors['theme.dark']"
-                                label="--secondary"
-                                type="custom"
-                            >
-                                <input
-                                    :value="form.theme?.dark?.['--secondary']"
-                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
-                                    placeholder="#222222"
-                                    type="text"
-                                    @input="form.theme!.dark!['--secondary'] = ($event.target as HTMLInputElement).value"
-                                />
-                            </PostFormField>
-                            <PostFormField
+                                :label="translationKeys.themeColorSecondary"
+                                :tooltip="translationKeys.themeColorSecondaryTooltip"
+                                placeholder="#222222"
+                            />
+                            <BlogFormColorField
                                 :id="`${fieldIdPrefix}-theme-dark-secondary-fg`"
                                 v-model="form.theme!.dark!['--secondary-foreground']"
                                 :error="form.errors['theme.dark']"
-                                label="--secondary-foreground"
-                                type="custom"
-                            >
-                                <input
-                                    :value="form.theme?.dark?.['--secondary-foreground']"
-                                    class="w-full rounded border border-border bg-background p-2 text-foreground"
-                                    placeholder="#fafafa"
-                                    type="text"
-                                    @input="form.theme!.dark!['--secondary-foreground'] = ($event.target as HTMLInputElement).value"
-                                />
-                            </PostFormField>
+                                :label="translationKeys.themeColorSecondaryForeground"
+                                :tooltip="translationKeys.themeColorSecondaryForegroundTooltip"
+                                placeholder="#fafafa"
+                            />
                         </div>
                     </div>
                 </div>
                 <div class="mt-2 text-xs text-muted-foreground">
-                    Advanced: you may add any other CSS variables used by the app (e.g., --accent, --muted, --border) by editing JSON payload via API.
+                    {{ translationKeys.themeAdvancedHint }}
                 </div>
             </div>
 
