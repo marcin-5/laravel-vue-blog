@@ -61,6 +61,7 @@ const translationKeys = computed(() => ({
     create: t('blogger.post_form.create_post_button'),
     creating: t('blogger.post_form.creating_button'),
     save: t('blogger.post_form.save_post_button'),
+    apply: t('blogger.post_form.apply_button'),
     saving: t('blogger.post_form.saving_button'),
     // Preview-related translations for MarkdownPreviewSection
     preview: t('blogger.post_form.preview_button'),
@@ -113,6 +114,13 @@ const debouncedRenderMarkdown = useDebounceFn((content: string) => {
 
 function handleSubmit() {
     emit('submit', form);
+}
+
+function handleApply() {
+    form.patch(route('posts.update', props.post!.id), {
+        preserveScroll: true,
+        preserveState: true,
+    });
 }
 
 function handleCancel() {
@@ -206,9 +214,11 @@ function handleContentInput() {
                     cancel: translationKeys.cancel,
                     create: translationKeys.create,
                     save: translationKeys.save,
+                    apply: translationKeys.apply,
                     creating: translationKeys.creating,
                     saving: translationKeys.saving,
                 }"
+                @apply="handleApply"
                 @cancel="handleCancel"
                 @submit="handleSubmit"
             />

@@ -78,6 +78,7 @@ const actionTranslations = computed(() => ({
     cancel: t('blogger.form.cancel_button'),
     create: t('blogger.form.create_button'),
     save: t('blogger.form.save_button'),
+    apply: t('blogger.form.apply_button'),
     saving: t('blogger.form.saving_button'),
     creating: t('blogger.form.creating_button'),
 }));
@@ -166,6 +167,13 @@ const themeDarkErrors = computed(() => filterErrorsByPrefix(form.errors, 'theme.
 
 function handleSubmit() {
     emit('submit', form);
+}
+
+function handleApply() {
+    form.patch(route('blogs.update', props.blog!.id), {
+        preserveScroll: true,
+        preserveState: true,
+    });
 }
 
 function handleCancel() {
@@ -372,9 +380,11 @@ function handleFooterInput() {
                     cancel: actionTranslations.cancel,
                     create: actionTranslations.create,
                     save: actionTranslations.save,
+                    apply: actionTranslations.apply,
                     creating: actionTranslations.creating,
                     saving: actionTranslations.saving,
                 }"
+                @apply="handleApply"
                 @cancel="handleCancel"
                 @submit="handleSubmit"
             />

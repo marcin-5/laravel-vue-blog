@@ -6,6 +6,7 @@ interface SubmitTranslations {
     cancel: string;
     create: string;
     save: string;
+    apply: string;
     creating: string;
     saving: string;
 }
@@ -18,6 +19,7 @@ interface Props {
 
 interface Emits {
     (e: 'submit'): void;
+    (e: 'apply'): void;
     (e: 'cancel'): void;
 }
 
@@ -36,6 +38,9 @@ const submitButtonLabel = computed(() => {
     <div class="flex items-center gap-2">
         <Button :disabled="isProcessing" type="submit" variant="constructive">
             {{ submitButtonLabel }}
+        </Button>
+        <Button v-if="isEdit" :disabled="isProcessing" type="button" variant="outline" @click="emit('apply')">
+            {{ translations.apply }}
         </Button>
         <Button type="button" variant="destructive" @click="emit('cancel')">
             {{ translations.cancel }}
