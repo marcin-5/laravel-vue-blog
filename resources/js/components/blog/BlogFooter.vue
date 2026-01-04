@@ -6,6 +6,6 @@ const props = defineProps<{
 
 <template>
     <section v-if="props.html" class="mt-6" style="font-family: 'Roboto', sans-serif">
-        <div class="prose max-w-none" v-html="props.html" />
+        <div class="prose max-w-none text-primary/90" v-html="props.html" />
     </section>
 </template>

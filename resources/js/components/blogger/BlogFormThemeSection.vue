@@ -20,6 +20,14 @@ interface Props {
         secondaryTooltip: string;
         secondaryForeground: string;
         secondaryForegroundTooltip: string;
+        mutedForeground: string;
+        mutedForegroundTooltip: string;
+        border: string;
+        borderTooltip: string;
+        link: string;
+        linkTooltip: string;
+        linkHover: string;
+        linkHoverTooltip: string;
     };
 }
 
@@ -54,30 +62,21 @@ function updateColor(key: string, value: string) {
             />
             <BlogFormColorField
                 :id="`${props.idPrefix}-foreground`"
-                :error="props.errors?.['--foreground']"
-                :label="props.translations.foreground"
-                :model-value="props.colors['--foreground']"
-                :tooltip="props.translations.foregroundTooltip"
-                placeholder="#0a0a0a"
-                @update:model-value="updateColor('--foreground', $event)"
-            />
-            <BlogFormColorField
-                :id="`${props.idPrefix}-primary`"
                 :error="props.errors?.['--primary']"
-                :label="props.translations.primary"
+                :label="props.translations.foreground"
                 :model-value="props.colors['--primary']"
                 :tooltip="props.translations.primaryTooltip"
-                placeholder="#111111"
+                placeholder="#0a0a0a"
                 @update:model-value="updateColor('--primary', $event)"
             />
             <BlogFormColorField
-                :id="`${props.idPrefix}-primary-fg`"
-                :error="props.errors?.['--primary-foreground']"
-                :label="props.translations.primaryForeground"
-                :model-value="props.colors['--primary-foreground']"
-                :tooltip="props.translations.primaryForegroundTooltip"
-                placeholder="#fafafa"
-                @update:model-value="updateColor('--primary-foreground', $event)"
+                :id="`${props.idPrefix}-primary`"
+                :error="props.errors?.['--foreground']"
+                :label="props.translations.primary"
+                :model-value="props.colors['--foreground']"
+                :tooltip="props.translations.foregroundTooltip"
+                placeholder="#111111"
+                @update:model-value="updateColor('--foreground', $event)"
             />
             <BlogFormColorField
                 :id="`${props.idPrefix}-secondary`"
@@ -89,6 +88,15 @@ function updateColor(key: string, value: string) {
                 @update:model-value="updateColor('--secondary', $event)"
             />
             <BlogFormColorField
+                :id="`${props.idPrefix}-primary-fg`"
+                :error="props.errors?.['--primary-foreground']"
+                :label="props.translations.primaryForeground"
+                :model-value="props.colors['--primary-foreground']"
+                :tooltip="props.translations.primaryForegroundTooltip"
+                placeholder="#fafafa"
+                @update:model-value="updateColor('--primary-foreground', $event)"
+            />
+            <BlogFormColorField
                 :id="`${props.idPrefix}-secondary-fg`"
                 :error="props.errors?.['--secondary-foreground']"
                 :label="props.translations.secondaryForeground"
@@ -96,6 +104,42 @@ function updateColor(key: string, value: string) {
                 :tooltip="props.translations.secondaryForegroundTooltip"
                 placeholder="#111111"
                 @update:model-value="updateColor('--secondary-foreground', $event)"
+            />
+            <BlogFormColorField
+                :id="`${props.idPrefix}-muted-fg`"
+                :error="props.errors?.['--muted-foreground']"
+                :label="props.translations.mutedForeground"
+                :model-value="props.colors['--muted-foreground']"
+                :tooltip="props.translations.mutedForegroundTooltip"
+                placeholder="#737373"
+                @update:model-value="updateColor('--muted-foreground', $event)"
+            />
+            <BlogFormColorField
+                :id="`${props.idPrefix}-border`"
+                :error="props.errors?.['--border']"
+                :label="props.translations.border"
+                :model-value="props.colors['--border']"
+                :tooltip="props.translations.borderTooltip"
+                placeholder="#e5e5e5"
+                @update:model-value="updateColor('--border', $event)"
+            />
+            <BlogFormColorField
+                :id="`${props.idPrefix}-link`"
+                :error="props.errors?.['--link']"
+                :label="props.translations.link"
+                :model-value="props.colors['--link']"
+                :tooltip="props.translations.linkTooltip"
+                placeholder="#0d9488"
+                @update:model-value="updateColor('--link', $event)"
+            />
+            <BlogFormColorField
+                :id="`${props.idPrefix}-link-hover`"
+                :error="props.errors?.['--link-hover']"
+                :label="props.translations.linkHover"
+                :model-value="props.colors['--link-hover']"
+                :tooltip="props.translations.linkHoverTooltip"
+                placeholder="#0f766e"
+                @update:model-value="updateColor('--link-hover', $event)"
             />
         </div>
     </div>

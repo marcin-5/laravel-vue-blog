@@ -44,10 +44,10 @@ const hasPosts = computed(() => props.posts && props.posts.length > 0);
 const hasPagination = computed(() => paginationLinks.value.length > 0);
 
 // CSS classes
-const LINK_BASE_CLASSES = 'rounded border px-2 py-1 text-sm';
-const LINK_ACTIVE_CLASSES = 'border-slate-500 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800';
-const LINK_INACTIVE_CLASSES = 'border border-gray-200 text-gray-500 dark:border-gray-700 dark:text-gray-600';
-const LINK_HOVER_CLASSES = 'hover:bg-gray-50 dark:hover:bg-gray-800';
+const LINK_BASE_CLASSES = 'rounded border px-2 py-1 text-sm transition-colors';
+const LINK_ACTIVE_CLASSES = 'border-foreground text-foreground hover:bg-muted';
+const LINK_INACTIVE_CLASSES = 'border-border text-muted-foreground';
+const LINK_HOVER_CLASSES = 'hover:bg-muted';
 const LINK_DISABLED_CLASSES = 'pointer-events-none opacity-50';
 
 function getPaginationLinkClasses(link: { active: boolean; url: string | null }): string[] {
@@ -71,7 +71,7 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
 
 <template>
     <section :aria-label="t('blog.posts_list.aria')" style="font-family: 'Inter', sans-serif">
-        <h2 class="mb-2 text-xl font-semibold text-slate-700 dark:text-slate-500">
+        <h2 class="mb-2 text-xl font-semibold text-foreground opacity-90">
             {{ t('blog.posts_list.title') }}
         </h2>
 
@@ -83,12 +83,12 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
             <li v-for="post in posts" :key="post.id">
                 <Link
                     :href="route('blog.public.post', { blog: blogSlug, postSlug: post.slug })"
-                    class="font-semibold text-teal-900 hover:underline dark:font-normal dark:text-sky-200"
+                    class="font-semibold text-link hover:text-link-hover hover:underline"
                 >
                     {{ post.title }}
                 </Link>
-                <small v-if="post.published_at" class="text-gray-700 dark:text-gray-400"> · {{ post.published_at }} </small>
-                <div v-if="post.excerpt" class="prose dark:prose-invert -mt-3 max-w-none text-slate-800 dark:text-slate-400" v-html="post.excerpt" />
+                <small v-if="post.published_at" class="text-muted-foreground"> · {{ post.published_at }} </small>
+                <div v-if="post.excerpt" class="prose -mt-3 max-w-none text-secondary-foreground opacity-90" v-html="post.excerpt" />
             </li>
         </ul>
 

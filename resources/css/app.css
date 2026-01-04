@@ -25,6 +25,7 @@
 
     --color-secondary: var(--secondary);
     --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary-hover: var(--secondary-hover);
 
     --color-muted: var(--muted);
     --color-muted-foreground: var(--muted-foreground);
@@ -41,14 +42,6 @@
     --color-destructive-hover: var(--destructive-hover);
 
     --color-error: var(--destructive-hover);
-
-    --color-exit: var(--exit);
-    --color-exit-hover: var(--exit-hover);
-    --color-exit-foreground: var(--exit-foreground);
-
-    --color-toggle: var(--toggle);
-    --color-toggle-hover: var(--toggle-hover);
-    --color-toggle-foreground: var(--toggle-foreground);
 
     --color-warning: var(--warning);
     --color-warning-foreground: var(--warning-foreground);
@@ -74,6 +67,9 @@
 
     --color-breadcrumb-link: var(--breadcrumb-link);
     --color-breadcrumb-link-active: var(--breadcrumb-link-active);
+
+    --color-link: var(--link);
+    --color-link-hover: var(--link-hover);
 }
 
 @layer utilities {
@@ -91,9 +87,7 @@
     --popover: hsl(0 0% 100%);
     --popover-foreground: hsl(0 0% 3.9%);
     --primary: hsl(0 0% 9%);
-    --primary-foreground: hsl(0 0% 98%);
-    --secondary: hsl(0 0% 92.1%);
-    --secondary-foreground: hsl(0 0% 9%);
+    --primary-foreground: hsl(112 21% 26%);
     --muted: hsl(0 0% 96.1%);
     --muted-foreground: hsl(0 0% 45.1%);
     --accent: hsl(0 0% 96.1%);
@@ -104,12 +98,9 @@
     --destructive: hsl(6 75% 50%);
     --destructive-hover: hsl(6 84% 60%);
     --destructive-foreground: hsl(5 95% 99%);
-    --exit: hsl(112 11% 12%);
-    --exit-hover: hsl(112 21% 26%);
-    --exit-foreground: hsl(112 75% 93%);
-    --toggle: hsl(102 21% 75%);
-    --toggle-hover: hsl(102 20% 61%);
-    --toggle-foreground: hsl(102 75% 5%);
+    --secondary: hsl(102 21% 75%);
+    --secondary-hover: hsl(102 20% 61%);
+    --secondary-foreground: hsl(102 75% 5%);
     --warning: #eddaaede;
     --warning-foreground: #222010;
     --border: hsl(0 0% 92.8%);
@@ -132,6 +123,8 @@
     --sidebar: hsl(0 0% 98%);
     --breadcrumb-link: #534432ee;
     --breadcrumb-link-active: #403020;
+    --link: hsl(175 38% 34%);
+    --link-hover: hsl(169 58% 21%);
 }
 
 .dark {
@@ -142,9 +135,7 @@
     --popover: hsl(0 0% 3.9%);
     --popover-foreground: hsl(0 0% 98%);
     --primary: hsl(0 0% 98%);
-    --primary-foreground: hsl(0 0% 9%);
-    --secondary: hsl(0 0% 14.9%);
-    --secondary-foreground: hsl(0 0% 98%);
+    --primary-foreground: hsl(112 75% 93%);
     --muted: hsl(0 0% 16.08%);
     --muted-foreground: hsl(0 0% 63.9%);
     --accent: hsl(0 0% 14.9%);
@@ -155,12 +146,9 @@
     --destructive: hsl(5 53% 47%);
     --destructive-hover: hsl(0 64% 69%);
     --destructive-foreground: hsl(5 79% 98%);
-    --exit: hsl(112 21% 12%);
-    --exit-hover: hsl(112 21% 26%);
-    --exit-foreground: hsl(112 75% 93%);
-    --toggle: hsl(102 21% 12%);
-    --toggle-hover: hsl(102 20% 25%);
-    --toggle-foreground: hsl(102 75% 93%);
+    --secondary: hsl(102 21% 12%);
+    --secondary-hover: hsl(102 20% 25%);
+    --secondary-foreground: hsl(102 75% 93%);
     --warning: #0c1716de;
     --warning-foreground: #eece7e;
     --border: hsl(0 0% 14.9%);
@@ -182,6 +170,8 @@
     --sidebar: hsl(240 5.9% 10%);
     --breadcrumb-link: #ccbb55aa;
     --breadcrumb-link-active: #bbaa55dd;
+    --link: hsl(169 25% 69%);
+    --link-hover: hsl(169 69% 89%);
 }
 
 @layer base {

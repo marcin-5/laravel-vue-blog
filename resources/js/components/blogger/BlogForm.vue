@@ -112,6 +112,14 @@ const themeSectionTranslations = computed(() => ({
     colorSecondaryTooltip: t('blogger.form.theme_color_secondary_tooltip'),
     colorSecondaryForeground: t('blogger.form.theme_color_secondary_foreground'),
     colorSecondaryForegroundTooltip: t('blogger.form.theme_color_secondary_foreground_tooltip'),
+    colorMutedForeground: t('blogger.form.theme_color_muted_foreground'),
+    colorMutedForegroundTooltip: t('blogger.form.theme_color_muted_foreground_tooltip'),
+    colorBorder: t('blogger.form.theme_color_border'),
+    colorBorderTooltip: t('blogger.form.theme_color_border_tooltip'),
+    colorLink: t('blogger.form.theme_color_link'),
+    colorLinkTooltip: t('blogger.form.theme_color_link_tooltip'),
+    colorLinkHover: t('blogger.form.theme_color_link_hover'),
+    colorLinkHoverTooltip: t('blogger.form.theme_color_link_hover_tooltip'),
 }));
 
 const localeOptions = computed(() => [
@@ -122,16 +130,24 @@ const localeOptions = computed(() => [
 const themeTranslations = computed(() => ({
     background: themeSectionTranslations.value.colorBackground,
     backgroundTooltip: themeSectionTranslations.value.colorBackgroundTooltip,
-    foreground: themeSectionTranslations.value.colorForeground,
-    foregroundTooltip: themeSectionTranslations.value.colorForegroundTooltip,
-    primary: themeSectionTranslations.value.colorPrimary,
-    primaryTooltip: themeSectionTranslations.value.colorPrimaryTooltip,
+    foreground: themeSectionTranslations.value.colorPrimary,
+    foregroundTooltip: themeSectionTranslations.value.colorPrimaryTooltip,
+    primary: themeSectionTranslations.value.colorForeground,
+    primaryTooltip: themeSectionTranslations.value.colorForegroundTooltip,
     primaryForeground: themeSectionTranslations.value.colorPrimaryForeground,
     primaryForegroundTooltip: themeSectionTranslations.value.colorPrimaryForegroundTooltip,
     secondary: themeSectionTranslations.value.colorSecondary,
     secondaryTooltip: themeSectionTranslations.value.colorSecondaryTooltip,
     secondaryForeground: themeSectionTranslations.value.colorSecondaryForeground,
     secondaryForegroundTooltip: themeSectionTranslations.value.colorSecondaryForegroundTooltip,
+    mutedForeground: themeSectionTranslations.value.colorMutedForeground,
+    mutedForegroundTooltip: themeSectionTranslations.value.colorMutedForegroundTooltip,
+    border: themeSectionTranslations.value.colorBorder,
+    borderTooltip: themeSectionTranslations.value.colorBorderTooltip,
+    link: themeSectionTranslations.value.colorLink,
+    linkTooltip: themeSectionTranslations.value.colorLinkTooltip,
+    linkHover: themeSectionTranslations.value.colorLinkHover,
+    linkHoverTooltip: themeSectionTranslations.value.colorLinkHoverTooltip,
 }));
 
 function filterErrorsByPrefix(errors: Record<string, string>, prefix: string): Record<string, string> {

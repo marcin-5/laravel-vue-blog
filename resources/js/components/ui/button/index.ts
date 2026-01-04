@@ -14,9 +14,9 @@ export const buttonVariants = cva(
         constructive:
           'bg-constructive text-constructive-foreground shadow-xs hover:bg-constructive-hover focus-visible:ring-constructive/20',
         exit:
-          'bg-exit text-exit-foreground shadow-xs hover:bg-exit-hover focus-visible:ring-exit/20',
+          'bg-secondary text-primary-foreground shadow-xs hover:bg-secondary-hover focus-visible:ring-secondary/20',
         toggle:
-          'bg-toggle text-toggle-foreground shadow-xs hover:bg-toggle-hover focus-visible:ring-toggle/20',
+          'bg-secondary/70 text-secondary-foreground shadow-xs hover:bg-secondary-hover focus-visible:ring-secondary/20',
         muted:
           'bg-muted text-muted-foreground shadow-xs hover:bg-muted/80 focus-visible:ring-muted/20',
         outline:

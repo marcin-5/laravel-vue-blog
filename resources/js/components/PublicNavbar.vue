@@ -71,10 +71,10 @@ watch(
                         :key="link.route"
                         :as="link.as"
                         :class="[
-                            'inline-block rounded-sm px-5 py-1.5 text-sm leading-normal text-[#1b1b18] dark:text-[#EDEDEC]',
+                            'inline-block rounded-sm px-5 py-1.5 text-sm leading-normal text-primary',
                             link.emphasized
-                                ? 'border border-[#19140035] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:hover:border-[#62605b]'
-                                : 'border border-transparent hover:border-[#19140035] dark:hover:border-[#3E3E3A]',
+                                ? 'border border-border hover:border-primary/20 dark:hover:border-primary/30'
+                                : 'border border-transparent hover:border-border',
                         ]"
                         :href="route(link.route)"
                         :method="link.method"
@@ -90,7 +90,7 @@ watch(
                     :aria-expanded="mobileOpen"
                     aria-controls="mobile-menu"
                     aria-label="Toggle menu"
-                    class="inline-flex items-center justify-center rounded-sm border border-transparent p-2 text-[#1b1b18] hover:border-[#19140035] md:hidden dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
+                    class="inline-flex items-center justify-center rounded-sm border border-transparent p-2 text-foreground hover:border-border md:hidden"
                     type="button"
                     @click="mobileOpen = !mobileOpen"
                 >
@@ -102,16 +102,16 @@ watch(
         <!-- Mobile menu panel -->
         <div v-if="mobileOpen" id="mobile-menu" class="md:hidden">
             <div :class="['mx-auto w-full px-4 pt-3 sm:px-6 lg:px-8', props.maxWidth]">
-                <div class="flex flex-col gap-2 border-t border-[#19140035] pt-3 dark:border-[#3E3E3A]">
+                <div class="flex flex-col gap-2 border-t border-border pt-3">
                     <Link
                         v-for="link in navLinks"
                         :key="link.route"
                         :as="link.as"
                         :class="[
-                            'inline-block rounded-sm px-4 py-2 text-sm leading-normal text-[#1b1b18] dark:text-[#EDEDEC]',
+                            'inline-block rounded-sm px-4 py-2 text-sm leading-normal text-primary',
                             link.emphasized
-                                ? 'border border-[#19140035] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:hover:border-[#62605b]'
-                                : 'border border-transparent hover:border-[#19140035] dark:hover:border-[#3E3E3A]',
+                                ? 'border border-border hover:border-primary/20 dark:hover:border-primary/30'
+                                : 'border border-transparent hover:border-border',
                         ]"
                         :href="route(link.route)"
                         :method="link.method"
