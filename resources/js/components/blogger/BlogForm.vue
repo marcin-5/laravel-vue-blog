@@ -121,6 +121,10 @@ const themeSectionTranslations = computed(() => ({
     colorLinkTooltip: t('blogger.form.theme_color_link_tooltip'),
     colorLinkHover: t('blogger.form.theme_color_link_hover'),
     colorLinkHoverTooltip: t('blogger.form.theme_color_link_hover_tooltip'),
+    colorBreadcrumbLink: t('blogger.form.theme_color_breadcrumb_link'),
+    colorBreadcrumbLinkTooltip: t('blogger.form.theme_color_breadcrumb_link_tooltip'),
+    colorBreadcrumbLinkActive: t('blogger.form.theme_color_breadcrumb_link_active'),
+    colorBreadcrumbLinkActiveTooltip: t('blogger.form.theme_color_breadcrumb_link_active_tooltip'),
 }));
 
 const localeOptions = computed(() => [
@@ -149,6 +153,10 @@ const themeTranslations = computed(() => ({
     linkTooltip: themeSectionTranslations.value.colorLinkTooltip,
     linkHover: themeSectionTranslations.value.colorLinkHover,
     linkHoverTooltip: themeSectionTranslations.value.colorLinkHoverTooltip,
+    breadcrumbLink: themeSectionTranslations.value.colorBreadcrumbLink,
+    breadcrumbLinkTooltip: themeSectionTranslations.value.colorBreadcrumbLinkTooltip,
+    breadcrumbLinkActive: themeSectionTranslations.value.colorBreadcrumbLinkActive,
+    breadcrumbLinkActiveTooltip: themeSectionTranslations.value.colorBreadcrumbLinkActiveTooltip,
 }));
 
 function filterErrorsByPrefix(errors: Record<string, string>, prefix: string): Record<string, string> {

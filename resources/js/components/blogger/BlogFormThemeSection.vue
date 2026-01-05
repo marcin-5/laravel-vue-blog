@@ -28,6 +28,10 @@ interface Props {
         linkTooltip: string;
         linkHover: string;
         linkHoverTooltip: string;
+        breadcrumbLink: string;
+        breadcrumbLinkTooltip: string;
+        breadcrumbLinkActive: string;
+        breadcrumbLinkActiveTooltip: string;
     };
 }
 
@@ -140,6 +144,24 @@ function updateColor(key: string, value: string) {
                 :tooltip="props.translations.linkHoverTooltip"
                 placeholder="#0f766e"
                 @update:model-value="updateColor('--link-hover', $event)"
+            />
+            <BlogFormColorField
+                :id="`${props.idPrefix}-breadcrumb-link`"
+                :error="props.errors?.['--breadcrumb-link']"
+                :label="props.translations.breadcrumbLink"
+                :model-value="props.colors['--breadcrumb-link']"
+                :tooltip="props.translations.breadcrumbLinkTooltip"
+                placeholder="#534432ee"
+                @update:model-value="updateColor('--breadcrumb-link', $event)"
+            />
+            <BlogFormColorField
+                :id="`${props.idPrefix}-breadcrumb-link-active`"
+                :error="props.errors?.['--breadcrumb-link-active']"
+                :label="props.translations.breadcrumbLinkActive"
+                :model-value="props.colors['--breadcrumb-link-active']"
+                :tooltip="props.translations.breadcrumbLinkActiveTooltip"
+                placeholder="#403020"
+                @update:model-value="updateColor('--breadcrumb-link-active', $event)"
             />
         </div>
     </div>
