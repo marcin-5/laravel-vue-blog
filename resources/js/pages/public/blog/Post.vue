@@ -59,7 +59,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
 </script>
 
 <template>
-    <div :style="mergedThemeStyle" class="flex min-h-screen flex-col bg-background text-foreground">
+    <div :style="mergedThemeStyle" class="flex min-h-screen flex-col bg-background text-foreground antialiased">
         <PublicNavbar :maxWidth="navbarMaxWidth" />
 
         <div
@@ -70,8 +70,8 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
         >
             <BorderDivider class="mb-4" />
 
-            <header class="mb-4">
-                <h1 class="text-2xl font-bold text-foreground">{{ post.title }}</h1>
+            <header class="mb-4 font-[var(--blog-header-font)]">
+                <h1 class="font-[inherit] text-2xl font-bold text-foreground">{{ post.title }}</h1>
                 <div class="my-2 inline-flex items-center gap-x-5 text-sm font-medium text-muted-foreground">
                     <p v-if="post.published_at" class="italic">{{ publishedLabel }} {{ post.published_at }}</p>
                     <span>

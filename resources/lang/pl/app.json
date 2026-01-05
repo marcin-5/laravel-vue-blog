@@ -198,7 +198,13 @@
             "theme_color_breadcrumb_link": "--breadcrumb-link",
             "theme_color_breadcrumb_link_tooltip": "Kolor linków ścieżki nawigacji.",
             "theme_color_breadcrumb_link_active": "--breadcrumb-link-hover",
-            "theme_color_breadcrumb_link_active_tooltip": "Kolor bieżącej ścieżki nawigacji."
+            "theme_color_breadcrumb_link_active_tooltip": "Kolor bieżącej ścieżki nawigacji.",
+            "theme_font_header": "Font nagłówków",
+            "theme_font_body": "Font treści",
+            "theme_font_motto": "Font motto/cytatów",
+            "theme_font_footer": "Font stopki",
+            "theme_motto_style": "Styl motto/cytatów",
+            "theme_footer_scale": "Wielkość stopki"
         },
         "stats": {
             "posts": "Posty",

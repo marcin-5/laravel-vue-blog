@@ -1,7 +1,13 @@
+import '@fontsource-variable/montserrat';
 import '@fontsource-variable/nunito';
+import '@fontsource-variable/quicksand';
+import '@fontsource-variable/recursive';
 import '@fontsource-variable/roboto';
+import '@fontsource-variable/rokkitt';
+import '@fontsource/esteban';
 import '@fontsource/inter';
 import '@fontsource/noto-serif';
+import '@fontsource/slabo-27px';
 import '../css/app.css';
 
 import { createInertiaApp, router } from '@inertiajs/vue3';

@@ -157,6 +157,12 @@ const themeTranslations = computed(() => ({
     breadcrumbLinkTooltip: themeSectionTranslations.value.colorBreadcrumbLinkTooltip,
     breadcrumbLinkActive: themeSectionTranslations.value.colorBreadcrumbLinkActive,
     breadcrumbLinkActiveTooltip: themeSectionTranslations.value.colorBreadcrumbLinkActiveTooltip,
+    fontHeader: t('blogger.form.theme_font_header'),
+    fontBody: t('blogger.form.theme_font_body'),
+    fontMotto: t('blogger.form.theme_font_motto'),
+    fontFooter: t('blogger.form.theme_font_footer'),
+    mottoStyle: t('blogger.form.theme_motto_style'),
+    footerScale: t('blogger.form.theme_footer_scale'),
 }));
 
 function filterErrorsByPrefix(errors: Record<string, string>, prefix: string): Record<string, string> {

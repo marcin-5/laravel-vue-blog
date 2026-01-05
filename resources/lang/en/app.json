@@ -198,7 +198,13 @@
             "theme_color_breadcrumb_link": "--breadcrumb-link",
             "theme_color_breadcrumb_link_tooltip": "Navigation path link color.",
             "theme_color_breadcrumb_link_active": "--breadcrumb-link-hover",
-            "theme_color_breadcrumb_link_active_tooltip": "Color of the current navigation path."
+            "theme_color_breadcrumb_link_active_tooltip": "Color of the current navigation path.",
+            "theme_font_header": "Header Font",
+            "theme_font_body": "Body Font",
+            "theme_font_motto": "Motto/Quote Font",
+            "theme_font_footer": "Footer Font",
+            "theme_motto_style": "Motto/Quote Style",
+            "theme_footer_scale": "Footer Size"
         },
         "stats": {
             "posts": "Posts",

@@ -17,22 +17,26 @@ defineProps<{
 </script>
 
 <template>
-    <header class="mb-4">
+    <header :style="{ fontFamily: 'var(--blog-header-font)' }" class="mb-4">
         <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-bold text-foreground">
+            <h1 class="font-[inherit] text-2xl font-bold text-foreground">
                 {{ blog.name }}
             </h1>
             <ViewStats :total="viewStats.total" :unique="viewStats.unique"></ViewStats>
         </div>
-        <p v-if="displayedMotto" class="mt-2 mb-12 font-serif text-foreground italic opacity-80">
+        <p
+            v-if="displayedMotto"
+            :style="{ fontStyle: 'var(--blog-motto-style)', fontFamily: 'var(--blog-motto-font)' }"
+            class="mt-2 mb-12 text-foreground opacity-80"
+        >
             {{ displayedMotto }}
         </p>
     </header>
-    <section>
+    <section :style="{ fontFamily: 'var(--blog-body-font)' }">
         <div v-if="blog.descriptionHtml" class="prose max-w-none text-primary" v-html="blog.descriptionHtml" />
     </section>
-    <footer>
-        <div v-if="blog.authorName && blog.authorEmail" class="author text-md mr-12 mb-12 text-end font-serif text-muted-foreground">
+    <footer :style="{ fontFamily: 'var(--blog-footer-font)' }" class="origin-right">
+        <div v-if="blog.authorName && blog.authorEmail" class="author text-md mr-12 mb-12 text-end text-muted-foreground">
             <a :href="`mailto:${blog.authorEmail}`" class="hover:text-foreground">{{ blog.authorName }}</a>
         </div>
     </footer>

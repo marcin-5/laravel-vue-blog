@@ -68,7 +68,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
 </script>
 
 <template>
-    <div :style="mergedThemeStyle" class="flex min-h-screen flex-col bg-background text-foreground">
+    <div :style="mergedThemeStyle" class="flex min-h-screen flex-col bg-background text-foreground antialiased">
         <PublicNavbar :maxWidth="navbarMaxWidth" />
         <div
             :class="[

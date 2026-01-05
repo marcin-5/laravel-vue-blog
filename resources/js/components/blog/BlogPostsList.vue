@@ -70,8 +70,8 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
 </script>
 
 <template>
-    <section :aria-label="t('blog.posts_list.aria')" style="font-family: 'Inter', sans-serif">
-        <h2 class="mb-2 text-xl font-semibold text-foreground opacity-90">
+    <section :aria-label="t('blog.posts_list.aria')" :style="{ fontFamily: 'var(--blog-body-font)' }">
+        <h2 :style="{ fontFamily: 'var(--blog-header-font)' }" class="mb-2 text-xl font-semibold text-foreground opacity-90">
             {{ t('blog.posts_list.title') }}
         </h2>
 
