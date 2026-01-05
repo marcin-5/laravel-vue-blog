@@ -83,7 +83,9 @@ class PublicBlogController extends BasePublicController
             'seo' => $seoData->toArray(),
             'viewStats' => [
                 'total' => $blog->view_count,
-                'unique' => $this->countUniqueViews((new Blog)->getMorphClass(), $blog->id),
+                'unique' => auth()->check() && auth()->user()->isAdmin()
+                    ? $this->countUniqueViews((new Blog)->getMorphClass(), $blog->id)
+                    : null,
             ],
         ]);
     }

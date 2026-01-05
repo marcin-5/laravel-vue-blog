@@ -17,7 +17,7 @@ defineProps({
         <span class="inline-block h-2 w-2 rounded-full bg-foreground opacity-80"></span>
         <span>
             Odsłony: {{ total.toLocaleString() }}
-            <template v-if="unique !== undefined"> (unikalne: {{ Number(unique).toLocaleString() }})</template>
+            <template v-if="unique !== undefined && unique > 0 && unique !== total"> (unikalne: {{ Number(unique).toLocaleString() }})</template>
         </span>
     </div>
 </template>
