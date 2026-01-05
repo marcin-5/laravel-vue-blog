@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import InputError from '@/components/InputError.vue';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface SelectOption {
     value: string | number;
@@ -21,25 +22,24 @@ interface Emits {
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
-function handleChange(event: Event) {
-    const target = event.target as HTMLSelectElement;
-    emit('update:modelValue', target.value);
+function handleUpdate(value: any) {
+    emit('update:modelValue', value);
 }
 </script>
 
 <template>
     <div class="flex items-center gap-2">
         <label :for="props.id" class="text-sm">{{ props.label }}</label>
-        <select
-            :id="props.id"
-            :value="props.modelValue"
-            class="rounded border px-2 py-1 text-sm"
-            @change="handleChange"
-        >
-            <option v-for="option in props.options" :key="option.value" :value="option.value">
-                {{ option.label }}
-            </option>
-        </select>
+        <Select :model-value="props.modelValue.toString()" @update:model-value="handleUpdate">
+            <SelectTrigger :id="props.id" class="h-8 w-[180px]">
+                <SelectValue placeholder="Wybierz opcję..." />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem v-for="option in props.options" :key="option.value" :value="option.value.toString()">
+                    {{ option.label }}
+                </SelectItem>
+            </SelectContent>
+        </Select>
         <InputError :message="props.error" />
     </div>
 </template>
