@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import UserCreateForm from '@/components/admin/UserCreateForm.vue';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type UserWithQuota, useUserPermissions } from '@/composables/useUserPermissions';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
@@ -113,9 +114,14 @@ function saveUser(user: UserRow) {
                                 <td class="py-2 pr-4">{{ u.name }}</td>
                                 <td class="py-2 pr-4">{{ u.email }}</td>
                                 <td class="py-2 pr-4">
-                                    <select v-model="u.role" class="rounded-md border bg-background px-2 py-1 text-foreground">
-                                        <option v-for="r in roles" :key="r" :value="r">{{ $t('admin.users.roles.' + r) }}</option>
-                                    </select>
+                                    <Select v-model="u.role">
+                                        <SelectTrigger class="h-8 w-[120px]">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem v-for="r in roles" :key="r" :value="r">{{ $t('admin.users.roles.' + r) }}</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </td>
                                 <td class="py-2 pr-4">
                                     <input

@@ -1,4 +1,7 @@
 <script lang="ts" setup>
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AcceptableValue } from 'reka-ui';
+
 interface Option {
     value: string | number;
     label: string;
@@ -6,7 +9,7 @@ interface Option {
 
 interface Props {
     label: string;
-    modelValue: string | number | null | undefined;
+    modelValue: any;
     options: Option[];
     placeholder?: string;
     minWidth?: string;
@@ -18,28 +21,23 @@ withDefaults(defineProps<Props>(), {
 });
 
 defineEmits<{
-    'update:modelValue': [value: string | number | null | undefined];
+    'update:modelValue': [value: AcceptableValue | undefined];
 }>();
 </script>
 
 <template>
     <div class="flex flex-col">
         <label class="mb-1 text-xs text-muted-foreground">{{ label }}</label>
-        <select
-            :class="minWidth !== 'auto' ? minWidth : ''"
-            :value="modelValue ?? ''"
-            class="rounded-md border bg-background px-2 py-1 text-foreground"
-            @change="
-                $emit(
-                    'update:modelValue',
-                    ($event.target as HTMLSelectElement).value === ''
-                        ? undefined
-                        : Number(($event.target as HTMLSelectElement).value) || ($event.target as HTMLSelectElement).value,
-                )
-            "
+        <Select
+            :model-value="modelValue?.toString() ?? ''"
+            @update:model-value="$emit('update:modelValue', $event === '' ? undefined : Number($event) || $event)"
         >
-            <option v-if="placeholder" value="">{{ placeholder }}</option>
-            <option v-for="opt in options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-        </select>
+            <SelectTrigger :class="minWidth !== 'auto' ? minWidth : ''" class="h-9">
+                <SelectValue :placeholder="placeholder" />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem v-for="opt in options" :key="opt.value" :value="opt.value.toString()">{{ opt.label }}</SelectItem>
+            </SelectContent>
+        </Select>
     </div>
 </template>

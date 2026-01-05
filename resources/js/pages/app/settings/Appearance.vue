@@ -8,6 +8,7 @@ import { type BreadcrumbItem } from '@/types';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { setLocale as setI18nLocale } from '@/i18n';
 import { useI18n } from 'vue-i18n';
 
@@ -47,14 +48,15 @@ function onLocaleChange(newLocale: string) {
                     <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300" for="locale">{{
                         t('appearance.language')
                     }}</label>
-                    <select
-                        id="locale"
-                        class="mt-1 block w-48 rounded-md border-neutral-300 bg-white py-1.5 pr-10 pl-3 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100"
-                        @change="onLocaleChange(($event.target as HTMLSelectElement).value)"
-                    >
-                        <option :selected="$page.props.locale === 'en'" value="en">{{ t('appearance.en') }}</option>
-                        <option :selected="$page.props.locale === 'pl'" value="pl">{{ t('appearance.pl') }}</option>
-                    </select>
+                    <Select :model-value="$page.props.locale as string" @update:model-value="onLocaleChange">
+                        <SelectTrigger id="locale" class="mt-1 h-10 w-48">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="en">{{ t('appearance.en') }}</SelectItem>
+                            <SelectItem value="pl">{{ t('appearance.pl') }}</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
             </div>
         </SettingsLayout>

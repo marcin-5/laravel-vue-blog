@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type Role, useUserPermissions } from '@/composables/useUserPermissions';
 import { useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -86,9 +87,14 @@ function submitCreate() {
                 <InputError :message="createForm.errors.password" />
             </div>
             <div>
-                <select v-model="createForm.role" class="w-full rounded-md border bg-background px-2 py-1 text-foreground">
-                    <option v-for="r in roles" :key="r" :value="r">{{ $t('admin.users.roles.' + r) }}</option>
-                </select>
+                <Select v-model="createForm.role">
+                    <SelectTrigger class="h-[34px] w-full">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem v-for="r in roles" :key="r" :value="r">{{ $t('admin.users.roles.' + r) }}</SelectItem>
+                    </SelectContent>
+                </Select>
                 <InputError :message="createForm.errors.role" />
             </div>
             <div>

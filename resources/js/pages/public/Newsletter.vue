@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toaster } from '@/components/ui/toast';
 import { useToast } from '@/composables/useToast';
 import { Head, useForm } from '@inertiajs/vue3';
@@ -185,19 +186,23 @@ const unsubscribe = () => {
                                             </label>
                                         </td>
                                         <td class="px-4 py-3">
-                                            <select
+                                            <Select
                                                 v-model="sub.frequency"
                                                 :disabled="!sub.selected"
-                                                class="rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:opacity-50"
-                                                @change="
-                                                    sub.frequency === 'daily' && !sub.send_time_weekend
+                                                @update:model-value="
+                                                    $event === 'daily' && !sub.send_time_weekend
                                                         ? (sub.send_time_weekend = props.config.daily_weekend_time)
                                                         : null
                                                 "
                                             >
-                                                <option value="daily">{{ t.form.daily }}</option>
-                                                <option value="weekly">{{ t.form.weekly }}</option>
-                                            </select>
+                                                <SelectTrigger class="h-8 w-[100px]">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="daily">{{ t.form.daily }}</SelectItem>
+                                                    <SelectItem value="weekly">{{ t.form.weekly }}</SelectItem>
+                                                </SelectContent>
+                                            </Select>
                                         </td>
                                         <td class="px-4 py-3">
                                             <div v-if="sub.selected" class="flex flex-col gap-2">
@@ -228,18 +233,23 @@ const unsubscribe = () => {
                                                         class="w-20 rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
                                                         type="time"
                                                     />
-                                                    <select
-                                                        v-model="sub.send_day"
-                                                        class="rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+                                                    <Select
+                                                        :model-value="sub.send_day?.toString()"
+                                                        @update:model-value="sub.send_day = Number($event)"
                                                     >
-                                                        <option :value="1">{{ t.form.monday }}</option>
-                                                        <option :value="2">{{ t.form.tuesday }}</option>
-                                                        <option :value="3">{{ t.form.wednesday }}</option>
-                                                        <option :value="4">{{ t.form.thursday }}</option>
-                                                        <option :value="5">{{ t.form.friday }}</option>
-                                                        <option :value="6">{{ t.form.saturday }}</option>
-                                                        <option :value="7">{{ t.form.sunday }}</option>
-                                                    </select>
+                                                        <SelectTrigger class="h-8 w-[120px]">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="1">{{ t.form.monday }}</SelectItem>
+                                                            <SelectItem value="2">{{ t.form.tuesday }}</SelectItem>
+                                                            <SelectItem value="3">{{ t.form.wednesday }}</SelectItem>
+                                                            <SelectItem value="4">{{ t.form.thursday }}</SelectItem>
+                                                            <SelectItem value="5">{{ t.form.friday }}</SelectItem>
+                                                            <SelectItem value="6">{{ t.form.saturday }}</SelectItem>
+                                                            <SelectItem value="7">{{ t.form.sunday }}</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
                                                 </div>
                                             </div>
                                             <span v-else class="text-xs text-slate-500"> - </span>

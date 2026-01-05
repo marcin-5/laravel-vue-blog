@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { i18n } from '@/i18n';
 import type { CategoryRow } from '@/types/admin.types';
 import { router, useForm } from '@inertiajs/vue3';
@@ -103,11 +104,16 @@ watch(
             <div v-else class="flex items-end gap-2">
                 <div>
                     <label :for="`edit-locale-${category.id}`" class="sr-only">{{ t('admin.categories.language_label') }}</label>
-                    <select :id="`edit-locale-${category.id}`" v-model="editForm.locale" class="rounded-md border px-2 py-1 text-sm">
-                        <option v-for="loc in supportedLocales" :key="`edit-${category.id}-${loc}`" :value="loc">
-                            {{ loc.toUpperCase() }}
-                        </option>
-                    </select>
+                    <Select v-model="editForm.locale">
+                        <SelectTrigger :id="`edit-locale-${category.id}`" class="h-8 w-[80px]">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem v-for="loc in supportedLocales" :key="`edit-${category.id}-${loc}`" :value="loc">
+                                {{ loc.toUpperCase() }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
                     <InputError :message="editForm.errors.locale" />
                 </div>
                 <div class="flex-1">

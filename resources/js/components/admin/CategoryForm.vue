@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { i18n } from '@/i18n';
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -35,9 +36,16 @@ function submitCreate() {
         <form class="flex flex-wrap items-end gap-3" @submit.prevent="submitCreate">
             <div>
                 <label class="mb-1 block text-sm font-medium" for="new-locale">{{ t('admin.categories.language_label') }}</label>
-                <select id="new-locale" v-model="createForm.locale" class="block rounded-md border px-3 py-2">
-                    <option v-for="loc in props.supportedLocales" :key="`new-${loc}`" :value="loc">{{ loc.toUpperCase() }}</option>
-                </select>
+                <Select v-model="createForm.locale">
+                    <SelectTrigger id="new-locale" class="h-10 w-[100px]">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem v-for="loc in props.supportedLocales" :key="`new-${loc}`" :value="loc">
+                            {{ loc.toUpperCase() }}
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
                 <InputError :message="createForm.errors.locale" />
             </div>
             <div class="min-w-64">
