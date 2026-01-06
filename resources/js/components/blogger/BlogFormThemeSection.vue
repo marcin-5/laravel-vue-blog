@@ -60,15 +60,17 @@ function updateValue(key: string, value: string) {
 
 const fontOptions = [
     { label: 'System Default', value: 'inherit' },
+    { label: 'Inter', value: 'var(--font-inter)' },
     { label: 'Montserrat', value: 'var(--font-montserrat)' },
     { label: 'Nunito', value: 'var(--font-nunito)' },
     { label: 'Quicksand', value: 'var(--font-quicksand)' },
+    { label: 'Raleway', value: 'var(--font-raleway)' },
     { label: 'Recursive', value: 'var(--font-recursive)' },
     { label: 'Roboto', value: 'var(--font-roboto)' },
-    { label: 'Rokkitt', value: 'var(--font-rokkitt)' },
     { label: 'Esteban', value: 'var(--font-esteban)' },
-    { label: 'Inter', value: 'var(--font-inter)' },
     { label: 'Noto Serif', value: 'var(--font-noto)' },
+    { label: 'Old Standard TT', value: 'var(--font-old-standard-tt)' },
+    { label: 'Rokkitt', value: 'var(--font-rokkitt)' },
     { label: 'Slabo 27px', value: 'var(--font-slabo)' },
 ];
 

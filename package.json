@@ -35,6 +35,7 @@
         "@fontsource-variable/rokkitt": "^5.2.8",
         "@fontsource/esteban": "^5.2.7",
         "@fontsource/old-standard-tt": "^5.2.8",
+        "@fontsource/raleway": "^5.2.8",
         "@fontsource/slabo-27px": "^5.2.7",
         "@heroicons/vue": "^2.2.0",
         "@inertiajs/vue3": "^2.3.4",

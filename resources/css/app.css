@@ -8,13 +8,15 @@
     --font-montserrat: 'Montserrat Variable', sans-serif;
     --font-nunito: 'Nunito Variable', sans-serif;
     --font-quicksand: 'Quicksand Variable', sans-serif;
+    --font-raleway: 'Raleway', sans-serif;
     --font-recursive: 'Recursive Variable', sans-serif;
     --font-roboto: 'Roboto Variable', sans-serif;
-    --font-rokkitt: 'Rokkitt Variable', sans-serif;
+    --font-rokkitt: 'Rokkitt Variable', serif;
     --font-esteban: 'Esteban', serif;
     --font-inter: 'Inter', sans-serif;
     --font-noto: 'Noto Serif', serif;
     --font-slabo: 'Slabo 27px', serif;
+    --font-old-standard-tt: 'Old Standard TT', serif;
 
     --font-sans: var(--font-nunito);
 

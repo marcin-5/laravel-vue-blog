@@ -7,6 +7,8 @@ import '@fontsource-variable/rokkitt';
 import '@fontsource/esteban';
 import '@fontsource/inter';
 import '@fontsource/noto-serif';
+import '@fontsource/old-standard-tt';
+import '@fontsource/raleway';
 import '@fontsource/slabo-27px';
 import '../css/app.css';
 
