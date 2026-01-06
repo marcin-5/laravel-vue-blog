@@ -97,13 +97,14 @@
     html {
         --font-sans: 'Nunito Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
         font-family: var(--blog-body-font);
+        font-size: 105%;
     }
 }
 
 :root {
     --font-header-default: var(--font-nunito);
-    --font-body-default: var(--font-nunito);
-    --font-motto-default: var(--font-nunito);
+    --font-body-default: var(--font-montserrat);
+    --font-motto-default: var(--font-esteban);
     --font-footer-default: var(--font-nunito);
 
     --font-header: var(--font-header-default);
