@@ -1,15 +1,18 @@
+import '@fontsource-variable/bitter';
+import '@fontsource-variable/dm-sans';
+import '@fontsource-variable/faustina';
+import '@fontsource-variable/inter';
+import '@fontsource-variable/kreon';
+import '@fontsource-variable/literata';
 import '@fontsource-variable/montserrat';
 import '@fontsource-variable/nunito';
 import '@fontsource-variable/quicksand';
+import '@fontsource-variable/raleway';
 import '@fontsource-variable/recursive';
 import '@fontsource-variable/roboto';
 import '@fontsource-variable/rokkitt';
-import '@fontsource/esteban';
-import '@fontsource/inter';
-import '@fontsource/noto-serif';
-import '@fontsource/old-standard-tt';
-import '@fontsource/raleway';
-import '@fontsource/slabo-27px';
+import '@fontsource-variable/vollkorn';
+import '@fontsource-variable/yrsa';
 import '../css/app.css';
 
 import { createInertiaApp, router } from '@inertiajs/vue3';

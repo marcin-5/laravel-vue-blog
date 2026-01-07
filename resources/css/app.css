@@ -5,20 +5,34 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+    --font-dm-sans: 'DM Sans Variable', sans-serif;
+    --font-inter: 'Inter Variable', sans-serif;
     --font-montserrat: 'Montserrat Variable', sans-serif;
     --font-nunito: 'Nunito Variable', sans-serif;
     --font-quicksand: 'Quicksand Variable', sans-serif;
-    --font-raleway: 'Raleway', sans-serif;
+    --font-raleway: 'Raleway Variable', sans-serif;
     --font-recursive: 'Recursive Variable', sans-serif;
     --font-roboto: 'Roboto Variable', sans-serif;
+    --font-bitter: 'Bitter Variable', serif;
+    --font-faustina: 'Faustina Variable', serif;
+    --font-literata: 'Literata Variable', serif;
+    --font-kreon: 'Kreon Variable', serif;
     --font-rokkitt: 'Rokkitt Variable', serif;
-    --font-esteban: 'Esteban', serif;
-    --font-inter: 'Inter', sans-serif;
-    --font-noto: 'Noto Serif', serif;
-    --font-slabo: 'Slabo 27px', serif;
-    --font-old-standard-tt: 'Old Standard TT', serif;
+    --font-vollkorn: 'Vollkorn Variable', serif;
+    --font-yrsa: 'Yrsa Variable', serif;
 
-    --font-sans: var(--font-nunito);
+    --font-sans: var(--font-montserrat);
+    --font-serif: var(--font-faustina);
+
+    --font-nav: var(--font-nav-default);
+    --font-header: var(--font-header-default);
+    --font-slogan: var(--font-kreon);
+    --font-motto: var(--font-motto-default);
+    --font-body: var(--font-body-default);
+    --font-footer: var(--font-footer-default);
+
+    --motto-style: italic;
+    --footer-scale: 0.9;
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -86,6 +100,7 @@
 
     /* Blog Custom Fonts & Typography */
     --blog-header-font: var(--font-header);
+    --blog-nav-font: var(--font-nav);
     --blog-body-font: var(--font-body);
     --blog-motto-font: var(--font-motto);
     --blog-footer-font: var(--font-footer);
@@ -97,24 +112,18 @@
 @layer base {
     body,
     html {
-        --font-sans: 'Nunito Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+        --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
         font-family: var(--blog-body-font);
         font-size: 105%;
     }
 }
 
 :root {
-    --font-header-default: var(--font-nunito);
-    --font-body-default: var(--font-montserrat);
-    --font-motto-default: var(--font-esteban);
-    --font-footer-default: var(--font-nunito);
-
-    --font-header: var(--font-header-default);
-    --font-body: var(--font-body-default);
-    --font-motto: var(--font-motto-default);
-    --font-footer: var(--font-footer-default);
-    --motto-style: italic;
-    --footer-scale: 1;
+    --font-header-default: var(--font-roboto);
+    --font-nav-default: var(--font-inter);
+    --font-body-default: var(--font-nunito);
+    --font-motto-default: var(--font-vollkorn);
+    --font-footer-default: var(--font-dm-sans);
 
     --background: hsl(0 0% 100%);
     --foreground: hsl(0 0% 3.9%);
