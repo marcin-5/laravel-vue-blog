@@ -60,6 +60,7 @@ function updateValue(key: string, value: string) {
 
 const fontOptions = [
     { label: 'System Default', value: 'inherit' },
+    { label: 'DM Sans', value: 'var(--font-dm-sans)' },
     { label: 'Inter', value: 'var(--font-inter)' },
     { label: 'Montserrat', value: 'var(--font-montserrat)' },
     { label: 'Nunito', value: 'var(--font-nunito)' },
@@ -67,11 +68,13 @@ const fontOptions = [
     { label: 'Raleway', value: 'var(--font-raleway)' },
     { label: 'Recursive', value: 'var(--font-recursive)' },
     { label: 'Roboto', value: 'var(--font-roboto)' },
-    { label: 'Esteban', value: 'var(--font-esteban)' },
-    { label: 'Noto Serif', value: 'var(--font-noto)' },
-    { label: 'Old Standard TT', value: 'var(--font-old-standard-tt)' },
+    { label: 'Bitter', value: 'var(--font-bitter)' },
+    { label: 'Faustina', value: 'var(--font-faustina)' },
+    { label: 'Literata', value: 'var(--font-literata)' },
+    { label: 'Kreon', value: 'var(--font-kreon)' },
     { label: 'Rokkitt', value: 'var(--font-rokkitt)' },
-    { label: 'Slabo 27px', value: 'var(--font-slabo)' },
+    { label: 'Vollkorn', value: 'var(--font-vollkorn)' },
+    { label: 'Yrsa', value: 'var(--font-yrsa)' },
 ];
 
 const mottoStyleOptions = [
