@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import { Card } from '@/components/ui/card';
+import { hasContent } from '@/lib/utils';
 import { getCategoryDisplayName } from '@/types/blog';
 import type { BlogItem } from '@/types/blog.types';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { hasContent } from '@/lib/utils';
 
 const props = defineProps<{ blog: BlogItem }>();
 
@@ -19,11 +19,11 @@ const hasCategories = computed(() => props.blog.categories.length > 0);
 
 // CSS Classes
 const CARD_CLASSES = 'border-gray-200 bg-white p-4 hover:shadow-md dark:border-gray-800 dark:bg-slate-900';
-const TITLE_CLASSES = 'mb-1 text-xl font-semibold text-slate-800 dark:text-slate-100';
+const TITLE_CLASSES = 'mb-1 font-header text-xl font-semibold text-slate-800 dark:text-slate-100';
 const LINK_CLASSES = 'hover:underline';
-const AUTHOR_CLASSES = 'text-slate-600 mb-2 text-sm dark:text-slate-400';
+const AUTHOR_CLASSES = 'mb-2 font-footer text-sm text-slate-600 dark:text-slate-400';
 const DESCRIPTION_CLASSES = 'mb-3 text-sm text-slate-600 dark:text-slate-300';
-const CATEGORY_CONTAINER_CLASSES = 'flex flex-wrap gap-2';
+const CATEGORY_CONTAINER_CLASSES = 'flex flex-wrap gap-2 font-nav';
 const CATEGORY_BADGE_CLASSES = 'rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700 dark:bg-slate-800 dark:text-slate-200';
 </script>
 
