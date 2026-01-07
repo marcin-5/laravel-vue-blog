@@ -24,7 +24,7 @@ const selected = computed<number[]>(() => props.selectedIds ?? []);
 </script>
 
 <template>
-    <div :class="['flex flex-wrap items-center gap-2', props.class]">
+    <div :class="['font-nav flex flex-wrap items-center gap-2', props.class]">
         <CategoryPill
             v-for="cat in categories"
             :key="cat.id"
