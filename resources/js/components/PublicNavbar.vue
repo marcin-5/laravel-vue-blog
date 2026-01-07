@@ -60,7 +60,7 @@ watch(
 );
 </script>
 <template>
-    <header class="w-full pt-4 text-sm">
+    <header class="font-nav w-full pt-4 text-sm">
         <nav :class="['mx-auto flex w-full items-center gap-4 sm:px-12 md:px-16', props.maxWidth, isHomePage ? 'justify-end' : 'justify-between']">
             <HomeButton class="pl-4" />
             <div class="flex items-center gap-3">
