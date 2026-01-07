@@ -62,7 +62,7 @@ function clearFilter() {
         <div class="mx-auto w-full max-w-[1024px] p-6 lg:p-8">
             <div class="mb-12 text-center">
                 <AppLogo />
-                <p class="mt-4 font-serif text-lg opacity-80 sm:text-xl md:text-2xl dark:text-white">— {{ randomSlogan }} —</p>
+                <p class="mt-4 font-slogan text-lg opacity-80 sm:text-xl md:text-2xl dark:text-white">— {{ randomSlogan }} —</p>
             </div>
 
             <!-- Categories Filter -->
