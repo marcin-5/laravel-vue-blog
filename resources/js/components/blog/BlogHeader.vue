@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import ViewStats from '@/components/blog/ViewStats.vue';
 import type { Blog } from '@/types/blog.types';
-import '@fontsource/noto-serif';
 
 defineProps<{
     blog: Blog & {
@@ -32,8 +31,13 @@ defineProps<{
             {{ displayedMotto }}
         </p>
     </header>
-    <section :style="{ fontFamily: 'var(--blog-body-font)' }">
-        <div v-if="blog.descriptionHtml" class="prose max-w-none text-primary" v-html="blog.descriptionHtml" />
+    <section>
+        <div
+            v-if="blog.descriptionHtml"
+            :style="{ fontFamily: 'var(--blog-body-font)' }"
+            class="prose max-w-none text-primary"
+            v-html="blog.descriptionHtml"
+        />
     </section>
     <footer :style="{ fontFamily: 'var(--blog-footer-font)' }" class="origin-right">
         <div v-if="blog.authorName && blog.authorEmail" class="author text-md mr-12 mb-12 text-end text-muted-foreground">
