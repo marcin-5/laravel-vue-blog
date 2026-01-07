@@ -1,7 +1,8 @@
 <script lang="ts" setup>
-import { useI18n } from 'vue-i18n';
+import StatCard from '@/components/blogger/StatCard.vue';
 import type { BlogStats } from '@/types/stats';
 import { BookOpen, Calendar, Eye, Mail } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 
@@ -17,45 +18,13 @@ defineProps<{
                 <h3 class="text-sm font-medium text-muted-foreground">{{ blog.name }}</h3>
             </div>
 
-            <div class="rounded-xl border border-sidebar-border/70 bg-sidebar p-4 shadow-sm dark:border-sidebar-border">
-                <div class="flex items-center gap-2">
-                    <BookOpen class="h-4 w-4 text-muted-foreground" />
-                    <span class="text-xs font-medium tracking-wider text-muted-foreground uppercase">{{ t('blogger.stats.posts') }}</span>
-                </div>
-                <div class="mt-2 flex items-baseline gap-1">
-                    <span class="text-2xl font-bold">{{ blog.posts_count }}</span>
-                </div>
-            </div>
+            <StatCard :icon="BookOpen" :title="t('blogger.stats.posts')" :value="blog.posts_count" />
 
-            <div class="rounded-xl border border-sidebar-border/70 bg-sidebar p-4 shadow-sm dark:border-sidebar-border">
-                <div class="flex items-center gap-2">
-                    <Eye class="h-4 w-4 text-muted-foreground" />
-                    <span class="text-xs font-medium tracking-wider text-muted-foreground uppercase">{{ t('blogger.stats.views') }}</span>
-                </div>
-                <div class="mt-2 flex items-baseline gap-1">
-                    <span class="text-2xl font-bold">{{ blog.total_views }}</span>
-                </div>
-            </div>
+            <StatCard :icon="Eye" :title="t('blogger.stats.views')" :value="blog.total_views" />
 
-            <div class="rounded-xl border border-sidebar-border/70 bg-sidebar p-4 shadow-sm dark:border-sidebar-border">
-                <div class="flex items-center gap-2">
-                    <Mail class="h-4 w-4 text-muted-foreground" />
-                    <span class="text-xs font-medium tracking-wider text-muted-foreground uppercase">{{ t('blogger.stats.daily_subs') }}</span>
-                </div>
-                <div class="mt-2 flex items-baseline gap-1">
-                    <span class="text-2xl font-bold">{{ blog.daily_subscriptions_count }}</span>
-                </div>
-            </div>
+            <StatCard :icon="Mail" :title="t('blogger.stats.daily_subs')" :value="blog.daily_subscriptions_count" />
 
-            <div class="rounded-xl border border-sidebar-border/70 bg-sidebar p-4 shadow-sm dark:border-sidebar-border">
-                <div class="flex items-center gap-2">
-                    <Calendar class="h-4 w-4 text-muted-foreground" />
-                    <span class="text-xs font-medium tracking-wider text-muted-foreground uppercase">{{ t('blogger.stats.weekly_subs') }}</span>
-                </div>
-                <div class="mt-2 flex items-baseline gap-1">
-                    <span class="text-2xl font-bold">{{ blog.weekly_subscriptions_count }}</span>
-                </div>
-            </div>
+            <StatCard :icon="Calendar" :title="t('blogger.stats.weekly_subs')" :value="blog.weekly_subscriptions_count" />
         </template>
 
         <div v-if="stats.length === 0" class="col-span-full py-8 text-center text-muted-foreground">
