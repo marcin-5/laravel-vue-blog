@@ -21,7 +21,7 @@ const form = useForm({
     email: '',
     password: '',
     remember: false,
-});
+}).withPrecognition('get', '/dashboard');
 
 const submit = () => {
     form.post(route('login'), {
