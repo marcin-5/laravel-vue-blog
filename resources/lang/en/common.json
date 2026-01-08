@@ -11,7 +11,11 @@
             "users": "Users",
             "categories": "Categories",
             "statistics": "Statistics",
-            "blogs": "Blogs"
+            "blogs": "Blogs",
+            "font_size": {
+                "label": "Font size",
+                "adjust": "Adjust font size"
+            }
         },
         "cookie_notice": {
             "message": "This site uses cookies and local data storage required for proper operation and visit analytics.",

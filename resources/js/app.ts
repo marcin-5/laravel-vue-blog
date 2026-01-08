@@ -21,6 +21,7 @@ import type { DefineComponent } from 'vue';
 import { createApp, h, Suspense } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
 import { initializeTheme } from './composables/useAppearance';
+import { initializeFontSize } from './composables/useFontSize';
 import { i18n, setLocale } from './i18n';
 
 // Better type safety for props
@@ -32,8 +33,9 @@ interface InertiaPageProps {
     };
 }
 
-// Move theme initialization before app creation to prevent FOUC
+// Move theme and font-size initialization before app creation to prevent FOUC
 initializeTheme();
+initializeFontSize();
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
