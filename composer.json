@@ -9,13 +9,13 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.4",
+        "php": "^8.5",
         "erusev/parsedown": "^1.7",
         "erusev/parsedown-extra": "^0.8.1",
         "ezyang/htmlpurifier": "^4.19",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^12.0",
-        "laravel/tinker": "^2.10",
+        "laravel/tinker": "^2.11",
         "spatie/laravel-sitemap": "^7.3",
         "spatie/laravel-translatable": "^6.12",
         "tightenco/ziggy": "^2.6"
@@ -24,12 +24,12 @@
         "fakerphp/faker": "^1.24",
         "laravel/boost": "^1.8",
         "laravel/pail": "^1.2",
-        "laravel/pint": "^1.26",
-        "laravel/sail": "^1.51",
+        "laravel/pint": "^v1.27",
+        "laravel/sail": "^v1.52",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.8",
-        "pestphp/pest": "^3.7",
-        "pestphp/pest-plugin-laravel": "^3.2"
+        "pestphp/pest": "^v4.3.1",
+        "pestphp/pest-plugin-laravel": "^4.0"
     },
     "autoload": {
         "psr-4": {
@@ -79,9 +79,6 @@
         }
     },
     "config": {
-        "platform": {
-            "php": "8.4.13"
-        },
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true,

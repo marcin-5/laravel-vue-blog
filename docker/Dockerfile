@@ -85,8 +85,7 @@ FROM base AS production
 COPY . .
 
 # Install production PHP dependencies
-RUN composer config platform.php 8.4.13 \
-    && composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Copy built assets from node builder
 COPY --from=node-builder /app/public/build ./public/build
@@ -130,8 +129,7 @@ COPY --from=node-builder /app/public/build ./public/build
 COPY --from=node-builder /app/bootstrap/ssr ./bootstrap/ssr
 
 # Install all PHP dependencies, including dev
-RUN composer config platform.php 8.4.13 \
-    && composer install --no-interaction
+RUN composer install --no-interaction
 
 # Set up fish plugins and configuration for development
 ENV FISH_CONFIG_DIR /root/.config/fish
