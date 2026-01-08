@@ -8,7 +8,7 @@ import { type BreadcrumbItem } from '@/types';
 import { type NewsletterSubscription } from '@/types/admin.types';
 import { type BlogStats, type PostsStats, type UserAgentStats } from '@/types/stats';
 import { Head } from '@inertiajs/vue3';
-
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -22,7 +22,7 @@ defineProps<{
 
 const { currentView } = useDashboardView();
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: t('dashboard.title'), href: '/dashboard' }];
+const breadcrumbs = computed<BreadcrumbItem[]>(() => [{ title: t('dashboard.title'), href: '/dashboard' }]);
 </script>
 
 <template>

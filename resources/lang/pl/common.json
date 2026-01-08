@@ -7,7 +7,11 @@
             "logout": "Wyloguj",
             "login": "Zaloguj",
             "register": "Rejestracja",
-            "settings": "Ustawienia"
+            "settings": "Ustawienia",
+            "users": "Użytkownicy",
+            "categories": "Kategorie",
+            "statistics": "Statystyki",
+            "blogs": "Blogi"
         },
         "cookie_notice": {
             "message": "Ta strona używa ciasteczek i lokalnego przechowywania danych potrzebnych do prawidłowego działania i analityki odwiedzin.",

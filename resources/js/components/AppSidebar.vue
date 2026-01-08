@@ -3,49 +3,60 @@ import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem } from '@/components/ui/sidebar';
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuItem
+} from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import { BarChart3, BookOpen, Folder, LayoutGrid, Users } from 'lucide-vue-next';
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-const mainNavItems: NavItem[] = [
+const { t } = useI18n();
+
+const mainNavItems = computed<NavItem[]>(() => [
     {
-        title: 'Dashboard',
+        title: t('common.nav.dashboard'),
         href: '/dashboard',
         icon: LayoutGrid,
         // No roles => visible to everyone
     },
     {
-        title: 'Users',
+        title: t('common.nav.users'),
         href: '/admin/users',
         icon: Users,
         roles: ['admin'], // only admins see this
     },
     {
-        title: 'Categories',
+        title: t('common.nav.categories'),
         href: '/admin/categories',
         icon: Folder,
         roles: ['admin'], // only admins see this
     },
     {
-        title: 'Statistics',
+        title: t('common.nav.statistics'),
         href: '/admin/stats',
         icon: BarChart3,
         roles: ['admin'],
     },
     {
-        title: 'Blogs',
+        title: t('common.nav.blogs'),
         href: '/blogs',
         icon: BookOpen,
         roles: ['admin', 'blogger'],
     },
     {
-        title: 'Statistics',
+        title: t('common.nav.statistics'),
         href: '/blogs/stats',
         icon: BarChart3,
         roles: ['blogger'],
     },
-];
+]);
 
 const footerNavItems: NavItem[] = [
     {

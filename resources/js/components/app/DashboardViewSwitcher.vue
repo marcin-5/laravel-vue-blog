@@ -9,13 +9,13 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 const { currentView, availableViews, setView } = useDashboardView();
 
-const viewLabels: Record<DashboardView, string> = {
+const viewLabels = computed<Record<DashboardView, string>>(() => ({
     admin: t('dashboard.view_switcher.admin'),
     blogger: t('dashboard.view_switcher.blogger'),
     user: t('dashboard.view_switcher.user'),
-};
+}));
 
-const currentLabel = computed(() => (currentView.value ? viewLabels[currentView.value] : t('dashboard.view_switcher.select')));
+const currentLabel = computed(() => (currentView.value ? viewLabels.value[currentView.value] : t('dashboard.view_switcher.select')));
 </script>
 
 <template>
