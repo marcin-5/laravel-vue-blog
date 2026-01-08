@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import BlogFormColorField from '@/components/blogger/BlogFormColorField.vue';
 import BlogFormSelectField from '@/components/blogger/BlogFormSelectField.vue';
+import { useCssVariables } from '@/composables/useCssVariables';
 import type { ThemeColors } from '@/types/blog.types';
 
 interface Props {
@@ -43,6 +44,21 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const { variables } = useCssVariables([
+    '--background',
+    '--foreground',
+    '--primary',
+    '--primary-foreground',
+    '--secondary',
+    '--secondary-foreground',
+    '--muted-foreground',
+    '--border',
+    '--link',
+    '--link-hover',
+    '--breadcrumb-link',
+    '--breadcrumb-link-active',
+]);
 
 // Define the update event (following v-model convention for the colors object)
 const emit = defineEmits<{
@@ -148,8 +164,8 @@ const footerScaleOptions = [
                 :error="props.errors?.['--background']"
                 :label="props.translations.background"
                 :model-value="props.colors['--background']"
+                :placeholder="variables['--background']"
                 :tooltip="props.translations.backgroundTooltip"
-                placeholder="#ffffff"
                 @update:model-value="updateValue('--background', $event)"
             />
             <BlogFormColorField
@@ -157,8 +173,8 @@ const footerScaleOptions = [
                 :error="props.errors?.['--primary']"
                 :label="props.translations.foreground"
                 :model-value="props.colors['--primary']"
+                :placeholder="variables['--primary']"
                 :tooltip="props.translations.primaryTooltip"
-                placeholder="#0a0a0a"
                 @update:model-value="updateValue('--primary', $event)"
             />
             <BlogFormColorField
@@ -166,8 +182,8 @@ const footerScaleOptions = [
                 :error="props.errors?.['--foreground']"
                 :label="props.translations.primary"
                 :model-value="props.colors['--foreground']"
+                :placeholder="variables['--foreground']"
                 :tooltip="props.translations.foregroundTooltip"
-                placeholder="#111111"
                 @update:model-value="updateValue('--foreground', $event)"
             />
             <BlogFormColorField
@@ -175,8 +191,8 @@ const footerScaleOptions = [
                 :error="props.errors?.['--secondary']"
                 :label="props.translations.secondary"
                 :model-value="props.colors['--secondary']"
+                :placeholder="variables['--secondary']"
                 :tooltip="props.translations.secondaryTooltip"
-                placeholder="#ececec"
                 @update:model-value="updateValue('--secondary', $event)"
             />
             <BlogFormColorField
@@ -184,8 +200,8 @@ const footerScaleOptions = [
                 :error="props.errors?.['--primary-foreground']"
                 :label="props.translations.primaryForeground"
                 :model-value="props.colors['--primary-foreground']"
+                :placeholder="variables['--primary-foreground']"
                 :tooltip="props.translations.primaryForegroundTooltip"
-                placeholder="#fafafa"
                 @update:model-value="updateValue('--primary-foreground', $event)"
             />
             <BlogFormColorField
@@ -193,8 +209,8 @@ const footerScaleOptions = [
                 :error="props.errors?.['--secondary-foreground']"
                 :label="props.translations.secondaryForeground"
                 :model-value="props.colors['--secondary-foreground']"
+                :placeholder="variables['--secondary-foreground']"
                 :tooltip="props.translations.secondaryForegroundTooltip"
-                placeholder="#111111"
                 @update:model-value="updateValue('--secondary-foreground', $event)"
             />
             <BlogFormColorField
@@ -202,8 +218,8 @@ const footerScaleOptions = [
                 :error="props.errors?.['--muted-foreground']"
                 :label="props.translations.mutedForeground"
                 :model-value="props.colors['--muted-foreground']"
+                :placeholder="variables['--muted-foreground']"
                 :tooltip="props.translations.mutedForegroundTooltip"
-                placeholder="#737373"
                 @update:model-value="updateValue('--muted-foreground', $event)"
             />
             <BlogFormColorField
@@ -211,8 +227,8 @@ const footerScaleOptions = [
                 :error="props.errors?.['--border']"
                 :label="props.translations.border"
                 :model-value="props.colors['--border']"
+                :placeholder="variables['--border']"
                 :tooltip="props.translations.borderTooltip"
-                placeholder="#e5e5e5"
                 @update:model-value="updateValue('--border', $event)"
             />
             <BlogFormColorField
@@ -220,8 +236,8 @@ const footerScaleOptions = [
                 :error="props.errors?.['--link']"
                 :label="props.translations.link"
                 :model-value="props.colors['--link']"
+                :placeholder="variables['--link']"
                 :tooltip="props.translations.linkTooltip"
-                placeholder="#0d9488"
                 @update:model-value="updateValue('--link', $event)"
             />
             <BlogFormColorField
@@ -229,8 +245,8 @@ const footerScaleOptions = [
                 :error="props.errors?.['--link-hover']"
                 :label="props.translations.linkHover"
                 :model-value="props.colors['--link-hover']"
+                :placeholder="variables['--link-hover']"
                 :tooltip="props.translations.linkHoverTooltip"
-                placeholder="#0f766e"
                 @update:model-value="updateValue('--link-hover', $event)"
             />
             <BlogFormColorField
@@ -238,8 +254,8 @@ const footerScaleOptions = [
                 :error="props.errors?.['--breadcrumb-link']"
                 :label="props.translations.breadcrumbLink"
                 :model-value="props.colors['--breadcrumb-link']"
+                :placeholder="variables['--breadcrumb-link']"
                 :tooltip="props.translations.breadcrumbLinkTooltip"
-                placeholder="#534432ee"
                 @update:model-value="updateValue('--breadcrumb-link', $event)"
             />
             <BlogFormColorField
@@ -247,8 +263,8 @@ const footerScaleOptions = [
                 :error="props.errors?.['--breadcrumb-link-active']"
                 :label="props.translations.breadcrumbLinkActive"
                 :model-value="props.colors['--breadcrumb-link-active']"
+                :placeholder="variables['--breadcrumb-link-active']"
                 :tooltip="props.translations.breadcrumbLinkActiveTooltip"
-                placeholder="#403020"
                 @update:model-value="updateValue('--breadcrumb-link-active', $event)"
             />
         </div>
