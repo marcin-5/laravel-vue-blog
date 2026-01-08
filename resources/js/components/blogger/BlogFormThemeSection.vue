@@ -3,6 +3,7 @@ import BlogFormColorField from '@/components/blogger/BlogFormColorField.vue';
 import BlogFormSelectField from '@/components/blogger/BlogFormSelectField.vue';
 import { useCssVariables } from '@/composables/useCssVariables';
 import type { ThemeColors } from '@/types/blog.types';
+import { computed } from 'vue';
 
 interface Props {
     title: string;
@@ -103,6 +104,31 @@ const footerScaleOptions = [
     { label: '90%', value: '0.9' },
     { label: '80%', value: '0.8' },
 ];
+
+const colorFields = computed(() => [
+    { key: '--primary', idSuffix: 'primary', labelKey: 'primary' as const, tooltipKey: 'primaryTooltip' as const },
+    { key: '--background', idSuffix: 'background', labelKey: 'background' as const, tooltipKey: 'backgroundTooltip' as const },
+    { key: '--secondary', idSuffix: 'secondary', labelKey: 'secondary' as const, tooltipKey: 'secondaryTooltip' as const },
+    { key: '--foreground', idSuffix: 'foreground', labelKey: 'foreground' as const, tooltipKey: 'foregroundTooltip' as const },
+    { key: '--primary-foreground', idSuffix: 'primary-fg', labelKey: 'primaryForeground' as const, tooltipKey: 'primaryForegroundTooltip' as const },
+    { key: '--muted-foreground', idSuffix: 'muted-fg', labelKey: 'mutedForeground' as const, tooltipKey: 'mutedForegroundTooltip' as const },
+    {
+        key: '--secondary-foreground',
+        idSuffix: 'secondary-fg',
+        labelKey: 'secondaryForeground' as const,
+        tooltipKey: 'secondaryForegroundTooltip' as const,
+    },
+    { key: '--border', idSuffix: 'border', labelKey: 'border' as const, tooltipKey: 'borderTooltip' as const },
+    { key: '--link', idSuffix: 'link', labelKey: 'link' as const, tooltipKey: 'linkTooltip' as const },
+    { key: '--breadcrumb-link', idSuffix: 'breadcrumb-link', labelKey: 'breadcrumbLink' as const, tooltipKey: 'breadcrumbLinkTooltip' as const },
+    { key: '--link-hover', idSuffix: 'link-hover', labelKey: 'linkHover' as const, tooltipKey: 'linkHoverTooltip' as const },
+    {
+        key: '--breadcrumb-link-active',
+        idSuffix: 'breadcrumb-link-active',
+        labelKey: 'breadcrumbLinkActive' as const,
+        tooltipKey: 'breadcrumbLinkActiveTooltip' as const,
+    },
+]);
 </script>
 
 <template>
@@ -160,112 +186,15 @@ const footerScaleOptions = [
 
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <BlogFormColorField
-                :id="`${props.idPrefix}-background`"
-                :error="props.errors?.['--background']"
-                :label="props.translations.background"
-                :model-value="props.colors['--background']"
-                :placeholder="variables['--background']"
-                :tooltip="props.translations.backgroundTooltip"
-                @update:model-value="updateValue('--background', $event)"
-            />
-            <BlogFormColorField
-                :id="`${props.idPrefix}-foreground`"
-                :error="props.errors?.['--primary']"
-                :label="props.translations.foreground"
-                :model-value="props.colors['--primary']"
-                :placeholder="variables['--primary']"
-                :tooltip="props.translations.primaryTooltip"
-                @update:model-value="updateValue('--primary', $event)"
-            />
-            <BlogFormColorField
-                :id="`${props.idPrefix}-primary`"
-                :error="props.errors?.['--foreground']"
-                :label="props.translations.primary"
-                :model-value="props.colors['--foreground']"
-                :placeholder="variables['--foreground']"
-                :tooltip="props.translations.foregroundTooltip"
-                @update:model-value="updateValue('--foreground', $event)"
-            />
-            <BlogFormColorField
-                :id="`${props.idPrefix}-secondary`"
-                :error="props.errors?.['--secondary']"
-                :label="props.translations.secondary"
-                :model-value="props.colors['--secondary']"
-                :placeholder="variables['--secondary']"
-                :tooltip="props.translations.secondaryTooltip"
-                @update:model-value="updateValue('--secondary', $event)"
-            />
-            <BlogFormColorField
-                :id="`${props.idPrefix}-primary-fg`"
-                :error="props.errors?.['--primary-foreground']"
-                :label="props.translations.primaryForeground"
-                :model-value="props.colors['--primary-foreground']"
-                :placeholder="variables['--primary-foreground']"
-                :tooltip="props.translations.primaryForegroundTooltip"
-                @update:model-value="updateValue('--primary-foreground', $event)"
-            />
-            <BlogFormColorField
-                :id="`${props.idPrefix}-secondary-fg`"
-                :error="props.errors?.['--secondary-foreground']"
-                :label="props.translations.secondaryForeground"
-                :model-value="props.colors['--secondary-foreground']"
-                :placeholder="variables['--secondary-foreground']"
-                :tooltip="props.translations.secondaryForegroundTooltip"
-                @update:model-value="updateValue('--secondary-foreground', $event)"
-            />
-            <BlogFormColorField
-                :id="`${props.idPrefix}-muted-fg`"
-                :error="props.errors?.['--muted-foreground']"
-                :label="props.translations.mutedForeground"
-                :model-value="props.colors['--muted-foreground']"
-                :placeholder="variables['--muted-foreground']"
-                :tooltip="props.translations.mutedForegroundTooltip"
-                @update:model-value="updateValue('--muted-foreground', $event)"
-            />
-            <BlogFormColorField
-                :id="`${props.idPrefix}-border`"
-                :error="props.errors?.['--border']"
-                :label="props.translations.border"
-                :model-value="props.colors['--border']"
-                :placeholder="variables['--border']"
-                :tooltip="props.translations.borderTooltip"
-                @update:model-value="updateValue('--border', $event)"
-            />
-            <BlogFormColorField
-                :id="`${props.idPrefix}-link`"
-                :error="props.errors?.['--link']"
-                :label="props.translations.link"
-                :model-value="props.colors['--link']"
-                :placeholder="variables['--link']"
-                :tooltip="props.translations.linkTooltip"
-                @update:model-value="updateValue('--link', $event)"
-            />
-            <BlogFormColorField
-                :id="`${props.idPrefix}-link-hover`"
-                :error="props.errors?.['--link-hover']"
-                :label="props.translations.linkHover"
-                :model-value="props.colors['--link-hover']"
-                :placeholder="variables['--link-hover']"
-                :tooltip="props.translations.linkHoverTooltip"
-                @update:model-value="updateValue('--link-hover', $event)"
-            />
-            <BlogFormColorField
-                :id="`${props.idPrefix}-breadcrumb-link`"
-                :error="props.errors?.['--breadcrumb-link']"
-                :label="props.translations.breadcrumbLink"
-                :model-value="props.colors['--breadcrumb-link']"
-                :placeholder="variables['--breadcrumb-link']"
-                :tooltip="props.translations.breadcrumbLinkTooltip"
-                @update:model-value="updateValue('--breadcrumb-link', $event)"
-            />
-            <BlogFormColorField
-                :id="`${props.idPrefix}-breadcrumb-link-active`"
-                :error="props.errors?.['--breadcrumb-link-active']"
-                :label="props.translations.breadcrumbLinkActive"
-                :model-value="props.colors['--breadcrumb-link-active']"
-                :placeholder="variables['--breadcrumb-link-active']"
-                :tooltip="props.translations.breadcrumbLinkActiveTooltip"
-                @update:model-value="updateValue('--breadcrumb-link-active', $event)"
+                v-for="field in colorFields"
+                :id="`${props.idPrefix}-${field.idSuffix}`"
+                :key="field.key"
+                :error="props.errors?.[field.key]"
+                :label="props.translations[field.labelKey]"
+                :model-value="props.colors[field.key]"
+                :placeholder="variables[field.key]"
+                :tooltip="props.translations[field.tooltipKey]"
+                @update:model-value="updateValue(field.key, $event)"
             />
         </div>
     </div>
