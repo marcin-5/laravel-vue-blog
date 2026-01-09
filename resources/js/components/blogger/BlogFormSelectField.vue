@@ -28,10 +28,10 @@ function handleUpdate(value: any) {
 </script>
 
 <template>
-    <div class="flex items-center gap-2">
-        <label :for="props.id" class="text-sm">{{ props.label }}</label>
+    <div class="flex flex-col gap-1.5">
+        <label :for="props.id" class="text-xs font-medium opacity-70">{{ props.label }}</label>
         <Select :model-value="props.modelValue.toString()" @update:model-value="handleUpdate">
-            <SelectTrigger :id="props.id" class="h-8 w-[180px]">
+            <SelectTrigger :id="props.id" class="h-8 w-full">
                 <SelectValue placeholder="Wybierz opcję..." />
             </SelectTrigger>
             <SelectContent>

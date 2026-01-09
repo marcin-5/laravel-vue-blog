@@ -22,7 +22,14 @@ const { fontSize, updateFontSize } = useFontSize();
             <DropdownMenuLabel class="px-0 pt-0 text-center"> {{ t('common.nav.font_size.label') }}: {{ fontSize[0] }}% </DropdownMenuLabel>
             <DropdownMenuSeparator class="-mx-4 my-4" />
             <div class="py-2">
-                <Slider :max="125" :min="85" :model-value="fontSize" :step="5" class="w-full" @update:model-value="updateFontSize" />
+                <Slider
+                    :max="125"
+                    :min="85"
+                    :model-value="fontSize"
+                    :step="5"
+                    class="w-full"
+                    @update:model-value="updateFontSize($event as number[])"
+                />
             </div>
             <div class="mt-4 flex justify-between text-xs text-muted-foreground">
                 <span>85%</span>

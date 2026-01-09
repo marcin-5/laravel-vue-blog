@@ -16,16 +16,16 @@ defineProps<{
 </script>
 
 <template>
-    <header :style="{ fontFamily: 'var(--blog-header-font)' }" class="mb-4">
+    <header :style="{ fontFamily: 'var(--blog-header-font)', fontSize: 'calc(1.5rem * var(--blog-header-scale))' }" class="mb-4">
         <div class="flex items-center justify-between">
-            <h1 class="font-[inherit] text-2xl font-bold text-foreground">
+            <h1 class="font-[inherit] text-[1em] leading-tight font-bold text-foreground">
                 {{ blog.name }}
             </h1>
             <ViewStats :total="viewStats.total" :unique="viewStats.unique"></ViewStats>
         </div>
         <p
             v-if="displayedMotto"
-            :style="{ fontStyle: 'var(--blog-motto-style)', fontFamily: 'var(--blog-motto-font)' }"
+            :style="{ fontStyle: 'var(--blog-motto-style)', fontFamily: 'var(--blog-motto-font)', fontSize: 'calc(1rem * var(--blog-motto-scale))' }"
             class="mt-2 mb-12 text-foreground opacity-80"
         >
             {{ displayedMotto }}
@@ -39,7 +39,7 @@ defineProps<{
             v-html="blog.descriptionHtml"
         />
     </section>
-    <footer :style="{ fontFamily: 'var(--blog-footer-font)' }" class="origin-right">
+    <footer :style="{ fontFamily: 'var(--blog-footer-font)', transform: 'scale(var(--blog-footer-scale))' }" class="origin-right">
         <div v-if="blog.authorName && blog.authorEmail" class="author text-md mr-12 mb-12 text-end text-muted-foreground">
             <a :href="`mailto:${blog.authorEmail}`" class="hover:text-foreground">{{ blog.authorName }}</a>
         </div>

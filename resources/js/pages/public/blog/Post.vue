@@ -70,8 +70,8 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
         >
             <BorderDivider class="mb-4" />
 
-            <header :style="{ fontFamily: 'var(--blog-header-font)' }" class="mb-4">
-                <h1 class="font-[inherit] text-2xl font-bold text-foreground">{{ post.title }}</h1>
+            <header :style="{ fontFamily: 'var(--blog-header-font)', fontSize: 'calc(1.5rem * var(--blog-header-scale))' }" class="mb-4">
+                <h1 class="font-[inherit] text-[1em] leading-tight font-bold text-foreground">{{ post.title }}</h1>
                 <div class="my-2 inline-flex items-center gap-x-5 text-sm font-medium text-muted-foreground">
                     <p v-if="post.published_at" class="italic">{{ publishedLabel }} {{ post.published_at }}</p>
                     <span>

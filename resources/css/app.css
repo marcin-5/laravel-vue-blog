@@ -31,8 +31,12 @@
     --font-body: var(--font-body-default);
     --font-footer: var(--font-footer-default);
 
+    --header-scale: 1;
+    --body-scale: 1;
+    --motto-scale: 1;
+    --footer-scale: 1;
+
     --motto-style: italic;
-    --footer-scale: 0.9;
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -106,6 +110,8 @@
     --blog-footer-font: var(--font-footer);
 
     --blog-motto-style: var(--motto-style);
+    --blog-header-scale: var(--header-scale);
+    --blog-motto-scale: var(--motto-scale);
     --blog-footer-scale: var(--footer-scale);
 }
 
@@ -114,7 +120,7 @@
     html {
         --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
         font-family: var(--blog-body-font);
-        font-size: 105%;
+        font-size: calc(105% * var(--body-scale));
     }
 }
 
