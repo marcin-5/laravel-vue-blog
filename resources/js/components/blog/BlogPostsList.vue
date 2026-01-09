@@ -92,7 +92,12 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
             </li>
         </ul>
 
-        <nav v-if="hasPagination" :aria-label="t('blog.pagination.aria')" class="mt-4 flex items-center gap-1">
+        <nav
+            v-if="hasPagination"
+            :aria-label="t('blog.pagination.aria')"
+            :style="{ fontFamily: 'var(--blog-nav-font)' }"
+            class="mt-4 flex items-center gap-1"
+        >
             <Link
                 v-for="(link, index) in paginationLinks"
                 :key="index"
