@@ -331,6 +331,12 @@
         padding-left: 1em;
     }
 
+    .prose blockquote p {
+        font-size: inherit;
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+    }
+
     .prose ul {
         list-style-type: disc;
         margin-top: 1.25em;
