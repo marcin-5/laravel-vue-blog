@@ -38,6 +38,7 @@ class UpdateBlogRequest extends FormRequest
             'theme' => ['nullable', 'array'],
             'theme.light' => ['nullable', 'array'],
             'theme.dark' => ['nullable', 'array'],
+            'landing_content' => ['nullable', 'string'],
         ];
     }
 
@@ -80,6 +81,10 @@ class UpdateBlogRequest extends FormRequest
 
         if (array_key_exists('theme', $validated)) {
             $data['theme'] = $validated['theme'];
+        }
+
+        if (array_key_exists('landing_content', $validated)) {
+            $data['landing_content'] = $validated['landing_content'];
         }
 
         return $data;

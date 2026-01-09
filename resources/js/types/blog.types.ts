@@ -113,6 +113,9 @@ export interface AdminBlog {
     categories?: Category[];
     posts?: AdminPostItem[];
     theme?: BlogTheme;
+    landing_page?: {
+        content: string | null;
+    } | null;
 }
 
 // ===== Blog form/composable shared types =====
@@ -126,6 +129,7 @@ export interface BlogFormData {
     sidebar: number;
     page_size: number;
     categories: number[];
+    landing_content?: string | null;
     theme?: BlogTheme | null;
     [key: string]: any;
 }

@@ -13,6 +13,7 @@ class BlogService
     {
         return Blog::query()
             ->where('user_id', $user->id)
+            ->with(['landingPage:blog_id,content'])
             ->withPostsForIndex()
             ->withCategories()
             ->orderByDesc('created_at')
@@ -53,8 +54,21 @@ class BlogService
 
     public function updateBlog(Blog $blog, array $blogData, ?array $categories = null): Blog
     {
+        $landingContent = null;
+        if (array_key_exists('landing_content', $blogData)) {
+            $landingContent = $blogData['landing_content'];
+            unset($blogData['landing_content']);
+        }
+
         $blog->fill($blogData);
         $blog->save();
+
+        if ($landingContent !== null) {
+            $blog->landingPage()->updateOrCreate(
+                ['blog_id' => $blog->id],
+                ['content' => $landingContent],
+            );
+        }
 
         if ($categories !== null) {
             $blog->categories()->sync($categories);

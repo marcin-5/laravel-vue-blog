@@ -154,6 +154,8 @@
             "name_placeholder": "My Awesome Blog",
             "description_label": "Description",
             "description_placeholder": "What's this blog about?",
+            "landing_content_label": "Landing page content",
+            "landing_content_placeholder": "Content displayed on the blog's landing page...",
             "motto_label": "Motto",
             "motto_placeholder": "A short motto or tagline...",
             "motto_tooltip": "You can add multiple mottos separated by double newlines (press Enter twice). One will be randomly displayed on each post page.",

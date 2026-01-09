@@ -154,6 +154,8 @@
             "name_placeholder": "Mój Wspaniały Blog",
             "description_label": "Opis",
             "description_placeholder": "O czym jest ten blog?",
+            "landing_content_label": "Treść strony głównej",
+            "landing_content_placeholder": "Treść wyświetlana na stronie głównej bloga...",
             "motto_label": "Motto",
             "motto_placeholder": "Krótkie motto lub hasło...",
             "motto_tooltip": "Możesz dodać wiele mott rozdzielonych podwójnym enterem (naciśnij Enter dwa razy). Jedno z nich będzie losowo wyświetlane na każdej stronie posta.",

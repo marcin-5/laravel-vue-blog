@@ -85,6 +85,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
                 <main v-if="hasLandingContent" class="min-w-0 flex-1">
                     <div class="prose max-w-none" v-html="landingHtml" />
                 </main>
+                <BorderDivider class="mb-4" />
                 <BlogPostsList :blogSlug="blog.slug" :class="{ 'mt-6': hasLandingContent }" :pagination="pagination" :posts="posts" />
             </template>
 

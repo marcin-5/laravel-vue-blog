@@ -21,6 +21,7 @@ export function createDefaultFormData(locale: string = 'en'): BlogFormData {
         sidebar: 0,
         page_size: 10,
         theme: ensureThemeStructure(null),
+        landing_content: null,
     };
 }
 
@@ -39,6 +40,7 @@ export function createFormDataFromBlog(blog: Blog | undefined, defaultLocale: st
         page_size: blog.page_size ?? 10,
         categories: (blog.categories ?? []).map((c) => c.id),
         theme: ensureThemeStructure(blog.theme),
+        landing_content: blog.landing_page?.content ?? null,
     };
 }
 
@@ -54,4 +56,5 @@ export function populateFormFromBlog(form: ReturnType<typeof useForm<BlogFormDat
     form.page_size = data.page_size;
     form.categories = data.categories;
     form.theme = data.theme;
+    form.landing_content = data.landing_content;
 }

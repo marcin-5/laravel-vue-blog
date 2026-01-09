@@ -57,11 +57,25 @@ const {
     setLayout: setFooterLayout,
 } = useMarkdownPreview('markdown.preview');
 
+// Landing content handlers
+const {
+    isPreviewMode: isLandingPreviewMode,
+    isFullPreview: isLandingFullPreview,
+    previewLayout: landingPreviewLayout,
+    previewHtml: landingPreviewHtml,
+    renderMarkdown: renderLandingMarkdown,
+    togglePreview: toggleLandingPreview,
+    toggleFullPreview: toggleLandingFullPreview,
+    setLayout: setLandingLayout,
+} = useMarkdownPreview('markdown.preview');
+
 const baseTranslations = computed(() => ({
     name: t('blogger.form.name_label'),
     namePlaceholder: props.isEdit ? '' : t('blogger.form.name_placeholder'),
     description: t('blogger.form.description_label'),
     descriptionPlaceholder: props.isEdit ? '' : t('blogger.form.description_placeholder'),
+    landingContent: t('blogger.form.landing_content_label'),
+    landingContentPlaceholder: props.isEdit ? '' : t('blogger.form.landing_content_placeholder'),
     footer: t('blogger.form.footer_label'),
     footerPlaceholder: props.isEdit ? '' : t('blogger.form.footer_placeholder'),
     motto: t('blogger.form.motto_label'),
@@ -219,6 +233,19 @@ function handleFooterToggleFullPreview() {
 function handleFooterInput() {
     renderFooterMarkdown(form.footer || '');
 }
+
+// Landing content handlers
+function handleLandingTogglePreview() {
+    toggleLandingPreview(form.landing_content || '');
+}
+
+function handleLandingToggleFullPreview() {
+    toggleLandingFullPreview(form.landing_content || '');
+}
+
+function handleLandingInput() {
+    renderLandingMarkdown(form.landing_content || '');
+}
 </script>
 
 <template>
@@ -276,6 +303,40 @@ function handleFooterInput() {
                 @set-layout="setLayout"
                 @toggle-full-preview="handleToggleFullPreview"
                 @toggle-preview="handleTogglePreview"
+            />
+
+            <MarkdownPreviewSection
+                :id="`${fieldIdPrefix}-landing-content`"
+                v-model="form.landing_content"
+                :error="form.errors.landing_content"
+                :is-edit="props.isEdit"
+                :is-full-preview="isLandingFullPreview"
+                :is-preview-mode="isLandingPreviewMode"
+                :is-processing="form.processing"
+                :label="baseTranslations.landingContent"
+                :placeholder="baseTranslations.landingContentPlaceholder"
+                :preview-html="landingPreviewHtml"
+                :preview-layout="landingPreviewLayout"
+                :show-save-button="false"
+                :translations="{
+                    cancel: actionTranslations.cancel,
+                    create: actionTranslations.create,
+                    save: actionTranslations.save,
+                    exitPreview: previewTranslations.exitPreview,
+                    markdownLabel: previewTranslations.markdown,
+                    previewLabel: previewTranslations.previewLabel,
+                    previewModeTitle: previewTranslations.previewModeTitle,
+                    toggleLayout: previewTranslations.toggleLayout,
+                    closePreview: previewTranslations.close,
+                    preview: previewTranslations.preview,
+                    fullPreview: previewTranslations.fullPreview,
+                    splitView: previewTranslations.splitView,
+                }"
+                @cancel="handleCancel"
+                @input="handleLandingInput"
+                @set-layout="setLandingLayout"
+                @toggle-full-preview="handleLandingToggleFullPreview"
+                @toggle-preview="handleLandingTogglePreview"
             />
 
             <MarkdownPreviewSection
