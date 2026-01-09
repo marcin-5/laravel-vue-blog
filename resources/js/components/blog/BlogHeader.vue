@@ -39,7 +39,7 @@ defineProps<{
             v-html="blog.descriptionHtml"
         />
     </section>
-    <footer :style="{ fontFamily: 'var(--blog-footer-font)', transform: 'scale(var(--blog-footer-scale))' }" class="origin-right">
+    <footer :style="{ fontFamily: 'var(--blog-footer-font)' }" class="origin-right text-lg">
         <div v-if="blog.authorName && blog.authorEmail" class="author text-md mr-12 mb-12 text-end text-muted-foreground">
             <a :href="`mailto:${blog.authorEmail}`" class="hover:text-foreground">{{ blog.authorName }}</a>
         </div>
