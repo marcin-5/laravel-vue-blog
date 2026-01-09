@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { ref, type Ref } from 'vue';
 
 type PreviewLayout = 'horizontal' | 'vertical';
@@ -10,20 +11,24 @@ export function useMarkdownPreview(previewRouteName: string) {
     const MARKDOWN_RENDER_ERROR_HTML = '<p class="text-error">Error rendering markdown</p>';
 
     async function fetchMarkdownPreview(content: string): Promise<string> {
-        const response = await fetch(route(previewRouteName), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-            },
-            body: JSON.stringify({ content }),
-        });
-        if (!response.ok) {
+        try {
+            const response = await axios.post(
+                route(previewRouteName),
+                {
+                    content,
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                    },
+                },
+            );
+            return response.data.html;
+        } catch (error) {
+            console.error('Markdown preview fetch error:', error);
             throw new Error('Failed to fetch markdown preview');
         }
-        const data = await response.json();
-        return data.html;
     }
 
     async function renderMarkdown(content: string) {
