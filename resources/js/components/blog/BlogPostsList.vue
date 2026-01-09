@@ -88,7 +88,12 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
                     {{ post.title }}
                 </Link>
                 <small v-if="post.published_at" class="text-muted-foreground"> · {{ post.published_at }} </small>
-                <div v-if="post.excerpt" class="prose -mt-3 max-w-none text-secondary-foreground opacity-90" v-html="post.excerpt" />
+                <div
+                    v-if="post.excerpt"
+                    :style="{ fontFamily: 'var(--blog-nav-font)' }"
+                    class="prose -mt-3 max-w-none text-secondary-foreground opacity-90"
+                    v-html="post.excerpt"
+                />
             </li>
         </ul>
 
