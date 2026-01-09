@@ -204,7 +204,8 @@
             "theme_font_motto": "Font motto/cytatów",
             "theme_font_footer": "Font stopki",
             "theme_motto_style": "Styl motto/cytatów",
-            "theme_footer_scale": "Wielkość stopki"
+            "theme_footer_scale": "Wielkość stopki",
+            "theme_font_scale_correction": "Korekcja wielkości"
         },
         "stats": {
             "posts": "Posty",

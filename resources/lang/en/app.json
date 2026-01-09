@@ -204,7 +204,8 @@
             "theme_font_motto": "Motto/Quote Font",
             "theme_font_footer": "Footer Font",
             "theme_motto_style": "Motto/Quote Style",
-            "theme_footer_scale": "Footer Size"
+            "theme_footer_scale": "Footer Size",
+            "theme_font_scale_correction": "Size correction"
         },
         "stats": {
             "posts": "Posts",

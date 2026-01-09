@@ -161,6 +161,7 @@ const themeTranslations = computed(() => ({
     fontBody: t('blogger.form.theme_font_body'),
     fontMotto: t('blogger.form.theme_font_motto'),
     fontFooter: t('blogger.form.theme_font_footer'),
+    fontScaleCorrection: t('blogger.form.theme_font_scale_correction'),
     mottoStyle: t('blogger.form.theme_motto_style'),
     footerScale: t('blogger.form.theme_footer_scale'),
 }));

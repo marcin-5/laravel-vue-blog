@@ -111,6 +111,7 @@
 
     --blog-motto-style: var(--motto-style);
     --blog-header-scale: var(--header-scale);
+    --blog-body-scale: var(--body-scale);
     --blog-motto-scale: var(--motto-scale);
     --blog-footer-scale: var(--footer-scale);
 }
@@ -120,7 +121,7 @@
     html {
         --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
         font-family: var(--blog-body-font);
-        font-size: calc(105% * var(--body-scale));
+        font-size: calc(105% * var(--blog-body-scale));
     }
 }
 
@@ -255,7 +256,7 @@
     .prose h1 {
         @apply text-foreground;
         font-family: var(--blog-header-font);
-        font-size: 2.25rem;
+        font-size: calc(2.25rem * var(--blog-header-scale));
         font-weight: 800;
         line-height: 1.1111111;
         margin-top: 0;
@@ -265,7 +266,7 @@
     .prose h2 {
         @apply text-foreground;
         font-family: var(--blog-header-font);
-        font-size: 1.875rem;
+        font-size: calc(1.875rem * var(--blog-header-scale));
         font-weight: 700;
         line-height: 1.3333333;
         margin-top: 2em;
@@ -275,7 +276,7 @@
     .prose h3 {
         @apply text-foreground;
         font-family: var(--blog-header-font);
-        font-size: 1.5rem;
+        font-size: calc(1.5rem * var(--blog-header-scale));
         font-weight: 600;
         line-height: 1.6;
         margin-top: 1.6em;
@@ -285,7 +286,7 @@
     .prose h4 {
         @apply text-foreground;
         font-family: var(--blog-header-font);
-        font-size: 1.25rem;
+        font-size: calc(1.25rem * var(--blog-header-scale));
         font-weight: 600;
         line-height: 1.5;
         margin-top: 1.5em;
@@ -295,7 +296,7 @@
     .prose h5 {
         @apply text-foreground;
         font-family: var(--blog-header-font);
-        font-size: 1.125rem;
+        font-size: calc(1.125rem * var(--blog-header-scale));
         font-weight: 600;
         line-height: 1.5555556;
         margin-top: 1.5555556em;
@@ -305,7 +306,7 @@
     .prose h6 {
         @apply text-foreground;
         font-family: var(--blog-header-font);
-        font-size: 1rem;
+        font-size: calc(1rem * var(--blog-header-scale));
         font-weight: 600;
         line-height: 1.75;
         margin-top: 1.75em;
@@ -313,6 +314,7 @@
     }
 
     .prose p {
+        font-size: calc(1rem * var(--blog-body-scale));
         margin-top: 1.25em;
         margin-bottom: 1.25em;
     }
@@ -320,6 +322,7 @@
     .prose blockquote {
         @apply text-muted-foreground border-l-border;
         font-family: var(--blog-motto-font);
+        font-size: calc(1rem * var(--blog-motto-scale));
         font-weight: 500;
         font-style: var(--blog-motto-style);
         border-left-width: 0.25rem;
