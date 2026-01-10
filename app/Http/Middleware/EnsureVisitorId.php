@@ -13,14 +13,19 @@ class EnsureVisitorId
     {
         // Try to read the decrypted cookie value first
         $visitorId = (string)$request->cookie('visitor_id', '');
+        $isNewVisitor = false;
 
         // If missing, generate and ensure both the current request and response carry it
         if ($visitorId === '') {
             $visitorId = (string)Str::uuid();
+            $isNewVisitor = true;
 
             // Make it available to subsequent middleware/handlers in this request
             $request->cookies->set('visitor_id', $visitorId);
         }
+
+        // Flag the request so PageViewTracker knows if this is a "fresh" cookie
+        $request->attributes->set('visitor_id_is_new', $isNewVisitor);
 
         $response = $next($request);
 

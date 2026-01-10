@@ -15,6 +15,7 @@ import '@fontsource-variable/vollkorn';
 import '@fontsource-variable/yrsa';
 import '../css/app.css';
 
+import { initializeVisitorId } from '@/composables/useVisitorId';
 import { createInertiaApp, router } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { DefineComponent } from 'vue';
@@ -34,6 +35,7 @@ interface InertiaPageProps {
 }
 
 // Move theme and font-size initialization before app creation to prevent FOUC
+initializeVisitorId();
 initializeTheme();
 initializeFontSize();
 

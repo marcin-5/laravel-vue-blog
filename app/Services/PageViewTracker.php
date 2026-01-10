@@ -9,7 +9,6 @@ use Illuminate\Database\ClassMorphViolationException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Psr\SimpleCache\InvalidArgumentException;
 
 use function sprintf;
 
@@ -29,7 +28,6 @@ readonly class PageViewTracker
 
     /**
      * @throws ClassMorphViolationException
-     * @throws InvalidArgumentException
      */
     public function track(Model $viewable, Request $request): void
     {
@@ -37,10 +35,79 @@ readonly class PageViewTracker
             return;
         }
 
+        $visitorId = $request->cookie('visitor_id');
+        $isNewVisitor = (bool)$request->attributes->get('visitor_id_is_new', true);
+
+        // If client sent X-Visitor-Id header, they are likely a real user with LocalStorage support
+        $headerVisitorId = $request->header('X-Visitor-Id');
+        if ($headerVisitorId && $isNewVisitor) {
+            $isNewVisitor = false;
+            $visitorId = $headerVisitorId;
+            // Update request for consistency
+            $request->cookies->set('visitor_id', $visitorId);
+        }
+
+        if ($isNewVisitor) {
+            $this->storePendingVisit($viewable, $request);
+            return;
+        }
+
+        // Check for a pending visit from this IP/UA/Fingerprint
+        $this->processPendingVisit($viewable, $request);
+
+        $this->recordView($viewable, $request);
+    }
+
+    private function storePendingVisit(Model $viewable, Request $request): void
+    {
+        $key = $this->getPendingVisitKey($viewable, $request);
+
+        $this->cache->put($key, [
+            'viewable_type' => $viewable->getMorphClass(),
+            'viewable_id' => $viewable->getKey(),
+            'ip_address' => $request->ip(),
+            'user_agent' => (string)$request->header('User-Agent', ''),
+            'session_id' => $request->session()->getId(),
+        ], 600); // 10 minutes
+    }
+
+    private function getPendingVisitKey(Model $viewable, Request $request): string
+    {
+        $fingerprint = $this->fingerprintGenerator->generate($request);
+
+        return sprintf(
+            'pending_visit:%s:%s:%s',
+            $viewable->getMorphClass(),
+            $viewable->getKey(),
+            $fingerprint ?? hash('sha256', $request->ip() . $request->header('User-Agent')),
+        );
+    }
+
+    private function processPendingVisit(Model $viewable, Request $request): void
+    {
+        $key = $this->getPendingVisitKey($viewable, $request);
+        $pending = $this->cache->get($key);
+
+        if ($pending) {
+            $this->cache->forget($key);
+
+            $visitorId = $request->cookie('visitor_id');
+
+            StorePageView::dispatch([
+                ...$pending,
+                'visitor_id' => $visitorId,
+                'user_id' => $this->auth->user()?->getAuthIdentifier(),
+                'fingerprint' => $this->fingerprintGenerator->generate($request),
+            ]);
+        }
+    }
+
+    private function recordView(Model $viewable, Request $request): void
+    {
         $user = $this->auth->user();
         $userId = $user?->getAuthIdentifier();
 
-        $visitorId = $this->resolveVisitorId($request);
+        $visitorId = $request->cookie('visitor_id');
         $sessionId = $request->session()->getId();
         $fingerprint = $this->fingerprintGenerator->generate($request);
 
@@ -55,8 +122,6 @@ readonly class PageViewTracker
             $keysToCheck[] = $baseKey . ':fingerprint:' . $fingerprint;
         }
 
-        // Always add both user and visitor keys when available to ensure
-        // blocking works correctly across login/logout transitions
         if ($userId !== null) {
             $keysToCheck[] = $baseKey . ':user:' . $userId;
         }
@@ -67,10 +132,10 @@ readonly class PageViewTracker
 
         // Check if any of the keys already exist (avoid duplicates)
         if (array_any($keysToCheck, fn($key) => $this->cache->has($key))) {
-            return; // already counted in this time window
+            return;
         }
 
-        // Set blocking keys in Redis
+        // Set blocking keys
         foreach ($keysToCheck as $key) {
             $this->cache->put($key, 1, $blockTtl);
         }
