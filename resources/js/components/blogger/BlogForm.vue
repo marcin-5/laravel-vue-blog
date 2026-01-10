@@ -8,7 +8,7 @@ import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
 import MarkdownPreviewSection from '@/components/blogger/MarkdownPreviewSection.vue';
 import PostFormField from '@/components/blogger/PostFormField.vue';
 import { useBlogFormLogic } from '@/composables/useBlogFormLogic';
-import { useMarkdownPreview } from '@/composables/useMarkdownPreview';
+import { useMarkdownPreviewSection } from '@/composables/useMarkdownPreviewSection';
 import type { AdminBlog as Blog, BlogFormData, Category } from '@/types/blog.types';
 import { InertiaForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -42,33 +42,6 @@ const { form, fieldIdPrefix, updateCategories } = useBlogFormLogic({
     externalForm: props.form,
 });
 
-const { isPreviewMode, isFullPreview, previewLayout, previewHtml, renderMarkdown, togglePreview, toggleFullPreview, setLayout } =
-    useMarkdownPreview('markdown.preview');
-
-// Separate preview state for footer content
-const {
-    isPreviewMode: isFooterPreviewMode,
-    isFullPreview: isFooterFullPreview,
-    previewLayout: footerPreviewLayout,
-    previewHtml: footerPreviewHtml,
-    renderMarkdown: renderFooterMarkdown,
-    togglePreview: toggleFooterPreview,
-    toggleFullPreview: toggleFooterFullPreview,
-    setLayout: setFooterLayout,
-} = useMarkdownPreview('markdown.preview');
-
-// Landing content handlers
-const {
-    isPreviewMode: isLandingPreviewMode,
-    isFullPreview: isLandingFullPreview,
-    previewLayout: landingPreviewLayout,
-    previewHtml: landingPreviewHtml,
-    renderMarkdown: renderLandingMarkdown,
-    togglePreview: toggleLandingPreview,
-    toggleFullPreview: toggleLandingFullPreview,
-    setLayout: setLandingLayout,
-} = useMarkdownPreview('markdown.preview');
-
 const baseTranslations = computed(() => ({
     name: t('blogger.form.name_label'),
     namePlaceholder: props.isEdit ? '' : t('blogger.form.name_placeholder'),
@@ -95,18 +68,6 @@ const actionTranslations = computed(() => ({
     apply: t('blogger.form.apply_button'),
     saving: t('blogger.form.saving_button'),
     creating: t('blogger.form.creating_button'),
-}));
-
-const previewTranslations = computed(() => ({
-    preview: t('blogger.post_form.preview_button'),
-    close: t('blogger.post_form.close_button'),
-    fullPreview: t('blogger.post_form.full_preview_button'),
-    splitView: t('blogger.post_form.split_view_button'),
-    toggleLayout: previewLayout.value === 'vertical' ? t('blogger.post_form.horizontal_button') : t('blogger.post_form.vertical_button'),
-    exitPreview: t('blogger.post_form.exit_preview_button'),
-    markdown: t('blogger.post_form.markdown_label'),
-    previewLabel: t('blogger.post_form.preview_label'),
-    previewModeTitle: t('blogger.post_form.preview_mode_title'),
 }));
 
 const themeSectionTranslations = computed(() => ({
@@ -180,6 +141,32 @@ const themeTranslations = computed(() => ({
     footerScale: t('blogger.form.theme_footer_scale'),
 }));
 
+const descriptionPreview = useMarkdownPreviewSection();
+const landingPreview = useMarkdownPreviewSection();
+const footerPreview = useMarkdownPreviewSection();
+
+function createMarkdownTranslations(previewSection: ReturnType<typeof useMarkdownPreviewSection>) {
+    return computed(() => ({
+        cancel: actionTranslations.value.cancel,
+        create: actionTranslations.value.create,
+        save: actionTranslations.value.save,
+        exitPreview: t('blogger.post_form.exit_preview_button'),
+        markdownLabel: t('blogger.post_form.markdown_label'),
+        previewLabel: t('blogger.post_form.preview_label'),
+        previewModeTitle: t('blogger.post_form.preview_mode_title'),
+        toggleLayout:
+            previewSection.previewLayout.value === 'vertical' ? t('blogger.post_form.horizontal_button') : t('blogger.post_form.vertical_button'),
+        closePreview: t('blogger.post_form.close_button'),
+        preview: t('blogger.post_form.preview_button'),
+        fullPreview: t('blogger.post_form.full_preview_button'),
+        splitView: t('blogger.post_form.split_view_button'),
+    }));
+}
+
+const descriptionTranslations = createMarkdownTranslations(descriptionPreview);
+const landingTranslations = createMarkdownTranslations(landingPreview);
+const footerTranslations = createMarkdownTranslations(footerPreview);
+
 function filterErrorsByPrefix(errors: Record<string, string>, prefix: string): Record<string, string> {
     const filtered: Record<string, string> = {};
     for (const key of Object.keys(errors)) {
@@ -209,42 +196,30 @@ function handleCancel() {
     emit('cancel');
 }
 
-function handleTogglePreview() {
-    togglePreview(form.description || '');
+function handleDescriptionTogglePreview() {
+    descriptionPreview.togglePreview(form.description || '');
 }
 
-function handleToggleFullPreview() {
-    toggleFullPreview(form.description || '');
-}
-
-function handleDescriptionInput() {
-    renderMarkdown(form.description || '');
+function handleDescriptionToggleFullPreview() {
+    descriptionPreview.toggleFullPreview(form.description || '');
 }
 
 // Footer handlers
 function handleFooterTogglePreview() {
-    toggleFooterPreview(form.footer || '');
+    footerPreview.togglePreview(form.footer || '');
 }
 
 function handleFooterToggleFullPreview() {
-    toggleFooterFullPreview(form.footer || '');
-}
-
-function handleFooterInput() {
-    renderFooterMarkdown(form.footer || '');
+    footerPreview.toggleFullPreview(form.footer || '');
 }
 
 // Landing content handlers
 function handleLandingTogglePreview() {
-    toggleLandingPreview(form.landing_content || '');
+    landingPreview.togglePreview(form.landing_content || '');
 }
 
 function handleLandingToggleFullPreview() {
-    toggleLandingFullPreview(form.landing_content || '');
-}
-
-function handleLandingInput() {
-    renderLandingMarkdown(form.landing_content || '');
+    landingPreview.toggleFullPreview(form.landing_content || '');
 }
 </script>
 
@@ -276,65 +251,39 @@ function handleLandingInput() {
                 v-model="form.description"
                 :error="form.errors.description"
                 :is-edit="props.isEdit"
-                :is-full-preview="isFullPreview"
-                :is-preview-mode="isPreviewMode"
+                :is-full-preview="descriptionPreview.isFullPreview.value"
+                :is-preview-mode="descriptionPreview.isPreviewMode.value"
                 :is-processing="form.processing"
                 :label="baseTranslations.description"
                 :placeholder="baseTranslations.descriptionPlaceholder"
-                :preview-html="previewHtml"
-                :preview-layout="previewLayout"
+                :preview-html="descriptionPreview.previewHtml.value"
+                :preview-layout="descriptionPreview.previewLayout.value"
                 :show-save-button="false"
-                :translations="{
-                    cancel: actionTranslations.cancel,
-                    create: actionTranslations.create,
-                    save: actionTranslations.save,
-                    exitPreview: previewTranslations.exitPreview,
-                    markdownLabel: previewTranslations.markdown,
-                    previewLabel: previewTranslations.previewLabel,
-                    previewModeTitle: previewTranslations.previewModeTitle,
-                    toggleLayout: previewTranslations.toggleLayout,
-                    closePreview: previewTranslations.close,
-                    preview: previewTranslations.preview,
-                    fullPreview: previewTranslations.fullPreview,
-                    splitView: previewTranslations.splitView,
-                }"
+                :translations="descriptionTranslations"
                 @cancel="handleCancel"
-                @input="handleDescriptionInput"
-                @set-layout="setLayout"
-                @toggle-full-preview="handleToggleFullPreview"
-                @toggle-preview="handleTogglePreview"
+                @input="descriptionPreview.handleInput(form.description || '')"
+                @set-layout="descriptionPreview.setLayout"
+                @toggle-full-preview="handleDescriptionToggleFullPreview"
+                @toggle-preview="handleDescriptionTogglePreview"
             />
 
             <MarkdownPreviewSection
                 :id="`${fieldIdPrefix}-landing-content`"
-                v-model="form.landing_content"
+                v-model="form.landing_content as string"
                 :error="form.errors.landing_content"
                 :is-edit="props.isEdit"
-                :is-full-preview="isLandingFullPreview"
-                :is-preview-mode="isLandingPreviewMode"
+                :is-full-preview="landingPreview.isFullPreview.value"
+                :is-preview-mode="landingPreview.isPreviewMode.value"
                 :is-processing="form.processing"
                 :label="baseTranslations.landingContent"
                 :placeholder="baseTranslations.landingContentPlaceholder"
-                :preview-html="landingPreviewHtml"
-                :preview-layout="landingPreviewLayout"
+                :preview-html="landingPreview.previewHtml.value"
+                :preview-layout="landingPreview.previewLayout.value"
                 :show-save-button="false"
-                :translations="{
-                    cancel: actionTranslations.cancel,
-                    create: actionTranslations.create,
-                    save: actionTranslations.save,
-                    exitPreview: previewTranslations.exitPreview,
-                    markdownLabel: previewTranslations.markdown,
-                    previewLabel: previewTranslations.previewLabel,
-                    previewModeTitle: previewTranslations.previewModeTitle,
-                    toggleLayout: previewTranslations.toggleLayout,
-                    closePreview: previewTranslations.close,
-                    preview: previewTranslations.preview,
-                    fullPreview: previewTranslations.fullPreview,
-                    splitView: previewTranslations.splitView,
-                }"
+                :translations="landingTranslations"
                 @cancel="handleCancel"
-                @input="handleLandingInput"
-                @set-layout="setLandingLayout"
+                @input="landingPreview.handleInput(form.landing_content || '')"
+                @set-layout="landingPreview.setLayout"
                 @toggle-full-preview="handleLandingToggleFullPreview"
                 @toggle-preview="handleLandingTogglePreview"
             />
@@ -344,31 +293,18 @@ function handleLandingInput() {
                 v-model="form.footer"
                 :error="form.errors.footer"
                 :is-edit="props.isEdit"
-                :is-full-preview="isFooterFullPreview"
-                :is-preview-mode="isFooterPreviewMode"
+                :is-full-preview="footerPreview.isFullPreview.value"
+                :is-preview-mode="footerPreview.isPreviewMode.value"
                 :is-processing="form.processing"
                 :label="baseTranslations.footer"
                 :placeholder="baseTranslations.footerPlaceholder"
-                :preview-html="footerPreviewHtml"
-                :preview-layout="footerPreviewLayout"
+                :preview-html="footerPreview.previewHtml.value"
+                :preview-layout="footerPreview.previewLayout.value"
                 :show-save-button="false"
-                :translations="{
-                    cancel: actionTranslations.cancel,
-                    create: actionTranslations.create,
-                    save: actionTranslations.save,
-                    exitPreview: previewTranslations.exitPreview,
-                    markdownLabel: previewTranslations.markdown,
-                    previewLabel: previewTranslations.previewLabel,
-                    previewModeTitle: previewTranslations.previewModeTitle,
-                    toggleLayout: previewTranslations.toggleLayout,
-                    closePreview: previewTranslations.close,
-                    preview: previewTranslations.preview,
-                    fullPreview: previewTranslations.fullPreview,
-                    splitView: previewTranslations.splitView,
-                }"
+                :translations="footerTranslations"
                 @cancel="handleCancel"
-                @input="handleFooterInput"
-                @set-layout="setFooterLayout"
+                @input="footerPreview.handleInput(form.footer || '')"
+                @set-layout="footerPreview.setLayout"
                 @toggle-full-preview="handleFooterToggleFullPreview"
                 @toggle-preview="handleFooterTogglePreview"
             />

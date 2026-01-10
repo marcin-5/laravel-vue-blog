@@ -3,7 +3,7 @@ import { ref, type Ref } from 'vue';
 
 type PreviewLayout = 'horizontal' | 'vertical';
 
-export function useMarkdownPreview(previewRouteName: string) {
+export function useMarkdownPreview(routeName: string = 'markdown.preview') {
     const isPreviewMode = ref(false);
     const isFullPreview = ref(false);
     const previewLayout = ref<PreviewLayout>('vertical');
@@ -13,7 +13,7 @@ export function useMarkdownPreview(previewRouteName: string) {
     async function fetchMarkdownPreview(content: string): Promise<string> {
         try {
             const response = await axios.post(
-                route(previewRouteName),
+                route(routeName),
                 {
                     content,
                 },
