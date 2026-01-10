@@ -45,7 +45,9 @@
         "posts_list": {
             "aria": "Lista wpisów",
             "title": "Wpisy na blogu:",
-            "empty": "Brak wpisów."
+            "empty": "Brak wpisów.",
+            "show_excerpts": "Pokaż skróty",
+            "view_excerpt": "Zobacz skrót"
         },
         "post_nav": {
             "aria": "Nawigacja między postami",

@@ -45,7 +45,9 @@
         "posts_list": {
             "aria": "Posts list",
             "title": "Posts:",
-            "empty": "No posts yet."
+            "empty": "No posts yet.",
+            "show_excerpts": "Show excerpts",
+            "view_excerpt": "View excerpt"
         },
         "post_nav": {
             "aria": "Post navigation",
