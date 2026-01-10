@@ -27,7 +27,7 @@ export function initializeVisitorId() {
             visitorId = cookieVisitorId;
             localStorage.setItem(LOCAL_STORAGE_KEY, visitorId);
         } else if (visitorId && !cookieVisitorId) {
-            // Cokie expired or cleared, but we have it in localStorage
+            // Cookie expired or cleared, but we have it in localStorage
             // We'll let the next request carry it via header
         }
     };
