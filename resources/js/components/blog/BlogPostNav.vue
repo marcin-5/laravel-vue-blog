@@ -11,7 +11,7 @@ defineProps<{
 const { t } = useI18n();
 
 const BASE_LINK_CLASSES = 'inline-flex items-center rounded-sm px-3 py-2 text-sm';
-const ACTIVE_LINK_CLASSES = 'border border-border text-foreground hover:bg-muted';
+const ACTIVE_LINK_CLASSES = 'border border-border text-foreground hover:bg-secondary bg-card';
 const INACTIVE_LINK_CLASSES = 'border border-border text-muted-foreground';
 
 const navLinkClasses = (postExists: boolean) => [`${BASE_LINK_CLASSES} gap-2`, postExists ? ACTIVE_LINK_CLASSES : INACTIVE_LINK_CLASSES];

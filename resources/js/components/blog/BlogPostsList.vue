@@ -33,9 +33,9 @@ const hasPagination = computed(() => paginationLinks.value.length > 0);
 
 function getPaginationLinkClasses(link: { active: boolean; url: string | null }) {
     return [
-        'rounded border px-2 py-1 text-sm transition-colors',
-        link.active ? 'border-foreground text-foreground' : 'border-border text-muted-foreground',
-        link.url ? 'hover:bg-muted' : 'pointer-events-none opacity-50',
+        'rounded border px-2 py-1 text-sm text-foreground transition-colors',
+        link.active ? 'border-foreground' : 'border-border',
+        link.url ? 'hover:bg-secondary' : 'pointer-events-none opacity-50',
     ];
 }
 </script>
