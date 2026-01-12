@@ -207,7 +207,7 @@
             "theme_color_breadcrumb_link_active": "--breadcrumb-link-hover",
             "theme_color_breadcrumb_link_active_tooltip": "Color of the current navigation path.",
             "theme_color_card": "--card",
-            "theme_color_card_tooltip": "Background color for cards and active buttons.",
+            "theme_color_card_tooltip": "Background color for cards and active navigation buttons.",
             "theme_font_header": "Header Font",
             "theme_font_body": "Body Font",
             "theme_font_motto": "Motto/Quote Font",

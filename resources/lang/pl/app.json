@@ -207,7 +207,7 @@
             "theme_color_breadcrumb_link_active": "--breadcrumb-link-hover",
             "theme_color_breadcrumb_link_active_tooltip": "Kolor bieżącej ścieżki nawigacji.",
             "theme_color_card": "--card",
-            "theme_color_card_tooltip": "Kolor tła dla kart i przycisków aktywnych.",
+            "theme_color_card_tooltip": "Kolor tła dla kart i aktywnych przycisków nawigacyjnych.",
             "theme_font_header": "Font nagłówków",
             "theme_font_body": "Font treści",
             "theme_font_motto": "Font motto/cytatów",
