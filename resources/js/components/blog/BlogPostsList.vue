@@ -11,6 +11,7 @@ import { useI18n } from 'vue-i18n';
 const props = defineProps<{
     posts: PostItem[];
     blogSlug: string;
+    blogId: number;
     pagination?: Pagination | null;
 }>();
 
@@ -101,6 +102,13 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
                 </div>
             </li>
         </ul>
+
+        <!-- Newsletter link -->
+        <div class="mt-4 flex">
+            <Link :href="route('newsletter.index', { blog_id: blogId })" class="text-sm font-medium text-foreground hover:text-foreground">
+                {{ t('blog.posts_list.newsletter_subscribe') }}
+            </Link>
+        </div>
 
         <nav
             v-if="hasPagination"

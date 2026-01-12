@@ -47,7 +47,8 @@
             "title": "Posts:",
             "empty": "No posts yet.",
             "show_excerpts": "Show excerpts",
-            "view_excerpt": "View excerpt"
+            "view_excerpt": "View excerpt",
+            "newsletter_subscribe": "Subscribe to newsletter"
         },
         "post_nav": {
             "aria": "Post navigation",

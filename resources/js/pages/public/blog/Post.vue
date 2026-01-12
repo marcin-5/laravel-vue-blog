@@ -11,7 +11,6 @@ import type { SEO } from '@/types';
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { Blog, Navigation, Pagination, PostDetails, PostItem } from '@/types/blog.types';
 import { formatDate, shouldShowUpdatedDate } from '@/utils/dateUtils';
-import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -97,13 +96,13 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
                     <PostContent :author="post.author" :content="post.contentHtml" />
                     <PostExtensions :extensions="post.extensions || []" />
                     <BorderDivider class="mt-12 mb-4" />
-                    <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
+                    <BlogPostsList :blogId="blog.id" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
                 </div>
 
                 <!-- Desktop layout (xl+): with left sidebar -->
                 <div class="hidden items-start gap-8 xl:flex">
                     <aside :style="asideStyle">
-                        <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
+                        <BlogPostsList :blogId="blog.id" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
                     </aside>
                     <div :style="mainStyle" class="min-w-0 flex-1">
                         <PostContent :author="post.author" :content="post.contentHtml" />
@@ -119,7 +118,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
                     <PostContent :author="post.author" :content="post.contentHtml" />
                     <PostExtensions :extensions="post.extensions || []" />
                     <BorderDivider class="mt-12 mb-4" />
-                    <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
+                    <BlogPostsList :blogId="blog.id" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
                 </div>
 
                 <!-- Desktop layout (xl+): with right sidebar -->
@@ -129,7 +128,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
                         <PostExtensions :extensions="post.extensions || []" />
                     </div>
                     <aside :style="asideStyle">
-                        <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
+                        <BlogPostsList :blogId="blog.id" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
                     </aside>
                 </div>
             </template>
@@ -139,14 +138,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
                 <PostContent :author="post.author" :content="post.contentHtml" />
                 <PostExtensions :extensions="post.extensions || []" />
                 <BorderDivider class="mt-12 mb-4" />
-                <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
-            </div>
-
-            <!-- Newsletter link -->
-            <div class="mt-8 flex justify-center">
-                <Link :href="route('newsletter.index', { blog_id: blog.id })" class="text-sm font-medium text-muted-foreground hover:text-foreground">
-                    Zapisz się do newslettera
-                </Link>
+                <BlogPostsList :blogId="blog.id" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
             </div>
 
             <!-- Post Navigation at bottom -->

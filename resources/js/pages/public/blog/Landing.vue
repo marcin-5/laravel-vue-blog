@@ -10,7 +10,6 @@ import { useSidebarLayout } from '@/composables/useSidebarLayout';
 import { hasContent } from '@/lib/utils';
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { Blog, Navigation, Pagination, PostItem } from '@/types/blog.types';
-import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -86,7 +85,13 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
                     <div class="prose max-w-none" v-html="landingHtml" />
                 </main>
                 <BorderDivider class="mb-4" />
-                <BlogPostsList :blogSlug="blog.slug" :class="{ 'mt-6': hasLandingContent }" :pagination="pagination" :posts="posts" />
+                <BlogPostsList
+                    :blogId="blog.id"
+                    :blogSlug="blog.slug"
+                    :class="{ 'mt-6': hasLandingContent }"
+                    :pagination="pagination"
+                    :posts="posts"
+                />
             </template>
 
             <!-- Layout with sidebar (hidden on <xl, visible from xl+) -->
@@ -98,13 +103,19 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
                     <main v-if="hasLandingContent" class="min-w-0 flex-1">
                         <div class="prose max-w-none" v-html="landingHtml" />
                     </main>
-                    <BlogPostsList :blogSlug="blog.slug" :class="{ 'mt-6': hasLandingContent }" :pagination="pagination" :posts="posts" />
+                    <BlogPostsList
+                        :blogId="blog.id"
+                        :blogSlug="blog.slug"
+                        :class="{ 'mt-6': hasLandingContent }"
+                        :pagination="pagination"
+                        :posts="posts"
+                    />
                 </div>
 
                 <!-- Desktop layout (xl+): with sidebar -->
                 <div class="hidden items-start gap-8 xl:flex">
                     <aside :class="asideOrderClass" :style="asideStyle">
-                        <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
+                        <BlogPostsList :blogId="blog.id" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
                     </aside>
                     <main :class="['min-w-0 flex-1', mainOrderClass]" :style="mainStyle">
                         <BlogHeader :blog="blog" :displayedMotto="displayedMotto" :viewStats="viewStats" />
@@ -114,12 +125,6 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
             </template>
 
             <!-- Navigation at bottom -->
-            <div class="mt-8 flex justify-center">
-                <Link :href="route('newsletter.index', { blog_id: blog.id })" class="text-sm font-medium text-muted-foreground hover:text-foreground">
-                    Zapisz się do newslettera
-                </Link>
-            </div>
-
             <BlogPostNav :navigation="navigation" />
 
             <!-- Footer (optional) -->

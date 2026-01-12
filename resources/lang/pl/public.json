@@ -47,7 +47,8 @@
             "title": "Wpisy na blogu:",
             "empty": "Brak wpisów.",
             "show_excerpts": "Pokaż skróty",
-            "view_excerpt": "Zobacz skrót"
+            "view_excerpt": "Zobacz skrót",
+            "newsletter_subscribe": "Zapisz się do newslettera"
         },
         "post_nav": {
             "aria": "Nawigacja między postami",
