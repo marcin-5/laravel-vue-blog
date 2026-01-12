@@ -2,6 +2,11 @@
     "actions": {
         "clear": "Wyczyść"
     },
+    "messages": {
+        "extension_created": "Rozszerzenie zostało utworzone pomyślnie.",
+        "extension_updated": "Rozszerzenie zostało zaktualizowane pomyślnie.",
+        "extension_deleted": "Rozszerzenie zostało usunięte pomyślnie."
+    },
     "admin": {
         "stats": {
             "title": "Statystyki",
@@ -265,7 +270,41 @@
         },
         "post_item": {
             "close_button": "Zamknij",
-            "edit_button": "Edytuj"
+            "edit_button": "Edytuj",
+            "show_extensions": "Pokaż rozszerzenia",
+            "hide_extensions": "Ukryj rozszerzenia",
+            "add_extension": "Dodaj rozszerzenie"
+        },
+        "extension_item": {
+            "edit_button": "Edytuj",
+            "close_button": "Zamknij"
+        },
+        "extensions": {
+            "empty": "Brak rozszerzeń.",
+            "hide_list": "Ukryj rozszerzenia"
+        },
+        "extension_form": {
+            "title_label": "Tytuł",
+            "title_placeholder": "Tytuł rozszerzenia",
+            "content_label": "Treść",
+            "content_placeholder": "Treść rozszerzenia",
+            "published_label": "Opublikowane",
+            "cancel_button": "Anuluj",
+            "create_button": "Utwórz rozszerzenie",
+            "creating_button": "Tworzenie...",
+            "save_button": "Zapisz",
+            "apply_button": "Zastosuj",
+            "saving_button": "Zapisywanie...",
+            "preview_button": "Podgląd",
+            "close_button": "Zamknij",
+            "full_preview_button": "Pełny podgląd",
+            "split_view_button": "Widok dzielony",
+            "horizontal_button": "Poziomo",
+            "vertical_button": "Pionowo",
+            "exit_preview_button": "Wyjdź z podglądu",
+            "markdown_label": "Markdown",
+            "preview_label": "Podgląd",
+            "preview_mode_title": "Tryb podglądu"
         }
     },
     "dashboard": {

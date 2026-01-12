@@ -3,6 +3,7 @@ import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import PostContent from '@/components/blog/PostContent.vue';
+import PostExtensions from '@/components/blog/PostExtensions.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import { useBlogTheme } from '@/composables/useBlogTheme';
 import { useSidebarLayout } from '@/composables/useSidebarLayout';
@@ -94,6 +95,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
                 <!-- Mobile/tablet layout (<xl): no sidebar -->
                 <div class="xl:hidden">
                     <PostContent :author="post.author" :content="post.contentHtml" />
+                    <PostExtensions :extensions="post.extensions || []" />
                     <BorderDivider class="mt-12 mb-4" />
                     <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
                 </div>
@@ -105,6 +107,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
                     </aside>
                     <div :style="mainStyle" class="min-w-0 flex-1">
                         <PostContent :author="post.author" :content="post.contentHtml" />
+                        <PostExtensions :extensions="post.extensions || []" />
                     </div>
                 </div>
             </template>
@@ -114,6 +117,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
                 <!-- Mobile/tablet layout (<xl): no sidebar -->
                 <div class="xl:hidden">
                     <PostContent :author="post.author" :content="post.contentHtml" />
+                    <PostExtensions :extensions="post.extensions || []" />
                     <BorderDivider class="mt-12 mb-4" />
                     <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
                 </div>
@@ -122,6 +126,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
                 <div class="hidden items-start gap-8 xl:flex">
                     <div :style="mainStyle" class="min-w-0 flex-1">
                         <PostContent :author="post.author" :content="post.contentHtml" />
+                        <PostExtensions :extensions="post.extensions || []" />
                     </div>
                     <aside :style="asideStyle">
                         <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
@@ -132,6 +137,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
             <!-- No sidebar layout -->
             <div v-else>
                 <PostContent :author="post.author" :content="post.contentHtml" />
+                <PostExtensions :extensions="post.extensions || []" />
                 <BorderDivider class="mt-12 mb-4" />
                 <BlogPostsList :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
             </div>

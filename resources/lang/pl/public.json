@@ -63,7 +63,8 @@
         "post": {
             "author": "Autor:",
             "published": "Opublikowany:",
-            "updated": "Zaktualizowano:"
+            "updated": "Zaktualizowano:",
+            "lock_extension": "Zablokuj treść"
         }
     }
 }

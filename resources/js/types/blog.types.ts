@@ -33,10 +33,17 @@ export interface PostItem {
     published_at?: string | null;
 }
 
+export interface PostExtension {
+    id: number;
+    title: string;
+    contentHtml: string;
+}
+
 export interface PostDetails extends PostItem {
     author: string;
     author_email: string | null;
     contentHtml: string;
+    extensions?: PostExtension[];
 }
 
 export interface PaginationLink {
@@ -85,6 +92,16 @@ export interface Category {
     slug?: string;
 }
 
+export interface AdminPostExtension {
+    id: number;
+    post_id: number;
+    title: string;
+    content: string;
+    is_published: boolean;
+    created_at?: string | null;
+    updated_at?: string | null;
+}
+
 export interface AdminPostItem {
     id: number;
     blog_id: number;
@@ -95,6 +112,7 @@ export interface AdminPostItem {
     visibility?: string;
     published_at?: string | null;
     created_at?: string | null;
+    extensions?: AdminPostExtension[];
 }
 
 export interface AdminBlog {

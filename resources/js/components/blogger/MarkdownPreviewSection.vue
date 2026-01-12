@@ -42,8 +42,8 @@ interface Emits {
     (e: 'input'): void;
     (e: 'cancel'): void;
     (e: 'submit'): void;
-    (e: 'togglePreview'): void;
-    (e: 'toggleFullPreview'): void;
+    (e: 'togglePreview', content: string): void;
+    (e: 'toggleFullPreview', content: string): void;
     (e: 'setLayoutHorizontal'): void;
     (e: 'setLayout', layout: 'horizontal' | 'vertical'): void;
 }
@@ -127,10 +127,10 @@ function handleLayoutToggle() {
 
         <!-- Preview Controls -->
         <div class="mt-2 flex justify-end gap-2">
-            <Button :variant="props.isPreviewMode ? 'exit' : 'toggle'" size="sm" type="button" @click="emit('togglePreview')">
+            <Button :variant="props.isPreviewMode ? 'exit' : 'toggle'" size="sm" type="button" @click="emit('togglePreview', props.modelValue ?? '')">
                 {{ props.isPreviewMode ? props.translations.closePreview : props.translations.preview }}
             </Button>
-            <Button v-if="props.isPreviewMode" size="sm" type="button" variant="exit" @click="emit('toggleFullPreview')">
+            <Button v-if="props.isPreviewMode" size="sm" type="button" variant="exit" @click="emit('toggleFullPreview', props.modelValue ?? '')">
                 {{ props.isFullPreview ? props.translations.splitView : props.translations.fullPreview }}
             </Button>
             <Button v-if="props.isPreviewMode && !props.isFullPreview" size="sm" type="button" variant="toggle" @click="handleLayoutToggle">

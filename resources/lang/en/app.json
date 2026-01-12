@@ -2,6 +2,11 @@
     "actions": {
         "clear": "Clear"
     },
+    "messages": {
+        "extension_created": "Extension created successfully.",
+        "extension_updated": "Extension updated successfully.",
+        "extension_deleted": "Extension deleted successfully."
+    },
     "admin": {
         "stats": {
             "title": "Statistics",
@@ -265,7 +270,41 @@
         },
         "post_item": {
             "close_button": "Close",
-            "edit_button": "Edit"
+            "edit_button": "Edit",
+            "show_extensions": "Show extensions",
+            "hide_extensions": "Hide extensions",
+            "add_extension": "Add extension"
+        },
+        "extension_item": {
+            "edit_button": "Edit",
+            "close_button": "Close"
+        },
+        "extensions": {
+            "empty": "No extensions yet.",
+            "hide_list": "Hide extensions"
+        },
+        "extension_form": {
+            "title_label": "Title",
+            "title_placeholder": "Extension title",
+            "content_label": "Content",
+            "content_placeholder": "Extension content",
+            "published_label": "Published",
+            "cancel_button": "Cancel",
+            "create_button": "Create Extension",
+            "creating_button": "Creating...",
+            "save_button": "Save",
+            "apply_button": "Apply",
+            "saving_button": "Saving...",
+            "preview_button": "Preview",
+            "close_button": "Close",
+            "full_preview_button": "Full Preview",
+            "split_view_button": "Split View",
+            "horizontal_button": "Horizontal",
+            "vertical_button": "Vertical",
+            "exit_preview_button": "Exit Preview",
+            "markdown_label": "Markdown",
+            "preview_label": "Preview",
+            "preview_mode_title": "Preview Mode"
         }
     },
     "dashboard": {

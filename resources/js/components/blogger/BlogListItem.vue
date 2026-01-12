@@ -20,6 +20,11 @@ interface Props {
     postEditForm?: any; // External post edit form instance
     postForm?: any; // External post form instance for creation
     editForm?: any; // External blog edit form instance
+    expandedExtensionsForId?: number | null;
+    creatingExtensionId?: number | null;
+    editingExtensionId?: number | null;
+    extensionForm?: any;
+    extensionEditForm?: any;
 }
 
 interface Emits {
@@ -33,6 +38,14 @@ interface Emits {
     (e: 'editPost', post: PostItem): void;
     (e: 'submitEditPost', form: any, post: PostItem): void;
     (e: 'cancelEditPost'): void;
+    (e: 'toggleExtensions', post: PostItem): void;
+    (e: 'createExtension', post: PostItem): void;
+    (e: 'submitCreateExtension', form: any, post: PostItem): void;
+    (e: 'cancelCreateExtension'): void;
+    (e: 'editExtension', extension: any): void;
+    (e: 'submitEditExtension', form: any, extension: any): void;
+    (e: 'applyEditExtension', form: any, extension: any): void;
+    (e: 'cancelEditExtension'): void;
 }
 
 const props = defineProps<Props>();
@@ -122,12 +135,26 @@ function localizedName(name: string | Record<string, string>): string {
                 <PostListItem
                     v-for="post in blog.posts"
                     :key="`post-${blog.id}-${post.id}`"
+                    :creating-extension-id="creatingExtensionId"
                     :edit-form="postEditForm"
+                    :editing-extension-id="editingExtensionId"
+                    :editing-post-id="editingPostId"
+                    :extension-edit-form="extensionEditForm"
+                    :extension-form="extensionForm"
                     :is-editing="editingPostId === post.id"
+                    :is-extensions-expanded="expandedExtensionsForId === post.id"
                     :post="post"
                     @edit="handleEditPost"
-                    @submit-edit="handleSubmitEditPost"
+                    @apply-edit-extension="(form, ext) => emit('applyEditExtension', form, ext)"
+                    @cancel-create-extension="emit('cancelCreateExtension')"
                     @cancel-edit="handleCancelEditPost"
+                    @cancel-edit-extension="emit('cancelEditExtension')"
+                    @create-extension="emit('createExtension', $event)"
+                    @edit-extension="emit('editExtension', $event)"
+                    @submit-create-extension="emit('submitCreateExtension', $event, post)"
+                    @submit-edit="handleSubmitEditPost"
+                    @submit-edit-extension="(form, ext) => emit('submitEditExtension', form, ext)"
+                    @toggle-extensions="emit('toggleExtensions', $event)"
                 />
             </div>
             <div v-else class="text-sm text-muted-foreground">{{ t('blogger.posts.empty') }}</div>

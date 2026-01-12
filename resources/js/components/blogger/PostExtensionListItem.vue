@@ -1,0 +1,55 @@
+<script lang="ts" setup>
+import PostExtensionForm from '@/components/blogger/PostExtensionForm.vue';
+import PublishedBadge from '@/components/blogger/PublishedBadge.vue';
+import { Button } from '@/components/ui/button';
+import type { AdminPostExtension as PostExtension } from '@/types/blog.types';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+
+interface Props {
+    extension: PostExtension;
+    isEditing: boolean;
+    editForm?: any;
+}
+
+interface Emits {
+    (e: 'edit', extension: PostExtension): void;
+    (e: 'submitEdit', form: any, extension: PostExtension): void;
+    (e: 'applyEdit', form: any, extension: PostExtension): void;
+    (e: 'cancelEdit'): void;
+    (e: 'delete', extension: PostExtension): void;
+}
+
+defineProps<Props>();
+const emit = defineEmits<Emits>();
+</script>
+
+<template>
+    <div class="rounded-md border p-3">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <div class="text-sm font-medium">{{ extension.title }}</div>
+                <div class="mt-1 flex items-center gap-2">
+                    <PublishedBadge :published="extension.is_published" />
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <Button :variant="isEditing ? 'exit' : 'toggle'" size="sm" type="button" @click="emit('edit', extension)">
+                    {{ isEditing ? t('blogger.extension_item.close_button') : t('blogger.extension_item.edit_button') }}
+                </Button>
+            </div>
+        </div>
+
+        <PostExtensionForm
+            v-if="isEditing"
+            :extension="extension"
+            :form="editForm"
+            :id-prefix="`edit-ext-${extension.id}`"
+            :is-edit="true"
+            @apply="(form) => emit('applyEdit', form, extension)"
+            @cancel="emit('cancelEdit')"
+            @submit="(form) => emit('submitEdit', form, extension)"
+        />
+    </div>
+</template>

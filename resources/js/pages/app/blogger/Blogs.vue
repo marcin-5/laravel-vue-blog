@@ -27,17 +27,27 @@ const { showCreate, editingId, createForm, editForm, openCreateForm, closeCreate
 const {
     creatingPostForId,
     editingPostId,
+    creatingExtensionForId,
+    editingExtensionId,
     postForm,
     postEditForm,
+    extensionForm,
+    extensionEditForm,
     startCreatePost,
     cancelCreatePost,
     submitCreatePost,
     startEditPost,
     cancelEditPost,
     submitEditPost,
+    startCreateExtension,
+    cancelCreateExtension,
+    submitCreateExtension,
+    startEditExtension,
+    cancelEditExtension,
+    submitEditExtension,
 } = usePostForm();
 
-const { expandedPostsForId, togglePosts } = useUIState();
+const { expandedPostsForId, expandedExtensionsForId, togglePosts, toggleExtensions } = useUIState();
 
 // Enhanced functions that coordinate between different composables
 function handleStartEdit(blog: Blog) {
@@ -45,6 +55,9 @@ function handleStartEdit(blog: Blog) {
     creatingPostForId.value = null;
     expandedPostsForId.value = null;
     editingPostId.value = null;
+    expandedExtensionsForId.value = null;
+    creatingExtensionForId.value = null;
+    editingExtensionId.value = null;
     postForm.reset();
     postEditForm.reset();
 
@@ -56,6 +69,9 @@ function handleStartCreatePost(blog: Blog) {
     editingId.value = null;
     expandedPostsForId.value = null;
     editingPostId.value = null;
+    expandedExtensionsForId.value = null;
+    creatingExtensionForId.value = null;
+    editingExtensionId.value = null;
     editForm.reset();
     postEditForm.reset();
 
@@ -67,6 +83,9 @@ function handleTogglePosts(blog: Blog) {
     editingId.value = null;
     creatingPostForId.value = null;
     editingPostId.value = null;
+    expandedExtensionsForId.value = null;
+    creatingExtensionForId.value = null;
+    editingExtensionId.value = null;
     editForm.reset();
     postForm.reset();
     postEditForm.reset();
@@ -78,10 +97,42 @@ function handleStartEditPost(post: any) {
     // Hide other forms when starting edit post
     editingId.value = null;
     creatingPostForId.value = null;
+    expandedExtensionsForId.value = null;
+    creatingExtensionForId.value = null;
+    editingExtensionId.value = null;
     editForm.reset();
     postForm.reset();
 
     startEditPost(post);
+}
+
+function handleToggleExtensions(post: any) {
+    editingId.value = null;
+    creatingPostForId.value = null;
+    editingPostId.value = null;
+    creatingExtensionForId.value = null;
+    editingExtensionId.value = null;
+
+    toggleExtensions(post);
+}
+
+function handleStartCreateExtension(post: any) {
+    editingId.value = null;
+    creatingPostForId.value = null;
+    editingPostId.value = null;
+    expandedExtensionsForId.value = post.id; // Expand list to show create form
+    editingExtensionId.value = null;
+
+    startCreateExtension(post);
+}
+
+function handleStartEditExtension(extension: any) {
+    editingId.value = null;
+    creatingPostForId.value = null;
+    editingPostId.value = null;
+    creatingExtensionForId.value = null;
+
+    startEditExtension(extension);
 }
 
 function handleToggleCreate() {
@@ -114,8 +165,13 @@ function handleToggleCreate() {
                     :key="blog.id"
                     :blog="blog"
                     :categories="props.categories"
+                    :creating-extension-id="creatingExtensionForId"
                     :edit-form="editForm"
+                    :editing-extension-id="editingExtensionId"
                     :editing-post-id="editingPostId"
+                    :expanded-extensions-for-id="expandedExtensionsForId"
+                    :extension-edit-form="extensionEditForm"
+                    :extension-form="extensionForm"
                     :is-creating-post="creatingPostForId === blog.id"
                     :is-editing="editingId === blog.id"
                     :is-posts-expanded="expandedPostsForId === blog.id"
@@ -129,8 +185,16 @@ function handleToggleCreate() {
                     @submit-create-post="() => submitCreatePost()"
                     @cancel-create-post="cancelCreatePost"
                     @edit-post="handleStartEditPost"
-                    @submit-edit-post="(post) => submitEditPost(post)"
+                    @submit-edit-post="() => submitEditPost()"
                     @cancel-edit-post="cancelEditPost"
+                    @toggle-extensions="handleToggleExtensions"
+                    @create-extension="handleStartCreateExtension"
+                    @submit-create-extension="($event, post) => submitCreateExtension(post)"
+                    @cancel-create-extension="cancelCreateExtension"
+                    @edit-extension="handleStartEditExtension"
+                    @submit-edit-extension="(form, ext) => submitEditExtension(ext)"
+                    @apply-edit-extension="(form, ext) => submitEditExtension(ext, false)"
+                    @cancel-edit-extension="cancelEditExtension"
                 />
 
                 <div v-if="props.blogs.length === 0" class="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
