@@ -39,6 +39,8 @@ interface Props {
         breadcrumbLinkTooltip: string;
         breadcrumbLinkActive: string;
         breadcrumbLinkActiveTooltip: string;
+        card: string;
+        cardTooltip: string;
         fontHeader?: string;
         fontBody?: string;
         fontMotto?: string;
@@ -64,6 +66,7 @@ const { variables } = useCssVariables([
     '--link-hover',
     '--breadcrumb-link',
     '--breadcrumb-link-active',
+    '--card',
 ]);
 
 // Define the update event (following v-model convention for the colors object)
@@ -156,6 +159,7 @@ const colorFields = computed(() => [
         labelKey: 'breadcrumbLinkActive' as const,
         tooltipKey: 'breadcrumbLinkActiveTooltip' as const,
     },
+    { key: '--card', idSuffix: 'card', labelKey: 'card' as const, tooltipKey: 'card' as const },
 ]);
 
 const fontFields = computed(() => [

@@ -100,6 +100,8 @@ const themeSectionTranslations = computed(() => ({
     colorBreadcrumbLinkTooltip: t('blogger.form.theme_color_breadcrumb_link_tooltip'),
     colorBreadcrumbLinkActive: t('blogger.form.theme_color_breadcrumb_link_active'),
     colorBreadcrumbLinkActiveTooltip: t('blogger.form.theme_color_breadcrumb_link_active_tooltip'),
+    colorCard: t('blogger.form.theme_color_card'),
+    colorCardTooltip: t('blogger.form.theme_color_card_tooltip'),
 }));
 
 const localeOptions = computed(() => [
@@ -132,6 +134,8 @@ const themeTranslations = computed(() => ({
     breadcrumbLinkTooltip: themeSectionTranslations.value.colorBreadcrumbLinkTooltip,
     breadcrumbLinkActive: themeSectionTranslations.value.colorBreadcrumbLinkActive,
     breadcrumbLinkActiveTooltip: themeSectionTranslations.value.colorBreadcrumbLinkActiveTooltip,
+    card: themeSectionTranslations.value.colorCard,
+    cardTooltip: themeSectionTranslations.value.colorCardTooltip,
     fontHeader: t('blogger.form.theme_font_header'),
     fontBody: t('blogger.form.theme_font_body'),
     fontMotto: t('blogger.form.theme_font_motto'),
