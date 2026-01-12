@@ -2,26 +2,25 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasMarkdownContent;
 use App\Observers\SitemapObserver;
 use App\Viewable;
-use HTMLPurifier;
-use HTMLPurifier_Config;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
-use ParsedownExtra;
 
 class Post extends Model
 {
     use HasFactory;
     use Viewable;
+    use HasMarkdownContent;
 
-    public const VIS_PUBLIC = 'public';
+    public const string VIS_PUBLIC = 'public';
 
-    public const VIS_REGISTERED = 'registered';
+    public const string VIS_REGISTERED = 'registered';
 
     protected $fillable = [
         'blog_id',
@@ -58,23 +57,9 @@ class Post extends Model
         return $this->hasMany(NewsletterLog::class);
     }
 
-    /**
-     * Accessor to get Markdown content rendered as HTML.
-     */
-    public function getContentHtmlAttribute(): string
+    public function extensions(): HasMany
     {
-        $content = (string)($this->content ?? '');
-        if ($content === '') {
-            return '';
-        }
-        $parser = new ParsedownExtra;
-        if (method_exists($parser, 'setSafeMode')) {
-            $parser->setSafeMode(false);
-        }
-        $html = $parser->text($content);
-        $purifier = new HTMLPurifier(HTMLPurifier_Config::createDefault());
-
-        return $purifier->purify($html);
+        return $this->hasMany(PostExtension::class);
     }
 
     /**

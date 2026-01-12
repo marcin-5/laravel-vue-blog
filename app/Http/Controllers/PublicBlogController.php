@@ -207,6 +207,15 @@ class PublicBlogController extends BasePublicController
                 'contentHtml' => $post->content_html,
                 'published_at' => $this->formatDateForLocale($post->published_at),
                 'excerpt' => $post->excerpt,
+                'extensions' => $post->extensions()
+                    ->where('is_published', true)
+                    ->oldest()
+                    ->get()
+                    ->map(fn($ext) => [
+                        'id' => $ext->id,
+                        'title' => $ext->title,
+                        'contentHtml' => $ext->content_html,
+                    ]),
             ],
             'posts' => PublicPostResource::collection($paginator->items())->toArray($request),
             'pagination' => $this->formatPagination($paginator),

@@ -124,6 +124,11 @@ class Blog extends Model
         return $query->with([
             'posts' => function ($q) {
                 $q->orderByRaw('COALESCE(published_at, created_at) DESC')
+                    ->with([
+                        'extensions' => function ($eq) {
+                            $eq->oldest();
+                        }
+                    ])
                     ->select(
                         'id',
                         'blog_id',
