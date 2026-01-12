@@ -33,7 +33,7 @@ const hasPagination = computed(() => paginationLinks.value.length > 0);
 
 function getPaginationLinkClasses(link: { active: boolean; url: string | null }) {
     return [
-        'rounded border px-2 py-1 text-sm text-foreground transition-colors',
+        'rounded border px-2 py-1 text-sm text-foreground transition-colors bg-card',
         link.active ? 'border-foreground' : 'border-border',
         link.url ? 'hover:bg-secondary' : 'pointer-events-none opacity-50',
     ];
