@@ -10,6 +10,7 @@ import { useSidebarLayout } from '@/composables/useSidebarLayout';
 import { hasContent } from '@/lib/utils';
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { Blog, Navigation, Pagination, PostItem } from '@/types/blog.types';
+import { selectRandomMotto } from '@/utils/stringUtils';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -34,17 +35,7 @@ const hasLandingContent = computed(() => hasContent(props.landingHtml));
 const hasFooterContent = computed(() => hasContent(props.footerHtml));
 
 // Motto selection
-function selectRandomMottoFromList(mottoText: string | null | undefined): string | null {
-    if (!mottoText) return null;
-
-    const mottoList = mottoText.split('\n\n').filter((motto) => motto.trim());
-    if (mottoList.length === 0) return null;
-
-    const randomIndex = Math.floor(Math.random() * mottoList.length);
-    return mottoList[randomIndex].trim();
-}
-
-const displayedMotto = selectRandomMottoFromList(props.blog.motto);
+const displayedMotto = selectRandomMotto(props.blog.motto);
 
 // Sidebar layout calculations
 const {
@@ -53,14 +44,12 @@ const {
     mainStyle,
     asideOrderClass,
     mainOrderClass,
+    navbarMaxWidth,
 } = useSidebarLayout({
     sidebar: props.sidebar,
     minPercent: SIDEBAR_MIN_WIDTH,
     maxPercent: SIDEBAR_MAX_WIDTH,
 });
-
-// Navbar max-width class based on sidebar layout
-const navbarMaxWidth = computed(() => (hasSidebarLayout.value ? 'max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl' : 'max-w-screen-lg'));
 
 // Theme handling
 const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));

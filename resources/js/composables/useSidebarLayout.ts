@@ -66,6 +66,9 @@ export function useSidebarLayout(options: UseSidebarLayoutOptions) {
     const asideOrderClass = computed<string | undefined>(() => (isRightSidebar.value ? 'order-2' : undefined));
     const mainOrderClass = computed<string | undefined>(() => (isRightSidebar.value ? 'order-1' : undefined));
 
+    // Navbar max-width class based on sidebar layout
+    const navbarMaxWidth = computed<string>(() => (hasSidebar.value ? 'max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl' : 'max-w-screen-lg'));
+
     return {
         // state
         hasSidebar,
@@ -79,5 +82,6 @@ export function useSidebarLayout(options: UseSidebarLayoutOptions) {
         mainStyle,
         asideOrderClass,
         mainOrderClass,
+        navbarMaxWidth,
     };
 }

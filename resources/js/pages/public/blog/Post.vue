@@ -45,14 +45,11 @@ const showUpdated = computed(() => shouldShowUpdatedDate(postPublishedTime.value
 const formattedUpdatedDate = computed(() => formatDate(postModifiedTime.value, props.locale));
 
 // Sidebar layout
-const { hasSidebar, isLeftSidebar, isRightSidebar, asideStyle, mainStyle } = useSidebarLayout({
+const { hasSidebar, asideStyle, mainStyle, asideOrderClass, mainOrderClass, navbarMaxWidth } = useSidebarLayout({
     sidebar: props.sidebar,
     minPercent: SIDEBAR_MIN_WIDTH,
     maxPercent: SIDEBAR_MAX_WIDTH,
 });
-
-// Navbar max-width class based on sidebar layout
-const navbarMaxWidth = computed(() => (hasSidebar.value ? 'max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl' : 'max-w-screen-lg'));
 
 // Theme handling
 const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
@@ -89,8 +86,8 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
             <!-- Add separation line under header when no sidebar -->
             <BorderDivider v-if="!hasSidebar" class="mb-8" />
 
-            <!-- Left sidebar layout -->
-            <template v-if="isLeftSidebar">
+            <!-- Layout with sidebar (hidden on <xl, visible from xl+) -->
+            <template v-if="hasSidebar">
                 <!-- Mobile/tablet layout (<xl): no sidebar -->
                 <div class="xl:hidden">
                     <PostContent :author="post.author" :content="post.contentHtml" />
@@ -99,37 +96,15 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
                     <BlogPostsList :blogId="blog.id" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
                 </div>
 
-                <!-- Desktop layout (xl+): with left sidebar -->
+                <!-- Desktop layout (xl+): with sidebar using order classes -->
                 <div class="hidden items-start gap-8 xl:flex">
-                    <aside :style="asideStyle">
+                    <aside :class="asideOrderClass" :style="asideStyle">
                         <BlogPostsList :blogId="blog.id" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
                     </aside>
-                    <div :style="mainStyle" class="min-w-0 flex-1">
+                    <div :class="['min-w-0 flex-1', mainOrderClass]" :style="mainStyle">
                         <PostContent :author="post.author" :content="post.contentHtml" />
                         <PostExtensions :extensions="post.extensions || []" />
                     </div>
-                </div>
-            </template>
-
-            <!-- Right sidebar layout -->
-            <template v-else-if="isRightSidebar">
-                <!-- Mobile/tablet layout (<xl): no sidebar -->
-                <div class="xl:hidden">
-                    <PostContent :author="post.author" :content="post.contentHtml" />
-                    <PostExtensions :extensions="post.extensions || []" />
-                    <BorderDivider class="mt-12 mb-4" />
-                    <BlogPostsList :blogId="blog.id" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
-                </div>
-
-                <!-- Desktop layout (xl+): with right sidebar -->
-                <div class="hidden items-start gap-8 xl:flex">
-                    <div :style="mainStyle" class="min-w-0 flex-1">
-                        <PostContent :author="post.author" :content="post.contentHtml" />
-                        <PostExtensions :extensions="post.extensions || []" />
-                    </div>
-                    <aside :style="asideStyle">
-                        <BlogPostsList :blogId="blog.id" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
-                    </aside>
                 </div>
             </template>
 
