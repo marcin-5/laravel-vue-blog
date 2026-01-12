@@ -2,19 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasMarkdownContent;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use HTMLPurifier;
-use HTMLPurifier_Config;
 
 class LandingPage extends Model
 {
     use HasFactory;
+    use HasMarkdownContent;
 
-    public const SIDEBAR_LEFT = 'left';
-    public const SIDEBAR_RIGHT = 'right';
-    public const SIDEBAR_NONE = 'none';
+    public const string SIDEBAR_LEFT = 'left';
+    public const string SIDEBAR_RIGHT = 'right';
+    public const string SIDEBAR_NONE = 'none';
 
     protected $fillable = [
         'blog_id',
@@ -33,30 +33,16 @@ class LandingPage extends Model
     }
 
     /**
-     * Accessor to get Markdown content rendered as HTML.
-     */
-    public function getContentHtmlAttribute(): string
-    {
-        $content = (string) ($this->content ?? '');
-        if ($content === '') {
-            return '';
-        }
-        $parser = new \ParsedownExtra();
-        if (method_exists($parser, 'setSafeMode')) {
-            $parser->setSafeMode(false);
-        }
-        $html = $parser->text($content);
-        $purifier = new HTMLPurifier(HTMLPurifier_Config::createDefault());
-        return $purifier->purify($html);
-    }
-
-    /**
      * Ensure sidebar_position is only left, right, or none; default to right.
      */
     public function setSidebarPositionAttribute(?string $value): void
     {
         $value = $value ? strtolower($value) : null;
-        $this->attributes['sidebar_position'] = in_array($value, [self::SIDEBAR_LEFT, self::SIDEBAR_RIGHT, self::SIDEBAR_NONE], true)
+        $this->attributes['sidebar_position'] = in_array(
+            $value,
+            [self::SIDEBAR_LEFT, self::SIDEBAR_RIGHT, self::SIDEBAR_NONE],
+            true,
+        )
             ? $value
             : self::SIDEBAR_RIGHT;
     }
