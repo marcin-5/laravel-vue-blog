@@ -64,7 +64,8 @@
             "author": "Autor:",
             "published": "Opublikowany:",
             "updated": "Zaktualizowano:",
-            "lock_extension": "Zablokuj treść"
+            "lock_extension": "Zablokuj",
+            "unlock_extension": "Odblokuj"
         }
     }
 }

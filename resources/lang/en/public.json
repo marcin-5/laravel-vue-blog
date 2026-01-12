@@ -64,7 +64,8 @@
             "author": "Author:",
             "published": "Published:",
             "updated": "Updated:",
-            "lock_extension": "Lock content"
+            "lock_extension": "Lock",
+            "unlock_extension": "Unlock"
         }
     }
 }

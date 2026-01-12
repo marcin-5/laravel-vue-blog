@@ -1,7 +1,9 @@
 <script lang="ts" setup>
-import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { PostExtension } from '@/types/blog.types';
+import { Lock, LockOpen } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 defineProps<{
@@ -29,12 +31,12 @@ function toggleExtension(id: number) {
     expandedIds.value = newExpanded;
 }
 
-function toggleLock(id: number, checked: boolean) {
+function toggleLock(id: number) {
     const newLocked = new Set(lockedIds.value);
-    if (checked) {
-        newLocked.add(id);
-    } else {
+    if (newLocked.has(id)) {
         newLocked.delete(id);
+    } else {
+        newLocked.add(id);
     }
     lockedIds.value = newLocked;
 }
@@ -64,8 +66,24 @@ function toggleLock(id: number, checked: boolean) {
                         </button>
                     </CollapsibleTrigger>
                     <div v-if="extensions.length > 1" class="ml-4 flex items-center gap-2">
-                        <Checkbox :checked="lockedIds.has(extension.id)" @update:checked="(val: boolean) => toggleLock(extension.id, val)" />
-                        <span class="text-xs text-muted-foreground">{{ $t('blog.post.lock_extension') }}</span>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger as-child>
+                                    <Button
+                                        :variant="lockedIds.has(extension.id) ? 'toggle' : 'ghost'"
+                                        class="h-8 w-8"
+                                        size="icon"
+                                        @click="toggleLock(extension.id)"
+                                    >
+                                        <Lock v-if="lockedIds.has(extension.id)" class="h-4 w-4" />
+                                        <LockOpen v-else class="h-4 w-4" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    {{ lockedIds.has(extension.id) ? $t('blog.post.unlock_extension') : $t('blog.post.lock_extension') }}
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
                     </div>
                 </div>
                 <CollapsibleContent>
