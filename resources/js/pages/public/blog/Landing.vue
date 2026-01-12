@@ -7,10 +7,9 @@ import BorderDivider from '@/components/blog/BorderDivider.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import { useBlogTheme } from '@/composables/useBlogTheme';
 import { useSidebarLayout } from '@/composables/useSidebarLayout';
-import { hasContent } from '@/lib/utils';
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { Blog, Navigation, Pagination, PostItem } from '@/types/blog.types';
-import { selectRandomMotto } from '@/utils/stringUtils';
+import { hasContent, selectRandomMotto } from '@/utils/stringUtils';
 import { computed } from 'vue';
 
 const props = defineProps<{

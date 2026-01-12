@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { cn } from '@/lib/utils'
+import { cn } from '@/utils/classUtils'
 import { ChevronDown } from 'lucide-vue-next'
 import {
   NavigationMenuTrigger,

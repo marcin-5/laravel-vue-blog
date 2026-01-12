@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/classUtils';
 import { ToastRoot, type ToastRootEmits, type ToastRootProps, useForwardPropsEmits } from 'reka-ui';
 import { computed, type HTMLAttributes } from 'vue';
 import { type ToastVariants, toastVariants } from '.';

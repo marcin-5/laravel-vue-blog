@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/classUtils';
 import { ChevronDown } from 'lucide-vue-next';
 import { SelectIcon, SelectTrigger, type SelectTriggerProps, useForwardProps } from 'reka-ui';
 import { computed, type HTMLAttributes } from 'vue';

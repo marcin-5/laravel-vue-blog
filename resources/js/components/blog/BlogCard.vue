@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { Card } from '@/components/ui/card';
-import { hasContent } from '@/lib/utils';
 import { getCategoryDisplayName } from '@/types/blog';
 import type { BlogItem } from '@/types/blog.types';
+import { hasContent } from '@/utils/stringUtils';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 

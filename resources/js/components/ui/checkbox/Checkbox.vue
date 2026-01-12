@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { CheckboxRootEmits, CheckboxRootProps } from 'reka-ui';
 import { CheckboxIndicator, CheckboxRoot, useForwardPropsEmits } from 'reka-ui';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/classUtils';
 import { Check } from 'lucide-vue-next';
 import { computed, type HTMLAttributes } from 'vue';
 

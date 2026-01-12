@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/classUtils';
 import { refDefault, useEventListener, useMediaQuery, useVModel } from '@vueuse/core';
 import { TooltipProvider } from 'reka-ui';
 import { computed, type HTMLAttributes, ref } from 'vue';
