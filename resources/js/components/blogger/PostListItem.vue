@@ -4,7 +4,9 @@ import PostExtensionListItem from '@/components/blogger/PostExtensionListItem.vu
 import PostForm from '@/components/blogger/PostForm.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { AdminPostExtension as PostExtension, AdminPostItem as PostItem } from '@/types/blog.types';
+import { ChevronDown, ChevronUp, Pencil, Plus, X } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -68,15 +70,41 @@ const addExtensionButtonLabel = computed(() =>
                 <div class="text-xs text-muted-foreground">{{ post.excerpt }}</div>
             </div>
             <div class="flex items-center gap-2">
-                <Button :variant="editButtonVariant" size="sm" type="button" @click="emit('edit', post)">
-                    {{ editButtonLabel }}
-                </Button>
-                <Button :variant="extensionsButtonVariant" size="sm" type="button" @click="emit('toggleExtensions', post)">
-                    {{ extensionsButtonLabel }}
-                </Button>
-                <Button :variant="addExtensionButtonVariant" size="sm" type="button" @click="emit('createExtension', post)">
-                    {{ addExtensionButtonLabel }}
-                </Button>
+                <Tooltip>
+                    <TooltipTrigger as-child>
+                        <Button :variant="editButtonVariant" size="icon" type="button" @click="emit('edit', post)">
+                            <X v-if="isEditing" />
+                            <Pencil v-else />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        {{ editButtonLabel }}
+                    </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                    <TooltipTrigger as-child>
+                        <Button :variant="extensionsButtonVariant" size="icon" type="button" @click="emit('toggleExtensions', post)">
+                            <ChevronUp v-if="isExtensionsExpanded" />
+                            <ChevronDown v-else />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        {{ extensionsButtonLabel }}
+                    </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                    <TooltipTrigger as-child>
+                        <Button :variant="addExtensionButtonVariant" size="icon" type="button" @click="emit('createExtension', post)">
+                            <X v-if="creatingExtensionId === post.id" />
+                            <Plus v-else />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        {{ addExtensionButtonLabel }}
+                    </TooltipContent>
+                </Tooltip>
             </div>
         </div>
         <!-- Inline Post Edit Form -->
@@ -118,11 +146,17 @@ const addExtensionButtonLabel = computed(() =>
                 @submit="(form) => emit('submitCreateExtension', form, post)"
             />
 
-            <!-- Collapse Button at the bottom of the list -->
             <div class="mt-4 flex justify-end">
-                <Button size="sm" variant="ghost" @click="emit('toggleExtensions', post)">
-                    {{ t('blogger.extensions.hide_list') }}
-                </Button>
+                <Tooltip>
+                    <TooltipTrigger as-child>
+                        <Button size="icon" variant="ghost" @click="emit('toggleExtensions', post)">
+                            <ChevronUp />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        {{ t('blogger.extensions.hide_list') }}
+                    </TooltipContent>
+                </Tooltip>
             </div>
         </div>
     </div>

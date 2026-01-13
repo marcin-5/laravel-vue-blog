@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import BlogForm from '@/components/blogger/BlogForm.vue';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { Category } from '@/types/blog.types';
+import { Plus, X } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -39,17 +41,30 @@ function handleCancelCreate() {
     <div class="space-y-6">
         <div class="flex items-center justify-between">
             <h1 class="text-xl font-semibold">{{ t('blogger.create_section.title') }}</h1>
-            <div :title="!props.canCreate ? t('blogger.create_section.quota_reached_tooltip') : ''">
-                <Button
-                    :disabled="!props.canCreate"
-                    :variant="!props.canCreate ? 'muted' : showCreate ? 'exit' : 'constructive'"
-                    type="button"
-                    @click="handleToggleCreate"
-                >
-                    <span v-if="showCreate">{{ t('blogger.create_section.close_button') }}</span>
-                    <span v-else>{{ t('blogger.create_section.create_button') }}</span>
-                </Button>
-            </div>
+            <Tooltip>
+                <TooltipTrigger as-child>
+                    <div>
+                        <Button
+                            :disabled="!props.canCreate"
+                            :variant="!props.canCreate ? 'muted' : showCreate ? 'exit' : 'constructive'"
+                            size="icon"
+                            type="button"
+                            @click="handleToggleCreate"
+                        >
+                            <X v-if="showCreate" />
+                            <Plus v-else />
+                        </Button>
+                    </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                    <template v-if="!props.canCreate">
+                        {{ t('blogger.create_section.quota_reached_tooltip') }}
+                    </template>
+                    <template v-else>
+                        {{ showCreate ? t('blogger.create_section.close_button') : t('blogger.create_section.create_button') }}
+                    </template>
+                </TooltipContent>
+            </Tooltip>
         </div>
 
         <!-- Create New Blog Form -->

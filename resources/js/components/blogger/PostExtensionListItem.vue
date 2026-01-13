@@ -2,7 +2,9 @@
 import PostExtensionForm from '@/components/blogger/PostExtensionForm.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { AdminPostExtension as PostExtension } from '@/types/blog.types';
+import { Pencil, X } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -37,9 +39,17 @@ const emit = defineEmits<Emits>();
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <Button :variant="isEditing ? 'exit' : 'toggle'" size="sm" type="button" @click="emit('edit', extension)">
-                    {{ isEditing ? t('blogger.extension_item.close_button') : t('blogger.extension_item.edit_button') }}
-                </Button>
+                <Tooltip>
+                    <TooltipTrigger as-child>
+                        <Button :variant="isEditing ? 'exit' : 'toggle'" size="icon" type="button" @click="emit('edit', extension)">
+                            <X v-if="isEditing" />
+                            <Pencil v-else />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        {{ isEditing ? t('blogger.extension_item.close_button') : t('blogger.extension_item.edit_button') }}
+                    </TooltipContent>
+                </Tooltip>
             </div>
         </div>
 

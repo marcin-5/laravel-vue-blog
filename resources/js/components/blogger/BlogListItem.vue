@@ -4,8 +4,10 @@ import PostForm from '@/components/blogger/PostForm.vue';
 import PostListItem from '@/components/blogger/PostListItem.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { i18n } from '@/i18n';
 import type { AdminBlog as Blog, AdminPostItem as PostItem, Category } from '@/types/blog.types';
+import { ChevronDown, ChevronUp, Pencil, Plus, X } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -118,16 +120,42 @@ function localizedName(name: string | Record<string, string>): string {
                 <Badge :variant="blog.is_published ? 'success' : 'accent'">
                     {{ blog.is_published ? t('blogger.badges.published') : t('blogger.badges.draft') }}
                 </Badge>
-                <Button size="sm" type="button" variant="toggle" @click="handleEdit">{{
-                    isEditing ? t('blogger.actions.close') : t('blogger.actions.edit')
-                }}</Button>
-                <Button size="sm" type="button" variant="toggle" @click="handleTogglePosts">
-                    <span v-if="isPostsExpanded">{{ t('blogger.actions.hide_posts') }}</span>
-                    <span v-else>{{ t('blogger.actions.show_posts') }}</span>
-                </Button>
-                <Button :variant="isCreatingPost ? 'exit' : 'constructive'" size="sm" type="button" @click="handleCreatePost">{{
-                    isCreatingPost ? t('blogger.actions.close') : t('blogger.actions.add_post')
-                }}</Button>
+
+                <Tooltip>
+                    <TooltipTrigger as-child>
+                        <Button size="icon" type="button" variant="toggle" @click="handleEdit">
+                            <X v-if="isEditing" />
+                            <Pencil v-else />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        {{ isEditing ? t('blogger.actions.close') : t('blogger.actions.edit') }}
+                    </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                    <TooltipTrigger as-child>
+                        <Button size="icon" type="button" variant="toggle" @click="handleTogglePosts">
+                            <ChevronUp v-if="isPostsExpanded" />
+                            <ChevronDown v-else />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        {{ isPostsExpanded ? t('blogger.actions.hide_posts') : t('blogger.actions.show_posts') }}
+                    </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                    <TooltipTrigger as-child>
+                        <Button :variant="isCreatingPost ? 'exit' : 'constructive'" size="icon" type="button" @click="handleCreatePost">
+                            <X v-if="isCreatingPost" />
+                            <Plus v-else />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        {{ isCreatingPost ? t('blogger.actions.close') : t('blogger.actions.add_post') }}
+                    </TooltipContent>
+                </Tooltip>
             </div>
         </div>
 
