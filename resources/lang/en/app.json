@@ -204,7 +204,7 @@
             "theme_color_link_hover_tooltip": "Link color on hover.",
             "theme_color_breadcrumb_link": "--breadcrumb-link",
             "theme_color_breadcrumb_link_tooltip": "Navigation path link color.",
-            "theme_color_breadcrumb_link_active": "--breadcrumb-link-hover",
+            "theme_color_breadcrumb_link_active": "--breadcrumb-link-active",
             "theme_color_breadcrumb_link_active_tooltip": "Color of the current navigation path.",
             "theme_color_card": "--card",
             "theme_color_card_tooltip": "Background color for cards and active navigation buttons.",

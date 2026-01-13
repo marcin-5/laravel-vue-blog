@@ -204,7 +204,7 @@
             "theme_color_link_hover_tooltip": "Kolor linków po najechaniu myszą.",
             "theme_color_breadcrumb_link": "--breadcrumb-link",
             "theme_color_breadcrumb_link_tooltip": "Kolor linków ścieżki nawigacji.",
-            "theme_color_breadcrumb_link_active": "--breadcrumb-link-hover",
+            "theme_color_breadcrumb_link_active": "--breadcrumb-link-active",
             "theme_color_breadcrumb_link_active_tooltip": "Kolor bieżącej ścieżki nawigacji.",
             "theme_color_card": "--card",
             "theme_color_card_tooltip": "Kolor tła dla kart i aktywnych przycisków nawigacyjnych.",
