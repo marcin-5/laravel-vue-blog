@@ -71,18 +71,6 @@
                 "created": "Użytkownik został pomyślnie utworzony.",
                 "updated": "Użytkownik został pomyślnie zaktualizowany."
             }
-        },
-        "extensions": {
-            "select_label": "Wybierz rozszerzenie",
-            "select_placeholder": "Wybierz post...",
-            "add_button": "Dodaj rozszerzenie",
-            "no_extensions": "Brak przypisanych rozszerzeń.",
-            "confirm_detach": "Czy na pewno chcesz odłączyć to rozszerzenie?",
-            "attached_success": "Rozszerzenie zostało przypisane.",
-            "detached_success": "Rozszerzenie zostało odłączone.",
-            "attach_failed": "Nie udało się przypisać rozszerzenia.",
-            "detach_failed": "Nie udało się odłączyć rozszerzenia.",
-            "hide_list": "Ukryj listę rozszerzeń"
         }
     },
     "settings": {
@@ -308,7 +296,11 @@
             "select_placeholder": "Wybierz post będący rozszerzeniem...",
             "add_button": "Dodaj rozszerzenie",
             "no_extensions": "Brak przypisanych rozszerzeń.",
-            "confirm_detach": "Czy na pewno chcesz odłączyć to rozszerzenie?"
+            "confirm_detach": "Czy na pewno chcesz odłączyć to rozszerzenie?",
+            "attached_success": "Rozszerzenie zostało przypisane.",
+            "detached_success": "Rozszerzenie zostało odłączone.",
+            "attach_failed": "Nie udało się przypisać rozszerzenia.",
+            "detach_failed": "Nie udało się odłączyć rozszerzenia."
         },
         "extension_form": {
             "title_label": "Tytuł",
