@@ -70,8 +70,15 @@ if [ -d /opt/built/public ]; then
     if [ -d /opt/built/public/build ]; then
         echo "Syncing Vite build assets (public/build)..."
         rm -rf /var/www/html/public/build
-        mkdir -p /var/www/html/public
-        cp -a /opt/built/public/build /var/www/html/public/
+        mkdir -p /var/www/html/public/build
+        cp -a /opt/built/public/build/. /var/www/html/public/build/
+    fi
+
+    # Sync public/img directory to ensure images are present in the volume
+    if [ -d /opt/built/public/img ]; then
+        echo "Syncing public/img directory..."
+        mkdir -p /var/www/html/public/img
+        cp -a /opt/built/public/img/. /var/www/html/public/img/
     fi
 
     # Sync specific static files that might have changed in the image

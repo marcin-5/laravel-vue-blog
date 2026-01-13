@@ -190,6 +190,12 @@ prod-check-assets: ## Verify built assets exist (prints only failures)
 		else \
 			echo "❌ No Vite build assets in app container!"; \
 		fi'
+	@$(DOCKER_COMPOSE_PROD) exec -T app sh -lc '\
+		if [ -d /var/www/html/public/img ] && [ "$$(ls -A /var/www/html/public/img 2>/dev/null)" ]; then \
+			:; \
+		else \
+			echo "❌ No public/img assets in app container!"; \
+		fi'
 
 # Full deployment flow: pull code/images, rebuild, wait for app, optimize, migrate
 prod-deploy: ## Build/Start prod, run optimizations & migrations
