@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -23,6 +24,8 @@ class Post extends Model
     public const string VIS_REGISTERED = 'registered';
 
     public const string VIS_UNLISTED = 'unlisted';
+
+    public const string VIS_EXTENSION = 'extension';
 
     protected $fillable = [
         'blog_id',
@@ -59,9 +62,35 @@ class Post extends Model
         return $this->hasMany(NewsletterLog::class);
     }
 
-    public function extensions(): HasMany
+    /**
+     * Posty-rozszerzenia przypisane do tego posta (przez pivot)
+     */
+    public function extensions(): BelongsToMany
     {
-        return $this->hasMany(PostExtension::class);
+        return $this->belongsToMany(
+            Post::class,
+            'post_extensions',
+            'post_id',
+            'extension_post_id',
+        )
+            ->withPivot('display_order')
+            ->orderByPivot('display_order')
+            ->withTimestamps();
+    }
+
+    /**
+     * Posty główne, do których ten post jest przypisany jako rozszerzenie
+     */
+    public function parentPosts(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Post::class,
+            'post_extensions',
+            'extension_post_id',
+            'post_id',
+        )
+            ->withPivot('display_order')
+            ->withTimestamps();
     }
 
     /**
@@ -78,6 +107,22 @@ class Post extends Model
         }
 
         $this->attributes['slug'] = Str::slug($source);
+    }
+
+    /**
+     * Scope dla postów będących rozszerzeniami
+     */
+    public function scopeExtensionType(Builder $query): Builder
+    {
+        return $query->where('visibility', self::VIS_EXTENSION);
+    }
+
+    /**
+     * Scope dla postów NIE będących rozszerzeniami (standardowe posty)
+     */
+    public function scopeRegularPosts(Builder $query): Builder
+    {
+        return $query->where('visibility', '!=', self::VIS_EXTENSION);
     }
 
     /**
@@ -123,8 +168,9 @@ class Post extends Model
     {
         return $query->published()
             ->public()
+            ->regularPosts()
             ->orderByPublicationDate()
-            ->select(['id', 'blog_id', 'title', 'slug', 'excerpt', 'published_at', 'created_at']);
+            ->select(['id', 'blog_id', 'title', 'slug', 'excerpt', 'published_at', 'created_at', 'visibility']);
     }
 
     /**

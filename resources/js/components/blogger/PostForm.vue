@@ -54,6 +54,13 @@ const isUnlisted = computed({
     },
 });
 
+const isExtension = computed({
+    get: () => form.visibility === 'extension',
+    set: (value: boolean) => {
+        form.visibility = value ? 'extension' : 'public';
+    },
+});
+
 const fieldIdPrefix = computed(() => props.idPrefix);
 
 // Consolidated translation keys
@@ -72,6 +79,7 @@ const translationKeys = computed(() => ({
     apply: t('blogger.post_form.apply_button'),
     saving: t('blogger.post_form.saving_button'),
     unlisted: t('blogger.post_form.unlisted_label'),
+    extension: t('blogger.post_form.extension_label'),
     // Preview-related translations for MarkdownPreviewSection
     preview: t('blogger.post_form.preview_button'),
     closePreview: t('blogger.post_form.close_button'),
@@ -221,6 +229,13 @@ function handleContentInput() {
                         <input :id="`${fieldIdPrefix}-unlisted`" v-model="isUnlisted" type="checkbox" />
                         <label :for="`${fieldIdPrefix}-unlisted`" class="text-sm">
                             {{ translationKeys.unlisted }}
+                        </label>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <input :id="`${fieldIdPrefix}-extension`" v-model="isExtension" type="checkbox" />
+                        <label :for="`${fieldIdPrefix}-extension`" class="text-sm">
+                            {{ translationKeys.extension }}
                         </label>
                     </div>
                 </div>

@@ -71,6 +71,18 @@
                 "created": "User created successfully.",
                 "updated": "User updated successfully."
             }
+        },
+        "extensions": {
+            "select_label": "Select Extension",
+            "select_placeholder": "Select a post...",
+            "add_button": "Add Extension",
+            "no_extensions": "No extensions assigned.",
+            "confirm_detach": "Are you sure you want to detach this extension?",
+            "attached_success": "Extension attached successfully.",
+            "detached_success": "Extension detached successfully.",
+            "attach_failed": "Failed to attach extension.",
+            "detach_failed": "Failed to detach extension.",
+            "hide_list": "Hide extension list"
         }
     },
     "settings": {
@@ -269,7 +281,8 @@
             "split_view_button": "Split View",
             "horizontal_button": "Horizontal",
             "vertical_button": "Vertical",
-            "unlisted_label": "Unlisted (available via link only)"
+            "unlisted_label": "Unlisted (available via link only)",
+            "extension_label": "Extension (used as an add-on to other posts)"
         },
         "post_item": {
             "close_button": "Close",
@@ -281,7 +294,8 @@
         "badges": {
             "draft": "Draft",
             "published": "Published",
-            "unlisted": "Unlisted"
+            "unlisted": "Unlisted",
+            "extension": "Extension"
         },
         "extension_item": {
             "edit_button": "Edit",
@@ -289,7 +303,12 @@
         },
         "extensions": {
             "empty": "No extensions yet.",
-            "hide_list": "Hide extensions"
+            "hide_list": "Hide extensions",
+            "select_label": "Select extension",
+            "select_placeholder": "Select a post to be used as extension...",
+            "add_button": "Add extension",
+            "no_extensions": "No extensions assigned.",
+            "confirm_detach": "Are you sure you want to detach this extension?"
         },
         "extension_form": {
             "title_label": "Title",

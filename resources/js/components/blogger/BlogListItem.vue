@@ -6,10 +6,15 @@ import { Badge } from '@/components/ui/badge';
 import { TooltipButton } from '@/components/ui/tooltip';
 import { i18n } from '@/i18n';
 import type { AdminBlog as Blog, AdminPostItem as PostItem, Category } from '@/types/blog.types';
+import { router } from '@inertiajs/vue3';
 import { ChevronDown, ChevronUp, Pencil, Plus, X } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
+
+function handleReload() {
+    router.reload({ only: ['blogs'] });
+}
 
 interface Props {
     blog: Blog;
@@ -168,6 +173,7 @@ function localizedName(name: string | Record<string, string>): string {
                     :is-extensions-expanded="expandedExtensionsForId === post.id"
                     :post="post"
                     @edit="handleEditPost"
+                    @updated="handleReload"
                     @apply-edit-extension="(form, ext) => emit('applyEditExtension', form, ext)"
                     @cancel-create-extension="emit('cancelCreateExtension')"
                     @cancel-edit="handleCancelEditPost"

@@ -1,11 +1,10 @@
 <script lang="ts" setup>
-import PostExtensionForm from '@/components/blogger/PostExtensionForm.vue';
-import PostExtensionListItem from '@/components/blogger/PostExtensionListItem.vue';
+import PostExtensionManager from '@/components/blogger/PostExtensionManager.vue';
 import PostForm from '@/components/blogger/PostForm.vue';
 import { Badge } from '@/components/ui/badge';
 import { TooltipButton } from '@/components/ui/tooltip';
-import type { AdminPostExtension as PostExtension, AdminPostItem as PostItem } from '@/types/blog.types';
-import { ChevronDown, ChevronUp, Pencil, Plus, X } from 'lucide-vue-next';
+import type { AdminPostItem as PostItem } from '@/types/blog.types';
+import { ChevronDown, ChevronUp, Pencil, X } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -16,10 +15,6 @@ interface Props {
     isEditing: boolean;
     editForm?: any; // External edit form instance
     isExtensionsExpanded: boolean;
-    creatingExtensionId?: number | null;
-    editingExtensionId?: number | null;
-    extensionForm?: any;
-    extensionEditForm?: any;
 }
 
 interface Emits {
@@ -27,13 +22,7 @@ interface Emits {
     (e: 'submitEdit', form: any, post: PostItem): void;
     (e: 'cancelEdit'): void;
     (e: 'toggleExtensions', post: PostItem): void;
-    (e: 'createExtension', post: PostItem): void;
-    (e: 'submitCreateExtension', form: any, post: PostItem): void;
-    (e: 'cancelCreateExtension'): void;
-    (e: 'editExtension', extension: PostExtension): void;
-    (e: 'submitEditExtension', form: any, extension: PostExtension): void;
-    (e: 'applyEditExtension', form: any, extension: PostExtension): void;
-    (e: 'cancelEditExtension'): void;
+    (e: 'updated'): void;
 }
 
 const props = defineProps<Props>();
@@ -45,11 +34,6 @@ const editButtonLabel = computed(() => (props.isEditing ? t('blogger.post_item.c
 const extensionsButtonVariant = computed(() => (props.isExtensionsExpanded ? 'exit' : 'toggle'));
 const extensionsButtonLabel = computed(() =>
     props.isExtensionsExpanded ? t('blogger.post_item.hide_extensions') : t('blogger.post_item.show_extensions'),
-);
-
-const addExtensionButtonVariant = computed(() => (props.creatingExtensionId === props.post.id ? 'exit' : 'constructive'));
-const addExtensionButtonLabel = computed(() =>
-    props.creatingExtensionId === props.post.id ? t('blogger.post_item.close_button') : t('blogger.post_item.add_extension'),
 );
 </script>
 
@@ -65,6 +49,9 @@ const addExtensionButtonLabel = computed(() =>
                     <Badge v-if="post.visibility === 'unlisted'" variant="warning">
                         {{ t('blogger.badges.unlisted') }}
                     </Badge>
+                    <Badge v-if="post.visibility === 'extension'" variant="outline">
+                        {{ t('blogger.badges.extension') }}
+                    </Badge>
                 </div>
                 <div class="text-xs text-muted-foreground">{{ post.excerpt }}</div>
             </div>
@@ -75,6 +62,7 @@ const addExtensionButtonLabel = computed(() =>
                 </TooltipButton>
 
                 <TooltipButton
+                    v-if="post.visibility !== 'extension'"
                     :tooltip-content="extensionsButtonLabel"
                     :variant="extensionsButtonVariant"
                     size="icon"
@@ -82,16 +70,6 @@ const addExtensionButtonLabel = computed(() =>
                 >
                     <ChevronUp v-if="isExtensionsExpanded" />
                     <ChevronDown v-else />
-                </TooltipButton>
-
-                <TooltipButton
-                    :tooltip-content="addExtensionButtonLabel"
-                    :variant="addExtensionButtonVariant"
-                    size="icon"
-                    @click="emit('createExtension', post)"
-                >
-                    <X v-if="creatingExtensionId === post.id" />
-                    <Plus v-else />
                 </TooltipButton>
             </div>
         </div>
@@ -106,33 +84,9 @@ const addExtensionButtonLabel = computed(() =>
             @submit="(form) => emit('submitEdit', form, post)"
         />
 
-        <!-- Extensions List -->
+        <!-- Extensions Management -->
         <div v-if="isExtensionsExpanded" class="mt-4 ml-4 border-t pt-4">
-            <div v-if="post.extensions && post.extensions.length" class="space-y-3">
-                <PostExtensionListItem
-                    v-for="extension in post.extensions"
-                    :key="`ext-${post.id}-${extension.id}`"
-                    :edit-form="extensionEditForm"
-                    :extension="extension"
-                    :is-editing="editingExtensionId === extension.id"
-                    @edit="emit('editExtension', $event)"
-                    @apply-edit="emit('applyEditExtension', $event, extension)"
-                    @cancel-edit="emit('cancelEditExtension')"
-                    @submit-edit="emit('submitEditExtension', $event, extension)"
-                />
-            </div>
-            <div v-else class="text-sm text-muted-foreground">{{ t('blogger.extensions.empty') }}</div>
-
-            <!-- Inline Create Extension Form (under list) -->
-            <PostExtensionForm
-                v-if="creatingExtensionId === post.id"
-                :form="extensionForm"
-                :id-prefix="`ext-${post.id}`"
-                :is-edit="false"
-                :post-id="post.id"
-                @cancel="emit('cancelCreateExtension')"
-                @submit="(form) => emit('submitCreateExtension', form, post)"
-            />
+            <PostExtensionManager :post="post" @updated="emit('updated')" />
 
             <div class="mt-4 flex justify-end">
                 <TooltipButton

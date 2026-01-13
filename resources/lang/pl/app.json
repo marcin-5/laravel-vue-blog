@@ -71,6 +71,18 @@
                 "created": "Użytkownik został pomyślnie utworzony.",
                 "updated": "Użytkownik został pomyślnie zaktualizowany."
             }
+        },
+        "extensions": {
+            "select_label": "Wybierz rozszerzenie",
+            "select_placeholder": "Wybierz post...",
+            "add_button": "Dodaj rozszerzenie",
+            "no_extensions": "Brak przypisanych rozszerzeń.",
+            "confirm_detach": "Czy na pewno chcesz odłączyć to rozszerzenie?",
+            "attached_success": "Rozszerzenie zostało przypisane.",
+            "detached_success": "Rozszerzenie zostało odłączone.",
+            "attach_failed": "Nie udało się przypisać rozszerzenia.",
+            "detach_failed": "Nie udało się odłączyć rozszerzenia.",
+            "hide_list": "Ukryj listę rozszerzeń"
         }
     },
     "settings": {
@@ -269,7 +281,8 @@
             "split_view_button": "Widok Podzielony",
             "horizontal_button": "Poziomy",
             "vertical_button": "Pionowy",
-            "unlisted_label": "Ukryty (dostępny tylko przez link)"
+            "unlisted_label": "Ukryty (dostępny tylko przez link)",
+            "extension_label": "Rozszerzenie (używane jako dodatek do innych postów)"
         },
         "post_item": {
             "close_button": "Zamknij",
@@ -281,7 +294,8 @@
         "badges": {
             "draft": "Szkic",
             "published": "Opublikowany",
-            "unlisted": "Ukryty"
+            "unlisted": "Ukryty",
+            "extension": "Rozszerzenie"
         },
         "extension_item": {
             "edit_button": "Edytuj",
@@ -289,7 +303,12 @@
         },
         "extensions": {
             "empty": "Brak rozszerzeń.",
-            "hide_list": "Ukryj rozszerzenia"
+            "hide_list": "Ukryj rozszerzenia",
+            "select_label": "Wybierz rozszerzenie",
+            "select_placeholder": "Wybierz post będący rozszerzeniem...",
+            "add_button": "Dodaj rozszerzenie",
+            "no_extensions": "Brak przypisanych rozszerzeń.",
+            "confirm_detach": "Czy na pewno chcesz odłączyć to rozszerzenie?"
         },
         "extension_form": {
             "title_label": "Tytuł",

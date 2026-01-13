@@ -92,27 +92,31 @@ export interface Category {
     slug?: string;
 }
 
-export interface AdminPostExtension {
+export type PostVisibility = 'public' | 'registered' | 'unlisted' | 'extension';
+
+export interface PostExtensionPivot {
     id: number;
-    post_id: number;
     title: string;
+    excerpt: string | null;
     content: string;
-    is_published: boolean;
-    created_at?: string | null;
-    updated_at?: string | null;
+    pivot: {
+        display_order: number;
+    };
 }
 
 export interface AdminPostItem {
     id: number;
     blog_id: number;
     title: string;
+    slug: string;
     excerpt: string | null;
     content?: string | null;
     is_published: boolean;
-    visibility?: string;
+    visibility?: PostVisibility;
     published_at?: string | null;
     created_at?: string | null;
-    extensions?: AdminPostExtension[];
+    updated_at?: string | null;
+    extensions?: PostExtensionPivot[];
 }
 
 export interface AdminBlog {

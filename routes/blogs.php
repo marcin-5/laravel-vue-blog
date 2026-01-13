@@ -19,14 +19,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('posts', [PostsController::class, 'store'])->name('posts.store');
     Route::patch('posts/{post}', [PostsController::class, 'update'])->name('posts.update');
 
-    // Post Extensions
-    Route::post('posts/{post}/extensions', [PostExtensionController::class, 'store'])->name('post-extensions.store');
-    Route::patch('post-extensions/{extension}', [PostExtensionController::class, 'update'])->name(
-        'post-extensions.update',
-    );
-    Route::delete('post-extensions/{extension}', [PostExtensionController::class, 'destroy'])->name(
-        'post-extensions.destroy',
-    );
+    // Post Extensions (New pivot-based routes)
+    Route::prefix('blogger/blogs/{blog}/posts/{post}')->group(function () {
+        Route::get('extensions/available', [PostsController::class, 'availableExtensions'])
+            ->name('blogger.posts.extensions.available');
+        Route::post('extensions', [PostsController::class, 'attachExtension'])
+            ->name('blogger.posts.extensions.attach');
+        Route::delete('extensions/{extensionPostId}', [PostsController::class, 'detachExtension'])
+            ->name('blogger.posts.extensions.detach');
+        Route::put('extensions/reorder', [PostsController::class, 'reorderExtensions'])
+            ->name('blogger.posts.extensions.reorder');
+    });
 
     // Markdown preview route
     Route::post('markdown/preview', [MarkdownController::class, 'preview'])->name('markdown.preview');
