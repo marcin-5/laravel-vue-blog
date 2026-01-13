@@ -44,7 +44,15 @@ const form =
         excerpt: props.post?.excerpt || '',
         content: props.post?.content || '',
         is_published: props.post?.is_published || false,
+        visibility: props.post?.visibility || 'public',
     });
+
+const isUnlisted = computed({
+    get: () => form.visibility === 'unlisted',
+    set: (value: boolean) => {
+        form.visibility = value ? 'unlisted' : 'public';
+    },
+});
 
 const fieldIdPrefix = computed(() => props.idPrefix);
 
@@ -63,6 +71,7 @@ const translationKeys = computed(() => ({
     save: t('blogger.post_form.save_post_button'),
     apply: t('blogger.post_form.apply_button'),
     saving: t('blogger.post_form.saving_button'),
+    unlisted: t('blogger.post_form.unlisted_label'),
     // Preview-related translations for MarkdownPreviewSection
     preview: t('blogger.post_form.preview_button'),
     closePreview: t('blogger.post_form.close_button'),
@@ -81,6 +90,7 @@ const updateFormFromPost = (post: PostItem) => {
     form.excerpt = post.excerpt ?? '';
     form.content = post.content ?? '';
     form.is_published = post.is_published;
+    form.visibility = post.visibility ?? 'public';
 };
 
 // Update form when post prop changes (for edit mode) - only if using internal form
@@ -199,11 +209,20 @@ function handleContentInput() {
             />
 
             <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <input :id="`${fieldIdPrefix}-published`" v-model="form.is_published" type="checkbox" />
-                    <label :for="`${fieldIdPrefix}-published`" class="text-sm">
-                        {{ translationKeys.published }}
-                    </label>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <input :id="`${fieldIdPrefix}-published`" v-model="form.is_published" type="checkbox" />
+                        <label :for="`${fieldIdPrefix}-published`" class="text-sm">
+                            {{ translationKeys.published }}
+                        </label>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <input :id="`${fieldIdPrefix}-unlisted`" v-model="isUnlisted" type="checkbox" />
+                        <label :for="`${fieldIdPrefix}-unlisted`" class="text-sm">
+                            {{ translationKeys.unlisted }}
+                        </label>
+                    </div>
                 </div>
             </div>
 

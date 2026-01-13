@@ -268,14 +268,16 @@
             "full_preview_button": "Pełny Podgląd",
             "split_view_button": "Widok Podzielony",
             "horizontal_button": "Poziomy",
-            "vertical_button": "Pionowy"
+            "vertical_button": "Pionowy",
+            "unlisted_label": "Ukryty (dostępny tylko przez link)"
         },
         "post_item": {
             "close_button": "Zamknij",
             "edit_button": "Edytuj",
             "show_extensions": "Pokaż rozszerzenia",
             "hide_extensions": "Ukryj rozszerzenia",
-            "add_extension": "Dodaj rozszerzenie"
+            "add_extension": "Dodaj rozszerzenie",
+            "unlisted_badge": "Ukryty"
         },
         "extension_item": {
             "edit_button": "Edytuj",

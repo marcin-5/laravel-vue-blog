@@ -22,6 +22,8 @@ class Post extends Model
 
     public const string VIS_REGISTERED = 'registered';
 
+    public const string VIS_UNLISTED = 'unlisted';
+
     protected $fillable = [
         'blog_id',
         'title',
@@ -110,7 +112,7 @@ class Post extends Model
     public function scopeForPublicView(Builder $query): Builder
     {
         return $query->published()
-            ->public()
+            ->whereIn('visibility', [self::VIS_PUBLIC, self::VIS_UNLISTED])
             ->orderByPublicationDate();
     }
 
@@ -119,7 +121,9 @@ class Post extends Model
      */
     public function scopeForPublicListing(Builder $query): Builder
     {
-        return $query->forPublicView()
+        return $query->published()
+            ->public()
+            ->orderByPublicationDate()
             ->select(['id', 'blog_id', 'title', 'slug', 'excerpt', 'published_at', 'created_at']);
     }
 

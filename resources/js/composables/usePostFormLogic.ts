@@ -8,6 +8,7 @@ interface PostFormData {
     excerpt: string;
     content: string;
     is_published: boolean;
+    visibility: string;
     [key: string]: any; // Index signature for Inertia form compatibility
 }
 
@@ -29,6 +30,7 @@ export function usePostFormLogic(options: UsePostFormLogicOptions = {}) {
             excerpt: post?.excerpt ?? '',
             content: post?.content ?? '',
             is_published: post?.is_published ?? false,
+            visibility: post?.visibility ?? 'public',
         });
 
     const fieldIdPrefix = computed(() => {
@@ -43,6 +45,7 @@ export function usePostFormLogic(options: UsePostFormLogicOptions = {}) {
         form.excerpt = newPost.excerpt ?? '';
         form.content = newPost.content ?? '';
         form.is_published = newPost.is_published;
+        form.visibility = newPost.visibility ?? 'public';
     };
 
     if (!externalForm) {

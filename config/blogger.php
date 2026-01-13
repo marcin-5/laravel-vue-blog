@@ -26,7 +26,7 @@ return [
             'visibility' => 'public',
         ],
 
-        'allowed_visibility' => ['public', 'registered'],
+        'allowed_visibility' => ['public', 'registered', 'unlisted'],
 
         'limits' => [
             'excerpt_max_length' => 500,

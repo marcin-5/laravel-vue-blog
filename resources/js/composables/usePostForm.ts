@@ -15,6 +15,7 @@ export function usePostForm() {
         excerpt: '' as string,
         content: '' as string,
         is_published: false as boolean,
+        visibility: 'public' as string,
     });
 
     const postEditForm = useForm({
@@ -22,6 +23,7 @@ export function usePostForm() {
         excerpt: '' as string | null,
         content: '' as string | null,
         is_published: false as boolean,
+        visibility: 'public' as string,
     });
 
     const extensionForm = useForm({
@@ -75,6 +77,7 @@ export function usePostForm() {
         postEditForm.excerpt = post.excerpt ?? '';
         postEditForm.content = post.content ?? '';
         postEditForm.is_published = post.is_published;
+        postEditForm.visibility = post.visibility ?? 'public';
     }
 
     function cancelEditPost() {

@@ -10,7 +10,7 @@ class BlogNavigationService
     public function getLandingNavigation(Blog $blog): array
     {
         $latestPost = $blog->posts()
-            ->forPublicView()
+            ->forPublicListing()
             ->select(['id', 'title', 'slug'])
             ->first();
 

@@ -268,14 +268,16 @@
             "full_preview_button": "Full Preview",
             "split_view_button": "Split View",
             "horizontal_button": "Horizontal",
-            "vertical_button": "Vertical"
+            "vertical_button": "Vertical",
+            "unlisted_label": "Unlisted (available via link only)"
         },
         "post_item": {
             "close_button": "Close",
             "edit_button": "Edit",
             "show_extensions": "Show extensions",
             "hide_extensions": "Hide extensions",
-            "add_extension": "Add extension"
+            "add_extension": "Add extension",
+            "unlisted_badge": "Unlisted"
         },
         "extension_item": {
             "edit_button": "Edit",

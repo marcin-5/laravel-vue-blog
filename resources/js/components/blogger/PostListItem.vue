@@ -2,6 +2,7 @@
 import PostExtensionForm from '@/components/blogger/PostExtensionForm.vue';
 import PostExtensionListItem from '@/components/blogger/PostExtensionListItem.vue';
 import PostForm from '@/components/blogger/PostForm.vue';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { AdminPostExtension as PostExtension, AdminPostItem as PostItem } from '@/types/blog.types';
 import { computed } from 'vue';
@@ -55,7 +56,12 @@ const addExtensionButtonLabel = computed(() =>
     <div class="rounded-md border p-3">
         <div class="flex items-start justify-between gap-4">
             <div>
-                <div class="text-sm font-medium">{{ post.title }}</div>
+                <div class="flex items-center gap-2">
+                    <div class="text-sm font-medium">{{ post.title }}</div>
+                    <Badge v-if="post.visibility === 'unlisted'" variant="secondary">
+                        {{ t('blogger.post_item.unlisted_badge') }}
+                    </Badge>
+                </div>
                 <div class="text-xs text-muted-foreground">{{ post.excerpt }}</div>
             </div>
             <div class="flex items-center gap-2">

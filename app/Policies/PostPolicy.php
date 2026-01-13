@@ -25,8 +25,8 @@ class PostPolicy
             return true;
         }
 
-        // For other users' posts, check if published and public
-        return $post->is_published && $post->visibility === Post::VIS_PUBLIC;
+        // For other users' posts, check if published and (public or unlisted)
+        return $post->is_published && in_array($post->visibility, [Post::VIS_PUBLIC, Post::VIS_UNLISTED]);
     }
 
     /**

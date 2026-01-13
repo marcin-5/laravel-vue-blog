@@ -1,0 +1,67 @@
+<?php
+
+use App\Models\Blog;
+use App\Models\Post;
+use App\Models\User;
+
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
+
+it('displays public posts in landing page', function () {
+    $blog = Blog::factory()->create(['is_published' => true]);
+    $post = Post::factory()->create([
+        'blog_id' => $blog->id,
+        'visibility' => Post::VIS_PUBLIC,
+        'published_at' => now()->subDay(),
+    ]);
+
+    get(route('blog.public.landing', $blog->slug))
+        ->assertSuccessful()
+        ->assertSee($post->title);
+});
+
+it('does not display unlisted posts in landing page', function () {
+    $blog = Blog::factory()->create(['is_published' => true]);
+    $unlistedPost = Post::factory()->create([
+        'blog_id' => $blog->id,
+        'visibility' => Post::VIS_UNLISTED,
+        'published_at' => now()->subDay(),
+    ]);
+
+    get(route('blog.public.landing', $blog->slug))
+        ->assertSuccessful()
+        ->assertDontSee($unlistedPost->title);
+});
+
+it('allows viewing unlisted post via direct link', function () {
+    $blog = Blog::factory()->create(['is_published' => true]);
+    $unlistedPost = Post::factory()->create([
+        'blog_id' => $blog->id,
+        'visibility' => Post::VIS_UNLISTED,
+        'published_at' => now()->subDay(),
+    ]);
+
+    get(route('blog.public.post', [$blog->slug, $unlistedPost->slug]))
+        ->assertSuccessful()
+        ->assertSee($unlistedPost->title);
+});
+
+it('allows blogger to save post as unlisted', function () {
+    $user = User::factory()->create([
+        'email_verified_at' => now(),
+    ]);
+    $blog = Blog::factory()->create(['user_id' => $user->id]);
+
+    actingAs($user)
+        ->post(route('posts.store'), [
+            'blog_id' => $blog->id,
+            'title' => 'Unlisted Post',
+            'content' => 'Post content',
+            'visibility' => Post::VIS_UNLISTED,
+            'is_published' => true,
+        ])
+        ->assertRedirect();
+
+    $post = Post::where('title', 'Unlisted Post')->first();
+    expect($post->visibility)->toBe(Post::VIS_UNLISTED);
+});
