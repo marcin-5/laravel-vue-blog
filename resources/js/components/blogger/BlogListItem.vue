@@ -3,8 +3,7 @@ import BlogForm from '@/components/blogger/BlogForm.vue';
 import PostForm from '@/components/blogger/PostForm.vue';
 import PostListItem from '@/components/blogger/PostListItem.vue';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { TooltipButton } from '@/components/ui/tooltip';
 import { i18n } from '@/i18n';
 import type { AdminBlog as Blog, AdminPostItem as PostItem, Category } from '@/types/blog.types';
 import { ChevronDown, ChevronUp, Pencil, Plus, X } from 'lucide-vue-next';
@@ -121,41 +120,35 @@ function localizedName(name: string | Record<string, string>): string {
                     {{ blog.is_published ? t('blogger.badges.published') : t('blogger.badges.draft') }}
                 </Badge>
 
-                <Tooltip>
-                    <TooltipTrigger as-child>
-                        <Button size="icon" type="button" variant="toggle" @click="handleEdit">
-                            <X v-if="isEditing" />
-                            <Pencil v-else />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        {{ isEditing ? t('blogger.actions.close') : t('blogger.actions.edit') }}
-                    </TooltipContent>
-                </Tooltip>
+                <TooltipButton
+                    :tooltip-content="isEditing ? t('blogger.actions.close') : t('blogger.actions.edit')"
+                    size="icon"
+                    variant="toggle"
+                    @click="handleEdit"
+                >
+                    <X v-if="isEditing" />
+                    <Pencil v-else />
+                </TooltipButton>
 
-                <Tooltip>
-                    <TooltipTrigger as-child>
-                        <Button size="icon" type="button" variant="toggle" @click="handleTogglePosts">
-                            <ChevronUp v-if="isPostsExpanded" />
-                            <ChevronDown v-else />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        {{ isPostsExpanded ? t('blogger.actions.hide_posts') : t('blogger.actions.show_posts') }}
-                    </TooltipContent>
-                </Tooltip>
+                <TooltipButton
+                    :tooltip-content="isPostsExpanded ? t('blogger.actions.hide_posts') : t('blogger.actions.show_posts')"
+                    size="icon"
+                    variant="toggle"
+                    @click="handleTogglePosts"
+                >
+                    <ChevronUp v-if="isPostsExpanded" />
+                    <ChevronDown v-else />
+                </TooltipButton>
 
-                <Tooltip>
-                    <TooltipTrigger as-child>
-                        <Button :variant="isCreatingPost ? 'exit' : 'constructive'" size="icon" type="button" @click="handleCreatePost">
-                            <X v-if="isCreatingPost" />
-                            <Plus v-else />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        {{ isCreatingPost ? t('blogger.actions.close') : t('blogger.actions.add_post') }}
-                    </TooltipContent>
-                </Tooltip>
+                <TooltipButton
+                    :tooltip-content="isCreatingPost ? t('blogger.actions.close') : t('blogger.actions.add_post')"
+                    :variant="isCreatingPost ? 'exit' : 'constructive'"
+                    size="icon"
+                    @click="handleCreatePost"
+                >
+                    <X v-if="isCreatingPost" />
+                    <Plus v-else />
+                </TooltipButton>
             </div>
         </div>
 

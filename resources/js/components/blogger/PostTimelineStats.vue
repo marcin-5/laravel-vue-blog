@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { PostTimelineEntry } from '@/types/stats';
 import { Info } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
@@ -70,24 +70,22 @@ function setSortOrder(order: SortOrder) {
                 <li v-for="post in sortedPosts" :key="post.id" class="flex items-center justify-between text-sm">
                     <div class="flex items-center gap-2 overflow-hidden">
                         <span :title="post.title" class="truncate font-medium">{{ post.title }}</span>
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger>
-                                    <Info class="h-4 w-4 text-muted-foreground" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <div class="text-xs">
-                                        <p class="mb-1 border-b pb-1 font-bold">{{ t('blogger.stats.views') }}:</p>
-                                        <div class="grid grid-cols-2 gap-x-4">
-                                            <template v-for="metric in VIEW_METRICS" :key="metric.key">
-                                                <span>{{ t(`blogger.stats.metrics.${metric.label}`) }}:</span>
-                                                <span class="text-right">{{ post.views[metric.key] }}</span>
-                                            </template>
-                                        </div>
+                        <Tooltip>
+                            <TooltipTrigger>
+                                <Info class="h-4 w-4 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <div class="text-xs">
+                                    <p class="mb-1 border-b pb-1 font-bold">{{ t('blogger.stats.views') }}:</p>
+                                    <div class="grid grid-cols-2 gap-x-4">
+                                        <template v-for="metric in VIEW_METRICS" :key="metric.key">
+                                            <span>{{ t(`blogger.stats.metrics.${metric.label}`) }}:</span>
+                                            <span class="text-right">{{ post.views[metric.key] }}</span>
+                                        </template>
                                     </div>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
+                                </div>
+                            </TooltipContent>
+                        </Tooltip>
                     </div>
                     <span class="text-xs whitespace-nowrap text-muted-foreground">
                         {{ formatDate(post.published_at) }}
