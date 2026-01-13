@@ -133,6 +133,7 @@ class Blog extends Model
                         'id',
                         'blog_id',
                         'title',
+                        'slug',
                         'excerpt',
                         'content',
                         'is_published',

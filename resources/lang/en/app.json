@@ -277,7 +277,9 @@
             "edit_button": "Edit",
             "show_extensions": "Show extensions",
             "hide_extensions": "Hide extensions",
-            "add_extension": "Add extension"
+            "add_extension": "Add extension",
+            "copy_url_button": "Copy URL",
+            "url_copied": "Copied to clipboard"
         },
         "badges": {
             "draft": "Draft",

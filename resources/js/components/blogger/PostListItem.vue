@@ -3,12 +3,16 @@ import PostExtensionManager from '@/components/blogger/PostExtensionManager.vue'
 import PostForm from '@/components/blogger/PostForm.vue';
 import { Badge } from '@/components/ui/badge';
 import { TooltipButton } from '@/components/ui/tooltip';
+import { useToast } from '@/composables/useToast';
 import type { AdminPostItem as PostItem } from '@/types/blog.types';
-import { ChevronDown, ChevronUp, Pencil, X } from 'lucide-vue-next';
+import { usePage } from '@inertiajs/vue3';
+import { ChevronDown, ChevronUp, Copy, Pencil, X } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
+const { toast } = useToast();
+const page = usePage();
 
 interface Props {
     post: PostItem;
@@ -35,6 +39,31 @@ const extensionsButtonVariant = computed(() => (props.isExtensionsExpanded ? 'ex
 const extensionsButtonLabel = computed(() =>
     props.isExtensionsExpanded ? t('blogger.post_item.hide_extensions') : t('blogger.post_item.show_extensions'),
 );
+
+const postUrl = computed(() => {
+    // We try to find the blog slug from the page props or from the post object if it was loaded with it
+    const blog = (page.props.blogs as any[])?.find((b: any) => b.id === props.post.blog_id);
+    const blogSlug = blog?.slug;
+
+    if (!blogSlug) {
+        return '';
+    }
+
+    return `${window.location.origin}/${blogSlug}/${props.post.slug}`;
+});
+
+function copyUrl() {
+    if (!postUrl.value) {
+        return;
+    }
+
+    navigator.clipboard.writeText(postUrl.value).then(() => {
+        toast({
+            title: t('blogger.post_item.url_copied'),
+            variant: 'success',
+        });
+    });
+}
 </script>
 
 <template>
@@ -56,6 +85,16 @@ const extensionsButtonLabel = computed(() =>
                 <div class="text-xs text-muted-foreground">{{ post.excerpt }}</div>
             </div>
             <div class="flex items-center gap-2">
+                <TooltipButton
+                    v-if="post.visibility === 'unlisted'"
+                    :tooltip-content="t('blogger.post_item.copy_url_button')"
+                    size="icon"
+                    variant="ghost"
+                    @click="copyUrl"
+                >
+                    <Copy />
+                </TooltipButton>
+
                 <TooltipButton :tooltip-content="editButtonLabel" :variant="editButtonVariant" size="icon" @click="emit('edit', post)">
                     <X v-if="isEditing" />
                     <Pencil v-else />

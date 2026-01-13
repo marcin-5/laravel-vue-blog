@@ -277,7 +277,9 @@
             "edit_button": "Edytuj",
             "show_extensions": "Pokaż rozszerzenia",
             "hide_extensions": "Ukryj rozszerzenia",
-            "add_extension": "Dodaj rozszerzenie"
+            "add_extension": "Dodaj rozszerzenie",
+            "copy_url_button": "Kopiuj adres URL",
+            "url_copied": "Skopiowano do schowka"
         },
         "badges": {
             "draft": "Szkic",
