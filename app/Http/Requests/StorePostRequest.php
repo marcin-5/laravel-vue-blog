@@ -29,7 +29,7 @@ class StorePostRequest extends FormRequest
         return [
             'blog_id' => ['required', 'integer', 'exists:blogs,id'],
             'title' => ['required', 'string', 'max:255'],
-            'excerpt' => ['nullable', 'string', 'max:' . ($config['excerpt_max_length'] ?? 500)],
+            'excerpt' => ['nullable', 'string', 'max:' . ($config['limits']['excerpt_max_length'] ?? 500)],
             'content' => ['nullable', 'string'],
             'is_published' => ['sometimes', 'boolean'],
             'visibility' => [

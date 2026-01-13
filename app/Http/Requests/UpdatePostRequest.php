@@ -23,7 +23,7 @@ class UpdatePostRequest extends FormRequest
 
         return [
             'title' => ['sometimes', 'required', 'string', 'max:255'],
-            'excerpt' => ['nullable', 'string', 'max:' . ($config['excerpt_max_length'] ?? 500)],
+            'excerpt' => ['nullable', 'string', 'max:' . ($config['limits']['excerpt_max_length'] ?? 500)],
             'content' => ['nullable', 'string'],
             'is_published' => ['sometimes', 'boolean'],
             'visibility' => [
