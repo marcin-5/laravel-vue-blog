@@ -406,4 +406,11 @@
     .dark .prose blockquote {
         @apply text-muted-foreground border-l-border;
     }
+
+    .eo {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 684px;
+    }
 }
