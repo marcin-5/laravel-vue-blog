@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import PostExtensionForm from '@/components/blogger/PostExtensionForm.vue';
-import PublishedBadge from '@/components/blogger/PublishedBadge.vue';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { AdminPostExtension as PostExtension } from '@/types/blog.types';
 import { useI18n } from 'vue-i18n';
@@ -31,7 +31,9 @@ const emit = defineEmits<Emits>();
             <div>
                 <div class="text-sm font-medium">{{ extension.title }}</div>
                 <div class="mt-1 flex items-center gap-2">
-                    <PublishedBadge :published="extension.is_published" />
+                    <Badge :variant="extension.is_published ? 'success' : 'accent'">
+                        {{ extension.is_published ? t('blogger.badges.published') : t('blogger.badges.draft') }}
+                    </Badge>
                 </div>
             </div>
             <div class="flex items-center gap-2">

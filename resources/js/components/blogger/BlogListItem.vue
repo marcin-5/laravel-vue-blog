@@ -2,7 +2,7 @@
 import BlogForm from '@/components/blogger/BlogForm.vue';
 import PostForm from '@/components/blogger/PostForm.vue';
 import PostListItem from '@/components/blogger/PostListItem.vue';
-import PublishedBadge from '@/components/blogger/PublishedBadge.vue';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { i18n } from '@/i18n';
 import type { AdminBlog as Blog, AdminPostItem as PostItem, Category } from '@/types/blog.types';
@@ -115,7 +115,9 @@ function localizedName(name: string | Record<string, string>): string {
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <PublishedBadge :published="blog.is_published" />
+                <Badge :variant="blog.is_published ? 'success' : 'accent'">
+                    {{ blog.is_published ? t('blogger.badges.published') : t('blogger.badges.draft') }}
+                </Badge>
                 <Button size="sm" type="button" variant="toggle" @click="handleEdit">{{
                     isEditing ? t('blogger.actions.close') : t('blogger.actions.edit')
                 }}</Button>

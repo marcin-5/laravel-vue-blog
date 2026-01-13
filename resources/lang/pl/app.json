@@ -276,8 +276,12 @@
             "edit_button": "Edytuj",
             "show_extensions": "Pokaż rozszerzenia",
             "hide_extensions": "Ukryj rozszerzenia",
-            "add_extension": "Dodaj rozszerzenie",
-            "unlisted_badge": "Ukryty"
+            "add_extension": "Dodaj rozszerzenie"
+        },
+        "badges": {
+            "draft": "Szkic",
+            "published": "Opublikowany",
+            "unlisted": "Ukryty"
         },
         "extension_item": {
             "edit_button": "Edytuj",

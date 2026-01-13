@@ -276,8 +276,12 @@
             "edit_button": "Edit",
             "show_extensions": "Show extensions",
             "hide_extensions": "Hide extensions",
-            "add_extension": "Add extension",
-            "unlisted_badge": "Unlisted"
+            "add_extension": "Add extension"
+        },
+        "badges": {
+            "draft": "Draft",
+            "published": "Published",
+            "unlisted": "Unlisted"
         },
         "extension_item": {
             "edit_button": "Edit",

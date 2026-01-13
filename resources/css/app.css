@@ -201,8 +201,8 @@
     --secondary: hsl(102 21% 12%);
     --secondary-hover: hsl(102 20% 25%);
     --secondary-foreground: hsl(102 75% 93%);
-    --warning: #0c1716de;
-    --warning-foreground: #eece7e;
+    --warning: #2c3726de;
+    --warning-foreground: #eede9e;
     --border: hsl(0 0% 14.9%);
     --input: hsl(0 0% 14.9%);
     --ring: hsl(0 0% 83.1%);

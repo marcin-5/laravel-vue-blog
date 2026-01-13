@@ -58,8 +58,11 @@ const addExtensionButtonLabel = computed(() =>
             <div>
                 <div class="flex items-center gap-2">
                     <div class="text-sm font-medium">{{ post.title }}</div>
-                    <Badge v-if="post.visibility === 'unlisted'" variant="secondary">
-                        {{ t('blogger.post_item.unlisted_badge') }}
+                    <Badge :variant="post.is_published ? 'success' : 'accent'">
+                        {{ post.is_published ? t('blogger.badges.published') : t('blogger.badges.draft') }}
+                    </Badge>
+                    <Badge v-if="post.visibility === 'unlisted'" variant="warning">
+                        {{ t('blogger.badges.unlisted') }}
                     </Badge>
                 </div>
                 <div class="text-xs text-muted-foreground">{{ post.excerpt }}</div>

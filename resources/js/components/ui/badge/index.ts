@@ -11,6 +11,12 @@ export const badgeVariants = cva(
           'border-transparent bg-primary text-primary-foreground shadow-sm hover:bg-primary/80',
         secondary:
           'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        success:
+          'border-transparent text-constructive bg-constructive-foreground shadow-sm hover:bg-constructive-foreground/80',
+        accent:
+          'border-transparent bg-accent text-accent-foreground shadow-sm hover:bg-accent-foreground/50',
+        warning:
+          'border-transparent bg-warning text-warning-foreground shadow-sm hover:bg-warning-foreground/50',
         destructive:
           'border-transparent bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/80',
         outline: 'text-foreground',
