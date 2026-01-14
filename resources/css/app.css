@@ -319,6 +319,10 @@
         margin-bottom: 1.25em;
     }
 
+    .prose a:hover {
+        color: var(--color-link-hover);
+    }
+
     .prose blockquote {
         @apply text-muted-foreground border-l-border;
         font-family: var(--blog-motto-font);
