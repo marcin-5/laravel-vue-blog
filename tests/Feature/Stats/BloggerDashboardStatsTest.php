@@ -39,7 +39,7 @@ test('blogger sees their blog statistics', function () {
         ->has('blogStats', 1)
         ->where('blogStats.0.name', $blog->name)
         ->where('blogStats.0.posts_count', 4)
-        ->where('blogStats.0.total_views', 5)
+        ->where('blogStats.0.lifetime_views', 5)
         ->where('blogStats.0.daily_subscriptions_count', 2)
         ->where('blogStats.0.weekly_subscriptions_count', 3)
         ->has('postsStats.timeline')

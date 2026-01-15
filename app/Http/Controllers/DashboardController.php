@@ -108,12 +108,12 @@ class DashboardController extends Controller
             ->withCount([
                 'newsletterSubscriptions as daily_subscriptions_count' => function ($query) {
                     $query->where('frequency', 'daily');
-                }
+                },
             ])
             ->withCount([
                 'newsletterSubscriptions as weekly_subscriptions_count' => function ($query) {
                     $query->where('frequency', 'weekly');
-                }
+                },
             ])
             ->get()
             ->map(function (Blog $blog) {
@@ -122,11 +122,12 @@ class DashboardController extends Controller
                     ->where('viewable_type', $postMorphClass)
                     ->whereIn('viewable_id', $blog->posts()->pluck('id'))
                     ->count();
+
                 return [
                     'id' => $blog->id,
                     'name' => $blog->name,
                     'posts_count' => $blog->posts_count,
-                    'total_views' => $totalViews,
+                    'lifetime_views' => $totalViews,
                     'daily_subscriptions_count' => $blog->daily_subscriptions_count,
                     'weekly_subscriptions_count' => $blog->weekly_subscriptions_count,
                 ];
@@ -159,6 +160,7 @@ class DashboardController extends Controller
                 $publishedAt = $post->published_at ?? $post->created_at;
                 $daysSincePublished = (int)max(1, abs(now()->diffInDays($publishedAt)));
                 $views = $post->pageViews()->count();
+
                 return [
                     'id' => $post->id,
                     'title' => $post->title,

@@ -20,7 +20,7 @@ defineProps<{
 
             <StatCard :icon="BookOpen" :title="t('blogger.stats.posts')" :value="blog.posts_count" />
 
-            <StatCard :icon="Eye" :title="t('blogger.stats.views')" :value="blog.total_views" />
+            <StatCard :icon="Eye" :title="t('blogger.stats.views')" :value="blog.lifetime_views" />
 
             <StatCard :icon="Mail" :title="t('blogger.stats.daily_subs')" :value="blog.daily_subscriptions_count" />
 

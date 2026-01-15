@@ -39,7 +39,7 @@ export interface BlogStats {
     id: number;
     name: string;
     posts_count: number;
-    total_views: number;
+    lifetime_views: number;
     daily_subscriptions_count: number;
     weekly_subscriptions_count: number;
 }
