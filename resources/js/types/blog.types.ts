@@ -37,6 +37,7 @@ export interface PostExtension {
     id: number;
     title: string;
     contentHtml: string;
+    excerpt?: string | null;
 }
 
 export interface PostDetails extends PostItem {
