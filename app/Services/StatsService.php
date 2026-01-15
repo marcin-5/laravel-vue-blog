@@ -222,6 +222,7 @@ class StatsService
                     'blog_views' => (int)$row->blog_views,
                     'post_views' => (int)$row->post_views,
                     'views' => (int)$row->views,
+                    'lifetime_views' => (int)$row->lifetime_views,
                     'user_agent' => isset($row->user_agent) ? (string)$row->user_agent : null,
                 ];
             }),
@@ -290,6 +291,13 @@ class StatsService
             ? 'page_views.fingerprint'
             : 'page_views.visitor_id';
 
+        $groupByColumn = $criteria->visitorGroupBy === 'fingerprint'
+            ? 'fingerprint'
+            : 'visitor_id';
+
+        // We need a correlated subquery for lifetime_views that ignores the main query's date filter.
+        $totalViewsRaw = "(SELECT COUNT(*) FROM page_views as pv2 WHERE pv2.$groupByColumn = page_views.$groupByColumn) as lifetime_views";
+
         if ($criteria->blogId === null) {
             // No blog filter: count all blog and post views per visitor.
             $query->selectRaw(
@@ -298,7 +306,8 @@ class StatsService
                 ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) as blog_views,' .
                 ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) as post_views,' .
                 ' (COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) + ' .
-                '  COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END)) as views',
+                '  COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END)) as views,' .
+                $totalViewsRaw,
                 [
                     $blogMorphClass,
                     $postMorphClass,
@@ -318,7 +327,8 @@ class StatsService
                 ' (COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?' .
                 ' AND page_views.viewable_id = ? THEN page_views.viewable_id END) + ' .
                 '  COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?' .
-                ' AND posts.blog_id = ? THEN page_views.viewable_id END)) as views',
+                ' AND posts.blog_id = ? THEN page_views.viewable_id END)) as views,' .
+                $totalViewsRaw,
                 [
                     $blogMorphClass,
                     $criteria->blogId,

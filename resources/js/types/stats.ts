@@ -20,6 +20,7 @@ export type VisitorRow = {
     blog_views: number;
     post_views: number;
     views: number;
+    lifetime_views: number;
 };
 
 export type UserOption = { id: number; name: string };

@@ -62,6 +62,7 @@ const visitorColumns = computed(() => [
     { key: 'visitor_label', label: visitorState.value.group_by === 'fingerprint' ? 'Fingerprint' : 'Visitor', hasInfo: true },
     { key: 'blog_views', label: 'Blog views' },
     { key: 'post_views', label: 'Post views' },
+    { key: 'lifetime_views', label: 'Lifetime visits' },
 ]);
 
 const effectivePostBlogOptions = computed(() => (props.postBlogOptions !== undefined ? props.postBlogOptions : props.blogOptions));
