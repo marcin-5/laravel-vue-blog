@@ -8,8 +8,11 @@ const props = defineProps<{
     <section v-if="props.html" class="mt-6 origin-left">
         <div
             :style="{
-                fontSize: 'calc(var(--blog-footer-scale) * 1em)',
                 fontFamily: 'var(--blog-footer-font)',
+                '--blog-body-scale': 'var(--blog-footer-scale)',
+                '--blog-header-scale': 'var(--blog-footer-scale)',
+                '--blog-motto-scale': 'var(--blog-footer-scale)',
+                fontSize: 'calc(1rem * var(--blog-footer-scale))',
             }"
             class="prose max-w-none text-primary/90"
             v-html="props.html"

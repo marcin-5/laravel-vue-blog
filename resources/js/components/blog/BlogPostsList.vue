@@ -42,7 +42,10 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
 </script>
 
 <template>
-    <section :aria-label="t('blog.posts_list.aria')" :style="{ fontFamily: 'var(--blog-body-font)' }">
+    <section
+        :aria-label="t('blog.posts_list.aria')"
+        :style="{ fontFamily: 'var(--blog-body-font)', fontSize: 'calc(1rem * var(--blog-body-scale))' }"
+    >
         <div class="mb-4 flex items-center justify-between gap-4">
             <h2 :style="{ fontFamily: 'var(--blog-header-font)' }" class="text-xl font-semibold text-foreground opacity-90">
                 {{ t('blog.posts_list.title') }}

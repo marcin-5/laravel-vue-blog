@@ -89,7 +89,7 @@ function toggleLock(id: number) {
                 <CollapsibleContent>
                     <div class="border-t border-border p-4">
                         <article
-                            :style="{ fontFamily: 'var(--blog-body-font)' }"
+                            :style="{ fontFamily: 'var(--blog-body-font)', fontSize: 'calc(1rem * var(--blog-body-scale))' }"
                             class="prose dark:prose-invert max-w-none"
                             v-html="extension.contentHtml"
                         />

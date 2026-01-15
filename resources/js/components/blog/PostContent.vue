@@ -4,7 +4,11 @@ defineProps<{ content: string; author: string }>();
 
 <template>
     <main class="min-w-0 flex-1">
-        <article :style="{ fontFamily: 'var(--blog-body-font)' }" class="prose max-w-none" v-html="content" />
+        <article
+            :style="{ fontFamily: 'var(--blog-body-font)', fontSize: 'calc(1rem * var(--blog-body-scale))' }"
+            class="prose max-w-none"
+            v-html="content"
+        />
     </main>
 </template>
 

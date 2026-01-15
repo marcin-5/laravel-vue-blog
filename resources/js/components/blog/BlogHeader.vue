@@ -34,13 +34,13 @@ defineProps<{
     <section>
         <div
             v-if="blog.descriptionHtml"
-            :style="{ fontFamily: 'var(--blog-body-font)' }"
+            :style="{ fontFamily: 'var(--blog-body-font)', fontSize: 'calc(1rem * var(--blog-body-scale))' }"
             class="prose max-w-none text-primary"
             v-html="blog.descriptionHtml"
         />
     </section>
-    <footer :style="{ fontFamily: 'var(--blog-footer-font)' }" class="origin-right text-lg">
-        <div v-if="blog.authorName && blog.authorEmail" class="author text-md mr-12 mb-12 text-end text-muted-foreground">
+    <footer :style="{ fontFamily: 'var(--blog-footer-font)', fontSize: 'calc(1rem * var(--blog-body-scale))' }" class="origin-right">
+        <div v-if="blog.authorName && blog.authorEmail" class="author mr-12 mb-12 text-end text-muted-foreground">
             <a :href="`mailto:${blog.authorEmail}`" class="hover:text-foreground">{{ blog.authorName }}</a>
         </div>
     </footer>

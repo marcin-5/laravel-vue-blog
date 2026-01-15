@@ -77,7 +77,11 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
                     </span>
                 </div>
                 <p v-if="showUpdated" class="-mt-1 mb-2 text-xs text-muted-foreground italic">{{ updatedLabel }} {{ formattedUpdatedDate }}</p>
-                <p v-if="post.author" :style="{ fontFamily: 'var(--blog-footer-font)' }" class="text-lg text-foreground">
+                <p
+                    v-if="post.author"
+                    :style="{ fontFamily: 'var(--blog-footer-font)', fontSize: 'calc(1rem * var(--blog-body-scale))' }"
+                    class="text-foreground"
+                >
                     {{ authorLabel }}
                     <a :href="`mailto:${post.author_email}`">{{ post.author }}</a>
                 </p>
