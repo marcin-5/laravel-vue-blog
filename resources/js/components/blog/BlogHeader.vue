@@ -16,7 +16,7 @@ defineProps<{
 </script>
 
 <template>
-    <header :style="{ fontFamily: 'var(--blog-header-font)', fontSize: 'calc(1.5rem * var(--blog-header-scale))' }" class="mb-4">
+    <header :style="{ fontFamily: 'var(--blog-header-font)', fontSize: 'calc(2rem * var(--blog-header-scale))' }" class="mb-4">
         <div class="flex items-center justify-between">
             <h1 class="font-[inherit] text-[1em] leading-tight font-bold text-foreground">
                 {{ blog.name }}
