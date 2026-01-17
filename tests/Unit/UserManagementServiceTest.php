@@ -2,11 +2,6 @@
 
 use App\Models\User;
 use App\Services\UserManagementService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-
-pest()->extend(TestCase::class)
-    ->use(RefreshDatabase::class);
 
 it('determines blog quota for non blogger/admin roles as zero', function (): void {
     $service = new UserManagementService;
