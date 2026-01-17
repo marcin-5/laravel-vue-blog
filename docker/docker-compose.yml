@@ -10,10 +10,13 @@ services:
         container_name: ${APP_NAME:-laravel-app}
         restart: unless-stopped
         working_dir: /var/www/html
+        env_file:
+            - ../.env
         environment:
             - APP_ENV=production
             - APP_DEBUG=false
             - APP_NAME=${APP_NAME:-laravel-app}
+            - APP_KEY=${APP_KEY}
             - TZ=${TZ:-UTC}
             - DB_CONNECTION=pgsql
             - DB_HOST=postgres
@@ -48,6 +51,7 @@ services:
             - APP_ENV=production
             - APP_DEBUG=false
             - APP_NAME=${APP_NAME:-laravel-queue}
+            - APP_KEY=${APP_KEY}
             - TZ=${TZ:-UTC}
             # Add all DB and Redis variables so the queue worker can connect
             - DB_CONNECTION=pgsql
@@ -83,6 +87,7 @@ services:
             - APP_ENV=production
             - APP_DEBUG=false
             - APP_NAME=${APP_NAME:-laravel-scheduler}
+            - APP_KEY=${APP_KEY}
             - TZ=${TZ:-UTC}
             - DB_CONNECTION=pgsql
             - DB_HOST=postgres

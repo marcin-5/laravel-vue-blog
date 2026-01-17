@@ -18,6 +18,7 @@ ARG TZ=UTC
 # Install system dependencies and install-php-extensions
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
+    wget \
     zip \
     unzip \
     git \
