@@ -6,7 +6,7 @@ use App\Models\Post;
 use App\Models\User;
 
 it('exposes unique view count for blog landing via Inertia props', function () {
-    $owner = User::factory()->create();
+    $owner = User::factory()->create(['role' => User::ROLE_ADMIN]);
     $blog = Blog::factory()->for($owner)->create(['is_published' => true]);
     $post = Post::factory()->for($blog)->create();
 
@@ -30,7 +30,7 @@ it('exposes unique view count for blog landing via Inertia props', function () {
         'viewable_id' => $blog->id,
     ]);
 
-    $response = $this->get("/{$blog->slug}");
+    $response = $this->actingAs($owner)->get("/{$blog->slug}");
 
     $response->assertOk();
     $response->assertInertia(fn($page) => $page
