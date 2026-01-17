@@ -58,44 +58,36 @@ if [ -d bootstrap/cache ]; then
 fi
 
 # Initialize/sync built assets into mounted volumes if needed
-# 1) Public directory (may be a named volume that masks image files)
-if [ -d /opt/built/public ]; then
-    # If public is empty or index.php missing, seed entire public directory
-    if [ ! -e /var/www/html/public/index.php ] || [ -z "$(ls -A /var/www/html/public 2>/dev/null)" ]; then
-        echo "Seeding public/ directory from image snapshot..."
-        mkdir -p /var/www/html/public
-        cp -a /opt/built/public/. /var/www/html/public/
-    fi
-    # Always refresh Vite build assets to ensure latest client bundle
-    if [ -d /opt/built/public/build ]; then
-        echo "Syncing Vite build assets (public/build)..."
-        rm -rf /var/www/html/public/build
-        mkdir -p /var/www/html/public/build
-        cp -a /opt/built/public/build/. /var/www/html/public/build/
-    fi
-
-    # Sync public/img directory to ensure images are present in the volume
-    if [ -d /opt/built/public/img ]; then
-        echo "Syncing public/img directory..."
-        mkdir -p /var/www/html/public/img
-        cp -a /opt/built/public/img/. /var/www/html/public/img/
-    fi
-
-    # Sync specific static files that might have changed in the image
-    # This ensures that if we update these files in the repo, the volume gets updated
-    for file in favicon.ico favicon.svg maintenance.html og-image.png apple-touch-icon.png; do
-        if [ -f "/opt/built/public/$file" ]; then
-             echo "Syncing $file..."
-             cp "/opt/built/public/$file" "/var/www/html/public/$file"
-        fi
-    done
+# 1) Vite build assets (may be a named volume that masks image files)
+if [ -d /opt/built/public/build ]; then
+    echo "Syncing Vite build assets (public/build)..."
+    mkdir -p /var/www/html/public/build
+    cp -a /opt/built/public/build/. /var/www/html/public/build/
 fi
 
-# 2) SSR bundle
+# 2) Public images (required for prod-check-assets and when public/ is a volume)
+if [ -d /opt/built/public/img ]; then
+    echo "Syncing public images (public/img)..."
+    mkdir -p /var/www/html/public/img
+    cp -a /opt/built/public/img/. /var/www/html/public/img/
+fi
+
+# 3) Public root files (favicon, icons, etc.)
+if [ -d /opt/built/public ]; then
+    echo "Syncing public root files..."
+    # Copy all files from /opt/built/public to /var/www/html/public/
+    # We use -p to not overwrite directories if they exist as mounts
+    cp /opt/built/public/* /var/www/html/public/ 2>/dev/null || true
+    # Also sync .htaccess specifically as * might miss it in some shells
+    if [ -f /opt/built/public/.htaccess ]; then
+        cp /opt/built/public/.htaccess /var/www/html/public/.htaccess
+    fi
+fi
+
+# 4) SSR bundle
 if [ -d /opt/built/bootstrap/ssr ]; then
     echo "Syncing SSR bundle (bootstrap/ssr)..."
     mkdir -p /var/www/html/bootstrap/ssr
-    rm -rf /var/www/html/bootstrap/ssr/*
     cp -a /opt/built/bootstrap/ssr/. /var/www/html/bootstrap/ssr/
 fi
 

@@ -1,5 +1,5 @@
 # Stage 1: Build frontend assets
-FROM node:25-alpine AS node-builder
+FROM node:25-trixie-slim AS node-builder
 WORKDIR /app
 
 # It's better to install all dependencies for building
@@ -7,52 +7,38 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build:ssr
+RUN npm run build && npm run build:ssr
 
 # Stage 2: Base PHP image with common dependencies
-FROM php:8.5-fpm-alpine AS base
+FROM php:8.5-fpm-trixie AS base
 
 ARG APP_NAME=laravel-app
 ARG TZ=UTC
 
-# Install only common system dependencies
-RUN apk add --no-cache \
-    postgresql-dev \
+# Install system dependencies and install-php-extensions
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
     zip \
     unzip \
-    curl \
-    libpng-dev \
-    libjpeg-turbo-dev \
-    freetype-dev \
-    libzip-dev \
-    icu-dev \
-    oniguruma-dev \
+    git \
     supervisor \
-    tzdata \
-    linux-headers \
-    autoconf \
-    g++ \
-    make
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions using the installer
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+RUN install-php-extensions \
+    pdo_pgsql \
+    pgsql \
+    gd \
+    zip \
+    intl \
+    mbstring \
+    redis
 
 # Set timezone
 ENV TZ=$TZ
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
-# Install common PHP extensions
-# Note: Do NOT include `pdo` here — it's built into PHP core and trying to
-# "install" it will fail on PHP 8.5 with: `cp: can't stat 'modules/*'`.
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
-        pdo_pgsql \
-        pgsql \
-        gd \
-        zip \
-        intl \
-        mbstring
-
-# Install Redis extension via PECL
-RUN pecl install redis \
-    && docker-php-ext-enable redis
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -63,7 +49,6 @@ WORKDIR /var/www/html
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # Fix Git "dubious ownership" when the workdir is owned by a different UID
-RUN apk add --no-cache git
 RUN git config --global --add safe.directory /var/www/html
 
 COPY composer.json composer.lock ./
@@ -93,9 +78,11 @@ COPY --from=node-builder /app/public/build ./public/build
 COPY --from=node-builder /app/bootstrap/ssr ./bootstrap/ssr
 
 # Prepare snapshots of built assets for seeding into mounted volumes at runtime
-RUN mkdir -p /opt/built/public /opt/built/bootstrap \
-    && cp -a /var/www/html/public/. /opt/built/public/ \
-    && cp -a /var/www/html/bootstrap/ssr /opt/built/bootstrap/ssr \
+RUN mkdir -p /opt/built/public/build /opt/built/public/img /opt/built/bootstrap/ssr \
+    && cp -a /var/www/html/public/build/. /opt/built/public/build/ \
+    && cp -a /var/www/html/public/img/. /opt/built/public/img/ \
+    && cp -a /var/www/html/bootstrap/ssr/. /opt/built/bootstrap/ssr/ \
+    && cp /var/www/html/public/*.ico /var/www/html/public/*.png /var/www/html/public/*.svg /var/www/html/public/*.xml /var/www/html/public/*.html /var/www/html/public/index.php /var/www/html/public/.htaccess /opt/built/public/ 2>/dev/null || true \
     && chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage \
     && chmod -R 775 /var/www/html/bootstrap/cache
@@ -115,13 +102,15 @@ CMD ["php-fpm"]
 FROM base AS development
 
 # Install development-specific system tools
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     fish \
     fzf \
     bash \
     mc \
-    nodejs \
-    npm
+    gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_25.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
 
 # FIX: Copy the application code and assets BEFORE running composer install.
 COPY . .
@@ -135,7 +124,7 @@ RUN composer install --no-interaction
 ENV FISH_CONFIG_DIR /root/.config/fish
 RUN mkdir -p $FISH_CONFIG_DIR/functions && \
     curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish > $FISH_CONFIG_DIR/functions/fisher.fish && \
-    fish -c "fisher install IlanCosman/tide && fisher install jethrokuan/fzf && fisher install jorgebucaran/autopair.fish" && \
+    fish -c "fisher install IlanCosman/tide@v6 && fisher install jethrokuan/fzf && fisher install jorgebucaran/autopair.fish" && \
     fish -c "tide configure --auto --style=Rainbow --prompt_colors='True color' --show_time='24-hour format' --rainbow_prompt_separators=Slanted --powerline_prompt_heads=Round --powerline_prompt_tails=Flat --powerline_prompt_style='Two lines, character and frame' --prompt_connection=Dotted --powerline_right_prompt_frame=No --prompt_connection_andor_frame_color=Dark --prompt_spacing=Sparse --icons='Many icons' --transient=Yes"
 
 # Backup the fish config
@@ -146,9 +135,11 @@ RUN mkdir -p /root/.local/share/fish /root/.config/fish
 VOLUME ["/root/.local/share/fish", "/root/.config/fish"]
 
 # Prepare snapshots of built assets for dev image too (useful when mounting volumes)
-RUN mkdir -p /opt/built/public /opt/built/bootstrap \
-    && cp -a /var/www/html/public/. /opt/built/public/ \
-    && cp -a /var/www/html/bootstrap/ssr /opt/built/bootstrap/ssr \
+RUN mkdir -p /opt/built/public/build /opt/built/public/img /opt/built/bootstrap/ssr \
+    && cp -a /var/www/html/public/build/. /opt/built/public/build/ \
+    && cp -a /var/www/html/public/img/. /opt/built/public/img/ \
+    && cp -a /var/www/html/bootstrap/ssr/. /opt/built/bootstrap/ssr/ \
+    && cp /var/www/html/public/*.ico /var/www/html/public/*.png /var/www/html/public/*.svg /var/www/html/public/*.xml /var/www/html/public/*.html /var/www/html/public/index.php /var/www/html/public/.htaccess /opt/built/public/ 2>/dev/null || true \
     && chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage \
     && chmod -R 775 /var/www/html/bootstrap/cache
@@ -160,9 +151,11 @@ EXPOSE 9000
 CMD ["php-fpm"]
 
 # Stage 5: SSR runtime image for running Inertia SSR server
-FROM node:25-alpine AS ssr-runtime
+FROM node:25-trixie-slim AS ssr-runtime
 WORKDIR /var/www/html
 # Install only runtime Node dependencies required by the SSR server
+# We need netcat for the deploy.sh script's health check
+RUN apt-get update && apt-get install -y --no-install-recommends netcat-openbsd && rm -rf /var/lib/apt/lists/*
 COPY package*.json ./
 RUN npm ci --omit=dev
 # Copy the application code (for env, config references if needed)
