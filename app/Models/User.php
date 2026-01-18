@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -15,7 +16,9 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     public const ROLE_ADMIN = 'admin';
+
     public const ROLE_BLOGGER = 'blogger';
+
     public const ROLE_USER = 'user';
 
     /**
@@ -82,6 +85,7 @@ class User extends Authenticatable
         // Bloggers can create a new blog only if they are under the blog_quota limit
         $current = $this->blogs()->count();
         $limit = max(0, (int)($this->blog_quota ?? 1));
+
         return $current < $limit;
     }
 
@@ -101,6 +105,25 @@ class User extends Authenticatable
     public function blogs(): HasMany
     {
         return $this->hasMany(Blog::class, 'user_id');
+    }
+
+    /**
+     * Grupy, których użytkownik jest właścicielem.
+     */
+    public function ownedGroups(): HasMany
+    {
+        return $this->hasMany(Group::class, 'user_id');
+    }
+
+    /**
+     * Grupy, do których użytkownik należy.
+     */
+    public function groups(): BelongsToMany
+    {
+        return $this->belongsToMany(Group::class, 'group_user')
+            ->using(GroupMember::class)
+            ->withPivot(['role', 'joined_at'])
+            ->withTimestamps();
     }
 
     /**

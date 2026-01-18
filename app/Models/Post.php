@@ -16,8 +16,8 @@ use Illuminate\Support\Str;
 class Post extends Model
 {
     use HasFactory;
-    use Viewable;
     use HasMarkdownContent;
+    use Viewable;
 
     public const string VIS_PUBLIC = 'public';
 
@@ -27,8 +27,11 @@ class Post extends Model
 
     public const string VIS_EXTENSION = 'extension';
 
+    public const string VIS_RESTRICTED = 'restricted';
+
     protected $fillable = [
         'blog_id',
+        'group_id',
         'title',
         'slug',
         'excerpt',
@@ -55,6 +58,11 @@ class Post extends Model
     public function blog(): BelongsTo
     {
         return $this->belongsTo(Blog::class);
+    }
+
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(Group::class);
     }
 
     public function newsletterLogs(): HasMany
@@ -180,5 +188,15 @@ class Post extends Model
     {
         return $query->forPublicView()
             ->where('slug', $slug);
+    }
+
+    /**
+     * Scope dla postów w grupie, widocznych dla zalogowanego członka
+     */
+    public function scopeForGroupView(Builder $query): Builder
+    {
+        return $query->published()
+            ->where('visibility', self::VIS_RESTRICTED)
+            ->orderByPublicationDate();
     }
 }

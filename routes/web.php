@@ -1,15 +1,21 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GroupController;
 use Illuminate\Support\Facades\Route;
 
 //Route::get('/', function () {
 //    return Inertia::render('Welcome');
 //})->name('home');
 
-Route::get('dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::prefix('_')->group(function () {
+        Route::get('/{group:slug}', [GroupController::class, 'landing'])->name('group.landing');
+        Route::get('/{group:slug}/{postSlug}', [GroupController::class, 'post'])->name('group.post');
+    });
+});
 
 // Grouped route files for app areas
 require __DIR__ . '/blogs.php';
