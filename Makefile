@@ -3,7 +3,7 @@ COMPOSE_FILES = -f docker/docker-compose.yml -f docker/docker-compose.dev.yml
 # Derive Docker Compose project name from current directory to keep it consistent
 PROJECT_NAME = $(notdir $(CURDIR))-v2
 # Always pass a fixed project name so we don't end up with multiple sets (e.g. running inside ./docker)
-DOCKER_COMPOSE = docker compose -p $(PROJECT_NAME) $(COMPOSE_FILES)
+DOCKER_COMPOSE = docker compose --env-file .env -p $(PROJECT_NAME) $(COMPOSE_FILES)
 
 # Default command to run when no target is specified
 .DEFAULT_GOAL := help
@@ -129,8 +129,8 @@ COMPOSE_FILES_PROD = -f docker/docker-compose.yml -f docker/docker-compose.prod.
 # directory name changes. If you intentionally plan to migrate names, override
 # DOCKER_PROJECT_NAME_PROD at invocation time: `make DOCKER_PROJECT_NAME_PROD=laravel-vue-blog prod-update`.
 DOCKER_PROJECT_NAME_PROD ?= docker
-# DOCKER_COMPOSE_PROD = docker compose -p $(PROJECT_NAME) $(COMPOSE_FILES_PROD)
-DOCKER_COMPOSE_PROD = docker compose -p $(DOCKER_PROJECT_NAME_PROD) $(COMPOSE_FILES_PROD)
+# DOCKER_COMPOSE_PROD = docker compose --env-file .env -p $(PROJECT_NAME) $(COMPOSE_FILES_PROD)
+DOCKER_COMPOSE_PROD = docker compose --env-file .env -p $(DOCKER_PROJECT_NAME_PROD) $(COMPOSE_FILES_PROD)
 
 .PHONY: prod-up prod-down prod-restart prod-build prod-logs \
         prod-migrate prod-optimize prod-deploy prod-update prod-wait \
