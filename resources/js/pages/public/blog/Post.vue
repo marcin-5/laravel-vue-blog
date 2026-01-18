@@ -11,6 +11,7 @@ import type { SEO } from '@/types';
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { Blog, Navigation, Pagination, PostDetails, PostItem } from '@/types/blog.types';
 import { formatDate, shouldShowUpdatedDate } from '@/utils/dateUtils';
+import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -56,6 +57,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
 </script>
 
 <template>
+    <Head v-if="seo?.title" :title="seo.title" />
     <div :style="mergedThemeStyle" class="flex min-h-screen flex-col bg-background text-foreground antialiased">
         <PublicNavbar :maxWidth="navbarMaxWidth" />
 

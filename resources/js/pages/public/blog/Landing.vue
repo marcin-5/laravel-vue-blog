@@ -10,6 +10,7 @@ import { useSidebarLayout } from '@/composables/useSidebarLayout';
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { Blog, Navigation, Pagination, PostItem } from '@/types/blog.types';
 import { hasContent, selectRandomMotto } from '@/utils/stringUtils';
+import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -26,6 +27,9 @@ const props = defineProps<{
     viewStats: {
         total: number;
         unique?: number;
+    };
+    seo?: {
+        title: string;
     };
 }>();
 
@@ -55,6 +59,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
 </script>
 
 <template>
+    <Head v-if="seo?.title" :title="seo.title" />
     <div :style="mergedThemeStyle" class="flex min-h-screen flex-col bg-background text-foreground antialiased">
         <PublicNavbar :maxWidth="navbarMaxWidth" />
         <div

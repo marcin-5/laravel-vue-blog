@@ -36,7 +36,7 @@
     @if(isset($page['props']['seo']['title']))
         <title inertia>{{ $page['props']['seo']['title'] }}</title>
     @else
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <title inertia>{{ config('app.name', 'Osobliwy Blog') }}</title>
     @endif
 
     <link rel="icon" href="/favicon.ico" sizes="any">
