@@ -1,4 +1,13 @@
 {
+    "common": {
+        "nav": {
+            "dashboard": "Dashboard",
+            "users": "Users",
+            "categories": "Categories",
+            "statistics": "Statistics",
+            "blogs": "Manage blogs"
+        }
+    },
     "actions": {
         "clear": "Clear"
     },
@@ -125,11 +134,41 @@
         "title": "Blogs",
         "stats_title": "Statistics",
         "all_my_blogs": "All my blogs",
+        "badges": {
+            "published": "Published",
+            "draft": "Draft"
+        },
         "breadcrumb": {
             "dashboard": "Dashboard",
             "index": "Blogs",
+            "groups": "Groups",
             "stats": "Statistics"
         },
+        "groups": {
+            "title": "Groups",
+            "empty": "No groups found.",
+            "empty_cta": "Create your first group",
+            "limit_reached_hint": "Group limit reached",
+            "create_section_title": "Your Groups",
+            "create_button": "Create New Group",
+            "limit_reached_tooltip": "Group limit reached.",
+            "create_group_tooltip": "Create new group",
+            "add_post": "Add post"
+        },
+        "group_form": {
+            "name_label": "Group Name",
+            "name_placeholder": "My Group",
+            "content_label": "Group Content",
+            "content_placeholder": "Content displayed on the group's landing page (Markdown)...",
+            "footer_label": "Group Footer",
+            "footer_placeholder": "Group footer (Markdown)..."
+        },
+        "status": {
+            "published": "Published",
+            "draft": "Draft"
+        },
+        "posts_list_title": "Posts list",
+        "no_posts": "No posts",
         "posts_list": {
             "aria": "Posts list",
             "title": "Posts",
@@ -146,7 +185,10 @@
             "close": "Close",
             "hide_posts": "Hide Posts",
             "show_posts": "Show Posts",
-            "add_post": "Add Post"
+            "add_post": "Add Post",
+            "add_post_to": "Add post to",
+            "view_group": "View group",
+            "preview_group": "Preview group"
         },
         "posts": {
             "empty": "No posts yet"

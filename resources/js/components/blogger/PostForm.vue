@@ -40,6 +40,7 @@ const form =
     props.form ||
     useForm({
         blog_id: props.blogId || props.post?.blog_id || 0,
+        group_id: props.post?.group_id || 0,
         title: props.post?.title || '',
         excerpt: props.post?.excerpt || '',
         content: props.post?.content || '',
@@ -73,7 +74,7 @@ const translationKeys = computed(() => ({
     contentPlaceholder: props.isEdit ? '' : t('blogger.post_form.content_placeholder'),
     published: props.isEdit ? t('blogger.post_form.published_label') : t('blogger.post_form.publish_now_label'),
     cancel: t('blogger.post_form.cancel_button'),
-    create: t('blogger.post_form.create_post_button'),
+    create: form.group_id ? t('blogger.post_form.create_post_button') : t('blogger.post_form.create_post_button'), // Simplified, keeping same for now or could specialize
     creating: t('blogger.post_form.creating_button'),
     save: t('blogger.post_form.save_post_button'),
     apply: t('blogger.post_form.apply_button'),
@@ -94,6 +95,7 @@ const translationKeys = computed(() => ({
 
 const updateFormFromPost = (post: PostItem) => {
     form.blog_id = post.blog_id;
+    form.group_id = post.group_id || 0;
     form.title = post.title;
     form.excerpt = post.excerpt ?? '';
     form.content = post.content ?? '';

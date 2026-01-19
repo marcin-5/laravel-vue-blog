@@ -36,8 +36,10 @@ export interface PostItem {
 export interface PostExtension {
     id: number;
     title: string;
-    contentHtml: string;
+    content: string;
+    contentHtml?: string;
     excerpt?: string | null;
+    is_published?: boolean;
 }
 
 export interface PostDetails extends PostItem {
@@ -108,6 +110,7 @@ export interface PostExtensionPivot {
 export interface AdminPostItem {
     id: number;
     blog_id: number;
+    group_id?: number | null;
     title: string;
     slug: string;
     excerpt: string | null;
@@ -141,6 +144,22 @@ export interface AdminBlog {
     } | null;
 }
 
+export interface AdminGroup {
+    id: number;
+    user_id: number;
+    name: string;
+    slug: string;
+    content: string | null;
+    footer: string | null;
+    is_published: boolean;
+    locale: string;
+    sidebar?: number;
+    page_size?: number;
+    theme?: BlogTheme;
+    posts?: AdminPostItem[];
+    created_at?: string;
+}
+
 // ===== Blog form/composable shared types =====
 export interface BlogFormData {
     name: string;
@@ -153,6 +172,18 @@ export interface BlogFormData {
     page_size: number;
     categories: number[];
     landing_content?: string | null;
+    theme?: BlogTheme | null;
+    [key: string]: any;
+}
+
+export interface GroupFormData {
+    name: string;
+    content: string | null;
+    footer: string | null;
+    is_published: boolean;
+    locale: string;
+    sidebar: number;
+    page_size: number;
     theme?: BlogTheme | null;
     [key: string]: any;
 }

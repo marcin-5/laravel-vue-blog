@@ -44,6 +44,12 @@ const mainNavItems = computed<NavItem[]>(() => [
         roles: ['admin', 'blogger'],
     },
     {
+        title: t('blogger.groups.title'),
+        href: '/groups',
+        icon: Users,
+        roles: ['admin', 'blogger'],
+    },
+    {
         title: t('common.nav.statistics'),
         href: '/blogs/stats',
         icon: BarChart3,
@@ -51,18 +57,14 @@ const mainNavItems = computed<NavItem[]>(() => [
     },
 ]);
 
-const footerNavItems: NavItem[] = [
+const footerNavItems = computed<NavItem[]>(() => [
     {
-        title: 'footerNavItem',
-        href: '/dashboard',
-        icon: Folder,
-    },
-    {
-        title: 'footerNavItem',
-        href: '/dashboard',
+        title: t('blogger.groups.title'),
+        href: '/groups',
         icon: BookOpen,
+        roles: ['admin', 'blogger'],
     },
-];
+]);
 </script>
 
 <template>

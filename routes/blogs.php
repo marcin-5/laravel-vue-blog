@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Blogger\BlogsController;
+use App\Http\Controllers\Blogger\GroupsController;
 use App\Http\Controllers\Blogger\PostsController;
 use App\Http\Controllers\Blogger\StatsController as BloggerStatsController;
 use App\Http\Controllers\MarkdownController;
@@ -10,6 +11,9 @@ use Illuminate\Support\Facades\Route;
 // Blogger routes for managing own blogs
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('blogs', BlogsController::class)
+        ->only(['index', 'store', 'update']);
+
+    Route::resource('groups', GroupsController::class)
         ->only(['index', 'store', 'update']);
 
     // Blogger stats

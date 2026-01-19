@@ -1,4 +1,13 @@
 {
+    "common": {
+        "nav": {
+            "dashboard": "Panel",
+            "users": "Użytkownicy",
+            "categories": "Kategorie",
+            "statistics": "Statystyki",
+            "blogs": "Zarządzaj blogami"
+        }
+    },
     "actions": {
         "clear": "Wyczyść"
     },
@@ -125,10 +134,38 @@
         "title": "Blogi",
         "stats_title": "Statystyki",
         "all_my_blogs": "Wszystkie moje blogi",
+        "badges": {
+            "published": "Opublikowano",
+            "draft": "Szkic"
+        },
         "breadcrumb": {
             "dashboard": "Panel",
             "index": "Blogi",
+            "groups": "Grupy",
             "stats": "Statystyki"
+        },
+        "groups": {
+            "title": "Grupy",
+            "empty": "Nie znaleziono grup.",
+            "empty_cta": "Utwórz swoją pierwszą grupę",
+            "limit_reached_hint": "Osiągnięto limit grup",
+            "create_section_title": "Twoje Grupy",
+            "create_button": "Utwórz Nową Grupę",
+            "limit_reached_tooltip": "Osiągnięto limit grup.",
+            "create_group_tooltip": "Utwórz nową grupę",
+            "add_post": "Dodaj post"
+        },
+        "group_form": {
+            "name_label": "Nazwa Grupy",
+            "name_placeholder": "Moja Grupa",
+            "content_label": "Treść Grupy",
+            "content_placeholder": "Treść wyświetlana na stronie głównej grupy (Markdown)...",
+            "footer_label": "Stopka Grupy",
+            "footer_placeholder": "Stopka grupy (Markdown)..."
+        },
+        "status": {
+            "published": "Opublikowano",
+            "draft": "Szkic"
         },
         "posts_list": {
             "aria": "Lista wpisów",
@@ -146,8 +183,13 @@
             "close": "Zamknij",
             "hide_posts": "Ukryj Posty",
             "show_posts": "Pokaż Posty",
-            "add_post": "Dodaj Post"
+            "add_post": "Dodaj Post",
+            "add_post_to": "Dodaj post do",
+            "view_group": "Zobacz grupę",
+            "preview_group": "Podgląd grupy"
         },
+        "posts_list_title": "Lista postów",
+        "no_posts": "Brak postów",
         "posts": {
             "empty": "Brak postów"
         },

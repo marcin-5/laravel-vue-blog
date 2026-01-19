@@ -1,4 +1,4 @@
-import type { AdminBlog as Blog, AdminPostExtension as PostExtension, AdminPostItem as PostItem } from '@/types/blog.types';
+import type { AdminBlog as Blog, AdminPostItem as PostItem, PostExtension } from '@/types/blog.types';
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -11,6 +11,7 @@ export function usePostForm() {
 
     const postForm = useForm({
         blog_id: 0 as number,
+        group_id: 0 as number,
         title: '' as string,
         excerpt: '' as string,
         content: '' as string,
@@ -132,7 +133,7 @@ export function usePostForm() {
         extensionEditForm.reset();
         extensionEditForm.title = extension.title;
         extensionEditForm.content = extension.content;
-        extensionEditForm.is_published = extension.is_published;
+        extensionEditForm.is_published = extension.is_published ?? false;
     }
 
     function cancelEditExtension() {

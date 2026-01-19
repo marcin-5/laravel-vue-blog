@@ -1,5 +1,5 @@
 // New file: resources/js/composables/blogFormUtils.ts
-import type { AdminBlog as Blog, BlogFormData, BlogTheme } from '@/types/blog.types';
+import type { AdminBlog as Blog, AdminGroup as Group, BlogFormData, BlogTheme, GroupFormData } from '@/types/blog.types';
 import { useForm } from '@inertiajs/vue3';
 
 export function ensureThemeStructure(theme: BlogTheme | null | undefined): BlogTheme {
@@ -57,4 +57,45 @@ export function populateFormFromBlog(form: ReturnType<typeof useForm<BlogFormDat
     form.categories = data.categories;
     form.theme = data.theme;
     form.landing_content = data.landing_content;
+}
+
+export function createDefaultGroupFormData(locale: string = 'en'): GroupFormData {
+    return {
+        name: '',
+        content: null,
+        footer: null,
+        is_published: false,
+        locale,
+        sidebar: 0,
+        page_size: 10,
+        theme: ensureThemeStructure(null),
+    };
+}
+
+export function createFormDataFromGroup(group: Group | undefined, defaultLocale: string = 'en'): GroupFormData {
+    if (!group) {
+        return createDefaultGroupFormData(defaultLocale);
+    }
+    return {
+        name: group.name,
+        content: group.content ?? null,
+        footer: group.footer ?? null,
+        is_published: group.is_published,
+        locale: group.locale || defaultLocale,
+        sidebar: group.sidebar ?? 0,
+        page_size: group.page_size ?? 10,
+        theme: ensureThemeStructure(group.theme),
+    };
+}
+
+export function populateFormFromGroup(form: ReturnType<typeof useForm<GroupFormData>>, group: Group, defaultLocale: string = 'en'): void {
+    const data = createFormDataFromGroup(group, defaultLocale);
+    form.name = data.name;
+    form.content = data.content;
+    form.footer = data.footer;
+    form.is_published = data.is_published;
+    form.locale = data.locale;
+    form.sidebar = data.sidebar;
+    form.page_size = data.page_size;
+    form.theme = data.theme;
 }

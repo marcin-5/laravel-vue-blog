@@ -12,7 +12,7 @@ class GroupPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->isAdmin() || $user->isBlogger();
     }
 
     /**
@@ -31,7 +31,7 @@ class GroupPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->isAdmin() || $user->isBlogger();
     }
 
     /**
@@ -39,7 +39,7 @@ class GroupPolicy
      */
     public function update(User $user, Group $group): bool
     {
-        return false;
+        return $user->isAdmin() || $group->user_id === $user->id;
     }
 
     /**
@@ -47,7 +47,7 @@ class GroupPolicy
      */
     public function delete(User $user, Group $group): bool
     {
-        return false;
+        return $user->isAdmin() || $group->user_id === $user->id;
     }
 
     /**
