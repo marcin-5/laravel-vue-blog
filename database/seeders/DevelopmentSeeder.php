@@ -55,9 +55,14 @@ class DevelopmentSeeder extends Seeder
             'role' => User::ROLE_USER,
         ]);
 
+        // Owners pool for groups (bloggers and admins)
+        $potentialOwners = $bloggers->merge(User::where('role', User::ROLE_ADMIN)->get());
+
         // Create 3-5 Groups
-        Group::factory(random_int(3, 5))
-            ->create()
+        Group::factory(random_int(5, 7))
+            ->create([
+                'user_id' => fn() => $potentialOwners->random()->id,
+            ])
             ->each(function (Group $group) use ($bloggers, $regularUsers) {
                 // Get the owner of the group
                 $owner = $group->user;
