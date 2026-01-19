@@ -160,6 +160,13 @@ export interface AdminGroup {
     created_at?: string;
 }
 
+export interface ManageableItem {
+    id: number;
+    name: string;
+    slug: string;
+    is_published: boolean;
+}
+
 // ===== Blog form/composable shared types =====
 export interface BlogFormData {
     name: string;
