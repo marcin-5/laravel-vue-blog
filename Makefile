@@ -28,7 +28,7 @@ init: migrate ## ✨ First-time project setup (builds, installs, migrates)
 	@echo "➡️ Run 'make dev' to start the Vite HMR server or 'make fish' to get a shell."
 
 # Phony targets are not files.
-.PHONY: init dev build up down restart logs migrate key-gen npm-install composer-install fish setup-env help db-reset cache-clear
+.PHONY: init dev build up down restart logs migrate db-seed db-reset key-gen npm-install composer-install fish setup-env help cache-clear
 
 # ====================================================================================
 # Main Commands
@@ -82,6 +82,10 @@ migrate: key-gen ## 🗄️ Run database migrations
 	$(DOCKER_COMPOSE) exec app php artisan migrate
 	@echo "Generating Ziggy routes..."
 	$(DOCKER_COMPOSE) exec app php artisan ziggy:generate
+
+db-seed: up ## 🌱 Seed the database with initial data
+	@echo "Seeding the database..."
+	$(DOCKER_COMPOSE) exec app php artisan db:seed
 
 db-reset: up ## 🔄 Reset database and run all migrations from scratch
 	@echo "Resetting database and running all migrations..."
