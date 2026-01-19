@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { i18n } from '@/i18n';
 import type { CategoryRow } from '@/types/admin.types';
+import { localizedName } from '@/utils/localization';
 import { router, useForm } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -14,12 +15,6 @@ const props = defineProps<{
     category: CategoryRow;
     supportedLocales: readonly string[];
 }>();
-
-function localizedName(name: string | Record<string, string>): string {
-    const locale = (i18n.global.locale.value as string) || 'en';
-    if (typeof name === 'string') return name;
-    return name?.[locale] ?? name?.en ?? Object.values(name ?? {})[0] ?? '';
-}
 
 const isEditing = ref(false);
 

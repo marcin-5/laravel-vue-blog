@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { i18n } from '@/i18n';
 import type { Category } from '@/types/blog.types';
+import { localizedName } from '@/utils/localization';
 
 interface Props {
     categories: Category[];
@@ -20,12 +20,6 @@ const emit = defineEmits<Emits>();
 
 function updateCategories(categoryIds: number[]) {
     emit('update:selectedCategories', categoryIds);
-}
-
-function localizedName(name: string | Record<string, string>): string {
-    const locale = (i18n.global.locale.value as string) || 'en';
-    if (typeof name === 'string') return name;
-    return name?.[locale] ?? name?.en ?? Object.values(name ?? {})[0] ?? '';
 }
 </script>
 

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import CategoryRow from '@/components/admin/CategoryRow.vue';
-import { i18n } from '@/i18n';
 import type { CategoryRow as CategoryRowType } from '@/types/admin.types';
+import { localizedName } from '@/utils/localization';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -11,12 +11,6 @@ const props = defineProps<{
     categories: CategoryRowType[];
     supportedLocales: readonly string[];
 }>();
-
-function localizedName(name: string | Record<string, string>): string {
-    const locale = (i18n.global.locale.value as string) || 'en';
-    if (typeof name === 'string') return name;
-    return name?.[locale] ?? name?.en ?? Object.values(name ?? {})[0] ?? '';
-}
 
 const sortedCategories = computed(() => [...props.categories].sort((a, b) => localizedName(a.name).localeCompare(localizedName(b.name))));
 </script>
