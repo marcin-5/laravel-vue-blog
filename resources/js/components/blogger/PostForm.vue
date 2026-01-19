@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import FormCheckboxField from '@/components/blogger/FormCheckboxField.vue';
 import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
 import MarkdownPreviewSection from '@/components/blogger/MarkdownPreviewSection.vue';
 import PostFormField from '@/components/blogger/PostFormField.vue';
@@ -218,29 +219,12 @@ function handleContentInput() {
                 @toggle-preview="handleTogglePreview"
             />
 
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="flex items-center gap-2">
-                        <input :id="`${fieldIdPrefix}-published`" v-model="form.is_published" type="checkbox" />
-                        <label :for="`${fieldIdPrefix}-published`" class="text-sm">
-                            {{ translationKeys.published }}
-                        </label>
-                    </div>
+            <div class="flex flex-wrap items-center gap-4">
+                <FormCheckboxField :id="`${fieldIdPrefix}-published`" v-model="form.is_published" :label="translationKeys.published" />
 
-                    <div class="flex items-center gap-2">
-                        <input :id="`${fieldIdPrefix}-unlisted`" v-model="isUnlisted" type="checkbox" />
-                        <label :for="`${fieldIdPrefix}-unlisted`" class="text-sm">
-                            {{ translationKeys.unlisted }}
-                        </label>
-                    </div>
+                <FormCheckboxField :id="`${fieldIdPrefix}-unlisted`" v-model="isUnlisted" :label="translationKeys.unlisted" />
 
-                    <div class="flex items-center gap-2">
-                        <input :id="`${fieldIdPrefix}-extension`" v-model="isExtension" type="checkbox" />
-                        <label :for="`${fieldIdPrefix}-extension`" class="text-sm">
-                            {{ translationKeys.extension }}
-                        </label>
-                    </div>
-                </div>
+                <FormCheckboxField :id="`${fieldIdPrefix}-extension`" v-model="isExtension" :label="translationKeys.extension" />
             </div>
 
             <FormSubmitActions

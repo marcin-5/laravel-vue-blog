@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import BlogFormColorField from '@/components/blogger/BlogFormColorField.vue';
-import BlogFormSelectField from '@/components/blogger/BlogFormSelectField.vue';
+import FormColorField from '@/components/blogger/FormColorField.vue';
+import FormSelectField from '@/components/blogger/FormSelectField.vue';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
@@ -12,7 +12,7 @@ import { computed } from 'vue';
 interface Props {
     title: string;
     idPrefix: string;
-    colors: ThemeColors;
+    colors?: ThemeColors;
     errors?: Record<string, any>;
     translations: {
         background: string;
@@ -77,7 +77,7 @@ const emit = defineEmits<{
 // Helper function to update a specific key in an object
 function updateValue(key: string, value: string) {
     const updatedColors = {
-        ...props.colors,
+        ...(props.colors ?? {}),
         [key]: value,
     };
 
@@ -109,7 +109,7 @@ const mottoStyleOptions = [
 ];
 
 function getBaseScale(scaleKey: string): number {
-    return parseFloat(props.colors[scaleKey] || '1');
+    return parseFloat(props.colors?.[scaleKey] || '1');
 }
 
 function updateBaseScale(scaleKey: string, newBaseScale: number) {
@@ -221,10 +221,10 @@ const fontFields = computed(() => [
         <div class="mb-6 grid grid-cols-1 gap-4 border-b border-border pb-6 sm:grid-cols-2">
             <div v-for="field in fontFields" :key="field.key" class="flex flex-col gap-2">
                 <div class="flex items-end gap-2">
-                    <BlogFormSelectField
+                    <FormSelectField
                         :id="`${props.idPrefix}-${field.idSuffix}`"
                         :label="props.translations[field.labelKey] || field.defaultLabel"
-                        :model-value="props.colors[field.key] || 'inherit'"
+                        :model-value="props.colors?.[field.key] || 'inherit'"
                         :options="fontOptions"
                         class="grow"
                         @update:model-value="updateValue(field.key, $event.toString())"
@@ -252,11 +252,11 @@ const fontFields = computed(() => [
                         </PopoverContent>
                     </Popover>
                 </div>
-                <BlogFormSelectField
+                <FormSelectField
                     v-if="field.additionalField"
                     :id="`${props.idPrefix}-${field.additionalField.idSuffix}`"
                     :label="props.translations[field.additionalField.labelKey] || field.additionalField.defaultLabel"
-                    :model-value="props.colors[field.additionalField.key] || field.additionalField.defaultValue"
+                    :model-value="props.colors?.[field.additionalField.key] || field.additionalField.defaultValue"
                     :options="field.additionalField.options"
                     @update:model-value="updateValue(field.additionalField.key, $event.toString())"
                 />
@@ -264,13 +264,13 @@ const fontFields = computed(() => [
         </div>
 
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <BlogFormColorField
+            <FormColorField
                 v-for="field in colorFields"
                 :id="`${props.idPrefix}-${field.idSuffix}`"
                 :key="field.key"
                 :error="props.errors?.[field.key]"
                 :label="props.translations[field.labelKey]"
-                :model-value="props.colors[field.key]"
+                :model-value="props.colors?.[field.key]"
                 :placeholder="variables[field.key]"
                 :tooltip="props.translations[field.tooltipKey]"
                 @update:model-value="updateValue(field.key, $event)"
