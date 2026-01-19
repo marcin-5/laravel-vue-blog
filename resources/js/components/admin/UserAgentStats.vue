@@ -17,10 +17,10 @@ type ViewType = 'unique' | 'added';
 
 const currentView = ref<ViewType>('unique');
 
-const switcherOptions = [
+const switcherOptions = computed(() => [
     { value: 'unique', label: t('admin.stats.user_agents.unique_label') },
     { value: 'added', label: t('admin.stats.user_agents.added_label') },
-];
+]);
 
 const displayAgents = computed<UserAgentEntry[]>(() => {
     return currentView.value === 'unique' ? props.stats.last_unique : props.stats.last_added;
