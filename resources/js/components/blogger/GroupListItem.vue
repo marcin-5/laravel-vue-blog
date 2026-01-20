@@ -62,12 +62,13 @@ function handleCancelCreatePost() {
 </script>
 
 <template>
-    <BaseListItem :is-creating-post="isCreatingPost" :is-editing="isEditing" :is-posts-expanded="isPostsExpanded" :item="group">
-        <template #header>
-            <div class="text-base font-medium">{{ group.name }}</div>
-            <div class="mt-1 text-sm text-muted-foreground">{{ group.slug }}</div>
-        </template>
-
+    <BaseListItem
+        :is-creating-post="isCreatingPost"
+        :is-editing="isEditing"
+        :is-posts-expanded="isPostsExpanded"
+        :item="group"
+        :subtitle="group.slug"
+    >
         <template #actions>
             <ItemActionGroup
                 :is-creating-post="isCreatingPost"

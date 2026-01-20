@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import CreateGroupSection from '@/components/blogger/CreateGroupSection.vue';
+import CreateEntitySection from '@/components/blogger/CreateEntitySection.vue';
+import GroupForm from '@/components/blogger/GroupForm.vue';
 import GroupListItem from '@/components/blogger/GroupListItem.vue';
 import { Button } from '@/components/ui/button';
 import { useGroupForm } from '@/composables/useGroupForm';
@@ -110,14 +111,21 @@ function handleToggleCreate() {
     <Head :title="$t('blogger.groups.title')" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
-            <CreateGroupSection
+            <CreateEntitySection
                 :can-create="props.canCreate"
                 :form="createForm"
                 :show-create="showCreate"
-                @cancel-create="closeCreateForm"
-                @submit-create="() => submitCreate()"
-                @toggle-create="handleToggleCreate"
-            />
+                :title="t('blogger.groups.create_section_title')"
+                :tooltip-create="t('blogger.groups.create_group_tooltip')"
+                :tooltip-limit="t('blogger.groups.limit_reached_tooltip')"
+                @cancel="closeCreateForm"
+                @submit="() => submitCreate()"
+                @toggle="handleToggleCreate"
+            >
+                <template #form="{ form, onCancel, onSubmit }">
+                    <GroupForm :form="form" :is-edit="false" id-prefix="new" @cancel="onCancel" @submit="onSubmit" />
+                </template>
+            </CreateEntitySection>
 
             <!-- Groups List -->
             <div class="space-y-3">

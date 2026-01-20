@@ -89,10 +89,14 @@ function handleSubmitEditPost(form: any, post: PostItem) {
 </script>
 
 <template>
-    <BaseListItem :is-creating-post="isCreatingPost" :is-editing="isEditing" :is-posts-expanded="isPostsExpanded" :item="blog">
-        <template #header>
-            <div class="text-base font-medium">{{ blog.name }}</div>
-            <div class="text-xs text-muted-foreground">/{{ blog.slug }} · {{ blog.creation_date ?? '' }}</div>
+    <BaseListItem
+        :is-creating-post="isCreatingPost"
+        :is-editing="isEditing"
+        :is-posts-expanded="isPostsExpanded"
+        :item="blog"
+        :subtitle="`/${blog.slug} · ${blog.creation_date ?? ''}`"
+    >
+        <template #badges>
             <div v-if="blog.categories && blog.categories.length" class="mt-1 flex flex-wrap gap-2">
                 <span
                     v-for="cat in blog.categories"

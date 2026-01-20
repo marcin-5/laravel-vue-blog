@@ -10,6 +10,8 @@ interface Props {
     isEditing: boolean;
     isCreatingPost: boolean;
     isPostsExpanded: boolean;
+    title?: string;
+    subtitle?: string;
 }
 
 defineProps<Props>();
@@ -20,9 +22,12 @@ defineProps<Props>();
         <div class="flex items-start justify-between gap-4">
             <div class="flex-1">
                 <slot name="header">
-                    <div class="text-base font-medium">{{ item.name }}</div>
-                    <div class="text-xs text-muted-foreground">/{{ item.slug }}</div>
+                    <div class="text-base font-medium">{{ title || item.name }}</div>
+                    <div v-if="subtitle || item.slug" class="text-xs text-muted-foreground">
+                        {{ subtitle || (item.slug ? `/${item.slug}` : '') }}
+                    </div>
                 </slot>
+                <slot name="badges" />
             </div>
 
             <div class="flex items-center gap-2">

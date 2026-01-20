@@ -2,9 +2,6 @@
 import CategorySelector from '@/components/CategorySelector.vue';
 import EntityMarkdownField from '@/components/blogger/EntityMarkdownField.vue';
 import EntityThemeSection from '@/components/blogger/EntityThemeSection.vue';
-import FormCheckboxField from '@/components/blogger/FormCheckboxField.vue';
-import FormNumberField from '@/components/blogger/FormNumberField.vue';
-import FormSelectField from '@/components/blogger/FormSelectField.vue';
 import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
 import PostFormField from '@/components/blogger/PostFormField.vue';
 import { useBlogFormLogic } from '@/composables/useBlogFormLogic';
@@ -56,17 +53,7 @@ const baseTranslations = computed(() => ({
     motto: t('blogger.form.motto_label'),
     mottoPlaceholder: props.isEdit ? '' : t('blogger.form.motto_placeholder'),
     mottoTooltip: t('blogger.form.motto_tooltip'),
-    published: t('blogger.form.published_label'),
-    locale: t('blogger.form.locale_label'),
-    sidebar: t('blogger.form.sidebar_label'),
-    sidebarHint: t('blogger.form.sidebar_hint'),
-    pageSize: t('blogger.form.page_size_label'),
 }));
-
-const localeOptions = computed(() => [
-    { value: 'en', label: 'EN' },
-    { value: 'pl', label: 'PL' },
-]);
 
 const descriptionTranslations = createMarkdownTranslations(useMarkdownPreviewSection());
 const landingTranslations = createMarkdownTranslations(useMarkdownPreviewSection());
@@ -147,44 +134,12 @@ function handleCancel() {
                 @cancel="handleCancel"
             />
 
-            <div class="flex flex-wrap items-center gap-3">
-                <FormCheckboxField
-                    :id="`${fieldIdPrefix}-published`"
-                    v-model="form.is_published"
-                    :additional-info="props.isEdit && props.blog ? `/${props.blog.slug}` : undefined"
-                    :error="form.errors.is_published"
-                    :label="baseTranslations.published"
-                />
-                <div class="ml-auto">
-                    <FormSelectField
-                        :id="`${fieldIdPrefix}-locale`"
-                        v-model="form.locale"
-                        :error="form.errors.locale"
-                        :label="baseTranslations.locale"
-                        :options="localeOptions"
-                    />
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <FormNumberField
-                    :id="`${fieldIdPrefix}-sidebar`"
-                    v-model="form.sidebar"
-                    :error="form.errors.sidebar"
-                    :hint="baseTranslations.sidebarHint"
-                    :label="baseTranslations.sidebar"
-                    :max="50"
-                    :min="-50"
-                />
-                <FormNumberField
-                    :id="`${fieldIdPrefix}-page_size`"
-                    v-model="form.page_size"
-                    :error="form.errors.page_size"
-                    :label="baseTranslations.pageSize"
-                    :max="100"
-                    :min="1"
-                />
-            </div>
+            <FormPublishingSettings
+                v-model="form"
+                :additional-info="props.isEdit && props.blog ? `/${props.blog.slug}` : undefined"
+                :errors="form.errors"
+                :id-prefix="fieldIdPrefix"
+            />
 
             <EntityThemeSection
                 v-model="form.theme"

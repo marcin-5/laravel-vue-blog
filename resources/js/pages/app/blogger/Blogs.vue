@@ -1,6 +1,7 @@
 <script lang="ts" setup>
+import BlogForm from '@/components/blogger/BlogForm.vue';
 import BlogListItem from '@/components/blogger/BlogListItem.vue';
-import CreateBlogSection from '@/components/blogger/CreateBlogSection.vue';
+import CreateEntitySection from '@/components/blogger/CreateEntitySection.vue';
 import { Button } from '@/components/ui/button';
 import { useBlogForm } from '@/composables/useBlogForm';
 import { usePostForm } from '@/composables/usePostForm';
@@ -148,15 +149,22 @@ function handleToggleCreate() {
     <Head :title="$t('blogger.title')" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
-            <CreateBlogSection
+            <CreateEntitySection
                 :can-create="props.canCreate"
-                :categories="props.categories"
                 :form="createForm"
                 :show-create="showCreate"
-                @toggle-create="handleToggleCreate"
-                @submit-create="() => submitCreate()"
-                @cancel-create="closeCreateForm"
-            />
+                :title="t('blogger.create_section.title')"
+                :tooltip-close="t('blogger.create_section.close_button')"
+                :tooltip-create="t('blogger.create_section.create_button')"
+                :tooltip-limit="t('blogger.create_section.quota_reached_tooltip')"
+                @cancel="closeCreateForm"
+                @submit="() => submitCreate()"
+                @toggle="handleToggleCreate"
+            >
+                <template #form="{ form, onCancel, onSubmit }">
+                    <BlogForm :categories="props.categories" :form="form" :is-edit="false" id-prefix="new" @cancel="onCancel" @submit="onSubmit" />
+                </template>
+            </CreateEntitySection>
 
             <!-- Blogs List -->
             <div class="space-y-3">
