@@ -2,6 +2,7 @@
 import CategorySelector from '@/components/CategorySelector.vue';
 import EntityMarkdownField from '@/components/blogger/EntityMarkdownField.vue';
 import EntityThemeSection from '@/components/blogger/EntityThemeSection.vue';
+import FormPublishingSettings from '@/components/blogger/FormPublishingSettings.vue';
 import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
 import PostFormField from '@/components/blogger/PostFormField.vue';
 import { useBlogFormLogic } from '@/composables/useBlogFormLogic';
