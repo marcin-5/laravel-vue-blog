@@ -1,5 +1,6 @@
 /.phpunit.cache
 /bootstrap/ssr
+/bootstrap/cache
 /node_modules
 /public/build
 /public/hot
@@ -8,6 +9,9 @@
 /public/robots.txt
 /storage/*.key
 /storage/pail
+/storage/cache
+/storage/framework
+/storage/logs
 /vendor
 /docker/.env
 .env
