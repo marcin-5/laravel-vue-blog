@@ -45,7 +45,7 @@ const form =
         title: props.post?.title || '',
         excerpt: props.post?.excerpt || '',
         content: props.post?.content || '',
-        is_published: props.post?.is_published || false,
+        is_published: !!props.post?.is_published,
         visibility: props.post?.visibility || 'public',
     });
 

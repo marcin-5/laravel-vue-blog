@@ -20,7 +20,11 @@ const emit = defineEmits<{
 <template>
     <div class="flex flex-col gap-1">
         <div class="flex items-center gap-2">
-            <Checkbox :id="props.id" :checked="props.modelValue" @update:checked="(val) => emit('update:modelValue', val as boolean)" />
+            <Checkbox
+                :id="props.id"
+                :model-value="props.modelValue"
+                @update:model-value="(val: boolean | 'indeterminate') => emit('update:modelValue', val === true)"
+            />
             <Label :for="props.id" class="cursor-pointer">
                 {{ props.label }}
             </Label>
