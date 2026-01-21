@@ -8,6 +8,7 @@ import { useListItemActions } from '@/composables/useListItemActions';
 import type { AdminBlog as Blog, AdminPostItem as PostItem, Category } from '@/types/blog.types';
 import { localizedName } from '@/utils/localization';
 import { router } from '@inertiajs/vue3';
+import { watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -27,6 +28,10 @@ interface Props {
     editingExtensionId?: number | null;
     extensionForm?: any;
     extensionEditForm?: any;
+    isEditing?: boolean;
+    isCreatingPost?: boolean;
+    isPostsExpanded?: boolean;
+    editingPostId?: number | null;
 }
 
 interface Emits {
@@ -54,10 +59,10 @@ const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 const {
-    isEditing,
-    isCreatingPost,
-    isPostsExpanded,
-    editingPostId,
+    isEditing: localIsEditing,
+    isCreatingPost: localIsCreatingPost,
+    isPostsExpanded: localIsPostsExpanded,
+    editingPostId: localEditingPostId,
     handleEdit,
     handleCreatePost,
     handleTogglePosts,
@@ -65,12 +70,44 @@ const {
     handleCancelEditPost,
 } = useListItemActions<Blog, PostItem>(emit);
 
+watch(
+    () => props.isEditing,
+    (val) => {
+        if (val !== undefined) localIsEditing.value = val;
+    },
+    { immediate: true },
+);
+
+watch(
+    () => props.isCreatingPost,
+    (val) => {
+        if (val !== undefined) localIsCreatingPost.value = val;
+    },
+    { immediate: true },
+);
+
+watch(
+    () => props.isPostsExpanded,
+    (val) => {
+        if (val !== undefined) localIsPostsExpanded.value = val;
+    },
+    { immediate: true },
+);
+
+watch(
+    () => props.editingPostId,
+    (val) => {
+        if (val !== undefined) localEditingPostId.value = val;
+    },
+    { immediate: true },
+);
+
 function handleSubmitEdit(form: any) {
     emit('submitEdit', form, props.blog);
 }
 
 function handleCancelEdit() {
-    isEditing.value = false;
+    localIsEditing.value = false;
     emit('cancelEdit');
 }
 
@@ -79,7 +116,7 @@ function handleSubmitCreatePost(form: any) {
 }
 
 function handleCancelCreatePost() {
-    isCreatingPost.value = false;
+    localIsCreatingPost.value = false;
     emit('cancelCreatePost');
 }
 
@@ -90,9 +127,9 @@ function handleSubmitEditPost(form: any, post: PostItem) {
 
 <template>
     <BaseListItem
-        :is-creating-post="isCreatingPost"
-        :is-editing="isEditing"
-        :is-posts-expanded="isPostsExpanded"
+        :is-creating-post="localIsCreatingPost"
+        :is-editing="localIsEditing"
+        :is-posts-expanded="localIsPostsExpanded"
         :item="blog"
         :subtitle="`/${blog.slug} · ${blog.creation_date ?? ''}`"
     >
@@ -110,9 +147,9 @@ function handleSubmitEditPost(form: any, post: PostItem) {
 
         <template #actions>
             <ItemActionGroup
-                :is-creating-post="isCreatingPost"
-                :is-editing="isEditing"
-                :is-posts-expanded="isPostsExpanded"
+                :is-creating-post="localIsCreatingPost"
+                :is-editing="localIsEditing"
+                :is-posts-expanded="localIsPostsExpanded"
                 @edit="handleEdit(blog)"
                 @create-post="handleCreatePost(blog)"
                 @toggle-posts="handleTogglePosts(blog)"
@@ -152,15 +189,15 @@ function handleSubmitEditPost(form: any, post: PostItem) {
                     :creating-extension-id="creatingExtensionId"
                     :edit-form="postEditForm"
                     :editing-extension-id="editingExtensionId"
-                    :editing-post-id="editingPostId"
+                    :editing-post-id="localEditingPostId"
                     :extension-edit-form="extensionEditForm"
                     :extension-form="extensionForm"
-                    :is-editing="editingPostId === post.id"
+                    :is-editing="localEditingPostId === post.id"
                     :is-extensions-expanded="expandedExtensionsForId === post.id"
                     :post="post"
                     @edit="handleEditPost"
                     @updated="handleReload"
-                    @apply-edit-extension="(form, ext) => emit('applyEditExtension', form, ext)"
+                    @apply-edit-extension="(form: any, ext: any) => emit('applyEditExtension', form, ext)"
                     @cancel-create-extension="emit('cancelCreateExtension')"
                     @cancel-edit="handleCancelEditPost"
                     @cancel-edit-extension="emit('cancelEditExtension')"
@@ -168,7 +205,7 @@ function handleSubmitEditPost(form: any, post: PostItem) {
                     @edit-extension="emit('editExtension', $event)"
                     @submit-create-extension="emit('submitCreateExtension', $event, post)"
                     @submit-edit="handleSubmitEditPost"
-                    @submit-edit-extension="(form, ext) => emit('submitEditExtension', form, ext)"
+                    @submit-edit-extension="(form: any, ext: any) => emit('submitEditExtension', form, ext)"
                     @toggle-extensions="emit('toggleExtensions', $event)"
                 />
             </div>

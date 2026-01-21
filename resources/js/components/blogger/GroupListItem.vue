@@ -9,6 +9,7 @@ import { TooltipButton } from '@/components/ui/tooltip';
 import { useListItemActions } from '@/composables/useListItemActions';
 import type { AdminGroup as Group, AdminPostItem as PostItem } from '@/types/blog.types';
 import { router } from '@inertiajs/vue3';
+import { watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -18,6 +19,10 @@ interface Props {
     postEditForm?: any;
     postForm?: any;
     editForm?: any;
+    isEditing?: boolean;
+    isCreatingPost?: boolean;
+    isPostsExpanded?: boolean;
+    editingPostId?: number | null;
 }
 
 interface Emits {
@@ -35,14 +40,14 @@ interface Emits {
     (e: 'postUpdated'): void;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 const {
-    isEditing,
-    isCreatingPost,
-    isPostsExpanded,
-    editingPostId,
+    isEditing: localIsEditing,
+    isCreatingPost: localIsCreatingPost,
+    isPostsExpanded: localIsPostsExpanded,
+    editingPostId: localEditingPostId,
     handleEdit,
     handleCreatePost,
     handleTogglePosts,
@@ -50,30 +55,62 @@ const {
     handleCancelEditPost,
 } = useListItemActions<Group, PostItem>(emit);
 
+watch(
+    () => props.isEditing,
+    (val) => {
+        if (val !== undefined) localIsEditing.value = val;
+    },
+    { immediate: true },
+);
+
+watch(
+    () => props.isCreatingPost,
+    (val) => {
+        if (val !== undefined) localIsCreatingPost.value = val;
+    },
+    { immediate: true },
+);
+
+watch(
+    () => props.isPostsExpanded,
+    (val) => {
+        if (val !== undefined) localIsPostsExpanded.value = val;
+    },
+    { immediate: true },
+);
+
+watch(
+    () => props.editingPostId,
+    (val) => {
+        if (val !== undefined) localEditingPostId.value = val;
+    },
+    { immediate: true },
+);
+
 function handleCancelEdit() {
-    isEditing.value = false;
+    localIsEditing.value = false;
     emit('cancelEdit');
 }
 
 function handleCancelCreatePost() {
-    isCreatingPost.value = false;
+    localIsCreatingPost.value = false;
     emit('cancelCreatePost');
 }
 </script>
 
 <template>
     <BaseListItem
-        :is-creating-post="isCreatingPost"
-        :is-editing="isEditing"
-        :is-posts-expanded="isPostsExpanded"
+        :is-creating-post="localIsCreatingPost"
+        :is-editing="localIsEditing"
+        :is-posts-expanded="localIsPostsExpanded"
         :item="group"
         :subtitle="group.slug"
     >
         <template #actions>
             <ItemActionGroup
-                :is-creating-post="isCreatingPost"
-                :is-editing="isEditing"
-                :is-posts-expanded="isPostsExpanded"
+                :is-creating-post="localIsCreatingPost"
+                :is-editing="localIsEditing"
+                :is-posts-expanded="localIsPostsExpanded"
                 @edit="handleEdit(group)"
                 @create-post="handleCreatePost(group)"
                 @toggle-posts="handleTogglePosts(group)"
@@ -118,7 +155,7 @@ function handleCancelCreatePost() {
                     v-for="post in group.posts"
                     :key="post.id"
                     :edit-form="postEditForm"
-                    :is-editing="editingPostId === post.id"
+                    :is-editing="localEditingPostId === post.id"
                     :is-extensions-expanded="false"
                     :post="post"
                     @edit="handleEditPost"
