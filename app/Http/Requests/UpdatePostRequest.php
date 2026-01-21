@@ -14,7 +14,17 @@ class UpdatePostRequest extends FormRequest
             return false;
         }
 
-        return $post->blog->user_id === $this->user()->id;
+        $user = $this->user();
+
+        if ($post->blog && $post->blog->user_id === $user->id) {
+            return true;
+        }
+
+        if ($post->group && $post->group->user_id === $user->id) {
+            return true;
+        }
+
+        return false;
     }
 
     public function rules(): array

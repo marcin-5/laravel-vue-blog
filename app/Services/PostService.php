@@ -57,10 +57,14 @@ class PostService
     public function getUserPosts($userId, ?int $blogId = null)
     {
         $query = Post::query()
-            ->whereHas('blog', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
+            ->where(function ($q) use ($userId) {
+                $q->whereHas('blog', function ($bq) use ($userId) {
+                    $bq->where('user_id', $userId);
+                })->orWhereHas('group', function ($gq) use ($userId) {
+                    $gq->where('user_id', $userId);
+                });
             })
-            ->with(['blog:id,name,slug,user_id'])
+            ->with(['blog:id,name,slug,user_id', 'group:id,name,slug,user_id'])
             ->orderByDesc('created_at');
 
         if ($blogId) {
@@ -72,6 +76,14 @@ class PostService
 
     public function canUserManagePost($userId, Post $post): bool
     {
-        return $post->blog->user_id === $userId;
+        if ($post->blog && $post->blog->user_id === $userId) {
+            return true;
+        }
+
+        if ($post->group && $post->group->user_id === $userId) {
+            return true;
+        }
+
+        return false;
     }
 }

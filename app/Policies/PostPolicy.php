@@ -21,8 +21,19 @@ class PostPolicy
     public function view(User $user, Post $post): bool
     {
         // Users can view their own posts or published public posts
-        if ($post->blog->user_id === $user->id) {
+        if ($post->blog?->user_id === $user->id) {
             return true;
+        }
+
+        // If in a group, check if the user is a member or the owner of the group
+        if ($post->group) {
+            if ($post->group->user_id === $user->id) {
+                return true;
+            }
+
+            if ($post->group->members()->where('users.id', $user->id)->exists()) {
+                return true;
+            }
         }
 
         // For other users' posts, check if published and (public or unlisted)
@@ -42,7 +53,15 @@ class PostPolicy
      */
     public function update(User $user, Post $post): bool
     {
-        return $post->blog->user_id === $user->id;
+        if ($post->blog?->user_id === $user->id) {
+            return true;
+        }
+
+        if ($post->group?->user_id === $user->id) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -50,7 +69,15 @@ class PostPolicy
      */
     public function delete(User $user, Post $post): bool
     {
-        return $post->blog->user_id === $user->id;
+        if ($post->blog?->user_id === $user->id) {
+            return true;
+        }
+
+        if ($post->group?->user_id === $user->id) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -58,7 +85,15 @@ class PostPolicy
      */
     public function restore(User $user, Post $post): bool
     {
-        return $post->blog->user_id === $user->id;
+        if ($post->blog?->user_id === $user->id) {
+            return true;
+        }
+
+        if ($post->group?->user_id === $user->id) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -66,6 +101,14 @@ class PostPolicy
      */
     public function forceDelete(User $user, Post $post): bool
     {
-        return $post->blog->user_id === $user->id;
+        if ($post->blog?->user_id === $user->id) {
+            return true;
+        }
+
+        if ($post->group?->user_id === $user->id) {
+            return true;
+        }
+
+        return false;
     }
 }
