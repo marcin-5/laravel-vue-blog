@@ -17,6 +17,14 @@ class PostsController extends AuthenticatedController
         private readonly PostService $postService,
     ) {
         parent::__construct();
+        // Authorize extension management actions as 'update' on the post
+        $this->middleware('can:update,post')->only([
+            'availableExtensions',
+            'attachExtension',
+            'detachExtension',
+            'reorderExtensions',
+        ]);
+
         // Only authorize existing post resources (show, update, delete)
         // Don't use authorizeResource for 'store' since it's handled in StorePostRequest
         $this->authorizeResource(Post::class, 'post', [
