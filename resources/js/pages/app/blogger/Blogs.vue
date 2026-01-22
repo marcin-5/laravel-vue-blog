@@ -171,7 +171,6 @@ function handleToggleCreate() {
                 <BlogListItem
                     v-for="blog in props.blogs"
                     :key="blog.id"
-                    :blog="blog"
                     :categories="props.categories"
                     :creating-extension-id="creatingExtensionForId"
                     :edit-form="editForm"
@@ -183,6 +182,7 @@ function handleToggleCreate() {
                     :is-creating-post="creatingPostForId === blog.id"
                     :is-editing="editingId === blog.id"
                     :is-posts-expanded="expandedPostsForId === blog.id"
+                    :item="blog"
                     :post-edit-form="postEditForm"
                     :post-form="postForm"
                     @edit="handleStartEdit"

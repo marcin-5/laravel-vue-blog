@@ -134,11 +134,11 @@ function handleToggleCreate() {
                     :key="group.id"
                     :edit-form="editForm"
                     :editing-post-id="editingPostId"
-                    :expanded-post-extensions-id="expandedExtensionsForId"
-                    :group="group"
+                    :expanded-extensions-for-id="expandedExtensionsForId"
                     :is-creating-post="creatingPostForId === group.id"
                     :is-editing="editingId === group.id"
                     :is-posts-expanded="expandedPostsForId === group.id"
+                    :item="group"
                     :post-edit-form="postEditForm"
                     :post-form="postForm"
                     @edit="handleStartEdit"
@@ -151,7 +151,7 @@ function handleToggleCreate() {
                     @submit-create-post="() => submitCreatePost()"
                     @submit-edit="() => submitEdit(group)"
                     @submit-edit-post="() => submitEditPost()"
-                    @toggle-post-extensions="handleToggleExtensions"
+                    @toggle-extensions="handleToggleExtensions"
                     @toggle-posts="handleTogglePosts"
                 />
 

@@ -160,6 +160,44 @@ export interface AdminGroup {
     created_at?: string;
 }
 
+export interface ListItemProps<T extends ManageableItem> {
+    item: T;
+    postEditForm?: any;
+    postForm?: any;
+    editForm?: any;
+    isEditing?: boolean;
+    isCreatingPost?: boolean;
+    isPostsExpanded?: boolean;
+    editingPostId?: number | null;
+    expandedExtensionsForId?: number | null;
+    creatingExtensionId?: number | null;
+    editingExtensionId?: number | null;
+    extensionForm?: any;
+    extensionEditForm?: any;
+}
+
+export interface ListItemEmits<T extends ManageableItem, P extends AdminPostItem> {
+    (e: 'edit', item: T): void;
+    (e: 'createPost', item: T): void;
+    (e: 'togglePosts', item: T): void;
+    (e: 'submitEdit', form: any, item: T): void;
+    (e: 'cancelEdit'): void;
+    (e: 'submitCreatePost', form: any): void;
+    (e: 'cancelCreatePost'): void;
+    (e: 'editPost', post: P): void;
+    (e: 'submitEditPost', form: any, post: P): void;
+    (e: 'cancelEditPost'): void;
+    (e: 'toggleExtensions', post: P): void;
+    (e: 'createExtension', post: P): void;
+    (e: 'submitCreateExtension', form: any, post: P): void;
+    (e: 'cancelCreateExtension'): void;
+    (e: 'editExtension', extension: any): void;
+    (e: 'submitEditExtension', form: any, extension: any): void;
+    (e: 'applyEditExtension', form: any, extension: any): void;
+    (e: 'cancelEditExtension'): void;
+    (e: 'postUpdated'): void;
+}
+
 export interface ManageableItem {
     id: number;
     name: string;
