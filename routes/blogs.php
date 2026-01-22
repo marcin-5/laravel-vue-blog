@@ -23,7 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('posts/{post}', [PostsController::class, 'update'])->name('posts.update');
 
     // Post Extensions (New pivot-based routes)
-    Route::prefix('blogger/blogs/{blog}/posts/{post}')->group(function () {
+    Route::prefix('blogger/posts/{post}')->group(function () {
         Route::get('extensions/available', [PostsController::class, 'availableExtensions'])
             ->name('blogger.posts.extensions.available');
         Route::post('extensions', [PostsController::class, 'attachExtension'])

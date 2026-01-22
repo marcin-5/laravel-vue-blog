@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Blogger;
 use App\Http\Controllers\AuthenticatedController;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
-use App\Models\Blog;
 use App\Models\Post;
 use App\Services\PostService;
 use Illuminate\Http\JsonResponse;
@@ -53,16 +52,23 @@ class PostsController extends AuthenticatedController
     /**
      * Pobierz dostępne rozszerzenia dla bloga
      */
-    public function availableExtensions(Blog $blog, Post $post): JsonResponse
+    public function availableExtensions(Post $post): JsonResponse
     {
         $attachedIds = $post->extensions()->pluck('extension_post_id');
 
-        $extensions = $blog->posts()
+        $query = Post::query()
             ->extensionType()
             ->whereNotIn('id', $attachedIds)
             ->where('id', '!=', $post->id)
-            ->select(['id', 'title', 'excerpt'])
-            ->get();
+            ->select(['id', 'title', 'excerpt']);
+
+        if ($post->group_id) {
+            $query->where('group_id', $post->group_id);
+        } else {
+            $query->where('blog_id', $post->blog_id);
+        }
+
+        $extensions = $query->get();
 
         return response()->json($extensions);
     }
@@ -70,7 +76,7 @@ class PostsController extends AuthenticatedController
     /**
      * Przypisz rozszerzenie do posta
      */
-    public function attachExtension(Blog $blog, Post $post, Request $request): JsonResponse
+    public function attachExtension(Request $request, Post $post): JsonResponse
     {
         $validated = $request->validate([
             'extension_post_id' => 'required|exists:posts,id',
@@ -89,7 +95,7 @@ class PostsController extends AuthenticatedController
     /**
      * Odłącz rozszerzenie od posta
      */
-    public function detachExtension(Blog $blog, Post $post, int $extensionPostId): JsonResponse
+    public function detachExtension(Request $request, Post $post, int $extensionPostId): JsonResponse
     {
         $post->extensions()->detach($extensionPostId);
 
@@ -99,7 +105,7 @@ class PostsController extends AuthenticatedController
     /**
      * Aktualizuj kolejność rozszerzeń
      */
-    public function reorderExtensions(Blog $blog, Post $post, Request $request): JsonResponse
+    public function reorderExtensions(Request $request, Post $post): JsonResponse
     {
         $validated = $request->validate([
             'extensions' => 'required|array',

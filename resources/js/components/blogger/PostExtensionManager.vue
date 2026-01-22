@@ -26,7 +26,7 @@ const isAttaching = ref(false);
 
 async function fetchAvailableExtensions() {
     try {
-        const response = await axios.get(route('blogger.posts.extensions.available', { blog: props.post.blog_id, post: props.post.id }));
+        const response = await axios.get(route('blogger.posts.extensions.available', { post: props.post.id }));
         availableExtensions.value = response.data;
     } catch (error) {
         console.error('Failed to fetch extensions', error);
@@ -38,7 +38,7 @@ async function attachExtension() {
 
     isAttaching.value = true;
     try {
-        await axios.post(route('blogger.posts.extensions.attach', { blog: props.post.blog_id, post: props.post.id }), {
+        await axios.post(route('blogger.posts.extensions.attach', { post: props.post.id }), {
             extension_post_id: selectedExtensionId.value,
             display_order: (props.post.extensions?.length || 0) + 1,
         });
@@ -68,7 +68,6 @@ async function detachExtension(extensionId: number) {
     try {
         await axios.delete(
             route('blogger.posts.extensions.detach', {
-                blog: props.post.blog_id,
                 post: props.post.id,
                 extensionPostId: extensionId,
             }),
