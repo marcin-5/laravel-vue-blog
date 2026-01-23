@@ -64,8 +64,6 @@ class GroupMembersController extends Controller
 
     public function store(StoreGroupMemberRequest $request, Group $group): RedirectResponse
     {
-        $this->authorize('update', $group);
-
         $validated = $request->validated();
 
         $userToAdd = User::where('email', $validated['email'])->first();

@@ -8,8 +8,9 @@ class StoreGroupMemberRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Authorization is handled in the controller for now,
-        return true;
+        $group = $this->route('group');
+
+        return $group && $this->user()->can('update', $group);
     }
 
     public function rules(): array
