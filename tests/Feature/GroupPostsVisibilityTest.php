@@ -40,6 +40,7 @@ it('displays regular posts but NOT extension posts on group landing page', funct
 
     $this->actingAs($user)
         ->get(route('group.landing', $group->slug))
+        ->assertSuccessful()
         ->assertInertia(fn($page) => $page
             ->component('app/group/Landing')
             ->has('posts', 2), // We expect 2 posts (Restricted and Public), Extension should be hidden
@@ -59,6 +60,7 @@ it('does not display unpublished posts on group landing page', function () {
 
     $this->actingAs($user)
         ->get(route('group.landing', $group->slug))
+        ->assertSuccessful()
         ->assertInertia(fn($page) => $page
             ->component('app/group/Landing')
             ->has('posts', 0),

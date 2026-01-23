@@ -1,5 +1,16 @@
 <script lang="ts" setup>
-import { Head, Link } from '@inertiajs/vue3';
+import BlogFooter from '@/components/blog/BlogFooter.vue';
+import BlogHeader from '@/components/blog/BlogHeader.vue';
+import BlogPostNav from '@/components/blog/BlogPostNav.vue';
+import BlogPostsList from '@/components/blog/BlogPostsList.vue';
+import BorderDivider from '@/components/blog/BorderDivider.vue';
+import PublicNavbar from '@/components/PublicNavbar.vue';
+import { useBlogTheme } from '@/composables/useBlogTheme';
+import { useSidebarLayout } from '@/composables/useSidebarLayout';
+import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
+import type { Blog, Navigation, Pagination, PostItem } from '@/types/blog.types';
+import { hasContent } from '@/utils/stringUtils';
+import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -10,61 +21,117 @@ const props = defineProps<{
         content: string | null;
         footer: string | null;
     };
-    posts: Array<{
-        id: number;
-        title: string;
-        slug: string;
-        excerpt: string | null;
-        published_at: string | null;
-    }>;
-    pagination: {
-        current_page: number;
-        last_page: number;
-        total: number;
-    };
+    posts: PostItem[];
+    pagination: Pagination;
     theme: any;
     sidebar: number;
+    navigation: Navigation;
+    viewStats: {
+        total: number;
+        unique?: number;
+    };
 }>();
 
-const themeStyle = computed(() => {
-    if (!props.theme) return {};
-    // Simplified theme mapping, similar to useBlogTheme
-    return {
-        '--blog-bg': props.theme.background || '',
-        '--blog-text': props.theme.text || '',
-    };
+// Map group to Blog type for components compatibility
+const blogData = computed<Blog>(() => ({
+    id: props.group.id,
+    name: props.group.name,
+    slug: props.group.slug,
+    motto: null,
+    theme: props.theme,
+}));
+
+// Content availability checks
+const hasLandingContent = computed(() => hasContent(props.group.content));
+const hasFooterContent = computed(() => hasContent(props.group.footer));
+
+// Sidebar layout calculations
+const {
+    hasSidebar: hasSidebarLayout,
+    asideStyle,
+    mainStyle,
+    asideOrderClass,
+    mainOrderClass,
+    navbarMaxWidth,
+} = useSidebarLayout({
+    sidebar: props.sidebar,
+    minPercent: SIDEBAR_MIN_WIDTH,
+    maxPercent: SIDEBAR_MAX_WIDTH,
 });
+
+// Theme handling
+const { mergedThemeStyle } = useBlogTheme(computed(() => props.theme));
 </script>
 
 <template>
     <Head :title="group.name" />
+    <div :style="mergedThemeStyle" class="flex min-h-screen flex-col bg-background text-foreground antialiased">
+        <PublicNavbar :maxWidth="navbarMaxWidth" />
+        <div
+            :class="[
+                'mx-auto w-full p-4 sm:px-12 md:px-16',
+                hasSidebarLayout ? 'max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl' : 'max-w-screen-lg',
+            ]"
+        >
+            <BorderDivider class="mb-4" />
 
-    <div :style="themeStyle" class="min-h-screen bg-background p-6 text-foreground">
-        <div class="mx-auto max-w-4xl">
-            <header class="mb-8 border-b pb-4">
-                <h1 class="text-4xl font-bold">{{ group.name }}</h1>
-                <div v-if="group.content" class="prose dark:prose-invert mt-4" v-html="group.content"></div>
-            </header>
+            <!-- Layout without sidebar -->
+            <template v-if="!hasSidebarLayout">
+                <BlogHeader :blog="blogData" :displayedMotto="null" :viewStats="viewStats" />
+                <BorderDivider class="mb-8" />
+                <main v-if="hasLandingContent" class="min-w-0 flex-1">
+                    <div class="prose max-w-none" v-html="group.content" />
+                </main>
+                <BorderDivider class="my-4" />
+                <BlogPostsList
+                    :blogId="group.id"
+                    :blogSlug="group.slug"
+                    :class="{ 'mt-6': hasLandingContent }"
+                    :pagination="pagination"
+                    :posts="posts"
+                    is-group
+                />
+            </template>
 
-            <main>
-                <h2 class="mb-4 text-2xl font-semibold">{{ $t('blogger.posts_list.title') }}</h2>
-                <div v-if="posts.length > 0" class="space-y-6">
-                    <article v-for="post in posts" :key="post.id" class="rounded-lg border p-4">
-                        <h3 class="text-xl font-bold">
-                            <Link :href="route('group.post', { group: group.slug, postSlug: post.slug })" class="hover:underline">
-                                {{ post.title }}
-                            </Link>
-                        </h3>
-                        <p v-if="post.excerpt" class="mt-2 text-muted-foreground">{{ post.excerpt }}</p>
-                        <div class="mt-2 text-xs text-muted-foreground">
-                            {{ post.published_at }}
-                        </div>
-                    </article>
+            <!-- Layout with sidebar (hidden on <xl, visible from xl+) -->
+            <template v-else>
+                <!-- Mobile/tablet layout (<xl): no sidebar -->
+                <div class="xl:hidden">
+                    <BlogHeader :blog="blogData" :displayedMotto="null" :viewStats="viewStats" />
+                    <BorderDivider class="mb-8" />
+                    <main v-if="hasLandingContent" class="min-w-0 flex-1">
+                        <div class="prose max-w-none" v-html="group.content" />
+                    </main>
+                    <BlogPostsList
+                        :blogId="group.id"
+                        :blogSlug="group.slug"
+                        :class="{ 'mt-6': hasLandingContent }"
+                        :pagination="pagination"
+                        :posts="posts"
+                        is-group
+                    />
                 </div>
-                <div v-else class="text-muted-foreground italic">{{ $t('blogger.groups.empty_list') }}</div>
-            </main>
 
-            <footer v-if="group.footer" class="mt-12 border-t pt-8 text-sm text-muted-foreground" v-html="group.footer"></footer>
+                <!-- Desktop layout (xl+): with sidebar -->
+                <div class="hidden items-start gap-8 xl:flex">
+                    <aside :class="asideOrderClass" :style="asideStyle">
+                        <BlogPostsList :blogId="group.id" :blogSlug="group.slug" :pagination="pagination" :posts="posts" is-group />
+                    </aside>
+                    <main :class="['min-w-0 flex-1', mainOrderClass]" :style="mainStyle">
+                        <BlogHeader :blog="blogData" :displayedMotto="null" :viewStats="viewStats" />
+                        <div v-if="hasLandingContent" class="prose max-w-none" v-html="group.content" />
+                    </main>
+                </div>
+            </template>
+
+            <!-- Navigation at bottom -->
+            <BlogPostNav :navigation="navigation" />
+
+            <!-- Footer (optional) -->
+            <template v-if="hasFooterContent">
+                <BorderDivider class="my-4" />
+                <BlogFooter :html="group.footer || ''" />
+            </template>
         </div>
     </div>
 </template>

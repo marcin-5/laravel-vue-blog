@@ -13,10 +13,15 @@ const props = defineProps<{
     blogSlug: string;
     blogId: number;
     pagination?: Pagination | null;
+    isGroup?: boolean;
 }>();
 
 const { t } = useI18n();
 const { showExcerpts } = useBlogExcerpts(props.blogSlug);
+
+const postUrlRoute = computed(() => (props.isGroup ? 'group.post' : 'blog.public.post'));
+const postUrlParams = (post: PostItem) =>
+    props.isGroup ? { group: props.blogSlug, postSlug: post.slug } : { blog: props.blogSlug, postSlug: post.slug };
 
 const paginationLabelsMap: Record<string, string> = {
     previous: 'blog.pagination.previous',
@@ -64,10 +69,7 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
             <li v-for="post in posts" :key="post.id">
                 <div class="flex flex-col">
                     <div class="inline">
-                        <Link
-                            :href="route('blog.public.post', { blog: blogSlug, postSlug: post.slug })"
-                            class="font-semibold text-link hover:text-link-hover hover:underline"
-                        >
+                        <Link :href="route(postUrlRoute, postUrlParams(post))" class="font-semibold text-link hover:text-link-hover hover:underline">
                             {{ post.title }}
                         </Link>
                         <small v-if="showExcerpts && post.published_at" class="text-muted-foreground"
@@ -107,7 +109,7 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
         </ul>
 
         <!-- Newsletter link -->
-        <div class="mt-4 flex">
+        <div v-if="!isGroup" class="mt-4 flex">
             <Link :href="route('newsletter.index', { blog_id: blogId })" class="text-sm font-medium text-foreground hover:text-foreground">
                 {{ t('blog.posts_list.newsletter_subscribe') }}
             </Link>
