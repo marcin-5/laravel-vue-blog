@@ -50,7 +50,6 @@ const { hasSidebar, asideStyle, mainStyle, asideOrderClass, mainOrderClass, navb
 
 // Theme handling
 const { mergedThemeStyle } = useBlogTheme(computed(() => props.theme));
-console.log(props.post);
 </script>
 
 <template>

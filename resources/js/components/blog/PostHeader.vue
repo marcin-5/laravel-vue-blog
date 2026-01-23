@@ -24,7 +24,6 @@ const updatedLabel = computed(() => t('blog.post.updated', 'Updated:'));
 
 const showUpdated = computed(() => shouldShowUpdatedDate(props.publishedTime, props.modifiedTime));
 const formattedUpdatedDate = computed(() => formatDate(props.modifiedTime, props.locale));
-console.log(props.post);
 </script>
 
 <template>
