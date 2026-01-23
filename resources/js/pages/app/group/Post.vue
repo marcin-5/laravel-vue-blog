@@ -5,7 +5,7 @@ import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import PostContent from '@/components/blog/PostContent.vue';
 import PostExtensions from '@/components/blog/PostExtensions.vue';
-import ViewStats from '@/components/blog/ViewStats.vue';
+import PostHeader from '@/components/blog/PostHeader.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import { useBlogTheme } from '@/composables/useBlogTheme';
 import { useSidebarLayout } from '@/composables/useSidebarLayout';
@@ -13,7 +13,6 @@ import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { Blog, Navigation, Pagination, PostDetails, PostItem } from '@/types/blog.types';
 import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
     group: {
@@ -33,12 +32,6 @@ const props = defineProps<{
     };
 }>();
 
-const { t } = useI18n();
-
-// Internationalization
-const authorLabel = computed(() => t('blog.post.author'));
-const publishedLabel = computed(() => t('blog.post.published'));
-
 // Map group to Blog type for components compatibility
 const blogData = computed<Blog>(() => ({
     id: props.group.id,
@@ -57,6 +50,7 @@ const { hasSidebar, asideStyle, mainStyle, asideOrderClass, mainOrderClass, navb
 
 // Theme handling
 const { mergedThemeStyle } = useBlogTheme(computed(() => props.theme));
+console.log(props.post);
 </script>
 
 <template>
@@ -72,21 +66,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.theme));
         >
             <BorderDivider class="mb-4" />
 
-            <header :style="{ fontFamily: 'var(--blog-header-font)', fontSize: 'calc(1.5rem * var(--blog-header-scale))' }" class="mb-4">
-                <h1 class="font-[inherit] text-[1em] leading-tight font-bold text-foreground">{{ post.title }}</h1>
-                <div class="my-2 inline-flex items-center gap-x-5 text-sm font-medium text-muted-foreground">
-                    <p v-if="post.published_at" class="italic">{{ publishedLabel }} {{ post.published_at }}</p>
-                    <ViewStats :total="viewStats.total" :unique="viewStats.unique" />
-                </div>
-                <p
-                    v-if="post.author"
-                    :style="{ fontFamily: 'var(--blog-footer-font)', fontSize: 'calc(1rem * var(--blog-body-scale))' }"
-                    class="text-foreground"
-                >
-                    {{ authorLabel }}
-                    <a :href="`mailto:${post.author_email}`">{{ post.author }}</a>
-                </p>
-            </header>
+            <PostHeader :post="post" :viewStats="viewStats" />
 
             <!-- Add separation line under header when no sidebar -->
             <BorderDivider v-if="!hasSidebar" class="mb-8" />

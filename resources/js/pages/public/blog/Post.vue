@@ -4,16 +4,15 @@ import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import PostContent from '@/components/blog/PostContent.vue';
 import PostExtensions from '@/components/blog/PostExtensions.vue';
+import PostHeader from '@/components/blog/PostHeader.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import { useBlogTheme } from '@/composables/useBlogTheme';
 import { useSidebarLayout } from '@/composables/useSidebarLayout';
 import type { SEO } from '@/types';
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { Blog, Navigation, Pagination, PostDetails, PostItem } from '@/types/blog.types';
-import { formatDate, shouldShowUpdatedDate } from '@/utils/dateUtils';
 import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
     blog: Blog;
@@ -30,20 +29,9 @@ const props = defineProps<{
     };
 }>();
 
-const { t } = useI18n();
-
 // Internationalization
-const authorLabel = computed(() => t('blog.post.author', ''));
-const publishedLabel = computed(() => t('blog.post.published', 'Published:'));
-const updatedLabel = computed(() => t('blog.post.updated', 'Updated:'));
-
 const postPublishedTime = computed(() => props.seo?.publishedTime || null);
 const postModifiedTime = computed(() => props.seo?.modifiedTime || null);
-
-// Date display computed properties
-const showUpdated = computed(() => shouldShowUpdatedDate(postPublishedTime.value, postModifiedTime.value));
-
-const formattedUpdatedDate = computed(() => formatDate(postModifiedTime.value, props.locale));
 
 // Sidebar layout
 const { hasSidebar, asideStyle, mainStyle, asideOrderClass, mainOrderClass, navbarMaxWidth } = useSidebarLayout({
@@ -69,27 +57,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
         >
             <BorderDivider class="mb-4" />
 
-            <header :style="{ fontFamily: 'var(--blog-header-font)', fontSize: 'calc(1.5rem * var(--blog-header-scale))' }" class="mb-4">
-                <h1 class="font-[inherit] text-[1em] leading-tight font-bold text-foreground">{{ post.title }}</h1>
-                <div class="my-2 inline-flex items-center gap-x-5 text-sm font-medium text-muted-foreground">
-                    <p v-if="post.published_at" class="italic">{{ publishedLabel }} {{ post.published_at }}</p>
-                    <span>
-                        {{ t('blog.post.views') }} {{ viewStats.total.toLocaleString() }}
-                        <template v-if="viewStats.unique !== undefined">
-                            ({{ t('blog.post.unique_views') }} {{ Number(viewStats.unique).toLocaleString() }})
-                        </template>
-                    </span>
-                </div>
-                <p v-if="showUpdated" class="-mt-1 mb-2 text-xs text-muted-foreground italic">{{ updatedLabel }} {{ formattedUpdatedDate }}</p>
-                <p
-                    v-if="post.author"
-                    :style="{ fontFamily: 'var(--blog-footer-font)', fontSize: 'calc(1rem * var(--blog-body-scale))' }"
-                    class="text-foreground"
-                >
-                    {{ authorLabel }}
-                    <a :href="`mailto:${post.author_email}`">{{ post.author }}</a>
-                </p>
-            </header>
+            <PostHeader :locale="locale" :modifiedTime="postModifiedTime" :post="post" :publishedTime="postPublishedTime" :viewStats="viewStats" />
 
             <!-- Add separation line under header when no sidebar -->
             <BorderDivider v-if="!hasSidebar" class="mb-8" />
