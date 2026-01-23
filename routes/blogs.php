@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Blogger\BlogsController;
+use App\Http\Controllers\Blogger\GroupMembersController;
 use App\Http\Controllers\Blogger\GroupsController;
 use App\Http\Controllers\Blogger\PostsController;
 use App\Http\Controllers\Blogger\StatsController as BloggerStatsController;
@@ -12,8 +13,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('blogs', BlogsController::class)
         ->only(['index', 'store', 'update']);
 
-    Route::resource('groups', GroupsController::class)
-        ->only(['index', 'store', 'update']);
+    // Groups - content management
+    Route::resource('groups/content', GroupsController::class)
+        ->only(['index', 'store', 'update'])
+        ->names([
+            'index' => 'blogger.groups.content.index',
+            'store' => 'blogger.groups.content.store',
+            'update' => 'blogger.groups.content.update',
+        ]);
+
+    // Groups - membership management
+    Route::get('groups/members', [GroupMembersController::class, 'index'])
+        ->name('blogger.groups.members.index');
+    Route::post('groups/members/{group}', [GroupMembersController::class, 'store'])
+        ->name('blogger.groups.members.store');
+    Route::patch(
+        'groups/members/{group}/{user}',
+        [GroupMembersController::class, 'update'],
+    )
+        ->name('blogger.groups.members.update');
+    Route::delete(
+        'groups/members/{group}/{user}',
+        [GroupMembersController::class, 'destroy'],
+    )
+        ->name('blogger.groups.members.destroy');
 
     // Blogger stats
     Route::get('blogs/stats', [BloggerStatsController::class, 'index'])->name('blogger.stats.index');

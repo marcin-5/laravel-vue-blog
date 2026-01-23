@@ -6,7 +6,28 @@
             "categories": "Categories",
             "statistics": "Statistics",
             "blogs": "Manage blogs"
-        }
+        },
+        "group": "Group",
+        "all": "All",
+        "all_groups": "All",
+        "all_per_page": "All",
+        "per_page": "Per page",
+        "sort_by": "Sort by",
+        "username": "Username",
+        "joined_at": "Joined at",
+        "role": "Role",
+        "direction": "Direction",
+        "asc": "Ascending",
+        "desc": "Descending",
+        "owner": "Owner",
+        "email": "Email",
+        "add": "Add",
+        "remove": "Remove",
+        "no_results": "No results"
+    },
+    "pagination": {
+        "previous": "Previous",
+        "next": "Next"
     },
     "actions": {
         "clear": "Clear"
@@ -142,7 +163,8 @@
             "dashboard": "Dashboard",
             "index": "Blogs",
             "groups": "Groups",
-            "stats": "Statistics"
+            "stats": "Statistics",
+            "groups_members": "Group members"
         },
         "groups": {
             "title": "Groups",
@@ -153,7 +175,10 @@
             "create_button": "Create New Group",
             "limit_reached_tooltip": "Group limit reached.",
             "create_group_tooltip": "Create new group",
-            "add_post": "Add post"
+            "add_post": "Add post",
+            "members": {
+                "title": "Group membership"
+            }
         },
         "group_form": {
             "name_label": "Group Name",

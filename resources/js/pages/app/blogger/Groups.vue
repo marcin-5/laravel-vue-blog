@@ -18,7 +18,7 @@ const { t } = useI18n();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: t('blogger.breadcrumb.dashboard'), href: '/dashboard' },
-    { title: t('blogger.breadcrumb.groups'), href: '/groups' },
+    { title: t('blogger.breadcrumb.groups'), href: '/groups/content' },
 ];
 
 function handleReload() {
