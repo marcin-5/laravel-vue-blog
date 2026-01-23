@@ -103,6 +103,7 @@ class BlogNavigationService
             'nextPost' => $latestPost ? $this->formatGroupPostLink($group, $latestPost) : null,
             'landingUrl' => route('group.landing', ['group' => $group->slug]),
             'isLandingPage' => true,
+            'isGroup' => true,
             'breadcrumbs' => $this->buildGroupBreadcrumbs($group),
         ];
     }
@@ -149,6 +150,7 @@ class BlogNavigationService
             'nextPost' => $nextPost ? $this->formatGroupPostLink($group, $nextPost) : null,
             'landingUrl' => route('group.landing', ['group' => $group->slug]),
             'isLandingPage' => false,
+            'isGroup' => true,
             'breadcrumbs' => $this->buildGroupBreadcrumbs($group, $post),
         ];
     }

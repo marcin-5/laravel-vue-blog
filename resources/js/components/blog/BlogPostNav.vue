@@ -69,7 +69,7 @@ const getBreadcrumbClasses = (index: number, total: number) =>
                 :class="getBackLinkClasses(!navigation.isLandingPage)"
                 :href="navigation.isLandingPage ? undefined : navigation.landingUrl"
             >
-                {{ t('blog.post_nav.back_to_blog') }}
+                {{ t(navigation.isGroup ? 'blog.post_nav.back_to_group' : 'blog.post_nav.back_to_blog') }}
             </component>
 
             <!-- Next Post Link -->

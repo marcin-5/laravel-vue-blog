@@ -54,7 +54,8 @@
             "aria": "Nawigacja między postami",
             "previous": "Poprzedni",
             "next": "Następny",
-            "back_to_blog": "Powrót do bloga"
+            "back_to_blog": "Powrót do bloga",
+            "back_to_group": "Powrót do grupy"
         },
         "pagination": {
             "aria": "Stronicowanie",

@@ -77,6 +77,7 @@ export interface Navigation {
     nextPost?: NavPost | null;
     landingUrl: string;
     isLandingPage?: boolean;
+    isGroup?: boolean;
     breadcrumbs?: BreadcrumbItem[];
 }
 
