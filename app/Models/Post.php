@@ -71,7 +71,7 @@ class Post extends Model
     }
 
     /**
-     * Posty-rozszerzenia przypisane do tego posta (przez pivot)
+     * Post extensions assigned to this post (via pivot)
      */
     public function extensions(): BelongsToMany
     {
@@ -87,7 +87,7 @@ class Post extends Model
     }
 
     /**
-     * Posty główne, do których ten post jest przypisany jako rozszerzenie
+     * Main posts to which this post is assigned as an extension
      */
     public function parentPosts(): BelongsToMany
     {
@@ -118,7 +118,7 @@ class Post extends Model
     }
 
     /**
-     * Scope dla postów będących rozszerzeniami
+     * Scope for extension posts
      */
     public function scopeExtensionType(Builder $query): Builder
     {
@@ -126,7 +126,7 @@ class Post extends Model
     }
 
     /**
-     * Scope dla postów NIE będących rozszerzeniami (standardowe posty)
+     * Scope for regular (non-extension) posts
      */
     public function scopeRegularPosts(Builder $query): Builder
     {
@@ -191,12 +191,12 @@ class Post extends Model
     }
 
     /**
-     * Scope dla postów w grupie, widocznych dla zalogowanego członka
+     * Scope for group posts, visible to logged-in members
      */
     public function scopeForGroupView(Builder $query): Builder
     {
         return $query->published()
-            ->where('visibility', self::VIS_RESTRICTED)
+            ->regularPosts()
             ->orderByPublicationDate();
     }
 }

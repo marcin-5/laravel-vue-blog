@@ -178,7 +178,8 @@
             "add_post": "Dodaj post",
             "members": {
                 "title": "Zarządzanie członkami"
-            }
+            },
+            "empty_list": "Brak postów w tej grupie."
         },
         "group_form": {
             "name_label": "Nazwa Grupy",

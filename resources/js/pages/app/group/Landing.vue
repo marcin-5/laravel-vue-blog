@@ -28,7 +28,7 @@ const props = defineProps<{
 
 const themeStyle = computed(() => {
     if (!props.theme) return {};
-    // Uproszczone mapowanie motywu, podobnie jak w useBlogTheme
+    // Simplified theme mapping, similar to useBlogTheme
     return {
         '--blog-bg': props.theme.background || '',
         '--blog-text': props.theme.text || '',
@@ -47,7 +47,7 @@ const themeStyle = computed(() => {
             </header>
 
             <main>
-                <h2 class="mb-4 text-2xl font-semibold">Posty w grupie</h2>
+                <h2 class="mb-4 text-2xl font-semibold">{{ $t('blogger.posts_list.title') }}</h2>
                 <div v-if="posts.length > 0" class="space-y-6">
                     <article v-for="post in posts" :key="post.id" class="rounded-lg border p-4">
                         <h3 class="text-xl font-bold">
@@ -61,7 +61,7 @@ const themeStyle = computed(() => {
                         </div>
                     </article>
                 </div>
-                <div v-else class="text-muted-foreground italic">Brak postów w tej grupie.</div>
+                <div v-else class="text-muted-foreground italic">{{ $t('blogger.groups.empty_list') }}</div>
             </main>
 
             <footer v-if="group.footer" class="mt-12 border-t pt-8 text-sm text-muted-foreground" v-html="group.footer"></footer>

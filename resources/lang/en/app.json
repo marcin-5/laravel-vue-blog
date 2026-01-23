@@ -178,7 +178,8 @@
             "add_post": "Add post",
             "members": {
                 "title": "Group membership"
-            }
+            },
+            "empty_list": "No posts in this group."
         },
         "group_form": {
             "name_label": "Group Name",
