@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Blogger;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Blogger\StoreGroupMemberRequest;
 use App\Models\Group;
 use App\Models\GroupMember;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
+use App\Queries\Blogger\GroupMembersQuery;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,44 +16,24 @@ use Inertia\Response;
 
 class GroupMembersController extends Controller
 {
-    public function index(Request $request): Response
+    use AuthorizesRequests;
+
+    public function index(Request $request, GroupMembersQuery $query): Response
     {
         $user = $request->user();
-        // Robust role detection: isAdmin() method, is_admin field, or role === 'admin'
-        $isAdmin = (method_exists($user, 'isAdmin') && $user->isAdmin())
-            || ($user->is_admin ?? false)
-            || (($user->role ?? null) === 'admin');
+        $isAdmin = $user->isAdmin();
 
         $ownerId = $isAdmin && $request->filled('owner_id')
             ? $request->integer('owner_id')
             : (int)$user->id;
 
-        $groupsQuery = Group::query()->where('user_id', $ownerId);
-        $groups = $groupsQuery->select(['id', 'name'])->orderBy('name')->get();
+        $groups = Group::query()
+            ->where('user_id', $ownerId)
+            ->select(['id', 'name'])
+            ->orderBy('name')
+            ->get();
 
-        $groupId = $request->integer('group_id') ?: null;
-        $perPage = $request->get('per_page', 10);
-        $perPage = $perPage === 'all' ? 100000 : (int)$perPage;
-        $sortBy = $request->get('sort_by', 'email');
-        $sortDir = $request->get('sort_dir', 'asc') === 'desc' ? 'desc' : 'asc';
-
-        $membersQuery = User::query()
-            ->select(['users.id', 'users.name', 'users.email'])
-            ->join('group_user as gu', 'gu.user_id', '=', 'users.id')
-            ->join('groups as g', 'g.id', '=', 'gu.group_id')
-            ->when($groupId, fn(Builder $q) => $q->where('g.id', $groupId))
-            ->where('g.user_id', $ownerId)
-            ->addSelect(['gu.group_id', 'gu.role', 'gu.joined_at'])
-            ->when(
-                in_array($sortBy, ['email', 'name', 'joined_at', 'role'], true),
-                function (Builder $q) use ($sortBy, $sortDir) {
-                    $column = in_array($sortBy, ['email', 'name'], true) ? 'users.' . $sortBy : 'gu.' . $sortBy;
-                    $q->orderBy($column, $sortDir);
-                },
-                fn(Builder $q) => $q->orderBy('users.email', 'asc'),
-            );
-
-        $members = $membersQuery->paginate($perPage)->withQueryString();
+        $members = $query->handle($request, $ownerId);
 
         // List of owners (users with at least one group) – for admin only
         $owners = [];
@@ -67,10 +49,10 @@ class GroupMembersController extends Controller
 
         return Inertia::render('app/blogger/GroupMembers', [
             'filters' => [
-                'group_id' => $groupId,
+                'group_id' => $request->integer('group_id') ?: null,
                 'per_page' => $request->get('per_page', 10),
-                'sort_by' => $sortBy,
-                'sort_dir' => $sortDir,
+                'sort_by' => $request->get('sort_by', 'email'),
+                'sort_dir' => $request->get('sort_dir', 'asc') === 'desc' ? 'desc' : 'asc',
                 'owner_id' => $ownerId,
             ],
             'isAdmin' => $isAdmin,
@@ -80,14 +62,11 @@ class GroupMembersController extends Controller
         ]);
     }
 
-    public function store(Request $request, Group $group): RedirectResponse
+    public function store(StoreGroupMemberRequest $request, Group $group): RedirectResponse
     {
-        $this->authorizeAction($request, $group);
+        $this->authorize('update', $group);
 
-        $validated = $request->validate([
-            'email' => ['required', 'email'],
-            'role' => ['nullable', 'string'],
-        ]);
+        $validated = $request->validated();
 
         $userToAdd = User::where('email', $validated['email'])->first();
         if (!$userToAdd) {
@@ -106,18 +85,9 @@ class GroupMembersController extends Controller
         return back()->with('success', __('Member added'));
     }
 
-    private function authorizeAction(Request $request, Group $group): void
-    {
-        $authUser = $request->user();
-        $isAdmin = (method_exists($authUser, 'isAdmin') ? (bool)$authUser->isAdmin() : false)
-            || (bool)($authUser->is_admin ?? false)
-            || (($authUser->role ?? null) === 'admin');
-        abort_unless($isAdmin || $group->user_id === $authUser->id, 403);
-    }
-
     public function update(Request $request, Group $group, User $user): RedirectResponse
     {
-        $this->authorizeAction($request, $group);
+        $this->authorize('update', $group);
 
         $validated = $request->validate([
             'role' => ['required', 'string'],
@@ -134,7 +104,7 @@ class GroupMembersController extends Controller
 
     public function destroy(Request $request, Group $group, User $user): RedirectResponse
     {
-        $this->authorizeAction($request, $group);
+        $this->authorize('update', $group);
 
         $group->members()->detach($user->id);
 
