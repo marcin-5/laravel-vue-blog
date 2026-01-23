@@ -32,6 +32,8 @@ class GroupController extends Controller
 
         return Inertia::render('app/group/Landing', [
             'group' => $group,
+            'authorName' => $group->user?->name,
+            'authorEmail' => $group->user?->email,
             'posts' => $posts->items(),
             'pagination' => $this->formatPagination($posts),
             'theme' => $group->theme,

@@ -22,6 +22,8 @@ const props = defineProps<{
         content: string | null;
         footer: string | null;
     };
+    authorName: string | null;
+    authorEmail: string | null;
     posts: PostItem[];
     pagination: Pagination;
     theme: any;
@@ -40,6 +42,8 @@ const blogData = computed<Blog>(() => ({
     slug: props.group.slug,
     motto: null,
     theme: props.theme,
+    authorName: props.authorName,
+    authorEmail: props.authorEmail,
 }));
 
 const { t } = useI18n();
