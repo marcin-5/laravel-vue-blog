@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import BlogHeader from '@/components/blog/BlogHeader.vue';
 import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
@@ -10,7 +9,7 @@ import PublicNavbar from '@/components/PublicNavbar.vue';
 import { useBlogTheme } from '@/composables/useBlogTheme';
 import { useSidebarLayout } from '@/composables/useSidebarLayout';
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
-import type { Blog, Navigation, Pagination, PostDetails, PostItem } from '@/types/blog.types';
+import type { Navigation, Pagination, PostDetails, PostItem } from '@/types/blog.types';
 import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -31,15 +30,6 @@ const props = defineProps<{
         unique?: number;
     };
 }>();
-
-// Map group to Blog type for components compatibility
-const blogData = computed<Blog>(() => ({
-    id: props.group.id,
-    name: props.group.name,
-    slug: props.group.slug,
-    motto: null,
-    theme: props.theme,
-}));
 
 // Sidebar layout
 const { hasSidebar, asideStyle, mainStyle, asideOrderClass, mainOrderClass, navbarMaxWidth } = useSidebarLayout({
@@ -74,7 +64,6 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.theme));
             <template v-if="hasSidebar">
                 <!-- Mobile/tablet layout (<xl): no sidebar -->
                 <div class="xl:hidden">
-                    <BlogHeader :blog="blogData" :displayedMotto="null" :viewStats="viewStats" />
                     <PostContent :author="post.author" :content="post.contentHtml" />
                     <PostExtensions :extensions="post.extensions || []" />
                     <BorderDivider class="mt-12 mb-4" />
@@ -87,7 +76,6 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.theme));
                         <BlogPostsList :blogId="group.id" :blogSlug="group.slug" :pagination="pagination" :posts="posts" is-group />
                     </aside>
                     <div :class="['min-w-0 flex-1', mainOrderClass]" :style="mainStyle">
-                        <BlogHeader :blog="blogData" :displayedMotto="null" :viewStats="viewStats" />
                         <PostContent :author="post.author" :content="post.contentHtml" />
                         <PostExtensions :extensions="post.extensions || []" />
                     </div>
@@ -96,7 +84,6 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.theme));
 
             <!-- No sidebar layout -->
             <div v-else>
-                <BlogHeader :blog="blogData" :displayedMotto="null" :viewStats="viewStats" />
                 <PostContent :author="post.author" :content="post.contentHtml" />
                 <PostExtensions :extensions="post.extensions || []" />
                 <BorderDivider class="mt-12 mb-4" />
