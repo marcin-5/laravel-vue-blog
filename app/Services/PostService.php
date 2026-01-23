@@ -7,11 +7,12 @@ use App\Models\Post;
 
 class PostService
 {
-    public function createPost(Blog $blog, array $postData): Post
+    public function createPost(Blog $blog, array $postData, ?int $userId = null): Post
     {
         $post = new Post($postData);
 
         $post->blog_id = $blog->id;
+        $post->user_id = $userId;
 
         // Ensure slug is generated from title
         $post->slug = $post->title;

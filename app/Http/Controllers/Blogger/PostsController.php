@@ -40,7 +40,7 @@ class PostsController extends AuthenticatedController
         $blog = $request->getBlog();
         $postData = $request->getPostData();
 
-        $this->postService->createPost($blog, $postData);
+        $this->postService->createPost($blog, $postData, $request->user()->id);
 
         return back()->with('success', __('blogs.messages.post_created'));
     }

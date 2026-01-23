@@ -32,6 +32,7 @@ class Post extends Model
     protected $fillable = [
         'blog_id',
         'group_id',
+        'user_id',
         'title',
         'slug',
         'excerpt',
@@ -63,6 +64,11 @@ class Post extends Model
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function newsletterLogs(): HasMany

@@ -19,14 +19,17 @@ class PostFactory extends Factory
      * Define the model's default state.
      *
      * @return array<string, mixed>
+     *
      * @throws RandomException
      */
     public function definition(): array
     {
         $title = $this->faker->sentence();
+        $blog = Blog::factory()->create();
 
         return [
-            'blog_id' => Blog::factory(),
+            'blog_id' => $blog->id,
+            'user_id' => $blog->user_id,
             'title' => $title,
             'slug' => Str::slug($title),
             'excerpt' => $this->faker->paragraph(random_int(1, 3)),

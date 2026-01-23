@@ -90,7 +90,7 @@ class GroupController extends Controller
             ->selectRaw("COUNT(DISTINCT ($sql)) as cnt")
             ->value('cnt');
 
-        return (int)$count;
+        return $count;
     }
 
     public function post(Request $request, Group $group, string $postSlug): Response
@@ -112,8 +112,8 @@ class GroupController extends Controller
                 'id' => $post->id,
                 'title' => $post->title,
                 'slug' => $post->slug,
-                'author' => $post->user?->name,
-                'author_email' => $post->user?->email,
+                'author' => $post->user?->name ?? $group->user?->name,
+                'author_email' => $post->user?->email ?? $group->user?->email,
                 'contentHtml' => $post->content_html,
                 'published_at' => $post->published_at?->format('Y-m-d H:i'),
                 'excerpt' => $post->excerpt,

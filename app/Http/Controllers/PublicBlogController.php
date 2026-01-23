@@ -52,10 +52,10 @@ class PublicBlogController extends BasePublicController
 
         $baseUrl = config('app.url');
         $seoData = new SeoData(
-            title: $blog->name.' - '.config('app.name'),
+            title: $blog->name . ' - ' . config('app.name'),
             description: $metaDescription,
-            canonicalUrl: $baseUrl.'/blogs/'.$blog->slug,
-            ogImage: $baseUrl.'/og-image.png',
+            canonicalUrl: $baseUrl . '/blogs/' . $blog->slug,
+            ogImage: $baseUrl . '/og-image.png',
             ogType: 'blog',
             locale: app()->getLocale(),
             structuredData: $this->seo->generateBlogStructuredData(
@@ -69,16 +69,16 @@ class PublicBlogController extends BasePublicController
         return $this->renderWithTranslations('public/blog/Landing', 'blog', [
             'locale' => app()->getLocale(),
             'blog' => new PublicBlogResource($blog)->toArray($request) + [
-                'descriptionHtml' => $descriptionHtml,
-                'authorName' => $blog->user?->name,
-                'authorEmail' => $blog->user?->email,
-            ],
+                    'descriptionHtml' => $descriptionHtml,
+                    'authorName' => $blog->user?->name,
+                    'authorEmail' => $blog->user?->email,
+                ],
             'landingHtml' => $landing?->content_html ?? '',
             'footerHtml' => $this->markdown->convertToHtml($blog->footer),
             'metaDescription' => $metaDescription,
             'posts' => PublicPostResource::collection($paginator->items())->toArray($request),
             'pagination' => $this->formatPagination($paginator),
-            'sidebar' => (int) ($blog->sidebar ?? 0),
+            'sidebar' => (int)($blog->sidebar ?? 0),
             'navigation' => $this->navigation->getLandingNavigation($blog),
             'seo' => $seoData->toArray(),
             'viewStats' => [
@@ -105,7 +105,7 @@ class PublicBlogController extends BasePublicController
     private function getPaginatedPosts(Blog $blog)
     {
         $size = Number::clamp(
-            (int) ($blog->page_size ?? config('blog.default_page_size')),
+            (int)($blog->page_size ?? config('blog.default_page_size')),
             1,
             config('blog.max_page_size'),
         );
@@ -121,7 +121,7 @@ class PublicBlogController extends BasePublicController
      */
     private function formatPagination($paginator): array
     {
-        if (! $paginator) {
+        if (!$paginator) {
             return [];
         }
 
@@ -133,7 +133,7 @@ class PublicBlogController extends BasePublicController
                 return [
                     'url' => $lnk['url'] ?? null,
                     'label' => $lnk['label'] ?? '',
-                    'active' => (bool) ($lnk['active'] ?? false),
+                    'active' => (bool)($lnk['active'] ?? false),
                 ];
             }, $links),
             'prevUrl' => $paginator->previousPageUrl(),
@@ -162,7 +162,7 @@ class PublicBlogController extends BasePublicController
             ->selectRaw("COUNT(DISTINCT ($sql)) as cnt")
             ->value('cnt');
 
-        return (int) $count;
+        return (int)$count;
     }
 
     /**
@@ -184,10 +184,10 @@ class PublicBlogController extends BasePublicController
 
         $baseUrl = config('app.url');
         $seoData = new SeoData(
-            title: $post->title.' - '.$blog->name,
+            title: $post->title . ' - ' . $blog->name,
             description: $metaDescription,
-            canonicalUrl: $baseUrl.'/blogs/'.$blog->slug.'/'.$post->slug,
-            ogImage: $baseUrl.'/og-image.png',
+            canonicalUrl: $baseUrl . '/blogs/' . $blog->slug . '/' . $post->slug,
+            ogImage: $baseUrl . '/og-image.png',
             ogType: 'article',
             locale: app()->getLocale(),
             structuredData: $this->seo->generatePostStructuredData($blog, $post, $baseUrl, $metaDescription),
@@ -202,8 +202,8 @@ class PublicBlogController extends BasePublicController
                 'id' => $post->id,
                 'title' => $post->title,
                 'slug' => $post->slug,
-                'author' => $blog->user->name,
-                'author_email' => $blog->user->email,
+                'author' => $post->user?->name ?? $blog->user->name,
+                'author_email' => $post->user?->email ?? $blog->user->email,
                 'contentHtml' => $post->content_html,
                 'published_at' => $this->formatDateForLocale($post->published_at),
                 'excerpt' => $post->excerpt,
@@ -211,7 +211,7 @@ class PublicBlogController extends BasePublicController
                     ->where('is_published', true)
                     ->oldest()
                     ->get()
-                    ->map(fn ($ext) => [
+                    ->map(fn($ext) => [
                         'id' => $ext->id,
                         'title' => $ext->title,
                         'contentHtml' => $ext->content_html,
@@ -220,7 +220,7 @@ class PublicBlogController extends BasePublicController
             'posts' => PublicPostResource::collection($paginator->items())->toArray($request),
             'pagination' => $this->formatPagination($paginator),
             'sidebarPosition' => $this->getSidebarPosition($blog),
-            'sidebar' => (int) ($blog->sidebar ?? 0),
+            'sidebar' => (int)($blog->sidebar ?? 0),
             'navigation' => $this->navigation->getPostNavigation($blog, $post),
             'seo' => $seoData->toArray(),
             'viewStats' => [
