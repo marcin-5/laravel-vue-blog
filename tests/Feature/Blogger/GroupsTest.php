@@ -15,7 +15,7 @@ class GroupsTest extends TestCase
     {
         $user = User::factory()->create(['role' => 'blogger']);
 
-        $response = $this->actingAs($user)->post(route('groups.store'), [
+        $response = $this->actingAs($user)->post(route('blogger.groups.content.store'), [
             'name' => 'A-Team',
             'content' => 'This is a team',
             'footer' => 'This is the footer',
@@ -26,7 +26,7 @@ class GroupsTest extends TestCase
             'theme' => ['light' => [], 'dark' => []],
         ]);
 
-        $response->assertRedirect(route('groups.index'));
+        $response->assertRedirect(route('blogger.groups.content.index'));
         $this->assertDatabaseHas('groups', [
             'name' => 'A-Team',
             'slug' => 'a-team',
@@ -42,7 +42,7 @@ class GroupsTest extends TestCase
             'slug' => 'old-name'
         ]);
 
-        $response = $this->actingAs($user)->put(route('groups.update', $group), [
+        $response = $this->actingAs($user)->put(route('blogger.groups.content.update', $group), [
             'name' => 'New Name',
             'content' => 'Updated content',
             'footer' => 'Updated footer',

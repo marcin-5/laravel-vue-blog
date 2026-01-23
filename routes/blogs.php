@@ -20,6 +20,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'index' => 'blogger.groups.content.index',
             'store' => 'blogger.groups.content.store',
             'update' => 'blogger.groups.content.update',
+        ])
+        ->parameters([
+            'content' => 'group',
         ]);
 
     // Groups - membership management

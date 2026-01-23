@@ -45,7 +45,7 @@ class GroupsController extends AuthenticatedController
         $groupData = $request->getGroupData();
         $this->groupService->createGroup($groupData);
 
-        return redirect()->route('groups.index')->with('success', __('groups.messages.group_created'));
+        return redirect()->route('blogger.groups.content.index')->with('success', __('groups.messages.group_created'));
     }
 
     /**
