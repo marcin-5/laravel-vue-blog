@@ -65,6 +65,8 @@
             "author": "Author:",
             "published": "Published:",
             "updated": "Updated:",
+            "views": "Views:",
+            "unique_views": "unique:",
             "lock_extension": "Lock",
             "unlock_extension": "Unlock"
         }

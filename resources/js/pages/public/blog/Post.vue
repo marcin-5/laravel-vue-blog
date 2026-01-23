@@ -74,8 +74,10 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
                 <div class="my-2 inline-flex items-center gap-x-5 text-sm font-medium text-muted-foreground">
                     <p v-if="post.published_at" class="italic">{{ publishedLabel }} {{ post.published_at }}</p>
                     <span>
-                        Odsłony: {{ viewStats.total.toLocaleString() }}
-                        <template v-if="viewStats.unique !== undefined"> (unikalne: {{ Number(viewStats.unique).toLocaleString() }}) </template>
+                        {{ t('blog.post.views') }} {{ viewStats.total.toLocaleString() }}
+                        <template v-if="viewStats.unique !== undefined">
+                            ({{ t('blog.post.unique_views') }} {{ Number(viewStats.unique).toLocaleString() }})
+                        </template>
                     </span>
                 </div>
                 <p v-if="showUpdated" class="-mt-1 mb-2 text-xs text-muted-foreground italic">{{ updatedLabel }} {{ formattedUpdatedDate }}</p>
