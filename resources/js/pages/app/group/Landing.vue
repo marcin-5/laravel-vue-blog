@@ -12,6 +12,7 @@ import type { Blog, Navigation, Pagination, PostItem } from '@/types/blog.types'
 import { hasContent } from '@/utils/stringUtils';
 import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
     group: {
@@ -41,9 +42,13 @@ const blogData = computed<Blog>(() => ({
     theme: props.theme,
 }));
 
+const { t } = useI18n();
+
 // Content availability checks
 const hasLandingContent = computed(() => hasContent(props.group.content));
 const hasFooterContent = computed(() => hasContent(props.group.footer));
+
+const postsListTitle = computed(() => t('blog.posts_list.title'));
 
 // Sidebar layout calculations
 const {
@@ -89,6 +94,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.theme));
                     :class="{ 'mt-6': hasLandingContent }"
                     :pagination="pagination"
                     :posts="posts"
+                    :title="postsListTitle"
                     is-group
                 />
             </template>
@@ -108,6 +114,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.theme));
                         :class="{ 'mt-6': hasLandingContent }"
                         :pagination="pagination"
                         :posts="posts"
+                        :title="postsListTitle"
                         is-group
                     />
                 </div>
@@ -115,7 +122,14 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.theme));
                 <!-- Desktop layout (xl+): with sidebar -->
                 <div class="hidden items-start gap-8 xl:flex">
                     <aside :class="asideOrderClass" :style="asideStyle">
-                        <BlogPostsList :blogId="group.id" :blogSlug="group.slug" :pagination="pagination" :posts="posts" is-group />
+                        <BlogPostsList
+                            :blogId="group.id"
+                            :blogSlug="group.slug"
+                            :pagination="pagination"
+                            :posts="posts"
+                            :title="postsListTitle"
+                            is-group
+                        />
                     </aside>
                     <main :class="['min-w-0 flex-1', mainOrderClass]" :style="mainStyle">
                         <BlogHeader :blog="blogData" :displayedMotto="null" :viewStats="viewStats" />

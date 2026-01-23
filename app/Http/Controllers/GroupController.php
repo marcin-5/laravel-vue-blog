@@ -43,7 +43,7 @@ class GroupController extends Controller
             ],
             'translations' => [
                 'locale' => app()->getLocale(),
-                'messages' => $this->translations->getPageTranslations('landing'),
+                'messages' => $this->translations->getPageTranslations('blog'),
             ],
         ]);
     }

@@ -5,6 +5,7 @@ import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import PostContent from '@/components/blog/PostContent.vue';
 import PostExtensions from '@/components/blog/PostExtensions.vue';
+import ViewStats from '@/components/blog/ViewStats.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import { useBlogTheme } from '@/composables/useBlogTheme';
 import { useSidebarLayout } from '@/composables/useSidebarLayout';
@@ -35,8 +36,8 @@ const props = defineProps<{
 const { t } = useI18n();
 
 // Internationalization
-const authorLabel = computed(() => t('blog.post.author', ''));
-const publishedLabel = computed(() => t('blog.post.published', 'Published:'));
+const authorLabel = computed(() => t('blog.post.author'));
+const publishedLabel = computed(() => t('blog.post.published'));
 
 // Map group to Blog type for components compatibility
 const blogData = computed<Blog>(() => ({
@@ -75,10 +76,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.theme));
                 <h1 class="font-[inherit] text-[1em] leading-tight font-bold text-foreground">{{ post.title }}</h1>
                 <div class="my-2 inline-flex items-center gap-x-5 text-sm font-medium text-muted-foreground">
                     <p v-if="post.published_at" class="italic">{{ publishedLabel }} {{ post.published_at }}</p>
-                    <span>
-                        Odsłony: {{ viewStats.total.toLocaleString() }}
-                        <template v-if="viewStats.unique !== undefined"> (unikalne: {{ Number(viewStats.unique).toLocaleString() }}) </template>
-                    </span>
+                    <ViewStats :total="viewStats.total" :unique="viewStats.unique" />
                 </div>
                 <p
                     v-if="post.author"
