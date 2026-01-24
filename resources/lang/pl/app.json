@@ -1,30 +1,4 @@
 {
-    "common": {
-        "nav": {
-            "dashboard": "Panel",
-            "users": "Użytkownicy",
-            "categories": "Kategorie",
-            "statistics": "Statystyki",
-            "blogs": "Zarządzaj blogami"
-        },
-        "group": "Grupa",
-        "all": "Wszyscy",
-        "all_groups": "Wszystkie",
-        "all_per_page": "Wszyscy",
-        "per_page": "Na stronę",
-        "sort_by": "Sortuj wg",
-        "username": "Nazwa użytkownika",
-        "joined_at": "Dołączono",
-        "role": "Rola",
-        "direction": "Kierunek",
-        "asc": "Rosnąco",
-        "desc": "Malejąco",
-        "owner": "Właściciel",
-        "email": "E-mail",
-        "add": "Dodaj",
-        "remove": "Usuń",
-        "no_results": "Brak wyników"
-    },
     "pagination": {
         "previous": "Poprzednia",
         "next": "Następna"
