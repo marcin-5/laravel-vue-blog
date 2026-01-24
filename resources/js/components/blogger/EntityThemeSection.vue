@@ -18,12 +18,24 @@ const emit = defineEmits<{
     (e: 'update:modelValue', value: BlogTheme): void;
 }>();
 
-const theme = computed({
-    get: () => ({
-        light: props.modelValue?.light ?? {},
-        dark: props.modelValue?.dark ?? {},
-    }),
-    set: (val) => emit('update:modelValue', val),
+const themeLight = computed({
+    get: () => props.modelValue?.light ?? {},
+    set: (value) => {
+        emit('update:modelValue', {
+            ...(props.modelValue ?? {}),
+            light: value,
+        });
+    },
+});
+
+const themeDark = computed({
+    get: () => props.modelValue?.dark ?? {},
+    set: (value) => {
+        emit('update:modelValue', {
+            ...(props.modelValue ?? {}),
+            dark: value,
+        });
+    },
 });
 
 function filterErrorsByPrefix(errors: Record<string, string>, prefix: string): Record<string, string> {
@@ -48,14 +60,14 @@ const themeDarkErrors = computed(() => filterErrorsByPrefix(props.errors, 'theme
         </p>
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <FormThemeSection
-                v-model:colors="theme.light"
+                v-model:colors="themeLight"
                 :errors="themeLightErrors"
                 :id-prefix="`${idPrefix}-theme-light`"
                 :title="translations.section.light"
                 :translations="translations.theme"
             />
             <FormThemeSection
-                v-model:colors="theme.dark"
+                v-model:colors="themeDark"
                 :errors="themeDarkErrors"
                 :id-prefix="`${idPrefix}-theme-dark`"
                 :title="translations.section.dark"
