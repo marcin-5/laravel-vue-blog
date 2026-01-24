@@ -58,7 +58,7 @@ function handleSubmit() {
 
 function handleApply() {
     if (!props.group?.id) return;
-    form.patch(route('groups.update', props.group.id), {
+    form.patch(route('blogger.groups.content.update', props.group.id), {
         preserveScroll: true,
         preserveState: true,
     });

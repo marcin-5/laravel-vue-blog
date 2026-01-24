@@ -22,7 +22,7 @@ export function useGroupForm() {
     }
 
     function submitCreate() {
-        createForm.post(route('groups.store'), {
+        createForm.post(route('blogger.groups.content.store'), {
             onSuccess: () => {
                 closeCreateForm();
             },
@@ -46,7 +46,7 @@ export function useGroupForm() {
     }
 
     function submitEdit(group: Group) {
-        editForm.patch(route('groups.update', group.id), {
+        editForm.patch(route('blogger.groups.content.update', group.id), {
             preserveScroll: true,
             onSuccess: () => {
                 editingId.value = null;
