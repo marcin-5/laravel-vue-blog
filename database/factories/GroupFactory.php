@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Group;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -22,19 +21,19 @@ class GroupFactory extends Factory
         $name = $this->faker->words(3, true);
         $hasFooter = $this->faker->boolean();
 
-        $markdownContent = "## " . $this->faker->sentence() . "\n\n" .
+        $markdownContent = '## ' . $this->faker->sentence() . "\n\n" .
             $this->faker->paragraphs(2, true) . "\n\n" .
             "```php\n" .
             "echo 'Hello World';\n" .
             "```\n\n" .
-            "- " . $this->faker->word() . "\n" .
-            "- " . $this->faker->word();
+            '- ' . $this->faker->word() . "\n" .
+            '- ' . $this->faker->word();
 
-        $markdownFooter = $hasFooter ? "### Footer" . $this->faker->sentence() . " [Link](" . $this->faker->url(
-            ) . ")" : null;
+        $markdownFooter = $hasFooter ? '### Footer' . $this->faker->sentence() . ' [Link](' . $this->faker->url(
+            ) . ')' : null;
 
         return [
-            'user_id' => User::factory(),
+            'user_id' => null,
             'name' => $name,
             'slug' => Str::slug($name),
             'content' => $markdownContent,

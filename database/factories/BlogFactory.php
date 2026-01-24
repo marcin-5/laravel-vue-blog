@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Blog;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 use Random\RandomException;
@@ -19,6 +18,7 @@ class BlogFactory extends Factory
      * Define the model's default state.
      *
      * @return array<string, mixed>
+     *
      * @throws RandomException
      */
     public function definition(): array
@@ -26,7 +26,7 @@ class BlogFactory extends Factory
         $name = $this->faker->unique()->sentence(3);
 
         return [
-            'user_id' => User::factory(),
+            'user_id' => null,
             'name' => $name,
             'slug' => Str::slug($name) . '-' . Str::random(6),
             'description' => $this->faker->paragraph(random_int(1, 5)),
