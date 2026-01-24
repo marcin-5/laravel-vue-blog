@@ -1,14 +1,14 @@
 <script lang="ts" setup>
 import BlogFooter from '@/components/blog/BlogFooter.vue';
-import BlogHeader from '@/components/blog/BlogHeader.vue';
 import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
+import PostHeader from '@/components/blog/PostHeader.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import { useBlogTheme } from '@/composables/useBlogTheme';
 import { useSidebarLayout } from '@/composables/useSidebarLayout';
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
-import type { Blog, Navigation, Pagination, PostItem } from '@/types/blog.types';
+import type { Navigation, Pagination, PostDetails, PostItem } from '@/types/blog.types';
 import { hasContent } from '@/utils/stringUtils';
 import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -21,6 +21,8 @@ const props = defineProps<{
         slug: string;
         content: string | null;
         footer: string | null;
+        created_at: string | null;
+        updated_at: string | null;
     };
     authorName: string | null;
     authorEmail: string | null;
@@ -33,17 +35,19 @@ const props = defineProps<{
         total: number;
         unique?: number;
     };
+    translations: {
+        locale: string;
+    };
 }>();
 
-// Map group to Blog type for components compatibility
-const blogData = computed<Blog>(() => ({
+const groupAsPost = computed<PostDetails>(() => ({
     id: props.group.id,
-    name: props.group.name,
+    title: props.group.name,
     slug: props.group.slug,
-    motto: null,
-    theme: props.theme,
-    authorName: props.authorName,
-    authorEmail: props.authorEmail,
+    author: props.authorName || '',
+    author_email: props.authorEmail,
+    contentHtml: props.group.content || '',
+    published_at: props.group.created_at,
 }));
 
 const { t } = useI18n();
@@ -86,7 +90,13 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.theme));
 
             <!-- Layout without sidebar -->
             <template v-if="!hasSidebarLayout">
-                <BlogHeader :blog="blogData" :displayedMotto="null" :viewStats="viewStats" />
+                <PostHeader
+                    :locale="translations.locale"
+                    :modifiedTime="group.updated_at"
+                    :post="groupAsPost"
+                    :publishedTime="group.created_at"
+                    :viewStats="viewStats"
+                />
                 <BorderDivider class="mb-8" />
                 <main v-if="hasLandingContent" class="min-w-0 flex-1">
                     <div class="prose max-w-none" v-html="group.content" />
@@ -107,7 +117,13 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.theme));
             <template v-else>
                 <!-- Mobile/tablet layout (<xl): no sidebar -->
                 <div class="xl:hidden">
-                    <BlogHeader :blog="blogData" :displayedMotto="null" :viewStats="viewStats" />
+                    <PostHeader
+                        :locale="translations.locale"
+                        :modifiedTime="group.updated_at"
+                        :post="groupAsPost"
+                        :publishedTime="group.created_at"
+                        :viewStats="viewStats"
+                    />
                     <BorderDivider class="mb-8" />
                     <main v-if="hasLandingContent" class="min-w-0 flex-1">
                         <div class="prose max-w-none" v-html="group.content" />
@@ -136,7 +152,13 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.theme));
                         />
                     </aside>
                     <main :class="['min-w-0 flex-1', mainOrderClass]" :style="mainStyle">
-                        <BlogHeader :blog="blogData" :displayedMotto="null" :viewStats="viewStats" />
+                        <PostHeader
+                            :locale="translations.locale"
+                            :modifiedTime="group.updated_at"
+                            :post="groupAsPost"
+                            :publishedTime="group.created_at"
+                            :viewStats="viewStats"
+                        />
                         <div v-if="hasLandingContent" class="prose max-w-none" v-html="group.content" />
                     </main>
                 </div>

@@ -31,7 +31,15 @@ class GroupController extends Controller
             ->paginate($group->page_size ?? 15);
 
         return Inertia::render('app/group/Landing', [
-            'group' => $group,
+            'group' => [
+                'id' => $group->id,
+                'name' => $group->name,
+                'slug' => $group->slug,
+                'content' => $group->content,
+                'footer' => $group->footer,
+                'created_at' => $group->created_at?->format('Y-m-d H:i'),
+                'updated_at' => $group->updated_at?->format('Y-m-d H:i'),
+            ],
             'authorName' => $group->user?->name,
             'authorEmail' => $group->user?->email,
             'posts' => $posts->items(),
