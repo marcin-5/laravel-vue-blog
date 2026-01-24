@@ -28,8 +28,8 @@ class DevelopmentSeeder extends Seeder
             ]);
 
         $bloggers->each(function (User $blogger) use ($categories) {
-            // 1-3 Blogs per Blogger
-            $blogs = Blog::factory(random_int(1, 3))->create([
+            // 0-3 Blogs per Blogger
+            $blogs = Blog::factory(random_int(0, 3))->create([
                 'user_id' => $blogger->id,
             ]);
 
@@ -58,8 +58,8 @@ class DevelopmentSeeder extends Seeder
         // Owners pool for groups (bloggers and admins)
         $potentialOwners = $bloggers->merge(User::where('role', User::ROLE_ADMIN)->get());
 
-        // Create 3-5 Groups
-        Group::factory(random_int(5, 7))
+        // Create 5 Groups
+        Group::factory(5)
             ->create([
                 'user_id' => fn() => $potentialOwners->random()->id,
             ])
@@ -79,11 +79,11 @@ class DevelopmentSeeder extends Seeder
                     ]);
                 }
 
-                // 1-10 posts for the group
+                // 2-5 posts for the group
                 // If owner has a blog, we use their first blog_id
                 $blogId = $owner->role === User::ROLE_BLOGGER ? $owner->blogs()->first()?->id : null;
 
-                Post::factory(random_int(1, 10))->create([
+                Post::factory(random_int(2, 5))->create([
                     'group_id' => $group->id,
                     'blog_id' => $blogId,
                     'is_published' => true,
