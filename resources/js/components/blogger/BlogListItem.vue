@@ -3,7 +3,14 @@ import BlogForm from '@/components/blogger/BlogForm.vue';
 import BloggerListItem from '@/components/blogger/BloggerListItem.vue';
 import ItemActionGroup from '@/components/blogger/ItemActionGroup.vue';
 import PostForm from '@/components/blogger/PostForm.vue';
-import type { AdminBlog as Blog, AdminPostItem as PostItem, Category, ListItemEmits, ListItemProps } from '@/types/blog.types';
+import type {
+    AdminBlog as Blog,
+    AdminPostItem as PostItem,
+    Category,
+    ListItemEmits,
+    ListItemProps
+} from '@/types/blog.types';
+import { localizedName } from '@/utils/localization';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 
