@@ -9,7 +9,6 @@ import { useBlogTheme } from '@/composables/useBlogTheme';
 import { useSidebarLayout } from '@/composables/useSidebarLayout';
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { Navigation, Pagination, PostDetails, PostItem } from '@/types/blog.types';
-import { hasContent } from '@/utils/stringUtils';
 import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -53,8 +52,8 @@ const groupAsPost = computed<PostDetails>(() => ({
 const { t } = useI18n();
 
 // Content availability checks
-const hasLandingContent = computed(() => hasContent(props.group.content));
-const hasFooterContent = computed(() => hasContent(props.group.footer));
+const hasLandingContent = computed(() => !!props.group.content);
+const hasFooterContent = computed(() => !!props.group.footer);
 
 const postsListTitle = computed(() => t('blog.posts_list.title'));
 

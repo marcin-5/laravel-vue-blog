@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasMarkdownContent;
 use App\Viewable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,7 @@ use Illuminate\Support\Str;
 class Group extends Model
 {
     use HasFactory;
+    use HasMarkdownContent;
     use Viewable;
 
     protected $fillable = [
@@ -27,6 +29,7 @@ class Group extends Model
         'is_published',
         'locale',
     ];
+
     protected $casts = [
         'is_published' => 'boolean',
         'sidebar' => 'integer',
