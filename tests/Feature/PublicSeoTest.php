@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Blog;
 use App\Models\Post;
 
 use function Pest\Laravel\get;
@@ -42,7 +41,7 @@ test('contact page has single meta description without inertia', function () {
 });
 
 test('public blog landing page has single meta description without inertia', function () {
-    $blog = Blog::factory()->create([
+    $blog = createBlog([
         'is_published' => true,
     ]);
 
@@ -56,7 +55,7 @@ test('public blog landing page has single meta description without inertia', fun
 });
 
 test('public blog post page has single meta description without inertia', function () {
-    $blog = Blog::factory()->create([
+    $blog = createBlog([
         'is_published' => true,
     ]);
 

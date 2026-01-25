@@ -1,16 +1,13 @@
 <?php
 
-use App\Models\Blog;
 use App\Models\Post;
-use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 it('displays public posts in landing page', function () {
-    $blog = Blog::factory()->create(['is_published' => true]);
-    $post = Post::factory()->create([
-        'blog_id' => $blog->id,
+    $blog = createBlog(['is_published' => true]);
+    $post = createPost($blog, [
         'visibility' => Post::VIS_PUBLIC,
         'published_at' => now()->subDay(),
     ]);
@@ -21,9 +18,8 @@ it('displays public posts in landing page', function () {
 });
 
 it('does not display unlisted posts in landing page', function () {
-    $blog = Blog::factory()->create(['is_published' => true]);
-    $unlistedPost = Post::factory()->create([
-        'blog_id' => $blog->id,
+    $blog = createBlog(['is_published' => true]);
+    $unlistedPost = createPost($blog, [
         'visibility' => Post::VIS_UNLISTED,
         'published_at' => now()->subDay(),
     ]);
@@ -34,9 +30,8 @@ it('does not display unlisted posts in landing page', function () {
 });
 
 it('allows viewing unlisted post via direct link', function () {
-    $blog = Blog::factory()->create(['is_published' => true]);
-    $unlistedPost = Post::factory()->create([
-        'blog_id' => $blog->id,
+    $blog = createBlog(['is_published' => true]);
+    $unlistedPost = createPost($blog, [
         'visibility' => Post::VIS_UNLISTED,
         'published_at' => now()->subDay(),
     ]);
@@ -47,10 +42,10 @@ it('allows viewing unlisted post via direct link', function () {
 });
 
 it('allows blogger to save post as unlisted', function () {
-    $user = User::factory()->create([
+    $user = createUser([
         'email_verified_at' => now(),
     ]);
-    $blog = Blog::factory()->create(['user_id' => $user->id]);
+    $blog = createBlog([], $user);
 
     actingAs($user)
         ->post(route('posts.store'), [
