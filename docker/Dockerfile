@@ -71,7 +71,9 @@ FROM base AS production
 COPY . .
 
 # Install production PHP dependencies
-RUN mkdir -p bootstrap/cache && chmod -R 775 bootstrap/cache && chown -R www-data:www-data bootstrap/cache
+RUN mkdir -p storage/app/public storage/framework/cache storage/framework/sessions storage/framework/testing storage/framework/views storage/logs bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Copy built assets from node builder
@@ -86,8 +88,7 @@ RUN mkdir -p /opt/built/public/build /opt/built/public/img /opt/built/bootstrap/
     && cp -a /var/www/html/bootstrap/ssr/. /opt/built/bootstrap/ssr/ \
     && cp /var/www/html/public/*.ico /var/www/html/public/*.png /var/www/html/public/*.svg /var/www/html/public/*.xml /var/www/html/public/*.html /var/www/html/public/index.php /var/www/html/public/.htaccess /opt/built/public/ 2>/dev/null || true \
     && chown -R www-data:www-data /var/www/html \
-    && chmod -R 775 /var/www/html/storage \
-    && chmod -R 775 /var/www/html/bootstrap/cache
+    && chmod -R 775 storage bootstrap/cache
 
 # Copy production configurations
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
@@ -120,7 +121,9 @@ COPY --from=node-builder /app/public/build ./public/build
 COPY --from=node-builder /app/bootstrap/ssr ./bootstrap/ssr
 
 # Install all PHP dependencies, including dev
-RUN mkdir -p bootstrap/cache && chmod -R 775 bootstrap/cache && chown -R www-data:www-data bootstrap/cache
+RUN mkdir -p storage/app/public storage/framework/cache storage/framework/sessions storage/framework/testing storage/framework/views storage/logs bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache
 RUN composer install --no-interaction
 
 # Set up fish plugins and configuration for development
@@ -144,8 +147,7 @@ RUN mkdir -p /opt/built/public/build /opt/built/public/img /opt/built/bootstrap/
     && cp -a /var/www/html/bootstrap/ssr/. /opt/built/bootstrap/ssr/ \
     && cp /var/www/html/public/*.ico /var/www/html/public/*.png /var/www/html/public/*.svg /var/www/html/public/*.xml /var/www/html/public/*.html /var/www/html/public/index.php /var/www/html/public/.htaccess /opt/built/public/ 2>/dev/null || true \
     && chown -R www-data:www-data /var/www/html \
-    && chmod -R 775 /var/www/html/storage \
-    && chmod -R 775 /var/www/html/bootstrap/cache
+    && chmod -R 775 storage bootstrap/cache
 
 # You can have separate php.ini for development (e.g., with Xdebug enabled)
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
