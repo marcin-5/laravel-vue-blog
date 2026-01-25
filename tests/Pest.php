@@ -1,5 +1,10 @@
 <?php
 
+use App\Models\Blog;
+use App\Models\NewsletterSubscription;
+use App\Models\Post;
+use App\Models\User;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -41,7 +46,31 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function createUser(array $attributes = []): User
 {
-    // ..
+    return User::factory()->create($attributes);
+}
+
+function createBlog(array $attributes = [], ?User $user = null): Blog
+{
+    if (!array_key_exists('user_id', $attributes)) {
+        $user = $user ?: User::factory()->create();
+        $attributes['user_id'] = $user->id;
+    }
+
+    return Blog::factory()->create($attributes);
+}
+
+function createSubscription(Blog $blog, array $attributes = []): NewsletterSubscription
+{
+    return NewsletterSubscription::factory()->create(array_merge([
+        'blog_id' => $blog->id,
+    ], $attributes));
+}
+
+function createPost(Blog $blog, array $attributes = []): Post
+{
+    return Post::factory()->create(array_merge([
+        'blog_id' => $blog->id,
+    ], $attributes));
 }
