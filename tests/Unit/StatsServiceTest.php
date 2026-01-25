@@ -152,7 +152,7 @@ it('aggregates post views with blogger, blog, range and sorting', function () {
     Carbon::setTestNow('2025-01-15 12:00:00');
 
     [$owner, $blog] = createBlogWithOwner();
-    $otherBlog = Blog::factory()->create();
+    $otherBlog = Blog::factory()->for(User::factory(), 'user')->create();
 
     $post1 = Post::factory()->create(['blog_id' => $blog->id, 'title' => 'A Post']);
     $post2 = Post::factory()->create(['blog_id' => $blog->id, 'title' => 'B Post']);
