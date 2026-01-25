@@ -4,29 +4,31 @@ namespace App\Http\Controllers;
 
 use App\DataTransferObjects\SeoData;
 use App\Http\Controllers\Concerns\FormatsDatesForLocale;
+use App\Http\Controllers\Concerns\FormatsPaginator;
 use App\Http\Resources\PublicBlogResource;
 use App\Http\Resources\PublicPostResource;
 use App\Models\Blog;
 use App\Models\LandingPage;
-use App\Models\PageView;
 use App\Models\Post;
+use App\Queries\Public\PublicBlogPostsQuery;
 use App\Services\BlogNavigationService;
 use App\Services\MarkdownService;
 use App\Services\SeoService;
+use App\Services\StatsService;
 use App\Services\TranslationService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Inertia\Response;
-use Number;
 
 class PublicBlogController extends BasePublicController
 {
-    use FormatsDatesForLocale;
+    use FormatsDatesForLocale, FormatsPaginator;
 
     public function __construct(
         private readonly MarkdownService $markdown,
         private readonly SeoService $seo,
         private readonly BlogNavigationService $navigation,
+        private readonly StatsService $stats,
         protected TranslationService $translations,
     ) {
         parent::__construct($translations);
@@ -36,12 +38,12 @@ class PublicBlogController extends BasePublicController
      * Show the public landing page for a blog by slug.
      * Route: /{blog:slug}
      */
-    public function landing(Request $request, Blog $blog): Response
+    public function landing(Request $request, Blog $blog, PublicBlogPostsQuery $query): Response
     {
         $this->ensureBlogIsPublic($blog);
 
         $landing = $blog->landingPage;
-        $paginator = $this->getPaginatedPosts($blog);
+        $paginator = $query->handle($blog);
 
         // Remove strip markers from the description
         $descriptionHtml = str_replace('-!-', '', $this->markdown->convertToHtml($blog->description));
@@ -84,7 +86,7 @@ class PublicBlogController extends BasePublicController
             'viewStats' => [
                 'total' => $blog->view_count,
                 'unique' => auth()->check() && auth()->user()->isAdmin()
-                    ? $this->countUniqueViews((new Blog)->getMorphClass(), $blog->id)
+                    ? $this->stats->countUniqueViews((new Blog)->getMorphClass(), $blog->id)
                     : null,
             ],
         ]);
@@ -100,78 +102,12 @@ class PublicBlogController extends BasePublicController
     }
 
     /**
-     * Get published, public posts for a blog.
-     */
-    private function getPaginatedPosts(Blog $blog)
-    {
-        $size = Number::clamp(
-            (int)($blog->page_size ?? config('blog.default_page_size')),
-            1,
-            config('blog.max_page_size'),
-        );
-
-        return $blog->posts()
-            ->forPublicListing()
-            ->paginate($size)
-            ->withQueryString();
-    }
-
-    /**
-     * Format Laravel LengthAwarePaginator into a simple structure for the front-end.
-     */
-    private function formatPagination($paginator): array
-    {
-        if (!$paginator) {
-            return [];
-        }
-
-        // Use the built-in pagination links array, but also expose prev/next urls
-        $links = $paginator->linkCollection()->toArray();
-
-        return [
-            'links' => array_map(function ($lnk) {
-                return [
-                    'url' => $lnk['url'] ?? null,
-                    'label' => $lnk['label'] ?? '',
-                    'active' => (bool)($lnk['active'] ?? false),
-                ];
-            }, $links),
-            'prevUrl' => $paginator->previousPageUrl(),
-            'nextUrl' => $paginator->nextPageUrl(),
-        ];
-    }
-
-    private function countUniqueViews(string $morphClass, int $id): int
-    {
-        // Build CASE expression identical to StatsService::uniqueViewerKeySql()
-        $table = 'page_views';
-        $sql = "(
-            CASE
-              WHEN {$table}.user_id IS NOT NULL THEN CONCAT('U:', {$table}.user_id)
-              WHEN {$table}.visitor_id IS NOT NULL AND {$table}.visitor_id <> '' THEN CONCAT('V:', {$table}.visitor_id)
-              WHEN {$table}.fingerprint IS NOT NULL AND {$table}.fingerprint <> '' THEN CONCAT('F:', {$table}.fingerprint)
-              WHEN {$table}.session_id IS NOT NULL AND {$table}.session_id <> '' THEN CONCAT('S:', {$table}.session_id)
-              ELSE CONCAT('I:', COALESCE({$table}.ip_address, ''))
-            END
-        )";
-
-        /** @var int $count */
-        $count = PageView::query()
-            ->where('viewable_type', $morphClass)
-            ->where('viewable_id', $id)
-            ->selectRaw("COUNT(DISTINCT ($sql)) as cnt")
-            ->value('cnt');
-
-        return (int)$count;
-    }
-
-    /**
      * Show a single post by slug for a blog by slug.
      * Route: /{blog:slug}/{post:slug}
      *
      * @throws ModelNotFoundException
      */
-    public function post(Request $request, Blog $blog, string $postSlug): Response
+    public function post(Request $request, Blog $blog, string $postSlug, PublicBlogPostsQuery $query): Response
     {
         $this->ensureBlogIsPublic($blog);
 
@@ -179,7 +115,7 @@ class PublicBlogController extends BasePublicController
             ->findBySlugForPublic($postSlug)
             ->firstOrFail();
 
-        $paginator = $this->getPaginatedPosts($blog);
+        $paginator = $query->handle($blog);
         $metaDescription = $post->excerpt ?: $this->seo->generateMetaDescription($post->content_html);
 
         $baseUrl = config('app.url');
@@ -225,7 +161,7 @@ class PublicBlogController extends BasePublicController
             'seo' => $seoData->toArray(),
             'viewStats' => [
                 'total' => $post->view_count,
-                'unique' => $this->countUniqueViews((new Post)->getMorphClass(), $post->id),
+                'unique' => $this->stats->countUniqueViews((new Post)->getMorphClass(), $post->id),
             ],
         ]);
     }

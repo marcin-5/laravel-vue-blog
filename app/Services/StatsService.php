@@ -154,6 +154,20 @@ class StatsService
         }
     }
 
+    public function countUniqueViews(string $morphClass, int $id): int
+    {
+        $uniqueViewerKeySql = $this->uniqueViewerKeySql('page_views');
+
+        /** @var int $count */
+        $count = PageView::query()
+            ->where('viewable_type', $morphClass)
+            ->where('viewable_id', $id)
+            ->selectRaw("COUNT(DISTINCT ($uniqueViewerKeySql)) as cnt")
+            ->value('cnt');
+
+        return (int)$count;
+    }
+
     /**
      * Returns aggregated views for posts within a blog and period.
      *

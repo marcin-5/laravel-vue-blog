@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\FormatsPaginator;
 use App\Models\Group;
-use App\Models\PageView;
 use App\Models\Post;
+use App\Queries\App\GroupPostsQuery;
 use App\Services\BlogNavigationService;
+use App\Services\StatsService;
 use App\Services\TranslationService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -14,21 +16,20 @@ use Inertia\Response;
 
 class GroupController extends Controller
 {
-    use AuthorizesRequests;
+    use AuthorizesRequests, FormatsPaginator;
 
     public function __construct(
         private readonly BlogNavigationService $navigation,
         private readonly TranslationService $translations,
+        private readonly StatsService $stats,
     ) {
     }
 
-    public function landing(Request $request, Group $group): Response
+    public function landing(Request $request, Group $group, GroupPostsQuery $query): Response
     {
         $this->authorize('view', $group);
 
-        $posts = $group->posts()
-            ->forGroupView()
-            ->paginate($group->page_size ?? 15);
+        $posts = $query->handle($group);
 
         return Inertia::render('app/group/Landing', [
             'group' => $this->formatGroup($group),
@@ -41,7 +42,7 @@ class GroupController extends Controller
             'navigation' => $this->navigation->getGroupLandingNavigation($group),
             'viewStats' => [
                 'total' => $group->view_count,
-                'unique' => $this->countUniqueViews((new Group)->getMorphClass(), $group->id),
+                'unique' => $this->stats->countUniqueViews((new Group)->getMorphClass(), $group->id),
             ],
             'translations' => [
                 'locale' => app()->getLocale(),
@@ -63,50 +64,7 @@ class GroupController extends Controller
         ];
     }
 
-    private function formatPagination($paginator): array
-    {
-        $links = $paginator->linkCollection()->toArray();
-
-        return [
-            'links' => array_map(function ($lnk) {
-                return [
-                    'url' => $lnk['url'] ?? null,
-                    'label' => $lnk['label'] ?? '',
-                    'active' => (bool)($lnk['active'] ?? false),
-                ];
-            }, $links),
-            'prevUrl' => $paginator->previousPageUrl(),
-            'nextUrl' => $paginator->nextPageUrl(),
-            'current_page' => $paginator->currentPage(),
-            'last_page' => $paginator->lastPage(),
-            'total' => $paginator->total(),
-        ];
-    }
-
-    private function countUniqueViews(string $morphClass, int $id): int
-    {
-        $table = 'page_views';
-        $sql = "(
-            CASE
-              WHEN {$table}.user_id IS NOT NULL THEN CONCAT('U:', {$table}.user_id)
-              WHEN {$table}.visitor_id IS NOT NULL AND {$table}.visitor_id <> '' THEN CONCAT('V:', {$table}.visitor_id)
-              WHEN {$table}.fingerprint IS NOT NULL AND {$table}.fingerprint <> '' THEN CONCAT('F:', {$table}.fingerprint)
-              WHEN {$table}.session_id IS NOT NULL AND {$table}.session_id <> '' THEN CONCAT('S:', {$table}.session_id)
-              ELSE CONCAT('I:', COALESCE({$table}.ip_address, ''))
-            END
-        )";
-
-        /** @var int $count */
-        $count = PageView::query()
-            ->where('viewable_type', $morphClass)
-            ->where('viewable_id', $id)
-            ->selectRaw("COUNT(DISTINCT ($sql)) as cnt")
-            ->value('cnt');
-
-        return $count;
-    }
-
-    public function post(Request $request, Group $group, string $postSlug): Response
+    public function post(Request $request, Group $group, string $postSlug, GroupPostsQuery $query): Response
     {
         $this->authorize('view', $group);
 
@@ -115,9 +73,7 @@ class GroupController extends Controller
             ->forGroupView()
             ->firstOrFail();
 
-        $paginatedPosts = $group->posts()
-            ->forGroupView()
-            ->paginate($group->page_size ?? 15);
+        $paginatedPosts = $query->handle($group);
 
         return Inertia::render('app/group/Post', [
             'group' => $group,
@@ -129,7 +85,7 @@ class GroupController extends Controller
             'navigation' => $this->navigation->getGroupPostNavigation($group, $post),
             'viewStats' => [
                 'total' => $post->view_count,
-                'unique' => $this->countUniqueViews((new Post)->getMorphClass(), $post->id),
+                'unique' => $this->stats->countUniqueViews((new Post)->getMorphClass(), $post->id),
             ],
             'translations' => [
                 'locale' => app()->getLocale(),
