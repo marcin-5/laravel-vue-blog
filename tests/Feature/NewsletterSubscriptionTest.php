@@ -1,13 +1,9 @@
 <?php
 
-use App\Models\Blog;
 use App\Models\NewsletterSubscription;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 test('newsletter page can be rendered', function () {
-    $blog = Blog::factory()->create(['is_published' => true]);
+    $blog = createBlog(['is_published' => true]);
 
     $response = $this->get(route('newsletter.index', ['blog_id' => $blog->id]));
 
@@ -20,7 +16,7 @@ test('newsletter page can be rendered', function () {
 });
 
 test('newsletter page pre-selects blog from selectedBlogId', function () {
-    $blog = Blog::factory()->create(['is_published' => true]);
+    $blog = createBlog(['is_published' => true]);
 
     $response = $this->get(route('newsletter.index', ['blog_id' => $blog->id]));
 
@@ -32,8 +28,8 @@ test('newsletter page pre-selects blog from selectedBlogId', function () {
 });
 
 test('can subscribe to newsletter', function () {
-    $blog1 = Blog::factory()->create(['is_published' => true]);
-    $blog2 = Blog::factory()->create(['is_published' => true]);
+    $blog1 = createBlog(['is_published' => true]);
+    $blog2 = createBlog(['is_published' => true]);
 
     $response = $this->withCookie('visitor_id', 'test-visitor')
         ->post(route('newsletter.store'), [
@@ -73,10 +69,9 @@ test('newsletter management page requires valid signature', function () {
 });
 
 test('newsletter management page renders with valid signature', function () {
-    $blog = Blog::factory()->create(['is_published' => true]);
-    NewsletterSubscription::factory()->create([
+    $blog = createBlog(['is_published' => true]);
+    createSubscription($blog, [
         'email' => 'test@example.com',
-        'blog_id' => $blog->id,
         'frequency' => 'weekly',
         'send_time' => '19:19',
         'send_day' => 7,
@@ -102,11 +97,10 @@ test('newsletter management page renders with valid signature', function () {
 });
 
 test('can update newsletter subscriptions via management page', function () {
-    $blog1 = Blog::factory()->create(['is_published' => true]);
-    $blog2 = Blog::factory()->create(['is_published' => true]);
-    NewsletterSubscription::factory()->create([
+    $blog1 = createBlog(['is_published' => true]);
+    $blog2 = createBlog(['is_published' => true]);
+    createSubscription($blog1, [
         'email' => 'test@example.com',
-        'blog_id' => $blog1->id,
         'frequency' => 'daily',
     ]);
 
@@ -133,10 +127,9 @@ test('can update newsletter subscriptions via management page', function () {
 });
 
 test('can unsubscribe from all via management page', function () {
-    $blog = Blog::factory()->create(['is_published' => true]);
-    NewsletterSubscription::factory()->create([
+    $blog = createBlog(['is_published' => true]);
+    createSubscription($blog, [
         'email' => 'test@example.com',
-        'blog_id' => $blog->id,
     ]);
 
     $url = URL::signedRoute('newsletter.manage', ['email' => 'test@example.com']);

@@ -2,47 +2,38 @@
 
 use App\Jobs\SendNewsletterNotification;
 use App\Mail\NewsletterPostNotification;
-use App\Models\Blog;
-use App\Models\NewsletterSubscription;
-use App\Models\Post;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Mail;
-
-uses(RefreshDatabase::class);
 
 it('sends separate emails for multiple subscriptions by the same user', function () {
     Bus::fake();
     Mail::fake();
 
     $email = 'user@example.com';
-    $blog1 = Blog::factory()->create(['name' => 'Blog One']);
-    $blog2 = Blog::factory()->create(['name' => 'Blog Two']);
+    $user = createUser();
+    $blog1 = createBlog(['name' => 'Blog One'], $user);
+    $blog2 = createBlog(['name' => 'Blog Two'], $user);
 
     $sendTime = '07:07';
     $this->travelTo(now()->startOfWeek()->setTimeFromTimeString($sendTime));
 
-    NewsletterSubscription::factory()->create([
-        'blog_id' => $blog1->id,
+    createSubscription($blog1, [
         'email' => $email,
         'frequency' => 'daily',
     ]);
 
-    NewsletterSubscription::factory()->create([
-        'blog_id' => $blog2->id,
+    createSubscription($blog2, [
         'email' => $email,
         'frequency' => 'daily',
     ]);
 
     // New post in blog 1
-    Post::factory()->create([
-        'blog_id' => $blog1->id,
+    createPost($blog1, [
         'published_at' => now()->subMinutes(10),
     ]);
 
     // New post in blog 2
-    Post::factory()->create([
-        'blog_id' => $blog2->id,
+    createPost($blog2, [
         'published_at' => now()->subMinutes(5),
     ]);
 

@@ -1,29 +1,21 @@
 <?php
 
 use App\Mail\NewsletterPostNotification;
-use App\Models\Blog;
 use App\Models\NewsletterLog;
-use App\Models\NewsletterSubscription;
-use App\Models\Post;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
-
-uses(RefreshDatabase::class);
 
 it('sends daily newsletter with only new posts', function () {
     Mail::fake();
 
-    $blog = Blog::factory()->create();
-    $subscription = NewsletterSubscription::factory()->create([
-        'blog_id' => $blog->id,
+    $blog = createBlog();
+    $subscription = createSubscription($blog, [
         'frequency' => 'daily',
         'send_time' => now()->format('H:i'),
         'send_time_weekend' => now()->format('H:i'),
     ]);
 
     // Post sent before
-    $oldPost = Post::factory()->create([
-        'blog_id' => $blog->id,
+    $oldPost = createPost($blog, [
         'published_at' => now()->subHours(5),
     ]);
     NewsletterLog::create([
@@ -33,15 +25,13 @@ it('sends daily newsletter with only new posts', function () {
     ]);
 
     // New post
-    $newPost = Post::factory()->create([
-        'blog_id' => $blog->id,
+    $newPost = createPost($blog, [
         'published_at' => now()->subMinutes(10),
     ]);
 
     // Post for another blog (should not be sent)
-    $otherBlog = Blog::factory()->create();
-    Post::factory()->create([
-        'blog_id' => $otherBlog->id,
+    $otherBlog = createBlog();
+    createPost($otherBlog, [
         'published_at' => now()->subMinutes(5),
     ]);
 
@@ -61,9 +51,8 @@ it('sends daily newsletter with only new posts', function () {
 it('does not send newsletter if no new posts', function () {
     Mail::fake();
 
-    $blog = Blog::factory()->create();
-    NewsletterSubscription::factory()->create([
-        'blog_id' => $blog->id,
+    $blog = createBlog();
+    createSubscription($blog, [
         'frequency' => 'daily',
         'send_time' => now()->format('H:i'),
     ]);
@@ -78,16 +67,14 @@ it('does not send newsletter if no new posts', function () {
 it('filters posts by frequency', function () {
     Mail::fake();
 
-    $blog = Blog::factory()->create();
-    $subscription = NewsletterSubscription::factory()->create([
-        'blog_id' => $blog->id,
+    $blog = createBlog();
+    $subscription = createSubscription($blog, [
         'frequency' => 'daily',
         'send_time' => now()->format('H:i'),
     ]);
 
     // Post older than a day
-    Post::factory()->create([
-        'blog_id' => $blog->id,
+    createPost($blog, [
         'published_at' => now()->subDays(2),
     ]);
 
@@ -101,32 +88,29 @@ it('does not send duplicate emails when user has multiple subscriptions for the 
     $now = now();
     $time = $now->format('H:i');
 
-    $blog1 = Blog::factory()->create(['name' => 'Blog 1']);
-    $blog2 = Blog::factory()->create(['name' => 'Blog 2']);
+    $user = createUser();
+    $blog1 = createBlog(['name' => 'Blog 1'], $user);
+    $blog2 = createBlog(['name' => 'Blog 2'], $user);
 
-    NewsletterSubscription::factory()->create([
+    createSubscription($blog1, [
         'email' => $email,
-        'blog_id' => $blog1->id,
         'frequency' => 'daily',
         'send_time' => $time,
         'send_time_weekend' => $time,
     ]);
 
-    NewsletterSubscription::factory()->create([
+    createSubscription($blog2, [
         'email' => $email,
-        'blog_id' => $blog2->id,
         'frequency' => 'daily',
         'send_time' => $time,
         'send_time_weekend' => $time,
     ]);
 
-    Post::factory()->create([
-        'blog_id' => $blog1->id,
+    createPost($blog1, [
         'published_at' => $now->copy()->subMinutes(10),
     ]);
 
-    Post::factory()->create([
-        'blog_id' => $blog2->id,
+    createPost($blog2, [
         'published_at' => $now->copy()->subMinutes(10),
     ]);
 

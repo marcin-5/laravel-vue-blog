@@ -1,27 +1,17 @@
 <?php
 
 use App\Mail\NewsletterPostNotification;
-use App\Models\Blog;
-use App\Models\NewsletterSubscription;
-use App\Models\Post;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 it('renders headings correctly for multiple posts in the same blog', function () {
-    $blog1 = Blog::factory()->create(['name' => 'Test Blog 1']);
-    $subscription = NewsletterSubscription::factory()->create([
-        'blog_id' => $blog1->id,
-    ]);
+    $blog1 = createBlog(['name' => 'Test Blog 1']);
+    $subscription = createSubscription($blog1);
 
-    $post1 = Post::factory()->create([
-        'blog_id' => $blog1->id,
+    $post1 = createPost($blog1, [
         'title' => 'First Post Title',
         'excerpt' => 'First Excerpt',
     ]);
 
-    $post2 = Post::factory()->create([
-        'blog_id' => $blog1->id,
+    $post2 = createPost($blog1, [
         'title' => 'Second Post Title',
         'excerpt' => 'Second Excerpt',
     ]);
