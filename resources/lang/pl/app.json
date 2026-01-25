@@ -1,4 +1,23 @@
 {
+    "list": {
+        "group": "Grupa",
+        "all": "Wszyscy",
+        "all_groups": "Wszystkie",
+        "all_per_page": "Wszyscy",
+        "per_page": "Na stronę",
+        "sort_by": "Sortuj wg",
+        "username": "Nazwa użytkownika",
+        "joined_at": "Dołączono",
+        "role": "Rola",
+        "direction": "Kierunek",
+        "asc": "Rosnąco",
+        "desc": "Malejąco",
+        "owner": "Właściciel",
+        "email": "E-mail",
+        "add": "Dodaj",
+        "remove": "Usuń",
+        "no_results": "Brak wyników"
+    },
     "pagination": {
         "previous": "Poprzednia",
         "next": "Następna"
@@ -130,8 +149,10 @@
         "stats_title": "Statystyki",
         "all_my_blogs": "Wszystkie moje blogi",
         "badges": {
-            "published": "Opublikowano",
-            "draft": "Szkic"
+            "draft": "Szkic",
+            "published": "Opublikowany",
+            "unlisted": "Ukryty",
+            "extension": "Rozszerzenie"
         },
         "breadcrumb": {
             "dashboard": "Panel",
@@ -322,12 +343,6 @@
             "add_extension": "Dodaj rozszerzenie",
             "copy_url_button": "Kopiuj adres URL",
             "url_copied": "Skopiowano do schowka"
-        },
-        "badges": {
-            "draft": "Szkic",
-            "published": "Opublikowany",
-            "unlisted": "Ukryty",
-            "extension": "Rozszerzenie"
         },
         "extension_item": {
             "edit_button": "Edytuj",

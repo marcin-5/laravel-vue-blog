@@ -82,7 +82,7 @@ function removeMember(row: any) {
             <!-- Filters -->
             <div class="grid grid-cols-1 gap-3 md:grid-cols-5">
                 <div v-if="props.isAdmin">
-                    <label class="mb-1 block text-sm text-muted-foreground">{{ $t('common.owner') }}</label>
+                    <label class="mb-1 block text-sm text-muted-foreground">{{ $t('list.owner') }}</label>
                     <Select v-model="ownerId" @update:modelValue="onOwnerChange">
                         <SelectTrigger>
                             <SelectValue />
@@ -96,20 +96,20 @@ function removeMember(row: any) {
                 </div>
 
                 <div>
-                    <label class="mb-1 block text-sm text-muted-foreground">{{ $t('common.group') }}</label>
+                    <label class="mb-1 block text-sm text-muted-foreground">{{ $t('list.group') }}</label>
                     <Select v-model="groupId" @update:modelValue="reload">
                         <SelectTrigger>
-                            <SelectValue :placeholder="$t('common.all_groups')" />
+                            <SelectValue :placeholder="$t('list.all_groups')" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">{{ $t('common.all_groups') }}</SelectItem>
+                            <SelectItem value="all">{{ $t('list.all_groups') }}</SelectItem>
                             <SelectItem v-for="g in props.groups" :key="g.id" :value="String(g.id)">{{ g.name }}</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
 
                 <div>
-                    <label class="mb-1 block text-sm text-muted-foreground">{{ $t('common.per_page') }}</label>
+                    <label class="mb-1 block text-sm text-muted-foreground">{{ $t('list.per_page') }}</label>
                     <Select v-model="perPage" @update:modelValue="reload">
                         <SelectTrigger>
                             <SelectValue />
@@ -117,35 +117,35 @@ function removeMember(row: any) {
                         <SelectContent>
                             <SelectItem value="10">10</SelectItem>
                             <SelectItem value="25">25</SelectItem>
-                            <SelectItem value="all">{{ $t('common.all_per_page') }}</SelectItem>
+                            <SelectItem value="all">{{ $t('list.all_per_page') }}</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
 
                 <div>
-                    <label class="mb-1 block text-sm text-muted-foreground">{{ $t('common.sort_by') }}</label>
+                    <label class="mb-1 block text-sm text-muted-foreground">{{ $t('list.sort_by') }}</label>
                     <Select v-model="sortBy" @update:modelValue="reload">
                         <SelectTrigger>
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="email">Email</SelectItem>
-                            <SelectItem value="name">{{ $t('common.username') }}</SelectItem>
-                            <SelectItem value="joined_at">{{ $t('common.joined_at') }}</SelectItem>
-                            <SelectItem value="role">{{ $t('common.role') }}</SelectItem>
+                            <SelectItem value="name">{{ $t('list.username') }}</SelectItem>
+                            <SelectItem value="joined_at">{{ $t('list.joined_at') }}</SelectItem>
+                            <SelectItem value="role">{{ $t('list.role') }}</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
 
                 <div>
-                    <label class="mb-1 block text-sm text-muted-foreground">{{ $t('common.direction') }}</label>
+                    <label class="mb-1 block text-sm text-muted-foreground">{{ $t('list.direction') }}</label>
                     <Select v-model="sortDir" @update:modelValue="reload">
                         <SelectTrigger>
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="asc">{{ $t('common.asc') }}</SelectItem>
-                            <SelectItem value="desc">{{ $t('common.desc') }}</SelectItem>
+                            <SelectItem value="asc">{{ $t('list.asc') }}</SelectItem>
+                            <SelectItem value="desc">{{ $t('list.desc') }}</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -154,11 +154,11 @@ function removeMember(row: any) {
             <!-- Add member (moved below filters for UX) -->
             <div class="grid grid-cols-1 items-end gap-3 md:grid-cols-5">
                 <div class="md:col-span-2">
-                    <label class="mb-1 block text-sm text-muted-foreground">{{ $t('common.email') }}</label>
-                    <Input v-model="addEmail" :placeholder="$t('common.email')" type="email" />
+                    <label class="mb-1 block text-sm text-muted-foreground">{{ $t('list.email') }}</label>
+                    <Input v-model="addEmail" :placeholder="$t('list.email')" type="email" />
                 </div>
                 <div>
-                    <label class="mb-1 block text-sm text-muted-foreground">{{ $t('common.role') }}</label>
+                    <label class="mb-1 block text-sm text-muted-foreground">{{ $t('list.role') }}</label>
                     <Select v-model="addRole">
                         <SelectTrigger>
                             <SelectValue />
@@ -172,7 +172,7 @@ function removeMember(row: any) {
                     </Select>
                 </div>
                 <div>
-                    <Button :disabled="!groupId || groupId === 'all' || !addEmail" @click="addMember">{{ $t('common.add') }}</Button>
+                    <Button :disabled="!groupId || groupId === 'all' || !addEmail" @click="addMember">{{ $t('list.add') }}</Button>
                 </div>
             </div>
 
@@ -182,9 +182,9 @@ function removeMember(row: any) {
                     <thead class="border-b">
                         <tr>
                             <th class="py-2 pr-2">Email</th>
-                            <th class="py-2 pr-2">{{ $t('common.username') }}</th>
-                            <th class="py-2 pr-2">{{ $t('common.joined_at') }}</th>
-                            <th class="py-2 pr-2">{{ $t('common.role') }}</th>
+                            <th class="py-2 pr-2">{{ $t('list.username') }}</th>
+                            <th class="py-2 pr-2">{{ $t('list.joined_at') }}</th>
+                            <th class="py-2 pr-2">{{ $t('list.role') }}</th>
                             <th class="py-2 pr-2"></th>
                         </tr>
                     </thead>
@@ -207,11 +207,11 @@ function removeMember(row: any) {
                                 </Select>
                             </td>
                             <td class="py-2 pr-2 text-right">
-                                <Button variant="destructive" @click="removeMember(u)">{{ $t('common.remove') }}</Button>
+                                <Button variant="destructive" @click="removeMember(u)">{{ $t('list.remove') }}</Button>
                             </td>
                         </tr>
                         <tr v-if="(props.members?.data ?? []).length === 0">
-                            <td class="py-4 text-center text-muted-foreground" colspan="5">{{ $t('common.no_results') }}</td>
+                            <td class="py-4 text-center text-muted-foreground" colspan="5">{{ $t('list.no_results') }}</td>
                         </tr>
                     </tbody>
                 </table>
