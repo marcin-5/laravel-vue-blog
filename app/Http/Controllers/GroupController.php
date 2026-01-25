@@ -31,15 +31,7 @@ class GroupController extends Controller
             ->paginate($group->page_size ?? 15);
 
         return Inertia::render('app/group/Landing', [
-            'group' => [
-                'id' => $group->id,
-                'name' => $group->name,
-                'slug' => $group->slug,
-                'content' => $group->content_html,
-                'footer' => $group->footer_html,
-                'created_at' => $group->created_at?->format('Y-m-d H:i'),
-                'updated_at' => $group->updated_at?->format('Y-m-d H:i'),
-            ],
+            'group' => $this->formatGroup($group),
             'authorName' => $group->user?->name,
             'authorEmail' => $group->user?->email,
             'posts' => $posts->items(),
@@ -56,6 +48,19 @@ class GroupController extends Controller
                 'messages' => $this->translations->getPageTranslations('blog'),
             ],
         ]);
+    }
+
+    private function formatGroup(Group $group): array
+    {
+        return [
+            'id' => $group->id,
+            'name' => $group->name,
+            'slug' => $group->slug,
+            'content' => $group->content_html,
+            'footer' => $group->footer_html,
+            'created_at' => $group->created_at?->format('Y-m-d H:i'),
+            'updated_at' => $group->updated_at?->format('Y-m-d H:i'),
+        ];
     }
 
     private function formatPagination($paginator): array
@@ -116,25 +121,7 @@ class GroupController extends Controller
 
         return Inertia::render('app/group/Post', [
             'group' => $group,
-            'post' => [
-                'id' => $post->id,
-                'title' => $post->title,
-                'slug' => $post->slug,
-                'author' => $post->user?->name ?? $group->user?->name,
-                'author_email' => $post->user?->email ?? $group->user?->email,
-                'contentHtml' => $post->content_html,
-                'published_at' => $post->published_at?->format('Y-m-d H:i'),
-                'excerpt' => $post->excerpt,
-                'extensions' => $post->extensions()
-                    ->where('is_published', true)
-                    ->oldest()
-                    ->get()
-                    ->map(fn($ext) => [
-                        'id' => $ext->id,
-                        'title' => $ext->title,
-                        'contentHtml' => $ext->content_html,
-                    ]),
-            ],
+            'post' => $this->formatPost($post, $group),
             'posts' => $paginatedPosts->items(),
             'pagination' => $this->formatPagination($paginatedPosts),
             'theme' => $group->theme,
@@ -149,5 +136,28 @@ class GroupController extends Controller
                 'messages' => $this->translations->getPageTranslations('post'),
             ],
         ]);
+    }
+
+    private function formatPost(Post $post, Group $group): array
+    {
+        return [
+            'id' => $post->id,
+            'title' => $post->title,
+            'slug' => $post->slug,
+            'author' => $post->user?->name ?? $group->user?->name,
+            'author_email' => $post->user?->email ?? $group->user?->email,
+            'contentHtml' => $post->content_html,
+            'published_at' => $post->published_at?->format('Y-m-d H:i'),
+            'excerpt' => $post->excerpt,
+            'extensions' => $post->extensions()
+                ->where('is_published', true)
+                ->oldest()
+                ->get()
+                ->map(fn($ext) => [
+                    'id' => $ext->id,
+                    'title' => $ext->title,
+                    'contentHtml' => $ext->content_html,
+                ]),
+        ];
     }
 }
