@@ -70,7 +70,7 @@ function toggleLock(id: number) {
                             <Tooltip>
                                 <TooltipTrigger as-child>
                                     <Button
-                                        :variant="lockedIds.has(extension.id) ? 'lock' : 'toggle'"
+                                        :variant="lockedIds.has(extension.id) ? 'toggle' : 'locked'"
                                         class="h-8 w-8"
                                         size="icon"
                                         @click="toggleLock(extension.id)"
