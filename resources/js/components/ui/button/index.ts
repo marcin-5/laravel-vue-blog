@@ -14,9 +14,9 @@ export const buttonVariants = cva(
         constructive:
           'bg-constructive text-constructive-foreground shadow-xs hover:bg-constructive-hover focus-visible:ring-constructive/20',
         exit:
-          'bg-secondary text-secondary-foreground/75 shadow-xs hover:bg-secondary-hover focus-visible:ring-secondary/20',
+          'bg-secondary text-secondary-foreground/75 shadow-xs hover:bg-primary-foreground focus-visible:ring-secondary/20',
         toggle:
-          'bg-secondary/70 text-secondary-foreground shadow-xs hover:bg-secondary-hover focus-visible:ring-secondary/20',
+          'bg-secondary/70 text-secondary-foreground shadow-xs hover:bg-primary-foreground focus-visible:ring-secondary/20',
         muted:
           'bg-muted text-muted-foreground shadow-xs hover:bg-muted/80 focus-visible:ring-muted/20',
         outline:
@@ -25,6 +25,8 @@ export const buttonVariants = cva(
           'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80',
         ghost:
           'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
+        lock:
+          'hover:bg-background',
         link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {

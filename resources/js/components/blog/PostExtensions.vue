@@ -70,7 +70,7 @@ function toggleLock(id: number) {
                             <Tooltip>
                                 <TooltipTrigger as-child>
                                     <Button
-                                        :variant="lockedIds.has(extension.id) ? 'toggle' : 'ghost'"
+                                        :variant="lockedIds.has(extension.id) ? 'lock' : 'toggle'"
                                         class="h-8 w-8"
                                         size="icon"
                                         @click="toggleLock(extension.id)"
@@ -79,7 +79,7 @@ function toggleLock(id: number) {
                                         <LockOpen v-else class="h-4 w-4" />
                                     </Button>
                                 </TooltipTrigger>
-                                <TooltipContent>
+                                <TooltipContent class="bg-secondary text-secondary-foreground">
                                     {{ lockedIds.has(extension.id) ? $t('blog.post.unlock_extension') : $t('blog.post.lock_extension') }}
                                 </TooltipContent>
                             </Tooltip>
