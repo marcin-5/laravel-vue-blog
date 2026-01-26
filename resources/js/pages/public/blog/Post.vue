@@ -49,12 +49,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
     <div :style="mergedThemeStyle" class="flex min-h-screen flex-col bg-background text-foreground antialiased">
         <PublicNavbar :maxWidth="navbarMaxWidth" />
 
-        <div
-            :class="[
-                'mx-auto w-full p-4 sm:px-12 md:px-16',
-                hasSidebar ? 'max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl' : 'max-w-screen-lg',
-            ]"
-        >
+        <div :class="['mx-auto w-full p-4 sm:px-12 md:px-16', hasSidebar ? 'max-w-5xl xl:max-w-7xl 2xl:max-w-screen-2xl' : 'max-w-5xl']">
             <BorderDivider class="mb-4" />
 
             <PostHeader :locale="locale" :modifiedTime="postModifiedTime" :post="post" :publishedTime="postPublishedTime" :viewStats="viewStats" />
@@ -67,7 +62,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
                 <!-- Mobile/tablet layout (<xl): no sidebar -->
                 <div class="xl:hidden">
                     <PostContent :author="post.author" :content="post.contentHtml" />
-                    <PostExtensions :extensions="post.extensions || []" />
+                    <PostExtensions :extensions="post.extensions || []" :theme="mergedThemeStyle" />
                     <BorderDivider class="mt-12 mb-4" />
                     <BlogPostsList :blogId="blog.id" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
                 </div>
@@ -79,7 +74,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
                     </aside>
                     <div :class="['min-w-0 flex-1', mainOrderClass]" :style="mainStyle">
                         <PostContent :author="post.author" :content="post.contentHtml" />
-                        <PostExtensions :extensions="post.extensions || []" />
+                        <PostExtensions :extensions="post.extensions || []" :theme="mergedThemeStyle" />
                     </div>
                 </div>
             </template>
@@ -87,7 +82,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
             <!-- No sidebar layout -->
             <div v-else>
                 <PostContent :author="post.author" :content="post.contentHtml" />
-                <PostExtensions :extensions="post.extensions || []" />
+                <PostExtensions :extensions="post.extensions || []" :theme="mergedThemeStyle" />
                 <BorderDivider class="mt-12 mb-4" />
                 <BlogPostsList :blogId="blog.id" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" class="mt-6" />
             </div>
