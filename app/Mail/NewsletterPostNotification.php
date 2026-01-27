@@ -35,7 +35,7 @@ class NewsletterPostNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Nowe wpisy na Twoich subskrybowanych blogach',
+            subject: __('newsletter.email.subject'),
         );
     }
 
