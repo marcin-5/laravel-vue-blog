@@ -5,12 +5,14 @@ namespace App\Models;
 use App\Models\Concerns\HasMarkdownContent;
 use App\Observers\SitemapObserver;
 use App\Viewable;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 class Post extends Model
@@ -87,7 +89,8 @@ class Post extends Model
             'post_id',
             'extension_post_id',
         )
-            ->withPivot('display_order')
+            ->withPivot(['display_order', 'created_at'])
+            ->as('attachment')
             ->orderByPivot('display_order')
             ->withTimestamps();
     }
@@ -103,8 +106,17 @@ class Post extends Model
             'extension_post_id',
             'post_id',
         )
-            ->withPivot('display_order')
+            ->withPivot(['display_order', 'created_at'])
+            ->as('attachment')
             ->withTimestamps();
+    }
+
+    /**
+     * Get attached_at attribute from pivot
+     */
+    public function getAttachedAtAttribute(): ?Carbon
+    {
+        return $this->attachment?->created_at;
     }
 
     /**
@@ -173,6 +185,29 @@ class Post extends Model
         return $query->published()
             ->whereIn('visibility', [self::VIS_PUBLIC, self::VIS_UNLISTED])
             ->orderByPublicationDate();
+    }
+
+    /**
+     * Scope for posts and extensions relevant for newsletter
+     */
+    public function scopeForNewsletter(Builder $query, DateTimeInterface $since): Builder
+    {
+        return $query->published()
+            ->where(function (Builder $q) use ($since) {
+                // Regular posts published since $since
+                $q->where(function (Builder $q2) use ($since) {
+                    $q2->whereIn('visibility', [self::VIS_PUBLIC, self::VIS_UNLISTED])
+                        ->where('published_at', '>=', $since);
+                })
+                    // OR Extensions attached to public posts since $since
+                    ->orWhere(function (Builder $q2) use ($since) {
+                        $q2->extensionType()
+                            ->whereHas('parentPosts', function (Builder $q3) use ($since) {
+                                $q3->whereIn('visibility', [self::VIS_PUBLIC, self::VIS_UNLISTED])
+                                    ->where('post_extensions.created_at', '>=', $since);
+                            });
+                    });
+            });
     }
 
     /**

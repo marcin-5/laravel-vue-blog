@@ -49,17 +49,18 @@ class SendNewsletter extends Command
             $processedSubscriptions = collect();
 
             foreach ($userSubscriptions as $subscription) {
+                $since = $subscription->frequency === 'daily' ? now()->subDay() : now()->subWeek();
+
                 $posts = Post::query()
+                    ->with([
+                        'parentPosts' => function ($query) {
+                            $query->whereIn('visibility', [Post::VIS_PUBLIC, Post::VIS_UNLISTED]);
+                        },
+                    ])
                     ->where('blog_id', $subscription->blog_id)
-                    ->forPublicView()
+                    ->forNewsletter($since)
                     ->whereDoesntHave('newsletterLogs', function ($query) use ($subscription) {
                         $query->where('newsletter_subscription_id', $subscription->id);
-                    })
-                    ->when($subscription->frequency === 'daily', function ($query) {
-                        $query->where('published_at', '>=', now()->subDay());
-                    })
-                    ->when($subscription->frequency === 'weekly', function ($query) {
-                        $query->where('published_at', '>=', now()->subWeek());
                     })
                     ->latest('published_at')
                     ->get();
