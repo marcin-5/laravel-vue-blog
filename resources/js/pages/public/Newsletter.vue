@@ -139,10 +139,10 @@ const unsubscribe = () => {
 
 <template>
     <Head :title="title" />
-    <div class="flex min-h-screen flex-col bg-primary-foreground text-primary">
+    <div class="flex min-h-screen flex-col bg-card text-primary">
         <PublicNavbar maxWidth="max-w-screen-lg" />
         <Toaster />
-        <main class="mx-auto w-full max-w-screen-lg p-4 sm:px-12 md:px-16">
+        <main class="mx-auto w-full max-w-5xl p-4 sm:px-12 md:px-16">
             <div class="mx-auto max-w-2xl py-12">
                 <h1 class="mb-6 text-3xl font-bold text-accent-foreground">
                     {{ title }}
@@ -162,7 +162,7 @@ const unsubscribe = () => {
                         <Label class="text-slate-700 dark:text-slate-300">{{ blogLabel }}</Label>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm">
-                                <thead class="border-b border-border bg-muted/50 text-xs text-slate-500 uppercase dark:text-slate-400">
+                                <thead class="border-b border-border bg-muted/50 text-xs text-foreground uppercase">
                                     <tr>
                                         <th class="px-4 py-3 font-medium"></th>
                                         <th class="px-4 py-3 font-medium">{{ t.form.blog_name }}</th>
@@ -177,7 +177,7 @@ const unsubscribe = () => {
                                                 :id="'blog-' + sub.blog_id"
                                                 :model-value="sub.selected"
                                                 class="text-primary"
-                                                @update:model-value="sub.selected = $event"
+                                                @update:model-value="sub.selected = !!$event"
                                             />
                                         </td>
                                         <td class="px-4 py-3 font-medium">
@@ -195,7 +195,7 @@ const unsubscribe = () => {
                                                         : null
                                                 "
                                             >
-                                                <SelectTrigger class="h-8 w-[100px]">
+                                                <SelectTrigger class="h-8 w-25">
                                                     <SelectValue />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -209,7 +209,7 @@ const unsubscribe = () => {
                                                 <!-- Daily schedule -->
                                                 <template v-if="sub.frequency === 'daily'">
                                                     <div class="flex items-center gap-2">
-                                                        <span class="w-24 text-xs text-slate-500">{{ t.form.weekday }}:</span>
+                                                        <span class="w-24 text-xs text-secondary-foreground">{{ t.form.weekday }}:</span>
                                                         <input
                                                             v-model="sub.send_time"
                                                             class="w-20 rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
@@ -217,7 +217,7 @@ const unsubscribe = () => {
                                                         />
                                                     </div>
                                                     <div class="flex items-center gap-2">
-                                                        <span class="w-24 text-xs text-slate-500">{{ t.form.weekend }}:</span>
+                                                        <span class="w-24 text-xs text-secondary-foreground">{{ t.form.weekend }}:</span>
                                                         <input
                                                             v-model="sub.send_time_weekend"
                                                             class="w-20 rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
@@ -237,7 +237,7 @@ const unsubscribe = () => {
                                                         :model-value="sub.send_day?.toString()"
                                                         @update:model-value="sub.send_day = Number($event)"
                                                     >
-                                                        <SelectTrigger class="h-8 w-[120px]">
+                                                        <SelectTrigger class="h-8 w-30">
                                                             <SelectValue />
                                                         </SelectTrigger>
                                                         <SelectContent>
