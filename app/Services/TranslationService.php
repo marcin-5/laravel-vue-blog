@@ -51,15 +51,20 @@ class TranslationService
     }
 
     /**
-     * Load a single JSON translation file.
+     * Load a single translation file (JSON or PHP).
      */
     private function loadTranslationFile(string $path): array
     {
-        if (!File::exists($path)) {
-            return [];
+        if (File::exists($path)) {
+            return json_decode(File::get($path), true) ?: [];
         }
 
-        return json_decode(File::get($path), true) ?: [];
+        $phpPath = str_replace('.json', '.php', $path);
+        if (File::exists($phpPath)) {
+            return File::getRequire($phpPath) ?: [];
+        }
+
+        return [];
     }
 
     /**
