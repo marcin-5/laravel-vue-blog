@@ -1,10 +1,14 @@
 {
     "agents": [
-        "claude_code",
-        "phpstorm"
+        "junie"
     ],
-    "editors": [
-        "phpstorm"
-    ],
-    "guidelines": []
+    "guidelines": true,
+    "herd_mcp": false,
+    "mcp": true,
+    "sail": false,
+    "skills": [
+        "pest-testing",
+        "inertia-vue-development",
+        "tailwindcss-development"
+    ]
 }
