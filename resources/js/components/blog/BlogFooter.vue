@@ -14,7 +14,7 @@ const props = defineProps<{
                 '--blog-motto-scale': 'var(--blog-footer-scale)',
                 fontSize: 'calc(1rem * var(--blog-footer-scale))',
             }"
-            class="prose max-w-none text-primary/90"
+            class="prose max-w-none text-foreground/90"
             v-html="props.html"
         />
     </section>

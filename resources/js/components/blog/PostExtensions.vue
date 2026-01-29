@@ -50,7 +50,7 @@ function toggleLock(id: number) {
                 <div class="flex items-center justify-between p-4">
                     <CollapsibleTrigger as-child>
                         <button
-                            class="flex flex-1 items-center justify-between text-left font-semibold transition-colors hover:text-primary"
+                            class="flex flex-1 items-center justify-between text-left font-semibold transition-colors hover:text-foreground"
                             @click="toggleExtension(extension.id)"
                         >
                             <span>{{ extension.title }}</span>

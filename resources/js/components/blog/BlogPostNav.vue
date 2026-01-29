@@ -15,8 +15,8 @@ const ARROW_LEFT = '←';
 const ARROW_RIGHT = '→';
 
 const BASE_LINK_CLASSES = 'inline-flex items-center rounded-sm px-3 py-2 text-sm transition-colors bg-card';
-const ACTIVE_LINK_CLASSES = 'border border-border text-foreground hover:bg-secondary';
-const INACTIVE_LINK_CLASSES = 'border border-border text-foreground opacity-50 cursor-default';
+const ACTIVE_LINK_CLASSES = 'border border-border text-primary hover:bg-secondary';
+const INACTIVE_LINK_CLASSES = 'border border-border text-primary opacity-50 cursor-default';
 
 const getNavLinkClasses = (post: NavPost | null | undefined) => clsx(BASE_LINK_CLASSES, 'gap-2', post ? ACTIVE_LINK_CLASSES : INACTIVE_LINK_CLASSES);
 

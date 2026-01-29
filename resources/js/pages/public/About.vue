@@ -10,7 +10,7 @@ const { t } = useI18n();
     <div class="flex min-h-screen flex-col">
         <PublicNavbar />
         <main class="mx-auto w-full max-w-[1024px] p-6 lg:p-8">
-            <div class="mb-8 text-center text-primary">
+            <div class="mb-8 text-center text-foreground">
                 <AppLogo :size="'md'" />
             </div>
             <h2 class="mb-4 font-header text-3xl font-semibold text-shadow-stone-700 dark:text-shadow-stone-50">{{ t('about.heading', 'About') }}</h2>

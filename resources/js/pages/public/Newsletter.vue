@@ -139,7 +139,7 @@ const unsubscribe = () => {
 
 <template>
     <Head :title="title" />
-    <div class="flex min-h-screen flex-col bg-card text-primary">
+    <div class="flex min-h-screen flex-col bg-card text-foreground">
         <PublicNavbar maxWidth="max-w-screen-lg" />
         <Toaster />
         <main class="mx-auto w-full max-w-5xl p-4 sm:px-12 md:px-16">
@@ -162,7 +162,7 @@ const unsubscribe = () => {
                         <Label class="text-slate-700 dark:text-slate-300">{{ blogLabel }}</Label>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm">
-                                <thead class="border-b border-border bg-muted/50 text-xs text-foreground uppercase">
+                                <thead class="border-b border-border bg-muted/50 text-xs text-primary uppercase">
                                     <tr>
                                         <th class="px-4 py-3 font-medium"></th>
                                         <th class="px-4 py-3 font-medium">{{ t.form.blog_name }}</th>
@@ -176,7 +176,7 @@ const unsubscribe = () => {
                                             <Checkbox
                                                 :id="'blog-' + sub.blog_id"
                                                 :model-value="sub.selected"
-                                                class="text-primary"
+                                                class="text-foreground"
                                                 @update:model-value="sub.selected = !!$event"
                                             />
                                         </td>

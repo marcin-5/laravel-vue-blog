@@ -60,7 +60,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
 
 <template>
     <Head v-if="seo?.title" :title="seo.title" />
-    <div :style="mergedThemeStyle" class="flex min-h-screen flex-col bg-background text-foreground antialiased">
+    <div :style="mergedThemeStyle" class="flex min-h-screen flex-col bg-background text-primary antialiased">
         <PublicNavbar :maxWidth="navbarMaxWidth" />
         <div
             :class="[

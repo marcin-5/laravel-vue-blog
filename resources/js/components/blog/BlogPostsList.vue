@@ -40,7 +40,7 @@ const hasPagination = computed(() => paginationLinks.value.length > 0);
 
 function getPaginationLinkClasses(link: { active: boolean; url: string | null }) {
     return [
-        'rounded border px-2 py-1 text-sm text-foreground transition-colors',
+        'rounded border px-2 py-1 text-sm text-primary transition-colors',
         link.active ? 'border-foreground bg-background' : 'border-border bg-card',
         link.url ? 'hover:bg-secondary' : 'pointer-events-none opacity-50',
     ];
@@ -53,7 +53,7 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
         :style="{ fontFamily: 'var(--blog-body-font)', fontSize: 'calc(1rem * var(--blog-body-scale))' }"
     >
         <div class="mb-4 flex items-center justify-between gap-4">
-            <h2 :style="{ fontFamily: 'var(--blog-header-font)' }" class="text-xl font-semibold text-foreground opacity-90">
+            <h2 :style="{ fontFamily: 'var(--blog-header-font)' }" class="text-xl font-semibold text-primary opacity-90">
                 {{ t('blog.posts_list.title') }}
             </h2>
             <div class="flex items-center gap-2">
@@ -87,7 +87,7 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
                                 <TooltipTrigger as-child>
                                     <button
                                         :aria-label="t('blog.posts_list.view_excerpt')"
-                                        class="text-muted-foreground transition-colors hover:text-foreground"
+                                        class="text-muted-foreground transition-colors hover:text-primary"
                                     >
                                         <Info class="size-4" />
                                     </button>
@@ -111,7 +111,7 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
 
         <!-- Newsletter link -->
         <div v-if="!isGroup" class="mt-4 flex">
-            <Link :href="route('newsletter.index', { blog_id: blogId })" class="text-sm font-medium text-foreground hover:text-foreground">
+            <Link :href="route('newsletter.index', { blog_id: blogId })" class="text-sm font-medium text-primary hover:text-primary">
                 {{ t('blog.posts_list.newsletter_subscribe') }}
             </Link>
         </div>
