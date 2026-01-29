@@ -248,7 +248,7 @@
             "theme_color_background": "--background",
             "theme_color_background_tooltip": "The background color of the page.",
             "theme_color_foreground": "--foreground",
-            "theme_color_foreground_tooltip": "The primary accent color (used for menu, etc.).",
+            "theme_color_foreground_tooltip": "The primary accent color (used for menu, motto, header, etc.).",
             "theme_color_primary": "--primary",
             "theme_color_primary_tooltip": "The main text color.",
             "theme_color_primary_foreground": "--primary-foreground",

@@ -72,7 +72,7 @@ watch(
                         :key="link.route"
                         :as="link.as"
                         :class="[
-                            'inline-block rounded-sm px-5 py-1.5 text-sm leading-normal text-primary',
+                            'inline-block rounded-sm px-5 py-1.5 text-sm leading-normal text-foreground',
                             link.emphasized
                                 ? 'border border-border hover:border-primary/20 dark:hover:border-primary/30'
                                 : 'border border-transparent hover:border-border',
@@ -94,7 +94,7 @@ watch(
                     :aria-expanded="mobileOpen"
                     aria-controls="mobile-menu"
                     aria-label="Toggle menu"
-                    class="inline-flex items-center justify-center rounded-sm border border-transparent p-2 text-foreground hover:border-border md:hidden"
+                    class="inline-flex items-center justify-center rounded-sm border border-transparent p-2 text-primary hover:border-border md:hidden"
                     type="button"
                     @click="mobileOpen = !mobileOpen"
                 >
@@ -112,7 +112,7 @@ watch(
                         :key="link.route"
                         :as="link.as"
                         :class="[
-                            'inline-block rounded-sm px-4 py-2 text-sm leading-normal text-primary',
+                            'inline-block rounded-sm px-4 py-2 text-sm leading-normal text-foreground',
                             link.emphasized
                                 ? 'border border-border hover:border-primary/20 dark:hover:border-primary/30'
                                 : 'border border-transparent hover:border-border',

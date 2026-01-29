@@ -18,7 +18,7 @@ defineProps<{
 <template>
     <header :style="{ fontFamily: 'var(--blog-header-font)', fontSize: 'calc(2rem * var(--blog-header-scale))' }" class="mb-4">
         <div class="flex items-center justify-between">
-            <h1 class="font-[inherit] text-[1em] leading-tight font-bold text-primary">
+            <h1 class="font-[inherit] text-[1em] leading-tight font-bold text-foreground">
                 {{ blog.name }}
             </h1>
             <ViewStats :total="viewStats.total" :unique="viewStats.unique"></ViewStats>
@@ -26,7 +26,7 @@ defineProps<{
         <p
             v-if="displayedMotto"
             :style="{ fontStyle: 'var(--blog-motto-style)', fontFamily: 'var(--blog-motto-font)', fontSize: 'calc(1rem * var(--blog-motto-scale))' }"
-            class="mt-2 mb-12 text-primary opacity-80"
+            class="mt-2 mb-12 text-foreground opacity-80"
         >
             {{ displayedMotto }}
         </p>
@@ -35,7 +35,7 @@ defineProps<{
         <div
             v-if="blog.descriptionHtml"
             :style="{ fontFamily: 'var(--blog-body-font)', fontSize: 'calc(1rem * var(--blog-body-scale))' }"
-            class="prose max-w-none text-foreground"
+            class="prose max-w-none text-primary/90"
             v-html="blog.descriptionHtml"
         />
     </section>

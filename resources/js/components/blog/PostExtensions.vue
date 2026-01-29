@@ -44,13 +44,13 @@ function toggleLock(id: number) {
 </script>
 
 <template>
-    <div v-if="extensions && extensions.length > 0" class="mt-8 space-y-4">
+    <div v-if="extensions && extensions.length > 0" class="mt-8 space-y-4 text-foreground">
         <div v-for="extension in extensions" :key="extension.id" class="rounded-lg border border-border bg-card">
             <Collapsible :open="expandedIds.has(extension.id)">
                 <div class="flex items-center justify-between p-4">
                     <CollapsibleTrigger as-child>
                         <button
-                            class="flex flex-1 items-center justify-between text-left font-semibold transition-colors hover:text-foreground"
+                            class="flex flex-1 items-center justify-between text-left font-semibold transition-colors hover:text-primary"
                             @click="toggleExtension(extension.id)"
                         >
                             <span>{{ extension.title }}</span>
@@ -91,7 +91,7 @@ function toggleLock(id: number) {
                     <div class="border-t border-border p-4">
                         <article
                             :style="{ fontFamily: 'var(--blog-body-font)', fontSize: 'calc(1rem * var(--blog-body-scale))' }"
-                            class="prose dark:prose-invert max-w-none"
+                            class="prose dark:prose-invert max-w-none text-primary"
                             v-html="extension.contentHtml"
                         />
                     </div>

@@ -75,7 +75,7 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
                 <BlogHeader :blog="blog" :displayedMotto="displayedMotto" :viewStats="viewStats" />
                 <BorderDivider class="mb-8" />
                 <main v-if="hasLandingContent" class="min-w-0 flex-1">
-                    <div class="prose max-w-none" v-html="landingHtml" />
+                    <div class="prose max-w-none text-primary" v-html="landingHtml" />
                 </main>
                 <BorderDivider class="my-4" />
                 <BlogPostsList
