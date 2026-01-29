@@ -62,6 +62,10 @@ Route::post('/locale', function (Request $request) {
     $locale = $data['locale'];
     App::setLocale($locale);
 
+    if ($user = $request->user()) {
+        $user->update(['locale' => $locale]);
+    }
+
     $response = back();
     return $response->withCookie(cookie('locale', $locale, 60 * 24 * 365));
 })->middleware('auth');

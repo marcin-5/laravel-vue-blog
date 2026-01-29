@@ -32,6 +32,7 @@ class User extends Authenticatable
         'password',
         'role',
         'blog_quota',
+        'locale',
     ];
 
     // Ensure default role/blog_quota on create and adjust blog_quota when role changes

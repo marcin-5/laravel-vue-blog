@@ -27,7 +27,14 @@ class NewsletterController extends BasePublicController
         $blogs = Blog::query()
             ->where('is_published', true)
             ->orderBy('name')
-            ->get(['id', 'name', 'slug']);
+            ->get(['id', 'name', 'slug', 'locale']);
+
+        if ($selectedBlogId) {
+            $currentBlog = $blogs->firstWhere('id', $selectedBlogId);
+            if ($currentBlog && $currentBlog->locale) {
+                app()->setLocale($currentBlog->locale);
+            }
+        }
 
         return $this->renderWithTranslations('public/Newsletter', 'newsletter', [
             'blogs' => $blogs,
@@ -71,12 +78,20 @@ class NewsletterController extends BasePublicController
         $email = $request->query('email');
         $subscriptions = NewsletterSubscription::query()
             ->where('email', $email)
+            ->with('blog:id,locale')
             ->get();
+
+        if ($subscriptions->isNotEmpty()) {
+            $firstSubBlog = $subscriptions->first()->blog;
+            if ($firstSubBlog && $firstSubBlog->locale) {
+                app()->setLocale($firstSubBlog->locale);
+            }
+        }
 
         $blogs = Blog::query()
             ->where('is_published', true)
             ->orderBy('name')
-            ->get(['id', 'name', 'slug']);
+            ->get(['id', 'name', 'slug', 'locale']);
 
         return $this->renderWithTranslations('public/Newsletter', 'newsletter', [
             'blogs' => $blogs,
