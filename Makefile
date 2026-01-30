@@ -263,7 +263,7 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 	@echo ""
 	@echo ""
 	@echo "🔍 Verifying queue worker is running..."
-	@$(DOCKER_COMPOSE_PROD) exec -T queue ps aux | grep -q "[q]ueue:work" && echo "✅ Queue worker is running." || echo "❌ Queue worker is NOT running! Check logs: make prod-logs"
+	@docker top $$($(DOCKER_COMPOSE_PROD) ps -q queue) 2>/dev/null | grep -q "queue:work" && echo "✅ Queue worker is running." || echo "❌ Queue worker is NOT running! Check logs: make prod-logs"
 	@echo ""
 	@echo "✅ Production update complete."
 	@echo ""
