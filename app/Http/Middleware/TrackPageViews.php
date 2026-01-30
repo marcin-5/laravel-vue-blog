@@ -9,7 +9,6 @@ use Closure;
 use Illuminate\Database\ClassMorphViolationException;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
-use Psr\SimpleCache\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 
 use function is_string;
@@ -23,7 +22,6 @@ readonly class TrackPageViews
 
     /**
      * @throws ClassMorphViolationException
-     * @throws InvalidArgumentException
      */
     public function handle(Request $request, Closure $next): Response
     {
