@@ -44,7 +44,7 @@ services:
                 - APP_NAME=${APP_NAME:-laravel-queue}
                 - TZ=${TZ:-UTC}
         container_name: ${APP_NAME:-laravel-app}-queue
-        command: php artisan queue:work --tries=3
+        command: php artisan queue:work --sleep=3 --tries=3 --timeout=90 --rest=1
         restart: unless-stopped
         working_dir: /var/www/html
         environment:
