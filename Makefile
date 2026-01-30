@@ -139,7 +139,7 @@ DOCKER_COMPOSE_PROD = docker compose --env-file .env -p $(DOCKER_PROJECT_NAME_PR
 .PHONY: prod-up prod-down prod-restart prod-build prod-logs \
         prod-migrate prod-optimize prod-deploy prod-update prod-wait \
         prod-maintenance-on prod-maintenance-off prod-rebuild-pg-redis \
-        prod-versions prod-check-assets
+        prod-versions prod-check-assets prod-logs-queue prod-logs-app
 
 prod-up: ## Start production services
 	$(DOCKER_COMPOSE_PROD) up -d
@@ -155,6 +155,12 @@ prod-build: ## Build/rebuild production images
 
 prod-logs: ## Tail production logs
 	$(DOCKER_COMPOSE_PROD) logs -f
+
+prod-logs-queue: ## Tail only queue container logs
+	$(DOCKER_COMPOSE_PROD) logs -f queue
+
+prod-logs-app: ## Tail only app container logs
+	$(DOCKER_COMPOSE_PROD) logs -f app
 
 prod-wait: ## Wait until the app container is ready to accept php exec
 	@echo "Waiting for app container to be ready..."
