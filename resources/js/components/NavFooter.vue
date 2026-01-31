@@ -29,7 +29,11 @@ const visibleItems = computed(() => {
         <SidebarGroupContent>
             <SidebarMenu>
                 <SidebarMenuItem v-for="item in visibleItems" :key="item.title">
-                    <SidebarMenuButton as-child class="text-neutral-600 hover:text-neutral-800 dark:text-neutral-300 dark:hover:text-neutral-100">
+                    <SidebarMenuButton
+                        :class="item.href === page.url ? 'cursor-default' : 'cursor-pointer'"
+                        :is-active="item.href === page.url"
+                        as-child
+                    >
                         <Link :href="item.href">
                             <component :is="item.icon" />
                             <span>{{ item.title }}</span>
