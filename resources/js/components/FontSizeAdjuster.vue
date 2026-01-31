@@ -23,8 +23,8 @@ const { fontSize, updateFontSize } = useFontSize();
             <DropdownMenuSeparator class="-mx-4 my-4" />
             <div class="py-2">
                 <Slider
-                    :max="125"
-                    :min="85"
+                    :max="120"
+                    :min="80"
                     :model-value="fontSize"
                     :step="5"
                     class="w-full"
@@ -32,9 +32,9 @@ const { fontSize, updateFontSize } = useFontSize();
                 />
             </div>
             <div class="mt-4 flex justify-between text-xs text-muted-foreground">
-                <span>85%</span>
-                <span>105%</span>
-                <span>125%</span>
+                <span>80%</span>
+                <span>100%</span>
+                <span>120%</span>
             </div>
         </DropdownMenuContent>
     </DropdownMenu>

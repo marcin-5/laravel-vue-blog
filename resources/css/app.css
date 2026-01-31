@@ -121,7 +121,7 @@
     html {
         --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
         font-family: var(--blog-body-font);
-        font-size: calc(105% * var(--blog-body-scale));
+        font-size: calc(100% * var(--blog-body-scale));
     }
 }
 

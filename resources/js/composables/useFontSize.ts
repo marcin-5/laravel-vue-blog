@@ -1,7 +1,7 @@
 import { onMounted, ref } from 'vue';
 
 const STORAGE_KEY = 'font-size-adjust';
-const DEFAULT_SIZE = 105;
+const DEFAULT_SIZE = 100;
 
 export function applyFontSize(size: number) {
     if (typeof window === 'undefined') {
