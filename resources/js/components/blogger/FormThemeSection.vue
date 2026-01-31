@@ -4,10 +4,12 @@ import FormSelectField from '@/components/blogger/FormSelectField.vue';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
+import { TooltipButton } from '@/components/ui/tooltip';
 import { useCssVariables } from '@/composables/useCssVariables';
+import { useToast } from '@/composables/useToast';
 import type { ThemeColors } from '@/types/blog.types';
-import { Settings2 } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { Download, Settings2, Upload } from 'lucide-vue-next';
+import { computed, useTemplateRef } from 'vue';
 
 interface Props {
     title: string;
@@ -48,10 +50,17 @@ interface Props {
         fontScaleCorrection?: string;
         mottoStyle?: string;
         footerScale?: string;
+        exportTooltip?: string;
+        importTooltip?: string;
+        importError?: string;
+        importSuccess?: string;
     };
 }
 
 const props = defineProps<Props>();
+
+const { toast } = useToast();
+const fileInput = useTemplateRef<HTMLInputElement>('fileInput');
 
 const { variables } = useCssVariables([
     '--background',
@@ -73,6 +82,65 @@ const { variables } = useCssVariables([
 const emit = defineEmits<{
     (e: 'update:colors', value: ThemeColors): void;
 }>();
+
+function exportTheme() {
+    const data = JSON.stringify(props.colors ?? {}, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const variant = props.idPrefix.includes('light') ? 'light' : 'dark';
+    link.download = `blog-theme-${variant}-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
+function triggerImport() {
+    fileInput.value?.click();
+}
+
+async function handleImport(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+    if (!file) {
+        return;
+    }
+
+    try {
+        const text = await file.text();
+        const theme = JSON.parse(text);
+
+        // Basic validation
+        if (typeof theme !== 'object' || theme === null) {
+            throw new Error('Invalid format');
+        }
+
+        let colorsToImport = theme;
+
+        // Compatibility check: if the user tries to import a full theme (with light/dark keys)
+        // into a specific section, we should pick the relevant part or the whole object if it's flat.
+        if (theme.light || theme.dark) {
+            const variant = props.idPrefix.includes('light') ? 'light' : 'dark';
+            colorsToImport = theme[variant] || (variant === 'light' ? theme.dark : theme.light) || theme;
+        }
+
+        emit('update:colors', {
+            ...(props.colors ?? {}),
+            ...colorsToImport,
+        });
+        toast({
+            title: props.translations.importSuccess || 'Import successful',
+            variant: 'default',
+        });
+    } catch {
+        toast({
+            title: props.translations.importError || 'Import failed',
+            variant: 'destructive',
+        });
+    } finally {
+        target.value = '';
+    }
+}
 
 // Helper function to update a specific key in an object
 function updateValue(key: string, value: string) {
@@ -216,7 +284,24 @@ const fontFields = computed(() => [
 
 <template>
     <div>
-        <h4 class="mb-2 text-sm font-medium opacity-80">{{ props.title }}</h4>
+        <div class="mb-2 flex items-center justify-between">
+            <h4 class="text-sm font-medium opacity-80">{{ props.title }}</h4>
+            <div class="flex gap-1">
+                <input ref="fileInput" accept=".json" class="hidden" type="file" @change="handleImport" />
+                <TooltipButton
+                    :tooltip-content="props.translations.importTooltip || ''"
+                    size="sm"
+                    type="button"
+                    variant="ghost"
+                    @click="triggerImport"
+                >
+                    <Upload class="h-3.5 w-3.5" />
+                </TooltipButton>
+                <TooltipButton :tooltip-content="props.translations.exportTooltip || ''" size="sm" type="button" variant="ghost" @click="exportTheme">
+                    <Download class="h-3.5 w-3.5" />
+                </TooltipButton>
+            </div>
+        </div>
 
         <div class="mb-6 grid grid-cols-1 gap-4 border-b border-border pb-6 sm:grid-cols-2">
             <div v-for="field in fontFields" :key="field.key" class="flex flex-col gap-2">

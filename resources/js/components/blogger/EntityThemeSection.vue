@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import FormThemeSection from '@/components/blogger/FormThemeSection.vue';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { BlogTheme } from '@/types/blog.types';
+import { Info } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 interface Props {
@@ -54,10 +56,21 @@ const themeDarkErrors = computed(() => filterErrorsByPrefix(props.errors, 'theme
 
 <template>
     <div class="mt-4 rounded-md border border-border p-4">
-        <h3 class="mb-3 text-lg font-semibold">{{ translations.section.title }}</h3>
-        <p class="mb-3 text-sm text-muted-foreground">
-            {{ translations.section.description }}
-        </p>
+        <div class="mb-3 flex items-center gap-2">
+            <h3 class="text-lg font-semibold">{{ translations.section.title }}</h3>
+            <TooltipProvider>
+                <Tooltip :delay-duration="0">
+                    <TooltipTrigger as-child>
+                        <button class="flex items-center justify-center text-muted-foreground hover:text-foreground">
+                            <Info class="h-4 w-4" />
+                        </button>
+                    </TooltipTrigger>
+                    <TooltipContent class="max-w-xs" side="top">
+                        <p class="text-sm">{{ translations.section.description }}</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        </div>
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <FormThemeSection
                 v-model:colors="themeLight"

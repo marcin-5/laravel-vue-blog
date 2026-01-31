@@ -20,6 +20,10 @@ export function useBloggerFormTranslations() {
         light: t('blogger.form.theme_light'),
         dark: t('blogger.form.theme_dark'),
         advancedHint: t('blogger.form.theme_advanced_hint'),
+        export: t('blogger.form.theme_export'),
+        import: t('blogger.form.theme_import'),
+        importError: t('blogger.form.theme_import_error'),
+        importSuccess: t('blogger.form.theme_import_success'),
         colorBackground: t('blogger.form.theme_color_background'),
         colorBackgroundTooltip: t('blogger.form.theme_color_background_tooltip'),
         colorForeground: t('blogger.form.theme_color_foreground'),
@@ -49,6 +53,10 @@ export function useBloggerFormTranslations() {
     }));
 
     const themeTranslations = computed(() => ({
+        exportTooltip: themeSectionTranslations.value.export,
+        importTooltip: themeSectionTranslations.value.import,
+        importError: themeSectionTranslations.value.importError,
+        importSuccess: themeSectionTranslations.value.importSuccess,
         background: themeSectionTranslations.value.colorBackground,
         backgroundTooltip: themeSectionTranslations.value.colorBackgroundTooltip,
         foreground: themeSectionTranslations.value.colorForeground,
