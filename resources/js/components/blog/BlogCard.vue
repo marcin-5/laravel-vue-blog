@@ -37,7 +37,7 @@ const CATEGORY_BADGE_CLASSES = 'rounded-full bg-gray-100 px-2 py-0.5 text-xs tex
 
         <div v-if="hasAuthor" :class="AUTHOR_CLASSES">{{ authorLabel }} {{ blog.author }}</div>
 
-        <div v-if="hasDescription" :class="DESCRIPTION_CLASSES" v-html="props.blog.descriptionHtml" />
+        <div v-if="hasDescription" :class="DESCRIPTION_CLASSES" data-nosnippet v-html="props.blog.descriptionHtml" />
 
         <div v-if="hasCategories" :class="CATEGORY_CONTAINER_CLASSES">
             <span v-for="category in blog.categories" :key="category.id" :class="CATEGORY_BADGE_CLASSES">

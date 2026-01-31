@@ -158,7 +158,7 @@ class SeoService
                         'name' => $blog['author'],
                     ],
                     'url' => $baseUrl . '/blogs/' . $blog['slug'],
-                    'description' => !empty($blog['descriptionHtml']) ? strip_tags($blog['descriptionHtml']) : null,
+                    'abstract' => !empty($blog['descriptionHtml']) ? strip_tags($blog['descriptionHtml']) : null,
                 ];
             })->all(),
         ];
