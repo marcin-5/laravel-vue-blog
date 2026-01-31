@@ -21,6 +21,7 @@
     --font-vollkorn: 'Vollkorn Variable', serif;
     --font-yrsa: 'Yrsa Variable', serif;
 
+
     --font-sans: var(--font-montserrat);
     --font-serif: var(--font-faustina);
 
@@ -195,9 +196,9 @@
     --constructive: hsl(121 28% 14%);
     --constructive-hover: hsl(126 35% 25%);
     --constructive-foreground: hsl(135 35% 91%);
-    --destructive: hsl(5 53% 47%);
-    --destructive-hover: hsl(0 64% 69%);
-    --destructive-foreground: hsl(5 79% 98%);
+    --destructive: hsl(5 53% 35%);
+    --destructive-hover: hsl(0 44% 49%);
+    --destructive-foreground: hsl(5 89% 98%);
     --secondary: hsl(102 21% 12%);
     --secondary-hover: hsl(102 20% 25%);
     --secondary-foreground: hsl(102 75% 93%);
