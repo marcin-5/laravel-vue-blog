@@ -139,7 +139,8 @@ DOCKER_COMPOSE_PROD = docker compose --env-file .env -p $(DOCKER_PROJECT_NAME_PR
 .PHONY: prod-up prod-down prod-restart prod-build prod-logs \
         prod-migrate prod-optimize prod-deploy prod-update prod-wait \
         prod-maintenance-on prod-maintenance-off prod-rebuild-pg-redis \
-        prod-versions prod-check-assets prod-logs-queue prod-logs-app
+        prod-versions prod-check-assets prod-logs-queue prod-logs-app \
+        prod-health-queue
 
 prod-up: ## Start production services
 	$(DOCKER_COMPOSE_PROD) up -d
@@ -161,6 +162,18 @@ prod-logs-queue: ## Tail only queue container logs
 
 prod-logs-app: ## Tail only app container logs
 	$(DOCKER_COMPOSE_PROD) logs -f app
+
+prod-health-queue: ## Check health status of the queue worker container (uses Docker healthcheck)
+	@cid=$$($(DOCKER_COMPOSE_PROD) ps -q queue); \
+	if [ -z "$$cid" ]; then \
+	  echo "❌ queue container not found"; exit 1; \
+	fi; \
+	status=$$(docker inspect -f '{{.State.Health.Status}}' $$cid 2>/dev/null || echo unknown); \
+	if [ "$$status" = "healthy" ]; then \
+	  echo "✅ Queue worker is healthy."; \
+	else \
+	  echo "❌ Queue worker is $$status"; exit 1; \
+	fi
 
 prod-wait: ## Wait until the app container is ready to accept php exec
 	@echo "Waiting for app container to be ready..."
@@ -263,7 +276,9 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 	@echo ""
 	@echo ""
 	@echo "🔍 Verifying queue worker is running..."
-	@docker top $$($(DOCKER_COMPOSE_PROD) ps -q queue) 2>/dev/null | grep -q "queue:work" && echo "✅ Queue worker is running." || echo "❌ Queue worker is NOT running! Check logs: make prod-logs"
+	@$(DOCKER_COMPOSE_PROD) exec -T queue sh -lc 'grep -qa "artisan.*queue:work" /proc/1/cmdline' \
+      && echo "✅ Queue worker is running." \
+      || echo "❌ Queue worker is NOT running! Check logs: make prod-logs-queue"
 	@echo ""
 	@echo "✅ Production update complete."
 	@echo ""

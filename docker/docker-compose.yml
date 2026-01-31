@@ -70,6 +70,12 @@ services:
             - ssr
         networks:
             - laravel-network
+        healthcheck:
+            test: [ "CMD-SHELL", "grep -qa 'artisan.*queue:work' /proc/1/cmdline" ]
+            interval: 10s
+            timeout: 5s
+            retries: 3
+            start_period: 10s
 
     scheduler:
         build:
