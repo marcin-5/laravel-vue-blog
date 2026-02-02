@@ -24,6 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     supervisor \
     ca-certificates \
+    procps \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions using the installer
