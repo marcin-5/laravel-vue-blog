@@ -54,6 +54,7 @@ export interface SEO {
     publishedTime?: string | null;
     modifiedTime?: string | null;
     structuredData: Record<string, any>;
+    alternateLinks?: Array<{ hreflang: string; href: string }> | null;
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;

@@ -40,6 +40,12 @@ class PublicHomeController extends BasePublicController
                     $data['selectedCategoryIds'],
                 ));
 
+        $alternateLinks = [
+            ['hreflang' => 'pl', 'href' => $canonicalUrl],
+            ['hreflang' => 'en', 'href' => $canonicalUrl],
+            ['hreflang' => 'x-default', 'href' => $canonicalUrl],
+        ];
+
         $seoData = new SeoData(
             title: $seoTitle,
             description: $seoDescription,
@@ -53,6 +59,7 @@ class PublicHomeController extends BasePublicController
                 $seoDescription,
                 $baseUrl,
             ),
+            alternateLinks: $alternateLinks,
         );
 
         return $this->renderWithTranslations('public/Welcome', 'home', array_merge($data, [

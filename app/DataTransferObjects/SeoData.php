@@ -14,6 +14,7 @@ class SeoData
         public readonly array $structuredData,
         public readonly ?string $publishedTime = null,
         public readonly ?string $modifiedTime = null,
+        public readonly ?array $alternateLinks = null,
     ) {
     }
 
@@ -29,6 +30,7 @@ class SeoData
             'structuredData' => $this->structuredData,
             'publishedTime' => $this->publishedTime,
             'modifiedTime' => $this->modifiedTime,
+            'alternateLinks' => $this->alternateLinks,
         ], fn($value) => $value !== null);
     }
 }

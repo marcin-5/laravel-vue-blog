@@ -11,6 +11,7 @@ interface Props {
     publishedTime?: string | null;
     modifiedTime?: string | null;
     structuredData?: Record<string, any> | null;
+    alternateLinks?: Array<{ hreflang: string; href: string }> | null;
 }
 
 defineProps<Props>();
@@ -22,6 +23,11 @@ defineProps<Props>();
         <meta :content="description || ''" name="description" />
         <meta content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" name="robots" />
         <link v-if="canonicalUrl" :href="canonicalUrl" rel="canonical" />
+
+        <template v-for="link in alternateLinks" :key="link.hreflang">
+            <link :href="link.href" :hreflang="link.hreflang" rel="alternate" />
+        </template>
+
         <meta v-if="locale" :content="locale" http-equiv="content-language" />
 
         <!-- Open Graph / Facebook -->
