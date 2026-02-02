@@ -47,5 +47,6 @@ return [
         'Chrome-Lighthouse',
         'TelegramBot',
         'meta-externalagent',
+        'Google-InspectionTool',
     ],
 ];
