@@ -44,7 +44,7 @@ services:
                 - APP_NAME=${APP_NAME:-laravel-queue}
                 - TZ=${TZ:-UTC}
         container_name: ${APP_NAME:-laravel-app}-queue
-        command: php artisan queue:work --sleep=3 --tries=3 --timeout=90
+        command: supervisord -n -c /etc/supervisor/conf.d/supervisord.conf
         restart: unless-stopped
         working_dir: /var/www/html
         environment:
@@ -71,11 +71,11 @@ services:
         networks:
             - laravel-network
         healthcheck:
-            test: [ "CMD-SHELL", "grep -qa 'artisan.*queue:work' /proc/1/cmdline" ]
-            interval: 10s
-            timeout: 5s
+            test: [ "CMD-SHELL", "timeout 10s php artisan queue:monitor redis:default || exit 1" ]
+            interval: 30s
+            timeout: 10s
             retries: 3
-            start_period: 10s
+            start_period: 30s
 
     scheduler:
         build:

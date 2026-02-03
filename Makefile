@@ -225,6 +225,8 @@ prod-deploy: ## Build/Start prod, run optimizations & migrations
 	# If building from source on the server, ensure latest code first:
 	git fetch --all
 	git pull --ff-only
+	@echo "🧹 Clearing old bootstrap cache to prevent worker stuck..."
+	rm -rf /srv/laravel-blog/bootstrap_cache/* 2>/dev/null || true
 	$(DOCKER_COMPOSE_PROD) up -d --build
 	$(MAKE) prod-wait
 	$(MAKE) prod-versions
@@ -250,8 +252,13 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 	$(MAKE) prod-maintenance-on
 	git fetch --all
 	git pull --ff-only
+	@echo "🧹 Clearing old bootstrap cache to prevent worker stuck..."
+	rm -rf /srv/laravel-blog/bootstrap_cache/* 2>/dev/null || true
 	@echo "🔨 Building fresh images for core services (app, ssr, queue, scheduler)..."
 	$(DOCKER_COMPOSE_PROD) build --no-cache --pull app ssr queue scheduler
+	@echo "🔧 Clearing Laravel caches before recreate..."
+	-$(DOCKER_COMPOSE_PROD) exec -T app php artisan optimize:clear || true
+	-$(DOCKER_COMPOSE_PROD) exec -T app php artisan package:discover --ansi || true
 	@echo "🚀 Recreating core services without touching caddy..."
 	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps app ssr queue scheduler
 	$(MAKE) prod-wait
@@ -260,9 +267,6 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 	@echo "🔍 Checking production assets..."
 	$(MAKE) prod-check-assets
 	@echo ""
-	@echo "🔧 Clearing all Laravel caches..."
-	$(DOCKER_COMPOSE_PROD) exec -T app php artisan optimize:clear
-	$(DOCKER_COMPOSE_PROD) exec -T app php artisan package:discover --ansi
 	@echo ""
 	@echo "🗄️  Running database migrations..."
 	$(MAKE) prod-migrate
@@ -275,10 +279,13 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 	$(DOCKER_COMPOSE_PROD) exec -T app wget -q -O- --timeout=5 "http://ssr:13714/render" 2>&1 || echo "SSR server not responding to /render"
 	@echo ""
 	@echo ""
-	@echo "🔍 Verifying queue worker is running..."
-	@$(DOCKER_COMPOSE_PROD) exec -T queue sh -lc 'grep -qa "artisan.*queue:work" /proc/1/cmdline' \
-      && echo "✅ Queue worker is running." \
-      || echo "❌ Queue worker is NOT running! Check logs: make prod-logs-queue"
+	@echo "🔍 Verifying queue worker process..."
+	@$(DOCKER_COMPOSE_PROD) exec -T queue sh -lc 'ps aux | grep -q "[q]ueue:work" || ps aux | grep -q "[s]upervisord"' \
+      && echo "✅ Queue process or supervisor detected." \
+      || echo "❌ No queue process found! Check logs: make prod-logs-queue"
+	$(MAKE) prod-health-queue
+	@echo "🔎 Queue status:"
+	$(DOCKER_COMPOSE_PROD) exec app php artisan queue:monitor redis:default
 	@echo ""
 	@echo "✅ Production update complete."
 	@echo ""
