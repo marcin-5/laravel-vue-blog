@@ -140,7 +140,7 @@ DOCKER_COMPOSE_PROD = docker compose --env-file .env -p $(DOCKER_PROJECT_NAME_PR
         prod-migrate prod-optimize prod-deploy prod-update prod-wait \
         prod-maintenance-on prod-maintenance-off prod-rebuild-pg-redis \
         prod-versions prod-check-assets prod-logs-queue prod-logs-app \
-        prod-health-queue
+        prod-health-queue prod-queue-diag
 
 prod-up: ## Start production services
 	$(DOCKER_COMPOSE_PROD) up -d
@@ -162,6 +162,35 @@ prod-logs-queue: ## Tail only queue container logs
 
 prod-logs-app: ## Tail only app container logs
 	$(DOCKER_COMPOSE_PROD) logs -f app
+
+prod-queue-diag: ## 🔍 Generate diagnostic data for queue worker debugging
+	@echo "=== Queue Worker Diagnostics ==="
+	@echo ""
+	@echo "📦 Container status:"
+	$(DOCKER_COMPOSE_PROD) ps queue
+	@echo ""
+	@echo "🔄 Queue monitor:"
+	-$(DOCKER_COMPOSE_PROD) exec -T queue timeout 10s php artisan queue:monitor redis:default || echo "Failed to run queue:monitor"
+	@echo ""
+	@echo "📋 Supervisor status:"
+	-$(DOCKER_COMPOSE_PROD) exec -T queue supervisorctl status || echo "supervisorctl not available"
+	@echo ""
+	@echo "🔧 Running processes:"
+	-$(DOCKER_COMPOSE_PROD) exec -T queue ps aux | grep -E 'queue|supervisord|php.*artisan'
+	@echo ""
+	@echo "📜 Supervisor logs (last 50 lines):"
+	-$(DOCKER_COMPOSE_PROD) exec -T queue tail -n 50 /var/log/supervisor/supervisord.log
+	@echo ""
+	@echo "📜 Queue worker logs (last 50 lines):"
+	-$(DOCKER_COMPOSE_PROD) exec -T queue tail -n 50 /var/www/html/storage/logs/supervisor_queue.log 2>/dev/null || echo "No queue log file"
+	@echo ""
+	@echo "🗄️ Database connection test:"
+	-$(DOCKER_COMPOSE_PROD) exec -T queue php artisan tinker --execute="DB::connection()->getPdo(); echo 'OK';" || echo "DB connection failed"
+	@echo ""
+	@echo "📡 Redis connection test:"
+	-$(DOCKER_COMPOSE_PROD) exec -T queue php artisan tinker --execute="Illuminate\\Support\\Facades\\Redis::ping(); echo 'OK';" || echo "Redis connection failed"
+	@echo ""
+	@echo "=== End of Diagnostics ==="
 
 prod-health-queue: ## Check health status of the queue worker container (uses Docker healthcheck)
  cid=$$($(DOCKER_COMPOSE_PROD) ps -q queue); \
