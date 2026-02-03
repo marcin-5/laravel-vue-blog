@@ -164,16 +164,23 @@ prod-logs-app: ## Tail only app container logs
 	$(DOCKER_COMPOSE_PROD) logs -f app
 
 prod-health-queue: ## Check health status of the queue worker container (uses Docker healthcheck)
-	@cid=$$($(DOCKER_COMPOSE_PROD) ps -q queue); \
+ cid=$$($(DOCKER_COMPOSE_PROD) ps -q queue); \
 	if [ -z "$$cid" ]; then \
 	  echo "❌ queue container not found"; exit 1; \
 	fi; \
-	status=$$(docker inspect -f '{{.State.Health.Status}}' $$cid 2>/dev/null || echo unknown); \
-	if [ "$$status" = "healthy" ]; then \
-	  echo "✅ Queue worker is healthy."; \
-	else \
-	  echo "❌ Queue worker is $$status"; exit 1; \
-	fi
+	for i in `seq 1 12`; do \
+	  status=$$(docker inspect -f '{{.State.Health.Status}}' $$cid 2>/dev/null || echo "unknown"); \
+	  if [ "$$status" = "healthy" ]; then \
+	    echo "✅ Queue worker is healthy."; \
+	    exit 0; \
+	  fi; \
+	  if [ $$i -eq 12 ]; then \
+	    echo "❌ Queue healthcheck failed after 120s ($$status)"; \
+	    exit 1; \
+	  fi; \
+	  echo "Queue is $$status ($$i/12), waiting 10s..."; \
+	  sleep 10; \
+	done
 
 prod-wait: ## Wait until the app container is ready to accept php exec
 	@echo "Waiting for app container to be ready..."
