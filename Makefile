@@ -163,6 +163,10 @@ prod-logs-queue: ## Tail only queue container logs
 prod-logs-app: ## Tail only app container logs
 	$(DOCKER_COMPOSE_PROD) logs -f app
 
+prod-queue-clear-logs: ## 🧹 Clear the queue worker log file
+	$(DOCKER_COMPOSE_PROD) exec -T queue sh -c '> /var/www/html/storage/logs/supervisor_queue.log'
+	@echo "✅ Queue log cleared."
+
 prod-queue-diag: ## 🔍 Generate diagnostic data for queue worker debugging
 	@echo "=== Queue Worker Diagnostics ==="
 	@echo ""
@@ -186,6 +190,10 @@ prod-queue-diag: ## 🔍 Generate diagnostic data for queue worker debugging
 	@echo ""
 	@echo "📜 Queue worker logs (last 50 lines):"
 	-$(DOCKER_COMPOSE_PROD) exec -T queue tail -n 50 /var/www/html/storage/logs/supervisor_queue.log 2>/dev/null || echo "No queue log file"
+	@echo ""
+	@echo "💡 Tip: If you see old errors above, you can clear the log file using:"
+	@echo "   make prod-queue-clear-logs"
+	@echo "   Note: Since 'storage' is a persistent volume, old logs stay there after restart."
 	@echo ""
 	@echo "🗄️ Database connection test:"
 	-$(DOCKER_COMPOSE_PROD) exec -T queue php artisan tinker --execute="DB::connection()->getPdo(); echo 'OK';" || echo "DB connection failed"
@@ -324,7 +332,7 @@ prod-update: ## Update code from Git and restart selected services with zero-502
       || echo "❌ No queue process found! Check logs: make prod-logs-queue"
 	$(MAKE) prod-health-queue
 	@echo "🔎 Queue status:"
-	$(DOCKER_COMPOSE_PROD) exec app php artisan queue:monitor redis:default
+	$(DOCKER_COMPOSE_PROD) exec app php artisan queue:monitor redis
 	@echo ""
 	@echo "✅ Production update complete."
 	@echo ""
