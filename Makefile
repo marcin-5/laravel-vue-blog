@@ -170,7 +170,10 @@ prod-queue-diag: ## 🔍 Generate diagnostic data for queue worker debugging
 	$(DOCKER_COMPOSE_PROD) ps queue
 	@echo ""
 	@echo "🔄 Queue monitor:"
-	-$(DOCKER_COMPOSE_PROD) exec -T queue timeout 10s php artisan queue:monitor redis:default || echo "Failed to run queue:monitor"
+	-$(DOCKER_COMPOSE_PROD) exec -T queue php artisan queue:monitor redis || echo "Failed to run queue:monitor"
+	@echo ""
+	@echo "⚙️ Laravel Queue Config:"
+	-$(DOCKER_COMPOSE_PROD) exec -T queue php artisan config:show queue || echo "Failed to show queue config"
 	@echo ""
 	@echo "📋 Supervisor status:"
 	-$(DOCKER_COMPOSE_PROD) exec -T queue supervisorctl status || echo "supervisorctl not available"

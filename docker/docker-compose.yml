@@ -72,7 +72,7 @@ services:
         networks:
             - laravel-network
         healthcheck:
-            test: [ "CMD-SHELL", "timeout 10s php artisan queue:monitor redis:default || exit 1" ]
+            test: [ "CMD-SHELL", "php artisan queue:monitor redis || exit 1" ]
             interval: 30s
             timeout: 10s
             retries: 3
