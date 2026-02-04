@@ -180,7 +180,7 @@ prod-queue-diag: ## 🔍 Generate diagnostic data for queue worker debugging
 	-$(DOCKER_COMPOSE_PROD) exec -T queue php artisan config:show queue || echo "Failed to show queue config"
 	@echo ""
 	@echo "📋 Supervisor status:"
-	-$(DOCKER_COMPOSE_PROD) exec -T queue supervisorctl status || echo "supervisorctl not available"
+	-$(DOCKER_COMPOSE_PROD) exec -T --env SUPERVISOR_PASSWORD=$(SUPERVISOR_PASSWORD) queue supervisorctl status || echo "supervisorctl not available"
 	@echo ""
 	@echo "🔧 Running processes:"
 	-$(DOCKER_COMPOSE_PROD) exec -T queue ps aux | grep -E 'queue|supervisord|php.*artisan'
