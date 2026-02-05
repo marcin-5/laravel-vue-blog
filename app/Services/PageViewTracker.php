@@ -115,7 +115,7 @@ readonly class PageViewTracker
         }
 
         // Check if any of the keys already exist (avoid duplicates)
-        if (array_any($keysToCheck, fn($key) => $this->cache->has($key))) {
+        if (collect($keysToCheck)->some(fn($key) => $this->cache->has($key))) {
             return;
         }
 
