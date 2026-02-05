@@ -141,7 +141,7 @@ class PublicBlogController extends BasePublicController
                 'author' => $post->user?->name ?? $blog->user->name,
                 'author_email' => $post->user?->email ?? $blog->user->email,
                 'contentHtml' => $post->content_html,
-                'published_at' => $this->formatDateForLocale($post->published_at),
+                'published_at' => $post->published_at?->format('Y-m-d'),
                 'excerpt' => $post->excerpt,
                 'extensions' => $post->extensions()
                     ->where('is_published', true)
