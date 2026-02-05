@@ -100,28 +100,23 @@ readonly class PageViewTracker
         // Blocking keys
         $baseKey = sprintf('page_view:block:%s:%d', $viewable->getMorphClass(), $viewable->getKey());
 
-        $keysToCheck = [];
-
-        if ($fingerprint !== null) {
-            $keysToCheck[] = $baseKey . ':fingerprint:' . $fingerprint;
-        }
-
+        // Choose a single identity to de-duplicate by (do not block other identities)
+        // Priority: user -> visitor -> fingerprint
+        $identityKey = null;
         if ($userId !== null) {
-            $keysToCheck[] = $baseKey . ':user:' . $userId;
+            $identityKey = $baseKey . ':user:' . $userId;
+        } elseif ($visitorId !== null) {
+            $identityKey = $baseKey . ':visitor:' . $visitorId;
+        } elseif ($fingerprint !== null) {
+            $identityKey = $baseKey . ':fingerprint:' . $fingerprint;
         }
 
-        if ($visitorId !== null) {
-            $keysToCheck[] = $baseKey . ':visitor:' . $visitorId;
-        }
-
-        // Check if any of the keys already exist (avoid duplicates)
-        if (collect($keysToCheck)->some(fn($key) => $this->cache->has($key))) {
+        if ($identityKey !== null && $this->cache->has($identityKey)) {
             return;
         }
 
-        // Set blocking keys
-        foreach ($keysToCheck as $key) {
-            $this->cache->put($key, 1, $blockTtl);
+        if ($identityKey !== null) {
+            $this->cache->put($identityKey, 1, $blockTtl);
         }
 
         // Dispatch the page view record to the queue
