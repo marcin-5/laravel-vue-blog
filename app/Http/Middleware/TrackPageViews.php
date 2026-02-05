@@ -52,8 +52,11 @@ readonly class TrackPageViews
             $postSlug = $route->parameter('postSlug');
 
             if ($blog instanceof Blog && is_string($postSlug)) {
+                // Use simple slug lookup without published_at check to avoid timing issues
+                // with now() being called at different moments. The controller already
+                // validated that the post is published before rendering the page.
                 $post = $blog->posts()
-                    ->findBySlugForPublic($postSlug)
+                    ->where('slug', $postSlug)
                     ->first();
 
                 if ($post instanceof Post) {
