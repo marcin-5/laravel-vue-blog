@@ -93,8 +93,8 @@ fi
 
 # If running as root, fix ownership and permissions on mounted volumes
 if [ "$(id -u)" = "0" ]; then
-    echo "Fixing permissions on storage, bootstrap/cache, public, and SSR..."
-    chown -R www-data:www-data storage bootstrap/cache public bootstrap/ssr || true
+    echo "Fixing permissions on storage, bootstrap/cache, public, SSR, vendor, and app..."
+    chown -R www-data:www-data storage bootstrap/cache public bootstrap/ssr vendor app || true
     chmod -R 775 storage bootstrap/cache || true
 fi
 
