@@ -153,6 +153,8 @@ RUN mkdir -p /opt/built/public/build /opt/built/public/img /opt/built/bootstrap/
 # You can have separate php.ini for development (e.g., with Xdebug enabled)
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
 
+COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
 EXPOSE 9000
 CMD ["php-fpm"]
 
