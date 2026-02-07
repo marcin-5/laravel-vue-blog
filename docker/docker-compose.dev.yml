@@ -70,12 +70,16 @@ services:
       - laravel-network
 
   postgres:
+    image: postgres:15-alpine
     container_name: ${APP_NAME:-laravel-app}-postgres-dev
     ports:
       - "5432:5432"
 
   redis:
+    image: redis:7-alpine
     container_name: ${APP_NAME:-laravel-app}-redis-dev
+    volumes:
+      - redis_data:/data
 
 volumes:
   fish_history:
