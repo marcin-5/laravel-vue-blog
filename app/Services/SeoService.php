@@ -57,7 +57,7 @@ class SeoService
                 'headline' => $post->title,
                 'url' => $baseUrl . '/blogs/' . $blog->slug . '/' . $post->slug,
                 'datePublished' => $post->published_at?->toIso8601String(),
-                'description' => $post->excerpt ? strip_tags($post->excerpt) : null,
+                'abstract' => $post->excerpt ? strip_tags($post->excerpt) : null,
             ])->all(),
             'breadcrumb' => $this->generateBreadcrumbStructuredData($baseUrl, $blogUrl, $blog->name),
         ];
