@@ -72,7 +72,7 @@ watch(
                         :key="link.route"
                         :as="link.as"
                         :class="[
-                            'inline-block rounded-sm px-5 py-1.5 text-sm leading-normal text-foreground',
+                            'inline-block rounded-sm px-5 py-1.5 text-sm leading-normal text-primary-foreground',
                             link.emphasized
                                 ? 'border border-border hover:border-primary/20 dark:hover:border-primary/30'
                                 : 'border border-transparent hover:border-border',
@@ -112,7 +112,7 @@ watch(
                         :key="link.route"
                         :as="link.as"
                         :class="[
-                            'inline-block rounded-sm px-4 py-2 text-sm leading-normal text-foreground',
+                            'inline-block rounded-sm px-4 py-2 text-sm leading-normal text-primary-foreground',
                             link.emphasized
                                 ? 'border border-border hover:border-primary/20 dark:hover:border-primary/30'
                                 : 'border border-transparent hover:border-border',
