@@ -65,7 +65,7 @@ it('aggregates blog views and post views with default sorting and limits', funct
         createPageView($postMorph, $data['viewable_id']);
     }
 
-    $service = new StatsService;
+    $service = app(StatsService::class);
     $criteria = new StatsCriteria(range: StatsRange::Week, limit: 10);
 
     $results = $service->blogViews($criteria);
@@ -105,7 +105,7 @@ it('filters blog stats by blogger and blog and applies name sorting', function (
         createPageView($blogMorph, $data['viewable_id']);
     }
 
-    $service = new StatsService;
+    $service = app(StatsService::class);
     $criteria = new StatsCriteria(
         range: StatsRange::Week,
         bloggerId: $owner1->id,
@@ -140,7 +140,7 @@ it('limits number of returned blogs to at least one when size is small positive'
         createPageView($blogMorph, $data['viewable_id']);
     }
 
-    $service = new StatsService;
+    $service = app(StatsService::class);
     $criteria = new StatsCriteria(range: StatsRange::Week, limit: 1);
 
     $results = $service->blogViews($criteria);
@@ -176,7 +176,7 @@ it('aggregates post views with blogger, blog, range and sorting', function () {
     $oldView = createPageView($postMorph, $post1->id, ['session_id' => 'old']);
     $oldView->forceFill(['created_at' => now()->subMonths(2)])->save();
 
-    $service = new StatsService;
+    $service = app(StatsService::class);
     $criteria = new StatsCriteria(
         range: StatsRange::Week,
         bloggerId: $owner->id,
@@ -215,7 +215,7 @@ it('applies title sorting and respects post limit', function () {
         createPageView($postMorph, $post->id);
     }
 
-    $service = new StatsService;
+    $service = app(StatsService::class);
     $criteria = new StatsCriteria(
         range: StatsRange::Week,
         blogId: $blog->id,
@@ -257,7 +257,7 @@ it('correctly counts post views when blog has multiple blog views', function () 
         createPageView($blogMorph, $blog->id);
     }
 
-    $service = new StatsService;
+    $service = app(StatsService::class);
     $criteria = new StatsCriteria(range: StatsRange::Week);
 
     $results = $service->blogViews($criteria);
@@ -303,7 +303,7 @@ it('aggregates visitor views with blog filter and sorts by post views', function
 
     createPageView($postMorph, $postBlog2->id, ['user_id' => $userBob->id, 'visitor_id' => $visitorIdBob]);
 
-    $service = new StatsService;
+    $service = app(StatsService::class);
     $criteria = new StatsCriteria(
         range: StatsRange::Week,
         blogId: $blog1->id,
@@ -334,7 +334,7 @@ it('aggregates visitor views by fingerprint', function () {
     // Another fingerprint
     createPageView($blogMorph, $blog->id, ['visitor_id' => 'v3', 'fingerprint' => 'f2']);
 
-    $service = new StatsService;
+    $service = app(StatsService::class);
 
     // Group by visitor_id (default)
     $criteria1 = new StatsCriteria(range: StatsRange::Week, visitorGroupBy: 'visitor_id');

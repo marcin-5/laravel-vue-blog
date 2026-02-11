@@ -129,7 +129,7 @@ it('keeps unique entries across anon → login → logout transitions', function
     expect(PageView::count())->toBe(2);
 
     // Bonus: verify stats count distinct per visitor label (user name) within day range
-    $stats = (new StatsService)->visitorViews(new StatsCriteria(range: StatsRange::Week));
+    $stats = app(StatsService::class)->visitorViews(new StatsCriteria(range: StatsRange::Week));
     // We only have one effective visitor (the logged user), blog_views=1, post_views=1
     expect($stats)->toHaveCount(1);
     $row = $stats[0];

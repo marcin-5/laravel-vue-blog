@@ -63,7 +63,7 @@ it('counts unique blog and post views in blogViews', function () {
         'user_agent' => 'UA2',
     ]);
 
-    $service = new StatsService;
+    $service = app(StatsService::class);
     $criteria = new StatsCriteria(
         range: StatsRange::Week,
         bloggerId: null,
