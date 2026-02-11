@@ -10,13 +10,11 @@ class RobotsController extends Controller
 {
     /**
      * Generate the robots.txt file.
-     *
-     * @return Response
      */
     public function generate(): Response
     {
         $content = "User-agent: *\n";
-        $content .= "Disallow: /blogs\n";
+        $content .= "Disallow: /blogs/\n";
         $content .= "Disallow: /dashboard\n";
 
         if (App::environment('production')) {

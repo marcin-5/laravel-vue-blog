@@ -56,7 +56,7 @@ class PublicBlogController extends BasePublicController
         $seoData = new SeoData(
             title: $blog->name . ' - ' . config('app.name'),
             description: $metaDescription,
-            canonicalUrl: $baseUrl . '/blogs/' . $blog->slug,
+            canonicalUrl: $baseUrl . '/' . $blog->slug,
             ogImage: $baseUrl . '/og-image.png',
             ogType: 'blog',
             locale: app()->getLocale(),
@@ -122,7 +122,7 @@ class PublicBlogController extends BasePublicController
         $seoData = new SeoData(
             title: $post->title . ' - ' . $blog->name,
             description: $metaDescription,
-            canonicalUrl: $baseUrl . '/blogs/' . $blog->slug . '/' . $post->slug,
+            canonicalUrl: $baseUrl . '/' . $blog->slug . '/' . $post->slug,
             ogImage: $baseUrl . '/og-image.png',
             ogType: 'article',
             locale: app()->getLocale(),

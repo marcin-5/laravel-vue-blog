@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 //    return Inertia::render('Welcome');
 //})->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'noindex'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('_')->group(function () {

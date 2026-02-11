@@ -9,7 +9,7 @@ use App\Http\Controllers\MarkdownController;
 use Illuminate\Support\Facades\Route;
 
 // Blogger routes for managing own blogs
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'noindex'])->group(function () {
     Route::resource('blogs', BlogsController::class)
         ->only(['index', 'store', 'update']);
 

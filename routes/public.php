@@ -23,6 +23,14 @@ Route::withoutMiddleware([
         Route::get('sitemap.xml', [SitemapController::class, 'generate'])->name('sitemap');
     });
 
+// Redirect robots to the public route
+Route::get('blogs/{blog:slug}/{postSlug}', function (string $blogSlug, string $postSlug) {
+    return redirect()->to("/$blogSlug/$postSlug", 301);
+});
+Route::get('blogs/{blog:slug}', function (string $blogSlug) {
+    return redirect()->to("/$blogSlug", 301);
+});
+
 // Public About page (SSR): provide translations via props
 Route::get('/about', [PublicHomeController::class, 'about'])->name('about');
 
