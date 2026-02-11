@@ -8,15 +8,15 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
+          'bg-primary-foreground text-primary shadow-xs hover:bg-secondary',
         destructive:
           'bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive-hover focus-visible:ring-destructive/20',
         constructive:
           'bg-constructive text-constructive-foreground shadow-xs hover:bg-constructive-hover focus-visible:ring-constructive/20',
         exit:
-          'bg-secondary text-secondary-foreground/75 shadow-xs hover:bg-primary-foreground focus-visible:ring-secondary/20',
+          'bg-secondary text-secondary-foreground/90 shadow-xs hover:bg-secondary/50 focus-visible:ring-secondary/20',
         toggle:
-          'bg-secondary/80 text-secondary-foreground shadow-xs hover:bg-primary-foreground focus-visible:ring-secondary/20',
+          'bg-secondary/75 text-secondary-foreground shadow-xs hover:bg-secondary focus-visible:ring-secondary/20',
         muted:
           'bg-muted text-muted-foreground shadow-xs hover:bg-muted/80 focus-visible:ring-muted/20',
         outline:
