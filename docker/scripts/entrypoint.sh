@@ -93,9 +93,15 @@ fi
 
 # If running as root, fix ownership and permissions on mounted volumes
 if [ "$(id -u)" = "0" ]; then
-    echo "Fixing permissions on storage, bootstrap/cache, public, SSR, vendor, and app..."
-    chown -R www-data:www-data storage bootstrap/cache public bootstrap/ssr vendor app || true
-    chmod -R 775 storage bootstrap/cache || true
+    echo "Fixing permissions..."
+    # Change only mandatory
+    chown -R www-data:www-data storage bootstrap/cache
+    chmod -R 775 storage bootstrap/cache
+
+    # For APP_ENV=local do not touch 'app' and 'vendor'
+    if [ "$APP_ENV" != "local" ]; then
+        chown -R www-data:www-data public bootstrap/ssr vendor app || true
+    fi
 fi
 
 # Laravel-specific initialization for production

@@ -105,6 +105,13 @@ CMD ["php-fpm"]
 # Stage 4: Development image (with dev tools and full dependencies)
 FROM base AS development
 
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
+# Create group and user, if they do not exist (or modifying an existing one)
+RUN groupmod -g ${GROUP_ID} www-data || groupadd -g ${GROUP_ID} www-data || true \
+    && usermod -u ${USER_ID} -g ${GROUP_ID} www-data || true
+
 # Install development-specific system tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
     fish \

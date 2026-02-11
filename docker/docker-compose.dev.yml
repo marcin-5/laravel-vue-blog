@@ -6,6 +6,8 @@ services:
     environment:
       - APP_ENV=local
       - APP_DEBUG=true
+      - USER_ID=${UID:-1000}
+      - GROUP_ID=${GID:-1000}
       # Add all required variables for DB/Redis connection
       - APP_NAME=${APP_NAME:-laravel-app}
       - TZ=${TZ:-UTC}
