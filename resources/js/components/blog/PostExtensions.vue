@@ -80,7 +80,7 @@ function toggleLock(id: number) {
                                         <LockOpen v-else class="h-4 w-4" />
                                     </Button>
                                 </TooltipTrigger>
-                                <TooltipContent :style="theme" class="mb-1 bg-primary-foreground px-4 py-2 text-secondary-foreground">
+                                <TooltipContent :style="theme" class="mb-1 bg-secondary px-4 py-2 text-primary">
                                     {{ lockedIds.has(extension.id) ? $t('blog.post.unlock_extension') : $t('blog.post.lock_extension') }}
                                 </TooltipContent>
                             </Tooltip>
