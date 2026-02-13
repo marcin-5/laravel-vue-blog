@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\PageView;
 use App\Queries\Stats\BlogViewsQuery;
+use App\Queries\Stats\BotViewsQuery;
 use App\Queries\Stats\PostViewsQuery;
 use App\Queries\Stats\VisitorViewsQuery;
 use App\Services\Stats\UniqueViewerKeyBuilder;
@@ -16,7 +17,18 @@ readonly class StatsService
         private BlogViewsQuery $blogViewsQuery,
         private PostViewsQuery $postViewsQuery,
         private VisitorViewsQuery $visitorViewsQuery,
+        private BotViewsQuery $botViewsQuery,
     ) {
+    }
+
+    /**
+     * Returns aggregated views for bots for the given criteria.
+     *
+     * @return Collection<int, array{user_agent:string,hits:int,last_seen_at:string}>
+     */
+    public function botViews(StatsCriteria $criteria): Collection
+    {
+        return $this->botViewsQuery->execute($criteria);
     }
 
     /**

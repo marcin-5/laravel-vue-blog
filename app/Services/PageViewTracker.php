@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\StoreBotView;
 use App\Jobs\StorePageView;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
@@ -32,6 +33,12 @@ readonly class PageViewTracker
     public function track(Model $viewable, Request $request): void
     {
         if ($this->botDetector->isBot($request)) {
+            StoreBotView::dispatch([
+                'viewable_type' => $viewable->getMorphClass(),
+                'viewable_id' => $viewable->getKey(),
+                'user_agent' => (string)$request->header('User-Agent', ''),
+            ]);
+
             return;
         }
 

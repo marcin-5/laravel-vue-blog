@@ -38,6 +38,13 @@
                 "unique_label": "Odwiedziny",
                 "added_label": "Zarejestrowane",
                 "no_data": "Brak danych"
+            },
+            "bot_views": {
+                "title": "Odwiedziny botów",
+                "user_agent": "User Agent",
+                "hits": "Liczba wizyt",
+                "last_seen": "Ostatnio widziany",
+                "no_data": "Brak zarejestrowanych odwiedzin botów"
             }
         },
         "dashboard": {
