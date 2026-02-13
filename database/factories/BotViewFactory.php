@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\BotView;
 use App\Models\Post;
 use App\Models\UserAgent;
 use Illuminate\Database\Eloquent\Factories\Factory;
