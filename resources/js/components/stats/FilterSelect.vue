@@ -29,8 +29,8 @@ defineEmits<{
     <div class="flex flex-col">
         <label class="mb-1 text-xs text-muted-foreground">{{ label }}</label>
         <Select
-            :model-value="modelValue?.toString() ?? ''"
-            @update:model-value="$emit('update:modelValue', $event === '' ? undefined : Number($event) || $event)"
+            :model-value="modelValue?.toString() ?? 'all'"
+            @update:model-value="$emit('update:modelValue', $event === 'all' ? undefined : Number($event) || $event)"
         >
             <SelectTrigger :class="minWidth !== 'auto' ? minWidth : ''" class="h-9">
                 <SelectValue :placeholder="placeholder" />

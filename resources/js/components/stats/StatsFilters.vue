@@ -98,11 +98,11 @@ const groupOptions = [
         <FilterSelect
             v-if="showBlogFilter"
             :model-value="selectedBlog"
-            :options="blogOptions.map((b) => ({ value: b.id, label: b.name }))"
+            :options="[{ value: 'all', label: blogFilterLabel || 'All' }, ...blogOptions.map((b) => ({ value: b.id, label: b.name }))]"
             :placeholder="blogFilterLabel"
             label="Blog"
             min-width="min-w-48"
-            @update:model-value="emit('update:selectedBlog', $event as number | null | undefined)"
+            @update:model-value="emit('update:selectedBlog', ($event === 'all' ? null : $event) as number | null | undefined)"
         />
 
         <FilterSelect
