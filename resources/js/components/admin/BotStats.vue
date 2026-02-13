@@ -2,6 +2,7 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { BotStats, BotViewEntry } from '@/types/stats';
+import { formatDateTime } from '@/utils/dateUtils';
 import { Info } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -54,7 +55,7 @@ const displayBots = computed<BotViewEntry[]>(() => {
                     </div>
                     <div class="shrink-0 text-xs text-muted-foreground">
                         <template v-if="currentView === 'recent'">
-                            {{ new Date(bot.last_seen_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                            {{ formatDateTime(bot.last_seen_at) }}
                         </template>
                         <template v-else>
                             {{ bot.hits }}
