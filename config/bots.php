@@ -48,5 +48,6 @@ return [
         'TelegramBot',
         'meta-externalagent',
         'Google-InspectionTool',
+        'GoogleOther',
     ],
 ];
