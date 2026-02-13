@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Blog;
+use App\Models\BotView;
 use App\Models\NewsletterSubscription;
 use App\Models\PageView;
 use App\Models\Post;
@@ -42,11 +43,13 @@ class DashboardController extends Controller
             'blogStats' => [],
             'postsStats' => [],
             'userAgentStats' => null,
+            'botStats' => null,
         ];
 
         if ($user->isAdmin()) {
             $data['newsletterSubscriptions'] = $this->getNewsletterSubscriptions();
             $data['userAgentStats'] = $this->getUserAgentStats();
+            $data['botStats'] = $this->getBotStats();
         }
 
         if ($user->isBlogger() || $user->isAdmin()) {
@@ -108,6 +111,79 @@ class DashboardController extends Controller
                 'id' => $userAgent->id,
                 'name' => $userAgent->name,
             ]);
+    }
+
+    private function getBotStats(): array
+    {
+        return [
+            'last_seen' => $this->getLastBotViews(),
+            'top_hits' => $this->getMostActiveBots(),
+            'total_hits' => (int)BotView::query()->sum('hits'),
+        ];
+    }
+
+    private function getLastBotViews(): SupportCollection
+    {
+        $fragments = config('bots.fragments', []);
+        // Sort fragments by length descending to match most specific ones first (e.g. 'googlebot' before 'bot')
+        $sortedFragments = collect($fragments)
+            ->sortByDesc(fn($f) => strlen((string)$f))
+            ->values()
+            ->all();
+
+        return BotView::query()
+            ->with('userAgent')
+            ->latest('last_seen_at')
+            ->get()
+            ->unique('user_agent_id')
+            ->take(5)
+            ->map(function (BotView $botView) use ($sortedFragments) {
+                $userAgentName = $botView->userAgent->name;
+                $matchedFragment = collect($sortedFragments)->first(
+                    fn($f) => stripos($userAgentName, (string)$f) !== false,
+                );
+
+                return [
+                    'id' => $botView->userAgent->id,
+                    'name' => $userAgentName,
+                    'matched_fragment' => $matchedFragment ?? $userAgentName,
+                    'hits' => $botView->hits,
+                    'last_seen_at' => $botView->last_seen_at->toIso8601String(),
+                ];
+            })
+            ->values();
+    }
+
+    private function getMostActiveBots(): SupportCollection
+    {
+        $fragments = config('bots.fragments', []);
+        // Sort fragments by length descending to match most specific ones first (e.g. 'googlebot' before 'bot')
+        $sortedFragments = collect($fragments)
+            ->sortByDesc(fn($f) => strlen((string)$f))
+            ->values()
+            ->all();
+
+        return BotView::query()
+            ->selectRaw('user_agent_id, SUM(hits) as total_hits, MAX(last_seen_at) as last_seen_at')
+            ->groupBy('user_agent_id')
+            ->orderByDesc('total_hits')
+            ->with('userAgent')
+            ->take(5)
+            ->get()
+            ->map(function ($botView) use ($sortedFragments) {
+                $userAgentName = $botView->userAgent->name;
+                $matchedFragment = collect($sortedFragments)->first(
+                    fn($f) => stripos($userAgentName, (string)$f) !== false,
+                );
+
+                return [
+                    'id' => $botView->userAgent->id,
+                    'name' => $userAgentName,
+                    'matched_fragment' => $matchedFragment ?? $userAgentName,
+                    'hits' => (int)$botView->total_hits,
+                    'last_seen_at' => $botView->last_seen_at->toIso8601String(),
+                ];
+            });
     }
 
     private function getBlogStats(User $user): SupportCollection

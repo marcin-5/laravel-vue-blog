@@ -78,3 +78,17 @@ export interface UserAgentStats {
     last_unique: UserAgentEntry[];
     last_added: UserAgentEntry[];
 }
+
+export interface BotViewEntry {
+    id: number;
+    name: string;
+    matched_fragment?: string;
+    hits: number;
+    last_seen_at: string;
+}
+
+export interface BotStats {
+    last_seen: BotViewEntry[];
+    top_hits: BotViewEntry[];
+    total_hits: number;
+}

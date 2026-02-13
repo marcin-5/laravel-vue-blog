@@ -41,6 +41,9 @@
             },
             "bot_views": {
                 "title": "Odwiedziny botów",
+                "recent_label": "Ostatnie",
+                "top_label": "Najczęstsze",
+                "total_label": "Suma: {total}",
                 "user_agent": "User Agent",
                 "hits": "Liczba wizyt",
                 "last_seen": "Ostatnio widziany",

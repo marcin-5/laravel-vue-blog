@@ -1,13 +1,15 @@
 <script lang="ts" setup>
+import BotStats from '@/components/admin/BotStats.vue';
 import RecentSubscriptions from '@/components/admin/RecentSubscriptions.vue';
 import UserAgentStats from '@/components/admin/UserAgentStats.vue';
 import type { NewsletterSubscription } from '@/types/admin.types';
-import type { UserAgentStats as UserAgentStatsType } from '@/types/stats';
+import type { BotStats as BotStatsType, UserAgentStats as UserAgentStatsType } from '@/types/stats';
 import PlaceholderPattern from '../PlaceholderPattern.vue';
 
 defineProps<{
     newsletterSubscriptions?: NewsletterSubscription[];
     userAgentStats?: UserAgentStatsType;
+    botStats?: BotStatsType;
 }>();
 </script>
 
@@ -27,7 +29,10 @@ defineProps<{
             <div v-else class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
                 <PlaceholderPattern />
             </div>
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
+            <div v-if="botStats" class="relative aspect-video overflow-hidden">
+                <BotStats :stats="botStats" />
+            </div>
+            <div v-else class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
                 <PlaceholderPattern />
             </div>
         </div>

@@ -2,7 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\BotView;
+use App\Models\Post;
+use App\Models\UserAgent;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,7 +19,11 @@ class BotViewFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'user_agent_id' => UserAgent::factory(),
+            'viewable_type' => (new Post)->getMorphClass(),
+            'viewable_id' => Post::factory(),
+            'hits' => $this->faker->numberBetween(1, 100),
+            'last_seen_at' => now(),
         ];
     }
 }
