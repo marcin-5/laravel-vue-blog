@@ -7,6 +7,7 @@ use App\Models\BotView;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\UserAgent;
+use App\Services\UserAgentNormalizer;
 use Illuminate\Support\Facades\Queue;
 
 it('tracks page views for bots in separate table', function () {
@@ -17,7 +18,8 @@ it('tracks page views for bots in separate table', function () {
     $post = Post::factory()->for($blog)->create();
 
     // Request from a normal user
-    $this->withCookie('visitor_id', 'test-visitor-id')
+    $this->withUnencryptedCookie('cookie_consent', 'accepted')
+        ->withCookie('visitor_id', 'test-visitor-id')
         ->get("/{$blog->slug}/{$post->slug}", [
             'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         ]);
@@ -63,7 +65,8 @@ it('correctly updates bot views in database', function () {
         'hits' => 1,
     ]);
 
-    $userAgentId = UserAgent::where('name', $botUserAgent)->firstOrFail()->id;
+    $normalizer = new UserAgentNormalizer;
+    $userAgentId = UserAgent::where('name', $normalizer->normalize($botUserAgent))->firstOrFail()->id;
     $this->assertDatabaseHas('bot_views', ['user_agent_id' => $userAgentId]);
 
     $lastSeenAt = BotView::first()->last_seen_at;
@@ -90,7 +93,7 @@ it('correctly updates bot views in database', function () {
 
     expect(BotView::count())->toBe(2);
     $this->assertDatabaseHas('bot_views', [
-        'user_agent_id' => UserAgent::where('name', $otherBotUA)->firstOrFail()->id,
+        'user_agent_id' => UserAgent::where('name', $normalizer->normalize($otherBotUA))->firstOrFail()->id,
         'hits' => 1,
     ]);
 });
