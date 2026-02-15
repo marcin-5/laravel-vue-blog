@@ -73,8 +73,9 @@ const pageVisitorColumns = computed(() => [
 ]);
 
 // Columns for Anonymous and Bot Views — first column is fixed to User agent
+// No tooltip/info icon here, user agent is already visible in the first column
 const specialVisitorColumns = [
-    { key: 'visitor_label', label: 'User agent', hasInfo: true },
+    { key: 'visitor_label', label: 'User agent' },
     { key: 'blog_views', label: 'Blog views' },
     { key: 'post_views', label: 'Post views' },
     { key: 'lifetime_views', label: 'Lifetime visits' },
@@ -87,9 +88,9 @@ const blogSortOptions = [...BLOG_SORT_OPTIONS];
 const postSortOptions = [...POST_SORT_OPTIONS];
 const visitorSortOptions = [...VISITOR_SORT_OPTIONS];
 
-// For the first Visitor table (data from page_views) we want the info column
-// to reflect current group-by selection: 'visitor' or 'fingerprint'
-const visitorInfoKey = computed(() => (visitorState.value.group_by === 'fingerprint' ? 'fingerprint' : 'visitor'));
+// For the first Visitor table (data from page_views) the tooltip should show the User Agent string.
+// Backend always provides `user_agent` alongside the grouped label, so we always use that key here.
+const visitorInfoKey = computed(() => 'user_agent');
 </script>
 
 <template>
@@ -169,7 +170,7 @@ const visitorInfoKey = computed(() => (visitorState.value.group_by === 'fingerpr
                 :show-visitor-type-filter="true"
                 :sort-options="visitorSortOptions"
             />
-            <StatsTable :columns="specialVisitorColumns" :data="visitorsFromSpecial" info-key="user_agent" row-key="visitor_label" />
+            <StatsTable :columns="specialVisitorColumns" :data="visitorsFromSpecial" row-key="visitor_label" />
         </div>
     </div>
 </template>

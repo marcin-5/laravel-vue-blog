@@ -21,6 +21,7 @@ export type VisitorRow = {
     post_views: number;
     views: number;
     lifetime_views: number;
+    user_agent?: string | null;
 };
 
 export type UserOption = { id: number; name: string };
