@@ -30,7 +30,7 @@ it('tracks immediately for a new visitor without a cookie', function () {
 });
 
 it('tracks immediately if X-Visitor-Id header is present (verified by JS)', function () {
-    $visitorId = (string) Str::uuid();
+    $visitorId = (string)Str::uuid();
 
     $this->withHeaders(['X-Visitor-Id' => $visitorId])
         ->get("/{$this->blog->slug}/{$this->post->slug}");
@@ -40,7 +40,7 @@ it('tracks immediately if X-Visitor-Id header is present (verified by JS)', func
 });
 
 it('does not duplicate track if visit is within block period', function () {
-    $visitorId = (string) Str::uuid();
+    $visitorId = (string)Str::uuid();
 
     // First tracked visit
     $this->withUnencryptedCookie('cookie_consent', 'accepted')
@@ -57,4 +57,16 @@ it('does not duplicate track if visit is within block period', function () {
 
     // Should still be 1
     Queue::assertPushed(StorePageView::class, 1);
+});
+
+it('does not set visitor cookie when consent rejected but tracks anonymously via fingerprint', function () {
+    // Simulate user rejecting cookies: no visitor_id, consent rejected
+    $response = $this->withUnencryptedCookie('cookie_consent', 'rejected')
+        ->get("/{$this->blog->slug}/{$this->post->slug}");
+
+    // Still tracks anonymously (fingerprint/IP/UA block)
+    Queue::assertPushed(StorePageView::class, 1);
+
+    $cookie = $response->getCookie('visitor_id');
+    expect($cookie)->toBeNull();
 });
