@@ -26,7 +26,7 @@ const props = defineProps<{
     viewStats: {
         anonymous: number;
         bots: number;
-        registered: number;
+        consented: number;
     } | null;
 }>();
 

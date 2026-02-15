@@ -48,7 +48,7 @@ it('exposes view stats on group landing for owner', function () {
     $response->assertOk();
     $response->assertInertia(fn($page) => $page
         ->component('app/group/Landing')
-        ->where('viewStats.registered', 2)
+        ->where('viewStats.consented', 2)
         ->where('viewStats.anonymous', 0)
         ->where('viewStats.bots', 0),
     );
@@ -90,7 +90,7 @@ it('exposes only registered view stats on group post for owner', function () {
     $response->assertOk();
     $response->assertInertia(fn($page) => $page
         ->component('app/group/Post')
-        ->where('viewStats.registered', 1)
+        ->where('viewStats.consented', 1)
         ->where('viewStats.anonymous', 0)
         ->where('viewStats.bots', 0),
     );

@@ -2,7 +2,7 @@
 import { useI18n } from 'vue-i18n';
 
 defineProps({
-    registered: {
+    consented: {
         type: Number,
         default: 0,
     },
@@ -25,7 +25,7 @@ const { t } = useI18n();
             class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/50 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium dark:text-emerald-100"
         >
             <span class="inline-block h-2 w-2 rounded-full bg-emerald-500"></span>
-            <span>{{ t('blog.post.registered_views') }} {{ registered.toLocaleString() }}</span>
+            <span>{{ t('blog.post.consented_views') }} {{ consented.toLocaleString() }}</span>
         </div>
         <div
             class="inline-flex items-center gap-1.5 rounded-full border border-blue-200/50 bg-blue-500/10 px-2.5 py-1 text-xs font-medium dark:text-blue-100"

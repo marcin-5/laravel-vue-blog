@@ -15,7 +15,7 @@ trait HandlesViewStats
         string $viewableType,
         int $viewableId,
         int $ownerId,
-        bool $onlyRegistered = false,
+        bool $onlyConsented = false,
     ): ?array {
         $user = auth()->user();
 
@@ -23,13 +23,13 @@ trait HandlesViewStats
             return null;
         }
 
-        $registered = PageView::where('viewable_type', $viewableType)
+        $consented = PageView::where('viewable_type', $viewableType)
             ->where('viewable_id', $viewableId)
             ->count();
 
-        if ($onlyRegistered) {
+        if ($onlyConsented) {
             return [
-                'registered' => (int)$registered,
+                'consented' => (int)$consented,
                 'anonymous' => 0,
                 'bots' => 0,
             ];
@@ -44,7 +44,7 @@ trait HandlesViewStats
             ->sum('hits');
 
         return [
-            'registered' => (int)$registered,
+            'consented' => (int)$consented,
             'anonymous' => (int)($anonymous ?: 0),
             'bots' => (int)($bots ?: 0),
         ];

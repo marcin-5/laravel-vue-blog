@@ -49,7 +49,7 @@ it('exposes view stats (registered, anonymous, bots) on post page for owner', fu
     $response->assertOk();
     $response->assertInertia(fn($page) => $page
         ->component('public/blog/Post')
-        ->where('viewStats.registered', 2)
+        ->where('viewStats.consented', 2)
         ->where('viewStats.anonymous', 4)
         ->where('viewStats.bots', 1),
     );
@@ -87,7 +87,7 @@ it('exposes view stats (registered, anonymous, bots) on post page for admin', fu
     $response->assertOk();
     $response->assertInertia(fn($page) => $page
         ->component('public/blog/Post')
-        ->where('viewStats.registered', 1)
+        ->where('viewStats.consented', 1)
         ->where('viewStats.anonymous', 2)
         ->where('viewStats.bots', 3),
     );

@@ -10,7 +10,7 @@ const props = defineProps<{
     viewStats: {
         anonymous: number;
         bots: number;
-        registered: number;
+        consented: number;
     } | null;
     locale?: string;
     publishedTime?: string | null;
@@ -33,7 +33,7 @@ const formattedUpdatedDate = computed(() => formatDate(props.modifiedTime, props
             v-if="viewStats"
             :anonymous="viewStats.anonymous"
             :bots="viewStats.bots"
-            :registered="viewStats.registered"
+            :consented="viewStats.consented"
             class="mb-8 justify-end"
         />
         <h1 class="font-[inherit] text-[1em] leading-tight font-bold text-foreground">{{ post.title }}</h1>
