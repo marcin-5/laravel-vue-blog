@@ -31,8 +31,6 @@ const props = defineProps<{
     sidebar: number;
     navigation: Navigation;
     viewStats: {
-        total: number;
-        unique?: number;
         anonymous: number;
         bots: number;
         registered: number;

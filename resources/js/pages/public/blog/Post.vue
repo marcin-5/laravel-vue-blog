@@ -24,8 +24,6 @@ const props = defineProps<{
     locale?: string;
     seo?: SEO;
     viewStats: {
-        total: number;
-        unique?: number;
         anonymous: number;
         bots: number;
         registered: number;

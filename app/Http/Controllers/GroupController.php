@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\FormatsPaginator;
+use App\Http\Controllers\Concerns\HandlesViewStats;
 use App\Models\Group;
 use App\Models\Post;
 use App\Queries\App\GroupPostsQuery;
@@ -16,7 +17,7 @@ use Inertia\Response;
 
 class GroupController extends Controller
 {
-    use AuthorizesRequests, FormatsPaginator;
+    use AuthorizesRequests, FormatsPaginator, HandlesViewStats;
 
     public function __construct(
         private readonly BlogNavigationService $navigation,
@@ -40,10 +41,7 @@ class GroupController extends Controller
             'theme' => $group->theme,
             'sidebar' => $group->sidebar,
             'navigation' => $this->navigation->getGroupLandingNavigation($group),
-            'viewStats' => [
-                'total' => $group->view_count,
-                'unique' => $this->stats->countUniqueViews((new Group)->getMorphClass(), $group->id),
-            ],
+            'viewStats' => $this->getViewStats(Group::class, $group->id, $group->user_id, true),
             'translations' => [
                 'locale' => app()->getLocale(),
                 'messages' => $this->translations->getPageTranslations('blog'),
@@ -83,10 +81,7 @@ class GroupController extends Controller
             'theme' => $group->theme,
             'sidebar' => $group->sidebar,
             'navigation' => $this->navigation->getGroupPostNavigation($group, $post),
-            'viewStats' => [
-                'total' => $post->view_count,
-                'unique' => $this->stats->countUniqueViews((new Post)->getMorphClass(), $post->id),
-            ],
+            'viewStats' => $this->getViewStats(Post::class, $post->id, $group->user_id, true),
             'translations' => [
                 'locale' => app()->getLocale(),
                 'messages' => $this->translations->getPageTranslations('post'),

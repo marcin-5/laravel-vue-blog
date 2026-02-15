@@ -26,8 +26,6 @@ const props = defineProps<{
     navigation?: Navigation;
     theme?: any;
     viewStats: {
-        total: number;
-        unique?: number;
         anonymous: number;
         bots: number;
         registered: number;

@@ -5,13 +5,11 @@ namespace App\Http\Controllers;
 use App\DataTransferObjects\SeoData;
 use App\Http\Controllers\Concerns\FormatsDatesForLocale;
 use App\Http\Controllers\Concerns\FormatsPaginator;
+use App\Http\Controllers\Concerns\HandlesViewStats;
 use App\Http\Resources\PublicBlogResource;
 use App\Http\Resources\PublicPostResource;
-use App\Models\AnonymousView;
 use App\Models\Blog;
-use App\Models\BotView;
 use App\Models\LandingPage;
-use App\Models\PageView;
 use App\Models\Post;
 use App\Queries\Public\PublicBlogPostsQuery;
 use App\Services\BlogNavigationService;
@@ -25,7 +23,7 @@ use Inertia\Response;
 
 class PublicBlogController extends BasePublicController
 {
-    use FormatsDatesForLocale, FormatsPaginator;
+    use FormatsDatesForLocale, FormatsPaginator, HandlesViewStats;
 
     public function __construct(
         private readonly MarkdownService $markdown,
@@ -97,33 +95,6 @@ class PublicBlogController extends BasePublicController
     {
         abort_unless($blog->is_published, 404);
         app()->setLocale($blog->locale ?? config('app.locale'));
-    }
-
-    private function getViewStats(string $viewableType, int $viewableId, int $ownerId): ?array
-    {
-        $user = auth()->user();
-
-        if (!$user || !($user->isAdmin() || $user->id === $ownerId)) {
-            return null;
-        }
-
-        $registered = PageView::where('viewable_type', $viewableType)
-            ->where('viewable_id', $viewableId)
-            ->count();
-
-        $anonymous = AnonymousView::where('viewable_type', $viewableType)
-            ->where('viewable_id', $viewableId)
-            ->sum('hits');
-
-        $bots = BotView::where('viewable_type', $viewableType)
-            ->where('viewable_id', $viewableId)
-            ->sum('hits');
-
-        return [
-            'registered' => (int)$registered,
-            'anonymous' => (int)($anonymous ?: 0),
-            'bots' => (int)($bots ?: 0),
-        ];
     }
 
     /**
