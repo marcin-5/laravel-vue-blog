@@ -18,8 +18,9 @@ beforeEach(function () {
 });
 
 it('tracks immediately for a new visitor without a cookie', function () {
-    // First request - no cookie
-    $response = $this->get("/{$this->blog->slug}/{$this->post->slug}");
+    // First request - no visitor_id cookie, but cookie consent accepted
+    $response = $this->withUnencryptedCookie('cookie_consent', 'accepted')
+        ->get("/{$this->blog->slug}/{$this->post->slug}");
 
     // Should push to queue immediately (fingerprint-based identification)
     Queue::assertPushed(StorePageView::class, 1);
@@ -42,13 +43,15 @@ it('does not duplicate track if visit is within block period', function () {
     $visitorId = (string) Str::uuid();
 
     // First tracked visit
-    $this->withHeaders(['X-Visitor-Id' => $visitorId])
+    $this->withUnencryptedCookie('cookie_consent', 'accepted')
+        ->withHeaders(['X-Visitor-Id' => $visitorId])
         ->get("/{$this->blog->slug}/{$this->post->slug}");
 
     Queue::assertPushed(StorePageView::class, 1);
 
     // Immediate second visit
-    $this->withCookie('visitor_id', $visitorId)
+    $this->withUnencryptedCookie('cookie_consent', 'accepted')
+        ->withCookie('visitor_id', $visitorId)
         ->withHeaders(['X-Visitor-Id' => $visitorId])
         ->get("/{$this->blog->slug}/{$this->post->slug}");
 

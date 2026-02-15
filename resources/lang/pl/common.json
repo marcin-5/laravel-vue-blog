@@ -19,7 +19,8 @@
         },
         "cookie_notice": {
             "message": "Ta strona używa ciasteczek i lokalnego przechowywania danych potrzebnych do prawidłowego działania i analityki odwiedzin.",
-            "button": "OK, rozumiem"
+            "accept_button": "OK, rozumiem",
+            "reject_button": "Odrzuć wszystkie"
         },
         "warning": "Ostrzeżenie",
         "caution_message": "Proszę postępować ostrożnie, tego nie można cofnąć.",

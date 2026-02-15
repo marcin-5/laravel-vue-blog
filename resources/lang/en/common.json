@@ -19,7 +19,8 @@
         },
         "cookie_notice": {
             "message": "This site uses cookies and local data storage required for proper operation and visit analytics.",
-            "button": "OK, I understand"
+            "accept_button": "OK, I understand",
+            "reject_button": "Reject all"
         },
         "warning": "Warning",
         "caution_message": "Please proceed with caution, this cannot be undone.",

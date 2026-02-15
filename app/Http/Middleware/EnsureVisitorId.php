@@ -11,6 +11,15 @@ class EnsureVisitorId
 {
     public function handle(Request $request, Closure $next): Response
     {
+        $cookieConsent = $request->cookie('cookie_consent', '');
+
+        // Only create/refresh visitor_id cookie if user has accepted cookies
+        if ($cookieConsent !== 'accepted') {
+            $request->attributes->set('visitor_id_is_new', false);
+
+            return $next($request);
+        }
+
         // Try to read the decrypted cookie value first
         $visitorId = (string)$request->cookie('visitor_id', '');
         $isNewVisitor = false;

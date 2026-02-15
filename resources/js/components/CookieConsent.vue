@@ -6,15 +6,32 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 const show = ref(false);
 
+const COOKIE_NAME = 'cookie_consent';
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year in seconds
+
+const getCookie = (name: string): string | null => {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? match[2] : null;
+};
+
+const setCookie = (name: string, value: string, maxAge: number): void => {
+    document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; SameSite=Strict`;
+};
+
 onMounted(() => {
-    const accepted = localStorage.getItem('cookie_consent_accepted');
-    if (!accepted) {
+    const consent = getCookie(COOKIE_NAME);
+    if (!consent) {
         show.value = true;
     }
 });
 
 const accept = () => {
-    localStorage.setItem('cookie_consent_accepted', 'true');
+    setCookie(COOKIE_NAME, 'accepted', COOKIE_MAX_AGE);
+    show.value = false;
+};
+
+const reject = () => {
+    setCookie(COOKIE_NAME, 'rejected', COOKIE_MAX_AGE);
     show.value = false;
 };
 </script>
@@ -27,8 +44,13 @@ const accept = () => {
         <p class="text-sm text-warning-foreground">
             {{ t('common.cookie_notice.message') }}
         </p>
-        <Button variant="exit" @click="accept">
-            {{ t('common.cookie_notice.button') }}
-        </Button>
+        <div class="flex gap-2">
+            <Button variant="outline" @click="reject">
+                {{ t('common.cookie_notice.reject_button') }}
+            </Button>
+            <Button variant="exit" @click="accept">
+                {{ t('common.cookie_notice.accept_button') }}
+            </Button>
+        </div>
     </div>
 </template>
