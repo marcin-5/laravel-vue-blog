@@ -9,8 +9,6 @@ defineProps<{
     };
     displayedMotto: string | null;
     viewStats: {
-        total: number;
-        unique?: number;
         anonymous: number;
         bots: number;
         registered: number;
