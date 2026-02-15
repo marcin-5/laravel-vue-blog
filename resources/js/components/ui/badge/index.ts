@@ -20,6 +20,12 @@ export const badgeVariants = cva(
         destructive:
           'border-transparent bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/80',
         outline: 'text-foreground',
+        rounded1:
+          'rounded-full border-border bg-background text-primary shadow-sm',
+        rounded2:
+          'rounded-full border-border bg-secondary text-primary shadow-sm',
+        rounded3:
+          'rounded-full border-border bg-card text-primary shadow-sm',
       },
     },
     defaultVariants: {
