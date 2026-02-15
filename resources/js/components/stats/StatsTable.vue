@@ -47,7 +47,7 @@ function getVisibleColumns(columns: Column[]): Column[] {
                                             <Info class="h-4 w-4 text-muted-foreground" />
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                            <p class="max-w-xs text-xs break-all">{{ row[infoKey] }}</p>
+                                            <p class="max-w-xs text-xs">{{ row[infoKey] }}</p>
                                         </TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>
