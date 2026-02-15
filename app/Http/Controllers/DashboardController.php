@@ -10,6 +10,7 @@ use App\Models\Post;
 use App\Models\User;
 use App\Models\UserAgent;
 use App\Services\TranslationService;
+use App\Services\UserAgentNormalizer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection as SupportCollection;
@@ -125,11 +126,8 @@ class DashboardController extends Controller
     private function getLastBotViews(): SupportCollection
     {
         $fragments = config('bots.fragments', []);
-        // Sort fragments by length descending to match most specific ones first (e.g. 'googlebot' before 'bot')
-        $sortedFragments = collect($fragments)
-            ->sortByDesc(fn($f) => strlen((string)$f))
-            ->values()
-            ->all();
+        // Get sorted fragments by length descending to match most specific ones first (e.g. 'googlebot' before 'bot')
+        $sortedFragments = UserAgentNormalizer::getSortedBotFragments();
 
         return BotView::query()
             ->with('userAgent')
@@ -157,11 +155,8 @@ class DashboardController extends Controller
     private function getMostActiveBots(): SupportCollection
     {
         $fragments = config('bots.fragments', []);
-        // Sort fragments by length descending to match most specific ones first (e.g. 'googlebot' before 'bot')
-        $sortedFragments = collect($fragments)
-            ->sortByDesc(fn($f) => strlen((string)$f))
-            ->values()
-            ->all();
+        // Get sorted fragments by length descending to match most specific ones first (e.g. 'googlebot' before 'bot')
+        $sortedFragments = UserAgentNormalizer::getSortedBotFragments();
 
         return BotView::query()
             ->selectRaw('user_agent_id, SUM(hits) as total_hits, MAX(last_seen_at) as last_seen_at')

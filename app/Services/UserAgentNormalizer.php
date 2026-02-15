@@ -19,8 +19,8 @@ readonly class UserAgentNormalizer
 
         $fragments = config('bots.fragments', []);
         if (Str::contains($userAgent, $fragments, ignoreCase: true)) {
-            $matchingFragment = collect($fragments)
-                ->sortByDesc(fn(string $fragment) => strlen($fragment))
+            $sortedFragments = self::getSortedBotFragments();
+            $matchingFragment = collect($sortedFragments)
                 ->first(fn(string $fragment) => Str::contains($userAgent, $fragment, ignoreCase: true));
             if ($matchingFragment !== null) {
                 return Str::ucfirst($matchingFragment);
@@ -35,5 +35,16 @@ readonly class UserAgentNormalizer
         $deviceFamily = $result->device->family ?? 'Unknown';
 
         return trim("{$uaFamily} on {$osFamily} ({$deviceFamily}) ");
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function getSortedBotFragments(): array
+    {
+        return collect(config('bots.fragments', []))
+            ->sortByDesc(static fn(string $fragment) => strlen($fragment))
+            ->values()
+            ->all();
     }
 }
