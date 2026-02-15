@@ -7,8 +7,11 @@ use App\Http\Controllers\Concerns\FormatsDatesForLocale;
 use App\Http\Controllers\Concerns\FormatsPaginator;
 use App\Http\Resources\PublicBlogResource;
 use App\Http\Resources\PublicPostResource;
+use App\Models\AnonymousView;
 use App\Models\Blog;
+use App\Models\BotView;
 use App\Models\LandingPage;
+use App\Models\PageView;
 use App\Models\Post;
 use App\Queries\Public\PublicBlogPostsQuery;
 use App\Services\BlogNavigationService;
@@ -83,12 +86,7 @@ class PublicBlogController extends BasePublicController
             'sidebar' => (int)($blog->sidebar ?? 0),
             'navigation' => $this->navigation->getLandingNavigation($blog),
             'seo' => $seoData->toArray(),
-            'viewStats' => [
-                'total' => $blog->view_count,
-                'unique' => auth()->check() && auth()->user()->isAdmin()
-                    ? $this->stats->countUniqueViews((new Blog)->getMorphClass(), $blog->id)
-                    : null,
-            ],
+            'viewStats' => $this->getViewStats(Blog::class, $blog->id, $blog->user_id),
         ]);
     }
 
@@ -99,6 +97,33 @@ class PublicBlogController extends BasePublicController
     {
         abort_unless($blog->is_published, 404);
         app()->setLocale($blog->locale ?? config('app.locale'));
+    }
+
+    private function getViewStats(string $viewableType, int $viewableId, int $ownerId): ?array
+    {
+        $user = auth()->user();
+
+        if (!$user || !($user->isAdmin() || $user->id === $ownerId)) {
+            return null;
+        }
+
+        $registered = PageView::where('viewable_type', $viewableType)
+            ->where('viewable_id', $viewableId)
+            ->count();
+
+        $anonymous = AnonymousView::where('viewable_type', $viewableType)
+            ->where('viewable_id', $viewableId)
+            ->sum('hits');
+
+        $bots = BotView::where('viewable_type', $viewableType)
+            ->where('viewable_id', $viewableId)
+            ->sum('hits');
+
+        return [
+            'registered' => (int)$registered,
+            'anonymous' => (int)($anonymous ?: 0),
+            'bots' => (int)($bots ?: 0),
+        ];
     }
 
     /**
@@ -159,10 +184,7 @@ class PublicBlogController extends BasePublicController
             'sidebar' => (int)($blog->sidebar ?? 0),
             'navigation' => $this->navigation->getPostNavigation($blog, $post),
             'seo' => $seoData->toArray(),
-            'viewStats' => [
-                'total' => $post->view_count,
-                'unique' => $this->stats->countUniqueViews((new Post)->getMorphClass(), $post->id),
-            ],
+            'viewStats' => $this->getViewStats(Post::class, $post->id, $blog->user_id),
         ]);
     }
 

@@ -26,7 +26,10 @@ const props = defineProps<{
     viewStats: {
         total: number;
         unique?: number;
-    };
+        anonymous: number;
+        bots: number;
+        registered: number;
+    } | null;
 }>();
 
 // Internationalization

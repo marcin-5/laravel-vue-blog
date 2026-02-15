@@ -68,6 +68,9 @@
             "updated": "Zaktualizowano:",
             "views": "Odsłony:",
             "unique_views": "unikalne:",
+            "registered_views": "Zarejestrowane:",
+            "anonymous_views": "Anonimowe:",
+            "bot_views": "Boty:",
             "lock_extension": "Zablokuj",
             "unlock_extension": "Odblokuj"
         }

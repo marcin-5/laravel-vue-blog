@@ -68,6 +68,9 @@
             "updated": "Updated:",
             "views": "Views:",
             "unique_views": "unique:",
+            "registered_views": "Registered:",
+            "anonymous_views": "Anonymous:",
+            "bot_views": "Bots:",
             "lock_extension": "Lock",
             "unlock_extension": "Unlock"
         }

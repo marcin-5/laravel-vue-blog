@@ -10,7 +10,10 @@ const props = defineProps<{
     viewStats: {
         total: number;
         unique?: number;
-    };
+        anonymous: number;
+        bots: number;
+        registered: number;
+    } | null;
     locale?: string;
     publishedTime?: string | null;
     modifiedTime?: string | null;
@@ -28,10 +31,16 @@ const formattedUpdatedDate = computed(() => formatDate(props.modifiedTime, props
 
 <template>
     <header :style="{ fontFamily: 'var(--blog-header-font)', fontSize: 'calc(1.5rem * var(--blog-header-scale))' }" class="mb-4">
+        <ViewStats
+            v-if="viewStats"
+            :anonymous="viewStats.anonymous"
+            :bots="viewStats.bots"
+            :registered="viewStats.registered"
+            class="mb-8 justify-end"
+        />
         <h1 class="font-[inherit] text-[1em] leading-tight font-bold text-foreground">{{ post.title }}</h1>
         <div class="my-2 inline-flex items-center gap-x-5 text-sm font-medium text-muted-foreground">
             <p v-if="post.published_at" class="italic">{{ publishedLabel }} {{ formatDate(post.published_at) }}</p>
-            <ViewStats :total="viewStats.total" :unique="viewStats.unique" />
         </div>
         <p v-if="showUpdated" class="-mt-1 mb-2 text-xs text-muted-foreground italic">{{ updatedLabel }} {{ formattedUpdatedDate }}</p>
         <p

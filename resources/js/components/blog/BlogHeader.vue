@@ -11,17 +11,26 @@ defineProps<{
     viewStats: {
         total: number;
         unique?: number;
-    };
+        anonymous: number;
+        bots: number;
+        registered: number;
+    } | null;
 }>();
 </script>
 
 <template>
     <header :style="{ fontFamily: 'var(--blog-header-font)', fontSize: 'calc(2rem * var(--blog-header-scale))' }" class="mb-4">
-        <div class="flex items-center justify-between">
+        <div class="flex inline">
+            <ViewStats
+                v-if="viewStats"
+                :anonymous="viewStats.anonymous"
+                :bots="viewStats.bots"
+                :registered="viewStats.registered"
+                class="mb-8 justify-end"
+            />
             <h1 class="font-[inherit] text-[1em] leading-tight font-bold text-foreground">
                 {{ blog.name }}
             </h1>
-            <ViewStats :total="viewStats.total" :unique="viewStats.unique"></ViewStats>
         </div>
         <p
             v-if="displayedMotto"
