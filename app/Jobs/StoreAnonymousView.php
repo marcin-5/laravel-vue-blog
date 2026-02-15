@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Models\BotView;
+use App\Models\AnonymousView;
 use App\Models\UserAgent;
 use App\Services\UserAgentNormalizer;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -11,9 +11,8 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
-use UAParser\Exception\FileNotFoundException;
 
-class StoreBotView implements ShouldQueue
+class StoreAnonymousView implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -27,7 +26,6 @@ class StoreBotView implements ShouldQueue
 
     /**
      * Execute the job.
-     * @throws FileNotFoundException
      */
     public function handle(): void
     {
@@ -36,7 +34,7 @@ class StoreBotView implements ShouldQueue
 
         $userAgent = UserAgent::firstOrCreate(['name' => $normalizedUa]);
 
-        BotView::query()->upsert([
+        AnonymousView::query()->upsert([
             [
                 'user_agent_id' => $userAgent->id,
                 'viewable_type' => $this->data['viewable_type'],
@@ -47,7 +45,7 @@ class StoreBotView implements ShouldQueue
                 'updated_at' => now(),
             ],
         ], ['user_agent_id', 'viewable_type', 'viewable_id'], [
-            'hits' => DB::raw('bot_views.hits + 1'),
+            'hits' => DB::raw('anonymous_views.hits + 1'),
             'last_seen_at',
             'updated_at',
         ]);

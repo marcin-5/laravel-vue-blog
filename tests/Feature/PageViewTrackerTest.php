@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\StoreAnonymousView;
 use App\Jobs\StorePageView;
 use App\Models\Blog;
 use App\Models\Post;
@@ -32,7 +33,8 @@ it('tracks immediately for a new visitor without a cookie', function () {
 it('tracks immediately if X-Visitor-Id header is present (verified by JS)', function () {
     $visitorId = (string)Str::uuid();
 
-    $this->withHeaders(['X-Visitor-Id' => $visitorId])
+    $this->withUnencryptedCookie('cookie_consent', 'accepted')
+        ->withHeaders(['X-Visitor-Id' => $visitorId])
         ->get("/{$this->blog->slug}/{$this->post->slug}");
 
     // Should push immediately because header proves JS execution (LocalStorage)
@@ -59,13 +61,24 @@ it('does not duplicate track if visit is within block period', function () {
     Queue::assertPushed(StorePageView::class, 1);
 });
 
-it('does not set visitor cookie when consent rejected but tracks anonymously via fingerprint', function () {
+it('does not set visitor cookie when consent rejected, tracks with StoreAnonymousView', function () {
     // Simulate user rejecting cookies: no visitor_id, consent rejected
     $response = $this->withUnencryptedCookie('cookie_consent', 'rejected')
         ->get("/{$this->blog->slug}/{$this->post->slug}");
 
-    // Still tracks anonymously (fingerprint/IP/UA block)
-    Queue::assertPushed(StorePageView::class, 1);
+    // Tracks anonymously via UA aggregation
+    Queue::assertPushed(StoreAnonymousView::class, 1);
+    Queue::assertNotPushed(StorePageView::class);
+
+    $cookie = $response->getCookie('visitor_id');
+    expect($cookie)->toBeNull();
+});
+
+it('tracks anonymously if no cookie consent', function () {
+    $response = $this->get("/{$this->blog->slug}/{$this->post->slug}");
+
+    Queue::assertPushed(StoreAnonymousView::class, 1);
+    Queue::assertNotPushed(StorePageView::class);
 
     $cookie = $response->getCookie('visitor_id');
     expect($cookie)->toBeNull();

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\StoreAnonymousView;
 use App\Jobs\StoreBotView;
 use App\Jobs\StorePageView;
 use Illuminate\Contracts\Auth\Guard;
@@ -10,6 +11,8 @@ use Illuminate\Database\ClassMorphViolationException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+
+use Psr\SimpleCache\InvalidArgumentException;
 
 use function sprintf;
 
@@ -28,7 +31,7 @@ readonly class PageViewTracker
     }
 
     /**
-     * @throws ClassMorphViolationException
+     * @throws ClassMorphViolationException|InvalidArgumentException
      */
     public function track(Model $viewable, Request $request): void
     {
@@ -42,16 +45,25 @@ readonly class PageViewTracker
             return;
         }
 
-        $visitorId = $request->cookie('visitor_id');
+        $consent = $request->cookie('cookie_consent');
+        if (!$consent || $consent === 'rejected') {
+            StoreAnonymousView::dispatch([
+                'viewable_type' => $viewable->getMorphClass(),
+                'viewable_id' => $viewable->getKey(),
+                'user_agent' => (string)$request->header('User-Agent', ''),
+            ]);
+
+            return;
+        }
+
         $isNewVisitor = (bool)$request->attributes->get('visitor_id_is_new', true);
 
         // If client sent X-Visitor-Id header, they are likely a real user with LocalStorage support
         $headerVisitorId = $request->header('X-Visitor-Id');
         if ($headerVisitorId && $isNewVisitor) {
             $isNewVisitor = false;
-            $visitorId = $headerVisitorId;
             // Update request for consistency
-            $request->cookies->set('visitor_id', $visitorId);
+            $request->cookies->set('visitor_id', $headerVisitorId);
         }
 
         // Check for a pending visit from this IP/UA/Fingerprint (for returning visitors)
@@ -62,6 +74,9 @@ readonly class PageViewTracker
         $this->recordView($viewable, $request);
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     private function processPendingVisit(Model $viewable, Request $request): void
     {
         $key = $this->getPendingVisitKey($viewable, $request);
@@ -93,6 +108,9 @@ readonly class PageViewTracker
         );
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     private function recordView(Model $viewable, Request $request): void
     {
         $user = $this->auth->user();
