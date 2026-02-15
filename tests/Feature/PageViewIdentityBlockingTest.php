@@ -16,26 +16,47 @@ beforeEach(function () {
     $this->post = Post::factory()->for($this->blog)->create();
 });
 
-it('counts first logged-in visit to a new post', function () {
+it('counts first logged-in visit to a new post when cookie consent is accepted', function () {
     $user = User::factory()->create();
 
-    $this->actingAs($user)
+    $this->withUnencryptedCookie('cookie_consent', 'accepted')
+        ->actingAs($user)
         ->get("/{$this->blog->slug}/{$this->post->slug}");
 
     Queue::assertPushed(StorePageView::class, 1);
 });
 
-it('counts unique views for two different logged-in users on the same device', function () {
-    $userA = User::factory()->create();
-    $userB = User::factory()->create();
+it(
+    'counts unique views for two different logged-in users on the same device when cookie consent is accepted',
+    function () {
+        $userA = User::factory()->create();
+        $userB = User::factory()->create();
 
-    // First user visits
-    $this->actingAs($userA)
+        // First user visits
+        $this->withUnencryptedCookie('cookie_consent', 'accepted')
+            ->actingAs($userA)
+            ->get("/{$this->blog->slug}/{$this->post->slug}");
+
+        // Second user visits (same IP/UA implied by test client)
+        $this->withUnencryptedCookie('cookie_consent', 'accepted')
+            ->actingAs($userB)
+            ->get("/{$this->blog->slug}/{$this->post->slug}");
+
+        Queue::assertPushed(StorePageView::class, 2);
+    },
+);
+
+it('does not count visits when cookie consent is rejected or missing', function () {
+    $user = User::factory()->create();
+
+    // Rejected consent
+    $this->withUnencryptedCookie('cookie_consent', 'rejected')
+        ->actingAs($user)
         ->get("/{$this->blog->slug}/{$this->post->slug}");
 
-    // Second user visits (same IP/UA implied by test client)
-    $this->actingAs($userB)
+    // No consent cookie at all
+    $this->actingAs($user)
         ->get("/{$this->blog->slug}/{$this->post->slug}");
 
-    Queue::assertPushed(StorePageView::class, 2);
+    Queue::assertPushed(StorePageView::class, 0);
 });
