@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useI18n } from 'vue-i18n';
 import FilterSelect from './FilterSelect.vue';
 
 type Range = 'today' | 'week' | 'month' | 'half_year' | 'year';
@@ -12,11 +13,13 @@ interface Props {
     selectedBlogger?: number | null;
     selectedBlog?: number | null;
     selectedGroupBy?: 'visitor_id' | 'fingerprint';
+    selectedVisitorType?: 'all' | 'bots' | 'anonymous';
     bloggers?: UserOption[];
     blogOptions: BlogOption[];
     showBloggerFilter?: boolean;
     showBlogFilter?: boolean;
     showGroupByFilter?: boolean;
+    showVisitorTypeFilter?: boolean;
     blogFilterLabel?: string;
     sortOptions: { value: string; label: string }[];
 }
@@ -24,6 +27,7 @@ interface Props {
 withDefaults(defineProps<Props>(), {
     showBlogFilter: true,
     showGroupByFilter: false,
+    showVisitorTypeFilter: false,
     sortOptions: () => [
         { value: 'views_desc', label: 'Views ↓' },
         { value: 'views_asc', label: 'Views ↑' },
@@ -39,7 +43,10 @@ const emit = defineEmits<{
     'update:selectedBlogger': [value: number | null | undefined];
     'update:selectedBlog': [value: number | null | undefined];
     'update:selectedGroupBy': [value: 'visitor_id' | 'fingerprint'];
+    'update:selectedVisitorType': [value: 'all' | 'bots' | 'anonymous'];
 }>();
+
+const { t } = useI18n();
 
 const ranges: { value: Range; label: string }[] = [
     { value: 'today', label: 'Today' },
@@ -59,6 +66,12 @@ const sizes = [
 const groupOptions = [
     { value: 'visitor_id', label: 'Visitor ID' },
     { value: 'fingerprint', label: 'Fingerprint' },
+];
+
+const visitorTypeOptions = [
+    { value: 'all', label: t('admin.stats.visitor_types.all') },
+    { value: 'bots', label: t('admin.stats.visitor_types.bots') },
+    { value: 'anonymous', label: t('admin.stats.visitor_types.anonymous') },
 ];
 </script>
 
@@ -103,6 +116,14 @@ const groupOptions = [
             label="Blog"
             min-width="min-w-48"
             @update:model-value="emit('update:selectedBlog', ($event === 'all' ? null : $event) as number | null | undefined)"
+        />
+
+        <FilterSelect
+            v-if="showVisitorTypeFilter"
+            :model-value="selectedVisitorType"
+            :options="visitorTypeOptions"
+            label="Visitor type"
+            @update:model-value="emit('update:selectedVisitorType', $event as 'all' | 'bots' | 'anonymous')"
         />
 
         <FilterSelect

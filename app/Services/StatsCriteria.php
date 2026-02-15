@@ -14,6 +14,7 @@ readonly class StatsCriteria
         public ?int $limit = 5,
         public StatsSort $sort = StatsSort::ViewsDesc,
         public string $visitorGroupBy = 'visitor_id',
+        public ?string $visitorType = 'all',
         public ?string $morphClass = null,
         public ?int $viewableId = null,
     ) {

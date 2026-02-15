@@ -60,7 +60,7 @@ test('visitor stats displays user name if available, newsletter email otherwise,
         fn($page) => $page
             ->component('app/admin/Stats')
             ->where(
-                'visitors',
+                'visitorsFromPage',
                 fn($visitors) => collect($visitors)->count() === 3 && collect($visitors)->pluck(
                         'visitor_label',
                     )->contains('Logged User') && collect($visitors)->pluck('visitor_label')->contains(

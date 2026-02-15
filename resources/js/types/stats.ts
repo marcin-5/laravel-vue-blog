@@ -33,6 +33,7 @@ export interface FilterState {
     blogger_id?: number | null;
     blog_id?: number | null;
     group_by?: 'visitor_id' | 'fingerprint';
+    visitor_type?: 'all' | 'bots' | 'anonymous';
 }
 
 export interface BlogStats {

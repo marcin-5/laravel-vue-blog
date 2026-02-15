@@ -12,7 +12,8 @@ interface Props {
     visitorFilters?: FilterState;
     blogs: BlogRow[];
     posts: PostRow[];
-    visitors?: VisitorRow[];
+    visitorsFromPage?: VisitorRow[];
+    visitorsFromSpecial?: VisitorRow[];
     bloggers?: UserOption[];
     blogOptions: BlogOption[];
     postBlogOptions?: BlogOption[];
@@ -30,7 +31,8 @@ const props = withDefaults(defineProps<Props>(), {
     postBlogOptions: undefined,
     visitorBlogOptions: undefined,
     visitorFilters: undefined,
-    visitors: () => [],
+    visitorsFromPage: () => [],
+    visitorsFromSpecial: () => [],
 });
 
 const { blogState, postState, visitorState } = useStatsFilters(
@@ -58,12 +60,25 @@ const postColumns = [
     { key: 'views', label: 'Views' },
 ];
 
-const visitorColumns = computed(() => [
-    { key: 'visitor_label', label: visitorState.value.group_by === 'fingerprint' ? 'Fingerprint' : 'Visitor', hasInfo: true },
+// Columns for Visitor Views (page_views only) — first column reflects group_by only
+const pageVisitorColumns = computed(() => [
+    {
+        key: 'visitor_label',
+        label: visitorState.value.group_by === 'fingerprint' ? 'Fingerprint' : 'Visitor',
+        hasInfo: true,
+    },
     { key: 'blog_views', label: 'Blog views' },
     { key: 'post_views', label: 'Post views' },
     { key: 'lifetime_views', label: 'Lifetime visits' },
 ]);
+
+// Columns for Anonymous and Bot Views — first column is fixed to User agent
+const specialVisitorColumns = [
+    { key: 'visitor_label', label: 'User agent', hasInfo: true },
+    { key: 'blog_views', label: 'Blog views' },
+    { key: 'post_views', label: 'Post views' },
+    { key: 'lifetime_views', label: 'Lifetime visits' },
+];
 
 const effectivePostBlogOptions = computed(() => (props.postBlogOptions !== undefined ? props.postBlogOptions : props.blogOptions));
 const effectiveVisitorBlogOptions = computed(() => (props.visitorBlogOptions !== undefined ? props.visitorBlogOptions : props.blogOptions));
@@ -71,6 +86,10 @@ const effectiveVisitorBlogOptions = computed(() => (props.visitorBlogOptions !==
 const blogSortOptions = [...BLOG_SORT_OPTIONS];
 const postSortOptions = [...POST_SORT_OPTIONS];
 const visitorSortOptions = [...VISITOR_SORT_OPTIONS];
+
+// For the first Visitor table (data from page_views) we want the info column
+// to reflect current group-by selection: 'visitor' or 'fingerprint'
+const visitorInfoKey = computed(() => (visitorState.value.group_by === 'fingerprint' ? 'fingerprint' : 'visitor'));
 </script>
 
 <template>
@@ -131,7 +150,26 @@ const visitorSortOptions = [...VISITOR_SORT_OPTIONS];
                 :show-group-by-filter="true"
                 :sort-options="visitorSortOptions"
             />
-            <StatsTable :columns="visitorColumns" :data="visitors" info-key="user_agent" row-key="visitor_label" />
+            <StatsTable :columns="pageVisitorColumns" :data="visitorsFromPage" :info-key="visitorInfoKey" row-key="visitor_label" />
+        </div>
+
+        <div class="flex flex-col gap-4">
+            <h2 class="text-lg font-medium text-sidebar-foreground">Anonymous and Bot Views</h2>
+            <StatsFilters
+                v-model:selected-blog="visitorState.blog_id"
+                v-model:selected-group-by="visitorState.group_by"
+                v-model:selected-range="visitorState.range"
+                v-model:selected-size="visitorState.size"
+                v-model:selected-sort="visitorState.sort"
+                v-model:selected-visitor-type="visitorState.visitor_type"
+                :blog-filter-label="blogFilterLabel"
+                :blog-options="effectiveVisitorBlogOptions"
+                :show-blog-filter="true"
+                :show-blogger-filter="false"
+                :show-visitor-type-filter="true"
+                :sort-options="visitorSortOptions"
+            />
+            <StatsTable :columns="specialVisitorColumns" :data="visitorsFromSpecial" info-key="user_agent" row-key="visitor_label" />
         </div>
     </div>
 </template>

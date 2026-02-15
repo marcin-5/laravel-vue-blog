@@ -48,6 +48,11 @@
                 "hits": "Hits",
                 "last_seen": "Last Seen",
                 "no_data": "No bot visits recorded"
+            },
+            "visitor_types": {
+                "all": "All",
+                "bots": "Bots",
+                "anonymous": "Anonymous"
             }
         },
         "dashboard": {

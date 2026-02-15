@@ -32,7 +32,91 @@ trait HandlesStatsFilters
 
         $visitorFilters = $this->parseStatsFilters($request, 'visitors_');
         $visitorCriteria = $this->createCriteria($visitorFilters, $forceBloggerId);
-        $visitors = $this->stats->visitorViews($visitorCriteria);
+
+        // First subsection: strictly from page_views table, ignore selected visitor_type
+        $visitorsFromPageViews = $this->stats->visitorViews(
+            new StatsCriteria(
+                range: $visitorCriteria->range,
+                bloggerId: $visitorCriteria->bloggerId,
+                blogId: $visitorCriteria->blogId,
+                limit: $visitorCriteria->limit,
+                sort: $visitorCriteria->sort,
+                visitorGroupBy: $visitorCriteria->visitorGroupBy,
+                visitorType: 'all',
+            ),
+        );
+
+        // Second subsection: from anonymous_views and/or bot_views based on selected type
+        if ($visitorCriteria->visitorType === 'bots' || $visitorCriteria->visitorType === 'anonymous') {
+            $visitorsFromSpecial = $this->stats->visitorViews($visitorCriteria);
+        } else {
+            // 'all' selected -> merge anonymous and bots
+            $anonymous = $this->stats->visitorViews(
+                new StatsCriteria(
+                    range: $visitorCriteria->range,
+                    bloggerId: $visitorCriteria->bloggerId,
+                    blogId: $visitorCriteria->blogId,
+                    limit: null, // merge then apply limit manually
+                    sort: $visitorCriteria->sort,
+                    visitorGroupBy: $visitorCriteria->visitorGroupBy,
+                    visitorType: 'anonymous',
+                ),
+            );
+            $bots = $this->stats->visitorViews(
+                new StatsCriteria(
+                    range: $visitorCriteria->range,
+                    bloggerId: $visitorCriteria->bloggerId,
+                    blogId: $visitorCriteria->blogId,
+                    limit: null,
+                    sort: $visitorCriteria->sort,
+                    visitorGroupBy: $visitorCriteria->visitorGroupBy,
+                    visitorType: 'bots',
+                ),
+            );
+
+            $merged = collect();
+            foreach ([$anonymous, $bots] as $set) {
+                foreach ($set as $row) {
+                    $key = $row['visitor_label'];
+                    if (!$merged->has($key)) {
+                        $merged->put($key, $row);
+                    } else {
+                        $existing = $merged->get($key);
+                        $existing['blog_views'] += $row['blog_views'];
+                        $existing['post_views'] += $row['post_views'];
+                        $existing['views'] += $row['views'];
+                        $existing['lifetime_views'] += $row['lifetime_views'];
+                        $existing['user_agent'] = $existing['user_agent'] ?? $row['user_agent'];
+                        $merged->put($key, $existing);
+                    }
+                }
+            }
+
+            // Apply sorting & limiting to merged collection similar to query
+            $visitorsFromSpecial = $merged->values();
+            switch ($visitorCriteria->sort) {
+                case StatsSort::ViewsAsc:
+                    $visitorsFromSpecial = $visitorsFromSpecial->sortBy('post_views')->values();
+                    break;
+                case StatsSort::NameAsc:
+                    $visitorsFromSpecial = $visitorsFromSpecial->sortBy(
+                        'visitor_label',
+                        SORT_NATURAL | SORT_FLAG_CASE,
+                    )->values();
+                    break;
+                case StatsSort::NameDesc:
+                    $visitorsFromSpecial = $visitorsFromSpecial->sortByDesc(
+                        'visitor_label',
+                        SORT_NATURAL | SORT_FLAG_CASE,
+                    )->values();
+                    break;
+                default:
+                    $visitorsFromSpecial = $visitorsFromSpecial->sortByDesc('post_views')->values();
+            }
+            if ($visitorCriteria->limit !== null) {
+                $visitorsFromSpecial = $visitorsFromSpecial->take(max(1, $visitorCriteria->limit))->values();
+            }
+        }
 
         return [
             'blogFilters' => $this->formatFiltersForResponse($blogFilters, $blogFilters['limit']),
@@ -40,7 +124,9 @@ trait HandlesStatsFilters
             'visitorFilters' => $this->formatFiltersForResponse($visitorFilters, $visitorFilters['limit']),
             'blogs' => $blogs,
             'posts' => $posts,
-            'visitors' => $visitors,
+            // Two separate datasets for Visitor sections
+            'visitorsFromPage' => $visitorsFromPageViews,
+            'visitorsFromSpecial' => $visitorsFromSpecial,
         ];
     }
 
@@ -55,6 +141,7 @@ trait HandlesStatsFilters
         $bloggerId = $request->has($prefix . 'blogger_id') ? (int)$request->query($prefix . 'blogger_id') : null;
         $blogId = $request->has($prefix . 'blog_id') ? (int)$request->query($prefix . 'blog_id') : null;
         $groupBy = (string)$request->query($prefix . 'group_by', 'visitor_id');
+        $visitorType = (string)$request->query($prefix . 'type', 'all');
 
         return [
             'range' => $range,
@@ -64,6 +151,7 @@ trait HandlesStatsFilters
             'blogger_id' => $bloggerId,
             'blog_id' => $blogId,
             'group_by' => $groupBy,
+            'visitor_type' => $visitorType,
         ];
     }
 
@@ -76,6 +164,7 @@ trait HandlesStatsFilters
             limit: $filters['limit'],
             sort: StatsSort::from($filters['sort']),
             visitorGroupBy: $filters['group_by'] ?? 'visitor_id',
+            visitorType: $filters['visitor_type'] ?? 'all',
         );
     }
 
@@ -88,6 +177,7 @@ trait HandlesStatsFilters
             'blogger_id' => $filters['blogger_id'],
             'blog_id' => $filters['blog_id'],
             'group_by' => $filters['group_by'] ?? 'visitor_id',
+            'visitor_type' => $filters['visitor_type'] ?? 'all',
         ];
     }
 }

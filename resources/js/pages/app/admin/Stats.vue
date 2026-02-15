@@ -15,7 +15,8 @@ interface Props {
     visitorFilters: FilterState;
     blogs: BlogRow[];
     posts: PostRow[];
-    visitors: VisitorRow[];
+    visitorsFromPage: VisitorRow[];
+    visitorsFromSpecial: VisitorRow[];
     bloggers: UserOption[];
     blogOptions: BlogOption[];
     postBlogOptions: BlogOption[];
@@ -49,7 +50,8 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: t('admin.stats.title'), href: '/
             :show-blogger-filter="true"
             :visitor-blog-options="visitorBlogOptions"
             :visitor-filters="visitorFilters"
-            :visitors="visitors"
+            :visitors-from-page="visitorsFromPage"
+            :visitors-from-special="visitorsFromSpecial"
             route-name="admin.stats.index"
         />
     </AppLayout>
