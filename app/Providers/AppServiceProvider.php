@@ -4,9 +4,11 @@ namespace App\Providers;
 
 use App\Models\Blog;
 use App\Models\Category;
+use App\Models\PageView;
 use App\Models\User;
 use App\Observers\BlogObserver;
 use App\Observers\CategoryObserver;
+use App\Observers\PageViewObserver;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -28,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
         // Model observers for cross-cutting slug generation logic
         Blog::observe(BlogObserver::class);
         Category::observe(CategoryObserver::class);
+        PageView::observe(PageViewObserver::class);
 
         // Authorization gate to control who can create a blog (fallback when not using policies)
         Gate::define('create-blog', function (User $user): bool {
