@@ -79,6 +79,16 @@ return [
     */
 
     'locale' => env('APP_LOCALE', 'en'),
+    'locale_override_accept_language' => env('APP_LOCALE_OVERRIDE_ACCEPT_LANGUAGE', true),
+
+    'supported_locales' => array_values(
+        array_filter(
+            array_map(
+                static fn(string $v): string => trim($v),
+                explode(',', (string)env('APP_SUPPORTED_LOCALES', 'en,pl')),
+            ),
+        ),
+    ),
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 

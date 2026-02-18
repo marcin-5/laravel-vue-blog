@@ -12,20 +12,27 @@ class SetLocale
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param Closure(Request): (Response) $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $supported = ['en', 'pl'];
+        $supported = (array)config('app.supported_locales', []);
 
-        $locale = optional($request->user())->locale
+        $locale =
+            optional($request->user())->locale
             ?? $request->session()->get('locale')
-            ?? $request->cookie('locale')
-            ?? $request->getPreferredLanguage($supported)
-            ?? config('app.locale');
+            ?? $request->cookie('locale');
 
-        if (! in_array($locale, $supported, true)) {
-            $locale = config('app.locale');
+        if ($locale === null) {
+            $overrideAcceptLanguage = (bool)config('app.locale_override_accept_language');
+
+            $locale = $overrideAcceptLanguage
+                ? (string)config('app.locale')
+                : ($request->getPreferredLanguage($supported) ?: (string)config('app.locale'));
+        }
+
+        if (!in_array($locale, $supported, true)) {
+            $locale = (string)config('app.locale');
         }
 
         AppFacade::setLocale($locale);

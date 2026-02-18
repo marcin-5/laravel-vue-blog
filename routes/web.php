@@ -2,7 +2,15 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GroupController;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Support\Facades\Route;
+
+// Test-only helper route to verify locale resolution in middleware
+if (app()->environment('testing')) {
+    Route::middleware('web')->get('/_test/locale', function () {
+        return response()->json(['locale' => app()->getLocale()]);
+    });
+}
 
 //Route::get('/', function () {
 //    return Inertia::render('Welcome');
