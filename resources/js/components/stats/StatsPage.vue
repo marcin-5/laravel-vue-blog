@@ -57,7 +57,9 @@ const blogColumns = computed(() => [
 
 const postColumns = [
     { key: 'title', label: 'Title' },
-    { key: 'views', label: 'Views' },
+    { key: 'views', label: 'Consent views' },
+    { key: 'bot_views', label: 'Bot views' },
+    { key: 'anonymous_views', label: 'Anonymous views' },
 ];
 
 // Columns for Visitor Views (page_views only) — first column reflects group_by only

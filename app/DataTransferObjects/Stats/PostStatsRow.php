@@ -9,6 +9,8 @@ readonly class PostStatsRow
         public string $title,
         public int $views,
         public int $uniqueViews,
+        public int $botViews,
+        public int $anonymousViews,
     ) {
     }
 
@@ -19,6 +21,8 @@ readonly class PostStatsRow
             title: (string)$row->title,
             views: (int)$row->views,
             uniqueViews: (int)$row->unique_views,
+            botViews: (int)($row->bot_views ?? 0),
+            anonymousViews: (int)($row->anonymous_views ?? 0),
         );
     }
 
@@ -29,6 +33,8 @@ readonly class PostStatsRow
             'title' => $this->title,
             'views' => $this->views,
             'unique_views' => $this->uniqueViews,
+            'bot_views' => $this->botViews,
+            'anonymous_views' => $this->anonymousViews,
         ];
     }
 }

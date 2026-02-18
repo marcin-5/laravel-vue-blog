@@ -10,6 +10,7 @@ use App\Services\Stats\UniqueViewerKeyBuilder;
 use App\Services\StatsCriteria;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class PostViewsQuery
 {
@@ -21,7 +22,7 @@ class PostViewsQuery
     }
 
     /**
-     * @return Collection<int, array{post_id:int,title:string,views:int,unique_views:int}>
+     * @return Collection<int, array{post_id:int,title:string,views:int,unique_views:int,bot_views:int,anonymous_views:int}>
      */
     public function execute(StatsCriteria $criteria): Collection
     {
@@ -29,13 +30,34 @@ class PostViewsQuery
         $postClass = $this->getPostMorphClass();
         $uniqueViewerKeySql = $this->uniqueViewerKeyBuilder->build('page_views');
 
+        $botSub = DB::query()
+            ->from('bot_views')
+            ->selectRaw('viewable_id, SUM(hits) as bot_views')
+            ->where('viewable_type', '=', $postClass)
+            ->whereBetween('last_seen_at', [$from, $to])
+            ->groupBy('viewable_id');
+
+        $anonSub = DB::query()
+            ->from('anonymous_views')
+            ->selectRaw('viewable_id, SUM(hits) as anonymous_views')
+            ->where('viewable_type', '=', $postClass)
+            ->whereBetween('last_seen_at', [$from, $to])
+            ->groupBy('viewable_id');
+
         $query = PageView::query()
             ->selectRaw(
-                "posts.id as post_id, posts.title, COUNT(page_views.id) as views, COUNT(DISTINCT ($uniqueViewerKeySql)) as unique_views",
+                "posts.id as post_id, posts.title, COUNT(page_views.id) as views, COUNT(DISTINCT ($uniqueViewerKeySql)) as unique_views, " .
+                'COALESCE(bot.bot_views, 0) as bot_views, COALESCE(anon.anonymous_views, 0) as anonymous_views',
             )
             ->join('posts', function ($j) use ($postClass) {
                 $j->on('posts.id', '=', 'page_views.viewable_id')
                     ->where('page_views.viewable_type', '=', $postClass);
+            })
+            ->leftJoinSub($botSub, 'bot', function ($j) {
+                $j->on('bot.viewable_id', '=', 'posts.id');
+            })
+            ->leftJoinSub($anonSub, 'anon', function ($j) {
+                $j->on('anon.viewable_id', '=', 'posts.id');
             })
             ->when($criteria->blogId, fn($q) => $q->where('posts.blog_id', $criteria->blogId))
             ->when($criteria->bloggerId, function ($q) use ($criteria) {
@@ -43,7 +65,7 @@ class PostViewsQuery
                     ->where('blogs.user_id', $criteria->bloggerId);
             })
             ->whereBetween('page_views.created_at', [$from, $to])
-            ->groupBy('posts.id', 'posts.title');
+            ->groupBy('posts.id', 'posts.title', 'bot.bot_views', 'anon.anonymous_views');
 
         $this->applySort($query, $criteria->sort);
         $this->applyLimit($query, $criteria->limit);

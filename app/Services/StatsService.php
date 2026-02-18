@@ -44,7 +44,7 @@ readonly class StatsService
     /**
      * Returns aggregated views for posts within a blog and period.
      *
-     * @return Collection<int, array{post_id:int,title:string,views:int,unique_views:int}>
+     * @return Collection<int, array{post_id:int,title:string,views:int,unique_views:int,bot_views:int,anonymous_views:int}>
      */
     public function postViews(StatsCriteria $criteria): Collection
     {
