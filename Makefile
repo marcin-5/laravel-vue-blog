@@ -323,7 +323,7 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 	@echo ""
 	@echo "🔗 Testing SSR server with a test request..."
 	@echo "SSR Server response:"
-	$(DOCKER_COMPOSE_PROD) exec -T app wget -q -O- --timeout=5 "http://ssr:13714/render" 2>&1 || echo "SSR server not responding to /render"
+	$(DOCKER_COMPOSE_PROD) exec -T app wget -q -O- --timeout=5 "http://ssr:13714/health" 2>&1 || echo "SSR server not responding to /health"
 	@echo ""
 	@echo ""
 	@echo "🔍 Verifying queue worker process..."
