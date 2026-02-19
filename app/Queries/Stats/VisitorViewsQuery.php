@@ -51,9 +51,11 @@ class VisitorViewsQuery
     {
         $blogMorphClass = $this->getBlogMorphClass();
         $postMorphClass = $this->getPostMorphClass();
+        [$startDate, $endDate] = $criteria->range->bounds();
 
         $query = BotView::query()
             ->join('user_agents', 'user_agents.id', '=', 'bot_views.user_agent_id')
+            ->whereBetween('bot_views.created_at', [$startDate, $endDate])
             ->selectRaw(
                 'user_agents.name as visitor_label,' .
                 ' user_agents.name as user_agent,' .
@@ -139,9 +141,11 @@ class VisitorViewsQuery
     {
         $blogMorphClass = $this->getBlogMorphClass();
         $postMorphClass = $this->getPostMorphClass();
+        [$startDate, $endDate] = $criteria->range->bounds();
 
         $query = AnonymousView::query()
             ->join('user_agents', 'user_agents.id', '=', 'anonymous_views.user_agent_id')
+            ->whereBetween('anonymous_views.created_at', [$startDate, $endDate])
             ->selectRaw(
                 'user_agents.name as visitor_label,' .
                 ' user_agents.name as user_agent,' .
