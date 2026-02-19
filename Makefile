@@ -309,6 +309,15 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 	@echo "🚀 Recreating core services without touching caddy..."
 	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps app ssr queue scheduler
 	$(MAKE) prod-wait
+	@echo "⏳ Waiting for HTTP application endpoint (/up) to be reachable..."
+	@for i in $$(seq 1 15); do \
+	  if $(DOCKER_COMPOSE_PROD) exec -T app php artisan migrate:status >/dev/null 2>&1; then \
+	    echo "✅ Application is ready (PHP-FPM/DB reachable)."; \
+	    break; \
+	  fi; \
+	  echo "⏳ App not ready yet ($$i/15); waiting..."; \
+	  sleep 2; \
+	done
 	$(MAKE) prod-versions
 	@echo ""
 	@echo "🔍 Checking production assets..."
