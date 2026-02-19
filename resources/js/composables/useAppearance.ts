@@ -78,6 +78,10 @@ export function useAppearance() {
     });
 
     function updateAppearance(value: Appearance) {
+        if (typeof window === 'undefined') {
+            return;
+        }
+
         appearance.value = value;
 
         // Store in localStorage for client-side persistence...

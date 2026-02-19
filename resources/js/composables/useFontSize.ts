@@ -44,7 +44,7 @@ export function useFontSize() {
     });
 
     function updateFontSize(newSize: number[] | undefined) {
-        if (!newSize || newSize.length === 0) {
+        if (typeof window === 'undefined' || !newSize || newSize.length === 0) {
             return;
         }
         fontSize.value = newSize;
