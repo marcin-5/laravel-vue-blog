@@ -10,8 +10,8 @@
     "license": "MIT",
     "require": {
         "php": "^8.5",
-        "erusev/parsedown": "^1.7",
-        "erusev/parsedown-extra": "^0.8.1",
+        "erusev/parsedown": "^1.8",
+        "erusev/parsedown-extra": "^0.9",
         "ezyang/htmlpurifier": "^4.19",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^12.0",
