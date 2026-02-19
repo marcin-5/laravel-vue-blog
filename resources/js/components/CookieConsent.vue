@@ -10,11 +10,19 @@ const COOKIE_NAME = 'cookie_consent';
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year in seconds
 
 const getCookie = (name: string): string | null => {
+    if (typeof document === 'undefined') {
+        return null;
+    }
+
     const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
     return match ? match[2] : null;
 };
 
 const setCookie = (name: string, value: string, maxAge: number): void => {
+    if (typeof document === 'undefined') {
+        return;
+    }
+
     document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; SameSite=Strict`;
 };
 

@@ -15,6 +15,10 @@ export interface StatsFiltersState {
 }
 
 function getInitialState(key: string, serverState: FilterState): FilterState {
+    if (typeof window === 'undefined') {
+        return { ...serverState };
+    }
+
     try {
         const saved = localStorage.getItem(key);
         if (saved) {
@@ -36,6 +40,10 @@ function getInitialState(key: string, serverState: FilterState): FilterState {
 }
 
 function saveState(key: string, state: FilterState): void {
+    if (typeof window === 'undefined') {
+        return;
+    }
+
     try {
         localStorage.setItem(key, JSON.stringify(state));
     } catch (e) {

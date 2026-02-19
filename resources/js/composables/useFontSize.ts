@@ -30,6 +30,10 @@ const fontSize = ref([DEFAULT_SIZE]);
 
 export function useFontSize() {
     onMounted(() => {
+        if (typeof window === 'undefined') {
+            return;
+        }
+
         const savedSize = localStorage.getItem(STORAGE_KEY);
         if (savedSize) {
             const parsed = parseInt(savedSize, 10);

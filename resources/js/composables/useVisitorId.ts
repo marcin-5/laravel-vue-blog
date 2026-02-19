@@ -37,6 +37,10 @@ export function initializeVisitorId() {
 
     // Attach to Inertia requests
     router.on('before', (event) => {
+        if (typeof window === 'undefined') {
+            return;
+        }
+
         const visitorId = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (visitorId) {
             event.detail.visit.headers = {

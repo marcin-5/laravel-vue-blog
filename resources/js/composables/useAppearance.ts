@@ -66,6 +66,10 @@ const appearance = ref<Appearance>('system');
 
 export function useAppearance() {
     onMounted(() => {
+        if (typeof window === 'undefined') {
+            return;
+        }
+
         const savedAppearance = localStorage.getItem('appearance') as Appearance | null;
 
         if (savedAppearance) {
