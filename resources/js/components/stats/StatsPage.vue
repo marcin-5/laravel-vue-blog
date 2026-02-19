@@ -10,6 +10,7 @@ interface Props {
     blogFilters: FilterState;
     postFilters: FilterState;
     visitorFilters?: FilterState;
+    specialVisitorFilters?: FilterState;
     blogs: BlogRow[];
     posts: PostRow[];
     visitorsFromPage?: VisitorRow[];
@@ -31,15 +32,17 @@ const props = withDefaults(defineProps<Props>(), {
     postBlogOptions: undefined,
     visitorBlogOptions: undefined,
     visitorFilters: undefined,
+    specialVisitorFilters: undefined,
     visitorsFromPage: () => [],
     visitorsFromSpecial: () => [],
 });
 
-const { blogState, postState, visitorState } = useStatsFilters(
+const { blogState, postState, visitorState, specialVisitorState } = useStatsFilters(
     {
         blog: props.blogFilters,
         post: props.postFilters,
         visitor: props.visitorFilters ?? props.blogFilters,
+        specialVisitor: props.specialVisitorFilters ?? props.visitorFilters ?? props.blogFilters,
     },
     {
         routeName: props.routeName,
@@ -159,12 +162,12 @@ const visitorInfoKey = computed(() => 'user_agent');
         <div class="flex flex-col gap-4">
             <h2 class="text-lg font-medium text-sidebar-foreground">Anonymous and Bot Views</h2>
             <StatsFilters
-                v-model:selected-blog="visitorState.blog_id"
-                v-model:selected-group-by="visitorState.group_by"
-                v-model:selected-range="visitorState.range"
-                v-model:selected-size="visitorState.size"
-                v-model:selected-sort="visitorState.sort"
-                v-model:selected-visitor-type="visitorState.visitor_type"
+                v-model:selected-blog="specialVisitorState.blog_id"
+                v-model:selected-group-by="specialVisitorState.group_by"
+                v-model:selected-range="specialVisitorState.range"
+                v-model:selected-size="specialVisitorState.size"
+                v-model:selected-sort="specialVisitorState.sort"
+                v-model:selected-visitor-type="specialVisitorState.visitor_type"
                 :blog-filter-label="blogFilterLabel"
                 :blog-options="effectiveVisitorBlogOptions"
                 :show-blog-filter="true"

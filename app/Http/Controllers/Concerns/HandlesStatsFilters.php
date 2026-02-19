@@ -33,6 +33,9 @@ trait HandlesStatsFilters
         $visitorFilters = $this->parseStatsFilters($request, 'visitors_');
         $visitorCriteria = $this->createCriteria($visitorFilters, $forceBloggerId);
 
+        $specialVisitorFilters = $this->parseStatsFilters($request, 'special_visitors_');
+        $specialVisitorCriteria = $this->createCriteria($specialVisitorFilters, $forceBloggerId);
+
         // First subsection: strictly from page_views table, ignore selected visitor_type
         $visitorsFromPageViews = $this->stats->visitorViews(
             new StatsCriteria(
@@ -47,29 +50,29 @@ trait HandlesStatsFilters
         );
 
         // Second subsection: from anonymous_views and/or bot_views based on selected type
-        if ($visitorCriteria->visitorType === 'bots' || $visitorCriteria->visitorType === 'anonymous') {
-            $visitorsFromSpecial = $this->stats->visitorViews($visitorCriteria);
+        if ($specialVisitorCriteria->visitorType === 'bots' || $specialVisitorCriteria->visitorType === 'anonymous') {
+            $visitorsFromSpecial = $this->stats->visitorViews($specialVisitorCriteria);
         } else {
             // 'all' selected -> merge anonymous and bots
             $anonymous = $this->stats->visitorViews(
                 new StatsCriteria(
-                    range: $visitorCriteria->range,
-                    bloggerId: $visitorCriteria->bloggerId,
-                    blogId: $visitorCriteria->blogId,
+                    range: $specialVisitorCriteria->range,
+                    bloggerId: $specialVisitorCriteria->bloggerId,
+                    blogId: $specialVisitorCriteria->blogId,
                     limit: null, // merge then apply limit manually
-                    sort: $visitorCriteria->sort,
-                    visitorGroupBy: $visitorCriteria->visitorGroupBy,
+                    sort: $specialVisitorCriteria->sort,
+                    visitorGroupBy: $specialVisitorCriteria->visitorGroupBy,
                     visitorType: 'anonymous',
                 ),
             );
             $bots = $this->stats->visitorViews(
                 new StatsCriteria(
-                    range: $visitorCriteria->range,
-                    bloggerId: $visitorCriteria->bloggerId,
-                    blogId: $visitorCriteria->blogId,
+                    range: $specialVisitorCriteria->range,
+                    bloggerId: $specialVisitorCriteria->bloggerId,
+                    blogId: $specialVisitorCriteria->blogId,
                     limit: null,
-                    sort: $visitorCriteria->sort,
-                    visitorGroupBy: $visitorCriteria->visitorGroupBy,
+                    sort: $specialVisitorCriteria->sort,
+                    visitorGroupBy: $specialVisitorCriteria->visitorGroupBy,
                     visitorType: 'bots',
                 ),
             );
@@ -94,7 +97,7 @@ trait HandlesStatsFilters
 
             // Apply sorting & limiting to merged collection similar to query
             $visitorsFromSpecial = $merged->values();
-            switch ($visitorCriteria->sort) {
+            switch ($specialVisitorCriteria->sort) {
                 case StatsSort::ViewsAsc:
                     $visitorsFromSpecial = $visitorsFromSpecial->sortBy('post_views')->values();
                     break;
@@ -113,8 +116,8 @@ trait HandlesStatsFilters
                 default:
                     $visitorsFromSpecial = $visitorsFromSpecial->sortByDesc('post_views')->values();
             }
-            if ($visitorCriteria->limit !== null) {
-                $visitorsFromSpecial = $visitorsFromSpecial->take(max(1, $visitorCriteria->limit))->values();
+            if ($specialVisitorCriteria->limit !== null) {
+                $visitorsFromSpecial = $visitorsFromSpecial->take(max(1, $specialVisitorCriteria->limit))->values();
             }
         }
 
@@ -122,6 +125,10 @@ trait HandlesStatsFilters
             'blogFilters' => $this->formatFiltersForResponse($blogFilters, $blogFilters['limit']),
             'postFilters' => $this->formatFiltersForResponse($postFilters, $postFilters['limit']),
             'visitorFilters' => $this->formatFiltersForResponse($visitorFilters, $visitorFilters['limit']),
+            'specialVisitorFilters' => $this->formatFiltersForResponse(
+                $specialVisitorFilters,
+                $specialVisitorFilters['limit'],
+            ),
             'blogs' => $blogs,
             'posts' => $posts,
             // Two separate datasets for Visitor sections

@@ -37,7 +37,7 @@ class VisitorTypeTest extends TestCase
         ]);
 
         $this->actingAs($this->admin)
-            ->get(route('admin.stats.index', ['visitors_type' => 'bots']))
+            ->get(route('admin.stats.index', ['special_visitors_type' => 'bots']))
             ->assertOk()
             ->assertInertia(fn(Assert $page) => $page
                 ->component('app/admin/Stats')
@@ -62,7 +62,7 @@ class VisitorTypeTest extends TestCase
         ]);
 
         $this->actingAs($this->admin)
-            ->get(route('admin.stats.index', ['visitors_type' => 'anonymous']))
+            ->get(route('admin.stats.index', ['special_visitors_type' => 'anonymous']))
             ->assertOk()
             ->assertInertia(fn(Assert $page) => $page
                 ->component('app/admin/Stats')

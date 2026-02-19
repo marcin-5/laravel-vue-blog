@@ -12,6 +12,7 @@ export interface StatsFiltersState {
     blog: FilterState;
     post: FilterState;
     visitor: FilterState;
+    specialVisitor: FilterState;
 }
 
 function getInitialState(key: string, serverState: FilterState): FilterState {
@@ -51,14 +52,19 @@ function saveState(key: string, state: FilterState): void {
     }
 }
 
-export function useStatsFilters(serverFilters: { blog: FilterState; post: FilterState; visitor: FilterState }, options: UseStatsFiltersOptions) {
+export function useStatsFilters(
+    serverFilters: { blog: FilterState; post: FilterState; visitor: FilterState; specialVisitor: FilterState },
+    options: UseStatsFiltersOptions,
+) {
     const blogStorageKey = `stats_blog_filters_${options.storageKeyPrefix}`;
     const postStorageKey = `stats_post_filters_${options.storageKeyPrefix}`;
     const visitorStorageKey = `stats_visitor_filters_${options.storageKeyPrefix}`;
+    const specialVisitorStorageKey = `stats_special_visitor_filters_${options.storageKeyPrefix}`;
 
     const blogState = ref<FilterState>(getInitialState(blogStorageKey, serverFilters.blog));
     const postState = ref<FilterState>(getInitialState(postStorageKey, serverFilters.post));
     const visitorState = ref<FilterState>(getInitialState(visitorStorageKey, serverFilters.visitor));
+    const specialVisitorState = ref<FilterState>(getInitialState(specialVisitorStorageKey, serverFilters.specialVisitor));
 
     function applyFilters(): void {
         const query: Record<string, any> = {
@@ -86,6 +92,15 @@ export function useStatsFilters(serverFilters: { blog: FilterState; post: Filter
             visitors_type: visitorState.value.visitor_type,
             // visitors_blog_id only when a specific blog is selected
             ...(visitorState.value.blog_id != null ? { visitors_blog_id: visitorState.value.blog_id } : {}),
+
+            // Special visitor params (prefixed)
+            special_visitors_range: specialVisitorState.value.range,
+            special_visitors_sort: specialVisitorState.value.sort,
+            special_visitors_size: specialVisitorState.value.size === 0 ? undefined : specialVisitorState.value.size,
+            special_visitors_group_by: specialVisitorState.value.group_by,
+            special_visitors_type: specialVisitorState.value.visitor_type,
+            // special_visitors_blog_id only when a specific blog is selected
+            ...(specialVisitorState.value.blog_id != null ? { special_visitors_blog_id: specialVisitorState.value.blog_id } : {}),
         };
 
         router.get(route(options.routeName), query, { preserveScroll: true, preserveState: true });
@@ -107,11 +122,12 @@ export function useStatsFilters(serverFilters: { blog: FilterState; post: Filter
 
     // Persistence and Application
     watch(
-        [blogState, postState, visitorState],
+        [blogState, postState, visitorState, specialVisitorState],
         () => {
             saveState(blogStorageKey, blogState.value);
             saveState(postStorageKey, postState.value);
             saveState(visitorStorageKey, visitorState.value);
+            saveState(specialVisitorStorageKey, specialVisitorState.value);
             applyFilters();
         },
         { deep: true },
@@ -122,8 +138,9 @@ export function useStatsFilters(serverFilters: { blog: FilterState; post: Filter
         const blogChanged = JSON.stringify(blogState.value) !== JSON.stringify(serverFilters.blog);
         const postChanged = JSON.stringify(postState.value) !== JSON.stringify(serverFilters.post);
         const visitorChanged = JSON.stringify(visitorState.value) !== JSON.stringify(serverFilters.visitor);
+        const specialVisitorChanged = JSON.stringify(specialVisitorState.value) !== JSON.stringify(serverFilters.specialVisitor);
 
-        if (blogChanged || postChanged || visitorChanged) {
+        if (blogChanged || postChanged || visitorChanged || specialVisitorChanged) {
             applyFilters();
         }
     });
@@ -132,6 +149,7 @@ export function useStatsFilters(serverFilters: { blog: FilterState; post: Filter
         blogState,
         postState,
         visitorState,
+        specialVisitorState,
         applyFilters,
     };
 }
