@@ -56,7 +56,7 @@ const reject = () => {
             <Button variant="outline" @click="reject">
                 {{ t('common.cookie_notice.reject_button') }}
             </Button>
-            <Button variant="exit" @click="accept">
+            <Button variant="constructive" @click="accept">
                 {{ t('common.cookie_notice.accept_button') }}
             </Button>
         </div>
