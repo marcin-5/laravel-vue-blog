@@ -1,3 +1,4 @@
+import '@fontsource-variable/afacad';
 import '@fontsource-variable/bitter';
 import '@fontsource-variable/dm-sans';
 import '@fontsource-variable/faustina';
@@ -11,6 +12,7 @@ import '@fontsource-variable/raleway';
 import '@fontsource-variable/recursive';
 import '@fontsource-variable/roboto';
 import '@fontsource-variable/rokkitt';
+import '@fontsource-variable/sofia-sans-semi-condensed';
 import '@fontsource-variable/vollkorn';
 import '@fontsource-variable/yrsa';
 import '../css/app.css';
