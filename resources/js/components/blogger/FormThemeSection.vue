@@ -46,6 +46,7 @@ interface Props {
         fontHeader?: string;
         fontBody?: string;
         fontMotto?: string;
+        fontExcerpt?: string;
         fontFooter?: string;
         fontScaleCorrection?: string;
         mottoStyle?: string;
@@ -154,6 +155,7 @@ function updateValue(key: string, value: string) {
 
 const fontOptions = [
     { label: 'System Default', value: 'inherit' },
+    { label: 'Afacad', value: 'var(--font-afacad)' },
     { label: 'DM Sans', value: 'var(--font-dm-sans)' },
     { label: 'Inter', value: 'var(--font-inter)' },
     { label: 'Montserrat', value: 'var(--font-montserrat)' },
@@ -167,6 +169,7 @@ const fontOptions = [
     { label: 'Literata', value: 'var(--font-literata)' },
     { label: 'Kreon', value: 'var(--font-kreon)' },
     { label: 'Rokkitt', value: 'var(--font-rokkitt)' },
+    { label: 'Sofia semi condensed', value: 'var(--font-sofia-semi-condensed)' },
     { label: 'Vollkorn', value: 'var(--font-vollkorn)' },
     { label: 'Yrsa', value: 'var(--font-yrsa)' },
 ];
@@ -197,6 +200,11 @@ const bodyScaleValue = computed({
 const mottoScaleValue = computed({
     get: () => [Math.round(getBaseScale('--motto-scale') * 100)],
     set: (val) => updateBaseScale('--motto-scale', val[0] / 100),
+});
+
+const excerptScaleValue = computed({
+    get: () => [Math.round(getBaseScale('--excerpt-scale') * 100)],
+    set: (val) => updateBaseScale('--excerpt-scale', val[0] / 100),
 });
 
 const footerScaleValue = computed({
@@ -270,6 +278,16 @@ const fontFields = computed(() => [
         },
     },
     {
+        key: '--font-excerpt',
+        idSuffix: 'font-excerpt',
+        labelKey: 'fontExcerpt' as const,
+        defaultLabel: 'Font tekstu zachęty',
+        scaleKey: '--excerpt-scale',
+        scaleValue: excerptScaleValue,
+        scaleMin: 90,
+        scaleMax: 120,
+    },
+    {
         key: '--font-footer',
         idSuffix: 'font-footer',
         labelKey: 'fontFooter' as const,
@@ -303,9 +321,9 @@ const fontFields = computed(() => [
             </div>
         </div>
 
-        <div class="mb-6 grid grid-cols-1 gap-4 border-b border-border pb-6 sm:grid-cols-2">
-            <div v-for="field in fontFields" :key="field.key" class="flex flex-col gap-2">
-                <div class="flex items-end gap-2">
+        <div class="mb-6 grid grid-cols-1 gap-4 border-b border-border pb-6 xl:grid-cols-2">
+            <template v-for="field in fontFields" :key="`${props.idPrefix}-${field.idSuffix}`">
+                <div class="flex w-full items-end gap-2">
                     <FormSelectField
                         :id="`${props.idPrefix}-${field.idSuffix}`"
                         :label="props.translations[field.labelKey] || field.defaultLabel"
@@ -343,12 +361,13 @@ const fontFields = computed(() => [
                     :label="props.translations[field.additionalField.labelKey] || field.additionalField.defaultLabel"
                     :model-value="props.colors?.[field.additionalField.key] || field.additionalField.defaultValue"
                     :options="field.additionalField.options"
-                    @update:model-value="updateValue(field.additionalField.key, $event.toString())"
+                    class="w-full"
+                    @update:model-value="updateValue(field.additionalField!.key, $event.toString())"
                 />
-            </div>
+            </template>
         </div>
 
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
             <FormColorField
                 v-for="field in colorFields"
                 :id="`${props.idPrefix}-${field.idSuffix}`"

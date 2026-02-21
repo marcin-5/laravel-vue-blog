@@ -86,6 +86,7 @@ export function useBloggerFormTranslations() {
         fontHeader: t('blogger.form.theme_font_header'),
         fontBody: t('blogger.form.theme_font_body'),
         fontMotto: t('blogger.form.theme_font_motto'),
+        fontExcerpt: t('blogger.form.theme_font_excerpt'),
         fontFooter: t('blogger.form.theme_font_footer'),
         fontScaleCorrection: t('blogger.form.theme_font_scale_correction'),
         mottoStyle: t('blogger.form.theme_motto_style'),
