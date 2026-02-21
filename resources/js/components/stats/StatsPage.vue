@@ -1,6 +1,11 @@
 <script lang="ts" setup>
 import { useStatsFilters } from '@/composables/useStatsFilters';
-import { BLOG_SORT_OPTIONS, POST_SORT_OPTIONS, VISITOR_SORT_OPTIONS } from '@/constants/stats';
+import {
+    BLOG_SORT_OPTIONS,
+    POST_SORT_OPTIONS,
+    SPECIAL_VISITOR_SORT_OPTIONS,
+    VISITOR_SORT_OPTIONS
+} from '@/constants/stats';
 import type { BlogOption, BlogRow, FilterState, PostRow, UserOption, VisitorRow } from '@/types/stats';
 import { computed } from 'vue';
 import StatsFilters from './StatsFilters.vue';
@@ -84,6 +89,7 @@ const specialVisitorColumns = [
     { key: 'blog_views', label: 'Blog views' },
     { key: 'post_views', label: 'Post views' },
     { key: 'lifetime_views', label: 'Lifetime visits' },
+    { key: 'last_seen_at', label: 'Last seen', isDate: true },
 ];
 
 const effectivePostBlogOptions = computed(() => (props.postBlogOptions !== undefined ? props.postBlogOptions : props.blogOptions));
@@ -92,6 +98,7 @@ const effectiveVisitorBlogOptions = computed(() => (props.visitorBlogOptions !==
 const blogSortOptions = [...BLOG_SORT_OPTIONS];
 const postSortOptions = [...POST_SORT_OPTIONS];
 const visitorSortOptions = [...VISITOR_SORT_OPTIONS];
+const specialVisitorSortOptions = [...SPECIAL_VISITOR_SORT_OPTIONS];
 
 // For the first Visitor table (data from page_views) the tooltip should show the User Agent string.
 // Backend always provides `user_agent` alongside the grouped label, so we always use that key here.
@@ -142,7 +149,7 @@ const visitorInfoKey = computed(() => 'user_agent');
 
         <!-- Visitor Stats Section -->
         <div class="flex flex-col gap-4">
-            <h2 class="text-lg font-medium text-sidebar-foreground">Visitor Views</h2>
+            <h2 class="text-lg font-medium text-sidebar-foreground">Consent Views</h2>
             <StatsFilters
                 v-model:selected-blog="visitorState.blog_id"
                 v-model:selected-group-by="visitorState.group_by"
@@ -172,8 +179,9 @@ const visitorInfoKey = computed(() => 'user_agent');
                 :blog-options="effectiveVisitorBlogOptions"
                 :show-blog-filter="true"
                 :show-blogger-filter="false"
+                :show-range-filter="false"
                 :show-visitor-type-filter="true"
-                :sort-options="visitorSortOptions"
+                :sort-options="specialVisitorSortOptions"
             />
             <StatsTable :columns="specialVisitorColumns" :data="visitorsFromSpecial" row-key="visitor_label" />
         </div>

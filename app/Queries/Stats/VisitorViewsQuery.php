@@ -65,7 +65,8 @@ class VisitorViewsQuery
                 ' SUM(CASE WHEN viewable_type = ? THEN hits ELSE 0 END) as blog_views,' .
                 ' SUM(CASE WHEN viewable_type = ? THEN hits ELSE 0 END) as post_views,' .
                 ' SUM(hits) as views,' .
-                ' SUM(hits) as lifetime_views',
+                ' SUM(hits) as lifetime_views,' .
+                ' MAX(last_seen_at) as last_seen_at',
                 [$blogMorphClass, $postMorphClass],
             )
             ->when(
@@ -157,6 +158,8 @@ class VisitorViewsQuery
             StatsSort::ViewsAsc => $query->orderBy('post_views', 'asc'),
             StatsSort::NameAsc => $query->orderBy('visitor_label', 'asc'),
             StatsSort::NameDesc => $query->orderBy('visitor_label', 'desc'),
+            StatsSort::LastSeenAsc => $query->orderBy('last_seen_at', 'asc'),
+            StatsSort::LastSeenDesc => $query->orderBy('last_seen_at', 'desc'),
             default => $query->orderBy('post_views', 'desc'),
         };
     }

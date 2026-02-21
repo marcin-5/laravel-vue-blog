@@ -90,6 +90,11 @@ trait HandlesStatsFilters
                         $existing['views'] += $row['views'];
                         $existing['lifetime_views'] += $row['lifetime_views'];
                         $existing['user_agent'] = $existing['user_agent'] ?? $row['user_agent'];
+                        if (isset($row['last_seen_at'])) {
+                            if (!isset($existing['last_seen_at']) || $row['last_seen_at'] > $existing['last_seen_at']) {
+                                $existing['last_seen_at'] = $row['last_seen_at'];
+                            }
+                        }
                         $merged->put($key, $existing);
                     }
                 }
@@ -100,6 +105,12 @@ trait HandlesStatsFilters
             switch ($specialVisitorCriteria->sort) {
                 case StatsSort::ViewsAsc:
                     $visitorsFromSpecial = $visitorsFromSpecial->sortBy('post_views')->values();
+                    break;
+                case StatsSort::LastSeenAsc:
+                    $visitorsFromSpecial = $visitorsFromSpecial->sortBy('last_seen_at')->values();
+                    break;
+                case StatsSort::LastSeenDesc:
+                    $visitorsFromSpecial = $visitorsFromSpecial->sortByDesc('last_seen_at')->values();
                     break;
                 case StatsSort::NameAsc:
                     $visitorsFromSpecial = $visitorsFromSpecial->sortBy(

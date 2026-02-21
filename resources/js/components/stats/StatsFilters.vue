@@ -20,6 +20,7 @@ interface Props {
     showBlogFilter?: boolean;
     showGroupByFilter?: boolean;
     showVisitorTypeFilter?: boolean;
+    showRangeFilter?: boolean;
     blogFilterLabel?: string;
     sortOptions: { value: string; label: string }[];
 }
@@ -28,6 +29,7 @@ withDefaults(defineProps<Props>(), {
     showBlogFilter: true,
     showGroupByFilter: false,
     showVisitorTypeFilter: false,
+    showRangeFilter: true,
     sortOptions: () => [
         { value: 'views_desc', label: 'Views ↓' },
         { value: 'views_asc', label: 'Views ↑' },
@@ -78,6 +80,7 @@ const visitorTypeOptions = [
 <template>
     <div class="flex flex-wrap items-end gap-3 rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border">
         <FilterSelect
+            v-if="showRangeFilter"
             :model-value="selectedRange"
             :options="ranges"
             label="Time range"

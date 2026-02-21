@@ -10,4 +10,6 @@ enum StatsSort: string
     case NameDesc = 'name_desc';
     case TitleAsc = 'title_asc';
     case TitleDesc = 'title_desc';
+    case LastSeenAsc = 'last_seen_asc';
+    case LastSeenDesc = 'last_seen_desc';
 }
