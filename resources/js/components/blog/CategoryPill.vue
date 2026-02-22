@@ -2,30 +2,30 @@
 import type { HTMLAttributes } from 'vue';
 
 interface Emits {
-  (e: 'click'): void;
+    (e: 'click'): void;
 }
 
 const props = defineProps<{
-  label: string;
-  selected?: boolean;
-  class?: HTMLAttributes['class'];
+    label: string;
+    selected?: boolean;
+    class?: HTMLAttributes['class'];
 }>();
 
 const emit = defineEmits<Emits>();
 </script>
 
 <template>
-  <button
-    :class="[
-      'rounded-full border px-3 py-1 text-sm transition-colors',
-      selected
-        ? 'border-blue-800 bg-blue-900 text-white'
-        : 'border-gray-300 bg-white text-gray-700 dark:bg-slate-800 dark:text-slate-200',
-      props.class,
-    ]"
-    type="button"
-    @click="emit('click')"
-  >
-    {{ label }}
-  </button>
+    <button
+        :class="[
+            'rounded-full border px-3 py-1 text-sm transition-colors',
+            selected
+                ? 'border-mist-500 bg-mist-200 dark:border-olive-300 dark:bg-lime-900'
+                : 'border-gray-300 bg-olive-50 text-gray-700 dark:bg-slate-800 dark:text-slate-200',
+            props.class,
+        ]"
+        type="button"
+        @click="emit('click')"
+    >
+        {{ label }}
+    </button>
 </template>
