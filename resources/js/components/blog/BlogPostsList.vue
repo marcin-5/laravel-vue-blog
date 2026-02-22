@@ -101,7 +101,11 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
 
                     <div
                         v-if="showExcerpts && post.excerpt"
-                        :style="{ fontFamily: 'var(--blog-excerpt-font)', fontSize: 'calc(1rem * var(--blog-excerpt-scale))' }"
+                        :style="{
+                            fontFamily: 'var(--blog-excerpt-font)',
+                            fontSize: 'calc(1rem * var(--blog-excerpt-scale))',
+                            fontWeight: 'var(--blog-excerpt-weight)',
+                        }"
                         class="my-1 max-w-none text-secondary-foreground opacity-90"
                         v-html="post.excerpt"
                     />
