@@ -1,5 +1,6 @@
 import '@fontsource-variable/afacad';
 import '@fontsource-variable/bitter';
+import '@fontsource-variable/darker-grotesque';
 import '@fontsource-variable/dm-sans';
 import '@fontsource-variable/faustina';
 import '@fontsource-variable/inter';

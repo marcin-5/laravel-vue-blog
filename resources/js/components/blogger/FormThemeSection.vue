@@ -160,6 +160,7 @@ function updateValue(key: string, value: string) {
 const fontOptions = [
     { label: 'System Default', value: 'inherit' },
     { label: 'Afacad', value: 'var(--font-afacad)' },
+    { label: 'Darker Grotesque', value: 'var(--font-darker-grotesque)' },
     { label: 'DM Sans', value: 'var(--font-dm-sans)' },
     { label: 'Inter', value: 'var(--font-inter)' },
     { label: 'Montserrat', value: 'var(--font-montserrat)' },

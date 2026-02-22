@@ -15,6 +15,7 @@ export const FONT_CORRECTIONS: Record<string, number> = {
     'var(--font-rokkitt)': 1.0,
     'var(--font-vollkorn)': 1.0,
     'var(--font-afacad)': 1.0,
+    'var(--font-darker-grotesque)': 1.0,
     'var(--font-sofia-semi-condensed)': 1.0,
 };
 
