@@ -1,4 +1,4 @@
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 
 type Appearance = 'light' | 'dark' | 'system';
 
@@ -62,21 +62,9 @@ export function initializeTheme() {
     mediaQuery()?.addEventListener('change', handleSystemThemeChange);
 }
 
-const appearance = ref<Appearance>('system');
+const appearance = ref<Appearance>(typeof window !== 'undefined' ? (localStorage.getItem('appearance') as Appearance | null) || 'system' : 'system');
 
 export function useAppearance() {
-    onMounted(() => {
-        if (typeof window === 'undefined') {
-            return;
-        }
-
-        const savedAppearance = localStorage.getItem('appearance') as Appearance | null;
-
-        if (savedAppearance) {
-            appearance.value = savedAppearance;
-        }
-    });
-
     function updateAppearance(value: Appearance) {
         if (typeof window === 'undefined') {
             return;
