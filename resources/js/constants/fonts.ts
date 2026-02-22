@@ -1,26 +1,34 @@
-export const FONT_CORRECTIONS: Record<string, number> = {
-    'var(--font-yrsa)': 1.2,
+export const FONT_SIZE_CORRECTIONS: Record<string, number> = {
+    'var(--font-afacad)': 1.0,
     'var(--font-bitter)': 1.0,
-    'var(--font-nunito)': 1.0,
+    'var(--font-darker-grotesque)': 1.0,
     'var(--font-dm-sans)': 1.0,
+    'var(--font-faustina)': 1.0,
     'var(--font-inter)': 1.0,
+    'var(--font-kreon)': 1.0,
+    'var(--font-literata)': 1.0,
     'var(--font-montserrat)': 1.0,
+    'var(--font-nunito)': 1.0,
     'var(--font-quicksand)': 1.0,
     'var(--font-raleway)': 1.0,
     'var(--font-recursive)': 1.0,
     'var(--font-roboto)': 1.0,
-    'var(--font-faustina)': 1.0,
-    'var(--font-literata)': 1.0,
-    'var(--font-kreon)': 1.0,
     'var(--font-rokkitt)': 1.0,
-    'var(--font-vollkorn)': 1.0,
-    'var(--font-afacad)': 1.0,
-    'var(--font-darker-grotesque)': 1.0,
     'var(--font-sofia-semi-condensed)': 1.0,
+    'var(--font-vollkorn)': 1.0,
+    'var(--font-yrsa)': 2.0,
 };
 
-export function getFontCorrection(fontValue: string): number {
-    return FONT_CORRECTIONS[fontValue] || 1.0;
+export const FONT_WEIGHT_CORRECTIONS: Record<string, string> = {
+    'var(--font-darker-grotesque)': '500',
+};
+
+export function getFontSizeCorrection(fontValue: string): number {
+    return FONT_SIZE_CORRECTIONS[fontValue] || 1.0;
+}
+
+export function getFontWeightCorrection(fontValue: string): string | null {
+    return FONT_WEIGHT_CORRECTIONS[fontValue] || null;
 }
 
 export const SPECIAL_KEY_MAPPINGS: Record<string, string> = {

@@ -1,5 +1,10 @@
 import { useAppearance } from '@/composables/useAppearance';
-import { getFontCorrection, SCALE_TO_FONT_MAP, SPECIAL_KEY_MAPPINGS } from '@/constants/fonts';
+import {
+    getFontSizeCorrection,
+    getFontWeightCorrection,
+    SCALE_TO_FONT_MAP,
+    SPECIAL_KEY_MAPPINGS
+} from '@/constants/fonts';
 import type { BlogTheme } from '@/types/blog.types';
 import { useMediaQuery } from '@vueuse/core';
 import { computed, type ComputedRef } from 'vue';
@@ -11,7 +16,7 @@ function mapThemeKeyToStyles(key: string, value: string, style: Record<string, s
     if (key in SCALE_TO_FONT_MAP) {
         const fontKey = SCALE_TO_FONT_MAP[key];
         const fontValue = currentTheme[fontKey] || 'inherit';
-        const correction = getFontCorrection(fontValue);
+        const correction = getFontSizeCorrection(fontValue);
         finalValue = (parseFloat(value) * correction).toString();
     }
 
@@ -21,19 +26,6 @@ function mapThemeKeyToStyles(key: string, value: string, style: Record<string, s
     if (key in SPECIAL_KEY_MAPPINGS) {
         style[SPECIAL_KEY_MAPPINGS[key]] = finalValue;
         return;
-    }
-
-    // Handle font keys: --font-xxx -> --blog-xxx-font
-    if (key.startsWith('--font-')) {
-        style[`--blog-${key.slice(7)}-font`] = value;
-        return;
-    }
-
-    // Handle color keys: all other CSS variables become --color-xxx
-    const isColorKey = key.startsWith('--') && !key.includes('font') && !key.includes('style') && !key.includes('scale');
-
-    if (isColorKey) {
-        style[`--color-${key.slice(2)}`] = value;
     }
 }
 
@@ -47,11 +39,48 @@ export function useBlogTheme(theme: ComputedRef<BlogTheme | undefined>) {
         const currentTheme = (isDark.value ? theme.value?.dark : theme.value?.light) || {};
 
         const style: Record<string, string> = {};
+
+        // First, process all keys present in the current theme
         for (const [key, value] of Object.entries(currentTheme)) {
             if (value) {
                 mapThemeKeyToStyles(key, value, style, currentTheme);
             }
         }
+
+        // Second, ensure all scale keys from SCALE_TO_FONT_MAP are processed,
+        // even if they are missing from the current theme (using default 1.0).
+        // This ensures font corrections are always applied.
+        for (const scaleKey of Object.keys(SCALE_TO_FONT_MAP)) {
+            if (!(scaleKey in style)) {
+                mapThemeKeyToStyles(scaleKey, '1', style, currentTheme);
+            }
+        }
+
+        // Third, handle font keys and other remaining logic that needs style object
+        for (const [key, value] of Object.entries(currentTheme)) {
+            if (!value) {
+                continue;
+            }
+
+            // Handle font keys: --font-xxx -> --blog-xxx-font
+            if (key.startsWith('--font-')) {
+                style[`--blog-${key.slice(7)}-font`] = value;
+
+                // Apply font weight correction
+                const weightCorrection = getFontWeightCorrection(value);
+                if (weightCorrection) {
+                    style[`--blog-${key.slice(7)}-weight`] = weightCorrection;
+                }
+            }
+
+            // Handle color keys: all other CSS variables become --color-xxx
+            const isColorKey = key.startsWith('--') && !key.includes('font') && !key.includes('style') && !key.includes('scale');
+
+            if (isColorKey && !style[`--color-${key.slice(2)}`]) {
+                style[`--color-${key.slice(2)}`] = value;
+            }
+        }
+
         return style;
     });
 
