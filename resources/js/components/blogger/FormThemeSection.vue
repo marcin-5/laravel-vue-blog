@@ -113,7 +113,11 @@ async function handleImport(event: Event) {
 
         // Basic validation
         if (typeof theme !== 'object' || theme === null) {
-            throw new Error('Invalid format');
+            toast({
+                title: props.translations.importError || 'Import failed',
+                variant: 'destructive',
+            });
+            return;
         }
 
         let colorsToImport = theme;
