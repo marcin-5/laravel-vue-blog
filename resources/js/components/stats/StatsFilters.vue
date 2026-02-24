@@ -2,7 +2,7 @@
 import { useI18n } from 'vue-i18n';
 import FilterSelect from './FilterSelect.vue';
 
-type Range = 'today' | 'week' | 'month' | 'half_year' | 'year';
+type Range = 'today' | 'week' | 'month' | 'half_year' | 'year' | 'lifetime';
 type UserOption = { id: number; name: string };
 type BlogOption = { id: number; name: string };
 
@@ -56,6 +56,7 @@ const ranges: { value: Range; label: string }[] = [
     { value: 'month', label: 'Last month' },
     { value: 'half_year', label: 'Last 6 months' },
     { value: 'year', label: 'Last year' },
+    { value: 'lifetime', label: 'Lifetime' },
 ];
 
 const sizes = [

@@ -30,7 +30,9 @@ class BlogViewsQuery
      */
     public function execute(StatsCriteria $criteria): Collection
     {
-        [$from, $to] = $criteria->range->bounds();
+        $bounds = $criteria->range->bounds();
+        $from = $bounds[0] ?? null;
+        $to = $bounds[1] ?? null;
         $postViewsSubquery = $this->buildPostViewsSubquery($from, $to);
 
         $query = $this->buildQuery($from, $to, $postViewsSubquery)
@@ -44,8 +46,8 @@ class BlogViewsQuery
     }
 
     private function buildPostViewsSubquery(
-        DateTimeInterface $from,
-        DateTimeInterface $to,
+        ?DateTimeInterface $from,
+        ?DateTimeInterface $to,
     ): QueryBuilder|Builder {
         $postClass = $this->getPostMorphClass();
         $uniqueViewerKeySql = $this->uniqueViewerKeyBuilder->build('page_views');
@@ -57,7 +59,7 @@ class BlogViewsQuery
             ->join('posts', function ($join) use ($postClass, $from, $to) {
                 $join->on('posts.id', '=', 'page_views.viewable_id')
                     ->where('page_views.viewable_type', '=', $postClass)
-                    ->whereBetween('page_views.created_at', [$from, $to]);
+                    ->when($from && $to, fn($q) => $q->whereBetween('page_views.created_at', [$from, $to]));
             })
             ->groupBy('posts.blog_id');
     }
@@ -68,8 +70,8 @@ class BlogViewsQuery
     }
 
     private function buildQuery(
-        DateTimeInterface $from,
-        DateTimeInterface $to,
+        ?DateTimeInterface $from,
+        ?DateTimeInterface $to,
         QueryBuilder|Builder $postViewsSubquery,
     ): Builder {
         $blogClass = $this->getBlogMorphClass();
@@ -90,7 +92,7 @@ class BlogViewsQuery
             ->leftJoin('page_views as blog_views', function ($join) use ($blogClass, $from, $to) {
                 $join->on('blogs.id', '=', 'blog_views.viewable_id')
                     ->where('blog_views.viewable_type', '=', $blogClass)
-                    ->whereBetween('blog_views.created_at', [$from, $to]);
+                    ->when($from && $to, fn($q) => $q->whereBetween('blog_views.created_at', [$from, $to]));
             })
             ->groupBy(
                 'blogs.id',

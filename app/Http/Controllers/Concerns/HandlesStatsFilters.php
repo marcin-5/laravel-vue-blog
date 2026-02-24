@@ -34,6 +34,8 @@ trait HandlesStatsFilters
         $visitorCriteria = $this->createCriteria($visitorFilters, $forceBloggerId);
 
         $specialVisitorFilters = $this->parseStatsFilters($request, 'special_visitors_');
+        // Force lifetime range for Anonymous and Bot Views regardless of incoming query, as the range selector is hidden in UI
+        $specialVisitorFilters['range'] = 'lifetime';
         $specialVisitorCriteria = $this->createCriteria($specialVisitorFilters, $forceBloggerId);
 
         // First subsection: strictly from page_views table, ignore selected visitor_type

@@ -34,11 +34,11 @@ class VisitorViewsQuery
             return $this->executeAggregatedViews($criteria, AnonymousView::class, 'anonymous_views');
         }
 
-        [$startDate, $endDate] = $criteria->range->bounds();
+        $bounds = $criteria->range->bounds();
         $blogMorphClass = $this->getBlogMorphClass();
         $postMorphClass = $this->getPostMorphClass();
 
-        $query = $this->buildBaseQuery($criteria, $blogMorphClass, $postMorphClass, $startDate, $endDate);
+        $query = $this->buildBaseQuery($criteria, $blogMorphClass, $postMorphClass, $bounds);
         $this->applySelectClause($query, $criteria, $blogMorphClass, $postMorphClass);
         $this->applyHavingClause($query, $criteria, $blogMorphClass, $postMorphClass);
         $this->applySort($query, $criteria->sort);
@@ -54,11 +54,11 @@ class VisitorViewsQuery
     {
         $blogMorphClass = $this->getBlogMorphClass();
         $postMorphClass = $this->getPostMorphClass();
-        [$startDate, $endDate] = $criteria->range->bounds();
+        $bounds = $criteria->range->bounds();
 
         $query = $modelClass::query()
             ->join('user_agents', 'user_agents.id', '=', "{$tableName}.user_agent_id")
-            ->whereBetween("{$tableName}.last_seen_at", [$startDate, $endDate])
+            ->when($bounds, fn(Builder $q) => $q->whereBetween("{$tableName}.last_seen_at", $bounds))
             ->selectRaw(
                 'user_agents.name as visitor_label,' .
                 ' user_agents.name as user_agent,' .
@@ -175,8 +175,7 @@ class VisitorViewsQuery
         StatsCriteria $criteria,
         string $blogMorphClass,
         string $postMorphClass,
-        string $startDate,
-        string $endDate,
+        ?array $bounds,
     ): Builder {
         $visitorLabelColumn = $this->resolveVisitorLabelColumn($criteria);
 
@@ -193,7 +192,7 @@ class VisitorViewsQuery
                 $join->on('posts.id', '=', 'page_views.viewable_id')
                     ->where('page_views.viewable_type', '=', $postMorphClass);
             })
-            ->whereBetween('page_views.created_at', [$startDate, $endDate])
+            ->when($bounds, fn(Builder $q) => $q->whereBetween('page_views.created_at', $bounds))
             ->when($criteria->bloggerId, function (Builder $query) use ($criteria, $blogMorphClass, $postMorphClass) {
                 $query->where(function (Builder $innerQuery) use ($criteria, $blogMorphClass, $postMorphClass) {
                     $innerQuery
