@@ -71,7 +71,7 @@ export function useStatsFilters(
             // Blog params
             range: blogState.value.range,
             sort: blogState.value.sort,
-            size: blogState.value.size === 0 ? undefined : blogState.value.size,
+            size: blogState.value.size,
             blogger_id: options.showBloggerFilter && blogState.value.blogger_id ? blogState.value.blogger_id : undefined,
             // blog_id only when a specific blog is selected
             ...(blogState.value.blog_id != null ? { blog_id: blogState.value.blog_id } : {}),
@@ -79,7 +79,7 @@ export function useStatsFilters(
             // Post params (prefixed)
             posts_range: postState.value.range,
             posts_sort: postState.value.sort,
-            posts_size: postState.value.size === 0 ? undefined : postState.value.size,
+            posts_size: postState.value.size,
             posts_blogger_id: options.showBloggerFilter && postState.value.blogger_id ? postState.value.blogger_id : undefined,
             // posts_blog_id only when a specific blog is selected
             ...(postState.value.blog_id != null ? { posts_blog_id: postState.value.blog_id } : {}),
@@ -87,7 +87,7 @@ export function useStatsFilters(
             // Visitor params (prefixed)
             visitors_range: visitorState.value.range,
             visitors_sort: visitorState.value.sort,
-            visitors_size: visitorState.value.size === 0 ? undefined : visitorState.value.size,
+            visitors_size: visitorState.value.size,
             visitors_group_by: visitorState.value.group_by,
             visitors_type: visitorState.value.visitor_type,
             // visitors_blog_id only when a specific blog is selected
@@ -96,7 +96,7 @@ export function useStatsFilters(
             // Special visitor params (prefixed)
             special_visitors_range: specialVisitorState.value.range,
             special_visitors_sort: specialVisitorState.value.sort,
-            special_visitors_size: specialVisitorState.value.size === 0 ? undefined : specialVisitorState.value.size,
+            special_visitors_size: specialVisitorState.value.size,
             special_visitors_group_by: specialVisitorState.value.group_by,
             special_visitors_type: specialVisitorState.value.visitor_type,
             // special_visitors_blog_id only when a specific blog is selected
