@@ -42,6 +42,7 @@
     },
     "blog": {
         "author": "Autor:",
+        "scroll_to_posts_list": "Przewiń do listy wpisów",
         "posts_list": {
             "aria": "Lista wpisów",
             "title": "Wpisy na blogu:",

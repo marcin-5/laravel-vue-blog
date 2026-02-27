@@ -4,6 +4,7 @@ import BlogHeader from '@/components/blog/BlogHeader.vue';
 import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
+import ScrollToPostsLink from '@/components/blog/ScrollToPostsLink.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import { useBlogTheme } from '@/composables/useBlogTheme';
 import { useSidebarLayout } from '@/composables/useSidebarLayout';
@@ -74,12 +75,13 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
             <!-- Layout without sidebar -->
             <template v-if="!hasSidebarLayout">
                 <BlogHeader :blog="blog" :displayedMotto="displayedMotto" :viewStats="viewStats" />
-                <BorderDivider class="mb-8" />
+                <ScrollToPostsLink />
                 <main v-if="hasLandingContent" class="min-w-0 flex-1">
                     <div class="prose max-w-none text-primary" v-html="landingHtml" />
                 </main>
                 <BorderDivider class="my-4" />
                 <BlogPostsList
+                    id="posts-list"
                     :blogId="blog.id"
                     :blogSlug="blog.slug"
                     :class="{ 'mt-6': hasLandingContent }"
@@ -93,11 +95,12 @@ const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
                 <!-- Mobile/tablet layout (<xl): no sidebar -->
                 <div class="xl:hidden">
                     <BlogHeader :blog="blog" :displayedMotto="displayedMotto" :viewStats="viewStats" />
-                    <BorderDivider class="mb-8" />
+                    <ScrollToPostsLink />
                     <main v-if="hasLandingContent" class="min-w-0 flex-1">
                         <div class="prose max-w-none" v-html="landingHtml" />
                     </main>
                     <BlogPostsList
+                        id="posts-list"
                         :blogId="blog.id"
                         :blogSlug="blog.slug"
                         :class="{ 'mt-6': hasLandingContent }"
