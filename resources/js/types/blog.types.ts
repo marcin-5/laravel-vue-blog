@@ -47,6 +47,7 @@ export interface PostDetails extends PostItem {
     author_email: string | null;
     contentHtml: string;
     extensions?: PostExtension[];
+    visibility?: PostVisibility;
 }
 
 export interface PaginationLink {
