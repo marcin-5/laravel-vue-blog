@@ -109,7 +109,7 @@ function handleLayoutToggle() {
                     <textarea
                         :id="props.id"
                         :placeholder="props.placeholder"
-                        :rows="props.isPreviewMode ? (props.isEdit ? 10 : 30) : props.rows"
+                        :rows="props.isPreviewMode ? (props.isEdit ? 20 : 30) : props.rows"
                         :value="props.modelValue"
                         class="block w-full rounded-md border px-3 py-2"
                         @input="handleInput"
