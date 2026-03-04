@@ -43,8 +43,7 @@ interface Emits {
     (e: 'cancel'): void;
     (e: 'submit'): void;
     (e: 'togglePreview', content: string): void;
-    (e: 'toggleFullPreview', content: string): void;
-    (e: 'setLayoutHorizontal'): void;
+    (e: 'toggleFullPreview', content?: string): void;
     (e: 'setLayout', layout: 'horizontal' | 'vertical'): void;
 }
 
