@@ -20,7 +20,7 @@ const props = defineProps<{
     footerHtml?: string;
     posts: PostItem[];
     pagination?: Pagination | null;
-    // numeric sidebar value (-50..50).
+    /** Numeric sidebar value (-50..50). */
     sidebar?: number;
     metaDescription: string;
     navigation?: Navigation;
@@ -42,15 +42,8 @@ const hasFooterContent = computed(() => hasContent(props.footerHtml));
 // Motto selection
 const displayedMotto = selectRandomMotto(props.blog.motto);
 
-// Sidebar layout calculations
-const {
-    hasSidebar: hasSidebarLayout,
-    asideStyle,
-    mainStyle,
-    asideOrderClass,
-    mainOrderClass,
-    navbarMaxWidth,
-} = useSidebarLayout({
+// Sidebar layout
+const { hasSidebar, asideStyle, mainStyle, asideOrderClass, mainOrderClass, navbarMaxWidth } = useSidebarLayout({
     sidebar: props.sidebar,
     minPercent: SIDEBAR_MIN_WIDTH,
     maxPercent: SIDEBAR_MAX_WIDTH,
@@ -58,68 +51,58 @@ const {
 
 // Theme handling
 const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
+
+// Derived template classes
+const containerClass = computed(() => [
+    'mx-auto w-full p-4 sm:px-12 md:px-16',
+    hasSidebar.value ? 'max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl' : 'max-w-screen-lg',
+]);
+
+const postsListSpacingClass = computed(() => (hasLandingContent.value ? 'mt-6' : ''));
 </script>
 
 <template>
     <Head v-if="seo?.title" :title="seo.title" />
+
     <div :style="mergedThemeStyle" class="flex min-h-screen flex-col bg-background text-primary antialiased">
         <PublicNavbar :maxWidth="navbarMaxWidth" />
-        <div
-            :class="[
-                'mx-auto w-full p-4 sm:px-12 md:px-16',
-                hasSidebarLayout ? 'max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl' : 'max-w-screen-lg',
-            ]"
-        >
+
+        <div :class="containerClass">
             <BorderDivider class="mb-4" />
 
-            <!-- Layout without sidebar -->
-            <template v-if="!hasSidebarLayout">
+            <!-- Stacked layout: used when there is no sidebar at all,
+            AND as the mobile/tablet (<xl) fallback when sidebar is configured. -->
+            <div :class="{ 'xl:hidden': hasSidebar }">
                 <BlogHeader :blog="blog" :displayedMotto="displayedMotto" :viewStats="viewStats" />
                 <ScrollToPostsLink />
+
                 <main v-if="hasLandingContent" class="min-w-0 flex-1">
                     <div class="prose max-w-none text-primary" v-html="landingHtml" />
                 </main>
-                <BorderDivider class="my-4" />
+
+                <BorderDivider v-if="!hasSidebar" class="my-4" />
+
                 <BlogPostsList
                     id="posts-list"
                     :blogId="blog.id"
                     :blogSlug="blog.slug"
-                    :class="{ 'mt-6': hasLandingContent }"
+                    :class="postsListSpacingClass"
                     :pagination="pagination"
                     :posts="posts"
                 />
-            </template>
+            </div>
 
-            <!-- Layout with sidebar (hidden on <xl, visible from xl+) -->
-            <template v-else>
-                <!-- Mobile/tablet layout (<xl): no sidebar -->
-                <div class="xl:hidden">
+            <!-- Desktop sidebar layout (xl+), only rendered when sidebar is configured -->
+            <div v-if="hasSidebar" class="hidden items-start gap-8 xl:flex">
+                <aside :class="asideOrderClass" :style="asideStyle">
+                    <BlogPostsList :blogId="blog.id" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
+                </aside>
+
+                <main :class="['min-w-0 flex-1', mainOrderClass]" :style="mainStyle">
                     <BlogHeader :blog="blog" :displayedMotto="displayedMotto" :viewStats="viewStats" />
-                    <ScrollToPostsLink />
-                    <main v-if="hasLandingContent" class="min-w-0 flex-1">
-                        <div class="prose max-w-none" v-html="landingHtml" />
-                    </main>
-                    <BlogPostsList
-                        id="posts-list"
-                        :blogId="blog.id"
-                        :blogSlug="blog.slug"
-                        :class="{ 'mt-6': hasLandingContent }"
-                        :pagination="pagination"
-                        :posts="posts"
-                    />
-                </div>
-
-                <!-- Desktop layout (xl+): with sidebar -->
-                <div class="hidden items-start gap-8 xl:flex">
-                    <aside :class="asideOrderClass" :style="asideStyle">
-                        <BlogPostsList :blogId="blog.id" :blogSlug="blog.slug" :pagination="pagination" :posts="posts" />
-                    </aside>
-                    <main :class="['min-w-0 flex-1', mainOrderClass]" :style="mainStyle">
-                        <BlogHeader :blog="blog" :displayedMotto="displayedMotto" :viewStats="viewStats" />
-                        <div v-if="hasLandingContent" class="prose max-w-none" v-html="landingHtml" />
-                    </main>
-                </div>
-            </template>
+                    <div v-if="hasLandingContent" class="prose max-w-none" v-html="landingHtml" />
+                </main>
+            </div>
 
             <!-- Navigation at bottom -->
             <BlogPostNav :navigation="navigation" />
