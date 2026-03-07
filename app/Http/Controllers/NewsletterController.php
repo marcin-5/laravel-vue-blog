@@ -9,8 +9,10 @@ use App\Services\IdentityResolver;
 use App\Services\TranslationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\URL;
 use Inertia\Response;
+use LaravelIdea\Helper\App\Models\_IH_Blog_C;
 
 class NewsletterController extends BasePublicController
 {
@@ -24,17 +26,9 @@ class NewsletterController extends BasePublicController
     public function index(Request $request): Response
     {
         $selectedBlogId = $request->integer('blog_id');
-        $blogs = Blog::query()
-            ->where('is_published', true)
-            ->orderBy('name')
-            ->get(['id', 'name', 'slug', 'locale']);
+        $blogs = $this->getPublishedBlogs();
 
-        if ($selectedBlogId) {
-            $currentBlog = $blogs->firstWhere('id', $selectedBlogId);
-            if ($currentBlog && $currentBlog->locale) {
-                app()->setLocale($currentBlog->locale);
-            }
-        }
+        $this->setLocaleFromBlog($blogs, $selectedBlogId);
 
         return $this->renderWithTranslations('public/Newsletter', 'newsletter', [
             'blogs' => $blogs,
@@ -45,7 +39,34 @@ class NewsletterController extends BasePublicController
         ]);
     }
 
+    private function getPublishedBlogs(): array|Collection|_IH_Blog_C
+    {
+        return Blog::query()
+            ->where('is_published', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug', 'locale']);
+    }
+
+    private function setLocaleFromBlog(Collection $blogs, ?int $blogId): void
+    {
+        if (!$blogId) {
+            return;
+        }
+
+        $currentBlog = $blogs->firstWhere('id', $blogId);
+        if ($currentBlog && $currentBlog->locale) {
+            app()->setLocale($currentBlog->locale);
+        }
+    }
+
     public function store(StoreNewsletterSubscriptionRequest $request): RedirectResponse
+    {
+        $this->processSubscriptions($request);
+
+        return back()->with('message', 'Zapisano do newslettera pomyślnie!');
+    }
+
+    private function processSubscriptions(StoreNewsletterSubscriptionRequest $request): void
     {
         $visitorId = $this->identityResolver->resolvedVisitorId($request);
         $data = $request->validated();
@@ -65,8 +86,6 @@ class NewsletterController extends BasePublicController
                 ],
             );
         }
-
-        return back()->with('message', 'Zapisano do newslettera pomyślnie!');
     }
 
     public function manage(Request $request): Response
@@ -81,32 +100,41 @@ class NewsletterController extends BasePublicController
             ->with('blog:id,locale')
             ->get();
 
-        if ($subscriptions->isNotEmpty()) {
-            $firstSubBlog = $subscriptions->first()->blog;
-            if ($firstSubBlog && $firstSubBlog->locale) {
-                app()->setLocale($firstSubBlog->locale);
-            }
-        }
+        $this->setLocaleFromSubscriptions($subscriptions);
 
-        $blogs = Blog::query()
-            ->where('is_published', true)
-            ->orderBy('name')
-            ->get(['id', 'name', 'slug', 'locale']);
+        $blogs = $this->getPublishedBlogs();
 
         return $this->renderWithTranslations('public/Newsletter', 'newsletter', [
             'blogs' => $blogs,
             'email' => $email,
-            'currentSubscriptions' => $subscriptions->map(fn($s) => [
-                'blog_id' => $s->blog_id,
-                'frequency' => $s->frequency,
-                'send_time' => $s->send_time,
-                'send_time_weekend' => $s->send_time_weekend,
-                'send_day' => $s->send_day,
-            ]),
+            'currentSubscriptions' => $this->mapSubscriptionsToArray($subscriptions),
             'updateUrl' => URL::signedRoute('newsletter.update', ['email' => $email]),
             'unsubscribeUrl' => URL::signedRoute('newsletter.unsubscribe', ['email' => $email]),
             'mode' => 'manage',
             'config' => config('newsletter'),
+        ]);
+    }
+
+    private function setLocaleFromSubscriptions(Collection $subscriptions): void
+    {
+        if ($subscriptions->isEmpty()) {
+            return;
+        }
+
+        $firstSubBlog = $subscriptions->first()?->blog;
+        if ($firstSubBlog && $firstSubBlog->locale) {
+            app()->setLocale($firstSubBlog->locale);
+        }
+    }
+
+    private function mapSubscriptionsToArray(Collection $subscriptions): Collection
+    {
+        return $subscriptions->map(fn($s) => [
+            'blog_id' => $s->blog_id,
+            'frequency' => $s->frequency,
+            'send_time' => $s->send_time,
+            'send_time_weekend' => $s->send_time_weekend,
+            'send_day' => $s->send_day,
         ]);
     }
 
@@ -116,37 +144,22 @@ class NewsletterController extends BasePublicController
             abort(403);
         }
 
+        $this->removeUnselectedSubscriptions($request);
+        $this->processSubscriptions($request);
+
+        return back()->with('message', 'Ustawienia newslettera zostały zaktualizowane.');
+    }
+
+    private function removeUnselectedSubscriptions(StoreNewsletterSubscriptionRequest $request): void
+    {
         $data = $request->validated();
         $email = $data['email'];
-
         $blogIds = collect($data['subscriptions'])->pluck('blog_id');
 
-        // Remove subscriptions not in the list
         NewsletterSubscription::query()
             ->where('email', $email)
             ->whereNotIn('blog_id', $blogIds)
             ->delete();
-
-        $visitorId = $this->identityResolver->resolvedVisitorId($request);
-
-        // Update or create subscriptions
-        foreach ($data['subscriptions'] as $sub) {
-            NewsletterSubscription::query()->updateOrCreate(
-                [
-                    'email' => $email,
-                    'blog_id' => $sub['blog_id'],
-                ],
-                [
-                    'frequency' => $sub['frequency'],
-                    'send_time' => $sub['send_time'] ?? null,
-                    'send_time_weekend' => $sub['send_time_weekend'] ?? null,
-                    'send_day' => $sub['send_day'] ?? null,
-                    'visitor_id' => $visitorId,
-                ],
-            );
-        }
-
-        return back()->with('message', 'Ustawienia newslettera zostały zaktualizowane.');
     }
 
     public function unsubscribe(Request $request): RedirectResponse
