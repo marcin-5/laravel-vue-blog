@@ -23,9 +23,7 @@ class UsersController extends Controller
      */
     public function index(Request $request): Response
     {
-        // Centralized authorization via Gate ability used in routes; double-check here as well
-        $this->authorize('edit-user-blog-quota');
-
+        // Authorization handled by middleware and routes
         $users = User::query()
             ->select(['id', 'name', 'email', 'role', 'blog_quota'])
             ->orderBy('name')
@@ -42,8 +40,7 @@ class UsersController extends Controller
      */
     public function store(StoreUserRequest $request): RedirectResponse
     {
-        $this->authorize('edit-user-blog-quota');
-
+        // Authorization handled by StoreUserRequest
         $this->userManagementService->createUser($request->validated());
 
         return back()->with('success', 'User created successfully.');
@@ -54,13 +51,9 @@ class UsersController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
-        // Centralized authorization via Gate
-        $this->authorize('edit-user-blog-quota');
-
-        // Keep the original role from DB to enforce blog_quota edit rules
-        $originalRole = $user->role;
-
-        $this->userManagementService->updateUser($user, $request->validated(), $originalRole);
+        // Authorization handled by UpdateUserRequest
+        // Role and blog_quota edit rules enforced by UserManagementService
+        $this->userManagementService->updateUser($user, $request->validated(), $user->getOriginal('role'));
 
         return back()->with('success', 'User updated successfully.');
     }
