@@ -24,6 +24,7 @@ beforeEach(function () {
 
 it('counts views for logged in admin', function () {
     $this->actingAs($this->admin)
+        ->withCookie('cookie_consent', 'accepted')
         ->get("/{$this->blog->slug}/{$this->post->slug}")
         ->assertStatus(200);
 
@@ -32,6 +33,7 @@ it('counts views for logged in admin', function () {
 
 it('counts views for logged in blogger (author)', function () {
     $this->actingAs($this->blogger)
+        ->withCookie('cookie_consent', 'accepted')
         ->get("/{$this->blog->slug}/{$this->post->slug}")
         ->assertStatus(200);
 
