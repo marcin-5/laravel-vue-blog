@@ -26,7 +26,6 @@ use Illuminate\Support\Carbon;
  * @property string $locale
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
  * @property-read User $user
  * @property-read LandingPage|null $landingPage
  * @property-read Collection<int, Post> $posts
@@ -51,12 +50,14 @@ class Blog extends Model
         'page_size',
         'theme',
     ];
+
     protected $casts = [
         'is_published' => 'boolean',
         'sidebar' => 'integer',
         'page_size' => 'integer',
         'theme' => 'array',
     ];
+
     protected $appends = [
         'creation_date',
     ];
@@ -127,7 +128,7 @@ class Blog extends Model
                     ->with([
                         'extensions' => function ($eq) {
                             $eq->oldest();
-                        }
+                        },
                     ])
                     ->select(
                         'id',
@@ -151,5 +152,20 @@ class Blog extends Model
     public function scopeWithCategories(Builder $query): Builder
     {
         return $query->with('categories:id,name');
+    }
+
+    /**
+     * Scope: Order blogs by the latest published post date.
+     */
+    public function scopeOrderByLatestPost(Builder $query): Builder
+    {
+        return $query->addSelect([
+            'latest_post_at' => Post::query()
+                ->selectRaw('COALESCE(MAX(COALESCE(published_at, created_at)), NULL)')
+                ->whereColumn('blog_id', 'blogs.id')
+                ->where('is_published', true),
+        ])
+            ->orderByDesc('latest_post_at')
+            ->orderBy('name');
     }
 }
