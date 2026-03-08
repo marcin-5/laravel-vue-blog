@@ -63,7 +63,7 @@ class NewsletterController extends BasePublicController
     {
         $this->processSubscriptions($request);
 
-        return back()->with('message', 'Zapisano do newslettera pomyślnie!');
+        return back()->with('message', __('newsletter.messages.success_subscribe'));
     }
 
     private function processSubscriptions(StoreNewsletterSubscriptionRequest $request): void
@@ -147,7 +147,7 @@ class NewsletterController extends BasePublicController
         $this->removeUnselectedSubscriptions($request);
         $this->processSubscriptions($request);
 
-        return back()->with('message', 'Ustawienia newslettera zostały zaktualizowane.');
+        return back()->with('message', __('newsletter.messages.success_manage'));
     }
 
     private function removeUnselectedSubscriptions(StoreNewsletterSubscriptionRequest $request): void
@@ -171,6 +171,6 @@ class NewsletterController extends BasePublicController
         $email = $request->input('email');
         NewsletterSubscription::query()->where('email', $email)->delete();
 
-        return redirect()->route('home')->with('message', 'Zostałeś wypisany z newslettera.');
+        return redirect()->route('home')->with('message', __('newsletter.messages.unsubscribed'));
     }
 }
