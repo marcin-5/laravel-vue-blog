@@ -9,6 +9,22 @@ use Illuminate\Database\Eloquent\Collection;
 
 class BlogService
 {
+    private const array BLOG_FIELDS = [
+        'id',
+        'user_id',
+        'name',
+        'slug',
+        'description',
+        'motto',
+        'footer',
+        'is_published',
+        'locale',
+        'sidebar',
+        'page_size',
+        'theme',
+        'created_at',
+    ];
+
     public function getUserBlogs(User $user): Collection
     {
         return Blog::query()
@@ -17,21 +33,7 @@ class BlogService
             ->withPostsForIndex()
             ->withCategories()
             ->orderByDesc('created_at')
-            ->get([
-                'id',
-                'user_id',
-                'name',
-                'slug',
-                'description',
-                'motto',
-                'footer',
-                'is_published',
-                'locale',
-                'sidebar',
-                'page_size',
-                'theme',
-                'created_at'
-            ]);
+            ->get(self::BLOG_FIELDS);
     }
 
     public function getCategories(): Collection
@@ -44,36 +46,43 @@ class BlogService
     public function createBlog(array $blogData, array $categories = []): Blog
     {
         $blog = Blog::create($blogData);
-
-        if (!empty($categories)) {
-            $blog->categories()->sync($categories);
-        }
-
+        $this->syncCategories($blog, $categories);
         return $blog;
+    }
+
+    private function syncCategories(Blog $blog, array $categories): void
+    {
+        $blog->categories()->sync($categories);
     }
 
     public function updateBlog(Blog $blog, array $blogData, ?array $categories = null): Blog
     {
-        $landingContent = null;
-        if (array_key_exists('landing_content', $blogData)) {
-            $landingContent = $blogData['landing_content'];
-            unset($blogData['landing_content']);
-        }
-
+        $landingContent = $this->extractLandingContent($blogData);
         $blog->fill($blogData);
         $blog->save();
-
-        if ($landingContent !== null) {
-            $blog->landingPage()->updateOrCreate(
-                ['blog_id' => $blog->id],
-                ['content' => $landingContent],
-            );
-        }
-
-        if ($categories !== null) {
-            $blog->categories()->sync($categories);
-        }
-
+        $this->updateLandingPage($blog, $landingContent);
+        $this->syncCategories($blog, $categories ?? []);
         return $blog;
+    }
+
+    private function extractLandingContent(array &$blogData): ?string
+    {
+        if (!array_key_exists('landing_content', $blogData)) {
+            return null;
+        }
+        $landingContent = $blogData['landing_content'];
+        unset($blogData['landing_content']);
+        return $landingContent;
+    }
+
+    private function updateLandingPage(Blog $blog, ?string $content): void
+    {
+        if ($content === null) {
+            return;
+        }
+        $blog->landingPage()->updateOrCreate(
+            ['blog_id' => $blog->id],
+            ['content' => $content],
+        );
     }
 }
