@@ -10,6 +10,7 @@ import { useBlogTheme } from '@/composables/useBlogTheme';
 import { useSidebarLayout } from '@/composables/useSidebarLayout';
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { Blog, Navigation, Pagination, PostItem } from '@/types/blog.types';
+import { handleContentClick } from '@/utils/domUtils';
 import { hasContent, selectRandomMotto } from '@/utils/stringUtils';
 import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -77,7 +78,7 @@ const postsListSpacingClass = computed(() => (hasLandingContent.value ? 'mt-6' :
                 <ScrollToPostsLink />
 
                 <main v-if="hasLandingContent" class="min-w-0 flex-1">
-                    <div class="prose max-w-none text-primary" v-html="landingHtml" />
+                    <div class="prose max-w-none text-primary" @click="handleContentClick" v-html="landingHtml" />
                 </main>
 
                 <BorderDivider v-if="!hasSidebar" class="my-4" />
@@ -100,7 +101,7 @@ const postsListSpacingClass = computed(() => (hasLandingContent.value ? 'mt-6' :
 
                 <main :class="['min-w-0 flex-1', mainOrderClass]" :style="mainStyle">
                     <BlogHeader :blog="blog" :displayedMotto="displayedMotto" :viewStats="viewStats" />
-                    <div v-if="hasLandingContent" class="prose max-w-none" v-html="landingHtml" />
+                    <div v-if="hasLandingContent" class="prose max-w-none" @click="handleContentClick" v-html="landingHtml" />
                 </main>
             </div>
 
