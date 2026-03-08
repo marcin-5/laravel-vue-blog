@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -20,34 +21,48 @@ class HandleTranslations
     {
         $locale = App::getLocale();
 
+        $isAuthenticated = Auth::check();
+        $cacheKey = "inertia.translations.{$locale}." . ($isAuthenticated ? 'app' : 'public');
+
+        $messages = Cache::remember($cacheKey, 3600, function () use ($locale, $isAuthenticated) {
+            return $this->getMergedMessages($locale, $isAuthenticated);
+        });
+
         Inertia::share([
-            'translations' => function () use ($locale) {
-                $commonPath = resource_path("lang/{$locale}/common.json");
-                $common = file_exists($commonPath) ? json_decode(file_get_contents($commonPath), true) : [];
-
-                $authPath = resource_path("lang/{$locale}/auth.json");
-                $auth = file_exists($authPath) ? json_decode(file_get_contents($authPath), true) : [];
-
-                if (Auth::check()) {
-                    $appPath = resource_path("lang/{$locale}/app.json");
-                    $app = file_exists($appPath) ? json_decode(file_get_contents($appPath), true) : [];
-
-                    return [
-                        'locale' => $locale,
-                        'messages' => array_merge($common, $app, $auth),
-                    ];
-                }
-
-                $publicPath = resource_path("lang/{$locale}/public.json");
-                $public = file_exists($publicPath) ? json_decode(file_get_contents($publicPath), true) : [];
-
-                return [
-                    'locale' => $locale,
-                    'messages' => array_merge($common, $public, $auth),
-                ];
-            },
+            'translations' => [
+                'locale' => $locale,
+                'messages' => $messages,
+            ],
         ]);
 
         return $next($request);
+    }
+
+    private function getMergedMessages(string $locale, bool $isAuthenticated): array
+    {
+        $common = $this->loadJsonFile($locale, 'common');
+        $authTranslations = $this->loadJsonFile($locale, 'auth');
+        $specificFile = $isAuthenticated ? 'app' : 'public';
+        $specific = $this->loadJsonFile($locale, $specificFile);
+
+        return array_merge($common, $authTranslations, $specific);
+    }
+
+    private function loadJsonFile(string $locale, string $file): array
+    {
+        $path = resource_path("lang/{$locale}/{$file}.json");
+
+        if (!file_exists($path)) {
+            return [];
+        }
+
+        $content = file_get_contents($path);
+        $data = json_decode($content, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return [];
+        }
+
+        return $data ?: [];
     }
 }
