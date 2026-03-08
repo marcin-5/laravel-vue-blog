@@ -4,63 +4,100 @@ namespace App\Services;
 
 use App\Models\Blog;
 use App\Models\Post;
+use DateTimeInterface;
 use Illuminate\Support\Str;
 
 class SeoService
 {
+    private const array MARKDOWN_PATTERNS = [
+        '/!\[([^]]*)]\([^)]+\)/' => '$1',    // images -> alt
+        '/\[([^]]+)]\([^)]+\)/' => '$1',     // links -> text
+        '/(\*\*|__|\*|_|`)/' => '',          // emphasis markers
+        '/^\s{0,3}[#>\-]+\s*/m' => '',       // heading/blockquote/list markers
+    ];
+
     public function generateMetaDescription(string $html, int $limit = 160): string
     {
-        $text = strip_tags($html);
-
-        // Convert Markdown leftovers and remove formatting
-        $patterns = [
-            '/!\[([^]]*)]\([^)]+\)/' => '$1',    // images -> alt
-            '/\[([^]]+)]\([^)]+\)/' => '$1',     // links -> text
-            '/(\*\*|__|\*|_|`)/' => '',          // emphasis markers
-            '/^\s{0,3}[#>\-]+\s*/m' => '',       // heading/blockquote/list markers
-        ];
-        $text = preg_replace(array_keys($patterns), array_values($patterns), $text);
-
-        // Collapse whitespace and decode HTML entities
+        $text = $this->safeStripTags($html);
+        $text = preg_replace(array_keys(self::MARKDOWN_PATTERNS), array_values(self::MARKDOWN_PATTERNS), $text);
         $text = Str::squish(html_entity_decode($text, ENT_QUOTES | ENT_HTML5));
+        return $this->truncateToLimit($text, $limit);
+    }
 
+    private function safeStripTags(?string $text): ?string
+    {
+        return $text ? strip_tags($text) : null;
+    }
+
+    private function truncateToLimit(string $text, int $limit): string
+    {
         if (mb_strlen($text) <= $limit) {
             return $text;
         }
-
         $text = mb_substr($text, 0, $limit);
         $cutPosition = mb_strrpos($text, ' ');
-
         if ($cutPosition !== false && $cutPosition > 80) {
             $text = mb_substr($text, 0, $cutPosition);
         }
-
         return rtrim($text) . '…';
     }
 
     public function generateBlogStructuredData(Blog $blog, array $posts, string $baseUrl, string $description): array
     {
-        $blogUrl = $baseUrl . '/blogs/' . $blog->slug;
-
+        $blogUrl = $this->buildBlogUrl($baseUrl, $blog->slug);
         return [
             '@context' => 'https://schema.org',
             '@type' => 'Blog',
             'name' => $blog->name,
             'url' => $blogUrl,
             'description' => $description,
-            'author' => [
-                '@type' => 'Organization',
-                'name' => $blog->name,
-            ],
-            'blogPost' => collect($posts)->map(fn($post) => [
-                '@type' => 'BlogPosting',
-                'headline' => $post->title,
-                'url' => $baseUrl . '/blogs/' . $blog->slug . '/' . $post->slug,
-                'datePublished' => $post->published_at?->toIso8601String(),
-                'abstract' => $post->excerpt ? strip_tags($post->excerpt) : null,
-            ])->all(),
+            'author' => $this->createAuthorOrganization($blog->name),
+            'blogPost' => $this->mapPostsToStructuredData($posts, $baseUrl, $blog->slug),
             'breadcrumb' => $this->generateBreadcrumbStructuredData($baseUrl, $blogUrl, $blog->name),
         ];
+    }
+
+    private function buildBlogUrl(string $baseUrl, string $slug): string
+    {
+        return $baseUrl . '/blogs/' . $slug;
+    }
+
+    private function createAuthorOrganization(string $name): array
+    {
+        return [
+            '@type' => 'Organization',
+            'name' => $name,
+        ];
+    }
+
+    private function mapPostsToStructuredData(array $posts, string $baseUrl, string $blogSlug): array
+    {
+        return collect($posts)->map(function ($post) use ($baseUrl, $blogSlug) {
+            $postUrl = $this->buildPostUrl($baseUrl, $blogSlug, $post->slug);
+            return [
+                '@type' => 'BlogPosting',
+                'headline' => $post->title,
+                'url' => $postUrl,
+                'datePublished' => $this->getIsoDate($post->published_at),
+                'abstract' => $this->safeStripTags($post->excerpt),
+            ];
+        })->all();
+    }
+
+    private function buildPostUrl(string $baseUrl, string $blogSlug, string $postSlug): string
+    {
+        return $this->buildBlogUrl($baseUrl, $blogSlug) . '/' . $postSlug;
+    }
+
+    private function getIsoDate(?DateTimeInterface $date): ?string
+    {
+        if ($date instanceof DateTimeInterface) {
+            return method_exists($date, 'toIso8601String')
+                ? $date->toIso8601String()
+                : $date->format(DATE_ATOM); // Fallback for classes without `toIso8601String`
+        }
+
+        return null;
     }
 
     private function generateBreadcrumbStructuredData(
@@ -88,7 +125,6 @@ class SeoService
                 ],
             ],
         ];
-
         if ($postUrl && $postTitle) {
             $items[] = [
                 '@type' => 'ListItem',
@@ -99,7 +135,6 @@ class SeoService
                 ],
             ];
         }
-
         return [
             '@type' => 'BreadcrumbList',
             'itemListElement' => $items,
@@ -108,25 +143,18 @@ class SeoService
 
     public function generatePostStructuredData(Blog $blog, Post $post, string $baseUrl, string $description): array
     {
-        $blogUrl = $baseUrl . '/blogs/' . $blog->slug;
-        $postUrl = $blogUrl . '/' . $post->slug;
-
+        $blogUrl = $this->buildBlogUrl($baseUrl, $blog->slug);
+        $postUrl = $this->buildPostUrl($baseUrl, $blog->slug, $post->slug);
         return [
             '@context' => 'https://schema.org',
             '@type' => 'BlogPosting',
             'headline' => $post->title,
             'description' => $description,
             'url' => $postUrl,
-            'datePublished' => $post->published_at?->toIso8601String(),
-            'dateModified' => $post->updated_at?->toIso8601String(),
-            'author' => [
-                '@type' => 'Organization',
-                'name' => $blog->name,
-            ],
-            'publisher' => [
-                '@type' => 'Organization',
-                'name' => $blog->name,
-            ],
+            'datePublished' => $this->getIsoDate($post->published_at),
+            'dateModified' => $this->getIsoDate($post->updated_at),
+            'author' => $this->createAuthorOrganization($blog->name),
+            'publisher' => $this->createAuthorOrganization($blog->name),
             'mainEntityOfPage' => [
                 '@type' => 'WebPage',
                 '@id' => $postUrl,
@@ -158,7 +186,7 @@ class SeoService
                         'name' => $blog['author'],
                     ],
                     'url' => $baseUrl . '/blogs/' . $blog['slug'],
-                    'abstract' => !empty($blog['descriptionHtml']) ? strip_tags($blog['descriptionHtml']) : null,
+                    'abstract' => $this->safeStripTags($blog['descriptionHtml'] ?? ''),
                 ];
             })->all(),
         ];
