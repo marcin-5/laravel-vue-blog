@@ -33,9 +33,11 @@ class BlogViewsQuery
         $bounds = $criteria->range->bounds();
         $from = $bounds[0] ?? null;
         $to = $bounds[1] ?? null;
+
+        $blogViewsSubquery = $this->buildBlogViewsSubquery($from, $to);
         $postViewsSubquery = $this->buildPostViewsSubquery($from, $to);
 
-        $query = $this->buildQuery($from, $to, $postViewsSubquery)
+        $query = $this->buildQuery($blogViewsSubquery, $postViewsSubquery)
             ->when($criteria->bloggerId, fn(Builder $q) => $q->where('blogs.user_id', $criteria->bloggerId))
             ->when($criteria->blogId, fn(Builder $q) => $q->where('blogs.id', $criteria->blogId));
 
@@ -43,6 +45,27 @@ class BlogViewsQuery
         $this->applyLimit($query, $criteria->limit);
 
         return $query->get()->map(fn(object $row) => BlogStatsRow::fromRow($row)->toArray());
+    }
+
+    private function buildBlogViewsSubquery(
+        ?DateTimeInterface $from,
+        ?DateTimeInterface $to,
+    ): QueryBuilder|Builder {
+        $blogClass = $this->getBlogMorphClass();
+        $uniqueViewerKeySql = $this->uniqueViewerKeyBuilder->build('page_views');
+
+        return PageView::query()
+            ->selectRaw(
+                "viewable_id as blog_id, COUNT(id) as views, COUNT(DISTINCT ($uniqueViewerKeySql)) as unique_views",
+            )
+            ->where('viewable_type', '=', $blogClass)
+            ->when($from && $to, fn($q) => $q->whereBetween('created_at', [$from, $to]))
+            ->groupBy('viewable_id');
+    }
+
+    private function getBlogMorphClass(): string
+    {
+        return $this->blogMorphClass ??= (new Blog)->getMorphClass();
     }
 
     private function buildPostViewsSubquery(
@@ -53,9 +76,9 @@ class BlogViewsQuery
         $uniqueViewerKeySql = $this->uniqueViewerKeyBuilder->build('page_views');
 
         return PageView::query()
-            ->selectRaw(
-                "posts.blog_id, COUNT(page_views.id) as views, COUNT(DISTINCT ($uniqueViewerKeySql)) as unique_views",
-            )
+            ->selectRaw('posts.blog_id')
+            ->selectRaw('COUNT(page_views.id) as views')
+            ->selectRaw("COUNT(DISTINCT ($uniqueViewerKeySql)) as unique_views")
             ->join('posts', function ($join) use ($postClass, $from, $to) {
                 $join->on('posts.id', '=', 'page_views.viewable_id')
                     ->where('page_views.viewable_type', '=', $postClass)
@@ -70,43 +93,18 @@ class BlogViewsQuery
     }
 
     private function buildQuery(
-        ?DateTimeInterface $from,
-        ?DateTimeInterface $to,
+        QueryBuilder|Builder $blogViewsSubquery,
         QueryBuilder|Builder $postViewsSubquery,
     ): Builder {
-        $blogClass = $this->getBlogMorphClass();
-        $uniqueViewerKeySql = $this->uniqueViewerKeyBuilder->build('blog_views');
-
         return Blog::query()
-            ->selectRaw(
-                'blogs.id as blog_id, blogs.name, blogs.user_id as owner_id, users.name as owner_name,' .
-                ' COALESCE(COUNT(blog_views.id), 0) as views,' .
-                " COALESCE(COUNT(DISTINCT ($uniqueViewerKeySql)), 0) as unique_views," .
-                ' COALESCE(post_views_agg.views, 0) as post_views,' .
-                ' COALESCE(post_views_agg.unique_views, 0) as unique_post_views',
-            )
+            ->select('blogs.id as blog_id', 'blogs.name', 'blogs.user_id as owner_id', 'users.name as owner_name')
+            ->selectRaw('COALESCE(blog_views_agg.views, 0) as views')
+            ->selectRaw('COALESCE(blog_views_agg.unique_views, 0) as unique_views')
+            ->selectRaw('COALESCE(post_views_agg.views, 0) as post_views')
+            ->selectRaw('COALESCE(post_views_agg.unique_views, 0) as unique_post_views')
             ->leftJoin('users', 'users.id', '=', 'blogs.user_id')
-            ->leftJoinSub($postViewsSubquery, 'post_views_agg', function ($join) {
-                $join->on('post_views_agg.blog_id', '=', 'blogs.id');
-            })
-            ->leftJoin('page_views as blog_views', function ($join) use ($blogClass, $from, $to) {
-                $join->on('blogs.id', '=', 'blog_views.viewable_id')
-                    ->where('blog_views.viewable_type', '=', $blogClass)
-                    ->when($from && $to, fn($q) => $q->whereBetween('blog_views.created_at', [$from, $to]));
-            })
-            ->groupBy(
-                'blogs.id',
-                'blogs.name',
-                'blogs.user_id',
-                'users.name',
-                'post_views_agg.views',
-                'post_views_agg.unique_views',
-            );
-    }
-
-    private function getBlogMorphClass(): string
-    {
-        return $this->blogMorphClass ??= (new Blog)->getMorphClass();
+            ->leftJoinSub($blogViewsSubquery, 'blog_views_agg', 'blog_views_agg.blog_id', '=', 'blogs.id')
+            ->leftJoinSub($postViewsSubquery, 'post_views_agg', 'post_views_agg.blog_id', '=', 'blogs.id');
     }
 
     private function applySort(Builder $query, StatsSort $sort): void
