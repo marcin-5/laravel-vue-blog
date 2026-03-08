@@ -2,6 +2,7 @@
 import { Card } from '@/components/ui/card';
 import { getCategoryDisplayName } from '@/types/blog';
 import type { BlogItem } from '@/types/blog.types';
+import { handleContentClick } from '@/utils/domUtils';
 import { hasContent } from '@/utils/stringUtils';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -21,7 +22,7 @@ const hasCategories = computed(() => props.blog.categories.length > 0);
 <template>
     <Card class="border-gray-200 bg-olive-100 p-4 hover:shadow-md dark:border-gray-800 dark:bg-slate-900">
         <h2 class="mb-1 font-header text-xl font-semibold text-slate-800 dark:text-slate-100">
-            <a :href="blogUrl" class="hover:underline">
+            <a :href="blogUrl" class="hover:underline" @click="handleContentClick">
                 {{ blog.name }}
             </a>
         </h2>
