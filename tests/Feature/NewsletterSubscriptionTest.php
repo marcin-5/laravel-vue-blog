@@ -41,7 +41,7 @@ test('can subscribe to newsletter', function () {
         ]);
 
     $response->assertRedirect();
-    $response->assertSessionHas('message', 'Zapisano do newslettera pomyślnie!');
+    $response->assertSessionHas('message', 'Your newsletter subscription has been saved.');
 
     expect(NewsletterSubscription::count())->toBe(2);
 
@@ -69,7 +69,7 @@ test('newsletter management page requires valid signature', function () {
 });
 
 test('newsletter management page renders with valid signature', function () {
-    $blog = createBlog(['is_published' => true]);
+    $blog = createBlog(['is_published' => true, 'locale' => 'en']);
     createSubscription($blog, [
         'email' => 'test@example.com',
         'frequency' => 'weekly',
@@ -97,8 +97,8 @@ test('newsletter management page renders with valid signature', function () {
 });
 
 test('can update newsletter subscriptions via management page', function () {
-    $blog1 = createBlog(['is_published' => true]);
-    $blog2 = createBlog(['is_published' => true]);
+    $blog1 = createBlog(['is_published' => true, 'locale' => 'en']);
+    $blog2 = createBlog(['is_published' => true, 'locale' => 'en']);
     createSubscription($blog1, [
         'email' => 'test@example.com',
         'frequency' => 'daily',
@@ -116,7 +116,7 @@ test('can update newsletter subscriptions via management page', function () {
     ]);
 
     $response->assertRedirect();
-    $response->assertSessionHas('message', 'Ustawienia newslettera zostały zaktualizowane.');
+    $response->assertSessionHas('message', 'Your newsletter settings have been updated.');
 
     expect(NewsletterSubscription::where('email', 'test@example.com')->count())->toBe(1);
     $subscription = NewsletterSubscription::where('email', 'test@example.com')->first();
@@ -127,7 +127,7 @@ test('can update newsletter subscriptions via management page', function () {
 });
 
 test('can unsubscribe from all via management page', function () {
-    $blog = createBlog(['is_published' => true]);
+    $blog = createBlog(['is_published' => true, 'locale' => 'en']);
     createSubscription($blog, [
         'email' => 'test@example.com',
     ]);
@@ -139,7 +139,7 @@ test('can unsubscribe from all via management page', function () {
     $response = $this->post($unsubscribeUrl, ['email' => 'test@example.com']);
 
     $response->assertRedirect(route('home'));
-    $response->assertSessionHas('message', 'Zostałeś wypisany z newslettera.');
+    $response->assertSessionHas('message', 'You have been unsubscribed from the newsletter.');
 
     expect(NewsletterSubscription::where('email', 'test@example.com')->count())->toBe(0);
 });
