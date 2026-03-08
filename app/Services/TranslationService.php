@@ -2,13 +2,18 @@
 
 namespace App\Services;
 
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 
-class TranslationService
+readonly class TranslationService
 {
     /**
      * Return merged translation messages for a given page type.
+     *
+     * @param string $pageType
+     * @return array<string, mixed>
+     * @throws FileNotFoundException
      */
     public function getPageTranslations(string $pageType): array
     {
@@ -19,7 +24,7 @@ class TranslationService
             return $this->loadAndMergeTranslations($locale, $pageType);
         }
 
-        $cacheKey = sprintf('page_translations:%s:%s', $locale, $pageType);
+        $cacheKey = "page_translations:{$locale}:{$pageType}";
 
         return Cache::remember(
             $cacheKey,
@@ -30,21 +35,28 @@ class TranslationService
 
     /**
      * Load and merge base and page-specific group translations.
+     *
+     * @param string $locale
+     * @param string $pageType
+     * @return array<string, mixed>
+     * @throws FileNotFoundException
      */
     private function loadAndMergeTranslations(string $locale, string $pageType): array
     {
         $messages = [];
 
         if (config('translations.include_root_json', true)) {
-            $baseJsonPath = resource_path("lang/{$locale}.json");
+            $baseJsonPath = lang_path("{$locale}.json");
             $messages = array_merge($messages, $this->loadTranslationFile($baseJsonPath));
         }
 
-        $groups = (array)data_get(config('translations'), "page_groups.{$pageType}", []);
+        $groups = (array)config("translations.page_groups.{$pageType}", []);
 
         foreach ($groups as $group) {
-            $path = resource_path("lang/{$locale}/{$group}.json");
-            $messages = $this->mergeAssociative($messages, $this->loadTranslationFile($path));
+            $messages = $this->mergeAssociative(
+                $messages,
+                $this->loadTranslationFile(lang_path("{$locale}/{$group}.json")),
+            );
         }
 
         return $messages;
@@ -52,6 +64,9 @@ class TranslationService
 
     /**
      * Load a single translation file (JSON or PHP).
+     *
+     * @return array<string, mixed>
+     * @throws FileNotFoundException
      */
     private function loadTranslationFile(string $path): array
     {
@@ -60,6 +75,7 @@ class TranslationService
         }
 
         $phpPath = str_replace('.json', '.php', $path);
+
         if (File::exists($phpPath)) {
             return File::getRequire($phpPath) ?: [];
         }
@@ -69,12 +85,17 @@ class TranslationService
 
     /**
      * Prefer array_replace_recursive to avoid nested arrays when keys collide.
+     *
+     * @param array<string, mixed> $base
+     * @param array<string, mixed> $override
+     * @return array<string, mixed>
      */
     private function mergeAssociative(array $base, array $override): array
     {
         if ($base === []) {
             return $override;
         }
+
         if ($override === []) {
             return $base;
         }
