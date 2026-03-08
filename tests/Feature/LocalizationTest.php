@@ -1,20 +1,30 @@
 <?php
 
 use App\Models\Blog;
-use App\Models\User;
 use App\Models\NewsletterSubscription;
-use Illuminate\Support\Facades\App;
-use Inertia\Testing\AssertableInertia as Assert;
+use App\Models\User;
 use Illuminate\Support\Facades\URL;
+use Inertia\Testing\AssertableInertia as Assert;
 
-it('sets locale based on browser preference for guests on generic public pages', function () {
-    // English preference
-    $this->get('/', ['Accept-Language' => 'en-US,en;q=0.9'])
+it('sets locale based on config APP_LOCALE_OVERRIDE_ACCEPT_LANGUAGE for guests on generic public pages', function () {
+    // Scenario 1: override=true → always fallback 'en', ignores Accept-Language
+    config(['app.locale_override_accept_language' => true]);
+    config(['app.locale' => 'en']); // to be sure
+
+    $this->get('/', ['Accept-Language' => 'pl-PL,pl;q=0.9'])
         ->assertInertia(fn(Assert $page) => $page->where('translations.locale', 'en'));
 
-    // Polish preference
+    // Scenario 2: override=false → uses Accept-Language
+    config(['app.locale_override_accept_language' => false]);
+    config(['app.supported_locales' => ['en', 'pl']]); // for getPreferredLanguage()
+
+    // Polish
     $this->get('/', ['Accept-Language' => 'pl-PL,pl;q=0.9'])
         ->assertInertia(fn(Assert $page) => $page->where('translations.locale', 'pl'));
+
+    // English
+    $this->get('/', ['Accept-Language' => 'en-US,en;q=0.9'])
+        ->assertInertia(fn(Assert $page) => $page->where('translations.locale', 'en'));
 });
 
 it('sets locale based on user setting for authenticated users on generic public pages', function () {
