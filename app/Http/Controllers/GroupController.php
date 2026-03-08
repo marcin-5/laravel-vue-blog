@@ -40,7 +40,7 @@ class GroupController extends Controller
             'pagination' => $this->formatPagination($posts),
             'theme' => $group->theme,
             'sidebar' => $group->sidebar,
-            'navigation' => $this->navigation->getGroupLandingNavigation($group),
+            'navigation' => $this->navigation->getLandingNavigation($group),
             'viewStats' => $this->getViewStats(Group::class, $group->id, $group->user_id, true),
             'translations' => [
                 'locale' => app()->getLocale(),
@@ -80,7 +80,7 @@ class GroupController extends Controller
             'pagination' => $this->formatPagination($paginatedPosts),
             'theme' => $group->theme,
             'sidebar' => $group->sidebar,
-            'navigation' => $this->navigation->getGroupPostNavigation($group, $post),
+            'navigation' => $this->navigation->getPostNavigation($group, $post),
             'viewStats' => $this->getViewStats(Post::class, $post->id, $group->user_id, true),
             'translations' => [
                 'locale' => app()->getLocale(),
