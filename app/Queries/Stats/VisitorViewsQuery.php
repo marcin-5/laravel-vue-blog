@@ -40,7 +40,7 @@ class VisitorViewsQuery
 
         $query = $this->buildBaseQuery($criteria, $blogMorphClass, $postMorphClass, $bounds);
         $this->applySelectClause($query, $criteria, $blogMorphClass, $postMorphClass);
-        $this->applyHavingClause($query, $criteria, $blogMorphClass, $postMorphClass);
+        $this->applyBlogIdWhereFilter($query, $criteria, $blogMorphClass, $postMorphClass);
         $this->applySort($query, $criteria->sort);
         $this->applyLimit($query, $criteria->limit);
 
@@ -278,7 +278,7 @@ class VisitorViewsQuery
         }
     }
 
-    private function applyHavingClause(
+    private function applyBlogIdWhereFilter(
         Builder $query,
         StatsCriteria $criteria,
         string $blogMorphClass,
