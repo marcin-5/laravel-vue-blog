@@ -37,14 +37,14 @@ it(
         $groups = $service->getUserGroups($user);
 
         expect($groups)->toHaveCount(2)
-            ->and($groups->first()->id)->toBe($newGroup->id)
-            ->and($groups->last()->id)->toBe($oldGroup->id)
-            ->and($groups->first()->relationLoaded('posts'))->toBeTrue()
-            ->and($groups->first()->posts->count())->toBe(3)
-            ->and($groups->first()->posts->first()->id)->toBe($newPost->id)
-            ->and($groups->first()->posts->first()->updated_at)->toBeNull()
-            ->and($groups->first()->posts->first()->relationLoaded('extensions'))->toBeTrue()
-            ->and($groups->first()->posts->first()->extensions->count())->toBe(1);
+            ->and($groups->first())->not->toBeNull()->id->toBe($newGroup->id)
+            ->and($groups->last())->not->toBeNull()->id->toBe($oldGroup->id)
+            ->and($groups->first())->not->toBeNull()->relationLoaded('posts')->toBeTrue()
+            ->and($groups->first())->not->toBeNull()->posts->count()->toBe(3)
+            ->and($groups->first())->not->toBeNull()->posts->first()->id->toBe($newPost->id)
+            ->and($groups->first())->not->toBeNull()->posts->first()->updated_at->toBeNull()
+            ->and($groups->first())->not->toBeNull()->posts->first()->relationLoaded('extensions')->toBeTrue()
+            ->and($groups->first())->not->toBeNull()->posts->first()->extensions->count()->toBe(1);
     },
 );
 
