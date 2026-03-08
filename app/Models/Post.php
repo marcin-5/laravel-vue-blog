@@ -44,15 +44,20 @@ class Post extends Model
         'published_at',
     ];
 
-    protected $casts = [
-        'is_published' => 'boolean',
-        'published_at' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
-
     protected static function booted(): void
     {
+        static::saving(function (Post $post) {
+            // Ensure slug is generated from title if changed or missing
+            if ($post->title && (!$post->slug || ($post->isDirty('title') && !$post->isDirty('slug')))) {
+                $post->slug = $post->title;
+            }
+
+            // Set published_at when post is first published
+            if ($post->is_published && !$post->getOriginal('is_published') && !$post->published_at) {
+                $post->published_at = now();
+            }
+        });
+
         static::created(fn() => app(SitemapObserver::class)->regenerateSitemap());
         static::updated(fn() => app(SitemapObserver::class)->regenerateSitemap());
         static::deleted(fn() => app(SitemapObserver::class)->regenerateSitemap());
@@ -232,6 +237,19 @@ class Post extends Model
     }
 
     /**
+     * Scope for posts manageable by a given user
+     */
+    public function scopeManageableBy(Builder $query, int|User $user): Builder
+    {
+        $userId = $user instanceof User ? $user->id : (int)$user;
+
+        return $query->where(function (Builder $q) use ($userId) {
+            $q->whereHas('blog', fn(Builder $bq) => $bq->where('user_id', $userId))
+                ->orWhereHas('group', fn(Builder $gq) => $gq->where('user_id', $userId));
+        });
+    }
+
+    /**
      * Scope for group posts, visible to logged-in members
      */
     public function scopeForGroupView(Builder $query): Builder
@@ -239,5 +257,20 @@ class Post extends Model
         return $query->published()
             ->regularPosts()
             ->orderByPublicationDate();
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'is_published' => 'boolean',
+            'published_at' => 'datetime',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
     }
 }
