@@ -8,6 +8,20 @@ use Illuminate\Database\Eloquent\Collection;
 
 class GroupService
 {
+    private const array POST_FIELDS = [
+        'id',
+        'blog_id',
+        'group_id',
+        'title',
+        'slug',
+        'excerpt',
+        'content',
+        'is_published',
+        'visibility',
+        'published_at',
+        'created_at',
+    ];
+
     public function getUserGroups(User $user): Collection
     {
         return Group::query()
@@ -20,19 +34,7 @@ class GroupService
                                 $eq->oldest();
                             }
                         ])
-                        ->select(
-                            'id',
-                            'blog_id',
-                            'group_id',
-                            'title',
-                            'slug',
-                            'excerpt',
-                            'content',
-                            'is_published',
-                            'visibility',
-                            'published_at',
-                            'created_at',
-                        );
+                        ->select(self::POST_FIELDS);
                 }
             ])
             ->orderByDesc('created_at')
