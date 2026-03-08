@@ -13,43 +13,55 @@ class SitemapService
     {
         $sitemap = Sitemap::create();
 
-        // Add home page
+        $this->addHomepage($sitemap);
+
+        $this->addPublishedBlogs($sitemap);
+
+        $this->addPublishedPosts($sitemap);
+
+        $sitemap->writeToFile(public_path('sitemap.xml'));
+    }
+
+    private function addHomepage(Sitemap $sitemap): void
+    {
         $sitemap->add(
             Url::create(route('home'))
                 ->setLastModificationDate(now())
-                ->setChangeFrequency(Url::CHANGE_FREQUENCY_DAILY)
+                ->setChangeFrequency('daily')
                 ->setPriority(1.0),
         );
+    }
 
-        // Add published blogs
+    private function addPublishedBlogs(Sitemap $sitemap): void
+    {
         Blog::where('is_published', true)
-            ->get()
-            ->each(function (Blog $blog) use ($sitemap) {
+            ->cursor()
+            ->each(function (Blog $blog) use ($sitemap): void {
                 $sitemap->add(
                     Url::create(route('blog.public.landing', $blog->slug))
                         ->setLastModificationDate($blog->updated_at)
-                        ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
+                        ->setChangeFrequency('weekly')
                         ->setPriority(0.8),
                 );
             });
+    }
 
-        // Add published posts
+    private function addPublishedPosts(Sitemap $sitemap): void
+    {
         Post::with('blog')
             ->published()
             ->public()
-            ->whereHas('blog', function ($query) {
+            ->whereHas('blog', function ($query): void {
                 $query->where('is_published', true);
             })
-            ->get()
-            ->each(function (Post $post) use ($sitemap) {
+            ->cursor()
+            ->each(function (Post $post) use ($sitemap): void {
                 $sitemap->add(
                     Url::create(route('blog.public.post', [$post->blog->slug, $post->slug]))
                         ->setLastModificationDate($post->updated_at)
-                        ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
+                        ->setChangeFrequency('weekly')
                         ->setPriority(0.6),
                 );
             });
-
-        $sitemap->writeToFile(public_path('sitemap.xml'));
     }
 }
