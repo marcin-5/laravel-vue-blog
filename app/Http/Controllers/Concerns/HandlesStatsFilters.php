@@ -23,116 +23,17 @@ trait HandlesStatsFilters
     protected function getStatsData(Request $request, ?int $forceBloggerId = null): array
     {
         $blogFilters = $this->parseStatsFilters($request);
-        $blogCriteria = $this->createCriteria($blogFilters, $forceBloggerId);
-        $blogs = $this->stats->blogViews($blogCriteria);
-
         $postFilters = $this->parseStatsFilters($request, 'posts_');
-        $postCriteria = $this->createCriteria($postFilters, $forceBloggerId);
-        $posts = $this->stats->postViews($postCriteria);
-
         $visitorFilters = $this->parseStatsFilters($request, 'visitors_');
-        $visitorCriteria = $this->createCriteria($visitorFilters, $forceBloggerId);
-
         $specialVisitorFilters = $this->parseStatsFilters($request, 'special_visitors_');
+
         // Force lifetime range for Anonymous and Bot Views regardless of incoming query, as the range selector is hidden in UI
         $specialVisitorFilters['range'] = 'lifetime';
+
+        $blogCriteria = $this->createCriteria($blogFilters, $forceBloggerId);
+        $postCriteria = $this->createCriteria($postFilters, $forceBloggerId);
+        $visitorCriteria = $this->createCriteria($visitorFilters, $forceBloggerId);
         $specialVisitorCriteria = $this->createCriteria($specialVisitorFilters, $forceBloggerId);
-
-        // First subsection: strictly from page_views table, ignore selected visitor_type
-        $visitorsFromPageViews = $this->stats->visitorViews(
-            new StatsCriteria(
-                range: $visitorCriteria->range,
-                bloggerId: $visitorCriteria->bloggerId,
-                blogId: $visitorCriteria->blogId,
-                limit: $visitorCriteria->limit,
-                sort: $visitorCriteria->sort,
-                visitorGroupBy: $visitorCriteria->visitorGroupBy,
-                visitorType: 'all',
-            ),
-        );
-
-        // Second subsection: from anonymous_views and/or bot_views based on selected type
-        if ($specialVisitorCriteria->visitorType === 'bots' || $specialVisitorCriteria->visitorType === 'anonymous') {
-            $visitorsFromSpecial = $this->stats->visitorViews($specialVisitorCriteria);
-        } else {
-            // 'all' selected -> merge anonymous and bots
-            $anonymous = $this->stats->visitorViews(
-                new StatsCriteria(
-                    range: $specialVisitorCriteria->range,
-                    bloggerId: $specialVisitorCriteria->bloggerId,
-                    blogId: $specialVisitorCriteria->blogId,
-                    limit: null, // merge then apply limit manually
-                    sort: $specialVisitorCriteria->sort,
-                    visitorGroupBy: $specialVisitorCriteria->visitorGroupBy,
-                    visitorType: 'anonymous',
-                ),
-            );
-            $bots = $this->stats->visitorViews(
-                new StatsCriteria(
-                    range: $specialVisitorCriteria->range,
-                    bloggerId: $specialVisitorCriteria->bloggerId,
-                    blogId: $specialVisitorCriteria->blogId,
-                    limit: null,
-                    sort: $specialVisitorCriteria->sort,
-                    visitorGroupBy: $specialVisitorCriteria->visitorGroupBy,
-                    visitorType: 'bots',
-                ),
-            );
-
-            $merged = collect();
-            foreach ([$anonymous, $bots] as $set) {
-                foreach ($set as $row) {
-                    $key = $row['visitor_label'];
-                    if (!$merged->has($key)) {
-                        $merged->put($key, $row);
-                    } else {
-                        $existing = $merged->get($key);
-                        $existing['blog_views'] += $row['blog_views'];
-                        $existing['post_views'] += $row['post_views'];
-                        $existing['views'] += $row['views'];
-                        $existing['lifetime_views'] += $row['lifetime_views'];
-                        $existing['user_agent'] = $existing['user_agent'] ?? $row['user_agent'];
-                        if (isset($row['last_seen_at'])) {
-                            if (!isset($existing['last_seen_at']) || $row['last_seen_at'] > $existing['last_seen_at']) {
-                                $existing['last_seen_at'] = $row['last_seen_at'];
-                            }
-                        }
-                        $merged->put($key, $existing);
-                    }
-                }
-            }
-
-            // Apply sorting & limiting to merged collection similar to query
-            $visitorsFromSpecial = $merged->values();
-            switch ($specialVisitorCriteria->sort) {
-                case StatsSort::ViewsAsc:
-                    $visitorsFromSpecial = $visitorsFromSpecial->sortBy('post_views')->values();
-                    break;
-                case StatsSort::LastSeenAsc:
-                    $visitorsFromSpecial = $visitorsFromSpecial->sortBy('last_seen_at')->values();
-                    break;
-                case StatsSort::LastSeenDesc:
-                    $visitorsFromSpecial = $visitorsFromSpecial->sortByDesc('last_seen_at')->values();
-                    break;
-                case StatsSort::NameAsc:
-                    $visitorsFromSpecial = $visitorsFromSpecial->sortBy(
-                        'visitor_label',
-                        SORT_NATURAL | SORT_FLAG_CASE,
-                    )->values();
-                    break;
-                case StatsSort::NameDesc:
-                    $visitorsFromSpecial = $visitorsFromSpecial->sortByDesc(
-                        'visitor_label',
-                        SORT_NATURAL | SORT_FLAG_CASE,
-                    )->values();
-                    break;
-                default:
-                    $visitorsFromSpecial = $visitorsFromSpecial->sortByDesc('post_views')->values();
-            }
-            if ($specialVisitorCriteria->limit !== null) {
-                $visitorsFromSpecial = $visitorsFromSpecial->take(max(1, $specialVisitorCriteria->limit))->values();
-            }
-        }
 
         return [
             'blogFilters' => $this->formatFiltersForResponse($blogFilters, $blogFilters['limit']),
@@ -142,11 +43,22 @@ trait HandlesStatsFilters
                 $specialVisitorFilters,
                 $specialVisitorFilters['limit'],
             ),
-            'blogs' => $blogs,
-            'posts' => $posts,
-            // Two separate datasets for Visitor sections
-            'visitorsFromPage' => $visitorsFromPageViews,
-            'visitorsFromSpecial' => $visitorsFromSpecial,
+            'blogs' => $this->stats->blogViews($blogCriteria),
+            'posts' => $this->stats->postViews($postCriteria),
+            // First subsection: strictly from page_views table, ignore selected visitor_type
+            'visitorsFromPage' => $this->stats->visitorViews(
+                new StatsCriteria(
+                    range: $visitorCriteria->range,
+                    bloggerId: $visitorCriteria->bloggerId,
+                    blogId: $visitorCriteria->blogId,
+                    limit: $visitorCriteria->limit,
+                    sort: $visitorCriteria->sort,
+                    visitorGroupBy: $visitorCriteria->visitorGroupBy,
+                    visitorType: 'all',
+                ),
+            ),
+            // Second subsection: from anonymous_views and/or bot_views based on selected type
+            'visitorsFromSpecial' => $this->stats->specialVisitorViews($specialVisitorCriteria),
         ];
     }
 
