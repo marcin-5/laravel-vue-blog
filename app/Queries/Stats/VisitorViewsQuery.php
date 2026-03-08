@@ -193,26 +193,16 @@ class VisitorViewsQuery
                     ->where('page_views.viewable_type', '=', $postMorphClass);
             })
             ->when($bounds, fn(Builder $q) => $q->whereBetween('page_views.created_at', $bounds))
-            ->when($criteria->bloggerId, function (Builder $query) use ($criteria, $blogMorphClass, $postMorphClass) {
-                $query->where(function (Builder $innerQuery) use ($criteria, $blogMorphClass, $postMorphClass) {
-                    $innerQuery
-                        ->whereExists(function (QueryBuilder $existsQuery) use ($criteria, $blogMorphClass) {
-                            $existsQuery
-                                ->from('blogs')
-                                ->whereColumn('blogs.id', 'page_views.viewable_id')
-                                ->where('page_views.viewable_type', '=', $blogMorphClass)
-                                ->where('blogs.user_id', '=', $criteria->bloggerId);
-                        })
-                        ->orWhereExists(function (QueryBuilder $existsQuery) use ($criteria, $postMorphClass) {
-                            $existsQuery
-                                ->from('blogs')
-                                ->join('posts', 'posts.blog_id', '=', 'blogs.id')
-                                ->whereColumn('posts.id', 'page_views.viewable_id')
-                                ->where('page_views.viewable_type', '=', $postMorphClass)
-                                ->where('blogs.user_id', '=', $criteria->bloggerId);
-                        });
-                });
-            })
+            ->when(
+                $criteria->bloggerId,
+                fn(Builder $q) => $this->applyBloggerIdFilter(
+                    $q,
+                    $criteria,
+                    $blogMorphClass,
+                    $postMorphClass,
+                    'page_views',
+                ),
+            )
             ->groupBy('visitor_label', $visitorLabelColumn, 'page_views.user_agent')
             ->when($criteria->visitorType === 'anonymous', function (Builder $query) {
                 $query->whereNull('page_views.user_id');
@@ -295,18 +285,19 @@ class VisitorViewsQuery
         string $postMorphClass,
     ): void {
         if ($criteria->blogId !== null) {
-            $query->havingRaw(
-                '(
-                COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? AND page_views.viewable_id = ? THEN page_views.viewable_id END) > 0
-                OR COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? AND posts.blog_id = ? THEN page_views.viewable_id END) > 0
-            )',
-                [
-                    $blogMorphClass,
-                    $criteria->blogId,
-                    $postMorphClass,
-                    $criteria->blogId,
-                ],
-            );
+            // Move the logical filter out of HAVING and into WHERE for planner friendliness.
+            // This preserves semantics by filtering grouped rows based on underlying rows.
+            $query->where(function (Builder $inner) use ($criteria, $blogMorphClass, $postMorphClass) {
+                $inner
+                    ->where(function (Builder $q) use ($criteria, $blogMorphClass) {
+                        $q->where('page_views.viewable_type', '=', $blogMorphClass)
+                            ->where('page_views.viewable_id', '=', $criteria->blogId);
+                    })
+                    ->orWhere(function (Builder $q) use ($criteria, $postMorphClass) {
+                        $q->where('page_views.viewable_type', '=', $postMorphClass)
+                            ->where('posts.blog_id', '=', $criteria->blogId);
+                    });
+            });
         }
     }
 }
