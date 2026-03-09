@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import NewsletterScheduleEditor from '@/components/newsletter/NewsletterScheduleEditor.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -7,45 +8,41 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toaster } from '@/components/ui/toast';
 import { useToast } from '@/composables/useToast';
+import type { Blog, InertiaForm } from '@/types/blog.types';
+import type {
+    ExistingSubscription,
+    NewsletterConfig,
+    NewsletterFormData,
+    NewsletterSubscription
+} from '@/types/newsletter.types';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const props = defineProps<{
     mode: 'subscribe' | 'manage';
-    blogs: Array<{ id: number; name: string; slug: string }>;
+    blogs: Blog[];
     translations: any;
     // subscribe
     selectedBlogId?: number | string;
     userEmail?: string;
     // manage
     email?: string;
-    currentSubscriptions?: Array<{
-        blog_id: number;
-        frequency: string;
-        send_time: string | null;
-        send_time_weekend: string | null;
-        send_day: number | null;
-    }>;
+    currentSubscriptions?: ExistingSubscription[];
     updateUrl?: string;
     unsubscribeUrl?: string;
-    config: {
-        daily_weekday_time: string;
-        daily_weekend_time: string;
-        weekly_day: number;
-        weekly_time: string;
-    };
+    config: NewsletterConfig;
 }>();
 
 const isManageMode = computed(() => props.mode === 'manage');
 const displayEmail = computed(() => (props.mode === 'subscribe' ? props.userEmail || '' : props.email || ''));
 
-const getInitialSub = (blogId: number) => {
+const getInitialSub = (blogId: number): NewsletterSubscription => {
     const existing = props.currentSubscriptions?.find((s) => s.blog_id === blogId);
     if (existing) {
         return {
             blog_id: blogId,
             selected: true,
-            frequency: existing.frequency,
+            frequency: existing.frequency as 'daily' | 'weekly',
             send_time: existing.send_time || (existing.frequency === 'daily' ? props.config.daily_weekday_time : props.config.weekly_time),
             send_time_weekend: existing.send_time_weekend || (existing.frequency === 'daily' ? props.config.daily_weekend_time : null),
             send_day: existing.send_day || props.config.weekly_day,
@@ -62,12 +59,12 @@ const getInitialSub = (blogId: number) => {
     };
 };
 
-const newsletterForm = useForm({
+const newsletterForm: InertiaForm<NewsletterFormData> = useForm<NewsletterFormData>({
     email: displayEmail.value,
     subscriptions: props.blogs.map((blog) => getInitialSub(blog.id)),
 });
 
-const unsubscribeForm = useForm({ email: displayEmail.value });
+const unsubscribeForm: InertiaForm<{ email: string }> = useForm<{ email: string }>({ email: displayEmail.value });
 
 const hasSelectedBlogs = computed(() => newsletterForm.subscriptions.some((s) => s.selected));
 
@@ -171,7 +168,7 @@ const unsubscribe = () => {
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-border">
-                                    <tr v-for="sub in newsletterForm.subscriptions" :key="sub.blog_id" class="hover:bg-muted/30">
+                                    <tr v-for="(sub, idx) in newsletterForm.subscriptions" :key="sub.blog_id" class="hover:bg-muted/30">
                                         <td class="px-4 py-3">
                                             <Checkbox
                                                 :id="'blog-' + sub.blog_id"
@@ -205,53 +202,7 @@ const unsubscribe = () => {
                                             </Select>
                                         </td>
                                         <td class="px-4 py-3">
-                                            <div v-if="sub.selected" class="flex flex-col gap-2">
-                                                <!-- Daily schedule -->
-                                                <template v-if="sub.frequency === 'daily'">
-                                                    <div class="flex items-center gap-2">
-                                                        <span class="w-24 text-xs text-secondary-foreground">{{ t.form.weekday }}:</span>
-                                                        <input
-                                                            v-model="sub.send_time"
-                                                            class="w-20 rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
-                                                            type="time"
-                                                        />
-                                                    </div>
-                                                    <div class="flex items-center gap-2">
-                                                        <span class="w-24 text-xs text-secondary-foreground">{{ t.form.weekend }}:</span>
-                                                        <input
-                                                            v-model="sub.send_time_weekend"
-                                                            class="w-20 rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
-                                                            type="time"
-                                                        />
-                                                    </div>
-                                                </template>
-
-                                                <!-- Weekly schedule -->
-                                                <div v-if="sub.frequency === 'weekly'" class="flex items-center gap-2">
-                                                    <input
-                                                        v-model="sub.send_time"
-                                                        class="w-20 rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
-                                                        type="time"
-                                                    />
-                                                    <Select
-                                                        :model-value="sub.send_day?.toString()"
-                                                        @update:model-value="sub.send_day = Number($event)"
-                                                    >
-                                                        <SelectTrigger class="h-8 w-30">
-                                                            <SelectValue />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="1">{{ t.form.monday }}</SelectItem>
-                                                            <SelectItem value="2">{{ t.form.tuesday }}</SelectItem>
-                                                            <SelectItem value="3">{{ t.form.wednesday }}</SelectItem>
-                                                            <SelectItem value="4">{{ t.form.thursday }}</SelectItem>
-                                                            <SelectItem value="5">{{ t.form.friday }}</SelectItem>
-                                                            <SelectItem value="6">{{ t.form.saturday }}</SelectItem>
-                                                            <SelectItem value="7">{{ t.form.sunday }}</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                            </div>
+                                            <NewsletterScheduleEditor v-if="sub.selected" v-model="newsletterForm.subscriptions[idx]" :t="t" />
                                             <span v-else class="text-xs text-slate-500"> - </span>
                                         </td>
                                     </tr>
