@@ -22,6 +22,12 @@ export interface UserRow {
     blog_quota: number | null;
 }
 
+interface SavePayload {
+    role: Role;
+    blog_quota?: number;
+    [key: string]: any;
+}
+
 interface Props {
     users?: UserRow[];
     currentUserIsAdmin?: boolean;
@@ -36,47 +42,68 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const editableUsers = ref<UserRow[]>(props.users ? props.users.map((u) => ({ ...u })) : []);
-const originalById = ref(new Map<number, UserWithQuota>());
-function setOriginals(users?: UserRow[]) {
+const roles: Role[] = ['admin', 'blogger', 'user'];
+
+// --- Helpers ---
+
+function cloneUsers(users?: UserRow[]): UserRow[] {
+    return users ? users.map((u) => ({ ...u })) : [];
+}
+
+function getQuotaOrDefault(quota: number | null): number {
+    return quota ?? 0;
+}
+
+function resetOriginals(users?: UserRow[]) {
     originalById.value = new Map((users ?? []).map((u) => [u.id, { ...u }]));
 }
-setOriginals(props.users);
+
+function buildSavePayload(user: UserRow): SavePayload {
+    const payload: SavePayload = { role: user.role };
+
+    if (canEditQuota(user)) {
+        payload.blog_quota = getQuotaOrDefault(user.blog_quota);
+    }
+
+    return payload;
+}
+
+// --- State ---
+
+const editableUsers = ref<UserRow[]>(cloneUsers(props.users));
+const originalById = ref(new Map<number, UserWithQuota>());
+resetOriginals(props.users);
+
 watch(
     () => props.users,
     (users) => {
-        editableUsers.value = users ? users.map((u) => ({ ...u })) : [];
-        setOriginals(users);
+        editableUsers.value = cloneUsers(users);
+        resetOriginals(users);
     },
 );
-
-const roles: Role[] = ['admin', 'blogger', 'user'];
 
 const { canEditQuota } = useUserPermissions({
     currentUserIsAdmin: props.currentUserIsAdmin,
     originalsById: originalById,
 });
 
+// --- Actions ---
+
 function isChanged(user: UserRow): boolean {
     const original = originalById.value.get(user.id);
     if (!original) return false;
+
     if (user.role !== original.role) return true;
+
     if (canEditQuota(user)) {
-        const current = user.blog_quota ?? 0;
-        const orig = original.blog_quota ?? 0;
-        return current !== orig;
+        return getQuotaOrDefault(user.blog_quota) !== getQuotaOrDefault(original.blog_quota);
     }
+
     return false;
 }
 
 function saveUser(user: UserRow) {
-    const payload: Record<string, unknown> = {
-        role: user.role,
-    };
-    if (canEditQuota(user)) {
-        payload.blog_quota = user.blog_quota ?? 0;
-    }
-    router.patch(route('admin.users.update', user.id), payload, {
+    router.patch(route('admin.users.update', user.id), buildSavePayload(user), {
         preserveScroll: true,
         preserveState: true,
     });
