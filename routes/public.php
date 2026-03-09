@@ -8,8 +8,10 @@ use App\Http\Controllers\SitemapController;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\TrackMarkdownRequests;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Support\Facades\Route;
+use Spatie\MarkdownResponse\Middleware\ProvideMarkdownResponse;
 
 // Robots.txt and Sitemap routes (without Inertia and appearance middleware)
 Route::withoutMiddleware([
@@ -50,10 +52,10 @@ Route::post('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscrib
 // Keep these at the very end to avoid conflicts.
 Route::get('{blog:slug}/{postSlug}', [PublicBlogController::class, 'post'])
     ->name('blog.public.post')
-    ->middleware('track-page-views');
+    ->middleware(['track-page-views', TrackMarkdownRequests::class, ProvideMarkdownResponse::class]);
 
 Route::get('{blog:slug}', [PublicBlogController::class, 'landing'])
     ->name('blog.public.landing')
-    ->middleware('track-page-views');
+    ->middleware(['track-page-views', TrackMarkdownRequests::class, ProvideMarkdownResponse::class]);
 
 Route::get('/', [PublicHomeController::class, 'welcome'])->name('home');

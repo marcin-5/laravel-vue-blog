@@ -30,6 +30,12 @@ readonly class TrackPageViews
 
         $response = $next($request);
 
+        $contentType = (string)$response->headers->get('Content-Type', '');
+
+        if (str_contains($contentType, 'text/markdown')) {
+            return $response;
+        }
+
         if (!$route) {
             return $response;
         }
