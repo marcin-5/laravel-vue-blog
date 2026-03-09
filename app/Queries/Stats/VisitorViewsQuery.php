@@ -7,6 +7,7 @@ use App\Enums\StatsSort;
 use App\Models\AnonymousView;
 use App\Models\Blog;
 use App\Models\BotView;
+use App\Models\MarkdownView;
 use App\Models\NewsletterSubscription;
 use App\Models\PageView;
 use App\Models\Post;
@@ -33,6 +34,9 @@ class VisitorViewsQuery
         if ($criteria->visitorType === 'anonymous') {
             return $this->executeAggregatedViews($criteria, AnonymousView::class, 'anonymous_views');
         }
+        if ($criteria->visitorType === 'markdown') {
+            return $this->executeAggregatedViews($criteria, MarkdownView::class, 'markdown_views');
+        }
 
         $bounds = $criteria->range->bounds();
         $blogMorphClass = $this->getBlogMorphClass();
@@ -48,7 +52,7 @@ class VisitorViewsQuery
     }
 
     /**
-     * @param class-string<BotView|AnonymousView> $modelClass
+     * @param class-string<BotView|AnonymousView|MarkdownView> $modelClass
      */
     private function executeAggregatedViews(StatsCriteria $criteria, string $modelClass, string $tableName): Collection
     {
@@ -56,12 +60,17 @@ class VisitorViewsQuery
         $postMorphClass = $this->getPostMorphClass();
         $bounds = $criteria->range->bounds();
 
+        $isMarkdown = $modelClass === MarkdownView::class;
+
         $query = $modelClass::query()
-            ->join('user_agents', 'user_agents.id', '=', "{$tableName}.user_agent_id")
+            ->when(
+                !$isMarkdown,
+                fn(Builder $q) => $q->join('user_agents', 'user_agents.id', '=', "{$tableName}.user_agent_id"),
+            )
             ->when($bounds, fn(Builder $q) => $q->whereBetween("{$tableName}.last_seen_at", $bounds))
             ->selectRaw(
-                'user_agents.name as visitor_label,' .
-                ' user_agents.name as user_agent,' .
+                ($isMarkdown ? "COALESCE({$tableName}.user_agent, 'Unknown') as visitor_label," : 'user_agents.name as visitor_label,') .
+                ($isMarkdown ? "COALESCE({$tableName}.user_agent, 'Unknown') as user_agent," : ' user_agents.name as user_agent,') .
                 ' SUM(CASE WHEN viewable_type = ? THEN hits ELSE 0 END) as blog_views,' .
                 ' SUM(CASE WHEN viewable_type = ? THEN hits ELSE 0 END) as post_views,' .
                 ' SUM(hits) as views,' .
@@ -83,7 +92,7 @@ class VisitorViewsQuery
                 $criteria->blogId,
                 fn(Builder $q) => $this->applyBlogIdFilter($q, $criteria, $blogMorphClass, $postMorphClass, $tableName),
             )
-            ->groupBy('user_agents.name');
+            ->groupByRaw($isMarkdown ? "COALESCE({$tableName}.user_agent, 'Unknown')" : 'user_agents.name');
 
         $this->applySort($query, $criteria->sort);
         $this->applyLimit($query, $criteria->limit);

@@ -8,7 +8,6 @@ use App\Models\Post;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
-use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 class TrackMarkdownRequests
@@ -60,18 +59,21 @@ class TrackMarkdownRequests
         }
 
         if ($viewable) {
-            MarkdownView::updateOrCreate(
-                [
-                    'viewable_type' => $viewable->getMorphClass(),
-                    'viewable_id' => $viewable->getKey(),
-                    'ip_address' => $request->ip(),
-                ],
-                [
-                    'user_agent' => substr((string)$request->header('User-Agent', ''), 0, 255),
-                    'last_seen_at' => now(),
-                    'hits' => DB::raw('hits + 1'),
-                ],
-            );
+            $view = MarkdownView::firstOrNew([
+                'viewable_type' => $viewable->getMorphClass(),
+                'viewable_id' => $viewable->getKey(),
+                'ip_address' => $request->ip(),
+            ]);
+
+            if ($view->exists) {
+                $view->hits++;
+            } else {
+                $view->hits = 1;
+            }
+
+            $view->user_agent = substr((string)$request->header('User-Agent', ''), 0, 255);
+            $view->last_seen_at = now();
+            $view->save();
         }
     }
 }

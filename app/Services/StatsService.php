@@ -59,11 +59,11 @@ readonly class StatsService
      */
     public function specialVisitorViews(StatsCriteria $criteria): Collection
     {
-        if ($criteria->visitorType === 'bots' || $criteria->visitorType === 'anonymous') {
+        if ($criteria->visitorType === 'bots' || $criteria->visitorType === 'anonymous' || $criteria->visitorType === 'markdown') {
             return $this->visitorViews($criteria);
         }
 
-        // 'all' selected -> merge anonymous and bots
+        // 'all' selected -> merge anonymous, bots and markdown
         $anonymous = $this->visitorViews(
             new StatsCriteria(
                 range: $criteria->range,
@@ -88,8 +88,20 @@ readonly class StatsService
             ),
         );
 
+        $markdown = $this->visitorViews(
+            new StatsCriteria(
+                range: $criteria->range,
+                bloggerId: $criteria->bloggerId,
+                blogId: $criteria->blogId,
+                limit: null,
+                sort: $criteria->sort,
+                visitorGroupBy: $criteria->visitorGroupBy,
+                visitorType: 'markdown',
+            ),
+        );
+
         $merged = collect();
-        foreach ([$anonymous, $bots] as $set) {
+        foreach ([$anonymous, $bots, $markdown] as $set) {
             foreach ($set as $row) {
                 $key = $row['visitor_label'];
                 if (!$merged->has($key)) {

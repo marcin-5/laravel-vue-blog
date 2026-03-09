@@ -13,7 +13,7 @@ interface Props {
     selectedBlogger?: number | null;
     selectedBlog?: number | null;
     selectedGroupBy?: 'visitor_id' | 'fingerprint';
-    selectedVisitorType?: 'all' | 'bots' | 'anonymous';
+    selectedVisitorType?: 'all' | 'bots' | 'anonymous' | 'markdown';
     bloggers?: UserOption[];
     blogOptions: BlogOption[];
     showBloggerFilter?: boolean;
@@ -45,7 +45,7 @@ const emit = defineEmits<{
     'update:selectedBlogger': [value: number | null | undefined];
     'update:selectedBlog': [value: number | null | undefined];
     'update:selectedGroupBy': [value: 'visitor_id' | 'fingerprint'];
-    'update:selectedVisitorType': [value: 'all' | 'bots' | 'anonymous'];
+    'update:selectedVisitorType': [value: 'all' | 'bots' | 'anonymous' | 'markdown'];
 }>();
 
 const { t } = useI18n();
@@ -75,6 +75,7 @@ const visitorTypeOptions = [
     { value: 'all', label: t('admin.stats.visitor_types.all') },
     { value: 'bots', label: t('admin.stats.visitor_types.bots') },
     { value: 'anonymous', label: t('admin.stats.visitor_types.anonymous') },
+    { value: 'markdown', label: t('admin.stats.visitor_types.markdown') },
 ];
 </script>
 
@@ -127,7 +128,7 @@ const visitorTypeOptions = [
             :model-value="selectedVisitorType"
             :options="visitorTypeOptions"
             label="Visitor type"
-            @update:model-value="emit('update:selectedVisitorType', $event as 'all' | 'bots' | 'anonymous')"
+            @update:model-value="emit('update:selectedVisitorType', $event as 'all' | 'bots' | 'anonymous' | 'markdown')"
         />
 
         <FilterSelect

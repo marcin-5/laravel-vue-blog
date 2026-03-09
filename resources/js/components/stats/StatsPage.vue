@@ -1,11 +1,6 @@
 <script lang="ts" setup>
 import { useStatsFilters } from '@/composables/useStatsFilters';
-import {
-    BLOG_SORT_OPTIONS,
-    POST_SORT_OPTIONS,
-    SPECIAL_VISITOR_SORT_OPTIONS,
-    VISITOR_SORT_OPTIONS
-} from '@/constants/stats';
+import { BLOG_SORT_OPTIONS, POST_SORT_OPTIONS, SPECIAL_VISITOR_SORT_OPTIONS, VISITOR_SORT_OPTIONS } from '@/constants/stats';
 import type { BlogOption, BlogRow, FilterState, PostRow, UserOption, VisitorRow } from '@/types/stats';
 import { computed } from 'vue';
 import StatsFilters from './StatsFilters.vue';
@@ -167,7 +162,7 @@ const visitorInfoKey = computed(() => 'user_agent');
         </div>
 
         <div class="flex flex-col gap-4">
-            <h2 class="text-lg font-medium text-sidebar-foreground">Anonymous and Bot Views</h2>
+            <h2 class="text-lg font-medium text-sidebar-foreground">Anonymous, Bot and Markdown Views</h2>
             <StatsFilters
                 v-model:selected-blog="specialVisitorState.blog_id"
                 v-model:selected-group-by="specialVisitorState.group_by"

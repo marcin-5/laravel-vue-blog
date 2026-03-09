@@ -52,7 +52,8 @@
             "visitor_types": {
                 "all": "All",
                 "bots": "Bots",
-                "anonymous": "Anonymous"
+                "anonymous": "Anonymous",
+                "markdown": "Markdown"
             }
         },
         "dashboard": {
