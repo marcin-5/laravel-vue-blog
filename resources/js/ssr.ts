@@ -1,12 +1,11 @@
 import { createInertiaApp } from '@inertiajs/vue3';
 import { renderToString } from '@vue/server-renderer';
+import type { IncomingMessage, ServerResponse } from 'http';
 import { createServer as createHttpServer } from 'http';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { App, DefineComponent } from 'vue';
 import { createSSRApp, h } from 'vue';
 import { route as ziggyRoute, ZiggyVue } from 'ziggy-js';
-// IMPORTANT: do NOT import your app's './i18n' here for SSR.
-// Build a minimal SSR-safe i18n instance instead.
 import type { Page } from '@inertiajs/core';
 import { createI18n } from 'vue-i18n';
 import type { AppPageProps } from './types';
@@ -15,6 +14,20 @@ import type { AppPageProps } from './types';
 const DEFAULT_LOCALE = 'en';
 const DEFAULT_ZIGGY_URL = 'http://localhost';
 const SSR_PORT = Number(process.env.PORT || 13714);
+
+const HTTP_STATUS = {
+    OK: 200,
+    BAD_REQUEST: 400,
+    NOT_FOUND: 404,
+    METHOD_NOT_ALLOWED: 405,
+    INTERNAL_SERVER_ERROR: 500,
+} as const;
+
+const ROUTES = {
+    HEALTH: '/health',
+    SHUTDOWN: '/shutdown',
+    RENDER: '/render',
+} as const;
 
 /**
  * Sets up global process error handlers for better SSR error visibility.
@@ -32,26 +45,24 @@ function setupProcessErrorHandling(): void {
  * Configures Vue-specific error and warning handlers for the app instance.
  */
 function configureVueErrorHandlers(app: App): void {
-    // Vue-level error handler to capture component setup/runtime failures
-    app.config.errorHandler = (err, instance, info) => {
+    app.config.errorHandler = (err, _instance, info) => {
         console.error('SSR Vue errorHandler:', info, (err as any)?.stack || err);
-        throw err; // rethrow so Inertia logs it too
+        throw err;
     };
-    app.config.warnHandler = (msg, instance, trace) => {
+    app.config.warnHandler = (msg, _instance, trace) => {
         console.warn('SSR Vue warnHandler:', msg, trace);
     };
 }
 
 /**
  * Creates a minimal, SSR-safe i18n instance.
- * @param pageProps - The page properties containing locale information.
  */
 function createSsrI18nInstance(pageProps: AppPageProps) {
-    // Create a minimal SSR-safe i18n instance (no localStorage, no window access)
     const initialLocale = (pageProps as any)?.locale || DEFAULT_LOCALE;
     const provided = (pageProps as any)?.translations as { locale?: string; messages?: Record<string, any> } | undefined;
     const locale = provided?.locale || initialLocale;
     const messages = provided?.messages ? { [locale]: provided.messages } : {};
+
     return createI18n({
         legacy: false,
         locale,
@@ -62,7 +73,6 @@ function createSsrI18nInstance(pageProps: AppPageProps) {
 
 /**
  * Creates the Ziggy configuration for SSR, ensuring a valid URL.
- * @param pageProps - The page properties containing Ziggy configuration.
  */
 function getZiggySsrConfig(pageProps: AppPageProps) {
     const ziggyProps = pageProps.ziggy ?? {};
@@ -72,16 +82,23 @@ function getZiggySsrConfig(pageProps: AppPageProps) {
     } catch {
         ziggyLocation = new URL(DEFAULT_ZIGGY_URL);
     }
-    return {
-        ...ziggyProps,
-        location: ziggyLocation,
-    };
+    return { ...ziggyProps, location: ziggyLocation };
 }
 
-setupProcessErrorHandling();
+// ── HTTP helpers ────────────────────────────────────────────────────────────
 
-// Small helper to read request body safely
-function readableToString(req: import('http').IncomingMessage): Promise<string> {
+/**
+ * Sends a JSON response with the given status code and payload.
+ */
+function sendJson(response: ServerResponse, statusCode: number, data: unknown): void {
+    response.writeHead(statusCode);
+    response.end(JSON.stringify(data));
+}
+
+/**
+ * Reads the full body of an incoming HTTP request as a string.
+ */
+function readRequestBody(req: IncomingMessage): Promise<string> {
     return new Promise((resolve, reject) => {
         let data = '';
         req.on('data', (chunk) => (data += chunk));
@@ -90,88 +107,107 @@ function readableToString(req: import('http').IncomingMessage): Promise<string> 
     });
 }
 
-// Our safe SSR server: avoids JSON.parse crashes on empty/invalid bodies
-function startSafeSsrServer(render: (page: Page) => Promise<any>, port: number = SSR_PORT) {
+// ── Route handlers ──────────────────────────────────────────────────────────
+
+function handleHealth(response: ServerResponse): void {
+    sendJson(response, HTTP_STATUS.OK, { status: 'OK', timestamp: Date.now() });
+}
+
+function handleShutdown(response: ServerResponse): void {
+    sendJson(response, HTTP_STATUS.OK, { status: 'SHUTTING_DOWN' });
+    setTimeout(() => process.exit(0), 10);
+}
+
+async function handleRender(request: IncomingMessage, response: ServerResponse, renderPage: (page: Page) => Promise<any>): Promise<void> {
+    if (request.method !== 'POST') {
+        sendJson(response, HTTP_STATUS.METHOD_NOT_ALLOWED, { error: 'METHOD_NOT_ALLOWED' });
+        return;
+    }
+
+    let body = '';
+    try {
+        body = await readRequestBody(request);
+    } catch (e) {
+        console.error('SSR read body failed:', e);
+    }
+
+    if (!body) {
+        sendJson(response, HTTP_STATUS.BAD_REQUEST, { error: 'EMPTY_BODY' });
+        return;
+    }
+
+    let page: Page;
+    try {
+        page = JSON.parse(body) as Page;
+    } catch (e) {
+        console.error('SSR JSON parse failed:', e);
+        sendJson(response, HTTP_STATUS.BAD_REQUEST, { error: 'INVALID_JSON' });
+        return;
+    }
+
+    try {
+        const result = await renderPage(page);
+        sendJson(response, HTTP_STATUS.OK, result);
+    } catch (e) {
+        console.error('SSR render failed:', e);
+        sendJson(response, HTTP_STATUS.INTERNAL_SERVER_ERROR, { error: 'RENDER_FAILED' });
+    }
+}
+
+function handleNotFound(response: ServerResponse): void {
+    sendJson(response, HTTP_STATUS.NOT_FOUND, { status: 'NOT_FOUND', timestamp: Date.now() });
+}
+
+// ── Server bootstrap ────────────────────────────────────────────────────────
+
+function startSafeSsrServer(renderPage: (page: Page) => Promise<any>, port: number = SSR_PORT): void {
     console.log(`Starting SSR server on port ${port}...`);
+
     const server = createHttpServer(async (request, response) => {
+        response.setHeader('Content-Type', 'application/json');
+        response.setHeader('Server', 'Inertia.js SSR (safe)');
+
         try {
             const url = request.url || '/';
-            response.setHeader('Content-Type', 'application/json');
-            response.setHeader('Server', 'Inertia.js SSR (safe)');
 
-            if (url === '/health') {
-                response.writeHead(200);
-                response.end(JSON.stringify({ status: 'OK', timestamp: Date.now() }));
-                return;
+            switch (url) {
+                case ROUTES.HEALTH:
+                    handleHealth(response);
+                    break;
+                case ROUTES.SHUTDOWN:
+                    handleShutdown(response);
+                    break;
+                case ROUTES.RENDER:
+                    await handleRender(request, response, renderPage);
+                    break;
+                default:
+                    handleNotFound(response);
             }
-            if (url === '/shutdown') {
-                response.writeHead(200);
-                response.end(JSON.stringify({ status: 'SHUTTING_DOWN' }));
-                // Let the response flush before exiting
-                setTimeout(() => process.exit(0), 10);
-                return;
-            }
-            if (url === '/render') {
-                if ((request.method || 'GET').toUpperCase() !== 'POST') {
-                    response.writeHead(405);
-                    response.end(JSON.stringify({ error: 'METHOD_NOT_ALLOWED' }));
-                    return;
-                }
-                let body = '';
-                try {
-                    body = await readableToString(request);
-                } catch (e) {
-                    console.error('SSR read body failed:', e);
-                }
-                if (!body) {
-                    response.writeHead(400);
-                    response.end(JSON.stringify({ error: 'EMPTY_BODY' }));
-                    return;
-                }
-                let page: Page;
-                try {
-                    page = JSON.parse(body) as Page;
-                } catch (e) {
-                    console.error('SSR JSON parse failed:', e);
-                    response.writeHead(400);
-                    response.end(JSON.stringify({ error: 'INVALID_JSON' }));
-                    return;
-                }
-                try {
-                    const result = await render(page);
-                    response.writeHead(200);
-                    response.end(JSON.stringify(result));
-                } catch (e) {
-                    console.error('SSR render failed:', e);
-                    response.writeHead(500);
-                    response.end(JSON.stringify({ error: 'RENDER_FAILED' }));
-                }
-                return;
-            }
-            // Not found
-            response.writeHead(404);
-            response.end(JSON.stringify({ status: 'NOT_FOUND', timestamp: Date.now() }));
         } catch (e) {
             console.error('SSR request handler error:', e);
             try {
-                response.writeHead(500);
-                response.end(JSON.stringify({ error: 'INTERNAL_ERROR' }));
+                sendJson(response, HTTP_STATUS.INTERNAL_SERVER_ERROR, { error: 'INTERNAL_ERROR' });
             } catch {
-                // ignore
+                // ignore – response may already be sent
             }
         }
     });
+
     server.listen(port, () => console.log('Inertia SSR server started.'));
 }
+
+// ── Entry point ─────────────────────────────────────────────────────────────
+
+setupProcessErrorHandling();
 
 startSafeSsrServer((page: Page) =>
     createInertiaApp({
         page,
         render: renderToString,
-        resolve: (name) => resolvePageComponent(`./pages/${name}.vue`, import.meta.glob<DefineComponent>('./pages/**/*.vue')),
-        setup({ App, props, plugin }) {
+        resolve: (name: string) => resolvePageComponent(`./pages/${name}.vue`, import.meta.glob<DefineComponent>('./pages/**/*.vue')),
+        setup({ App, props, plugin }: { App: any; props: any; plugin: any }) {
             const app = createSSRApp({ render: () => h(App, props) });
-            const pageProps = page.props as AppPageProps;
+            const pageProps = page.props as unknown as AppPageProps;
 
             configureVueErrorHandlers(app);
 
@@ -180,23 +216,19 @@ startSafeSsrServer((page: Page) =>
 
             app.use(plugin).use(ZiggyVue, ziggyConfig).use(i18n);
 
-            // Ensure a global route() is available during SSR for components that reference it directly.
             if (typeof (globalThis as any).route === 'undefined') {
                 (globalThis as any).route = (name: any, params?: any, absolute?: any) => {
                     try {
                         return ziggyRoute(name as any, params as any, absolute as any, ziggyConfig as any);
                     } catch {
-                        // Fallback to an empty string to prevent SSR from crashing; client will hydrate/correct URLs.
                         return '' as any;
                     }
                 };
             }
 
-            // Provide base URL for SSR fetches (if you later need to fetch translations on server)
             (globalThis as any).__ziggyLocation = pageProps.ziggy?.location ?? DEFAULT_ZIGGY_URL;
 
             return app;
         },
-        progress: false,
     }),
 );
