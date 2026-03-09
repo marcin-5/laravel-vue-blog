@@ -155,12 +155,12 @@ class VisitorViewsQuery
     private function applySort(Builder $query, StatsSort $sort): void
     {
         match ($sort) {
-            StatsSort::ViewsAsc => $query->orderBy('post_views', 'asc'),
+            StatsSort::ViewsAsc => $query->orderBy('views', 'asc'),
+            StatsSort::ViewsDesc => $query->orderBy('views', 'desc'),
             StatsSort::NameAsc => $query->orderBy('visitor_label', 'asc'),
             StatsSort::NameDesc => $query->orderBy('visitor_label', 'desc'),
             StatsSort::LastSeenAsc => $query->orderBy('last_seen_at', 'asc'),
-            StatsSort::LastSeenDesc => $query->orderBy('last_seen_at', 'desc'),
-            default => $query->orderBy('post_views', 'desc'),
+            default => $query->orderBy('last_seen_at', 'desc'),
         };
     }
 
@@ -223,81 +223,119 @@ class VisitorViewsQuery
         string $postMorphClass,
     ): void {
         $visitorLabelColumn = $this->resolveVisitorLabelColumn($criteria);
+        $groupByColumn = $criteria->visitorGroupBy === 'fingerprint' ? 'fingerprint' : 'visitor_id';
 
-        $groupByColumn = $criteria->visitorGroupBy === 'fingerprint'
-            ? 'fingerprint'
-            : 'visitor_id';
-
-        $totalViewsRaw = "(SELECT COUNT(*) FROM page_views as pv2 WHERE pv2.$groupByColumn = page_views.$groupByColumn) as lifetime_views";
-
-        $visitorLabelSelect = match ($criteria->visitorType) {
-            'anonymous' => 'page_views.user_agent as visitor_label,',
-            default => "COALESCE(users.name, ns.email, $visitorLabelColumn) as visitor_label,",
-        };
+        $lifetimeViewsSubquery = $this->buildLifetimeViewsSubquery($groupByColumn);
+        $visitorLabelSelect = $this->buildVisitorLabelSelect($criteria, $visitorLabelColumn);
 
         if ($criteria->blogId === null) {
-            $query->selectRaw(
-                $visitorLabelSelect .
-                ' page_views.user_agent,' .
-                ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) as blog_views,' .
-                ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) as post_views,' .
-                ' (COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) + ' .
-                '  COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END)) as views,' .
-                $totalViewsRaw,
-                [
-                    $blogMorphClass,
-                    $postMorphClass,
-                    $blogMorphClass,
-                    $postMorphClass,
-                ],
+            $this->applySelectWithoutBlogFilter(
+                $query,
+                $visitorLabelSelect,
+                $blogMorphClass,
+                $postMorphClass,
+                $lifetimeViewsSubquery,
             );
         } else {
-            $query->selectRaw(
-                $visitorLabelSelect .
-                ' page_views.user_agent,' .
-                ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?' .
-                ' AND page_views.viewable_id = ? THEN page_views.viewable_id END) as blog_views,' .
-                ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?' .
-                ' AND posts.blog_id = ? THEN page_views.viewable_id END) as post_views,' .
-                ' (COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?' .
-                ' AND page_views.viewable_id = ? THEN page_views.viewable_id END) + ' .
-                '  COUNT(DISTINCT CASE WHEN page_views.viewable_type = ?' .
-                ' AND posts.blog_id = ? THEN page_views.viewable_id END)) as views,' .
-                $totalViewsRaw,
-                [
-                    $blogMorphClass,
-                    $criteria->blogId,
-                    $postMorphClass,
-                    $criteria->blogId,
-                    $blogMorphClass,
-                    $criteria->blogId,
-                    $postMorphClass,
-                    $criteria->blogId,
-                ],
+            $this->applySelectWithBlogFilter(
+                $query,
+                $visitorLabelSelect,
+                $criteria->blogId,
+                $blogMorphClass,
+                $postMorphClass,
+                $lifetimeViewsSubquery,
             );
         }
     }
 
+    /**
+     * Build the lifetime views subquery.
+     */
+    private function buildLifetimeViewsSubquery(string $groupByColumn): string
+    {
+        return "(SELECT COUNT(*) FROM page_views as pv2 WHERE pv2.$groupByColumn = page_views.$groupByColumn) as lifetime_views";
+    }
+
+    /**
+     * Build the visitor label selection clause.
+     */
+    private function buildVisitorLabelSelect(StatsCriteria $criteria, string $visitorLabelColumn): string
+    {
+        return match ($criteria->visitorType) {
+            'anonymous' => 'page_views.user_agent as visitor_label,',
+            default => "COALESCE(users.name, ns.email, $visitorLabelColumn) as visitor_label,",
+        };
+    }
+
+    /**
+     * Apply SELECT clause when no blog filter is present.
+     */
+    private function applySelectWithoutBlogFilter(
+        Builder $query,
+        string $visitorLabelSelect,
+        string $blogMorphClass,
+        string $postMorphClass,
+        string $lifetimeViewsSubquery,
+    ): void {
+        $query->selectRaw(
+            $visitorLabelSelect .
+            ' page_views.user_agent,' .
+            ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) as blog_views,' .
+            ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) as post_views,' .
+            ' (COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) + ' .
+            ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END)) as views,' .
+            $lifetimeViewsSubquery,
+            [$blogMorphClass, $postMorphClass, $blogMorphClass, $postMorphClass],
+        );
+    }
+
+    /**
+     * Apply SELECT clause when blog filter is present.
+     */
+    private function applySelectWithBlogFilter(
+        Builder $query,
+        string $visitorLabelSelect,
+        int $blogId,
+        string $blogMorphClass,
+        string $postMorphClass,
+        string $lifetimeViewsSubquery,
+    ): void {
+        $query->selectRaw(
+            $visitorLabelSelect .
+            ' page_views.user_agent,' .
+            ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? AND page_views.viewable_id = ? THEN page_views.viewable_id END) as blog_views,' .
+            ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? AND posts.blog_id = ? THEN page_views.viewable_id END) as post_views,' .
+            ' (COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? AND page_views.viewable_id = ? THEN page_views.viewable_id END) + ' .
+            ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? AND posts.blog_id = ? THEN page_views.viewable_id END)) as views,' .
+            $lifetimeViewsSubquery,
+            [$blogMorphClass, $blogId, $postMorphClass, $blogId, $blogMorphClass, $blogId, $postMorphClass, $blogId],
+        );
+    }
+
+    /**
+     * Apply WHERE filter for blog ID.
+     * This filters grouped rows based on underlying page view rows.
+     */
     private function applyBlogIdWhereFilter(
         Builder $query,
         StatsCriteria $criteria,
         string $blogMorphClass,
         string $postMorphClass,
     ): void {
-        if ($criteria->blogId !== null) {
-            // Move the logical filter out of HAVING and into WHERE for planner friendliness.
-            // This preserves semantics by filtering grouped rows based on underlying rows.
-            $query->where(function (Builder $inner) use ($criteria, $blogMorphClass, $postMorphClass) {
-                $inner
-                    ->where(function (Builder $q) use ($criteria, $blogMorphClass) {
-                        $q->where('page_views.viewable_type', '=', $blogMorphClass)
-                            ->where('page_views.viewable_id', '=', $criteria->blogId);
-                    })
-                    ->orWhere(function (Builder $q) use ($criteria, $postMorphClass) {
-                        $q->where('page_views.viewable_type', '=', $postMorphClass)
-                            ->where('posts.blog_id', '=', $criteria->blogId);
-                    });
-            });
+        if ($criteria->blogId === null) {
+            return;
         }
+
+        $query->where(function (Builder $inner) use ($criteria, $blogMorphClass, $postMorphClass) {
+            $inner
+                ->where(function (Builder $q) use ($criteria, $blogMorphClass) {
+                    $q->where('page_views.viewable_type', '=', $blogMorphClass)
+                        ->where('page_views.viewable_id', '=', $criteria->blogId);
+                })
+                ->orWhere(function (Builder $q) use ($criteria, $postMorphClass) {
+                    $q->where('page_views.viewable_type', '=', $postMorphClass)
+                        ->where('posts.blog_id', '=', $criteria->blogId);
+                });
+        });
     }
 }
