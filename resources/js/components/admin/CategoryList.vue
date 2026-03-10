@@ -22,10 +22,10 @@ const sortedCategories = computed(() => [...props.categories].sort((a, b) => loc
             <table class="w-full text-left text-sm">
                 <thead class="border-b border-sidebar-border/70 text-xs text-muted-foreground uppercase dark:border-sidebar-border">
                     <tr>
-                        <th class="py-2 pr-4">{{ t('admin.categories.table.name') }}</th>
-                        <th class="py-2 pr-4">{{ t('admin.categories.table.slug') }}</th>
-                        <th class="py-2 pr-4">{{ t('admin.categories.table.blogs') }}</th>
-                        <th class="py-2 pr-4">{{ t('admin.categories.table.actions') }}</th>
+                        <th>{{ t('admin.categories.table.name') }}</th>
+                        <th>{{ t('admin.categories.table.slug') }}</th>
+                        <th>{{ t('admin.categories.table.blogs') }}</th>
+                        <th>{{ t('admin.categories.table.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -35,3 +35,11 @@ const sortedCategories = computed(() => [...props.categories].sort((a, b) => loc
         </div>
     </div>
 </template>
+
+<style scoped>
+@reference "../../../css/app.css";
+
+thead th {
+    @apply py-2 pr-4;
+}
+</style>
