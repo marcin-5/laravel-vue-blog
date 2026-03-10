@@ -1,15 +1,12 @@
 <script lang="ts" setup>
+import BlogLayout from '@/components/blog/BlogLayout.vue';
 import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import PostContent from '@/components/blog/PostContent.vue';
 import PostExtensions from '@/components/blog/PostExtensions.vue';
 import PostHeader from '@/components/blog/PostHeader.vue';
-import PublicNavbar from '@/components/PublicNavbar.vue';
-import { useBlogTheme } from '@/composables/useBlogTheme';
-import { useSidebarLayout } from '@/composables/useSidebarLayout';
 import type { SEO } from '@/types';
-import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { Blog, Navigation, Pagination, PostDetails, PostItem } from '@/types/blog.types';
 import { Head, router } from '@inertiajs/vue3';
 import { ArrowLeft } from 'lucide-vue-next';
@@ -37,16 +34,6 @@ const { t } = useI18n();
 // SEO timestamps
 const postPublishedTime = computed(() => props.seo?.publishedTime || null);
 const postModifiedTime = computed(() => props.seo?.modifiedTime || null);
-
-// Sidebar layout
-const { hasSidebar, asideStyle, mainStyle, asideOrderClass, mainOrderClass, navbarMaxWidth } = useSidebarLayout({
-    sidebar: props.sidebar,
-    minPercent: SIDEBAR_MIN_WIDTH,
-    maxPercent: SIDEBAR_MAX_WIDTH,
-});
-
-// Theme handling
-const { mergedThemeStyle } = useBlogTheme(computed(() => props.blog.theme));
 
 // Derived post state
 const isListed = computed(() => props.post.visibility !== 'unlisted');
@@ -76,46 +63,31 @@ const navigateBack = () => {
 
 <template>
     <Head v-if="seo?.title" :title="seo.title" />
-    <div :style="mergedThemeStyle" class="flex min-h-screen flex-col bg-background text-primary antialiased">
-        <PublicNavbar :maxWidth="navbarMaxWidth" />
-        <div :class="['mx-auto w-full p-4 sm:px-12 md:px-16', hasSidebar ? 'max-w-5xl xl:max-w-7xl 2xl:max-w-screen-2xl' : 'max-w-5xl']">
+
+    <BlogLayout :isPublic="true" :sidebar="sidebar" :theme="blog.theme" maxWidthClass="max-w-5xl xl:max-w-7xl 2xl:max-w-screen-2xl">
+        <template #top-divider>
             <BorderDivider class="mb-4" />
+        </template>
 
-            <!-- Layout with sidebar -->
-            <template v-if="hasSidebar">
-                <!-- Mobile/tablet layout (<xl): no sidebar -->
-                <div class="xl:hidden">
-                    <PostHeader v-bind="postHeaderProps" />
-                    <PostContent :author="post.author" :content="post.contentHtml" />
-                    <PostExtensions :extensions="postExtensionsList" :theme="mergedThemeStyle" />
-                    <BorderDivider class="mt-12 mb-4" />
-                    <BlogPostsList v-if="isListed" class="mt-6" v-bind="blogPostsListProps" />
-                </div>
+        <template #header>
+            <PostHeader v-bind="postHeaderProps" />
+            <BorderDivider v-if="!sidebar" class="mb-8" />
+        </template>
 
-                <!-- Desktop layout (xl+): with sidebar -->
-                <div class="hidden items-start gap-8 xl:flex">
-                    <aside :class="asideOrderClass" :style="asideStyle">
-                        <BlogPostsList v-if="isListed" v-bind="blogPostsListProps" />
-                    </aside>
-                    <div :class="['min-w-0 flex-1', mainOrderClass]" :style="mainStyle">
-                        <PostHeader v-bind="postHeaderProps" />
-                        <PostContent :author="post.author" :content="post.contentHtml" />
-                        <PostExtensions :extensions="postExtensionsList" :theme="mergedThemeStyle" />
-                    </div>
-                </div>
-            </template>
+        <template #content>
+            <PostContent :author="post.author" :content="post.contentHtml" />
+            <PostExtensions :extensions="postExtensionsList" />
+        </template>
 
-            <!-- No sidebar layout -->
-            <div v-else>
-                <PostHeader v-bind="postHeaderProps" />
-                <BorderDivider class="mb-8" />
-                <PostContent :author="post.author" :content="post.contentHtml" />
-                <PostExtensions :extensions="postExtensionsList" :theme="mergedThemeStyle" />
-                <BorderDivider class="mt-12 mb-4" />
-                <BlogPostsList v-if="isListed" class="mt-6" v-bind="blogPostsListProps" />
-            </div>
+        <template #middle-divider>
+            <BorderDivider class="mt-12 mb-4" />
+        </template>
 
-            <!-- Post Navigation -->
+        <template #sidebar-content>
+            <BlogPostsList v-if="isListed" :class="{ 'mt-6': !sidebar }" v-bind="blogPostsListProps" />
+        </template>
+
+        <template #navigation>
             <BlogPostNav v-if="isListed" :navigation="navigation" />
             <div v-else class="flex items-center">
                 <button
@@ -126,6 +98,6 @@ const navigateBack = () => {
                     <span>{{ t('blog.post_nav.back') }}</span>
                 </button>
             </div>
-        </div>
-    </div>
+        </template>
+    </BlogLayout>
 </template>
