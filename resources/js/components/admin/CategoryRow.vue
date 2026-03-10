@@ -23,29 +23,40 @@ const editForm = useForm({
     locale: ((i18n.global.locale.value as string) || 'en') as string,
 });
 
+function getCurrentUiLocale(): string {
+    return (i18n.global.locale.value as string) || 'en';
+}
+
+function resolveInitialLocale(): string {
+    const uiLocale = getCurrentUiLocale();
+
+    if (typeof props.category.name === 'string') {
+        return uiLocale;
+    }
+
+    const availableLocales = Object.keys(props.category.name || {});
+    if (availableLocales.includes(uiLocale) || availableLocales.length === 0) {
+        return uiLocale;
+    }
+
+    return availableLocales[0];
+}
+
+function resolveCategoryName(locale: string): string {
+    if (typeof props.category.name === 'string') {
+        return props.category.name;
+    }
+
+    return (props.category.name?.[locale] ?? props.category.name?.en ?? Object.values(props.category.name ?? {})[0] ?? '') as string;
+}
+
 function startEdit() {
     isEditing.value = true;
     editForm.reset();
-    const uiLocale = (i18n.global.locale.value as string) || 'en';
 
-    let initialLocale = uiLocale;
-    if (typeof props.category.name !== 'string') {
-        const keys = Object.keys(props.category.name || {});
-        if (!keys.includes(uiLocale) && keys.length > 0) {
-            initialLocale = keys[0];
-        }
-    }
-
-    if (typeof props.category.name === 'string') {
-        editForm.name = props.category.name;
-    } else {
-        editForm.name = (props.category.name?.[initialLocale] ??
-            props.category.name?.['en'] ??
-            Object.values(props.category.name ?? {})[0] ??
-            '') as string;
-    }
-
+    const initialLocale = resolveInitialLocale();
     editForm.locale = initialLocale;
+    editForm.name = resolveCategoryName(initialLocale);
 }
 
 function cancelEdit() {
@@ -64,9 +75,11 @@ function submitEdit() {
 }
 
 function destroyCategory() {
-    const n = localizedName(props.category.name);
-    const confirmMsg = t('admin.categories.delete_confirm', { name: n }) || `Delete category "${n}"? This will remove it from all blogs.`;
-    if (!confirm(confirmMsg)) {
+    const categoryName = localizedName(props.category.name);
+    const confirmationMessage =
+        t('admin.categories.delete_confirm', { name: categoryName }) || `Delete category "${categoryName}"? This will remove it from all blogs.`;
+
+    if (!confirm(confirmationMessage)) {
         return;
     }
 
@@ -83,11 +96,7 @@ watch(
             return;
         }
 
-        if (typeof props.category.name === 'string') {
-            editForm.name = props.category.name;
-        } else {
-            editForm.name = (props.category.name?.[newLocale] ?? '') as string;
-        }
+        editForm.name = resolveCategoryName(newLocale);
     },
 );
 </script>
