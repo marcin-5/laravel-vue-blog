@@ -48,47 +48,90 @@ const {
 
 const { expandedPostsForId, expandedExtensionsForId, togglePosts, toggleExtensions } = useUIState();
 
-/**
- * Resets all editing/creating state and forms to their defaults.
- * Call this before opening any new form to ensure only one is active at a time.
- */
-function resetAllForms() {
-    editingId.value = null;
+// Enhanced functions that coordinate between different composables
+function handleStartEdit(blog: Blog) {
+    // Hide other forms when starting edit
     creatingPostForId.value = null;
-    editingPostId.value = null;
     expandedPostsForId.value = null;
+    editingPostId.value = null;
     expandedExtensionsForId.value = null;
     creatingExtensionForId.value = null;
     editingExtensionId.value = null;
+    postForm.reset();
+    postEditForm.reset();
 
+    startEdit(blog);
+}
+
+function handleStartCreatePost(blog: Blog) {
+    // Hide other forms when starting create post
+    editingId.value = null;
+    expandedPostsForId.value = null;
+    editingPostId.value = null;
+    expandedExtensionsForId.value = null;
+    creatingExtensionForId.value = null;
+    editingExtensionId.value = null;
+    editForm.reset();
+    postEditForm.reset();
+
+    startCreatePost(blog);
+}
+
+function handleTogglePosts(blog: Blog) {
+    // Hide other forms when toggling posts
+    editingId.value = null;
+    creatingPostForId.value = null;
+    editingPostId.value = null;
+    expandedExtensionsForId.value = null;
+    creatingExtensionForId.value = null;
+    editingExtensionId.value = null;
     editForm.reset();
     postForm.reset();
     postEditForm.reset();
-    extensionForm.reset();
-    extensionEditForm.reset();
+
+    togglePosts(blog);
 }
 
-/**
- * Creates a wrapper that calls resetAllForms() before the provided function.
- */
-function withReset<T extends any[]>(fn: (...args: T) => void) {
-    return (...args: T) => {
-        resetAllForms();
-        fn(...args);
-    };
+function handleStartEditPost(post: any) {
+    // Hide other forms when starting edit post
+    editingId.value = null;
+    creatingPostForId.value = null;
+    expandedExtensionsForId.value = null;
+    creatingExtensionForId.value = null;
+    editingExtensionId.value = null;
+    editForm.reset();
+    postForm.reset();
+
+    startEditPost(post);
 }
 
-const handleStartEdit = withReset(startEdit);
-const handleStartCreatePost = withReset(startCreatePost);
-const handleTogglePosts = withReset(togglePosts);
-const handleStartEditPost = withReset(startEditPost);
-const handleToggleExtensions = withReset(toggleExtensions);
-const handleStartEditExtension = withReset(startEditExtension);
+function handleToggleExtensions(post: any) {
+    editingId.value = null;
+    creatingPostForId.value = null;
+    editingPostId.value = null;
+    creatingExtensionForId.value = null;
+    editingExtensionId.value = null;
+
+    toggleExtensions(post);
+}
 
 function handleStartCreateExtension(post: any) {
-    resetAllForms();
-    expandedExtensionsForId.value = post.id;
+    editingId.value = null;
+    creatingPostForId.value = null;
+    editingPostId.value = null;
+    expandedExtensionsForId.value = post.id; // Expand list to show create form
+    editingExtensionId.value = null;
+
     startCreateExtension(post);
+}
+
+function handleStartEditExtension(extension: any) {
+    editingId.value = null;
+    creatingPostForId.value = null;
+    editingPostId.value = null;
+    creatingExtensionForId.value = null;
+
+    startEditExtension(extension);
 }
 
 function handleToggleCreate() {
