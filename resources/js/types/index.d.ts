@@ -23,12 +23,19 @@ export interface NavItem {
     disabled?: boolean;
 }
 
+export interface UserGroup {
+    id: number;
+    name: string;
+    slug: string;
+}
+
 export type AppPageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
     name: string;
     quote: { message: string; author: string };
     auth: Auth;
     ziggy: Config & { location: string };
     sidebarOpen: boolean;
+    userGroups: UserGroup[];
 };
 
 export interface User {

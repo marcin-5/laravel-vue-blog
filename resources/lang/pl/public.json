@@ -76,5 +76,8 @@
             "lock_extension": "Zablokuj",
             "unlock_extension": "Odblokuj"
         }
+    },
+    "welcome": {
+        "my_groups": "Moje grupy"
     }
 }

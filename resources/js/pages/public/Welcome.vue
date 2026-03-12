@@ -3,6 +3,7 @@ import AppLogo from '@/components/AppLogo.vue';
 import BlogsGrid from '@/components/blog/BlogsGrid.vue';
 import CategoriesFilter from '@/components/blog/CategoriesFilter.vue';
 import NoBlogs from '@/components/blog/NoBlogs.vue';
+import UserGroupsList from '@/components/blog/UserGroupsList.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import type { BlogItem, CategoryItem } from '@/types/blog.types';
 import { router, usePage } from '@inertiajs/vue3';
@@ -64,6 +65,9 @@ function clearFilter() {
                 <AppLogo />
                 <p class="mt-4 font-slogan text-lg opacity-80 sm:text-xl md:text-2xl dark:text-white">— {{ randomSlogan }} —</p>
             </div>
+
+            <!-- Groups list -->
+            <UserGroupsList />
 
             <!-- Categories Filter -->
             <CategoriesFilter

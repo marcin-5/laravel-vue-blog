@@ -76,5 +76,8 @@
             "lock_extension": "Lock",
             "unlock_extension": "Unlock"
         }
+    },
+    "welcome": {
+        "my_groups": "My groups"
     }
 }

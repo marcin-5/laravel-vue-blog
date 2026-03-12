@@ -9,6 +9,7 @@ use App\Queries\Public\WelcomeQuery;
 use App\Services\MarkdownService;
 use App\Services\SeoService;
 use App\Services\TranslationService;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Response;
@@ -25,10 +26,26 @@ class PublicHomeController extends BasePublicController
 
     /**
      * Show the welcome page with blogs and categories filter.
+     * @throws FileNotFoundException
      */
     public function welcome(Request $request, WelcomeQuery $query): Response
     {
         $data = $query->handle($request);
+
+        if (auth()->check()) {
+            $data['userGroups'] = auth()->user()
+                ->groups()
+                ->select('groups.id', 'groups.name', 'groups.slug')
+                ->get()
+                ->map(fn($group) => [
+                    'id' => $group->id,
+                    'name' => $group->name,
+                    'slug' => $group->slug,
+                ]);
+        } else {
+            $data['userGroups'] = [];
+        }
+
         $baseUrl = config('app.url');
 
         $messages = $this->translations->getPageTranslations('home');
@@ -71,6 +88,7 @@ class PublicHomeController extends BasePublicController
      * About page (SSR) — stays scoped to public controllers only.
      * If you also need `about` group messages, you can augment them here without
      * changing the service mapping, or keep the original logic if preferred.
+     * @throws FileNotFoundException
      */
     public function about(): Response
     {
@@ -122,6 +140,7 @@ class PublicHomeController extends BasePublicController
 
     /**
      * Contact page (SSR).
+     * @throws FileNotFoundException
      */
     public function contact(): Response
     {
