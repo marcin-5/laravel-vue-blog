@@ -35,7 +35,7 @@ const selected = computed<number[]>(() => props.selectedIds ?? []);
 
         <button
             v-if="selected.length > 0"
-            class="ml-2 rounded-full border border-gray-300 px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:bg-slate-800 dark:text-slate-200"
+            class="ml-2 rounded-full border border-gray-500 bg-mist-50 px-3 py-1 text-sm text-gray-700 hover:bg-olive-100 dark:border-gray-600 dark:bg-slate-800 dark:text-slate-200 hover:dark:bg-slate-700"
             type="button"
             @click="emit('clear')"
         >
