@@ -50,7 +50,7 @@ class StorePostRequest extends FormRequest
             'title' => $validated['title'],
             'excerpt' => $validated['excerpt'] ?? null,
             'content' => $validated['content'] ?? null,
-            'is_published' => (bool)($validated['is_published'] ?? $config['is_published'] ?? false),
+            'is_published' => (bool) ($validated['is_published'] ?? $config['is_published'] ?? false),
             'visibility' => $validated['visibility'] ?? $config['visibility'] ?? 'public',
         ];
     }

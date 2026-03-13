@@ -33,7 +33,7 @@ readonly class UpdateVisitorOnLogin
 
     private function syncPageViews(Request $request, Authenticatable $user): void
     {
-        $visitorId = (string)$request->cookie('visitor_id', '');
+        $visitorId = (string) $request->cookie('visitor_id', '');
         $fingerprint = $this->fingerprintGenerator->generate($request);
 
         // Ensure we identify the anonymous user by at least one method

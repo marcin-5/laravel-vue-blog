@@ -21,12 +21,12 @@ class EnsureVisitorId
         }
 
         // Try to read the decrypted cookie value first
-        $visitorId = (string)$request->cookie('visitor_id', '');
+        $visitorId = (string) $request->cookie('visitor_id', '');
         $isNewVisitor = false;
 
         // If missing, generate and ensure both the current request and response carry it
         if ($visitorId === '') {
-            $visitorId = (string)Str::uuid();
+            $visitorId = (string) Str::uuid();
             $isNewVisitor = true;
 
             // Make it available to subsequent middleware/handlers in this request

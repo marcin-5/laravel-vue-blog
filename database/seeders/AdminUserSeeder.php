@@ -14,10 +14,10 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        $name = (string)config('admin.name');
-        $email = (string)config('admin.email');
+        $name = (string) config('admin.name');
+        $email = (string) config('admin.email');
         $passwordFromConfig = config('admin.password');
-        $verify = (bool)config('admin.verify_email');
+        $verify = (bool) config('admin.verify_email');
 
         if (empty($email)) {
             // Nothing to seed without an email

@@ -5,8 +5,7 @@ use App\Http\Controllers\Concerns\ValidatesLocale;
 it('returns given locale when it is available', function () {
     config(['app.available_locales' => ['en', 'pl']]);
 
-    $instance = new class
-    {
+    $instance = new class {
         use ValidatesLocale;
 
         public function callValidateAndGetLocale(?string $locale = null): string
@@ -22,8 +21,7 @@ it('falls back to app locale when argument is null', function () {
     config(['app.available_locales' => ['en', 'pl']]);
     app()->setLocale('pl');
 
-    $instance = new class
-    {
+    $instance = new class {
         use ValidatesLocale;
 
         public function callValidateAndGetLocale(?string $locale = null): string
@@ -41,8 +39,7 @@ it('returns fallback locale when given locale is not available', function () {
         'app.fallback_locale' => 'en',
     ]);
 
-    $instance = new class
-    {
+    $instance = new class {
         use ValidatesLocale;
 
         public function callValidateAndGetLocale(?string $locale = null): string

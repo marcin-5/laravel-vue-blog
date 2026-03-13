@@ -27,7 +27,7 @@ trait Viewable
             return $this->pageViews()->count();
         }
 
-        return (int)Cache::store('redis')->get($key, function () use ($key) {
+        return (int) Cache::store('redis')->get($key, function () use ($key) {
             $count = $this->pageViews()->count();
             Cache::store('redis')->forever($key, $count);
 

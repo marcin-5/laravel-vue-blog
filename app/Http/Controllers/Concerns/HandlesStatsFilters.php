@@ -64,16 +64,16 @@ trait HandlesStatsFilters
 
     protected function parseStatsFilters(Request $request, string $prefix = ''): array
     {
-        $range = (string)$request->query($prefix . 'range', 'week');
-        $sort = (string)$request->query($prefix . 'sort', 'views_desc');
+        $range = (string) $request->query($prefix . 'range', 'week');
+        $sort = (string) $request->query($prefix . 'sort', 'views_desc');
         // Default to 5 items when no explicit size is provided; 0 still means "All".
         $size = $request->integer($prefix . 'size', 5);
         // 0 means "All" -> no limit
         $limit = $size === 0 ? null : (in_array($size, [5, 10, 20], true) ? $size : 5);
-        $bloggerId = $request->has($prefix . 'blogger_id') ? (int)$request->query($prefix . 'blogger_id') : null;
-        $blogId = $request->has($prefix . 'blog_id') ? (int)$request->query($prefix . 'blog_id') : null;
-        $groupBy = (string)$request->query($prefix . 'group_by', 'visitor_id');
-        $visitorType = (string)$request->query($prefix . 'type', 'all');
+        $bloggerId = $request->has($prefix . 'blogger_id') ? (int) $request->query($prefix . 'blogger_id') : null;
+        $blogId = $request->has($prefix . 'blog_id') ? (int) $request->query($prefix . 'blog_id') : null;
+        $groupBy = (string) $request->query($prefix . 'group_by', 'visitor_id');
+        $visitorType = (string) $request->query($prefix . 'type', 'all');
 
         return [
             'range' => $range,

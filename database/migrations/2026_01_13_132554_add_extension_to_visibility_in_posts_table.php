@@ -12,8 +12,8 @@ return new class extends Migration {
     public function up(): void
     {
         if (DB::getDriverName() === 'pgsql') {
-            DB::statement("ALTER TABLE posts DROP CONSTRAINT IF EXISTS posts_visibility_check");
-            DB::statement("ALTER TABLE posts ALTER COLUMN visibility TYPE VARCHAR(255)");
+            DB::statement('ALTER TABLE posts DROP CONSTRAINT IF EXISTS posts_visibility_check');
+            DB::statement('ALTER TABLE posts ALTER COLUMN visibility TYPE VARCHAR(255)');
             DB::statement(
                 "ALTER TABLE posts ADD CONSTRAINT posts_visibility_check CHECK (visibility IN ('public', 'registered', 'unlisted', 'extension'))",
             );
@@ -30,8 +30,8 @@ return new class extends Migration {
     public function down(): void
     {
         if (DB::getDriverName() === 'pgsql') {
-            DB::statement("ALTER TABLE posts DROP CONSTRAINT IF EXISTS posts_visibility_check");
-            DB::statement("ALTER TABLE posts ALTER COLUMN visibility TYPE VARCHAR(255)");
+            DB::statement('ALTER TABLE posts DROP CONSTRAINT IF EXISTS posts_visibility_check');
+            DB::statement('ALTER TABLE posts ALTER COLUMN visibility TYPE VARCHAR(255)');
             DB::statement(
                 "ALTER TABLE posts ADD CONSTRAINT posts_visibility_check CHECK (visibility IN ('public', 'registered', 'unlisted'))",
             );

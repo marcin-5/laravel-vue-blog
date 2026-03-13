@@ -39,7 +39,7 @@ readonly class PageViewTracker
             StoreBotView::dispatch([
                 'viewable_type' => $viewable->getMorphClass(),
                 'viewable_id' => $viewable->getKey(),
-                'user_agent' => (string)$request->header('User-Agent', ''),
+                'user_agent' => (string) $request->header('User-Agent', ''),
             ]);
 
             return;
@@ -50,13 +50,13 @@ readonly class PageViewTracker
             StoreAnonymousView::dispatch([
                 'viewable_type' => $viewable->getMorphClass(),
                 'viewable_id' => $viewable->getKey(),
-                'user_agent' => (string)$request->header('User-Agent', ''),
+                'user_agent' => (string) $request->header('User-Agent', ''),
             ]);
 
             return;
         }
 
-        $isNewVisitor = (bool)$request->attributes->get('visitor_id_is_new', true);
+        $isNewVisitor = (bool) $request->attributes->get('visitor_id_is_new', true);
 
         // If client sent X-Visitor-Id header, they are likely a real user with LocalStorage support
         $headerVisitorId = $request->header('X-Visitor-Id');
@@ -120,7 +120,7 @@ readonly class PageViewTracker
         $sessionId = $request->session()->getId();
         $fingerprint = $this->fingerprintGenerator->generate($request);
 
-        $blockTtl = (int)config('blog.page_view_block_seconds', 3600);
+        $blockTtl = (int) config('blog.page_view_block_seconds', 3600);
 
         // Blocking keys
         $baseKey = sprintf('page_view:block:%s:%d', $viewable->getMorphClass(), $viewable->getKey());
@@ -152,7 +152,7 @@ readonly class PageViewTracker
             'viewable_type' => $viewable->getMorphClass(),
             'viewable_id' => $viewable->getKey(),
             'ip_address' => $request->ip(),
-            'user_agent' => (string)$request->header('User-Agent', ''),
+            'user_agent' => (string) $request->header('User-Agent', ''),
             'fingerprint' => $fingerprint,
         ]);
     }
@@ -165,7 +165,7 @@ readonly class PageViewTracker
             'viewable_type' => $viewable->getMorphClass(),
             'viewable_id' => $viewable->getKey(),
             'ip_address' => $request->ip(),
-            'user_agent' => (string)$request->header('User-Agent', ''),
+            'user_agent' => (string) $request->header('User-Agent', ''),
             'session_id' => $request->session()->getId(),
         ], 600); // 10 minutes
     }
@@ -173,12 +173,12 @@ readonly class PageViewTracker
     private function resolveVisitorId(Request $request): ?string
     {
         // If already exists in cookie, use it
-        $current = (string)$request->cookie('visitor_id', '');
+        $current = (string) $request->cookie('visitor_id', '');
         if ($current !== '') {
             return $current;
         }
 
         // Generate a new one (only for logic purposes; middleware handles cookie writing)
-        return (string)Str::uuid();
+        return (string) Str::uuid();
     }
 }

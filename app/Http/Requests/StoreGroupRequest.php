@@ -49,10 +49,10 @@ class StoreGroupRequest extends FormRequest
             'name' => $validated['name'],
             'content' => $validated['content'] ?? null,
             'footer' => $validated['footer'] ?? null,
-            'is_published' => (bool)($validated['is_published'] ?? false),
+            'is_published' => (bool) ($validated['is_published'] ?? false),
             'locale' => $validated['locale'] ?? app()->getLocale() ?? $config['locale'],
-            'sidebar' => (int)($validated['sidebar'] ?? $config['sidebar']),
-            'page_size' => (int)($validated['page_size'] ?? $config['page_size']),
+            'sidebar' => (int) ($validated['sidebar'] ?? $config['sidebar']),
+            'page_size' => (int) ($validated['page_size'] ?? $config['page_size']),
             'theme' => $validated['theme'] ?? null,
         ];
     }

@@ -39,11 +39,11 @@ beforeEach(function () {
     // Add someone to otherGroup
     $this->otherGroup->members()->attach($this->user1->id, ['role' => GroupMember::ROLE_MEMBER, 'joined_at' => now()]);
 
-    $this->query = new GroupMembersQuery();
+    $this->query = new GroupMembersQuery;
 });
 
 it('returns members of all groups owned by the owner', function () {
-    $request = new Request();
+    $request = new Request;
     $result = $this->query->handle($request, $this->owner->id);
 
     expect($result->total())->toBe(3);
@@ -89,7 +89,7 @@ it('handles per_page=all parameter', function () {
 });
 
 it('sorts members by email ascending by default', function () {
-    $request = new Request();
+    $request = new Request;
     $result = $this->query->handle($request, $this->owner->id);
 
     $emails = $result->pluck('email')->toArray();

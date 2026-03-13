@@ -27,7 +27,7 @@ class UserManagementService
 
     public function determineBlogQuota(string $role, ?int $requestedQuota = null): int
     {
-        if (! in_array($role, [User::ROLE_BLOGGER, User::ROLE_ADMIN], true)) {
+        if (!in_array($role, [User::ROLE_BLOGGER, User::ROLE_ADMIN], true)) {
             return 0;
         }
 

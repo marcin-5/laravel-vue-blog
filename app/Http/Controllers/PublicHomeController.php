@@ -33,7 +33,8 @@ class PublicHomeController extends BasePublicController
         $data = $query->handle($request);
 
         if (auth()->check()) {
-            $data['userGroups'] = auth()->user()
+            $data['userGroups'] = auth()
+                ->user()
                 ->groups()
                 ->select('groups.id', 'groups.name', 'groups.slug')
                 ->get()
@@ -53,9 +54,9 @@ class PublicHomeController extends BasePublicController
         $seoDescription = data_get($messages, 'meta.welcomeDescription') ?? ('Welcome to ' . config('app.name'));
 
         $canonicalUrl = $baseUrl . (empty($data['selectedCategoryIds']) ? '' : '?categories=' . implode(
-                    ',',
-                    $data['selectedCategoryIds'],
-                ));
+            ',',
+            $data['selectedCategoryIds'],
+        ));
 
         $alternateLinks = [
             ['hreflang' => 'pl', 'href' => $canonicalUrl],

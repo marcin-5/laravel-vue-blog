@@ -13,7 +13,7 @@ trait HasMarkdownContent
      */
     public function getContentHtmlAttribute(): string
     {
-        return $this->renderMarkdown((string)($this->content ?? ''));
+        return $this->renderMarkdown((string) ($this->content ?? ''));
     }
 
     /**
@@ -41,6 +41,6 @@ trait HasMarkdownContent
      */
     public function getFooterHtmlAttribute(): string
     {
-        return $this->renderMarkdown((string)($this->footer ?? ''));
+        return $this->renderMarkdown((string) ($this->footer ?? ''));
     }
 }

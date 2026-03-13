@@ -64,7 +64,7 @@ class UpdateBlogRequest extends FormRequest
         }
 
         if (array_key_exists('is_published', $validated)) {
-            $data['is_published'] = (bool)$validated['is_published'];
+            $data['is_published'] = (bool) $validated['is_published'];
         }
 
         if (array_key_exists('locale', $validated)) {
@@ -72,11 +72,11 @@ class UpdateBlogRequest extends FormRequest
         }
 
         if (array_key_exists('sidebar', $validated)) {
-            $data['sidebar'] = (int)$validated['sidebar'];
+            $data['sidebar'] = (int) $validated['sidebar'];
         }
 
         if (array_key_exists('page_size', $validated)) {
-            $data['page_size'] = (int)$validated['page_size'];
+            $data['page_size'] = (int) $validated['page_size'];
         }
 
         if (array_key_exists('theme', $validated)) {

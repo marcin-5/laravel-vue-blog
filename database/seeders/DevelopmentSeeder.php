@@ -14,19 +14,33 @@ use Illuminate\Database\Seeder;
 class DevelopmentSeeder extends Seeder
 {
     private const int CATEGORY_COUNT = 10;
+
     private const int BLOGGER_COUNT = 5;
+
     private const int BLOGGER_BLOG_QUOTA = 3;
+
     private const int BLOGS_PER_BLOGGER_MIN = 0;
+
     private const int BLOGS_PER_BLOGGER_MAX = 3;
+
     private const int BLOG_CATEGORIES_MIN = 1;
+
     private const int BLOG_CATEGORIES_MAX = 5;
+
     private const int POSTS_PER_BLOG_MIN = 2;
+
     private const int POSTS_PER_BLOG_MAX = 15;
+
     private const int REGULAR_USER_COUNT = 5;
+
     private const int GROUP_COUNT = 5;
+
     private const int GROUP_MEMBERS_MIN = 3;
+
     private const int GROUP_MEMBERS_MAX = 5;
+
     private const int POSTS_PER_GROUP_MIN = 2;
+
     private const int POSTS_PER_GROUP_MAX = 5;
 
     /**

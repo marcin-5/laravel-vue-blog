@@ -18,13 +18,13 @@ readonly class VisitorStatsRow
     public static function fromRow(object $row): self
     {
         return new self(
-            visitorLabel: (string)$row->visitor_label,
-            blogViews: (int)$row->blog_views,
-            postViews: (int)$row->post_views,
-            views: (int)$row->views,
-            lifetimeViews: (int)$row->lifetime_views,
-            userAgent: isset($row->user_agent) ? (string)$row->user_agent : null,
-            lastSeenAt: isset($row->last_seen_at) ? (string)$row->last_seen_at : null,
+            visitorLabel: (string) $row->visitor_label,
+            blogViews: (int) $row->blog_views,
+            postViews: (int) $row->post_views,
+            views: (int) $row->views,
+            lifetimeViews: (int) $row->lifetime_views,
+            userAgent: isset($row->user_agent) ? (string) $row->user_agent : null,
+            lastSeenAt: isset($row->last_seen_at) ? (string) $row->last_seen_at : null,
         );
     }
 

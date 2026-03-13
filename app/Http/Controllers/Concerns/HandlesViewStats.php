@@ -29,7 +29,7 @@ trait HandlesViewStats
 
         if ($onlyConsented) {
             return [
-                'consented' => (int)$consented,
+                'consented' => (int) $consented,
                 'anonymous' => 0,
                 'bots' => 0,
             ];
@@ -44,9 +44,9 @@ trait HandlesViewStats
             ->sum('hits');
 
         return [
-            'consented' => (int)$consented,
-            'anonymous' => (int)($anonymous ?: 0),
-            'bots' => (int)($bots ?: 0),
+            'consented' => (int) $consented,
+            'anonymous' => (int) ($anonymous ?: 0),
+            'bots' => (int) ($bots ?: 0),
         ];
     }
 }

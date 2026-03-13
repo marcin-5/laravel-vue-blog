@@ -119,7 +119,7 @@ class DashboardController extends Controller
         return [
             'last_seen' => $this->getLastBotViews(),
             'top_hits' => $this->getMostActiveBots(),
-            'total_hits' => (int)BotView::query()->sum('hits'),
+            'total_hits' => (int) BotView::query()->sum('hits'),
         ];
     }
 
@@ -138,7 +138,7 @@ class DashboardController extends Controller
             ->map(function (BotView $botView) use ($sortedFragments) {
                 $userAgentName = $botView->userAgent->name;
                 $matchedFragment = collect($sortedFragments)->first(
-                    fn($f) => stripos($userAgentName, (string)$f) !== false,
+                    fn($f) => stripos($userAgentName, (string) $f) !== false,
                 );
 
                 return [
@@ -168,14 +168,14 @@ class DashboardController extends Controller
             ->map(function ($botView) use ($sortedFragments) {
                 $userAgentName = $botView->userAgent->name;
                 $matchedFragment = collect($sortedFragments)->first(
-                    fn($f) => stripos($userAgentName, (string)$f) !== false,
+                    fn($f) => stripos($userAgentName, (string) $f) !== false,
                 );
 
                 return [
                     'id' => $botView->userAgent->id,
                     'name' => $userAgentName,
                     'matched_fragment' => $matchedFragment ?? $userAgentName,
-                    'hits' => (int)$botView->total_hits,
+                    'hits' => (int) $botView->total_hits,
                     'last_seen_at' => $botView->last_seen_at->toIso8601String(),
                 ];
             });
@@ -278,7 +278,7 @@ class DashboardController extends Controller
     {
         return $posts->map(function (Post $post) {
             $publishedAt = $post->published_at ?? $post->created_at;
-            $daysSincePublished = (int)max(1, abs(now()->diffInDays($publishedAt)));
+            $daysSincePublished = (int) max(1, abs(now()->diffInDays($publishedAt)));
             $totalViews = $post->pageViews->count();
 
             return [

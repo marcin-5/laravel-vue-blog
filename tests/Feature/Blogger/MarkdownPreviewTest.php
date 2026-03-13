@@ -14,7 +14,7 @@ it('allows authenticated users to preview markdown', function () {
 
     $response->assertOk()
         ->assertJsonStructure(['html'])
-        ->assertJson(['html' => "<h1>Hello World</h1>"]);
+        ->assertJson(['html' => '<h1>Hello World</h1>']);
 });
 
 it('validates markdown content', function () {

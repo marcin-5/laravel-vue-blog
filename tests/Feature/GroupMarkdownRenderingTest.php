@@ -20,7 +20,7 @@ it('renders markdown content and footer to html on group landing page', function
         ->assertOk()
         ->assertInertia(fn($page) => $page
             ->component('app/group/Landing')
-            ->where('group.content', "<h1>Hello World</h1>")
-            ->where('group.footer', "<p><em>Regards</em>, Team</p>"),
+            ->where('group.content', '<h1>Hello World</h1>')
+            ->where('group.footer', '<p><em>Regards</em>, Team</p>'),
         );
 });

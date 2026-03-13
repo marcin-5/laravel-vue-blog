@@ -39,7 +39,7 @@ class WelcomeQuery
         $selected = $request->query('categories', []);
 
         return collect(is_string($selected) ? explode(',', $selected) : $selected)
-            ->map(fn($value) => (int)trim($value))
+            ->map(fn($value) => (int) trim($value))
             ->filter()
             ->values()
             ->all();

@@ -17,7 +17,7 @@ return new class extends Migration {
                 "AND b.user_id = a.user_id\n" .
                 "AND b.viewable_type = a.viewable_type\n" .
                 "AND b.viewable_id = a.viewable_id\n" .
-                "AND b.id < a.id",
+                'AND b.id < a.id',
             );
 
             // b) Per (visitor_id, viewable_type, viewable_id) but only for anonymous rows (user_id IS NULL)
@@ -27,7 +27,7 @@ return new class extends Migration {
                 "AND b.user_id IS NULL AND b.visitor_id = a.visitor_id\n" .
                 "AND b.viewable_type = a.viewable_type\n" .
                 "AND b.viewable_id = a.viewable_id\n" .
-                "AND b.id < a.id",
+                'AND b.id < a.id',
             );
 
             DB::statement(

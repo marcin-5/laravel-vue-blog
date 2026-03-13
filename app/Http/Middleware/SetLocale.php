@@ -16,7 +16,7 @@ class SetLocale
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $supported = (array)config('app.supported_locales', []);
+        $supported = (array) config('app.supported_locales', []);
 
         $locale =
             optional($request->user())->locale
@@ -24,15 +24,15 @@ class SetLocale
             ?? $request->cookie('locale');
 
         if ($locale === null) {
-            $overrideAcceptLanguage = (bool)config('app.locale_override_accept_language');
+            $overrideAcceptLanguage = (bool) config('app.locale_override_accept_language');
 
             $locale = $overrideAcceptLanguage
-                ? (string)config('app.locale')
-                : ($request->getPreferredLanguage($supported) ?: (string)config('app.locale'));
+                ? (string) config('app.locale')
+                : ($request->getPreferredLanguage($supported) ?: (string) config('app.locale'));
         }
 
         if (!in_array($locale, $supported, true)) {
-            $locale = (string)config('app.locale');
+            $locale = (string) config('app.locale');
         }
 
         AppFacade::setLocale($locale);

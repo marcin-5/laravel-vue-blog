@@ -30,16 +30,16 @@ class IdentityResolver
         $user = $this->auth->user();
         if ($user !== null) {
             return [
-                'user_id' => (int)$user->getAuthIdentifier(),
-                'visitor_id' => (string)$request->cookie('visitor_id', '') ?: null
+                'user_id' => (int) $user->getAuthIdentifier(),
+                'visitor_id' => (string) $request->cookie('visitor_id', '') ?: null
             ];
         }
 
-        $visitorId = (string)$request->cookie('visitor_id', '') ?: null;
+        $visitorId = (string) $request->cookie('visitor_id', '') ?: null;
         if ($visitorId !== null) {
             $link = VisitorLink::query()->where('visitor_id', $visitorId)->first();
             if ($link !== null) {
-                return ['user_id' => (int)$link->user_id, 'visitor_id' => $visitorId];
+                return ['user_id' => (int) $link->user_id, 'visitor_id' => $visitorId];
             }
         }
 

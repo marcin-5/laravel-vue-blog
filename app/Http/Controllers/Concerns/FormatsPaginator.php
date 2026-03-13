@@ -22,7 +22,7 @@ trait FormatsPaginator
                 return [
                     'url' => $lnk['url'] ?? null,
                     'label' => $lnk['label'] ?? '',
-                    'active' => (bool)($lnk['active'] ?? false),
+                    'active' => (bool) ($lnk['active'] ?? false),
                 ];
             }, $links),
             'prevUrl' => $paginator->previousPageUrl(),

@@ -75,6 +75,6 @@ class GroupMembersQuery
             return self::MAX_ITEMS_PER_PAGE;
         }
 
-        return max(1, (int)$perPage);
+        return max(1, (int) $perPage);
     }
 }

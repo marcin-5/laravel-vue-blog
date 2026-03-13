@@ -25,7 +25,7 @@ class GroupMembersController extends Controller
 
         $ownerId = $isAdmin && $request->filled('owner_id')
             ? $request->integer('owner_id')
-            : (int)$user->id;
+            : (int) $user->id;
 
         $groups = Group::query()
             ->where('user_id', $ownerId)

@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GroupController;
-use App\Http\Middleware\SetLocale;
 use Illuminate\Support\Facades\Route;
 
 // Test-only helper route to verify locale resolution in middleware
@@ -12,9 +11,9 @@ if (app()->environment('testing')) {
     });
 }
 
-//Route::get('/', function () {
+// Route::get('/', function () {
 //    return Inertia::render('Welcome');
-//})->name('home');
+// })->name('home');
 
 Route::middleware(['auth', 'verified', 'noindex'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');

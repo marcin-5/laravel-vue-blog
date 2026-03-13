@@ -13,7 +13,9 @@ class LandingPage extends Model
     use HasMarkdownContent;
 
     public const string SIDEBAR_LEFT = 'left';
+
     public const string SIDEBAR_RIGHT = 'right';
+
     public const string SIDEBAR_NONE = 'none';
 
     protected $fillable = [

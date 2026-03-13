@@ -19,14 +19,14 @@ readonly class BlogStatsRow
     public static function fromRow(object $row): self
     {
         return new self(
-            blogId: (int)$row->blog_id,
-            name: (string)$row->name,
-            ownerId: (int)$row->owner_id,
-            ownerName: (string)($row->owner_name ?? ''),
-            views: (int)$row->views,
-            uniqueViews: (int)($row->unique_views ?? 0),
-            postViews: (int)$row->post_views,
-            uniquePostViews: (int)($row->unique_post_views ?? 0),
+            blogId: (int) $row->blog_id,
+            name: (string) $row->name,
+            ownerId: (int) $row->owner_id,
+            ownerName: (string) ($row->owner_name ?? ''),
+            views: (int) $row->views,
+            uniqueViews: (int) ($row->unique_views ?? 0),
+            postViews: (int) $row->post_views,
+            uniquePostViews: (int) ($row->unique_post_views ?? 0),
         );
     }
 

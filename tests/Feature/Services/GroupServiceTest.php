@@ -33,7 +33,7 @@ it(
             'updated_at' => now(),
         ]);
 
-        $service = new GroupService();
+        $service = new GroupService;
         $groups = $service->getUserGroups($user);
 
         expect($groups)->toHaveCount(2)
@@ -56,7 +56,7 @@ it('createGroup creates a new group with provided data', function () {
         'slug' => 'test-group',
         'content' => 'Test content',
     ];
-    $service = new GroupService();
+    $service = new GroupService;
     $group = $service->createGroup($data);
     $freshGroup = $group->fresh();
 
@@ -74,7 +74,7 @@ it('updateGroup updates group with new data', function () {
         'name' => 'Updated Group',
         'slug' => 'updated-group',
     ];
-    $service = new GroupService();
+    $service = new GroupService;
     $service->updateGroup($group, $data);
     $freshGroup = $group->fresh();
 

@@ -37,7 +37,7 @@ it('fetches welcome blogs and categories', function () {
     ]);
 
     $request = Request::create('/', 'GET');
-    $query = new WelcomeQuery();
+    $query = new WelcomeQuery;
     $result = $query->handle($request);
 
     expect($result)->toHaveKeys(['blogs', 'categories', 'selectedCategoryIds', 'locale'])
@@ -59,8 +59,8 @@ it('filters blogs by categories', function () {
     $blog2->categories()->attach($category2);
 
     // Request with category1
-    $request = Request::create('/', 'GET', ['categories' => (string)$category1->id]);
-    $query = new WelcomeQuery();
+    $request = Request::create('/', 'GET', ['categories' => (string) $category1->id]);
+    $query = new WelcomeQuery;
     $result = $query->handle($request);
 
     expect($result['blogs'])->toHaveCount(1)
@@ -85,7 +85,7 @@ it('orders blogs by latest_post_at', function () {
     ]);
 
     $request = Request::create('/', 'GET');
-    $query = new WelcomeQuery();
+    $query = new WelcomeQuery;
     $result = $query->handle($request);
 
     expect($result['blogs'])->toHaveCount(2)

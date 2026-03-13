@@ -39,7 +39,7 @@ return [
     |
     */
 
-    'debug' => (bool)env('APP_DEBUG', false),
+    'debug' => (bool) env('APP_DEBUG', false),
 
     /*
     |--------------------------------------------------------------------------
@@ -85,7 +85,7 @@ return [
         array_filter(
             array_map(
                 static fn(string $v): string => trim($v),
-                explode(',', (string)env('APP_SUPPORTED_LOCALES', 'en,pl')),
+                explode(',', (string) env('APP_SUPPORTED_LOCALES', 'en,pl')),
             ),
         ),
     ),

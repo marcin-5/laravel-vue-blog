@@ -29,7 +29,7 @@ return new class extends Migration {
 
         // 3. Aktualizuj CHECK constraint dla visibility w tabeli posts
         if (DB::getDriverName() === 'pgsql') {
-            DB::statement("ALTER TABLE posts DROP CONSTRAINT IF EXISTS posts_visibility_check");
+            DB::statement('ALTER TABLE posts DROP CONSTRAINT IF EXISTS posts_visibility_check');
             DB::statement(
                 "ALTER TABLE posts ADD CONSTRAINT posts_visibility_check CHECK (visibility IN ('public', 'registered', 'unlisted', 'extension'))",
             );
@@ -40,7 +40,7 @@ return new class extends Migration {
     {
         // Przywróć oryginalny CHECK constraint
         if (DB::getDriverName() === 'pgsql') {
-            DB::statement("ALTER TABLE posts DROP CONSTRAINT IF EXISTS posts_visibility_check");
+            DB::statement('ALTER TABLE posts DROP CONSTRAINT IF EXISTS posts_visibility_check');
             DB::statement(
                 "ALTER TABLE posts ADD CONSTRAINT posts_visibility_check CHECK (visibility IN ('public', 'registered', 'unlisted'))",
             );

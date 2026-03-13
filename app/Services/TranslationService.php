@@ -18,7 +18,7 @@ readonly class TranslationService
     public function getPageTranslations(string $pageType): array
     {
         $locale = app()->getLocale();
-        $cacheTtl = (int)config('translations.cache_ttl', 0);
+        $cacheTtl = (int) config('translations.cache_ttl', 0);
 
         if ($cacheTtl <= 0) {
             return $this->loadAndMergeTranslations($locale, $pageType);
@@ -50,7 +50,7 @@ readonly class TranslationService
             $messages = array_merge($messages, $this->loadTranslationFile($baseJsonPath));
         }
 
-        $groups = (array)config("translations.page_groups.{$pageType}", []);
+        $groups = (array) config("translations.page_groups.{$pageType}", []);
 
         foreach ($groups as $group) {
             $messages = $this->mergeAssociative(

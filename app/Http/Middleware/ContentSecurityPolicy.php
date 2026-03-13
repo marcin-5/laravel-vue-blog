@@ -24,7 +24,6 @@ class ContentSecurityPolicy
             );
         }
 
-
         return $response;
     }
 }

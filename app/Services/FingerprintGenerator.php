@@ -21,8 +21,8 @@ readonly class FingerprintGenerator
     public function generate(Request $request): ?string
     {
         $ip = $request->ip();
-        $ua = (string)$request->header('User-Agent', '');
-        $acceptLang = (string)$request->header('Accept-Language', '');
+        $ua = (string) $request->header('User-Agent', '');
+        $acceptLang = (string) $request->header('Accept-Language', '');
 
         if ($ip === null && $ua === '' && $acceptLang === '') {
             return null;

@@ -62,7 +62,7 @@ class UpdatePostRequest extends FormRequest
         }
 
         if (array_key_exists('is_published', $validated)) {
-            $data['is_published'] = (bool)$validated['is_published'];
+            $data['is_published'] = (bool) $validated['is_published'];
         }
 
         if (array_key_exists('visibility', $validated)) {

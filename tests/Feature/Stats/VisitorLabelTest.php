@@ -62,10 +62,10 @@ test('visitor stats displays user name if available, newsletter email otherwise,
             ->where(
                 'visitorsFromPage',
                 fn($visitors) => collect($visitors)->count() === 3 && collect($visitors)->pluck(
-                        'visitor_label',
-                    )->contains('Logged User') && collect($visitors)->pluck('visitor_label')->contains(
-                        'sub@example.com',
-                    ) && collect($visitors)->pluck('visitor_label')->contains($visitorIdAnon),
+                    'visitor_label',
+                )->contains('Logged User') && collect($visitors)->pluck('visitor_label')->contains(
+                    'sub@example.com',
+                ) && collect($visitors)->pluck('visitor_label')->contains($visitorIdAnon),
             ),
     );
 });

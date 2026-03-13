@@ -11,5 +11,5 @@ return [
     |
     */
 
-    'ttl' => (int)env('SITEMAP_TTL', 3600),
+    'ttl' => (int) env('SITEMAP_TTL', 3600),
 ];

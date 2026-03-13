@@ -15,7 +15,7 @@ readonly class BotDetector
      */
     public function isBot(Request $request): bool
     {
-        $userAgent = (string)$request->header('User-Agent', '');
+        $userAgent = (string) $request->header('User-Agent', '');
 
         if ($userAgent === '') {
             return false;

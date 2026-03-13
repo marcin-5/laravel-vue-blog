@@ -30,7 +30,7 @@ class GroupFactory extends Factory
             '- ' . $this->faker->word();
 
         $markdownFooter = $hasFooter ? '### Footer' . $this->faker->sentence() . ' [Link](' . $this->faker->url(
-            ) . ')' : null;
+        ) . ')' : null;
 
         return [
             'user_id' => null,

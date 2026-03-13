@@ -4,7 +4,7 @@ use App\Services\BotDetector;
 use Illuminate\Http\Request;
 
 it('detects bots from user agent fragments', function () {
-    $botDetector = new BotDetector();
+    $botDetector = new BotDetector;
 
     // Normal user
     $request = Request::create('/', 'GET');

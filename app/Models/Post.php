@@ -241,7 +241,7 @@ class Post extends Model
      */
     public function scopeManageableBy(Builder $query, int|User $user): Builder
     {
-        $userId = $user instanceof User ? $user->id : (int)$user;
+        $userId = $user instanceof User ? $user->id : (int) $user;
 
         return $query->where(function (Builder $q) use ($userId) {
             $q->whereHas('blog', fn(Builder $bq) => $bq->where('user_id', $userId))

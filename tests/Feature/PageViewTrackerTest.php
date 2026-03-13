@@ -31,7 +31,7 @@ it('tracks immediately for a new visitor without a cookie', function () {
 });
 
 it('tracks immediately if X-Visitor-Id header is present (verified by JS)', function () {
-    $visitorId = (string)Str::uuid();
+    $visitorId = (string) Str::uuid();
 
     $this->withUnencryptedCookie('cookie_consent', 'accepted')
         ->withHeaders(['X-Visitor-Id' => $visitorId])
@@ -42,7 +42,7 @@ it('tracks immediately if X-Visitor-Id header is present (verified by JS)', func
 });
 
 it('does not duplicate track if visit is within block period', function () {
-    $visitorId = (string)Str::uuid();
+    $visitorId = (string) Str::uuid();
 
     // First tracked visit
     $this->withUnencryptedCookie('cookie_consent', 'accepted')

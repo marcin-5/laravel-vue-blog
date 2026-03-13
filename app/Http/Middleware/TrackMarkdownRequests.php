@@ -71,7 +71,7 @@ class TrackMarkdownRequests
                 $view->hits = 1;
             }
 
-            $view->user_agent = substr((string)$request->header('User-Agent', ''), 0, 255);
+            $view->user_agent = substr((string) $request->header('User-Agent', ''), 0, 255);
             $view->last_seen_at = now();
             $view->save();
         }

@@ -85,7 +85,7 @@ class User extends Authenticatable
         }
         // Bloggers can create a new blog only if they are under the blog_quota limit
         $current = $this->blogs()->count();
-        $limit = max(0, (int)($this->blog_quota ?? 1));
+        $limit = max(0, (int) ($this->blog_quota ?? 1));
 
         return $current < $limit;
     }

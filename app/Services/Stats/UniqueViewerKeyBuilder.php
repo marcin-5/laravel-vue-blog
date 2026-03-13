@@ -8,9 +8,9 @@ class UniqueViewerKeyBuilder
 
     public function build(string $tableAlias): string
     {
-        $visitorIdPresent = sprintf(self::NON_EMPTY_STRING_SQL, $tableAlias.'.visitor_id');
-        $fingerprintPresent = sprintf(self::NON_EMPTY_STRING_SQL, $tableAlias.'.fingerprint');
-        $sessionIdPresent = sprintf(self::NON_EMPTY_STRING_SQL, $tableAlias.'.session_id');
+        $visitorIdPresent = sprintf(self::NON_EMPTY_STRING_SQL, $tableAlias . '.visitor_id');
+        $fingerprintPresent = sprintf(self::NON_EMPTY_STRING_SQL, $tableAlias . '.fingerprint');
+        $sessionIdPresent = sprintf(self::NON_EMPTY_STRING_SQL, $tableAlias . '.session_id');
 
         return "(
             CASE

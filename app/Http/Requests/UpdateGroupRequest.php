@@ -58,10 +58,10 @@ class UpdateGroupRequest extends FormRequest
             if (array_key_exists($field, $validated)) {
                 $data[$field] = $validated[$field];
                 if ($field === 'is_published') {
-                    $data[$field] = (bool)$validated[$field];
+                    $data[$field] = (bool) $validated[$field];
                 }
                 if (in_array($field, ['sidebar', 'page_size'])) {
-                    $data[$field] = (int)$validated[$field];
+                    $data[$field] = (int) $validated[$field];
                 }
             }
         }

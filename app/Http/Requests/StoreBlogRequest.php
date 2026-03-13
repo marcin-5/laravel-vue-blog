@@ -52,17 +52,17 @@ class StoreBlogRequest extends FormRequest
             'description' => $validated['description'] ?? null,
             'footer' => $validated['footer'] ?? null,
             'motto' => $validated['motto'] ?? null,
-            'is_published' => (bool)($validated['is_published'] ?? false),
+            'is_published' => (bool) ($validated['is_published'] ?? false),
             'locale' => $validated['locale'] ?? app()->getLocale() ?? $config['locale'],
-            'sidebar' => (int)($validated['sidebar'] ?? $config['sidebar']),
-            'page_size' => (int)($validated['page_size'] ?? $config['page_size']),
+            'sidebar' => (int) ($validated['sidebar'] ?? $config['sidebar']),
+            'page_size' => (int) ($validated['page_size'] ?? $config['page_size']),
             'theme' => $validated['theme'] ?? null,
         ];
     }
 
     public function getBlogName(): string
     {
-        return trim((string)($this->input('name') ?: 'New Blog'));
+        return trim((string) ($this->input('name') ?: 'New Blog'));
     }
 
     public function getCategories(): array
