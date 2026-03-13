@@ -9,6 +9,7 @@ use Closure;
 use Illuminate\Database\ClassMorphViolationException;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
+use Psr\SimpleCache\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 
 use function is_string;
@@ -17,11 +18,10 @@ readonly class TrackPageViews
 {
     public function __construct(
         private PageViewTracker $tracker,
-    ) {
-    }
+    ) {}
 
     /**
-     * @throws ClassMorphViolationException
+     * @throws ClassMorphViolationException|InvalidArgumentException
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -61,7 +61,8 @@ readonly class TrackPageViews
                 // Use simple slug lookup without published_at check to avoid timing issues
                 // with now() being called at different moments. The controller already
                 // validated that the post is published before rendering the page.
-                $post = $blog->posts()
+                $post = $blog
+                    ->posts()
                     ->where('slug', $postSlug)
                     ->first();
 
