@@ -1,6 +1,11 @@
 <script lang="ts" setup>
 import { useStatsFilters } from '@/composables/useStatsFilters';
-import { BLOG_SORT_OPTIONS, POST_SORT_OPTIONS, SPECIAL_VISITOR_SORT_OPTIONS, VISITOR_SORT_OPTIONS } from '@/constants/stats';
+import {
+    BLOG_SORT_OPTIONS,
+    POST_SORT_OPTIONS,
+    SPECIAL_VISITOR_SORT_OPTIONS,
+    VISITOR_SORT_OPTIONS
+} from '@/constants/stats';
 import type { BlogOption, BlogRow, FilterState, PostRow, UserOption, VisitorRow } from '@/types/stats';
 import { computed } from 'vue';
 import StatsFilters from './StatsFilters.vue';
@@ -37,20 +42,22 @@ const props = withDefaults(defineProps<Props>(), {
     visitorsFromSpecial: () => [],
 });
 
-const { blogState, postState, visitorState, specialVisitorState } = useStatsFilters(
-    {
+const createFilterStates = () => {
+    return {
         blog: props.blogFilters,
         post: props.postFilters,
         visitor: props.visitorFilters ?? props.blogFilters,
         specialVisitor: props.specialVisitorFilters ?? props.visitorFilters ?? props.blogFilters,
-    },
-    {
-        routeName: props.routeName,
-        storageKeyPrefix: props.routeName,
-        showBloggerFilter: props.showBloggerFilter,
-    },
-);
+    };
+};
 
+const { blogState, postState, visitorState, specialVisitorState } = useStatsFilters(createFilterStates(), {
+    routeName: props.routeName,
+    storageKeyPrefix: props.routeName,
+    showBloggerFilter: props.showBloggerFilter,
+});
+
+// Column definitions as computed properties for consistency
 const blogColumns = computed(() => [
     { key: 'name', label: 'Blog' },
     { key: 'owner_name', label: 'Blogger', visible: props.showBloggerColumn },
@@ -58,12 +65,12 @@ const blogColumns = computed(() => [
     { key: 'post_views', label: 'Post views' },
 ]);
 
-const postColumns = [
+const postColumns = computed(() => [
     { key: 'title', label: 'Title' },
     { key: 'views', label: 'Consent views' },
     { key: 'bot_views', label: 'Bot views' },
     { key: 'anonymous_views', label: 'Anonymous views' },
-];
+]);
 
 // Columns for Visitor Views (page_views only) — first column reflects group_by only
 const pageVisitorColumns = computed(() => [
@@ -78,25 +85,25 @@ const pageVisitorColumns = computed(() => [
 ]);
 
 // Columns for Anonymous and Bot Views — first column is fixed to User agent
-// No tooltip/info icon here, user agent is already visible in the first column
-const specialVisitorColumns = [
+const specialVisitorColumns = computed(() => [
     { key: 'visitor_label', label: 'User agent' },
     { key: 'blog_views', label: 'Blog views' },
     { key: 'post_views', label: 'Post views' },
     { key: 'lifetime_views', label: 'Lifetime visits' },
     { key: 'last_seen_at', label: 'Last seen', isDate: true },
-];
+]);
 
-const effectivePostBlogOptions = computed(() => (props.postBlogOptions !== undefined ? props.postBlogOptions : props.blogOptions));
-const effectiveVisitorBlogOptions = computed(() => (props.visitorBlogOptions !== undefined ? props.visitorBlogOptions : props.blogOptions));
+// Simplified effective blog options logic
+const effectivePostBlogOptions = computed(() => props.postBlogOptions ?? props.blogOptions);
+const effectiveVisitorBlogOptions = computed(() => props.visitorBlogOptions ?? props.blogOptions);
 
-const blogSortOptions = [...BLOG_SORT_OPTIONS];
-const postSortOptions = [...POST_SORT_OPTIONS];
-const visitorSortOptions = [...VISITOR_SORT_OPTIONS];
-const specialVisitorSortOptions = [...SPECIAL_VISITOR_SORT_OPTIONS];
+// Sort options as computed to ensure they're always fresh
+const blogSortOptions = computed(() => [...BLOG_SORT_OPTIONS]);
+const postSortOptions = computed(() => [...POST_SORT_OPTIONS]);
+const visitorSortOptions = computed(() => [...VISITOR_SORT_OPTIONS]);
+const specialVisitorSortOptions = computed(() => [...SPECIAL_VISITOR_SORT_OPTIONS]);
 
 // For the first Visitor table (data from page_views) the tooltip should show the User Agent string.
-// Backend always provides `user_agent` alongside the grouped label, so we always use that key here.
 const visitorInfoKey = computed(() => 'user_agent');
 </script>
 
