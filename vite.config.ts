@@ -2,6 +2,7 @@ import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
 import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
+import { configDefaults } from 'vitest/config';
 
 const appUrl = process.env.APP_URL ?? '';
 const isHttps = appUrl.startsWith('https://') || process.env.VITE_DEV_HTTPS === 'true';
@@ -47,5 +48,10 @@ export default defineConfig({
             protocol: hmrProtocol,
             clientPort: hmrClientPort,
         },
+    },
+    test: {
+        environment: 'jsdom',
+        exclude: [...configDefaults.exclude, 'tests/**'],
+        globals: true,
     },
 });
