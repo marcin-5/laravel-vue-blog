@@ -64,7 +64,7 @@ const navigateBack = () => {
 <template>
     <Head v-if="seo?.title" :title="seo.title" />
 
-    <BlogLayout :isPublic="true" :sidebar="sidebar" :theme="blog.theme" maxWidthClass="max-w-5xl xl:max-w-7xl 2xl:max-w-screen-2xl">
+    <BlogLayout :isPublic="true" :sidebar="sidebar" :theme="blog.theme">
         <template #top-divider>
             <BorderDivider class="mb-4" />
         </template>
