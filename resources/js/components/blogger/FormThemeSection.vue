@@ -1,14 +1,14 @@
 <script lang="ts" setup>
 import FormColorField from '@/components/blogger/FormColorField.vue';
 import FormSelectField from '@/components/blogger/FormSelectField.vue';
-import { FONT_OPTIONS, type ThemeTranslations, useThemeSection } from '@/components/blogger/useThemeSection';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
 import { TooltipButton } from '@/components/ui/tooltip';
 import { useCssVariables } from '@/composables/useCssVariables';
+import { FONT_OPTIONS, type ThemeTranslations, useThemeSection } from '@/composables/useThemeSection';
 import { useToast } from '@/composables/useToast';
-import type { ThemeColors } from '@/types/blog.types';
+import type { BlogTheme, ThemeColors } from '@/types/blog.types';
 import { Download, Settings2, Upload } from 'lucide-vue-next';
 import { useTemplateRef } from 'vue';
 
@@ -19,6 +19,11 @@ interface Props {
     errors?: Record<string, any>;
     translations: ThemeTranslations;
 }
+
+const IMPORT_ERROR_FALLBACK = 'Import failed';
+const IMPORT_SUCCESS_FALLBACK = 'Import successful';
+const DEFAULT_FONT_VALUE = 'inherit';
+const THEME_FILE_EXTENSION = '.json';
 
 const props = defineProps<Props>();
 
@@ -47,66 +52,93 @@ const { variables } = useCssVariables([
 
 const { updateValue, colorFields, fontFields } = useThemeSection(props, emit);
 
-function exportTheme() {
-    const data = JSON.stringify(props.colors ?? {}, null, 2);
-    const blob = new Blob([data], { type: 'application/json' });
+function resolveThemeVariant(): 'light' | 'dark' {
+    return props.idPrefix.includes('light') ? 'light' : 'dark';
+}
+
+function isThemeColors(value: unknown): value is ThemeColors {
+    return typeof value === 'object' && value !== null;
+}
+
+function normalizeImportedTheme(theme: unknown): ThemeColors {
+    const themeObject = theme as BlogTheme | ThemeColors;
+
+    if ('light' in themeObject || 'dark' in themeObject) {
+        const variant = resolveThemeVariant();
+        return (themeObject[variant] ?? (variant === 'light' ? themeObject.dark : themeObject.light) ?? {}) as ThemeColors;
+    }
+
+    return themeObject as ThemeColors;
+}
+
+function mergeColors(colors: ThemeColors): ThemeColors {
+    return {
+        ...(props.colors ?? {}),
+        ...colors,
+    };
+}
+
+function showImportErrorToast(): void {
+    toast({
+        title: props.translations.importError || IMPORT_ERROR_FALLBACK,
+        variant: 'destructive',
+    });
+}
+
+function showImportSuccessToast(): void {
+    toast({
+        title: props.translations.importSuccess || IMPORT_SUCCESS_FALLBACK,
+        variant: 'default',
+    });
+}
+
+function buildExportFileName(): string {
+    const variant = resolveThemeVariant();
+    const date = new Date().toISOString().split('T')[0];
+    return `blog-theme-${variant}-${date}${THEME_FILE_EXTENSION}`;
+}
+
+function exportTheme(): void {
+    const serializedTheme = JSON.stringify(props.colors ?? {}, null, 2);
+    const blob = new Blob([serializedTheme], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
+
     link.href = url;
-    const variant = props.idPrefix.includes('light') ? 'light' : 'dark';
-    link.download = `blog-theme-${variant}-${new Date().toISOString().split('T')[0]}.json`;
+    link.download = buildExportFileName();
     link.click();
+
     URL.revokeObjectURL(url);
 }
 
-function triggerImport() {
+function openFilePicker(): void {
     fileInput.value?.click();
 }
 
-async function handleImport(event: Event) {
-    const target = event.target as HTMLInputElement;
-    const file = target.files?.[0];
+async function handleImport(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
     if (!file) {
         return;
     }
 
     try {
-        const text = await file.text();
-        const theme = JSON.parse(text);
+        const fileContent = await file.text();
+        const parsedTheme = JSON.parse(fileContent);
 
-        // Basic validation
-        if (typeof theme !== 'object' || theme === null) {
-            toast({
-                title: props.translations.importError || 'Import failed',
-                variant: 'destructive',
-            });
+        if (!isThemeColors(parsedTheme)) {
+            showImportErrorToast();
             return;
         }
 
-        let colorsToImport = theme;
-
-        // Compatibility check: if the user tries to import a full theme (with light/dark keys)
-        // into a specific section, we should pick the relevant part or the whole object if it's flat.
-        if (theme.light || theme.dark) {
-            const variant = props.idPrefix.includes('light') ? 'light' : 'dark';
-            colorsToImport = theme[variant] || (variant === 'light' ? theme.dark : theme.light) || theme;
-        }
-
-        emit('update:colors', {
-            ...(props.colors ?? {}),
-            ...colorsToImport,
-        });
-        toast({
-            title: props.translations.importSuccess || 'Import successful',
-            variant: 'default',
-        });
+        const importedColors = normalizeImportedTheme(parsedTheme);
+        emit('update:colors', mergeColors(importedColors));
+        showImportSuccessToast();
     } catch {
-        toast({
-            title: props.translations.importError || 'Import failed',
-            variant: 'destructive',
-        });
+        showImportErrorToast();
     } finally {
-        target.value = '';
+        input.value = '';
     }
 }
 </script>
@@ -122,7 +154,7 @@ async function handleImport(event: Event) {
                     size="sm"
                     type="button"
                     variant="ghost"
-                    @click="triggerImport"
+                    @click="openFilePicker"
                 >
                     <Upload class="h-3.5 w-3.5" />
                 </TooltipButton>
@@ -138,7 +170,7 @@ async function handleImport(event: Event) {
                     <FormSelectField
                         :id="`${props.idPrefix}-${field.idSuffix}`"
                         :label="props.translations[field.labelKey] || field.defaultLabel"
-                        :model-value="props.colors?.[field.key] || 'inherit'"
+                        :model-value="props.colors?.[field.key] || DEFAULT_FONT_VALUE"
                         :options="FONT_OPTIONS"
                         class="grow"
                         @update:model-value="updateValue(field.key, $event.toString())"
@@ -166,6 +198,7 @@ async function handleImport(event: Event) {
                         </PopoverContent>
                     </Popover>
                 </div>
+
                 <FormSelectField
                     v-if="field.additionalField"
                     :id="`${props.idPrefix}-${field.additionalField.idSuffix}`"
@@ -184,7 +217,7 @@ async function handleImport(event: Event) {
                 :id="`${props.idPrefix}-${field.idSuffix}`"
                 :key="field.key"
                 :error="props.errors?.[field.key]"
-                :label="props.translations[field.labelKey]"
+                :label="props.translations[field.labelKey] || ''"
                 :model-value="props.colors?.[field.key]"
                 :placeholder="variables[field.key]"
                 :tooltip="props.translations[field.tooltipKey]"

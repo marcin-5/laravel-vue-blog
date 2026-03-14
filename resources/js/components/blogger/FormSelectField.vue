@@ -11,7 +11,7 @@ interface Props {
     id: string;
     label: string;
     modelValue: string | number;
-    options: SelectOption[];
+    options: readonly SelectOption[];
     error?: string;
 }
 
