@@ -17,7 +17,7 @@ interface Props {
     blogId?: number;
     isEdit?: boolean;
     idPrefix?: string;
-    form?: any; // External form instance
+    form?: any;
 }
 
 interface Emits {
@@ -36,7 +36,7 @@ const emit = defineEmits<Emits>();
 const { isPreviewMode, isFullPreview, previewLayout, previewHtml, renderMarkdown, togglePreview, toggleFullPreview, setLayout } =
     useMarkdownPreview('markdown.preview');
 
-// Use external form if provided, otherwise create internal form
+// Form initialization
 const form =
     props.form ||
     useForm({
@@ -49,24 +49,24 @@ const form =
         visibility: props.post?.visibility || 'public',
     });
 
-const isUnlisted = computed({
-    get: () => form.visibility === 'unlisted',
-    set: (value: boolean) => {
-        form.visibility = value ? 'unlisted' : 'public';
-    },
-});
+// Visibility computed properties
+const createVisibilityComputed = (value: string) =>
+    computed({
+        get: () => form.visibility === value,
+        set: (v: boolean) => {
+            form.visibility = v ? value : 'public';
+        },
+    });
 
-const isExtension = computed({
-    get: () => form.visibility === 'extension',
-    set: (value: boolean) => {
-        form.visibility = value ? 'extension' : 'public';
-    },
-});
+const isUnlisted = createVisibilityComputed('unlisted');
+const isExtension = createVisibilityComputed('extension');
 
+// Field ID prefix for consistent ID generation in template
 const fieldIdPrefix = computed(() => props.idPrefix);
 
-// Consolidated translation keys
+// Translation keys - organized by category
 const translationKeys = computed(() => ({
+    // Form labels
     title: props.isEdit ? t('blogger.post_form.title_label') : t('blogger.post_form.post_title_label'),
     titlePlaceholder: props.isEdit ? '' : t('blogger.post_form.title_placeholder'),
     excerpt: t('blogger.post_form.excerpt_label'),
@@ -74,15 +74,20 @@ const translationKeys = computed(() => ({
     content: t('blogger.post_form.content_label'),
     contentPlaceholder: props.isEdit ? '' : t('blogger.post_form.content_placeholder'),
     published: props.isEdit ? t('blogger.post_form.published_label') : t('blogger.post_form.publish_now_label'),
+
+    // Buttons
     cancel: t('blogger.post_form.cancel_button'),
-    create: form.group_id ? t('blogger.post_form.create_post_button') : t('blogger.post_form.create_post_button'), // Simplified, keeping same for now or could specialize
+    create: t('blogger.post_form.create_post_button'),
     creating: t('blogger.post_form.creating_button'),
     save: t('blogger.post_form.save_post_button'),
     apply: t('blogger.post_form.apply_button'),
     saving: t('blogger.post_form.saving_button'),
+
+    // Visibility
     unlisted: t('blogger.post_form.unlisted_label'),
     extension: t('blogger.post_form.extension_label'),
-    // Preview-related translations for MarkdownPreviewSection
+
+    // Preview
     preview: t('blogger.post_form.preview_button'),
     closePreview: t('blogger.post_form.close_button'),
     fullPreview: t('blogger.post_form.full_preview_button'),
@@ -94,6 +99,7 @@ const translationKeys = computed(() => ({
     previewModeTitle: t('blogger.post_form.preview_mode_title'),
 }));
 
+// Update form from post data
 const updateFormFromPost = (post: PostItem) => {
     form.blog_id = post.blog_id;
     form.group_id = post.group_id || 0;
@@ -104,19 +110,16 @@ const updateFormFromPost = (post: PostItem) => {
     form.visibility = post.visibility ?? 'public';
 };
 
-// Update form when post prop changes (for edit mode) - only if using internal form
+// Watchers for post and blogId props
 if (!props.form) {
     watch(
         () => props.post,
         (newPost) => {
-            if (newPost) {
-                updateFormFromPost(newPost);
-            }
+            if (newPost) updateFormFromPost(newPost);
         },
         { immediate: true },
     );
 
-    // Update blog_id when blogId prop changes (for create mode) - only if using internal form
     watch(
         () => props.blogId,
         (newBlogId) => {
@@ -128,39 +131,28 @@ if (!props.form) {
     );
 }
 
-// Debounced markdown rendering for better performance
+// Debounced markdown rendering
 const debouncedRenderMarkdown = useDebounceFn((content: string) => {
     renderMarkdown(content);
 }, 300);
 
-function handleSubmit() {
-    emit('submit', form);
-}
+// Event handlers
+const handleSubmit = () => emit('submit', form);
 
-function handleApply() {
+const handleApply = () =>
     form.patch(route('posts.update', props.post!.id), {
         preserveScroll: true,
         preserveState: true,
     });
-}
 
-function handleCancel() {
-    emit('cancel');
-}
+const handleCancel = () => emit('cancel');
 
-function handleTogglePreview() {
-    togglePreview(form.content);
-}
+const handleTogglePreview = () => togglePreview(form.content);
 
-function handleToggleFullPreview() {
-    toggleFullPreview(form.content);
-}
+const handleToggleFullPreview = () => toggleFullPreview(form.content);
 
-function handleContentInput() {
-    debouncedRenderMarkdown(form.content);
-}
+const handleContentInput = () => debouncedRenderMarkdown(form.content);
 </script>
-
 <template>
     <div class="mt-4 border-t pt-4">
         <form class="space-y-4" @submit.prevent="handleSubmit">
