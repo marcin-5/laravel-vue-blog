@@ -1,6 +1,5 @@
-// New file: resources/js/composables/blogFormUtils.ts
 import type { AdminBlog as Blog, AdminGroup as Group, BlogFormData, BlogTheme, GroupFormData } from '@/types/blog.types';
-import { useForm } from '@inertiajs/vue3';
+import type { InertiaForm } from '@inertiajs/vue3';
 
 export function ensureThemeStructure(theme: BlogTheme | null | undefined): BlogTheme {
     return {
@@ -44,7 +43,7 @@ export function createFormDataFromBlog(blog: Blog | undefined, defaultLocale: st
     };
 }
 
-export function populateFormFromBlog(form: ReturnType<typeof useForm<BlogFormData>>, blog: Blog, defaultLocale: string = 'en'): void {
+export function populateFormFromBlog(form: InertiaForm<BlogFormData>, blog: Blog, defaultLocale: string = 'en'): void {
     const data = createFormDataFromBlog(blog, defaultLocale);
     form.name = data.name;
     form.description = data.description;
@@ -88,7 +87,7 @@ export function createFormDataFromGroup(group: Group | undefined, defaultLocale:
     };
 }
 
-export function populateFormFromGroup(form: ReturnType<typeof useForm<GroupFormData>>, group: Group, defaultLocale: string = 'en'): void {
+export function populateFormFromGroup(form: InertiaForm<GroupFormData>, group: Group, defaultLocale: string = 'en'): void {
     const data = createFormDataFromGroup(group, defaultLocale);
     form.name = data.name;
     form.content = data.content;
