@@ -6,7 +6,12 @@ import ThemeToggle from '@/components/ThemeToggle.vue';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
+import {
+    NavigationMenu,
+    NavigationMenuItem,
+    NavigationMenuList,
+    navigationMenuTriggerStyle
+} from '@/components/ui/navigation-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import UserMenuContent from '@/components/UserMenuContent.vue';
@@ -136,8 +141,8 @@ const rightNavItems: NavItem[] = [
                         </Button>
 
                         <div class="hidden space-x-1 lg:flex">
-                            <template v-for="item in rightNavItems" :key="item.title">
-                                <TooltipProvider :delay-duration="0">
+                            <TooltipProvider :delay-duration="0">
+                                <template v-for="item in rightNavItems" :key="item.title">
                                     <Tooltip>
                                         <TooltipTrigger>
                                             <Button as-child class="group h-9 w-9 cursor-pointer" size="icon" variant="ghost">
@@ -163,8 +168,8 @@ const rightNavItems: NavItem[] = [
                                             <p>{{ item.title }}</p>
                                         </TooltipContent>
                                     </Tooltip>
-                                </TooltipProvider>
-                            </template>
+                                </template>
+                            </TooltipProvider>
                         </div>
                     </div>
 
