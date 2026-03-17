@@ -26,6 +26,8 @@ export const badgeVariants = cva(
           'rounded-full border-border bg-secondary text-primary shadow-sm',
         rounded3:
           'rounded-full border-border bg-card text-primary shadow-sm',
+        rounded4:
+          'rounded-full border-border bg-background text-foreground shadow-sm',
       },
     },
     defaultVariants: {
