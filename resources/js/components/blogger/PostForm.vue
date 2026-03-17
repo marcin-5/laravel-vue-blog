@@ -3,10 +3,9 @@ import FormCheckboxField from '@/components/blogger/FormCheckboxField.vue';
 import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
 import MarkdownPreviewSection from '@/components/blogger/MarkdownPreviewSection.vue';
 import PostFormField from '@/components/blogger/PostFormField.vue';
-import { useMarkdownPreview } from '@/composables/useMarkdownPreview';
+import { useMarkdownPreviewSection } from '@/composables/useMarkdownPreviewSection';
 import type { AdminPostItem as PostItem } from '@/types/blog.types';
 import { useForm } from '@inertiajs/vue3';
-import { useDebounceFn } from '@vueuse/core';
 import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -33,8 +32,8 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<Emits>();
 
 // Preview functionality using composable
-const { isPreviewMode, isFullPreview, previewLayout, previewHtml, renderMarkdown, togglePreview, toggleFullPreview, setLayout } =
-    useMarkdownPreview('markdown.preview');
+const { isPreviewMode, isFullPreview, previewLayout, previewHtml, togglePreview, toggleFullPreview, setLayout, handleInput } =
+    useMarkdownPreviewSection('markdown.preview');
 
 // Form initialization
 const form =
@@ -131,11 +130,6 @@ if (!props.form) {
     );
 }
 
-// Debounced markdown rendering
-const debouncedRenderMarkdown = useDebounceFn((content: string) => {
-    renderMarkdown(content);
-}, 300);
-
 // Event handlers
 const handleSubmit = () => emit('submit', form);
 
@@ -151,7 +145,7 @@ const handleTogglePreview = () => togglePreview(form.content);
 
 const handleToggleFullPreview = () => toggleFullPreview(form.content);
 
-const handleContentInput = () => debouncedRenderMarkdown(form.content);
+const handleContentInput = () => handleInput(form.content);
 </script>
 <template>
     <div class="mt-4 border-t pt-4">

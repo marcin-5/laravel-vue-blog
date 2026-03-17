@@ -1,4 +1,5 @@
 import { useMarkdownPreview } from '@/composables/useMarkdownPreview';
+import { useDebounceFn } from '@vueuse/core';
 import type { Ref } from 'vue';
 
 export interface MarkdownPreviewSection {
@@ -16,6 +17,10 @@ export function useMarkdownPreviewSection(routeName: string = 'markdown.preview'
     const { isPreviewMode, isFullPreview, previewLayout, previewHtml, renderMarkdown, togglePreview, toggleFullPreview, setLayout } =
         useMarkdownPreview(routeName);
 
+    const handleInput = useDebounceFn((content: string) => {
+        void renderMarkdown(content);
+    }, 300);
+
     return {
         isPreviewMode,
         isFullPreview,
@@ -24,6 +29,6 @@ export function useMarkdownPreviewSection(routeName: string = 'markdown.preview'
         togglePreview,
         toggleFullPreview,
         setLayout,
-        handleInput: renderMarkdown,
+        handleInput,
     };
 }
