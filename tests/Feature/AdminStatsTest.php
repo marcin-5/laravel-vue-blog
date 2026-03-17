@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Blog;
+use App\Models\MarkdownView;
 use App\Models\PageView;
 use App\Models\Post;
 use App\Models\User;
@@ -30,7 +31,17 @@ class AdminStatsTest extends TestCase
             'user_agent' => 'test',
         ]);
 
-        $this->actingAs($admin)
+        // Create markdown view
+        MarkdownView::query()->create([
+            'viewable_type' => $post->getMorphClass(),
+            'viewable_id' => $post->id,
+            'user_agent' => 'Markdown-Parser/1.0',
+            'last_seen_at' => now(),
+            'hits' => 5,
+        ]);
+
+        $this
+            ->actingAs($admin)
             ->get(route('admin.stats.index'))
             ->assertOk()
             ->assertInertia(fn(Assert $page) => $page
@@ -38,6 +49,7 @@ class AdminStatsTest extends TestCase
                 ->has('posts', 1)
                 ->where('posts.0.title', 'Top Post')
                 ->where('posts.0.views', 1)
+                ->where('posts.0.markdown_views', 5)
                 ->has('translations')
                 ->where('translations.messages.blogger.stats.timeline_title', 'Posts Timeline'),
             );
@@ -61,7 +73,8 @@ class AdminStatsTest extends TestCase
         ]);
 
         // Default request (range=week) -> should see 0 posts
-        $this->actingAs($admin)
+        $this
+            ->actingAs($admin)
             ->get(route('admin.stats.index'))
             ->assertOk()
             ->assertInertia(fn(Assert $page) => $page
@@ -70,7 +83,8 @@ class AdminStatsTest extends TestCase
             );
 
         // Request with posts_range=month -> should see the post
-        $this->actingAs($admin)
+        $this
+            ->actingAs($admin)
             ->get(route('admin.stats.index', ['posts_range' => 'month']))
             ->assertOk()
             ->assertInertia(fn(Assert $page) => $page
@@ -86,7 +100,8 @@ class AdminStatsTest extends TestCase
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
 
-        $this->actingAs($admin)
+        $this
+            ->actingAs($admin)
             ->get(route('admin.stats.index'))
             ->assertOk()
             ->assertInertia(fn(Assert $page) => $page
@@ -100,7 +115,8 @@ class AdminStatsTest extends TestCase
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
 
-        $this->actingAs($admin)
+        $this
+            ->actingAs($admin)
             ->get(
                 route('admin.stats.index', [
                     'size' => 0,

@@ -72,6 +72,7 @@
             "unique_views": "unique:",
             "consented_views": "Consented:",
             "anonymous_views": "Anonymous:",
+            "markdown_views": "Markdown:",
             "bot_views": "Bots:",
             "lock_extension": "Lock",
             "unlock_extension": "Unlock"

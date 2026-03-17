@@ -11,8 +11,8 @@ readonly class PostStatsRow
         public int $uniqueViews,
         public int $botViews,
         public int $anonymousViews,
-    ) {
-    }
+        public int $markdownViews,
+    ) {}
 
     public static function fromRow(object $row): self
     {
@@ -23,6 +23,7 @@ readonly class PostStatsRow
             uniqueViews: (int) $row->unique_views,
             botViews: (int) ($row->bot_views ?? 0),
             anonymousViews: (int) ($row->anonymous_views ?? 0),
+            markdownViews: (int) ($row->markdown_views ?? 0),
         );
     }
 
@@ -35,6 +36,7 @@ readonly class PostStatsRow
             'unique_views' => $this->uniqueViews,
             'bot_views' => $this->botViews,
             'anonymous_views' => $this->anonymousViews,
+            'markdown_views' => $this->markdownViews,
         ];
     }
 }

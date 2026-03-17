@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Concerns;
 
 use App\Models\AnonymousView;
 use App\Models\BotView;
+use App\Models\MarkdownView;
 use App\Models\PageView;
 
 trait HandlesViewStats
@@ -32,6 +33,7 @@ trait HandlesViewStats
                 'consented' => (int) $consented,
                 'anonymous' => 0,
                 'bots' => 0,
+                'markdown' => 0,
             ];
         }
 
@@ -43,10 +45,15 @@ trait HandlesViewStats
             ->where('viewable_id', $viewableId)
             ->sum('hits');
 
+        $markdown = MarkdownView::where('viewable_type', $viewableType)
+            ->where('viewable_id', $viewableId)
+            ->sum('hits');
+
         return [
             'consented' => (int) $consented,
             'anonymous' => (int) ($anonymous ?: 0),
             'bots' => (int) ($bots ?: 0),
+            'markdown' => (int) ($markdown ?: 0),
         ];
     }
 }

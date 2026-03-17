@@ -3,6 +3,7 @@
 use App\Models\AnonymousView;
 use App\Models\Blog;
 use App\Models\BotView;
+use App\Models\MarkdownView;
 use App\Models\PageView;
 use App\Models\Post;
 use App\Models\User;
@@ -44,6 +45,15 @@ it('exposes view stats (registered, anonymous, bots) on post page for owner', fu
         'hits' => 1,
     ]);
 
+    // Markdown
+    MarkdownView::query()->create([
+        'viewable_type' => Post::class,
+        'viewable_id' => $post->id,
+        'user_agent' => 'Markdown-Parser/1.0',
+        'last_seen_at' => now(),
+        'hits' => 3,
+    ]);
+
     $response = $this->actingAs($owner)->get("/{$blog->slug}/{$post->slug}");
 
     $response->assertOk();
@@ -51,7 +61,8 @@ it('exposes view stats (registered, anonymous, bots) on post page for owner', fu
         ->component('public/blog/Post')
         ->where('viewStats.consented', 2)
         ->where('viewStats.anonymous', 4)
-        ->where('viewStats.bots', 1),
+        ->where('viewStats.bots', 1)
+        ->where('viewStats.markdown', 3),
     );
 });
 

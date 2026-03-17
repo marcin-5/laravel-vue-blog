@@ -6,13 +6,20 @@ export type BlogRow = {
     owner_id: number;
     owner_name: string;
     views: number;
+    unique_views: number;
     post_views: number;
+    unique_post_views: number;
+    markdown_views: number;
 };
 
 export type PostRow = {
     post_id: number;
     title: string;
     views: number;
+    unique_views: number;
+    bot_views: number;
+    anonymous_views: number;
+    markdown_views: number;
 };
 
 export type VisitorRow = {
@@ -34,7 +41,7 @@ export interface FilterState {
     blogger_id?: number | null;
     blog_id?: number | null;
     group_by?: 'visitor_id' | 'fingerprint';
-    visitor_type?: 'all' | 'bots' | 'anonymous';
+    visitor_type?: 'all' | 'bots' | 'anonymous' | 'markdown';
 }
 
 export interface BlogStats {

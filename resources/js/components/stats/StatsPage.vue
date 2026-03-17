@@ -63,6 +63,7 @@ const blogColumns = computed(() => [
     { key: 'owner_name', label: 'Blogger', visible: props.showBloggerColumn },
     { key: 'views', label: 'Blog views' },
     { key: 'post_views', label: 'Post views' },
+    { key: 'markdown_views', label: 'Markdown views' },
 ]);
 
 const postColumns = computed(() => [
@@ -70,6 +71,7 @@ const postColumns = computed(() => [
     { key: 'views', label: 'Consent views' },
     { key: 'bot_views', label: 'Bot views' },
     { key: 'anonymous_views', label: 'Anonymous views' },
+    { key: 'markdown_views', label: 'Markdown views' },
 ]);
 
 // Columns for Visitor Views (page_views only) — first column reflects group_by only

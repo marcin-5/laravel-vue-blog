@@ -13,8 +13,8 @@ readonly class BlogStatsRow
         public int $uniqueViews,
         public int $postViews,
         public int $uniquePostViews,
-    ) {
-    }
+        public int $markdownViews,
+    ) {}
 
     public static function fromRow(object $row): self
     {
@@ -27,6 +27,7 @@ readonly class BlogStatsRow
             uniqueViews: (int) ($row->unique_views ?? 0),
             postViews: (int) $row->post_views,
             uniquePostViews: (int) ($row->unique_post_views ?? 0),
+            markdownViews: (int) ($row->markdown_views ?? 0),
         );
     }
 
@@ -41,6 +42,7 @@ readonly class BlogStatsRow
             'unique_views' => $this->uniqueViews,
             'post_views' => $this->postViews,
             'unique_post_views' => $this->uniquePostViews,
+            'markdown_views' => $this->markdownViews,
         ];
     }
 }

@@ -20,11 +20,10 @@ class PostViewsQuery
 
     public function __construct(
         private readonly UniqueViewerKeyBuilder $uniqueViewerKeyBuilder,
-    ) {
-    }
+    ) {}
 
     /**
-     * @return Collection<int, array{post_id:int,title:string,views:int,unique_views:int,bot_views:int,anonymous_views:int}>
+     * @return Collection<int, array{post_id:int,title:string,views:int,unique_views:int,bot_views:int,anonymous_views:int,markdown_views:int}>
      */
     public function execute(StatsCriteria $criteria): Collection
     {
@@ -32,10 +31,12 @@ class PostViewsQuery
         $from = $bounds[0] ?? null;
         $to = $bounds[1] ?? null;
 
-        $query = $this->buildQuery($from, $to)
+        $query = $this
+            ->buildQuery($from, $to)
             ->when($criteria->blogId, fn(Builder $q) => $q->where('posts.blog_id', $criteria->blogId))
             ->when($criteria->bloggerId, function (Builder $q) use ($criteria) {
-                $q->join('blogs', 'blogs.id', '=', 'posts.blog_id')
+                $q
+                    ->join('blogs', 'blogs.id', '=', 'posts.blog_id')
                     ->where('blogs.user_id', $criteria->bloggerId);
             });
 
@@ -52,20 +53,23 @@ class PostViewsQuery
 
         $botSub = $this->buildAggregateSubquery('bot_views', 'bot_views', $postClass, $from, $to);
         $anonSub = $this->buildAggregateSubquery('anonymous_views', 'anonymous_views', $postClass, $from, $to);
+        $markdownSub = $this->buildAggregateSubquery('markdown_views', 'markdown_views', $postClass, $from, $to);
 
         return PageView::query()
             ->selectRaw(
                 "posts.id as post_id, posts.title, COUNT(page_views.id) as views, COUNT(DISTINCT ($uniqueViewerKeySql)) as unique_views, " .
-                'COALESCE(bot.bot_views, 0) as bot_views, COALESCE(anon.anonymous_views, 0) as anonymous_views',
+                'COALESCE(bot.bot_views, 0) as bot_views, COALESCE(anon.anonymous_views, 0) as anonymous_views, COALESCE(markdown.markdown_views, 0) as markdown_views',
             )
             ->join('posts', function ($join) use ($postClass) {
-                $join->on('posts.id', '=', 'page_views.viewable_id')
+                $join
+                    ->on('posts.id', '=', 'page_views.viewable_id')
                     ->where('page_views.viewable_type', '=', $postClass);
             })
             ->leftJoinSub($botSub, 'bot', 'bot.viewable_id', '=', 'posts.id')
             ->leftJoinSub($anonSub, 'anon', 'anon.viewable_id', '=', 'posts.id')
+            ->leftJoinSub($markdownSub, 'markdown', 'markdown.viewable_id', '=', 'posts.id')
             ->when($from && $to, fn($q) => $q->whereBetween('page_views.created_at', [$from, $to]))
-            ->groupBy('posts.id', 'posts.title', 'bot.bot_views', 'anon.anonymous_views');
+            ->groupBy('posts.id', 'posts.title', 'bot.bot_views', 'anon.anonymous_views', 'markdown.markdown_views');
     }
 
     private function getPostMorphClass(): string

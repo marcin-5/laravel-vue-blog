@@ -15,6 +15,10 @@ defineProps({
         type: Number,
         default: 0,
     },
+    markdown: {
+        type: Number,
+        default: 0,
+    },
 });
 
 const { t } = useI18n();
@@ -33,6 +37,10 @@ const { t } = useI18n();
         <Badge v-if="bots" class="gap-1.5 px-2.5 py-1" variant="rounded3">
             <span class="inline-block h-2 w-2 rounded-full bg-foreground"></span>
             <span>{{ t('blog.post.bot_views') }} {{ bots.toLocaleString() }}</span>
+        </Badge>
+        <Badge v-if="markdown" class="gap-1.5 px-2.5 py-1" variant="rounded4">
+            <span class="inline-block h-2 w-2 rounded-full bg-accent-foreground"></span>
+            <span>{{ t('blog.post.markdown_views') }} {{ markdown.toLocaleString() }}</span>
         </Badge>
     </div>
 </template>
