@@ -56,7 +56,7 @@ class PublicBlogController extends BasePublicController
 
         $baseUrl = config('app.url');
         $seoData = new SeoData(
-            title: $blog->seo_title . ' - ' . config('app.name'),
+            title: $blog->getSeoTitleWithFallback() . ' - ' . config('app.name'),
             description: $metaDescription,
             canonicalUrl: $baseUrl . '/' . $blog->slug,
             ogImage: $baseUrl . '/og-image.png',
@@ -118,7 +118,7 @@ class PublicBlogController extends BasePublicController
 
         $baseUrl = config('app.url');
         $seoData = new SeoData(
-            title: $post->seo_title . ' - ' . $blog->name,
+            title: $post->getSeoTitleWithFallback() . ' - ' . $blog->name,
             description: $metaDescription,
             canonicalUrl: $baseUrl . '/' . $blog->slug . '/' . $post->slug,
             ogImage: $baseUrl . '/og-image.png',

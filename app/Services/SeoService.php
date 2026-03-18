@@ -48,7 +48,7 @@ class SeoService
         return [
             '@context' => 'https://schema.org',
             '@type' => 'Blog',
-            'name' => $blog->seo_title,
+            'name' => $blog->getSeoTitleWithFallback(),
             'url' => $blogUrl,
             'description' => $description,
             'author' => $this->createAuthorOrganization($blog->name),
@@ -76,7 +76,7 @@ class SeoService
             $postUrl = $this->buildPostUrl($baseUrl, $blogSlug, $post->slug);
             return [
                 '@type' => 'BlogPosting',
-                'headline' => $post->seo_title,
+                'headline' => $post->getSeoTitleWithFallback(),
                 'url' => $postUrl,
                 'datePublished' => $this->getIsoDate($post->published_at),
                 'abstract' => $this->safeStripTags($post->excerpt),
@@ -148,7 +148,7 @@ class SeoService
         return [
             '@context' => 'https://schema.org',
             '@type' => 'BlogPosting',
-            'headline' => $post->seo_title,
+            'headline' => $post->getSeoTitleWithFallback(),
             'description' => $description,
             'url' => $postUrl,
             'datePublished' => $this->getIsoDate($post->published_at),

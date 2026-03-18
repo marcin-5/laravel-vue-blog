@@ -17,6 +17,7 @@ class UpdateBlogRequest extends FormRequest
 
         return [
             'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'seo_title' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'footer' => ['nullable', 'string'],
             'motto' => ['nullable', 'string'],
@@ -27,13 +28,13 @@ class UpdateBlogRequest extends FormRequest
             'sidebar' => [
                 'sometimes',
                 'integer',
-                'between:' . $config['limits']['sidebar']['min'] . ',' . $config['limits']['sidebar']['max']
+                'between:' . $config['limits']['sidebar']['min'] . ',' . $config['limits']['sidebar']['max'],
             ],
             'page_size' => [
                 'sometimes',
                 'integer',
                 'min:' . $config['limits']['page_size']['min'],
-                'max:' . $config['limits']['page_size']['max']
+                'max:' . $config['limits']['page_size']['max'],
             ],
             'theme' => ['nullable', 'array'],
             'theme.light' => ['nullable', 'array'],
@@ -49,6 +50,10 @@ class UpdateBlogRequest extends FormRequest
 
         if (array_key_exists('name', $validated)) {
             $data['name'] = $validated['name'];
+        }
+
+        if (array_key_exists('seo_title', $validated)) {
+            $data['seo_title'] = $validated['seo_title'];
         }
 
         if (array_key_exists('description', $validated)) {

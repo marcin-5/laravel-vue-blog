@@ -17,6 +17,8 @@ class StoreBlogRequest extends FormRequest
         $config = config('blogger');
 
         return [
+            'name' => ['required', 'string', 'max:255'],
+            'seo_title' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'footer' => ['nullable', 'string'],
             'motto' => ['nullable', 'string'],
@@ -27,13 +29,13 @@ class StoreBlogRequest extends FormRequest
             'sidebar' => [
                 'sometimes',
                 'integer',
-                'between:' . $config['limits']['sidebar']['min'] . ',' . $config['limits']['sidebar']['max']
+                'between:' . $config['limits']['sidebar']['min'] . ',' . $config['limits']['sidebar']['max'],
             ],
             'page_size' => [
                 'sometimes',
                 'integer',
                 'min:' . $config['limits']['page_size']['min'],
-                'max:' . $config['limits']['page_size']['max']
+                'max:' . $config['limits']['page_size']['max'],
             ],
             'theme' => ['nullable', 'array'],
             'theme.light' => ['nullable', 'array'],
@@ -49,6 +51,7 @@ class StoreBlogRequest extends FormRequest
         return [
             'user_id' => $this->user()->id,
             'name' => $this->getBlogName(),
+            'seo_title' => $validated['seo_title'] ?? null,
             'description' => $validated['description'] ?? null,
             'footer' => $validated['footer'] ?? null,
             'motto' => $validated['motto'] ?? null,

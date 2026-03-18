@@ -33,13 +33,14 @@ class UpdatePostRequest extends FormRequest
 
         return [
             'title' => ['sometimes', 'required', 'string', 'max:255'],
+            'seo_title' => ['nullable', 'string', 'max:255'],
             'excerpt' => ['nullable', 'string', 'max:' . ($config['limits']['excerpt_max_length'] ?? 500)],
             'content' => ['nullable', 'string'],
             'is_published' => ['sometimes', 'boolean'],
             'visibility' => [
                 'sometimes',
                 'string',
-                'in:' . implode(',', $config['allowed_visibility'] ?? ['public', 'registered'])
+                'in:' . implode(',', $config['allowed_visibility'] ?? ['public', 'registered']),
             ],
         ];
     }
@@ -51,6 +52,10 @@ class UpdatePostRequest extends FormRequest
 
         if (array_key_exists('title', $validated)) {
             $data['title'] = $validated['title'];
+        }
+
+        if (array_key_exists('seo_title', $validated)) {
+            $data['seo_title'] = $validated['seo_title'];
         }
 
         if (array_key_exists('excerpt', $validated)) {

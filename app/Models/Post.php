@@ -128,11 +128,19 @@ class Post extends Model
     }
 
     /**
-     * Get the SEO title, falling back to title.
+     * Get the SEO title, falling back to title if not specifically requested.
      */
-    public function getSeoTitleAttribute(?string $value): string
+    public function getSeoTitleAttribute(?string $value): ?string
     {
-        return $value ?: $this->title;
+        return $value;
+    }
+
+    /**
+     * Get the SEO title with fallback to title.
+     */
+    public function getSeoTitleWithFallback(): string
+    {
+        return $this->seo_title ?: $this->title;
     }
 
     /**
