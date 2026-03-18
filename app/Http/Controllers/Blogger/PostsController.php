@@ -38,9 +38,10 @@ class PostsController extends AuthenticatedController
     public function store(StorePostRequest $request): RedirectResponse
     {
         $blog = $request->getBlog();
+        $group = $request->getGroup();
         $postData = $request->getPostData();
 
-        $this->postService->createPost($blog, $postData, $request->user()->id);
+        $this->postService->createPost($blog, $postData, $request->user()->id, $group);
 
         return back()->with('success', __('blogs.messages.post_created'));
     }

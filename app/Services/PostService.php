@@ -3,16 +3,21 @@
 namespace App\Services;
 
 use App\Models\Blog;
+use App\Models\Group;
 use App\Models\Post;
 use Illuminate\Database\Eloquent\Builder;
 
 class PostService
 {
-    public function createPost(Blog $blog, array $postData, ?int $userId = null): Post
+    public function createPost(?Blog $blog, array $postData, ?int $userId = null, ?Group $group = null): Post
     {
-        return $blog->posts()->create(array_merge($postData, [
-            'user_id' => $userId,
-        ]));
+        $data = array_merge($postData, ['user_id' => $userId]);
+
+        if ($group) {
+            return $group->posts()->create($data);
+        }
+
+        return $blog->posts()->create($data);
     }
 
     public function updatePost(Post $post, array $postData): Post

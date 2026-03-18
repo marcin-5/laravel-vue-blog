@@ -33,7 +33,7 @@ const {
     editingPostId,
     postForm,
     postEditForm,
-    startCreatePost,
+    startCreatePostInGroup,
     cancelCreatePost,
     submitCreatePost,
     startEditPost,
@@ -62,7 +62,7 @@ function handleStartCreatePost(group: Group) {
     editForm.reset();
     postEditForm.reset();
 
-    startCreatePost(group as any); // Adapt to the expectation of the composable
+    startCreatePostInGroup(group);
 }
 
 function handleTogglePosts(group: Group) {

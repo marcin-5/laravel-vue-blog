@@ -1,4 +1,4 @@
-import type { AdminBlog as Blog, AdminPostItem as PostItem, PostExtension } from '@/types/blog.types';
+import type { AdminBlog as Blog, AdminGroup as Group, AdminPostItem as PostItem, PostExtension } from '@/types/blog.types';
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -10,8 +10,8 @@ export function usePostForm() {
     const editingExtensionId = ref<number | null>(null);
 
     const postForm = useForm({
-        blog_id: 0 as number,
-        group_id: 0 as number,
+        blog_id: null as number | null,
+        group_id: null as number | null,
         title: '' as string,
         excerpt: '' as string,
         content: '' as string,
@@ -49,6 +49,19 @@ export function usePostForm() {
         creatingPostForId.value = blog.id;
         postForm.reset();
         postForm.blog_id = blog.id;
+        postForm.group_id = null;
+    }
+
+    function startCreatePostInGroup(group: Group) {
+        if (creatingPostForId.value === group.id) {
+            cancelCreatePost();
+            return;
+        }
+
+        creatingPostForId.value = group.id;
+        postForm.reset();
+        postForm.group_id = group.id;
+        postForm.blog_id = null;
     }
 
     function cancelCreatePost() {
@@ -165,6 +178,7 @@ export function usePostForm() {
 
         // Actions
         startCreatePost,
+        startCreatePostInGroup,
         cancelCreatePost,
         submitCreatePost,
         startEditPost,

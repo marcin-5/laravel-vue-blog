@@ -3,12 +3,23 @@
 namespace App\Http\Requests;
 
 use App\Models\Blog;
+use App\Models\Group;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StorePostRequest extends FormRequest
 {
     public function authorize(): bool
     {
+        $groupId = $this->input('group_id');
+        if ($groupId) {
+            $group = Group::find($groupId);
+            if (!$group) {
+                return false;
+            }
+
+            return $group->user_id === $this->user()->id;
+        }
+
         $blogId = $this->input('blog_id');
         if (!$blogId) {
             return false;
@@ -27,7 +38,8 @@ class StorePostRequest extends FormRequest
         $config = config('blogger.posts', []);
 
         return [
-            'blog_id' => ['required', 'integer', 'exists:blogs,id'],
+            'blog_id' => ['nullable', 'integer', 'exists:blogs,id'],
+            'group_id' => ['nullable', 'integer', 'exists:groups,id'],
             'title' => ['required', 'string', 'max:255'],
             'seo_title' => ['nullable', 'string', 'max:255'],
             'excerpt' => ['nullable', 'string', 'max:' . ($config['limits']['excerpt_max_length'] ?? 500)],
@@ -47,7 +59,8 @@ class StorePostRequest extends FormRequest
         $config = config('blogger.posts.defaults', []);
 
         return [
-            'blog_id' => $validated['blog_id'],
+            'blog_id' => $validated['blog_id'] ?? null,
+            'group_id' => $validated['group_id'] ?? null,
             'title' => $validated['title'],
             'seo_title' => $validated['seo_title'] ?? null,
             'excerpt' => $validated['excerpt'] ?? null,
@@ -57,8 +70,17 @@ class StorePostRequest extends FormRequest
         ];
     }
 
-    public function getBlog(): Blog
+    public function getBlog(): ?Blog
     {
-        return Blog::findOrFail($this->input('blog_id'));
+        $blogId = $this->input('blog_id');
+
+        return $blogId ? Blog::findOrFail($blogId) : null;
+    }
+
+    public function getGroup(): ?Group
+    {
+        $groupId = $this->input('group_id');
+
+        return $groupId ? Group::findOrFail($groupId) : null;
     }
 }
