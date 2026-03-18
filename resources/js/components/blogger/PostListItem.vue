@@ -116,6 +116,7 @@ function copyUrl() {
         <PostForm
             v-if="isEditing"
             :form="editForm"
+            :group-id="post.group_id ?? undefined"
             :id-prefix="`edit-post-${post.id}`"
             :is-edit="true"
             :post="post"

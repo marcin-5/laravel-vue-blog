@@ -74,7 +74,7 @@ const emit = defineEmits<ListItemEmits<Group, PostItem>>();
                 <div class="mb-4 flex items-center justify-between">
                     <h3 class="text-sm font-medium">{{ t('blogger.actions.add_post_to') }} {{ item.name }}</h3>
                 </div>
-                <PostForm :form="postForm" @cancel="handleCancelCreatePost" @submit="(form) => emit('submitCreatePost', form)" />
+                <PostForm :form="postForm" :group-id="item.id" @cancel="handleCancelCreatePost" @submit="(form) => emit('submitCreatePost', form)" />
             </div>
         </template>
     </BloggerListItem>

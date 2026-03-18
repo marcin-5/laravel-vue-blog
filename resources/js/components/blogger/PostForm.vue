@@ -14,6 +14,7 @@ const { t } = useI18n();
 interface Props {
     post?: PostItem;
     blogId?: number;
+    groupId?: number;
     isEdit?: boolean;
     idPrefix?: string;
     form?: any;
@@ -179,6 +180,7 @@ const excerptClass = computed(() => {
             />
 
             <PostFormField
+                v-if="!props.groupId && !form.group_id"
                 :id="`${fieldIdPrefix}-seo-title`"
                 v-model="form.seo_title"
                 :error="form.errors?.seo_title"
