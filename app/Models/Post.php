@@ -36,6 +36,7 @@ class Post extends Model
         'group_id',
         'user_id',
         'title',
+        'seo_title',
         'slug',
         'excerpt',
         'content',
@@ -88,12 +89,13 @@ class Post extends Model
      */
     public function extensions(): BelongsToMany
     {
-        return $this->belongsToMany(
-            Post::class,
-            'post_extensions',
-            'post_id',
-            'extension_post_id',
-        )
+        return $this
+            ->belongsToMany(
+                Post::class,
+                'post_extensions',
+                'post_id',
+                'extension_post_id',
+            )
             ->withPivot(['display_order', 'created_at'])
             ->as('attachment')
             ->orderByPivot('display_order')
@@ -105,12 +107,13 @@ class Post extends Model
      */
     public function parentPosts(): BelongsToMany
     {
-        return $this->belongsToMany(
-            Post::class,
-            'post_extensions',
-            'extension_post_id',
-            'post_id',
-        )
+        return $this
+            ->belongsToMany(
+                Post::class,
+                'post_extensions',
+                'extension_post_id',
+                'post_id',
+            )
             ->withPivot(['display_order', 'created_at'])
             ->as('attachment')
             ->withTimestamps();
@@ -122,6 +125,14 @@ class Post extends Model
     public function getAttachedAtAttribute(): ?Carbon
     {
         return $this->attachment?->created_at;
+    }
+
+    /**
+     * Get the SEO title, falling back to title.
+     */
+    public function getSeoTitleAttribute(?string $value): string
+    {
+        return $value ?: $this->title;
     }
 
     /**
@@ -161,7 +172,8 @@ class Post extends Model
      */
     public function scopePublished(Builder $query): Builder
     {
-        return $query->whereNotNull('published_at')
+        return $query
+            ->whereNotNull('published_at')
             ->where('published_at', '<=', now());
     }
 
@@ -178,7 +190,8 @@ class Post extends Model
      */
     public function scopeOrderByPublicationDate(Builder $query, string $direction = 'desc'): Builder
     {
-        return $query->orderBy('published_at', $direction)
+        return $query
+            ->orderBy('published_at', $direction)
             ->orderBy('created_at', $direction);
     }
 
@@ -187,7 +200,8 @@ class Post extends Model
      */
     public function scopeForPublicView(Builder $query): Builder
     {
-        return $query->published()
+        return $query
+            ->published()
             ->whereIn('visibility', [self::VIS_PUBLIC, self::VIS_UNLISTED])
             ->orderByPublicationDate();
     }
@@ -197,18 +211,23 @@ class Post extends Model
      */
     public function scopeForNewsletter(Builder $query, DateTimeInterface $since): Builder
     {
-        return $query->published()
+        return $query
+            ->published()
             ->where(function (Builder $q) use ($since) {
                 // Regular posts published since $since
-                $q->where(function (Builder $q2) use ($since) {
-                    $q2->whereIn('visibility', [self::VIS_PUBLIC, self::VIS_UNLISTED])
-                        ->where('published_at', '>=', $since);
-                })
+                $q
+                    ->where(function (Builder $q2) use ($since) {
+                        $q2
+                            ->whereIn('visibility', [self::VIS_PUBLIC, self::VIS_UNLISTED])
+                            ->where('published_at', '>=', $since);
+                    })
                     // OR Extensions attached to public posts since $since
                     ->orWhere(function (Builder $q2) use ($since) {
-                        $q2->extensionType()
+                        $q2
+                            ->extensionType()
                             ->whereHas('parentPosts', function (Builder $q3) use ($since) {
-                                $q3->whereIn('visibility', [self::VIS_PUBLIC, self::VIS_UNLISTED])
+                                $q3
+                                    ->whereIn('visibility', [self::VIS_PUBLIC, self::VIS_UNLISTED])
                                     ->where('post_extensions.created_at', '>=', $since);
                             });
                     });
@@ -220,7 +239,8 @@ class Post extends Model
      */
     public function scopeForPublicListing(Builder $query): Builder
     {
-        return $query->published()
+        return $query
+            ->published()
             ->public()
             ->regularPosts()
             ->orderByPublicationDate()
@@ -232,7 +252,8 @@ class Post extends Model
      */
     public function scopeFindBySlugForPublic(Builder $query, string $slug): Builder
     {
-        return $query->forPublicView()
+        return $query
+            ->forPublicView()
             ->where('slug', $slug);
     }
 
@@ -244,7 +265,8 @@ class Post extends Model
         $userId = $user instanceof User ? $user->id : (int) $user;
 
         return $query->where(function (Builder $q) use ($userId) {
-            $q->whereHas('blog', fn(Builder $bq) => $bq->where('user_id', $userId))
+            $q
+                ->whereHas('blog', fn(Builder $bq) => $bq->where('user_id', $userId))
                 ->orWhereHas('group', fn(Builder $gq) => $gq->where('user_id', $userId));
         });
     }
@@ -254,7 +276,8 @@ class Post extends Model
      */
     public function scopeForGroupView(Builder $query): Builder
     {
-        return $query->published()
+        return $query
+            ->published()
             ->regularPosts()
             ->orderByPublicationDate();
     }

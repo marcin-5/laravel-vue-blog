@@ -40,6 +40,7 @@ class Blog extends Model
     protected $fillable = [
         'user_id',
         'name',
+        'seo_title',
         'slug',
         'description',
         'motto',
@@ -118,13 +119,22 @@ class Blog extends Model
     }
 
     /**
+     * Get the SEO title, falling back to name.
+     */
+    public function getSeoTitleAttribute(?string $value): string
+    {
+        return $value ?: $this->name;
+    }
+
+    /**
      * Scope: Load posts for the index view with proper ordering and fields.
      */
     public function scopeWithPostsForIndex(Builder $query): Builder
     {
         return $query->with([
             'posts' => function ($q) {
-                $q->orderByRaw('COALESCE(published_at, created_at) DESC')
+                $q
+                    ->orderByRaw('COALESCE(published_at, created_at) DESC')
                     ->with([
                         'extensions' => function ($eq) {
                             $eq->oldest();
@@ -159,12 +169,13 @@ class Blog extends Model
      */
     public function scopeOrderByLatestPost(Builder $query): Builder
     {
-        return $query->addSelect([
-            'latest_post_at' => Post::query()
-                ->selectRaw('COALESCE(MAX(COALESCE(published_at, created_at)), NULL)')
-                ->whereColumn('blog_id', 'blogs.id')
-                ->where('is_published', true),
-        ])
+        return $query
+            ->addSelect([
+                'latest_post_at' => Post::query()
+                    ->selectRaw('COALESCE(MAX(COALESCE(published_at, created_at)), NULL)')
+                    ->whereColumn('blog_id', 'blogs.id')
+                    ->where('is_published', true),
+            ])
             ->orderByDesc('latest_post_at')
             ->orderBy('name');
     }

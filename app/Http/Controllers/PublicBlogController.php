@@ -56,7 +56,7 @@ class PublicBlogController extends BasePublicController
 
         $baseUrl = config('app.url');
         $seoData = new SeoData(
-            title: $blog->name . ' - ' . config('app.name'),
+            title: $blog->seo_title . ' - ' . config('app.name'),
             description: $metaDescription,
             canonicalUrl: $baseUrl . '/' . $blog->slug,
             ogImage: $baseUrl . '/og-image.png',
@@ -118,7 +118,7 @@ class PublicBlogController extends BasePublicController
 
         $baseUrl = config('app.url');
         $seoData = new SeoData(
-            title: $post->title . ' - ' . $blog->name,
+            title: $post->seo_title . ' - ' . $blog->name,
             description: $metaDescription,
             canonicalUrl: $baseUrl . '/' . $blog->slug . '/' . $post->slug,
             ogImage: $baseUrl . '/og-image.png',
