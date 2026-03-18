@@ -27,8 +27,7 @@ const visibleItems = computed(() => {
         if (!item.roles || item.roles.length === 0) return true;
         if (!currentRole.value) return false;
         if (item.roles.includes(currentRole.value)) return true;
-        if (item.roles.includes('contributor') && isGroupContributor.value) return true;
-        return false;
+        return item.roles.includes('contributor') && isGroupContributor.value;
     });
 });
 </script>
