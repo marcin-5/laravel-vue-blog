@@ -358,7 +358,8 @@
             "horizontal_button": "Poziomy",
             "vertical_button": "Pionowy",
             "unlisted_label": "Ukryty (dostępny tylko przez link)",
-            "extension_label": "Rozszerzenie (używane jako dodatek do innych postów)"
+            "extension_label": "Rozszerzenie (używane jako dodatek do innych postów)",
+            "characters": "znaków"
         },
         "post_item": {
             "close_button": "Zamknij",

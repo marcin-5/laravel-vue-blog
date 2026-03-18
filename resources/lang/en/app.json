@@ -358,7 +358,8 @@
             "horizontal_button": "Horizontal",
             "vertical_button": "Vertical",
             "unlisted_label": "Unlisted (available via link only)",
-            "extension_label": "Extension (used as an add-on to other posts)"
+            "extension_label": "Extension (used as an add-on to other posts)",
+            "characters": "characters"
         },
         "post_item": {
             "close_button": "Close",

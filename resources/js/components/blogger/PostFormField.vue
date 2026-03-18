@@ -12,6 +12,7 @@ interface Props {
     required?: boolean;
     tooltip?: string;
     inputClass?: string;
+    hint?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -60,5 +61,6 @@ function handleInput(event: Event) {
         />
         <slot v-else />
         <InputError :message="props.error" />
+        <p v-if="props.hint" class="mt-1 text-xs text-muted-foreground">{{ props.hint }}</p>
     </div>
 </template>

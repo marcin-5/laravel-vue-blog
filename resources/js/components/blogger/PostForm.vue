@@ -99,6 +99,7 @@ const translationKeys = computed(() => ({
     markdownLabel: t('blogger.post_form.markdown_label'),
     previewLabel: t('blogger.post_form.preview_label'),
     previewModeTitle: t('blogger.post_form.preview_mode_title'),
+    characters: t('blogger.post_form.characters'),
 }));
 
 // Update form from post data
@@ -155,6 +156,13 @@ const seoTitleClass = computed(() => {
     const length = form.seo_title?.length || 0;
     return length >= 50 && length <= 60 ? 'bg-secondary' : '';
 });
+
+const excerptClass = computed(() => {
+    const length = form.excerpt?.length || 0;
+    if (length > 160) return 'bg-destructive text-destructive-foreground';
+    if (length > 120) return 'bg-constructive text-constructive-foreground';
+    return '';
+});
 </script>
 <template>
     <div class="mt-4 border-t pt-4">
@@ -183,6 +191,8 @@ const seoTitleClass = computed(() => {
                 :id="`${fieldIdPrefix}-excerpt`"
                 v-model="form.excerpt"
                 :error="form.errors?.excerpt"
+                :hint="`${form.excerpt?.length || 0} ${translationKeys.characters}`"
+                :input-class="excerptClass"
                 :label="translationKeys.excerpt"
                 :placeholder="translationKeys.excerptPlaceholder"
                 :rows="2"
