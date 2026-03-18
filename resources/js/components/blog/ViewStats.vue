@@ -26,7 +26,7 @@ const { t } = useI18n();
 
 <template>
     <div class="flex items-center gap-2">
-        <Badge class="gap-1.5 px-2.5 py-1" variant="rounded1">
+        <Badge v-if="consented" class="gap-1.5 px-2.5 py-1" variant="rounded1">
             <span class="inline-block h-2 w-2 rounded-full bg-primary-foreground"></span>
             <span>{{ t('blog.post.consented_views') }} {{ consented.toLocaleString() }}</span>
         </Badge>

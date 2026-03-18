@@ -19,6 +19,7 @@ use App\Services\StatsService;
 use App\Services\TranslationService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Inertia\Response;
 
 class PublicBlogController extends BasePublicController
@@ -84,7 +85,7 @@ class PublicBlogController extends BasePublicController
             'sidebar' => (int) ($blog->sidebar ?? 0),
             'navigation' => $this->navigation->getLandingNavigation($blog),
             'seo' => $seoData->toArray(),
-            'viewStats' => $this->getViewStats(Blog::class, $blog->id, $blog->user_id),
+            'viewStats' => Inertia::defer(fn() => $this->getViewStats(Blog::class, $blog->id, $blog->user_id)),
         ]);
     }
 
@@ -107,7 +108,8 @@ class PublicBlogController extends BasePublicController
     {
         $this->ensureBlogIsPublic($blog);
 
-        $post = $blog->posts()
+        $post = $blog
+            ->posts()
             ->findBySlugForPublic($postSlug)
             ->firstOrFail();
 
@@ -140,7 +142,8 @@ class PublicBlogController extends BasePublicController
                 'published_at' => $post->published_at?->format('Y-m-d'),
                 'visibility' => $post->visibility,
                 'excerpt' => $post->excerpt,
-                'extensions' => $post->extensions()
+                'extensions' => $post
+                    ->extensions()
                     ->where('is_published', true)
                     ->oldest()
                     ->get()
@@ -156,7 +159,7 @@ class PublicBlogController extends BasePublicController
             'sidebar' => (int) ($blog->sidebar ?? 0),
             'navigation' => $this->navigation->getPostNavigation($blog, $post),
             'seo' => $seoData->toArray(),
-            'viewStats' => $this->getViewStats(Post::class, $post->id, $blog->user_id),
+            'viewStats' => Inertia::defer(fn() => $this->getViewStats(Post::class, $post->id, $blog->user_id)),
         ]);
     }
 

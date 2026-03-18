@@ -7,6 +7,7 @@ use App\Models\PageView;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\UserAgent;
+use Inertia\Testing\AssertableInertia as Assert;
 
 it('exposes view stats (registered, anonymous, bots) on blog landing for owner', function () {
     $owner = User::factory()->create();
@@ -47,11 +48,14 @@ it('exposes view stats (registered, anonymous, bots) on blog landing for owner',
     $response = $this->actingAs($owner)->get("/{$blog->slug}");
 
     $response->assertOk();
-    $response->assertInertia(fn($page) => $page
+    $response->assertInertia(fn(Assert $page) => $page
         ->component('public/blog/Landing')
-        ->where('viewStats.consented', 2)
-        ->where('viewStats.anonymous', 3)
-        ->where('viewStats.bots', 2),
+        ->missing('viewStats')
+        ->loadDeferredProps(fn(Assert $reload) => $reload
+            ->where('viewStats.consented', 2)
+            ->where('viewStats.anonymous', 4)
+            ->where('viewStats.bots', 2),
+        ),
     );
 });
 
@@ -84,11 +88,14 @@ it('exposes view stats (registered, anonymous, bots) on blog landing for admin',
     $response = $this->actingAs($admin)->get("/{$blog->slug}");
 
     $response->assertOk();
-    $response->assertInertia(fn($page) => $page
+    $response->assertInertia(fn(Assert $page) => $page
         ->component('public/blog/Landing')
-        ->where('viewStats.consented', 1)
-        ->where('viewStats.anonymous', 1)
-        ->where('viewStats.bots', 1),
+        ->missing('viewStats')
+        ->loadDeferredProps(fn(Assert $reload) => $reload
+            ->where('viewStats.consented', 1)
+            ->where('viewStats.anonymous', 2)
+            ->where('viewStats.bots', 1),
+        ),
     );
 });
 
@@ -100,16 +107,20 @@ it('does not expose view stats on blog landing to guests or non-owners', functio
     // Guest
     $guestResponse = $this->get("/{$blog->slug}");
     $guestResponse->assertOk();
-    $guestResponse->assertInertia(fn($page) => $page
+    $guestResponse->assertInertia(fn(Assert $page) => $page
         ->component('public/blog/Landing')
-        ->where('viewStats', null),
+        ->loadDeferredProps(fn(Assert $reload) => $reload
+            ->where('viewStats', null),
+        ),
     );
 
     // Logged-in but not owner and not admin
     $userResponse = $this->actingAs($other)->get("/{$blog->slug}");
     $userResponse->assertOk();
-    $userResponse->assertInertia(fn($page) => $page
+    $userResponse->assertInertia(fn(Assert $page) => $page
         ->component('public/blog/Landing')
-        ->where('viewStats', null),
+        ->loadDeferredProps(fn(Assert $reload) => $reload
+            ->where('viewStats', null),
+        ),
     );
 });
