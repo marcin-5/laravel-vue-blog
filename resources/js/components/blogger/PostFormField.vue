@@ -11,12 +11,14 @@ interface Props {
     rows?: number;
     required?: boolean;
     tooltip?: string;
+    inputClass?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
     type: 'input',
     rows: 2,
     required: false,
+    inputClass: '',
 });
 
 const modelValue = defineModel<string | null>({ required: false, default: '' });
@@ -40,20 +42,20 @@ function handleInput(event: Event) {
         <input
             v-if="props.type === 'input'"
             :id="props.id"
+            :class="['block w-full rounded-md border px-3 py-2', props.inputClass]"
             :placeholder="props.placeholder"
             :required="props.required"
             :value="modelValue ?? ''"
-            class="block w-full rounded-md border px-3 py-2"
             type="text"
             @input="handleInput"
         />
         <textarea
             v-else-if="props.type === 'textarea'"
             :id="props.id"
+            :class="['block w-full rounded-md border px-3 py-2', props.inputClass]"
             :placeholder="props.placeholder"
             :rows="props.rows"
             :value="modelValue ?? ''"
-            class="block w-full rounded-md border px-3 py-2"
             @input="handleInput"
         />
         <slot v-else />

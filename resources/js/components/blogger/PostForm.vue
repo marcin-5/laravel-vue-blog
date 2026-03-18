@@ -150,6 +150,11 @@ const handleTogglePreview = () => togglePreview(form.content);
 const handleToggleFullPreview = () => toggleFullPreview(form.content);
 
 const handleContentInput = () => handleInput(form.content);
+
+const seoTitleClass = computed(() => {
+    const length = form.seo_title?.length || 0;
+    return length >= 50 && length <= 60 ? 'bg-secondary' : '';
+});
 </script>
 <template>
     <div class="mt-4 border-t pt-4">
@@ -168,6 +173,7 @@ const handleContentInput = () => handleInput(form.content);
                 :id="`${fieldIdPrefix}-seo-title`"
                 v-model="form.seo_title"
                 :error="form.errors?.seo_title"
+                :input-class="seoTitleClass"
                 :label="translationKeys.seoTitle"
                 :placeholder="translationKeys.seoTitlePlaceholder"
                 type="input"

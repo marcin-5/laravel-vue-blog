@@ -76,6 +76,11 @@ function handleApply() {
 function handleCancel() {
     emit('cancel');
 }
+
+const seoTitleClass = computed(() => {
+    const length = form.seo_title?.length || 0;
+    return length >= 50 && length <= 60 ? 'bg-secondary' : '';
+});
 </script>
 
 <template>
@@ -95,6 +100,7 @@ function handleCancel() {
                 :id="`${fieldIdPrefix}-seo-title`"
                 v-model="form.seo_title"
                 :error="form.errors.seo_title"
+                :input-class="seoTitleClass"
                 :label="baseTranslations.seoTitle"
                 :placeholder="baseTranslations.seoTitlePlaceholder"
                 type="input"
