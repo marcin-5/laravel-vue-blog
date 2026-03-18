@@ -61,6 +61,13 @@ class PostPolicy
             return true;
         }
 
+        if ($post->group && $post->group->members()->where('users.id', $user->id)->wherePivot(
+            'role',
+            'contributor',
+        )->exists()) {
+            return true;
+        }
+
         return false;
     }
 
@@ -74,6 +81,13 @@ class PostPolicy
         }
 
         if ($post->group?->user_id === $user->id) {
+            return true;
+        }
+
+        if ($post->group && $post->group->members()->where('users.id', $user->id)->wherePivot(
+            'role',
+            'contributor',
+        )->exists()) {
             return true;
         }
 
@@ -93,6 +107,13 @@ class PostPolicy
             return true;
         }
 
+        if ($post->group && $post->group->members()->where('users.id', $user->id)->wherePivot(
+            'role',
+            'contributor',
+        )->exists()) {
+            return true;
+        }
+
         return false;
     }
 
@@ -106,6 +127,13 @@ class PostPolicy
         }
 
         if ($post->group?->user_id === $user->id) {
+            return true;
+        }
+
+        if ($post->group && $post->group->members()->where('users.id', $user->id)->wherePivot(
+            'role',
+            'contributor',
+        )->exists()) {
             return true;
         }
 

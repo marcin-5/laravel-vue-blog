@@ -56,7 +56,7 @@ const footerNavItems = computed<NavItem[]>(() => [
         title: t('blogger.groups.title'),
         href: '/groups/content',
         icon: BookOpen,
-        roles: ['admin', 'blogger'],
+        roles: ['admin', 'blogger', 'contributor'],
     },
     {
         title: t('blogger.groups.members.title'),

@@ -17,7 +17,11 @@ class StorePostRequest extends FormRequest
                 return false;
             }
 
-            return $group->user_id === $this->user()->id;
+            if ($group->user_id === $this->user()->id) {
+                return true;
+            }
+
+            return $group->members()->where('users.id', $this->user()->id)->wherePivot('role', 'contributor')->exists();
         }
 
         $blogId = $this->input('blog_id');

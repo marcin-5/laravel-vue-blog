@@ -12,7 +12,11 @@ class GroupPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->isBlogger();
+        if ($user->isAdmin() || $user->isBlogger()) {
+            return true;
+        }
+
+        return $user->groups()->wherePivotIn('role', ['contributor', 'maintainer'])->exists();
     }
 
     /**

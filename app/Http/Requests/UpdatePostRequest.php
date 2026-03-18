@@ -23,7 +23,12 @@ class UpdatePostRequest extends FormRequest
         if ($post->group && $post->group->user_id === $user->id) {
             return true;
         }
-
+        if ($post->group && $post->group->members()->where('users.id', $user->id)->wherePivot(
+            'role',
+            'contributor',
+        )->exists()) {
+            return true;
+        }
         return false;
     }
 

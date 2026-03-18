@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\Group;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 
 class GroupService
 {
@@ -24,21 +24,33 @@ class GroupService
 
     public function getUserGroups(User $user): Collection
     {
-        return Group::query()
+        $withPosts = [
+            'posts' => function ($query) {
+                $query
+                    ->orderByDesc('created_at')
+                    ->with([
+                        'extensions' => function ($eq) {
+                            $eq->oldest();
+                        },
+                    ])
+                    ->select(self::POST_FIELDS);
+            },
+        ];
+
+        $ownedGroups = Group::query()
             ->where('user_id', $user->id)
-            ->with([
-                'posts' => function ($query) {
-                    $query->orderByDesc('created_at')
-                        ->with([
-                            'extensions' => function ($eq) {
-                                $eq->oldest();
-                            }
-                        ])
-                        ->select(self::POST_FIELDS);
-                }
-            ])
+            ->with($withPosts)
             ->orderByDesc('created_at')
             ->get();
+
+        $contributorGroups = $user
+            ->groups()
+            ->wherePivotIn('role', ['contributor', 'maintainer'])
+            ->with($withPosts)
+            ->orderByDesc('created_at')
+            ->get();
+
+        return $ownedGroups->merge($contributorGroups)->unique('id')->values();
     }
 
     public function createGroup(array $groupData): Group

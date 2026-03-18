@@ -46,6 +46,7 @@ export interface User {
     role: string;
     blog_quota?: number | null;
     can_create_blog?: boolean;
+    is_group_contributor?: boolean;
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
