@@ -10,10 +10,12 @@ interface Props {
     isCreatingPost: boolean;
     isPostsExpanded: boolean;
     showAddPost?: boolean;
+    canEdit?: boolean;
 }
 
 withDefaults(defineProps<Props>(), {
     showAddPost: true,
+    canEdit: true,
 });
 
 defineEmits<{
@@ -28,6 +30,7 @@ defineEmits<{
         <slot name="prefix" />
 
         <TooltipButton
+            v-if="canEdit"
             :tooltip-content="isEditing ? t('blogger.actions.close') : t('blogger.actions.edit')"
             size="icon"
             variant="toggle"

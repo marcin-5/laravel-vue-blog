@@ -5,13 +5,18 @@ import ItemActionGroup from '@/components/blogger/ItemActionGroup.vue';
 import PostForm from '@/components/blogger/PostForm.vue';
 import { Badge } from '@/components/ui/badge';
 import { TooltipButton } from '@/components/ui/tooltip';
+import type { AppPageProps } from '@/types';
 import type { AdminGroup as Group, AdminPostItem as PostItem, ListItemEmits, ListItemProps } from '@/types/blog.types';
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 
+const page = usePage<AppPageProps>();
 const props = defineProps<ListItemProps<Group>>();
+
+const canEdit = computed(() => page.props.auth.user?.id === props.item.user_id);
 const emit = defineEmits<ListItemEmits<Group, PostItem>>();
 </script>
 
@@ -41,6 +46,7 @@ const emit = defineEmits<ListItemEmits<Group, PostItem>>();
     >
         <template #actions="{ handleEdit, handleCreatePost, handleTogglePosts, isCreatingPost, isEditing, isPostsExpanded }">
             <ItemActionGroup
+                :can-edit="canEdit"
                 :is-creating-post="isCreatingPost"
                 :is-editing="isEditing"
                 :is-posts-expanded="isPostsExpanded"
