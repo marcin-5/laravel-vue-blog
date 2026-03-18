@@ -236,6 +236,8 @@
         "form": {
             "name_label": "Nazwa",
             "name_placeholder": "Mój Wspaniały Blog",
+            "seo_title_label": "Tytuł SEO",
+            "seo_title_placeholder": "Opcjonalny tytuł dla wyszukiwarek (rekomendowane 50–60 znaków)...",
             "description_label": "Opis",
             "description_placeholder": "O czym jest ten blog?",
             "landing_content_label": "Treść strony głównej",
@@ -327,6 +329,8 @@
         "post_form": {
             "title_label": "Tytuł",
             "post_title_label": "Tytuł posta",
+            "seo_title_label": "Tytuł SEO",
+            "seo_title_placeholder": "Opcjonalny tytuł dla wyszukiwarek (rekomendowane 50–60 znaków)...",
             "title_placeholder": "Mój pierwszy post",
             "excerpt_label": "Zajawka",
             "excerpt_placeholder": "Krótkie podsumowanie",
@@ -385,6 +389,8 @@
         "extension_form": {
             "title_label": "Tytuł",
             "title_placeholder": "Tytuł rozszerzenia",
+            "seo_title_label": "Tytuł SEO",
+            "seo_title_placeholder": "Opcjonalny tytuł dla wyszukiwarek (rekomendowane 50–60 znaków)...",
             "content_label": "Treść",
             "content_placeholder": "Treść rozszerzenia",
             "published_label": "Opublikowane",

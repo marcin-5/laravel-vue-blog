@@ -23,19 +23,23 @@ it('updates blog theme colors', function () {
     actingAs($user)
         ->patch(route('blogs.update', $blog), [
             'name' => 'Updated Name',
+            'seo_title' => 'Updated SEO Title',
             'theme' => $themeData,
         ])
         ->assertRedirect();
 
     $blog->refresh();
-    expect($blog->theme)->toBe($themeData);
+    expect($blog->name)
+        ->toBe('Updated Name')
+        ->and($blog->seo_title)->toBe('Updated SEO Title')
+        ->and($blog->theme)->toBe($themeData);
 });
 
 it('can set theme to null or empty', function () {
     $user = User::factory()->create();
     $blog = Blog::factory()->create([
         'user_id' => $user->id,
-        'theme' => ['light' => ['--background' => '#ff0000']]
+        'theme' => ['light' => ['--background' => '#ff0000']],
     ]);
 
     actingAs($user)

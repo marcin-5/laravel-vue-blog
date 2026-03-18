@@ -113,6 +113,7 @@ export interface AdminPostItem {
     id: number;
     blog_id: number;
     group_id?: number | null;
+    seo_title?: string | null;
     title: string;
     slug: string;
     excerpt: string | null;
@@ -129,6 +130,7 @@ export interface AdminBlog {
     id: number;
     user_id: number;
     name: string;
+    seo_title: string | null;
     slug: string;
     description: string | null;
     motto?: string | null;
@@ -210,6 +212,7 @@ export interface ManageableItem {
 // ===== Blog form/composable shared types =====
 export interface BlogFormData {
     name: string;
+    seo_title: string | null;
     description: string | null;
     footer: string | null;
     motto: string | null;

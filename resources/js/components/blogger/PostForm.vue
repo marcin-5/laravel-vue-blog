@@ -42,6 +42,7 @@ const form =
         blog_id: props.blogId || props.post?.blog_id || 0,
         group_id: props.post?.group_id || 0,
         title: props.post?.title || '',
+        seo_title: props.post?.seo_title || '',
         excerpt: props.post?.excerpt || '',
         content: props.post?.content || '',
         is_published: !!props.post?.is_published,
@@ -68,6 +69,8 @@ const translationKeys = computed(() => ({
     // Form labels
     title: props.isEdit ? t('blogger.post_form.title_label') : t('blogger.post_form.post_title_label'),
     titlePlaceholder: props.isEdit ? '' : t('blogger.post_form.title_placeholder'),
+    seoTitle: t('blogger.post_form.seo_title_label'),
+    seoTitlePlaceholder: t('blogger.post_form.seo_title_placeholder'),
     excerpt: t('blogger.post_form.excerpt_label'),
     excerptPlaceholder: props.isEdit ? '' : t('blogger.post_form.excerpt_placeholder'),
     content: t('blogger.post_form.content_label'),
@@ -103,6 +106,7 @@ const updateFormFromPost = (post: PostItem) => {
     form.blog_id = post.blog_id;
     form.group_id = post.group_id || 0;
     form.title = post.title;
+    form.seo_title = post.seo_title ?? '';
     form.excerpt = post.excerpt ?? '';
     form.content = post.content ?? '';
     form.is_published = post.is_published;
@@ -157,6 +161,15 @@ const handleContentInput = () => handleInput(form.content);
                 :label="translationKeys.title"
                 :placeholder="translationKeys.titlePlaceholder"
                 required
+                type="input"
+            />
+
+            <PostFormField
+                :id="`${fieldIdPrefix}-seo-title`"
+                v-model="form.seo_title"
+                :error="form.errors?.seo_title"
+                :label="translationKeys.seoTitle"
+                :placeholder="translationKeys.seoTitlePlaceholder"
                 type="input"
             />
 

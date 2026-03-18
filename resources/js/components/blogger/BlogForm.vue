@@ -45,6 +45,8 @@ const { form, fieldIdPrefix, updateCategories } = useBlogFormLogic({
 const baseTranslations = computed(() => ({
     name: t('blogger.form.name_label'),
     namePlaceholder: props.isEdit ? '' : t('blogger.form.name_placeholder'),
+    seoTitle: t('blogger.form.seo_title_label'),
+    seoTitlePlaceholder: t('blogger.form.seo_title_placeholder'),
     description: t('blogger.form.description_label'),
     descriptionPlaceholder: props.isEdit ? '' : t('blogger.form.description_placeholder'),
     landingContent: t('blogger.form.landing_content_label'),
@@ -86,6 +88,15 @@ function handleCancel() {
                 :label="baseTranslations.name"
                 :placeholder="baseTranslations.namePlaceholder"
                 required
+                type="input"
+            />
+
+            <PostFormField
+                :id="`${fieldIdPrefix}-seo-title`"
+                v-model="form.seo_title"
+                :error="form.errors.seo_title"
+                :label="baseTranslations.seoTitle"
+                :placeholder="baseTranslations.seoTitlePlaceholder"
                 type="input"
             />
 

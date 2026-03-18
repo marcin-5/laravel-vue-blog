@@ -11,6 +11,7 @@ export function ensureThemeStructure(theme: BlogTheme | null | undefined): BlogT
 export function createDefaultFormData(locale: string = 'en'): BlogFormData {
     return {
         name: '',
+        seo_title: null,
         description: null,
         footer: null,
         motto: null,
@@ -30,6 +31,7 @@ export function createFormDataFromBlog(blog: Blog | undefined, defaultLocale: st
     }
     return {
         name: blog.name,
+        seo_title: blog.seo_title ?? null,
         description: blog.description ?? null,
         footer: blog.footer ?? null,
         motto: blog.motto ?? null,
@@ -46,6 +48,7 @@ export function createFormDataFromBlog(blog: Blog | undefined, defaultLocale: st
 export function populateFormFromBlog(form: InertiaForm<BlogFormData>, blog: Blog, defaultLocale: string = 'en'): void {
     const data = createFormDataFromBlog(blog, defaultLocale);
     form.name = data.name;
+    form.seo_title = data.seo_title;
     form.description = data.description;
     form.footer = data.footer;
     form.motto = data.motto;
