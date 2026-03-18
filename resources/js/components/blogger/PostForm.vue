@@ -152,6 +152,7 @@ const handleToggleFullPreview = () => toggleFullPreview(form.content);
 
 const handleContentInput = () => handleInput(form.content);
 
+// helpers for SEO data length validation
 const seoTitleClass = computed(() => {
     const length = form.seo_title?.length || 0;
     return length >= 50 && length <= 60 ? 'bg-secondary' : '';
