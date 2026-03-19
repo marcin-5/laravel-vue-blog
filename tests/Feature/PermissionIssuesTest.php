@@ -60,4 +60,31 @@ class PermissionIssuesTest extends TestCase
             'Admin role should have view_admin_users permission',
         );
     }
+
+    public function test_blogger_has_correct_permissions()
+    {
+        // 1. Create a blogger user
+        $blogger = User::factory()->create([
+            'role' => UserRole::Blogger->value,
+        ]);
+
+        // 2. Run migrations to ensure roles/permissions exist and are synced
+        $repairMigration = require database_path('migrations/2026_03_19_180631_sync_roles_for_existing_users.php');
+        $repairMigration->up();
+
+        $fixMigration = require database_path('migrations/2026_03_19_183000_fix_roles_and_permissions.php');
+        $fixMigration->up();
+
+        $blogger->refresh();
+
+        // 3. Verify roles
+        $this->assertTrue($blogger->hasRole(UserRole::Blogger->value));
+        $this->assertTrue($blogger->isBlogger());
+
+        // 4. Verify permissions via Spatie (Gate)
+        // Note: We use can() because it's what Laravel/Inertia uses
+        $this->assertTrue($blogger->can('view_blogs'), 'Blogger should be able to view blogs');
+        $this->assertTrue($blogger->can('view_blogger_stats'), 'Blogger should be able to view blogger stats');
+        $this->assertFalse($blogger->can('view_admin_users'), 'Blogger should NOT be able to view admin users');
+    }
 }

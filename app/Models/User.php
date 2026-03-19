@@ -69,8 +69,8 @@ class User extends Authenticatable
             if ($user->isDirty('role')) {
                 // If switching to blogger, default to 1 (unless explicitly set in code)
                 if ($user->role === UserRole::Blogger->value && $user->getOriginal(
-                    'role',
-                ) !== UserRole::Blogger->value) {
+                        'role',
+                    ) !== UserRole::Blogger->value) {
                     // Only set when not explicitly provided by code performing the update
                     if ($user->blog_quota === null) {
                         $user->blog_quota = 1;
@@ -161,7 +161,7 @@ class User extends Authenticatable
         }
 
         try {
-            return $this->hasRole(UserRole::Blogger->value);
+            return $this->hasRole(UserRole::Blogger->value) || $this->isAdmin();
         } catch (Throwable) {
             return ($this->role ?? $this->getOriginal('role')) === UserRole::Blogger->value;
         }
@@ -206,18 +206,6 @@ class User extends Authenticatable
         return false;
     }
 
-    public function hasPermissionTo($permission, $guardName = null): bool
-    {
-        if (!self::shouldSyncPermissions()) {
-            return false;
-        }
-
-        try {
-            return $this->hasDirectPermission($permission) || $this->hasPermissionViaRoles($permission);
-        } catch (Throwable) {
-            return false;
-        }
-    }
 
     /**
      * Grupy, do których użytkownik należy.
@@ -231,14 +219,6 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
-    public function checkPermissionTo($permission, $guardName = null): bool
-    {
-        if (!self::shouldSyncPermissions()) {
-            return false;
-        }
-
-        return $this->hasPermissionTo($permission, $guardName);
-    }
 
     /**
      * Grupy, których użytkownik jest właścicielem.
