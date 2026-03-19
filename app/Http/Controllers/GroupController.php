@@ -3,12 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\FormatsPaginator;
-use App\Http\Controllers\Concerns\HandlesViewStats;
 use App\Models\Group;
 use App\Models\Post;
 use App\Queries\App\GroupPostsQuery;
 use App\Services\BlogNavigationService;
-use App\Services\StatsService;
 use App\Services\TranslationService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -17,14 +15,12 @@ use Inertia\Response;
 
 class GroupController extends Controller
 {
-    use AuthorizesRequests, FormatsPaginator, HandlesViewStats;
+    use AuthorizesRequests, FormatsPaginator;
 
     public function __construct(
         private readonly BlogNavigationService $navigation,
         private readonly TranslationService $translations,
-        private readonly StatsService $stats,
-    ) {
-    }
+    ) {}
 
     public function landing(Request $request, Group $group, GroupPostsQuery $query): Response
     {
@@ -41,7 +37,6 @@ class GroupController extends Controller
             'theme' => $group->theme,
             'sidebar' => $group->sidebar,
             'navigation' => $this->navigation->getLandingNavigation($group),
-            'viewStats' => $this->getViewStats(Group::class, $group->id, $group->user_id, true),
             'translations' => [
                 'locale' => app()->getLocale(),
                 'messages' => $this->translations->getPageTranslations('blog'),
@@ -66,7 +61,8 @@ class GroupController extends Controller
     {
         $this->authorize('view', $group);
 
-        $post = $group->posts()
+        $post = $group
+            ->posts()
             ->where('slug', $postSlug)
             ->forGroupView()
             ->firstOrFail();
@@ -81,7 +77,6 @@ class GroupController extends Controller
             'theme' => $group->theme,
             'sidebar' => $group->sidebar,
             'navigation' => $this->navigation->getPostNavigation($group, $post),
-            'viewStats' => $this->getViewStats(Post::class, $post->id, $group->user_id, true),
             'translations' => [
                 'locale' => app()->getLocale(),
                 'messages' => $this->translations->getPageTranslations('post'),
@@ -100,7 +95,8 @@ class GroupController extends Controller
             'contentHtml' => $post->content_html,
             'published_at' => $post->published_at?->format('Y-m-d H:i'),
             'excerpt' => $post->excerpt,
-            'extensions' => $post->extensions()
+            'extensions' => $post
+                ->extensions()
                 ->where('is_published', true)
                 ->oldest()
                 ->get()

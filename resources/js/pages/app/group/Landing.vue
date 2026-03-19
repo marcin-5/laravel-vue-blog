@@ -27,11 +27,6 @@ const props = defineProps<{
     theme: any;
     sidebar: number;
     navigation: Navigation;
-    viewStats: {
-        anonymous: number;
-        bots: number;
-        consented: number;
-    } | null;
     translations: {
         locale: string;
     };
@@ -65,13 +60,7 @@ const postsListTitle = computed(() => t('blog.posts_list.title'));
         </template>
 
         <template #header>
-            <PostHeader
-                :locale="translations.locale"
-                :modifiedTime="group.updated_at"
-                :post="groupAsPost"
-                :publishedTime="group.created_at"
-                :viewStats="viewStats"
-            />
+            <PostHeader :locale="translations.locale" :modifiedTime="group.updated_at" :post="groupAsPost" :publishedTime="group.created_at" />
             <BorderDivider v-if="!sidebar" class="mb-8" />
         </template>
 

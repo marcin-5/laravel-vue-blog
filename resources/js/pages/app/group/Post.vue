@@ -21,11 +21,6 @@ defineProps<{
     pagination?: Pagination | null;
     navigation?: Navigation;
     theme?: any;
-    viewStats: {
-        anonymous: number;
-        bots: number;
-        consented: number;
-    } | null;
 }>();
 </script>
 
@@ -38,7 +33,7 @@ defineProps<{
         </template>
 
         <template #header>
-            <PostHeader :post="post" :viewStats="viewStats" />
+            <PostHeader :post="post" />
             <BorderDivider v-if="!sidebar" class="mb-8" />
         </template>
 
