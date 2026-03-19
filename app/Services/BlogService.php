@@ -22,6 +22,7 @@ class BlogService
         'sidebar',
         'page_size',
         'theme',
+        'seo_title',
         'created_at',
     ];
 

@@ -117,8 +117,12 @@ class PublicBlogController extends BasePublicController
         $metaDescription = $post->excerpt ?: $this->seo->generateMetaDescription($post->content_html);
 
         $baseUrl = config('app.url');
+        // If post has an explicit SEO title, use it as-is (without appending blog name).
+        // Otherwise, fall back to "{post title} - {blog name}".
+        $seoTitle = $post->seo_title ?: ($post->title . ' - ' . $blog->name);
+
         $seoData = new SeoData(
-            title: $post->getSeoTitleWithFallback() . ' - ' . $blog->name,
+            title: $seoTitle,
             description: $metaDescription,
             canonicalUrl: $baseUrl . '/' . $blog->slug . '/' . $post->slug,
             ogImage: $baseUrl . '/og-image.png',

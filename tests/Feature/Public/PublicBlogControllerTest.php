@@ -132,7 +132,7 @@ it('uses seo_title for post when available and falls back to title', function ()
     $this
         ->get("/{$blog->slug}/{$post->slug}")
         ->assertInertia(fn(Assert $page) => $page
-            ->where('seo.title', 'SEO Optimized Title - ' . $blog->name),
+            ->where('seo.title', 'SEO Optimized Title'),
         );
 
     // Without seo_title (fallback to title)
