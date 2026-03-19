@@ -151,6 +151,8 @@ class Blog extends Model
                     ->select(
                         'id',
                         'blog_id',
+                        'group_id',
+                        'seo_title',
                         'title',
                         'slug',
                         'excerpt',
