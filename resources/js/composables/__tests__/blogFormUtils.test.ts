@@ -39,6 +39,7 @@ describe('blogFormUtils', () => {
             const data = createDefaultFormData('pl');
             expect(data.locale).toBe('pl');
             expect(data.name).toBe('');
+            expect(data.seo_title).toBe(null);
             expect(data.is_published).toBe(false);
             expect(data.theme).toEqual({ light: {}, dark: {} });
         });
@@ -58,6 +59,7 @@ describe('blogFormUtils', () => {
             const blog: Partial<Blog> = {
                 id: 1,
                 name: 'Test Blog',
+                seo_title: 'SEO Title',
                 description: 'Desc',
                 footer: 'Footer',
                 motto: 'Motto',
@@ -74,6 +76,7 @@ describe('blogFormUtils', () => {
 
             expect(data).toEqual({
                 name: 'Test Blog',
+                seo_title: 'SEO Title',
                 description: 'Desc',
                 footer: 'Footer',
                 motto: 'Motto',
@@ -98,6 +101,7 @@ describe('blogFormUtils', () => {
         it('populates form from blog data', () => {
             const form = {
                 name: '',
+                seo_title: null,
                 description: '',
                 footer: '',
                 motto: '',
@@ -112,6 +116,7 @@ describe('blogFormUtils', () => {
 
             const blog: Partial<Blog> = {
                 name: 'Updated Name',
+                seo_title: 'Updated SEO',
                 is_published: true,
                 locale: 'it',
             };
@@ -119,6 +124,7 @@ describe('blogFormUtils', () => {
             populateFormFromBlog(form, blog as Blog);
 
             expect(form.name).toBe('Updated Name');
+            expect(form.seo_title).toBe('Updated SEO');
             expect(form.is_published).toBe(true);
             expect(form.locale).toBe('it');
         });
