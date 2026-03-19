@@ -1,11 +1,5 @@
 <script lang="ts" setup>
-import {
-    SidebarGroup,
-    SidebarGroupContent,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem
-} from '@/components/ui/sidebar';
+import { SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type AppPageProps, type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -19,15 +13,11 @@ const props = defineProps<Props>();
 
 const page = usePage<AppPageProps>();
 
-const currentRole = computed(() => page.props.auth.user?.role ?? null);
-const isGroupContributor = computed(() => page.props.auth.user?.is_group_contributor ?? false);
-
 const visibleItems = computed(() => {
     return props.items.filter((item) => {
         if (!item.roles || item.roles.length === 0) return true;
-        if (!currentRole.value) return false;
-        if (item.roles.includes(currentRole.value)) return true;
-        return item.roles.includes('contributor') && isGroupContributor.value;
+        const userPermissions = page.props.auth.user?.can ?? {};
+        return item.roles.some((permission) => userPermissions[permission] === true);
     });
 });
 </script>

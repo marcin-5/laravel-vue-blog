@@ -8,13 +8,11 @@ const props = defineProps<{ items: NavItem[] }>();
 
 const page = usePage<AppPageProps>();
 
-const currentRole = computed(() => page.props.auth.user?.role ?? null);
-
 const visibleItems = computed(() => {
     return props.items.filter((item) => {
-        if (!item.roles || item.roles.length === 0) return true; // visible to all if roles not provided
-        if (!currentRole.value) return false; // not logged in and item requires a role
-        return item.roles.includes(currentRole.value);
+        if (!item.roles || item.roles.length === 0) return true;
+        const userPermissions = page.props.auth.user?.can ?? {};
+        return item.roles.some((permission) => userPermissions[permission] === true);
     });
 });
 </script>

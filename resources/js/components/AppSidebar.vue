@@ -17,37 +17,36 @@ const mainNavItems = computed<NavItem[]>(() => [
         title: t('common.nav.dashboard'),
         href: '/dashboard',
         icon: LayoutGrid,
-        // No roles => visible to everyone
     },
     {
         title: t('common.nav.users'),
         href: '/admin/users',
         icon: Users,
-        roles: ['admin'], // only admins see this
+        roles: ['view_admin_users'],
     },
     {
         title: t('common.nav.categories'),
         href: '/admin/categories',
         icon: Folder,
-        roles: ['admin'], // only admins see this
+        roles: ['view_admin_categories'],
     },
     {
         title: t('common.nav.statistics'),
         href: '/admin/stats',
         icon: BarChart3,
-        roles: ['admin'],
+        roles: ['view_admin_stats'],
     },
     {
         title: t('common.nav.blogs'),
         href: '/blogs',
         icon: BookOpen,
-        roles: ['admin', 'blogger'],
+        roles: ['view_blogs'],
     },
     {
         title: t('common.nav.statistics'),
         href: '/blogs/stats',
         icon: BarChart3,
-        roles: ['blogger'],
+        roles: ['view_blogger_stats'],
     },
 ]);
 
@@ -56,13 +55,13 @@ const footerNavItems = computed<NavItem[]>(() => [
         title: t('blogger.groups.title'),
         href: '/groups/content',
         icon: BookOpen,
-        roles: ['admin', 'blogger', 'contributor'],
+        roles: ['contribute_groups'],
     },
     {
         title: t('blogger.groups.members.title'),
         href: '/groups/members',
         icon: Users,
-        roles: ['admin', 'blogger'],
+        roles: ['manage_groups'],
     },
 ]);
 </script>

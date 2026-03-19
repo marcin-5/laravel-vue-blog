@@ -34,7 +34,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Authorization gate to control who can create a blog (fallback when not using policies)
         Gate::define('create-blog', function (User $user): bool {
-            return $user->canCreateBlog();
+            return $user->can('view_blogs');
         });
 
         // Only admins can edit the blog_quota attribute on users

@@ -14,8 +14,9 @@ class AuthServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Gate to allow only admins to view the admin stats page
-        Gate::define('view-admin-stats', function (?User $user): bool {
-            return $user instanceof User && $user->role === User::ROLE_ADMIN;
+        Gate::define('view_admin_stats', function (?User $user): bool {
+            return $user instanceof User
+                && ($user->isAdmin() || $user->hasAbility('view_admin_stats'));
         });
     }
 }

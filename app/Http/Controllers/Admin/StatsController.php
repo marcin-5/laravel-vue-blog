@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\UserRole;
 use App\Http\Controllers\AuthenticatedController;
 use App\Http\Controllers\Concerns\HandlesStatsFilters;
 use App\Models\User;
@@ -27,7 +28,7 @@ class StatsController extends AuthenticatedController
         $statsData = $this->getStatsData($request);
 
         $bloggers = User::query()
-            ->where('role', User::ROLE_BLOGGER)
+            ->where('role', UserRole::Blogger->value)
             ->select(['id', 'name'])
             ->orderBy('name')
             ->get();

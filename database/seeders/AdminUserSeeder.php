@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
@@ -56,7 +57,7 @@ class AdminUserSeeder extends Seeder
                 $user->email_verified_at = now();
             }
             // Ensure admin role
-            $user->role = User::ROLE_ADMIN;
+            $user->role = UserRole::Admin->value;
             $user->save();
         } else {
             $attributes = [
@@ -68,7 +69,7 @@ class AdminUserSeeder extends Seeder
                 $attributes['email_verified_at'] = now();
             }
             // Ensure admin role
-            $attributes['role'] = User::ROLE_ADMIN;
+            $attributes['role'] = UserRole::Admin->value;
             User::query()->create($attributes);
         }
     }

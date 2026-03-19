@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\UserRole;
 use App\Models\User;
 
 class UserManagementService
@@ -27,7 +28,7 @@ class UserManagementService
 
     public function determineBlogQuota(string $role, ?int $requestedQuota = null): int
     {
-        if (!in_array($role, [User::ROLE_BLOGGER, User::ROLE_ADMIN], true)) {
+        if (!in_array($role, [UserRole::Blogger->value, UserRole::Admin->value], true)) {
             return 0;
         }
 
@@ -35,7 +36,7 @@ class UserManagementService
             return max(0, $requestedQuota);
         }
 
-        if ($role === User::ROLE_BLOGGER) {
+        if ($role === UserRole::Blogger->value) {
             return 1;
         }
 
@@ -60,6 +61,6 @@ class UserManagementService
 
     public function canEditBlogQuota(string $originalRole): bool
     {
-        return in_array($originalRole, [User::ROLE_BLOGGER, User::ROLE_ADMIN], true);
+        return in_array($originalRole, [UserRole::Blogger->value, UserRole::Admin->value], true);
     }
 }

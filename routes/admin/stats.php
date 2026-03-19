@@ -8,6 +8,5 @@ Route::prefix('admin')
     ->name('admin.')
     ->group(function () {
         Route::get('stats', [StatsController::class, 'index'])
-            ->middleware('can:view-admin-stats')
             ->name('stats.index');
     });

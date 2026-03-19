@@ -12,11 +12,7 @@ class GroupPolicy
      */
     public function viewAny(User $user): bool
     {
-        if ($user->isAdmin() || $user->isBlogger()) {
-            return true;
-        }
-
-        return $user->groups()->wherePivotIn('role', ['contributor', 'maintainer'])->exists();
+        return $user->isBlogger() || $user->hasAbility('contribute_groups');
     }
 
     /**
@@ -35,7 +31,7 @@ class GroupPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isAdmin() || $user->isBlogger();
+        return $user->isBlogger() || $user->hasAbility('manage_groups');
     }
 
     /**
@@ -43,7 +39,9 @@ class GroupPolicy
      */
     public function update(User $user, Group $group): bool
     {
-        return $user->isAdmin() || $group->user_id === $user->id;
+        return $user->isAdmin()
+            || $group->user_id === $user->id
+            || $user->hasAbility('manage-group', $group);
     }
 
     /**
@@ -51,7 +49,9 @@ class GroupPolicy
      */
     public function delete(User $user, Group $group): bool
     {
-        return $user->isAdmin() || $group->user_id === $user->id;
+        return $user->isAdmin()
+            || $group->user_id === $user->id
+            || $user->hasAbility('manage-group', $group);
     }
 
     /**

@@ -45,10 +45,15 @@ class HandleInertiaRequests extends Middleware
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
                 'user' => $request->user() ? array_merge($request->user()->toArray(), [
-                    'is_group_contributor' => $request
-                        ->user()->groups()
-                        ->wherePivotIn('role', ['contributor', 'maintainer'])
-                        ->exists(),
+                    'can' => [
+                        'view_admin_users' => $request->user()->isAdmin(),
+                        'view_admin_categories' => $request->user()->isAdmin(),
+                        'view_admin_stats' => $request->user()->isAdmin(),
+                        'view_blogs' => $request->user()->isAdmin() || $request->user()->isBlogger(),
+                        'view_blogger_stats' => $request->user()->isBlogger(),
+                        'manage_groups' => $request->user()->isAdmin() || $request->user()->isBlogger(),
+                        'contribute_groups' => $request->user()->isAdmin() || $request->user()->isBlogger(),
+                    ],
                 ]) : null,
             ],
             'locale' => app()->getLocale(),

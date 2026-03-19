@@ -15,7 +15,7 @@ export interface NavItem {
     href: string;
     icon?: LucideIcon;
     isActive?: boolean;
-    // Optional list of roles allowed to see the item. If omitted or empty, visible to all.
+    // Optional list of permissions allowed to see the item. If omitted or empty, visible to all.
     roles?: string[];
     // Optional HTTP method for Inertia Link. Defaults to 'get'.
     method?: 'get' | 'post' | 'put' | 'patch' | 'delete';
@@ -46,7 +46,7 @@ export interface User {
     role: string;
     blog_quota?: number | null;
     can_create_blog?: boolean;
-    is_group_contributor?: boolean;
+    can?: Record<string, boolean>;
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;

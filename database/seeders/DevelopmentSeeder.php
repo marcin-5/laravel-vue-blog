@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
 use App\Models\Blog;
 use App\Models\Category;
 use App\Models\Group;
@@ -51,18 +52,18 @@ class DevelopmentSeeder extends Seeder
         $categories = Category::factory(self::CATEGORY_COUNT)->create();
 
         $bloggers = User::factory(self::BLOGGER_COUNT)->create([
-            'role' => User::ROLE_BLOGGER,
+            'role' => UserRole::Blogger->value,
             'blog_quota' => self::BLOGGER_BLOG_QUOTA,
         ]);
 
         $this->seedBlogsForBloggers($bloggers, $categories);
 
         $regularUsers = User::factory(self::REGULAR_USER_COUNT)->create([
-            'role' => User::ROLE_USER,
+            'role' => UserRole::User->value,
         ]);
 
         $groupOwnerPool = $bloggers->merge(
-            User::where('role', User::ROLE_ADMIN)->get(),
+            User::where('role', UserRole::Admin->value)->get(),
         );
 
         $this->seedGroups($groupOwnerPool, $bloggers, $regularUsers);
@@ -123,7 +124,7 @@ class DevelopmentSeeder extends Seeder
                     ]);
                 }
 
-                $ownerBlogId = $owner->role === User::ROLE_BLOGGER
+                $ownerBlogId = $owner->role === UserRole::Blogger->value
                     ? $owner->blogs()->first()?->id
                     : null;
 
