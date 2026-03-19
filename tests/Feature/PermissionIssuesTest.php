@@ -40,13 +40,24 @@ class PermissionIssuesTest extends TestCase
         $this->assertFalse($admin->isAdmin(), 'Admin user should not be recognized as admin!');
 
         // 4. RUN REPAIR MIGRATION
-        $migration = require database_path('migrations/2026_03_19_180631_sync_roles_for_existing_users.php');
-        $migration->up();
+        $repairMigration = require database_path('migrations/2026_03_19_180631_sync_roles_for_existing_users.php');
+        $repairMigration->up();
+
+        // 5. RUN FIX MIGRATION (which includes permissions)
+        $fixMigration = require database_path('migrations/2026_03_19_183000_fix_roles_and_permissions.php');
+        $fixMigration->up();
 
         $admin->refresh();
 
-        // 5. Now they should be an admin
+        // 6. Verify roles
         $this->assertTrue($admin->hasRole(UserRole::Admin->value));
         $this->assertTrue($admin->isAdmin());
+
+        // 7. Verify permissions in DB
+        $this->assertDatabaseHas('permissions', ['name' => 'view_admin_users']);
+        $this->assertTrue(
+            $admin->roles->flatMap->permissions->pluck('name')->contains('view_admin_users'),
+            'Admin role should have view_admin_users permission',
+        );
     }
 }

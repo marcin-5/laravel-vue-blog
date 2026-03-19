@@ -213,7 +213,7 @@ class User extends Authenticatable
         }
 
         try {
-            return parent::hasPermissionTo($permission, $guardName);
+            return $this->hasDirectPermission($permission) || $this->hasPermissionViaRoles($permission);
         } catch (Throwable) {
             return false;
         }
@@ -237,11 +237,7 @@ class User extends Authenticatable
             return false;
         }
 
-        try {
-            return parent::checkPermissionTo($permission, $guardName);
-        } catch (Throwable) {
-            return false;
-        }
+        return $this->hasPermissionTo($permission, $guardName);
     }
 
     /**
