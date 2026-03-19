@@ -1,12 +1,12 @@
-# Laravel Blog (Laravel 12 + Inertia v2 + Vue 3 + Tailwind v4 + SSR)
+# Laravel Blog (Laravel 13 + Inertia v2 + Vue 3 + Tailwind v4 + SSR)
 
-A Laravel-based blog starter that uses Inertia v2 with Vue 3, TypeScript, Tailwind CSS v4, and Vite. The project
+A Laravel-based blog that uses Inertia v2 with Vue 3, TypeScript, Tailwind CSS v4, and Vite. The project
 supports Server-Side Rendering (SSR) for improved SEO and performance on public pages. It includes a public home page,
 static pages, and a blog with landing and post pages.
 
 ## Features
 
-- Laravel 12 backend (PHP 8.5)
+- Laravel 13 backend (PHP 8.5)
 - Inertia v2 + Vue 3 frontend with TypeScript
 - Vite 7 for dev server and builds; Tailwind CSS v4
 - SSR rendering pipeline for Inertia (see `resources/js/ssr.ts`)
@@ -14,7 +14,7 @@ static pages, and a blog with landing and post pages.
 - Docker-based development workflow with Makefile helpers
 - Example blog pages with markdown-to-HTML processing (server side)
 - Ziggy v2 for client-side `route()` helper
-- Pest v3 test setup
+- Pest v4 test setup
 
 ## Prerequisites
 
@@ -34,8 +34,8 @@ Choose your setup:
 2. Start the Vite HMR dev server (containers must be up):
     - `make dev`
 3. Open the app:
-   - App: http://localhost:8000
-   - Vite (HMR): http://localhost:5173
+    - App: http://localhost:8000
+    - Vite (HMR): http://localhost:5173
 
 Useful Make targets:
 
@@ -151,4 +151,4 @@ Key .env settings to verify:
 This project is provided as-is for demonstration and can be adapted to your preferred license.
 
 ---
-Last updated: 2025-12-11
+Last updated: 2026-03-19
