@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Enums\UserRole;
+
 use App\Models\BotView;
 use App\Models\User;
 use App\Models\UserAgent;
@@ -15,7 +17,7 @@ class BotDashboardStatsTest extends TestCase
 
     public function test_admin_can_see_bot_stats_on_dashboard(): void
     {
-        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $admin = User::factory()->create(['role' => UserRole::Admin->value]);
         $ua1 = UserAgent::factory()->create(
             ['name' => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'],
         );
@@ -56,7 +58,7 @@ class BotDashboardStatsTest extends TestCase
 
     public function test_blogger_cannot_see_bot_stats_on_dashboard(): void
     {
-        $blogger = User::factory()->create(['role' => User::ROLE_BLOGGER]);
+        $blogger = User::factory()->create(['role' => UserRole::Blogger->value]);
 
         $this->actingAs($blogger)
             ->get('/dashboard')

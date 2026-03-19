@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\AnonymousView;
+use App\Enums\UserRole;
 use App\Models\Blog;
 use App\Models\BotView;
 use App\Models\MarkdownView;
@@ -72,7 +73,7 @@ it('exposes view stats (registered, anonymous, bots) on post page for owner', fu
 
 it('exposes view stats (registered, anonymous, bots) on post page for admin', function () {
     $owner = User::factory()->create();
-    $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+    $admin = User::factory()->create(['role' => UserRole::Admin->value]);
     $blog = Blog::factory()->for($owner)->create(['is_published' => true]);
     $post = Post::factory()->for($blog)->create();
 

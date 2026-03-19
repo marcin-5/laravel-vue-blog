@@ -1,11 +1,12 @@
 <?php
 
 use App\Models\NewsletterSubscription;
+use App\Enums\UserRole;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
 test('dashboard displays latest unique newsletter subscriptions for admin', function () {
-    $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+    $admin = User::factory()->create(['role' => UserRole::Admin->value]);
     $blog1 = createBlog(['name' => 'Blog 1'], $admin);
     $blog2 = createBlog(['name' => 'Blog 2'], $admin);
 
@@ -52,7 +53,7 @@ test('dashboard displays latest unique newsletter subscriptions for admin', func
 });
 
 test('dashboard does not display newsletter subscriptions for non-admin', function () {
-    $user = User::factory()->create(['role' => User::ROLE_USER]);
+    $user = User::factory()->create(['role' => UserRole::User->value]);
     $blog = createBlog([], $user);
 
     NewsletterSubscription::factory()->create([

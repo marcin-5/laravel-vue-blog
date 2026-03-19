@@ -1,6 +1,7 @@
 <?php
 
 use App\Jobs\StorePageView;
+use App\Enums\UserRole;
 use App\Models\Blog;
 use App\Models\PageView;
 use App\Models\Post;
@@ -12,18 +13,19 @@ beforeEach(function () {
     Queue::fake();
     Cache::flush();
 
-    $this->admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
-    $this->blogger = User::factory()->create(['role' => User::ROLE_BLOGGER]);
+    $this->admin = User::factory()->create(['role' => UserRole::Admin->value]);
+    $this->blogger = User::factory()->create(['role' => UserRole::Blogger->value]);
 
     $this->blog = Blog::factory()->for($this->blogger)->create(['is_published' => true]);
     $this->post = Post::factory()->for($this->blog)->create([
         'published_at' => now()->subMinute(),
-        'visibility' => 'public'
+        'visibility' => 'public',
     ]);
 });
 
 it('counts views for logged in admin', function () {
-    $this->actingAs($this->admin)
+    $this
+        ->actingAs($this->admin)
         ->withCookie('cookie_consent', 'accepted')
         ->get("/{$this->blog->slug}/{$this->post->slug}")
         ->assertStatus(200);
@@ -32,7 +34,8 @@ it('counts views for logged in admin', function () {
 });
 
 it('counts views for logged in blogger (author)', function () {
-    $this->actingAs($this->blogger)
+    $this
+        ->actingAs($this->blogger)
         ->withCookie('cookie_consent', 'accepted')
         ->get("/{$this->blog->slug}/{$this->post->slug}")
         ->assertStatus(200);

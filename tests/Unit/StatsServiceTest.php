@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\StatsRange;
+use App\Enums\UserRole;
 use App\Enums\StatsSort;
 use App\Models\Blog;
 use App\Models\PageView;
@@ -13,7 +14,7 @@ use Illuminate\Support\Carbon;
 
 uses(RefreshDatabase::class);
 
-function createBlogWithOwner(string $role = User::ROLE_BLOGGER, array $blogAttributes = []): array
+function createBlogWithOwner(string $role = UserRole::Blogger->value, array $blogAttributes = []): array
 {
     $owner = User::factory()->create(['role' => $role]);
     $blog = Blog::factory()->create(array_merge(['user_id' => $owner->id], $blogAttributes));

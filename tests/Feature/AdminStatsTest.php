@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\UserRole;
 use App\Models\Blog;
 use App\Models\MarkdownView;
 use App\Models\PageView;
@@ -17,8 +18,8 @@ class AdminStatsTest extends TestCase
 
     public function test_admin_can_see_post_stats_without_selecting_blog()
     {
-        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
-        $blogger = User::factory()->create(['role' => User::ROLE_BLOGGER]);
+        $admin = User::factory()->create(['role' => UserRole::Admin->value]);
+        $blogger = User::factory()->create(['role' => UserRole::Blogger->value]);
         $blog = Blog::factory()->create(['user_id' => $blogger->id]);
         $post = Post::factory()->create(['blog_id' => $blog->id, 'title' => 'Top Post']);
 
@@ -57,8 +58,8 @@ class AdminStatsTest extends TestCase
 
     public function test_admin_can_filter_posts_independently()
     {
-        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
-        $blogger = User::factory()->create(['role' => User::ROLE_BLOGGER]);
+        $admin = User::factory()->create(['role' => UserRole::Admin->value]);
+        $blogger = User::factory()->create(['role' => UserRole::Blogger->value]);
         $blog = Blog::factory()->create(['user_id' => $blogger->id]);
         $post = Post::factory()->create(['blog_id' => $blog->id, 'title' => 'Filtered Post']);
 
@@ -98,7 +99,7 @@ class AdminStatsTest extends TestCase
 
     public function test_default_items_size_is_five_for_both_sections()
     {
-        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $admin = User::factory()->create(['role' => UserRole::Admin->value]);
 
         $this
             ->actingAs($admin)
@@ -113,7 +114,7 @@ class AdminStatsTest extends TestCase
 
     public function test_explicit_all_items_size_zero_is_preserved()
     {
-        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $admin = User::factory()->create(['role' => UserRole::Admin->value]);
 
         $this
             ->actingAs($admin)

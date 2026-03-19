@@ -1,13 +1,14 @@
 <?php
 
 use App\Models\Blog;
+use App\Enums\UserRole;
 use App\Models\NewsletterSubscription;
 use App\Models\PageView;
 use App\Models\Post;
 use App\Models\User;
 
 test('blogger sees their blog statistics', function () {
-    $user = User::factory()->create(['role' => User::ROLE_BLOGGER]);
+    $user = User::factory()->create(['role' => UserRole::Blogger->value]);
     $blog = Blog::factory()->create(['user_id' => $user->id]);
 
     // Create posts

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Blog;
+use App\Enums\UserRole;
 use App\Models\NewsletterSubscription;
 use App\Models\PageView;
 use App\Models\User;
@@ -10,10 +11,10 @@ use Illuminate\Support\Str;
 uses(RefreshDatabase::class);
 
 test('visitor stats displays user name if available, newsletter email otherwise, or visitor_id fallback', function () {
-    $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+    $admin = User::factory()->create(['role' => UserRole::Admin->value]);
     $this->actingAs($admin);
 
-    $blogger = User::factory()->create(['role' => User::ROLE_BLOGGER]);
+    $blogger = User::factory()->create(['role' => UserRole::Blogger->value]);
     $blog = Blog::factory()->create(['user_id' => $blogger->id]);
 
     $now = now();

@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Stats;
 
+use App\Enums\UserRole;
+
 use App\Models\AnonymousView;
 use App\Models\Blog;
 use App\Models\BotView;
@@ -19,7 +21,7 @@ class VisitorTypeTest extends TestCase
 
     public function test_can_filter_visitors_by_bots()
     {
-        $blogger = User::factory()->create(['role' => User::ROLE_BLOGGER]);
+        $blogger = User::factory()->create(['role' => UserRole::Blogger->value]);
         $blog = Blog::factory()->create(['user_id' => $blogger->id]);
         $ua = UserAgent::factory()->create(['name' => 'Googlebot']);
 
@@ -50,7 +52,7 @@ class VisitorTypeTest extends TestCase
 
     public function test_can_filter_visitors_by_anonymous()
     {
-        $blogger = User::factory()->create(['role' => User::ROLE_BLOGGER]);
+        $blogger = User::factory()->create(['role' => UserRole::Blogger->value]);
         $blog = Blog::factory()->create(['user_id' => $blogger->id]);
 
         // Anonymous view (anonymous_views table, grouped by user agent)
@@ -74,7 +76,7 @@ class VisitorTypeTest extends TestCase
 
     public function test_can_merge_bots_and_anonymous_visitors()
     {
-        $blogger = User::factory()->create(['role' => User::ROLE_BLOGGER]);
+        $blogger = User::factory()->create(['role' => UserRole::Blogger->value]);
         $blog = Blog::factory()->create(['user_id' => $blogger->id]);
 
         $botUa = UserAgent::factory()->create(['name' => 'Googlebot']);
@@ -109,7 +111,7 @@ class VisitorTypeTest extends TestCase
 
     public function test_can_merge_bots_and_anonymous_with_same_user_agent()
     {
-        $blogger = User::factory()->create(['role' => User::ROLE_BLOGGER]);
+        $blogger = User::factory()->create(['role' => UserRole::Blogger->value]);
         $blog = Blog::factory()->create(['user_id' => $blogger->id]);
 
         $ua = UserAgent::factory()->create(['name' => 'Shared UA']);
@@ -141,6 +143,6 @@ class VisitorTypeTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $this->admin = User::factory()->create(['role' => UserRole::Admin->value]);
     }
 }
