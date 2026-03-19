@@ -99,6 +99,13 @@ export interface Category {
 
 export type PostVisibility = 'public' | 'registered' | 'unlisted' | 'extension';
 
+export interface ViewStats {
+    anonymous: number;
+    bots: number;
+    consented: number;
+    markdown: number;
+}
+
 export interface PostExtensionPivot {
     id: number;
     title: string;

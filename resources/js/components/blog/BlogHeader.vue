@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import ViewStats from '@/components/blog/ViewStats.vue';
-import type { Blog } from '@/types/blog.types';
+import ViewStatsComponent from '@/components/blog/ViewStats.vue';
+import type { Blog, ViewStats } from '@/types/blog.types';
 
 defineProps<{
     blog: Blog & {
@@ -8,19 +8,19 @@ defineProps<{
         authorEmail?: string;
     };
     displayedMotto: string | null;
-    viewStats: {
-        anonymous: number;
-        bots: number;
-        consented: number;
-        markdown: number;
-    } | null;
+    viewStats?: ViewStats | null;
 }>();
 </script>
 
 <template>
     <header :style="{ fontFamily: 'var(--blog-header-font)', fontSize: 'calc(2rem * var(--blog-header-scale))' }" class="mb-4">
         <h1 class="mb-2 font-[inherit] text-[1em] leading-tight font-bold text-foreground">{{ blog.name }}</h1>
-        <ViewStats :anonymous="viewStats?.anonymous" :bots="viewStats?.bots" :consented="viewStats?.consented" :markdown="viewStats?.markdown" />
+        <ViewStatsComponent
+            :anonymous="viewStats?.anonymous"
+            :bots="viewStats?.bots"
+            :consented="viewStats?.consented"
+            :markdown="viewStats?.markdown"
+        />
         <p
             v-if="displayedMotto"
             :style="{ fontStyle: 'var(--blog-motto-style)', fontFamily: 'var(--blog-motto-font)', fontSize: 'calc(1rem * var(--blog-motto-scale))' }"

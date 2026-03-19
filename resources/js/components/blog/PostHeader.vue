@@ -1,18 +1,13 @@
 <script lang="ts" setup>
-import ViewStats from '@/components/blog/ViewStats.vue';
-import type { PostDetails } from '@/types/blog.types';
+import ViewStatsComponent from '@/components/blog/ViewStats.vue';
+import type { PostDetails, ViewStats } from '@/types/blog.types';
 import { formatDate, shouldShowUpdatedDate } from '@/utils/dateUtils';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
     post: PostDetails;
-    viewStats: {
-        anonymous: number;
-        bots: number;
-        consented: number;
-        markdown: number;
-    } | null;
+    viewStats?: ViewStats | null;
     locale?: string;
     publishedTime?: string | null;
     modifiedTime?: string | null;
@@ -31,7 +26,12 @@ const formattedUpdatedDate = computed(() => formatDate(props.modifiedTime, props
 <template>
     <header :style="{ fontFamily: 'var(--blog-header-font)', fontSize: 'calc(2rem * var(--blog-header-scale))' }" class="mb-4">
         <h1 class="mb-2 font-[inherit] text-[1em] leading-tight font-bold text-foreground">{{ post.title }}</h1>
-        <ViewStats :anonymous="viewStats?.anonymous" :bots="viewStats?.bots" :consented="viewStats?.consented" :markdown="viewStats?.markdown" />
+        <ViewStatsComponent
+            :anonymous="viewStats?.anonymous"
+            :bots="viewStats?.bots"
+            :consented="viewStats?.consented"
+            :markdown="viewStats?.markdown"
+        />
         <div class="my-2 inline-flex items-center gap-x-5 text-sm font-medium text-muted-foreground">
             <p v-if="post.published_at" class="italic">{{ publishedLabel }} {{ formatDate(post.published_at) }}</p>
         </div>

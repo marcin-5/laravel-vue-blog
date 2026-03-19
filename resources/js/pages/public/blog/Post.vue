@@ -7,7 +7,7 @@ import PostContent from '@/components/blog/PostContent.vue';
 import PostExtensions from '@/components/blog/PostExtensions.vue';
 import PostHeader from '@/components/blog/PostHeader.vue';
 import type { SEO } from '@/types';
-import type { Blog, Navigation, Pagination, PostDetails, PostItem } from '@/types/blog.types';
+import type { Blog, Navigation, Pagination, PostDetails, PostItem, ViewStats } from '@/types/blog.types';
 import { Head, router } from '@inertiajs/vue3';
 import { ArrowLeft } from 'lucide-vue-next';
 import { computed } from 'vue';
@@ -22,11 +22,7 @@ const props = defineProps<{
     navigation?: Navigation;
     locale?: string;
     seo?: SEO;
-    viewStats: {
-        anonymous: number;
-        bots: number;
-        consented: number;
-    } | null;
+    viewStats: ViewStats | null;
 }>();
 
 const { t } = useI18n();

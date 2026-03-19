@@ -6,7 +6,7 @@ import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import ScrollToPostsLink from '@/components/blog/ScrollToPostsLink.vue';
-import type { Blog, Navigation, Pagination, PostItem } from '@/types/blog.types';
+import type { Blog, Navigation, Pagination, PostItem, ViewStats } from '@/types/blog.types';
 import { handleContentClick } from '@/utils/domUtils';
 import { hasContent, selectRandomMotto } from '@/utils/stringUtils';
 import { Head } from '@inertiajs/vue3';
@@ -23,11 +23,7 @@ const props = defineProps<{
     metaDescription: string;
     navigation?: Navigation;
     locale?: string;
-    viewStats: {
-        anonymous: number;
-        bots: number;
-        consented: number;
-    } | null;
+    viewStats: ViewStats | null;
     seo?: {
         title: string;
     };
