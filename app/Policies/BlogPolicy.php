@@ -21,7 +21,7 @@ class BlogPolicy
      */
     public function create(User $user): bool
     {
-        if ($user->isAdmin()) {
+        if ($user->can('view_admin_users')) {
             return true;
         }
         return $user->canCreateBlog();
@@ -33,6 +33,6 @@ class BlogPolicy
      */
     public function update(User $user, Blog $blog): bool
     {
-        return $user->isAdmin() || $blog->user_id === $user->id;
+        return $user->can('view_admin_users') || $blog->user_id === $user->id;
     }
 }

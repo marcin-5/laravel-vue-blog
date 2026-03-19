@@ -12,15 +12,16 @@ export function useDashboardView() {
 
     const availableViews = computed(() => {
         if (!user.value) return [];
-        if (user.value.role === 'admin') return ['admin', 'blogger', 'user'] as DashboardView[];
-        if (user.value.role === 'blogger') return ['blogger', 'user'] as DashboardView[];
-        return [];
+        const views: DashboardView[] = ['user'];
+        if (user.value.can?.view_admin_stats) views.unshift('admin');
+        if (user.value.can?.view_blogger_stats) views.unshift('blogger');
+        return [...new Set(views)];
     });
 
     // Initialize default view if not set
     if (!currentView.value && user.value) {
-        if (user.value.role === 'admin') currentView.value = 'admin';
-        else if (user.value.role === 'blogger') currentView.value = 'blogger';
+        if (user.value.can?.view_admin_stats) currentView.value = 'admin';
+        else if (user.value.can?.view_blogger_stats) currentView.value = 'blogger';
         else currentView.value = 'user';
     }
 

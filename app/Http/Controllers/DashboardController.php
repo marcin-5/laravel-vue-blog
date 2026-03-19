@@ -19,9 +19,7 @@ use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __construct(protected TranslationService $translations)
-    {
-    }
+    public function __construct(protected TranslationService $translations) {}
 
     public function index(Request $request): Response
     {
@@ -47,13 +45,13 @@ class DashboardController extends Controller
             'botStats' => null,
         ];
 
-        if ($user->isAdmin()) {
+        if ($user->can('view_admin_stats')) {
             $data['newsletterSubscriptions'] = $this->getNewsletterSubscriptions();
             $data['userAgentStats'] = $this->getUserAgentStats();
             $data['botStats'] = $this->getBotStats();
         }
 
-        if ($user->isBlogger() || $user->isAdmin()) {
+        if ($user->can('view_blogs')) {
             $data['blogStats'] = $this->getBlogStats($user);
             $data['postsStats'] = $this->getPostsStats($user);
         }

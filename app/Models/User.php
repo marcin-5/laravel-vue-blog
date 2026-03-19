@@ -93,15 +93,19 @@ class User extends Authenticatable
     }
 
     /**
-     * Sprawdza czy tabele uprawnień są dostępne przed ich użyciem.
+     * Check if permission tables are available before use.
      */
-    public static function shouldSyncPermissions(): bool
+    public static function shouldSyncPermissions(?bool $reset = false): bool
     {
-        if (app()->environment('testing')) {
-            return false;
+        static $canSync = null;
+
+        if ($reset) {
+            $canSync = null;
         }
 
-        static $canSync = null;
+        if (config('permission.disabled', false)) {
+            return false;
+        }
 
         if ($canSync !== null) {
             return $canSync;

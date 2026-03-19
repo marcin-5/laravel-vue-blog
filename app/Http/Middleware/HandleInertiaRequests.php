@@ -46,13 +46,13 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user() ? array_merge($request->user()->toArray(), [
                     'can' => [
-                        'view_admin_users' => $request->user()->isAdmin(),
-                        'view_admin_categories' => $request->user()->isAdmin(),
-                        'view_admin_stats' => $request->user()->isAdmin(),
-                        'view_blogs' => $request->user()->isAdmin() || $request->user()->isBlogger(),
-                        'view_blogger_stats' => $request->user()->isBlogger(),
-                        'manage_groups' => $request->user()->isAdmin() || $request->user()->isBlogger(),
-                        'contribute_groups' => $request->user()->isAdmin() || $request->user()->isBlogger(),
+                        'view_admin_users' => $request->user()->can('view_admin_users'),
+                        'view_admin_categories' => $request->user()->can('view_admin_categories'),
+                        'view_admin_stats' => $request->user()->can('view_admin_stats'),
+                        'view_blogs' => $request->user()->can('view_blogs'),
+                        'view_blogger_stats' => $request->user()->can('view_blogger_stats'),
+                        'manage_groups' => $request->user()->can('manage_groups'),
+                        'contribute_groups' => $request->user()->can('contribute_groups'),
                     ],
                 ]) : null,
             ],
