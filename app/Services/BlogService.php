@@ -46,23 +46,10 @@ class BlogService
 
     public function createBlog(array $blogData, array $categories = []): Blog
     {
-        $blog = Blog::create($blogData);
-        $this->syncCategories($blog, $categories);
-        return $blog;
-    }
-
-    private function syncCategories(Blog $blog, array $categories): void
-    {
-        $blog->categories()->sync($categories);
-    }
-
-    public function updateBlog(Blog $blog, array $blogData, ?array $categories = null): Blog
-    {
         $landingContent = $this->extractLandingContent($blogData);
-        $blog->fill($blogData);
-        $blog->save();
+        $blog = Blog::create($blogData);
         $this->updateLandingPage($blog, $landingContent);
-        $this->syncCategories($blog, $categories ?? []);
+        $this->syncCategories($blog, $categories);
         return $blog;
     }
 
@@ -85,5 +72,20 @@ class BlogService
             ['blog_id' => $blog->id],
             ['content' => $content],
         );
+    }
+
+    private function syncCategories(Blog $blog, array $categories): void
+    {
+        $blog->categories()->sync($categories);
+    }
+
+    public function updateBlog(Blog $blog, array $blogData, ?array $categories = null): Blog
+    {
+        $landingContent = $this->extractLandingContent($blogData);
+        $blog->fill($blogData);
+        $blog->save();
+        $this->updateLandingPage($blog, $landingContent);
+        $this->syncCategories($blog, $categories ?? []);
+        return $blog;
     }
 }

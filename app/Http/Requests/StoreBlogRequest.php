@@ -40,6 +40,7 @@ class StoreBlogRequest extends FormRequest
             'theme' => ['nullable', 'array'],
             'theme.light' => ['nullable', 'array'],
             'theme.dark' => ['nullable', 'array'],
+            'landing_content' => ['nullable', 'string'],
         ];
     }
 
@@ -60,6 +61,7 @@ class StoreBlogRequest extends FormRequest
             'sidebar' => (int) ($validated['sidebar'] ?? $config['sidebar']),
             'page_size' => (int) ($validated['page_size'] ?? $config['page_size']),
             'theme' => $validated['theme'] ?? null,
+            'landing_content' => $validated['landing_content'] ?? null,
         ];
     }
 
