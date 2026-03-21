@@ -5,7 +5,9 @@ import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import PostContent from '@/components/blog/PostContent.vue';
 import PostExtensions from '@/components/blog/PostExtensions.vue';
+import PostExternalLinks from '@/components/blog/PostExternalLinks.vue';
 import PostHeader from '@/components/blog/PostHeader.vue';
+import PostRelatedPosts from '@/components/blog/PostRelatedPosts.vue';
 import type { SEO } from '@/types';
 import type { Blog, Navigation, Pagination, PostDetails, PostItem, ViewStats } from '@/types/blog.types';
 import { Head, router } from '@inertiajs/vue3';
@@ -34,6 +36,8 @@ const postModifiedTime = computed(() => props.seo?.modifiedTime || null);
 // Derived post state
 const isListed = computed(() => props.post.visibility !== 'unlisted');
 const postExtensionsList = computed(() => props.post.extensions || []);
+const relatedPosts = computed(() => props.post.relatedPosts || []);
+const externalLinks = computed(() => props.post.externalLinks || []);
 
 // Shared prop objects to avoid template repetition
 const postHeaderProps = computed(() => ({
@@ -73,6 +77,9 @@ const navigateBack = () => {
         <template #content>
             <PostContent :author="post.author" :content="post.contentHtml" />
             <PostExtensions :extensions="postExtensionsList" />
+            <!-- Optional related posts and external links -->
+            <PostRelatedPosts :items="relatedPosts" />
+            <PostExternalLinks :items="externalLinks" />
         </template>
 
         <template #middle-divider>

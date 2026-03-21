@@ -48,6 +48,8 @@ export interface PostDetails extends PostItem {
     contentHtml: string;
     extensions?: PostExtension[];
     visibility?: PostVisibility;
+    relatedPosts?: (RelatedPostItem & { blog_slug?: string | null })[];
+    externalLinks?: ExternalLinkItem[];
 }
 
 export interface PaginationLink {

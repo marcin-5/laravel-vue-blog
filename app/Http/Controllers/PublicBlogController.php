@@ -9,8 +9,10 @@ use App\Http\Controllers\Concerns\HandlesViewStats;
 use App\Http\Resources\PublicBlogResource;
 use App\Http\Resources\PublicPostResource;
 use App\Models\Blog;
+use App\Models\ExternalLink;
 use App\Models\LandingPage;
 use App\Models\Post;
+use App\Models\RelatedPost;
 use App\Queries\Public\PublicBlogPostsQuery;
 use App\Services\BlogNavigationService;
 use App\Services\MarkdownService;
@@ -155,6 +157,40 @@ class PublicBlogController extends BasePublicController
                         'id' => $ext->id,
                         'title' => $ext->title,
                         'contentHtml' => $ext->content_html,
+                    ]),
+                // Related posts (optional)
+                'relatedPosts' => RelatedPost::query()
+                    ->where('post_id', $post->id)
+                    ->orderBy('display_order')
+                    ->get()
+                    ->map(function ($rp) {
+                        $related = $rp->relatedPost()->with(['blog'])->first();
+                        return [
+                            'id' => $rp->id,
+                            'blog_id' => $rp->blog_id,
+                            'related_post_id' => $rp->related_post_id,
+                            'reason' => $rp->reason,
+                            'display_order' => $rp->display_order,
+                            'blog_slug' => $related?->blog?->slug,
+                            'related_post' => $related ? [
+                                'id' => $related->id,
+                                'title' => $related->title,
+                                'slug' => $related->slug,
+                            ] : null,
+                        ];
+                    }),
+                // External links (optional)
+                'externalLinks' => ExternalLink::query()
+                    ->where('post_id', $post->id)
+                    ->orderBy('display_order')
+                    ->get()
+                    ->map(fn($el) => [
+                        'id' => $el->id,
+                        'title' => $el->title,
+                        'url' => $el->url,
+                        'description' => $el->description,
+                        'reason' => $el->reason,
+                        'display_order' => $el->display_order,
                     ]),
             ],
             'posts' => PublicPostResource::collection($paginator->items())->toArray($request),

@@ -74,6 +74,8 @@
             "anonymous_views": "Anonymous:",
             "markdown_views": "Markdown:",
             "bot_views": "Bots:",
+            "related_posts": "Related posts",
+            "external_links": "External links",
             "lock_extension": "Lock",
             "unlock_extension": "Unlock"
         }
