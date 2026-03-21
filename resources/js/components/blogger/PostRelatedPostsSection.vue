@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button/index';
+import { Input } from '@/components/ui/input/index';
+import { Label } from '@/components/ui/label/index';
 import type { RelatedPostItem } from '@/types/blog.types';
 import { Plus, Trash2 } from 'lucide-vue-next';
 
