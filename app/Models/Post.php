@@ -84,6 +84,16 @@ class Post extends Model
         return $this->hasMany(NewsletterLog::class);
     }
 
+    public function relatedPosts(): HasMany
+    {
+        return $this->hasMany(RelatedPost::class)->orderBy('display_order');
+    }
+
+    public function externalLinks(): HasMany
+    {
+        return $this->hasMany(ExternalLink::class)->orderBy('display_order');
+    }
+
     /**
      * Post extensions assigned to this post (via pivot)
      */
