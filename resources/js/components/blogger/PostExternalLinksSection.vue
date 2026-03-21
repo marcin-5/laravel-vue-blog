@@ -43,11 +43,7 @@ const isSubmitDisabled = computed(() => {
         return true;
     }
 
-    if (newDescription.value && !newReason.value) {
-        return true;
-    }
-
-    return false;
+    return newDescription.value && !newReason.value;
 });
 
 const handleAddItem = () => {
