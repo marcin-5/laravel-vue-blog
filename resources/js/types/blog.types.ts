@@ -126,6 +126,7 @@ export interface RelatedPostItem {
     related_post?: {
         id: number;
         title: string;
+        slug: string;
     };
 }
 

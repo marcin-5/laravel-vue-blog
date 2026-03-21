@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input/index';
 import { Label } from '@/components/ui/label/index';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select/index';
 import type { RelatedPostItem } from '@/types/blog.types';
+import { Link } from '@inertiajs/vue3';
 import axios from 'axios';
 import { Plus, Trash2 } from 'lucide-vue-next';
 import { onMounted, ref, watch } from 'vue';
@@ -28,7 +29,7 @@ interface Emits {
 defineProps<Props>();
 const emit = defineEmits<Emits>();
 
-const availableBlogs = ref<{ id: number; name: string }[]>([]);
+const availableBlogs = ref<{ id: number; name: string; slug: string }[]>([]);
 const availablePosts = ref<{ id: number; title: string }[]>([]);
 
 const selectedBlogId = ref<string>('');
@@ -97,6 +98,21 @@ const getPostTitle = (rp: RelatedPostItem) => {
     }
     return availablePosts.value.find((p) => p.id === rp.related_post_id)?.title || `Post ID: ${rp.related_post_id}`;
 };
+
+const getPostUrl = (rp: RelatedPostItem) => {
+    const blog = availableBlogs.value.find((b) => b.id === rp.blog_id);
+    const blogSlug = blog?.slug;
+    const postSlug = rp.related_post?.slug;
+
+    if (blogSlug && postSlug) {
+        return route('blog.public.post', {
+            blog: blogSlug,
+            postSlug,
+        });
+    }
+
+    return '#';
+};
 </script>
 
 <template>
@@ -153,7 +169,9 @@ const getPostTitle = (rp: RelatedPostItem) => {
 
         <div v-for="(rp, index) in items" :key="index" class="flex items-start justify-between border-t py-2 first:border-t-0 first:pt-0 last:pb-0">
             <div class="flex-1 space-y-1">
-                <div class="text-sm font-medium">{{ getBlogName(rp.blog_id) }} - {{ getPostTitle(rp) }}</div>
+                <Link :href="getPostUrl(rp)" class="text-sm font-medium hover:text-primary-foreground">
+                    {{ getBlogName(rp.blog_id) }} - {{ getPostTitle(rp) }}
+                </Link>
                 <div v-if="rp.reason" class="text-xs text-muted-foreground">
                     {{ rp.reason }}
                 </div>
