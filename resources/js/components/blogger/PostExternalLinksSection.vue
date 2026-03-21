@@ -31,7 +31,7 @@ defineEmits<Emits>();
     <div class="space-y-4 rounded-lg border p-4">
         <div class="flex items-center justify-between">
             <h3 class="text-lg font-medium">{{ translations.label }}</h3>
-            <Button size="sm" type="button" variant="outline" @click="$emit('add')">
+            <Button size="sm" type="button" variant="outline" @click.stop="$emit('add')">
                 <Plus class="mr-2 h-4 w-4" />
                 {{ translations.addItem }}
             </Button>

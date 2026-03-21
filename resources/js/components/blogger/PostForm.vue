@@ -54,6 +54,14 @@ const form =
         external_links: (props.post?.external_links || []) as ExternalLinkItem[],
     });
 
+// Ensure related_posts and external_links are initialized if props.form was provided without them
+if (form.related_posts === undefined) {
+    form.related_posts = (props.post?.related_posts || []) as RelatedPostItem[];
+}
+if (form.external_links === undefined) {
+    form.external_links = (props.post?.external_links || []) as ExternalLinkItem[];
+}
+
 // Visibility computed properties
 const createVisibilityComputed = (value: string) =>
     computed({

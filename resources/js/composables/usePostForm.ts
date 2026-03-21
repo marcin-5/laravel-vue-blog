@@ -23,6 +23,8 @@ export function usePostForm() {
         content: '' as string,
         is_published: false as boolean,
         visibility: 'public' as string,
+        related_posts: [] as any[],
+        external_links: [] as any[],
     });
 
     const postEditForm = useForm({
@@ -32,6 +34,8 @@ export function usePostForm() {
         content: '' as string | null,
         is_published: false as boolean,
         visibility: 'public' as string,
+        related_posts: [] as any[],
+        external_links: [] as any[],
     });
 
     const extensionForm = useForm({
@@ -100,6 +104,8 @@ export function usePostForm() {
         postEditForm.content = post.content ?? '';
         postEditForm.is_published = post.is_published;
         postEditForm.visibility = post.visibility ?? 'public';
+        postEditForm.related_posts = [...(post.related_posts || [])];
+        postEditForm.external_links = [...(post.external_links || [])];
     }
 
     function cancelEditPost() {

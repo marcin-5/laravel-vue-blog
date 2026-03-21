@@ -123,6 +123,45 @@ describe('PostForm.vue', () => {
         expect(hiddenSeoTitleField).toBeUndefined();
     });
 
+    it('adds a related post when @add event is emitted', async () => {
+        const wrapper = mount(PostForm);
+        const section = wrapper.findComponent({ name: 'PostRelatedPostsSection' });
+
+        await section.vm.$emit('add');
+
+        // Check internal form state
+        expect(wrapper.vm.form.related_posts).toHaveLength(1);
+    });
+
+    it('adds an external link when @add event is emitted', async () => {
+        const wrapper = mount(PostForm);
+        const section = wrapper.findComponent({ name: 'PostExternalLinksSection' });
+
+        await section.vm.$emit('add');
+
+        expect(wrapper.vm.form.external_links).toHaveLength(1);
+    });
+
+    it('initializes missing form fields when props.form is incomplete', async () => {
+        const incompleteForm = {
+            title: 'Test',
+            errors: {},
+            processing: false,
+            // related_posts and external_links are missing
+        };
+
+        const wrapper = mount(PostForm, {
+            props: {
+                form: incompleteForm as any,
+            },
+        });
+
+        expect(wrapper.vm.form.related_posts).toBeDefined();
+        expect(Array.isArray(wrapper.vm.form.related_posts)).toBe(true);
+        expect(wrapper.vm.form.external_links).toBeDefined();
+        expect(Array.isArray(wrapper.vm.form.external_links)).toBe(true);
+    });
+
     it('emits submit when form is submitted', async () => {
         const wrapper = mount(PostForm);
 
