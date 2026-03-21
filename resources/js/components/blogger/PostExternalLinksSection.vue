@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label/index';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover/index';
 import { Textarea } from '@/components/ui/textarea/index';
 import type { ExternalLinkItem } from '@/types/blog.types';
-import { Info, Plus, Trash2 } from 'lucide-vue-next';
+import { Check, Info, Pencil, Plus, Trash2 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 interface Props {
@@ -15,6 +15,7 @@ interface Props {
     translations: {
         label: string;
         addItem: string;
+        updateItem: string;
         title: string;
         url: string;
         description: string;
@@ -24,16 +25,18 @@ interface Props {
 
 interface Emits {
     (e: 'add-item', item: { title: string; url: string; description: string; reason: string }): void;
+    (e: 'update-item', index: number, item: { title: string; url: string; description: string; reason: string }): void;
     (e: 'remove', index: number): void;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 const newTitle = ref('');
 const newUrl = ref('');
 const newDescription = ref('');
 const newReason = ref('');
+const editingIndex = ref<number | null>(null);
 
 const isSubmitDisabled = computed(() => {
     if (!newTitle.value || !newUrl.value) {
@@ -55,17 +58,42 @@ const handleAddItem = () => {
             url = `https://${url}`;
         }
 
-        emit('add-item', {
+        const item = {
             title: newTitle.value,
             url: url,
             description: newDescription.value,
             reason: newReason.value,
-        });
+        };
+
+        if (editingIndex.value !== null) {
+            emit('update-item', editingIndex.value, item);
+        } else {
+            emit('add-item', item);
+        }
+
         newTitle.value = '';
         newUrl.value = '';
         newDescription.value = '';
         newReason.value = '';
+        editingIndex.value = null;
     }
+};
+
+const editItem = (index: number) => {
+    const item = props.items[index];
+    newTitle.value = item.title;
+    newUrl.value = item.url;
+    newDescription.value = item.description || '';
+    newReason.value = item.reason || '';
+    editingIndex.value = index;
+};
+
+const cancelEdit = () => {
+    newTitle.value = '';
+    newUrl.value = '';
+    newDescription.value = '';
+    newReason.value = '';
+    editingIndex.value = null;
 };
 </script>
 
@@ -97,10 +125,15 @@ const handleAddItem = () => {
                     <Textarea :id="`${idPrefix}-new-desc`" v-model="newDescription" rows="3" />
                     <p v-if="newDescription && !newReason" class="text-xs text-destructive">Powód jest wymagany, gdy podano opis.</p>
                 </div>
-                <Button :disabled="isSubmitDisabled" class="w-full justify-end lg:w-auto" type="button" variant="outline" @click="handleAddItem">
-                    <Plus class="mr-2 h-4 w-4" />
-                    {{ translations.addItem }}
-                </Button>
+                <div class="flex flex-col items-end gap-2 lg:flex-row lg:gap-4">
+                    <Button :disabled="isSubmitDisabled" class="w-full justify-end lg:w-auto" type="button" variant="outline" @click="handleAddItem">
+                        <component :is="editingIndex !== null ? Check : Plus" class="mr-2 h-4 w-4" />
+                        {{ editingIndex !== null ? translations.updateItem : translations.addItem }}
+                    </Button>
+                    <Button v-if="editingIndex !== null" class="w-full justify-end lg:w-auto" type="button" variant="ghost" @click="cancelEdit">
+                        Anuluj
+                    </Button>
+                </div>
             </div>
         </div>
 
@@ -139,7 +172,10 @@ const handleAddItem = () => {
                     </Popover>
                 </div>
             </div>
-            <div class="ml-4 flex items-center">
+            <div class="ml-4 flex items-center gap-1">
+                <Button class="h-8 w-8 text-muted-foreground hover:bg-muted" size="icon" type="button" variant="ghost" @click="editItem(index)">
+                    <Pencil class="h-4 w-4" />
+                </Button>
                 <Button
                     class="h-8 w-8 text-destructive hover:bg-destructive/10"
                     size="icon"

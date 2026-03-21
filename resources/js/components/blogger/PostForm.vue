@@ -126,6 +126,7 @@ const relatedPostsTranslations = computed(() => ({
 const externalLinksTranslations = computed(() => ({
     label: t('blogger.post_form.external_links_label'),
     addItem: t('blogger.post_form.add_external_link'),
+    updateItem: t('blogger.post_form.update_external_link'),
     title: t('blogger.post_form.external_link_title'),
     url: t('blogger.post_form.external_link_url'),
     description: t('blogger.post_form.external_link_description'),
@@ -183,6 +184,13 @@ const addExternalLink = (item: { title: string; url: string; description: string
 
 const removeExternalLink = (index: number) => {
     form.external_links.splice(index, 1);
+};
+
+const updateExternalLink = (index: number, item: { title: string; url: string; description: string; reason: string }) => {
+    form.external_links[index] = {
+        ...form.external_links[index],
+        ...item,
+    };
 };
 
 // Watchers for post and blogId props
@@ -323,6 +331,7 @@ const excerptClass = computed(() => {
                 :translations="externalLinksTranslations"
                 @remove="removeExternalLink"
                 @add-item="addExternalLink"
+                @update-item="updateExternalLink"
             />
 
             <div class="flex flex-wrap items-center gap-4">

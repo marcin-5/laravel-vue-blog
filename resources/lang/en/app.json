@@ -364,6 +364,7 @@
             "external_links_label": "External links",
             "add_related_post": "Add related post",
             "add_external_link": "Add external link",
+            "update_external_link": "Update",
             "related_post_id": "Post",
             "related_post_blog": "Blog",
             "related_post_reason": "Explanation of the relationship",
