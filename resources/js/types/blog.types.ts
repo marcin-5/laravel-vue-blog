@@ -121,7 +121,7 @@ export interface RelatedPostItem {
     post_id?: number;
     blog_id: number;
     related_post_id: number;
-    reason: string | null;
+    reason?: string;
     display_order: number;
     related_post?: {
         id: number;
@@ -134,8 +134,8 @@ export interface ExternalLinkItem {
     post_id?: number;
     title: string;
     url: string;
-    description: string | null;
-    reason: string | null;
+    description?: string;
+    reason?: string;
     display_order: number;
 }
 
