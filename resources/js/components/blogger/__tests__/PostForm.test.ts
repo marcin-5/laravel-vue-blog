@@ -57,13 +57,25 @@ vi.mock('@/components/blogger/MarkdownPreviewSection.vue', () => ({
     default: { name: 'MarkdownPreviewSection', template: '<div>MarkdownPreviewSection</div>' },
 }));
 vi.mock('@/components/blogger/PostFormField.vue', () => ({
-    default: { name: 'PostFormField', template: '<div>PostFormField</div>' },
+    default: {
+        name: 'PostFormField',
+        props: ['id', 'label', 'error', 'placeholder', 'type', 'rows', 'required', 'tooltip', 'inputClass', 'hint'],
+        template: '<div :id="id">PostFormField</div>',
+    },
 }));
 vi.mock('@/components/blogger/PostRelatedPostsSection.vue', () => ({
-    default: { name: 'PostRelatedPostsSection', template: '<div>PostRelatedPostsSection</div>' },
+    default: {
+        name: 'PostRelatedPostsSection',
+        props: ['translations'],
+        template: '<div><h3>{{ translations.label }}</h3>PostRelatedPostsSection</div>',
+    },
 }));
 vi.mock('@/components/blogger/PostExternalLinksSection.vue', () => ({
-    default: { name: 'PostExternalLinksSection', template: '<div>PostExternalLinksSection</div>' },
+    default: {
+        name: 'PostExternalLinksSection',
+        props: ['translations'],
+        template: '<div><h3>{{ translations.label }}</h3>PostExternalLinksSection</div>',
+    },
 }));
 
 (global as any).route = vi.fn(() => 'mock-route');
@@ -77,6 +89,38 @@ describe('PostForm.vue', () => {
     it('renders the form', () => {
         const wrapper = mount(PostForm);
         expect(wrapper.find('form').exists()).toBe(true);
+    });
+
+    it('renders related posts section', () => {
+        const wrapper = mount(PostForm);
+        const section = wrapper.findComponent({ name: 'PostRelatedPostsSection' });
+        expect(section.exists()).toBe(true);
+        expect(section.find('h3').text()).toBe('blogger.post_form.related_posts_label');
+    });
+
+    it('renders external links section', () => {
+        const wrapper = mount(PostForm);
+        const section = wrapper.findComponent({ name: 'PostExternalLinksSection' });
+        expect(section.exists()).toBe(true);
+        expect(section.find('h3').text()).toBe('blogger.post_form.external_links_label');
+    });
+
+    it('renders seo title field only when NOT in group', () => {
+        const wrapper = mount(PostForm, {
+            props: {
+                groupId: 0,
+            },
+        });
+        const seoTitleField = wrapper.findAllComponents({ name: 'PostFormField' }).find((c) => c.props('id') === 'post-seo-title');
+        expect(seoTitleField).toBeDefined();
+
+        const groupWrapper = mount(PostForm, {
+            props: {
+                groupId: 1,
+            },
+        });
+        const hiddenSeoTitleField = groupWrapper.findAllComponents({ name: 'PostFormField' }).find((c) => c.props('id') === 'post-seo-title');
+        expect(hiddenSeoTitleField).toBeUndefined();
     });
 
     it('emits submit when form is submitted', async () => {
