@@ -2,9 +2,11 @@
 import FormCheckboxField from '@/components/blogger/FormCheckboxField.vue';
 import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
 import MarkdownPreviewSection from '@/components/blogger/MarkdownPreviewSection.vue';
+import PostExternalLinksSection from '@/components/blogger/PostExternalLinksSection.vue';
 import PostFormField from '@/components/blogger/PostFormField.vue';
+import PostRelatedPostsSection from '@/components/blogger/PostRelatedPostsSection.vue';
 import { useMarkdownPreviewSection } from '@/composables/useMarkdownPreviewSection';
-import type { AdminPostItem as PostItem } from '@/types/blog.types';
+import type { AdminPostItem as PostItem, ExternalLinkItem, RelatedPostItem } from '@/types/blog.types';
 import { useForm } from '@inertiajs/vue3';
 import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -48,6 +50,8 @@ const form =
         content: props.post?.content || '',
         is_published: !!props.post?.is_published,
         visibility: props.post?.visibility || 'public',
+        related_posts: (props.post?.related_posts || []) as RelatedPostItem[],
+        external_links: (props.post?.external_links || []) as ExternalLinkItem[],
     });
 
 // Visibility computed properties
@@ -103,6 +107,23 @@ const translationKeys = computed(() => ({
     characters: t('blogger.post_form.characters'),
 }));
 
+const relatedPostsTranslations = computed(() => ({
+    label: t('blogger.post_form.related_posts_label'),
+    addItem: t('blogger.post_form.add_related_post'),
+    blogId: t('blogger.post_form.related_post_blog'),
+    postId: t('blogger.post_form.related_post_id'),
+    reason: t('blogger.post_form.related_post_reason'),
+}));
+
+const externalLinksTranslations = computed(() => ({
+    label: t('blogger.post_form.external_links_label'),
+    addItem: t('blogger.post_form.add_external_link'),
+    title: t('blogger.post_form.external_link_title'),
+    url: t('blogger.post_form.external_link_url'),
+    description: t('blogger.post_form.external_link_description'),
+    reason: t('blogger.post_form.external_link_reason'),
+}));
+
 // Update form from post data
 const updateFormFromPost = (post: PostItem) => {
     form.blog_id = post.blog_id;
@@ -113,6 +134,35 @@ const updateFormFromPost = (post: PostItem) => {
     form.content = post.content ?? '';
     form.is_published = post.is_published;
     form.visibility = post.visibility ?? 'public';
+    form.related_posts = (post.related_posts || []) as RelatedPostItem[];
+    form.external_links = (post.external_links || []) as ExternalLinkItem[];
+};
+
+const addRelatedPost = () => {
+    form.related_posts.push({
+        blog_id: form.blog_id,
+        related_post_id: 0,
+        reason: '',
+        display_order: form.related_posts.length,
+    });
+};
+
+const removeRelatedPost = (index: number) => {
+    form.related_posts.splice(index, 1);
+};
+
+const addExternalLink = () => {
+    form.external_links.push({
+        title: '',
+        url: '',
+        description: '',
+        reason: '',
+        display_order: form.external_links.length,
+    });
+};
+
+const removeExternalLink = (index: number) => {
+    form.external_links.splice(index, 1);
 };
 
 // Watchers for post and blogId props
@@ -166,6 +216,7 @@ const excerptClass = computed(() => {
     return '';
 });
 </script>
+
 <template>
     <div class="mt-4 border-t pt-4">
         <form class="space-y-4" @submit.prevent="handleSubmit">
@@ -244,6 +295,22 @@ const excerptClass = computed(() => {
 
                 <FormCheckboxField :id="`${fieldIdPrefix}-extension`" v-model="isExtension" :label="translationKeys.extension" />
             </div>
+
+            <PostRelatedPostsSection
+                :id-prefix="fieldIdPrefix"
+                :items="form.related_posts"
+                :translations="relatedPostsTranslations"
+                @add="addRelatedPost"
+                @remove="removeRelatedPost"
+            />
+
+            <PostExternalLinksSection
+                :id-prefix="fieldIdPrefix"
+                :items="form.external_links"
+                :translations="externalLinksTranslations"
+                @add="addExternalLink"
+                @remove="removeExternalLink"
+            />
 
             <FormSubmitActions
                 :is-edit="props.isEdit"

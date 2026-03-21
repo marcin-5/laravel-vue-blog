@@ -59,6 +59,12 @@ vi.mock('@/components/blogger/MarkdownPreviewSection.vue', () => ({
 vi.mock('@/components/blogger/PostFormField.vue', () => ({
     default: { name: 'PostFormField', template: '<div>PostFormField</div>' },
 }));
+vi.mock('@/components/blogger/PostRelatedPostsSection.vue', () => ({
+    default: { name: 'PostRelatedPostsSection', template: '<div>PostRelatedPostsSection</div>' },
+}));
+vi.mock('@/components/blogger/PostExternalLinksSection.vue', () => ({
+    default: { name: 'PostExternalLinksSection', template: '<div>PostExternalLinksSection</div>' },
+}));
 
 (global as any).route = vi.fn(() => 'mock-route');
 

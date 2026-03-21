@@ -54,6 +54,17 @@ class StorePostRequest extends FormRequest
                 'string',
                 'in:' . implode(',', $config['allowed_visibility'] ?? ['public', 'registered']),
             ],
+            'related_posts' => ['nullable', 'array'],
+            'related_posts.*.blog_id' => ['required', 'integer', 'exists:blogs,id'],
+            'related_posts.*.related_post_id' => ['required', 'integer', 'exists:posts,id'],
+            'related_posts.*.reason' => ['nullable', 'string', 'max:500'],
+            'related_posts.*.display_order' => ['nullable', 'integer', 'min:0'],
+            'external_links' => ['nullable', 'array'],
+            'external_links.*.title' => ['required', 'string', 'max:255'],
+            'external_links.*.url' => ['required', 'url', 'max:255'],
+            'external_links.*.description' => ['nullable', 'string', 'max:500'],
+            'external_links.*.reason' => ['nullable', 'string', 'max:500'],
+            'external_links.*.display_order' => ['nullable', 'integer', 'min:0'],
         ];
     }
 
@@ -71,6 +82,8 @@ class StorePostRequest extends FormRequest
             'content' => $validated['content'] ?? null,
             'is_published' => (bool) ($validated['is_published'] ?? $config['is_published'] ?? false),
             'visibility' => $validated['visibility'] ?? $config['visibility'] ?? 'public',
+            'related_posts' => $validated['related_posts'] ?? [],
+            'external_links' => $validated['external_links'] ?? [],
         ];
     }
 

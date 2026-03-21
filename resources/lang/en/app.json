@@ -359,7 +359,19 @@
             "vertical_button": "Vertical",
             "unlisted_label": "Unlisted (available via link only)",
             "extension_label": "Extension (used as an add-on to other posts)",
-            "characters": "characters"
+            "characters": "characters",
+            "related_posts_label": "Related posts",
+            "external_links_label": "External links",
+            "add_related_post": "Add related post",
+            "add_external_link": "Add external link",
+            "related_post_id": "Post",
+            "related_post_blog": "Blog",
+            "related_post_reason": "Explanation of the relationship",
+            "external_link_title": "Title",
+            "external_link_url": "URL",
+            "external_link_description": "Description",
+            "external_link_reason": "Clarification of association",
+            "remove_item": "Delete"
         },
         "post_item": {
             "close_button": "Close",

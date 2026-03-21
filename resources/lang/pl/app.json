@@ -359,7 +359,19 @@
             "vertical_button": "Pionowy",
             "unlisted_label": "Ukryty (dostępny tylko przez link)",
             "extension_label": "Rozszerzenie (używane jako dodatek do innych postów)",
-            "characters": "znaków"
+            "characters": "znaków",
+            "related_posts_label": "Powiązane posty",
+            "external_links_label": "Linki zewnętrzne",
+            "add_related_post": "Dodaj powiązany post",
+            "add_external_link": "Dodaj link zewnętrzny",
+            "related_post_id": "Post",
+            "related_post_blog": "Blog",
+            "related_post_reason": "Wyjaśnienie powiązania",
+            "external_link_title": "Tytuł",
+            "external_link_url": "URL",
+            "external_link_description": "Opis",
+            "external_link_reason": "Wyjaśnienie powiązania",
+            "remove_item": "Usuń"
         },
         "post_item": {
             "close_button": "Zamknij",

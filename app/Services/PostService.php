@@ -11,18 +11,58 @@ class PostService
 {
     public function createPost(?Blog $blog, array $postData, ?int $userId = null, ?Group $group = null): Post
     {
+        $relatedPosts = $postData['related_posts'] ?? [];
+        $externalLinks = $postData['external_links'] ?? [];
+        unset($postData['related_posts'], $postData['external_links']);
+
         $data = array_merge($postData, ['user_id' => $userId]);
 
-        if ($group) {
-            return $group->posts()->create($data);
+        $post = $group ? $group->posts()->create($data) : $blog->posts()->create($data);
+
+        $this->syncRelations($post, $relatedPosts, $externalLinks);
+
+        return $post;
+    }
+
+    private function syncRelations(Post $post, array $relatedPosts, array $externalLinks): void
+    {
+        if (!empty($relatedPosts) || $post->relatedPosts()->exists()) {
+            $post->relatedPosts()->delete();
+            foreach ($relatedPosts as $index => $rp) {
+                $post->relatedPosts()->create([
+                    'blog_id' => $rp['blog_id'],
+                    'related_post_id' => $rp['related_post_id'],
+                    'reason' => $rp['reason'] ?? null,
+                    'display_order' => $rp['display_order'] ?? $index,
+                ]);
+            }
         }
 
-        return $blog->posts()->create($data);
+        if (!empty($externalLinks) || $post->externalLinks()->exists()) {
+            $post->externalLinks()->delete();
+            foreach ($externalLinks as $index => $el) {
+                $post->externalLinks()->create([
+                    'title' => $el['title'],
+                    'url' => $el['url'],
+                    'description' => $el['description'] ?? null,
+                    'reason' => $el['reason'] ?? null,
+                    'display_order' => $el['display_order'] ?? $index,
+                ]);
+            }
+        }
     }
 
     public function updatePost(Post $post, array $postData): Post
     {
+        $relatedPosts = $postData['related_posts'] ?? null;
+        $externalLinks = $postData['external_links'] ?? null;
+        unset($postData['related_posts'], $postData['external_links']);
+
         $post->update($postData);
+
+        if ($relatedPosts !== null || $externalLinks !== null) {
+            $this->syncRelations($post, $relatedPosts ?? [], $externalLinks ?? []);
+        }
 
         return $post;
     }

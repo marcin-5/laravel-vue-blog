@@ -47,6 +47,17 @@ class UpdatePostRequest extends FormRequest
                 'string',
                 'in:' . implode(',', $config['allowed_visibility'] ?? ['public', 'registered']),
             ],
+            'related_posts' => ['nullable', 'array'],
+            'related_posts.*.blog_id' => ['required', 'integer', 'exists:blogs,id'],
+            'related_posts.*.related_post_id' => ['required', 'integer', 'exists:posts,id'],
+            'related_posts.*.reason' => ['nullable', 'string', 'max:500'],
+            'related_posts.*.display_order' => ['nullable', 'integer', 'min:0'],
+            'external_links' => ['nullable', 'array'],
+            'external_links.*.title' => ['required', 'string', 'max:255'],
+            'external_links.*.url' => ['required', 'url', 'max:255'],
+            'external_links.*.description' => ['nullable', 'string', 'max:500'],
+            'external_links.*.reason' => ['nullable', 'string', 'max:500'],
+            'external_links.*.display_order' => ['nullable', 'integer', 'min:0'],
         ];
     }
 
@@ -77,6 +88,14 @@ class UpdatePostRequest extends FormRequest
 
         if (array_key_exists('visibility', $validated)) {
             $data['visibility'] = $validated['visibility'];
+        }
+
+        if (array_key_exists('related_posts', $validated)) {
+            $data['related_posts'] = $validated['related_posts'];
+        }
+
+        if (array_key_exists('external_links', $validated)) {
+            $data['external_links'] = $validated['external_links'];
         }
 
         return $data;

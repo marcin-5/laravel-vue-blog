@@ -116,6 +116,29 @@ export interface PostExtensionPivot {
     };
 }
 
+export interface RelatedPostItem {
+    id?: number;
+    post_id?: number;
+    blog_id: number;
+    related_post_id: number;
+    reason: string | null;
+    display_order: number;
+    related_post?: {
+        id: number;
+        title: string;
+    };
+}
+
+export interface ExternalLinkItem {
+    id?: number;
+    post_id?: number;
+    title: string;
+    url: string;
+    description: string | null;
+    reason: string | null;
+    display_order: number;
+}
+
 export interface AdminPostItem {
     id: number;
     blog_id: number;
@@ -131,6 +154,8 @@ export interface AdminPostItem {
     created_at?: string | null;
     updated_at?: string | null;
     extensions?: PostExtensionPivot[];
+    related_posts?: RelatedPostItem[];
+    external_links?: ExternalLinkItem[];
 }
 
 export interface AdminBlog {
