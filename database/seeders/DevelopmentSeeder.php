@@ -5,12 +5,15 @@ namespace Database\Seeders;
 use App\Enums\UserRole;
 use App\Models\Blog;
 use App\Models\Category;
+use App\Models\ExternalLink;
 use App\Models\Group;
 use App\Models\GroupMember;
 use App\Models\LandingPage;
 use App\Models\Post;
+use App\Models\RelatedPost;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Random\RandomException;
 
 class DevelopmentSeeder extends Seeder
 {
@@ -78,7 +81,10 @@ class DevelopmentSeeder extends Seeder
                 'user_id' => $blogger->id,
             ]);
 
-            $blogs->each(function (Blog $blog) use ($categories): void {
+            $blogs->each(
+            /**
+             * @throws RandomException
+             */ function (Blog $blog) use ($categories): void {
                 $categoryCount = random_int(self::BLOG_CATEGORIES_MIN, self::BLOG_CATEGORIES_MAX);
 
                 $blog->categories()->attach(
@@ -91,12 +97,56 @@ class DevelopmentSeeder extends Seeder
 
                 $postCount = random_int(self::POSTS_PER_BLOG_MIN, self::POSTS_PER_BLOG_MAX);
 
-                Post::factory($postCount)->create([
+                $posts = Post::factory($postCount)->create([
                     'blog_id' => $blog->id,
                     'user_id' => $blog->user_id,
                 ]);
-            });
+
+                $this->seedRelationsForPosts($posts, $blog);
+            },
+            );
         });
+    }
+
+    private function seedRelationsForPosts($posts, Blog $blog): void
+    {
+        $posts->each(
+        /**
+         * @throws RandomException
+         */ function (Post $post) use ($posts, $blog): void {
+            // Seeding related posts: 0 or 1, then if 1, then 1 or 2
+            if (random_int(0, 1) === 1) {
+                $count = random_int(1, 2);
+                $potentialRelated = $posts->reject(fn(Post $p) => $p->id === $post->id);
+
+                if ($potentialRelated->isNotEmpty()) {
+                    $countToTake = min($count, $potentialRelated->count());
+                    $relatedToCreate = $potentialRelated->random($countToTake);
+
+                    if ($relatedToCreate instanceof Post) {
+                        $relatedToCreate = collect([$relatedToCreate]);
+                    }
+
+                    $relatedToCreate->each(function (Post $rp, int $index) use ($post, $blog): void {
+                        RelatedPost::factory()->create([
+                            'post_id' => $post->id,
+                            'blog_id' => $blog->id,
+                            'related_post_id' => $rp->id,
+                            'display_order' => $index,
+                        ]);
+                    });
+                }
+            }
+
+            // Seeding external links (optional, but good for completeness)
+            if (random_int(0, 1) === 1) {
+                $count = random_int(1, 3);
+                ExternalLink::factory($count)->create([
+                    'post_id' => $post->id,
+                ]);
+            }
+        },
+        );
     }
 
     private function seedGroups($groupOwnerPool, $bloggers, $regularUsers): void
@@ -130,12 +180,16 @@ class DevelopmentSeeder extends Seeder
 
                 $postCount = random_int(self::POSTS_PER_GROUP_MIN, self::POSTS_PER_GROUP_MAX);
 
-                Post::factory($postCount)->create([
+                $posts = Post::factory($postCount)->create([
                     'group_id' => $group->id,
                     'blog_id' => $ownerBlogId,
                     'user_id' => $owner->id,
                     'is_published' => true,
                 ]);
+
+                if ($ownerBlogId) {
+                    $this->seedRelationsForPosts($posts, Blog::find($ownerBlogId));
+                }
             });
     }
 }
