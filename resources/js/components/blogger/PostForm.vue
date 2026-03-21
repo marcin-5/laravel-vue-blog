@@ -132,6 +132,18 @@ const externalLinksTranslations = computed(() => ({
     reason: t('blogger.post_form.external_link_reason'),
 }));
 
+const externalLinksErrors = computed(() => {
+    if (!form.errors) return {};
+
+    const errors: Record<string, string> = {};
+    Object.keys(form.errors).forEach((key) => {
+        if (key.startsWith('external_links.')) {
+            errors[key] = form.errors[key];
+        }
+    });
+    return errors;
+});
+
 // Update form from post data
 const updateFormFromPost = (post: PostItem) => {
     form.blog_id = post.blog_id;
@@ -305,6 +317,7 @@ const excerptClass = computed(() => {
             />
 
             <PostExternalLinksSection
+                :errors="externalLinksErrors"
                 :id-prefix="fieldIdPrefix"
                 :items="form.external_links"
                 :translations="externalLinksTranslations"
