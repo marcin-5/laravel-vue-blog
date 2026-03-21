@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label/index';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover/index';
 import { Textarea } from '@/components/ui/textarea/index';
 import type { ExternalLinkItem } from '@/types/blog.types';
+import { Link } from '@inertiajs/vue3';
 import { Check, Info, Pencil, Plus, Trash2 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
@@ -143,7 +144,7 @@ const cancelEdit = () => {
         <div v-for="(el, index) in items" :key="index" class="flex items-start justify-between border-t py-2 first:border-t-0 first:pt-0 last:pb-0">
             <div class="flex-1 space-y-1">
                 <div class="text-sm font-medium">
-                    <a :href="el.url" class="text-primary hover:underline" target="_blank">{{ el.title }}</a>
+                    <Link :href="el.url" class="text-primary hover:text-primary-foreground" target="_blank">{{ el.title }}</Link>
                 </div>
                 <div v-if="el.reason" class="flex items-center gap-1.5 text-xs text-muted-foreground/80 italic">
                     {{ el.reason }}
