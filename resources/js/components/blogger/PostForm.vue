@@ -159,12 +159,12 @@ const removeRelatedPost = (index: number) => {
     form.related_posts.splice(index, 1);
 };
 
-const addExternalLink = () => {
+const addExternalLink = (item: { title: string; url: string; description: string; reason: string }) => {
     form.external_links.push({
-        title: '',
-        url: '',
-        description: '',
-        reason: '',
+        title: item.title,
+        url: item.url,
+        description: item.description,
+        reason: item.reason,
         display_order: form.external_links.length,
     });
 };
@@ -316,8 +316,8 @@ const excerptClass = computed(() => {
                 :id-prefix="fieldIdPrefix"
                 :items="form.external_links"
                 :translations="externalLinksTranslations"
-                @add="addExternalLink"
                 @remove="removeExternalLink"
+                @add-item="addExternalLink"
             />
 
             <FormSubmitActions
