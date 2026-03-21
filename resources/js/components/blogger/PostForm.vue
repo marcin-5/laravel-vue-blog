@@ -296,14 +296,6 @@ const excerptClass = computed(() => {
                 @toggle-preview="handleTogglePreview"
             />
 
-            <div class="flex flex-wrap items-center gap-4">
-                <FormCheckboxField :id="`${fieldIdPrefix}-published`" v-model="form.is_published" :label="translationKeys.published" />
-
-                <FormCheckboxField :id="`${fieldIdPrefix}-unlisted`" v-model="isUnlisted" :label="translationKeys.unlisted" />
-
-                <FormCheckboxField :id="`${fieldIdPrefix}-extension`" v-model="isExtension" :label="translationKeys.extension" />
-            </div>
-
             <PostRelatedPostsSection
                 :id-prefix="fieldIdPrefix"
                 :items="form.related_posts"
@@ -319,6 +311,14 @@ const excerptClass = computed(() => {
                 @remove="removeExternalLink"
                 @add-item="addExternalLink"
             />
+
+            <div class="flex flex-wrap items-center gap-4">
+                <FormCheckboxField :id="`${fieldIdPrefix}-published`" v-model="form.is_published" :label="translationKeys.published" />
+
+                <FormCheckboxField :id="`${fieldIdPrefix}-unlisted`" v-model="isUnlisted" :label="translationKeys.unlisted" />
+
+                <FormCheckboxField :id="`${fieldIdPrefix}-extension`" v-model="isExtension" :label="translationKeys.extension" />
+            </div>
 
             <FormSubmitActions
                 :is-edit="props.isEdit"
