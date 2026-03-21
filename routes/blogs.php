@@ -4,6 +4,7 @@ use App\Http\Controllers\Blogger\BlogsController;
 use App\Http\Controllers\Blogger\GroupMembersController;
 use App\Http\Controllers\Blogger\GroupsController;
 use App\Http\Controllers\Blogger\PostsController;
+use App\Http\Controllers\Blogger\PublicDataController;
 use App\Http\Controllers\Blogger\StatsController as BloggerStatsController;
 use App\Http\Controllers\MarkdownController;
 use Illuminate\Support\Facades\Route;
@@ -62,4 +63,8 @@ Route::middleware(['auth', 'verified', 'noindex'])->group(function () {
 
     // Markdown preview route
     Route::post('markdown/preview', [MarkdownController::class, 'preview'])->name('markdown.preview');
+
+    // Public data routes for related posts selection
+    Route::get('data/blogs', [PublicDataController::class, 'blogs'])->name('blogger.data.blogs');
+    Route::get('data/blogs/{blog}/posts', [PublicDataController::class, 'posts'])->name('blogger.data.posts');
 });

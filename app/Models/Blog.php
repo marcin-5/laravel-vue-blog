@@ -147,6 +147,9 @@ class Blog extends Model
                         'extensions' => function ($eq) {
                             $eq->oldest();
                         },
+                        'relatedPosts.relatedPost',
+                        'relatedPosts.blog',
+                        'externalLinks',
                     ])
                     ->select(
                         'id',

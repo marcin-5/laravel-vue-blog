@@ -32,6 +32,9 @@ class GroupService
                         'extensions' => function ($eq) {
                             $eq->oldest();
                         },
+                        'relatedPosts.relatedPost',
+                        'relatedPosts.blog',
+                        'externalLinks',
                     ])
                     ->select(self::POST_FIELDS);
             },

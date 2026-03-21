@@ -146,11 +146,11 @@ const updateFormFromPost = (post: PostItem) => {
     form.external_links = (post.external_links || []) as ExternalLinkItem[];
 };
 
-const addRelatedPost = () => {
+const addRelatedPost = (item: { blog_id: number; related_post_id: number; reason: string }) => {
     form.related_posts.push({
-        blog_id: form.blog_id,
-        related_post_id: 0,
-        reason: '',
+        blog_id: item.blog_id,
+        related_post_id: item.related_post_id,
+        reason: item.reason,
         display_order: form.related_posts.length,
     });
 };
@@ -308,8 +308,8 @@ const excerptClass = computed(() => {
                 :id-prefix="fieldIdPrefix"
                 :items="form.related_posts"
                 :translations="relatedPostsTranslations"
-                @add="addRelatedPost"
                 @remove="removeRelatedPost"
+                @add-item="addRelatedPost"
             />
 
             <PostExternalLinksSection
