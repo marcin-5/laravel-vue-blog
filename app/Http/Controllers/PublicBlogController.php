@@ -170,6 +170,7 @@ class PublicBlogController extends BasePublicController
                             'blog_id' => $rp->blog_id,
                             'related_post_id' => $rp->related_post_id,
                             'reason' => $rp->reason,
+                            'excerpt' => $related?->excerpt,
                             'display_order' => $rp->display_order,
                             'blog_slug' => $related?->blog?->slug,
                             'related_post' => $related ? [
