@@ -48,7 +48,7 @@ it('uses seo_title for blog landing when available and falls back to name', func
     $this
         ->get("/{$blog->slug}")
         ->assertInertia(fn(Assert $page) => $page
-            ->where('seo.title', 'My Awesome SEO Blog - ' . config('app.name')),
+            ->where('seo.title', 'My Awesome SEO Blog'),
         );
 
     // Without seo_title (fallback to name)
