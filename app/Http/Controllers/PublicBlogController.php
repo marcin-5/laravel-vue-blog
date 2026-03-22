@@ -56,9 +56,13 @@ class PublicBlogController extends BasePublicController
             $descriptionHtml ?: $landing?->content_html ?: $blog->name,
         );
 
+        // If blog has an explicit SEO title, use it as-is (without appending app name).
+        // Otherwise, fall back to "{blog name} - {app name}".
+        $seoTitle = $blog->seo_title ?: ($blog->name . ' - ' . config('app.name'));
+
         $baseUrl = config('app.url');
         $seoData = new SeoData(
-            title: $blog->getSeoTitleWithFallback() . ' - ' . config('app.name'),
+            title: $seoTitle,
             description: $metaDescription,
             canonicalUrl: $baseUrl . '/' . $blog->slug,
             ogImage: $baseUrl . '/og-image.png',
