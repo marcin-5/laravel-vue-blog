@@ -5,10 +5,15 @@
     "guidelines": true,
     "herd_mcp": false,
     "mcp": true,
+    "packages": [
+        "spatie/laravel-permission"
+    ],
     "sail": false,
     "skills": [
+        "laravel-best-practices",
         "pest-testing",
         "inertia-vue-development",
-        "tailwindcss-development"
+        "tailwindcss-development",
+        "laravel-permission-development"
     ]
 }
