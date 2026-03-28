@@ -13,7 +13,7 @@
         "erusev/parsedown": "^1.8",
         "erusev/parsedown-extra": "^0.9",
         "ezyang/htmlpurifier": "^4.19",
-        "inertiajs/inertia-laravel": "^2.0",
+        "inertiajs/inertia-laravel": "^v3.0.1",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
         "spatie/laravel-markdown-response": "^1.1",

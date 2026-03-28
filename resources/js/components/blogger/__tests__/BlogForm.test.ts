@@ -14,8 +14,14 @@ vi.mock('@inertiajs/vue3', () => ({
         ...data,
         processing: false,
         errors: {},
-        patch: vi.fn(),
+        patch: vi.fn().mockResolvedValue({}),
     })),
+    // Provide useHttp to satisfy composables used inside the form (markdown preview)
+    useHttp: () => ({
+        post: vi.fn().mockResolvedValue({ data: { html: '<p></p>' } }),
+        get: vi.fn().mockResolvedValue({ data: {} }),
+        delete: vi.fn().mockResolvedValue({}),
+    }),
 }));
 
 // Mock components to simplify testing

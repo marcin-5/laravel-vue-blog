@@ -1,14 +1,20 @@
-import axios from 'axios';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useMarkdownPreviewSection } from '../useMarkdownPreviewSection';
 
-vi.mock('axios');
+// Mock Inertia useHttp hook
+const postMock = vi.fn();
+vi.mock('@inertiajs/vue3', () => ({
+    useHttp: () => ({
+        post: postMock,
+    }),
+}));
 
 (global as any).route = vi.fn(() => 'mock-route');
 
 describe('useMarkdownPreviewSection', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        postMock.mockReset();
     });
 
     it('initializes with default values', () => {
@@ -21,7 +27,7 @@ describe('useMarkdownPreviewSection', () => {
     });
 
     it('exposes handleInput as an alias for renderMarkdown', async () => {
-        vi.mocked(axios.post).mockResolvedValueOnce({ data: { html: '<p>Handled</p>' } });
+        postMock.mockResolvedValueOnce({ data: { html: '<p>Handled</p>' } });
 
         const { previewHtml, handleInput } = useMarkdownPreviewSection();
         await handleInput('# Handled');
@@ -46,7 +52,7 @@ describe('useMarkdownPreviewSection', () => {
     });
 
     it('togglePreview toggles isPreviewMode and renders markdown', async () => {
-        vi.mocked(axios.post).mockResolvedValueOnce({ data: { html: '<p>Preview</p>' } });
+        postMock.mockResolvedValueOnce({ data: { html: '<p>Preview</p>' } });
 
         const { isPreviewMode, previewHtml, togglePreview } = useMarkdownPreviewSection();
         await togglePreview('# Preview');
@@ -56,7 +62,7 @@ describe('useMarkdownPreviewSection', () => {
     });
 
     it('toggleFullPreview toggles isFullPreview and renders markdown', async () => {
-        vi.mocked(axios.post).mockResolvedValueOnce({ data: { html: '<p>Full</p>' } });
+        postMock.mockResolvedValueOnce({ data: { html: '<p>Full</p>' } });
 
         const { isFullPreview, previewHtml, toggleFullPreview } = useMarkdownPreviewSection();
         await toggleFullPreview('# Full');
@@ -66,7 +72,7 @@ describe('useMarkdownPreviewSection', () => {
     });
 
     it('uses custom routeName when provided', async () => {
-        vi.mocked(axios.post).mockResolvedValueOnce({ data: { html: '<p>ok</p>' } });
+        postMock.mockResolvedValueOnce({ data: { html: '<p>ok</p>' } });
 
         const { handleInput } = useMarkdownPreviewSection('custom.route');
         await handleInput('content');

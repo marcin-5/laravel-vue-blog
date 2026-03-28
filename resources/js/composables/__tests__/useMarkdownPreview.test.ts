@@ -1,14 +1,20 @@
-import axios from 'axios';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useMarkdownPreview } from '../useMarkdownPreview';
 
-vi.mock('axios');
+// Mock Inertia useHttp hook
+const postMock = vi.fn();
+vi.mock('@inertiajs/vue3', () => ({
+    useHttp: () => ({
+        post: postMock,
+    }),
+}));
 
 (global as any).route = vi.fn(() => 'mock-route');
 
 describe('useMarkdownPreview', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        postMock.mockReset();
     });
 
     it('initializes with default values', () => {
@@ -40,7 +46,7 @@ describe('useMarkdownPreview', () => {
     });
 
     it('renderMarkdown fetches and sets previewHtml on success', async () => {
-        vi.mocked(axios.post).mockResolvedValueOnce({ data: { html: '<p>Hello</p>' } });
+        postMock.mockResolvedValueOnce({ data: { html: '<p>Hello</p>' } });
 
         const { previewHtml, renderMarkdown } = useMarkdownPreview();
         await renderMarkdown('# Hello');
@@ -49,7 +55,7 @@ describe('useMarkdownPreview', () => {
     });
 
     it('renderMarkdown sets error html on fetch failure', async () => {
-        vi.mocked(axios.post).mockRejectedValueOnce(new Error('Network error'));
+        postMock.mockRejectedValueOnce(new Error('Network error'));
 
         const { previewHtml, renderMarkdown } = useMarkdownPreview();
         await renderMarkdown('# Hello');
@@ -58,7 +64,7 @@ describe('useMarkdownPreview', () => {
     });
 
     it('togglePreview toggles isPreviewMode and renders markdown when enabled', async () => {
-        vi.mocked(axios.post).mockResolvedValueOnce({ data: { html: '<p>Content</p>' } });
+        postMock.mockResolvedValueOnce({ data: { html: '<p>Content</p>' } });
 
         const { isPreviewMode, previewHtml, togglePreview } = useMarkdownPreview();
 
@@ -76,11 +82,11 @@ describe('useMarkdownPreview', () => {
         await togglePreview('# Content');
 
         expect(isPreviewMode.value).toBe(false);
-        expect(axios.post).not.toHaveBeenCalled();
+        expect(postMock).not.toHaveBeenCalled();
     });
 
     it('toggleFullPreview toggles isFullPreview and renders markdown when enabled', async () => {
-        vi.mocked(axios.post).mockResolvedValueOnce({ data: { html: '<p>Full</p>' } });
+        postMock.mockResolvedValueOnce({ data: { html: '<p>Full</p>' } });
 
         const { isFullPreview, previewHtml, toggleFullPreview } = useMarkdownPreview();
 
@@ -97,11 +103,11 @@ describe('useMarkdownPreview', () => {
         await toggleFullPreview('# Full');
 
         expect(isFullPreview.value).toBe(false);
-        expect(axios.post).not.toHaveBeenCalled();
+        expect(postMock).not.toHaveBeenCalled();
     });
 
     it('uses custom routeName when provided', async () => {
-        vi.mocked(axios.post).mockResolvedValueOnce({ data: { html: '<p>ok</p>' } });
+        postMock.mockResolvedValueOnce({ data: { html: '<p>ok</p>' } });
 
         const { renderMarkdown } = useMarkdownPreview('custom.route');
         await renderMarkdown('content');

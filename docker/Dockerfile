@@ -4,7 +4,7 @@ WORKDIR /app
 
 # It's better to install all dependencies for building
 COPY package*.json ./
-RUN npm install -g npm@latest && npm ci
+RUN npm ci
 
 COPY . .
 RUN npm run build && npm run build:ssr
@@ -119,11 +119,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
     mc \
     gnupg \
-    && curl -fsSL https://deb.nodesource.com/setup_25.x | bash - \
-    && apt-get install -y nodejs \
+    nodejs \
+    npm \
     && rm -rf /var/lib/apt/lists/*
-
-RUN npm install -g npm@latest
 
 # FIX: Copy the application code and assets BEFORE running composer install.
 COPY . .
@@ -174,7 +172,7 @@ WORKDIR /var/www/html
 # We need netcat for the deploy.sh script's health check
 RUN apt-get update && apt-get install -y --no-install-recommends netcat-openbsd && rm -rf /var/lib/apt/lists/*
 COPY package*.json ./
-RUN npm install -g npm@latest && npm ci --omit=dev
+RUN npm ci --omit=dev
 # Copy the application code (for env, config references if needed)
 COPY . .
 # Copy the built SSR bundle from the node-builder stage

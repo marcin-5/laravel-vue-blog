@@ -123,21 +123,21 @@ describe('PostForm.vue', () => {
         expect(hiddenSeoTitleField).toBeUndefined();
     });
 
-    it('adds a related post when @add event is emitted', async () => {
+    it('adds a related post when @add-item event is emitted', async () => {
         const wrapper = mount(PostForm);
         const section = wrapper.findComponent({ name: 'PostRelatedPostsSection' });
 
-        await section.vm.$emit('add');
+        await section.vm.$emit('add-item', { blog_id: 1, related_post_id: 2, reason: 'test' });
 
         // Check internal form state
         expect(wrapper.vm.form.related_posts).toHaveLength(1);
     });
 
-    it('adds an external link when @add event is emitted', async () => {
+    it('adds an external link when @add-item event is emitted', async () => {
         const wrapper = mount(PostForm);
         const section = wrapper.findComponent({ name: 'PostExternalLinksSection' });
 
-        await section.vm.$emit('add');
+        await section.vm.$emit('add-item', { title: 't', url: 'https://example.com', description: 'd', reason: 'r' });
 
         expect(wrapper.vm.form.external_links).toHaveLength(1);
     });

@@ -4,8 +4,7 @@ import { Input } from '@/components/ui/input/index';
 import { Label } from '@/components/ui/label/index';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select/index';
 import type { RelatedPostItem } from '@/types/blog.types';
-import { Link } from '@inertiajs/vue3';
-import axios from 'axios';
+import { Link, useHttp } from '@inertiajs/vue3';
 import { Plus, Trash2 } from 'lucide-vue-next';
 import { onMounted, ref, watch } from 'vue';
 
@@ -38,11 +37,12 @@ const selectedReason = ref<string>('');
 
 const isLoadingBlogs = ref(false);
 const isLoadingPosts = ref(false);
+const http = useHttp();
 
 const fetchBlogs = async () => {
     isLoadingBlogs.value = true;
     try {
-        const response = await axios.get(route('blogger.data.blogs'));
+        const response = await http.get(route('blogger.data.blogs'));
         availableBlogs.value = response.data;
     } catch (error) {
         console.error('Failed to fetch blogs', error);
@@ -58,7 +58,7 @@ const fetchPosts = async (blogId: string) => {
     }
     isLoadingPosts.value = true;
     try {
-        const response = await axios.get(route('blogger.data.posts', { blog: blogId }));
+        const response = await http.get(route('blogger.data.posts', { blog: blogId }));
         availablePosts.value = response.data;
     } catch (error) {
         console.error('Failed to fetch posts', error);

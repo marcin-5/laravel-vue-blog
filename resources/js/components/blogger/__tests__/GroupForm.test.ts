@@ -14,8 +14,13 @@ vi.mock('@inertiajs/vue3', () => ({
         ...data,
         processing: false,
         errors: {},
-        patch: vi.fn(),
+        patch: vi.fn().mockResolvedValue({}),
     })),
+    useHttp: () => ({
+        post: vi.fn().mockResolvedValue({ data: { html: '<p></p>' } }),
+        get: vi.fn().mockResolvedValue({ data: {} }),
+        delete: vi.fn().mockResolvedValue({}),
+    }),
 }));
 
 // Mock components to simplify testing

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { useHttp } from '@inertiajs/vue3';
 import { ref, type Ref } from 'vue';
 
 type PreviewLayout = 'horizontal' | 'vertical';
@@ -9,14 +9,13 @@ export function useMarkdownPreview(routeName: string = 'markdown.preview') {
     const previewLayout = ref<PreviewLayout>('vertical');
     const previewHtml = ref('');
     const MARKDOWN_RENDER_ERROR_HTML = '<p class="text-error">Error rendering markdown</p>';
+    const http = useHttp();
 
     async function fetchMarkdownPreview(content: string): Promise<string> {
         try {
-            const response = await axios.post(
+            const response = await http.post(
                 route(routeName),
-                {
-                    content,
-                },
+                { content },
                 {
                     headers: {
                         'Content-Type': 'application/json',

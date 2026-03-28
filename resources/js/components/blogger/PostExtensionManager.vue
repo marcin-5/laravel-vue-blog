@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/composables/useToast';
 import type { AdminPostItem as PostItem } from '@/types/blog.types';
-import axios from 'axios';
+import { useHttp } from '@inertiajs/vue3';
 import { GripVertical, Plus, Trash2 } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -23,10 +23,11 @@ const emit = defineEmits<{
 const availableExtensions = ref<Partial<PostItem>[]>([]);
 const selectedExtensionId = ref<string>('');
 const isAttaching = ref(false);
+const http = useHttp();
 
 async function fetchAvailableExtensions() {
     try {
-        const response = await axios.get(route('blogger.posts.extensions.available', { post: props.post.id }));
+        const response = await http.get(route('blogger.posts.extensions.available', { post: props.post.id }));
         availableExtensions.value = response.data;
     } catch (error) {
         console.error('Failed to fetch extensions', error);
@@ -38,7 +39,7 @@ async function attachExtension() {
 
     isAttaching.value = true;
     try {
-        await axios.post(route('blogger.posts.extensions.attach', { post: props.post.id }), {
+        await http.post(route('blogger.posts.extensions.attach', { post: props.post.id }), {
             extension_post_id: selectedExtensionId.value,
             display_order: (props.post.extensions?.length || 0) + 1,
         });
@@ -66,7 +67,7 @@ async function detachExtension(extensionId: number) {
     if (!confirm(t('blogger.extensions.confirm_detach'))) return;
 
     try {
-        await axios.delete(
+        await http.delete(
             route('blogger.posts.extensions.detach', {
                 post: props.post.id,
                 extensionPostId: extensionId,
