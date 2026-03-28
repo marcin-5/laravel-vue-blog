@@ -15,6 +15,16 @@
         "inertia-vue-development",
         "tailwindcss-development",
         "laravel-permission-development",
-        "project-principles"
+        "laravel-performance-caching",
+        "laravel-query-builders",
+        "laravel-routes-best-practices",
+        "laravel-security",
+        "laravel-tdd",
+        "php-best-practices",
+        "php-laravel",
+        "php-modern",
+        "php-pro",
+        "project-principles",
+        "technical-debt-manager-php-laravel"
     ]
 }
