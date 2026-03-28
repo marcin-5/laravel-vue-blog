@@ -19,7 +19,7 @@ interface Props {
     visitorsFromPage: VisitorRow[];
     visitorsFromSpecial: VisitorRow[];
     blogOptions: BlogOption[];
-    visitorBlogOptions: BlogOption[];
+    visitorBlogOptions?: BlogOption[];
 }
 
 defineProps<Props>();
