@@ -27,6 +27,7 @@ const formattedUpdatedDate = computed(() => formatDate(props.modifiedTime, props
     <header :style="{ fontFamily: 'var(--blog-header-font)', fontSize: 'calc(2rem * var(--blog-header-scale))' }" class="mb-4">
         <h1 class="mb-2 font-[inherit] text-[1em] leading-tight font-bold text-foreground">{{ post.title }}</h1>
         <ViewStatsComponent
+            v-if="viewStats"
             :anonymous="viewStats?.anonymous"
             :bots="viewStats?.bots"
             :consented="viewStats?.consented"
