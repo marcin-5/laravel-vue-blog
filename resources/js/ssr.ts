@@ -1,3 +1,4 @@
+import type { Page } from '@inertiajs/core';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { renderToString } from '@vue/server-renderer';
 import type { IncomingMessage, ServerResponse } from 'http';
@@ -5,9 +6,8 @@ import { createServer as createHttpServer } from 'http';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { App, DefineComponent } from 'vue';
 import { createSSRApp, h } from 'vue';
-import { route as ziggyRoute, ZiggyVue } from 'ziggy-js';
-import type { Page } from '@inertiajs/core';
 import { createI18n } from 'vue-i18n';
+import { route as ziggyRoute, ZiggyVue } from 'ziggy-js';
 import type { AppPageProps } from './types';
 
 // Constants for default values to avoid magic strings and duplication
@@ -148,9 +148,9 @@ async function handleRender(request: IncomingMessage, response: ServerResponse, 
     try {
         const result = await renderPage(page);
         sendJson(response, HTTP_STATUS.OK, result);
-    } catch (e) {
-        console.error('SSR render failed:', e);
-        sendJson(response, HTTP_STATUS.INTERNAL_SERVER_ERROR, { error: 'RENDER_FAILED' });
+    } catch (e: any) {
+        console.error(`SSR render failed for ${page.url}:`, e?.stack || e);
+        sendJson(response, HTTP_STATUS.INTERNAL_SERVER_ERROR, { error: 'RENDER_FAILED', message: e?.message });
     }
 }
 
