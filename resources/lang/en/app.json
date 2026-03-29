@@ -336,6 +336,8 @@
             "excerpt_placeholder": "Short summary",
             "content_label": "Content",
             "content_placeholder": "Write your post...",
+            "summary_label": "Summary",
+            "summary_placeholder": "Optional summary in markdown format...",
             "markdown_placeholder": "Write your markdown here...",
             "published_label": "Published",
             "publish_now_label": "Publish now",

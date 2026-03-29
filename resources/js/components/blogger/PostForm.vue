@@ -34,9 +34,11 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>();
 
-// Preview functionality using composable
-const { isPreviewMode, isFullPreview, previewLayout, previewHtml, togglePreview, toggleFullPreview, setLayout, handleInput } =
-    useMarkdownPreviewSection('markdown.preview');
+// Preview functionality for content
+const contentPreview = useMarkdownPreviewSection('markdown.preview');
+
+// Preview functionality for summary
+const summaryPreview = useMarkdownPreviewSection('markdown.preview');
 
 // Form initialization
 const form =
@@ -47,6 +49,7 @@ const form =
         title: props.post?.title || '',
         seo_title: props.post?.seo_title || '',
         excerpt: props.post?.excerpt || '',
+        summary: props.post?.summary || '',
         content: props.post?.content || '',
         is_published: !!props.post?.is_published,
         visibility: props.post?.visibility || 'public',
@@ -54,7 +57,10 @@ const form =
         external_links: (props.post?.external_links || []) as ExternalLinkItem[],
     });
 
-// Ensure related_posts and external_links are initialized if props.form was provided without them
+// Ensure summary, related_posts and external_links are initialized if props.form was provided without them
+if (form.summary === undefined) {
+    form.summary = props.post?.summary || '';
+}
 if (form.related_posts === undefined) {
     form.related_posts = (props.post?.related_posts || []) as RelatedPostItem[];
 }
@@ -86,8 +92,12 @@ const translationKeys = computed(() => ({
     seoTitlePlaceholder: t('blogger.post_form.seo_title_placeholder'),
     excerpt: t('blogger.post_form.excerpt_label'),
     excerptPlaceholder: props.isEdit ? '' : t('blogger.post_form.excerpt_placeholder'),
+    summary: t('blogger.post_form.summary_label'),
+    summaryPlaceholder: props.isEdit ? '' : t('blogger.post_form.summary_placeholder'),
     content: t('blogger.post_form.content_label'),
     contentPlaceholder: props.isEdit ? '' : t('blogger.post_form.content_placeholder'),
+    previewToggleLayout: (layout: string) =>
+        layout === 'vertical' ? t('blogger.post_form.horizontal_button') : t('blogger.post_form.vertical_button'),
     published: props.isEdit ? t('blogger.post_form.published_label') : t('blogger.post_form.publish_now_label'),
 
     // Buttons
@@ -107,7 +117,6 @@ const translationKeys = computed(() => ({
     closePreview: t('blogger.post_form.close_button'),
     fullPreview: t('blogger.post_form.full_preview_button'),
     splitView: t('blogger.post_form.split_view_button'),
-    toggleLayout: previewLayout.value === 'vertical' ? t('blogger.post_form.horizontal_button') : t('blogger.post_form.vertical_button'),
     exitPreview: t('blogger.post_form.exit_preview_button'),
     markdownLabel: t('blogger.post_form.markdown_label'),
     previewLabel: t('blogger.post_form.preview_label'),
@@ -152,6 +161,7 @@ const updateFormFromPost = (post: PostItem) => {
     form.title = post.title;
     form.seo_title = post.seo_title ?? '';
     form.excerpt = post.excerpt ?? '';
+    form.summary = post.summary ?? '';
     form.content = post.content ?? '';
     form.is_published = post.is_published;
     form.visibility = post.visibility ?? 'public';
@@ -225,11 +235,17 @@ const handleApply = () =>
 
 const handleCancel = () => emit('cancel');
 
-const handleTogglePreview = () => togglePreview(form.content);
+const handleToggleContentPreview = () => contentPreview.togglePreview(form.content);
 
-const handleToggleFullPreview = () => toggleFullPreview(form.content);
+const handleToggleContentFullPreview = () => contentPreview.toggleFullPreview(form.content);
 
-const handleContentInput = () => handleInput(form.content);
+const handleContentInput = () => contentPreview.handleInput(form.content);
+
+const handleToggleSummaryPreview = () => summaryPreview.togglePreview(form.summary);
+
+const handleToggleSummaryFullPreview = () => summaryPreview.toggleFullPreview(form.summary);
+
+const handleSummaryInput = () => summaryPreview.handleInput(form.summary);
 
 // helpers for SEO data length validation
 const seoTitleClass = computed(() => {
@@ -282,17 +298,52 @@ const excerptClass = computed(() => {
             />
 
             <MarkdownPreviewSection
+                :id="`${fieldIdPrefix}-summary`"
+                v-model="form.summary"
+                :error="form.errors.summary"
+                :is-edit="props.isEdit"
+                :is-full-preview="summaryPreview.isFullPreview.value"
+                :is-preview-mode="summaryPreview.isPreviewMode.value"
+                :is-processing="form.processing"
+                :label="translationKeys.summary"
+                :placeholder="translationKeys.summaryPlaceholder"
+                :preview-html="summaryPreview.previewHtml.value"
+                :preview-layout="summaryPreview.previewLayout.value"
+                :rows="props.isEdit ? 4 : 6"
+                :translations="{
+                    cancel: translationKeys.cancel,
+                    create: translationKeys.create,
+                    save: translationKeys.save,
+                    exitPreview: translationKeys.exitPreview,
+                    markdownLabel: translationKeys.markdownLabel,
+                    previewLabel: translationKeys.previewLabel,
+                    previewModeTitle: translationKeys.previewModeTitle,
+                    toggleLayout: translationKeys.previewToggleLayout(summaryPreview.previewLayout.value),
+                    closePreview: translationKeys.closePreview,
+                    preview: translationKeys.preview,
+                    fullPreview: translationKeys.fullPreview,
+                    splitView: translationKeys.splitView,
+                }"
+                @cancel="handleCancel"
+                @input="handleSummaryInput"
+                @submit="handleSubmit"
+                @set-layout="summaryPreview.setLayout"
+                @toggle-full-preview="handleToggleSummaryFullPreview"
+                @toggle-preview="handleToggleSummaryPreview"
+            />
+
+            <MarkdownPreviewSection
                 :id="`${fieldIdPrefix}-content`"
                 v-model="form.content"
                 :error="form.errors.content"
                 :is-edit="props.isEdit"
-                :is-full-preview="isFullPreview"
-                :is-preview-mode="isPreviewMode"
+                :is-full-preview="contentPreview.isFullPreview.value"
+                :is-preview-mode="contentPreview.isPreviewMode.value"
                 :is-processing="form.processing"
                 :label="translationKeys.content"
                 :placeholder="translationKeys.contentPlaceholder"
-                :preview-html="previewHtml"
-                :preview-layout="previewLayout"
+                :preview-html="contentPreview.previewHtml.value"
+                :preview-layout="contentPreview.previewLayout.value"
                 :rows="props.isEdit ? 10 : 15"
                 :translations="{
                     cancel: translationKeys.cancel,
@@ -302,7 +353,7 @@ const excerptClass = computed(() => {
                     markdownLabel: translationKeys.markdownLabel,
                     previewLabel: translationKeys.previewLabel,
                     previewModeTitle: translationKeys.previewModeTitle,
-                    toggleLayout: translationKeys.toggleLayout,
+                    toggleLayout: translationKeys.previewToggleLayout(contentPreview.previewLayout.value),
                     closePreview: translationKeys.closePreview,
                     preview: translationKeys.preview,
                     fullPreview: translationKeys.fullPreview,
@@ -311,9 +362,9 @@ const excerptClass = computed(() => {
                 @cancel="handleCancel"
                 @input="handleContentInput"
                 @submit="handleSubmit"
-                @set-layout="setLayout"
-                @toggle-full-preview="handleToggleFullPreview"
-                @toggle-preview="handleTogglePreview"
+                @set-layout="contentPreview.setLayout"
+                @toggle-full-preview="handleToggleContentFullPreview"
+                @toggle-preview="handleToggleContentPreview"
             />
 
             <PostRelatedPostsSection

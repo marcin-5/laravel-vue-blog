@@ -148,10 +148,12 @@ class PublicBlogController extends BasePublicController
                 'slug' => $post->slug,
                 'author' => $post->user?->name ?? $blog->user->name,
                 'author_email' => $post->user?->email ?? $blog->user->email,
+                'summaryHtml' => $post->summary_html,
                 'contentHtml' => $post->content_html,
                 'published_at' => $post->published_at?->format('Y-m-d'),
                 'visibility' => $post->visibility,
                 'excerpt' => $post->excerpt,
+                'summary' => $post->summary,
                 'extensions' => $post
                     ->extensions()
                     ->where('is_published', true)

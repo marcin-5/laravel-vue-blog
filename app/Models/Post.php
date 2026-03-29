@@ -39,6 +39,7 @@ class Post extends Model
         'seo_title',
         'slug',
         'excerpt',
+        'summary',
         'content',
         'is_published',
         'visibility',
@@ -127,6 +128,14 @@ class Post extends Model
             ->withPivot(['display_order', 'created_at'])
             ->as('attachment')
             ->withTimestamps();
+    }
+
+    /**
+     * Accessor to get Markdown summary rendered as HTML.
+     */
+    public function getSummaryHtmlAttribute(): string
+    {
+        return $this->renderMarkdown((string) ($this->summary ?? ''));
     }
 
     /**

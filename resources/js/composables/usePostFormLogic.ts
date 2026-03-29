@@ -28,6 +28,7 @@ export function usePostFormLogic(options: UsePostFormLogicOptions = {}) {
             blog_id: blogId ?? post?.blog_id ?? 0,
             title: post?.title ?? '',
             excerpt: post?.excerpt ?? '',
+            summary: post?.summary ?? '',
             content: post?.content ?? '',
             is_published: post?.is_published ?? false,
             visibility: post?.visibility ?? 'public',
@@ -43,6 +44,7 @@ export function usePostFormLogic(options: UsePostFormLogicOptions = {}) {
         form.blog_id = newPost.blog_id;
         form.title = newPost.title;
         form.excerpt = newPost.excerpt ?? '';
+        form.summary = newPost.summary ?? '';
         form.content = newPost.content ?? '';
         form.is_published = newPost.is_published;
         form.visibility = newPost.visibility ?? 'public';

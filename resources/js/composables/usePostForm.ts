@@ -1,9 +1,4 @@
-import type {
-    AdminBlog as Blog,
-    AdminGroup as Group,
-    AdminPostItem as PostItem,
-    PostExtension
-} from '@/types/blog.types';
+import type { AdminBlog as Blog, AdminGroup as Group, AdminPostItem as PostItem, PostExtension } from '@/types/blog.types';
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -20,6 +15,7 @@ export function usePostForm() {
         title: '' as string,
         seo_title: '' as string,
         excerpt: '' as string,
+        summary: '' as string,
         content: '' as string,
         is_published: false as boolean,
         visibility: 'public' as string,
@@ -31,6 +27,7 @@ export function usePostForm() {
         title: '' as string,
         seo_title: '' as string,
         excerpt: '' as string | null,
+        summary: '' as string | null,
         content: '' as string | null,
         is_published: false as boolean,
         visibility: 'public' as string,
@@ -101,6 +98,7 @@ export function usePostForm() {
         postEditForm.title = post.title;
         postEditForm.seo_title = post.seo_title ?? '';
         postEditForm.excerpt = post.excerpt ?? '';
+        postEditForm.summary = post.summary ?? '';
         postEditForm.content = post.content ?? '';
         postEditForm.is_published = post.is_published;
         postEditForm.visibility = post.visibility ?? 'public';

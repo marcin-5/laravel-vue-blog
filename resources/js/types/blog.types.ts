@@ -30,6 +30,7 @@ export interface PostItem {
     title: string;
     slug: string;
     excerpt?: string | null;
+    summary?: string | null;
     published_at?: string | null;
 }
 
@@ -45,6 +46,7 @@ export interface PostExtension {
 export interface PostDetails extends PostItem {
     author: string;
     author_email: string | null;
+    summaryHtml?: string | null;
     contentHtml: string;
     extensions?: PostExtension[];
     visibility?: PostVisibility;
@@ -150,6 +152,7 @@ export interface AdminPostItem {
     title: string;
     slug: string;
     excerpt: string | null;
+    summary?: string | null;
     content?: string | null;
     is_published: boolean;
     visibility?: PostVisibility;

@@ -40,6 +40,7 @@ class UpdatePostRequest extends FormRequest
             'title' => ['sometimes', 'required', 'string', 'max:255'],
             'seo_title' => ['nullable', 'string', 'max:255'],
             'excerpt' => ['nullable', 'string', 'max:' . ($config['limits']['excerpt_max_length'] ?? 500)],
+            'summary' => ['nullable', 'string'],
             'content' => ['nullable', 'string'],
             'is_published' => ['sometimes', 'boolean'],
             'visibility' => [
@@ -76,6 +77,10 @@ class UpdatePostRequest extends FormRequest
 
         if (array_key_exists('excerpt', $validated)) {
             $data['excerpt'] = $validated['excerpt'];
+        }
+
+        if (array_key_exists('summary', $validated)) {
+            $data['summary'] = $validated['summary'];
         }
 
         if (array_key_exists('content', $validated)) {

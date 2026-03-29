@@ -47,6 +47,7 @@ class StorePostRequest extends FormRequest
             'title' => ['required', 'string', 'max:255'],
             'seo_title' => ['nullable', 'string', 'max:255'],
             'excerpt' => ['nullable', 'string', 'max:' . ($config['limits']['excerpt_max_length'] ?? 500)],
+            'summary' => ['nullable', 'string'],
             'content' => ['nullable', 'string'],
             'is_published' => ['sometimes', 'boolean'],
             'visibility' => [
@@ -79,6 +80,7 @@ class StorePostRequest extends FormRequest
             'title' => $validated['title'],
             'seo_title' => $validated['seo_title'] ?? null,
             'excerpt' => $validated['excerpt'] ?? null,
+            'summary' => $validated['summary'] ?? null,
             'content' => $validated['content'] ?? null,
             'is_published' => (bool) ($validated['is_published'] ?? $config['is_published'] ?? false),
             'visibility' => $validated['visibility'] ?? $config['visibility'] ?? 'public',

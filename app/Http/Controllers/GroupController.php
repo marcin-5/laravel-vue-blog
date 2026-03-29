@@ -92,9 +92,11 @@ class GroupController extends Controller
             'slug' => $post->slug,
             'author' => $post->user?->name ?? $group->user?->name,
             'author_email' => $post->user?->email ?? $group->user?->email,
+            'summaryHtml' => $post->summary_html,
             'contentHtml' => $post->content_html,
             'published_at' => $post->published_at?->format('Y-m-d H:i'),
             'excerpt' => $post->excerpt,
+            'summary' => $post->summary,
             'extensions' => $post
                 ->extensions()
                 ->where('is_published', true)

@@ -40,6 +40,7 @@ defineProps<{
         <template #content>
             <PostContent :author="post.author" :content="post.contentHtml" />
             <PostExtensions :extensions="post.extensions || []" />
+            <PostContent v-if="post.summaryHtml" :author="post.author" :content="post.summaryHtml" class="mt-8" />
         </template>
 
         <template #middle-divider>

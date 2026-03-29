@@ -77,6 +77,7 @@ const navigateBack = () => {
         <template #content>
             <PostContent :author="post.author" :content="post.contentHtml" />
             <PostExtensions :extensions="postExtensionsList" />
+            <PostContent v-if="post.summaryHtml" :author="post.author" :content="post.summaryHtml" class="mt-8" />
             <!-- Optional related posts and external links -->
             <PostRelatedPosts :items="relatedPosts" />
             <PostExternalLinks :items="externalLinks" />

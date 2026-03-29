@@ -336,6 +336,8 @@
             "excerpt_placeholder": "Krótkie podsumowanie",
             "content_label": "Treść",
             "content_placeholder": "Napisz swój post...",
+            "summary_label": "Podsumowanie",
+            "summary_placeholder": "Opcjonalne podsumowanie w formacie markdown...",
             "markdown_placeholder": "Napisz swój markdown tutaj...",
             "published_label": "Opublikowany",
             "publish_now_label": "Opublikuj teraz",
