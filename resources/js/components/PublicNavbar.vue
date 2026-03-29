@@ -22,7 +22,7 @@ const { t } = useI18n();
 const page = usePage();
 const isHomePage = computed(() => page.url === '/');
 
-const user = computed(() => page.props.auth.user);
+const user = computed(() => (page.props as any).auth?.user);
 
 interface NavLink {
     route: string;
@@ -77,7 +77,7 @@ watch(
                                 ? 'border border-border hover:border-primary/20 dark:hover:border-primary/30'
                                 : 'border border-transparent hover:border-border',
                         ]"
-                        :href="route(link.route)"
+                        :href="route().has(link.route) ? route(link.route) : '#'"
                         :method="link.method"
                         :prefetch="link.prefetch"
                     >
@@ -117,7 +117,7 @@ watch(
                                 ? 'border border-border hover:border-primary/20 dark:hover:border-primary/30'
                                 : 'border border-transparent hover:border-border',
                         ]"
-                        :href="route(link.route)"
+                        :href="route().has(link.route) ? route(link.route) : '#'"
                         :method="link.method"
                         :prefetch="link.prefetch"
                     >

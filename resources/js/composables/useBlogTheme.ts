@@ -1,10 +1,5 @@
 import { useAppearance } from '@/composables/useAppearance';
-import {
-    getFontSizeCorrection,
-    getFontWeightCorrection,
-    SCALE_TO_FONT_MAP,
-    SPECIAL_KEY_MAPPINGS
-} from '@/constants/fonts';
+import { getFontSizeCorrection, getFontWeightCorrection, SCALE_TO_FONT_MAP, SPECIAL_KEY_MAPPINGS } from '@/constants/fonts';
 import type { BlogTheme } from '@/types/blog.types';
 import { useMediaQuery } from '@vueuse/core';
 import { computed, type ComputedRef } from 'vue';
@@ -36,7 +31,7 @@ export function useBlogTheme(theme: ComputedRef<BlogTheme | undefined>) {
     const isDark = computed(() => appearance.value === 'dark' || (appearance.value === 'system' && isSystemDark.value));
 
     const mergedThemeStyle = computed<Record<string, string>>(() => {
-        const currentTheme = (isDark.value ? theme.value?.dark : theme.value?.light) || {};
+        const currentTheme = (isDark.value ? theme.value?.dark : theme.value?.light) ?? {};
 
         const style: Record<string, string> = {};
 

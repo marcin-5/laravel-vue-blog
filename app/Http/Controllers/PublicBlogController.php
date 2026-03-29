@@ -206,7 +206,7 @@ class PublicBlogController extends BasePublicController
             'sidebar' => (int) ($blog->sidebar ?? 0),
             'navigation' => $this->navigation->getPostNavigation($blog, $post),
             'seo' => $seoData->toArray(),
-            'viewStats' => Inertia::defer(fn() => $this->getViewStats(Post::class, $post->id, $blog->user_id)),
+            'viewStats' => $this->getViewStats(Post::class, $post->id, $blog->user_id),
         ]);
     }
 

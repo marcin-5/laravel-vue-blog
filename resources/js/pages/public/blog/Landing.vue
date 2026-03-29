@@ -42,7 +42,7 @@ const postsListSpacingClass = computed(() => (hasLandingContent.value ? 'mt-6' :
 <template>
     <Head v-if="seo?.title" :title="seo.title" />
 
-    <BlogLayout :isPublic="true" :sidebar="sidebar" :theme="blog.theme">
+    <BlogLayout v-if="blog" :isPublic="true" :sidebar="sidebar" :theme="blog.theme">
         <template #top-divider>
             <BorderDivider class="mb-4" />
         </template>
