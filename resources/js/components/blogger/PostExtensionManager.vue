@@ -23,12 +23,20 @@ const emit = defineEmits<{
 const availableExtensions = ref<Partial<PostItem>[]>([]);
 const selectedExtensionId = ref<string>('');
 const isAttaching = ref(false);
-const http = useHttp();
+const http = useHttp<
+    {
+        extension_post_id: string;
+        display_order: number;
+    },
+    PostItem[]
+>({
+    extension_post_id: '',
+    display_order: 0,
+});
 
 async function fetchAvailableExtensions() {
     try {
-        const response = await http.get(route('blogger.posts.extensions.available', { post: props.post.id }));
-        availableExtensions.value = response.data;
+        availableExtensions.value = (await http.get(route('blogger.posts.extensions.available', { post: props.post.id }))) as unknown as PostItem[];
     } catch (error) {
         console.error('Failed to fetch extensions', error);
     }
@@ -39,10 +47,10 @@ async function attachExtension() {
 
     isAttaching.value = true;
     try {
-        await http.post(route('blogger.posts.extensions.attach', { post: props.post.id }), {
-            extension_post_id: selectedExtensionId.value,
-            display_order: (props.post.extensions?.length || 0) + 1,
-        });
+        http.extension_post_id = selectedExtensionId.value;
+        http.display_order = (props.post.extensions?.length || 0) + 1;
+
+        await http.post(route('blogger.posts.extensions.attach', { post: props.post.id }));
         selectedExtensionId.value = '';
 
         toast({
