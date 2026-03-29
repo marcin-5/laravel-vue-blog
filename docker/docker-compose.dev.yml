@@ -1,6 +1,8 @@
 services:
   app:
     container_name: ${APP_NAME:-laravel-app}-dev
+    networks:
+      - laravel-network
     build:
       target: development
     environment:
@@ -30,6 +32,8 @@ services:
 
   queue:
     container_name: ${APP_NAME:-laravel-app}-queue-dev
+    networks:
+      - laravel-network
     build:
       target: development
     environment:
@@ -53,11 +57,17 @@ services:
 
   ssr:
     container_name: ${APP_NAME:-laravel-app}-ssr-dev
+    networks:
+      - laravel-network
+    entrypoint: [ ]
+    command: [ "node", "bootstrap/ssr/ssr.js" ]
     environment:
       - SSR_BASE_URL=http://caddy
+      - VITE_DEV_SERVER_URL=http://app:5173
     ports:
       - "13714:13714"
-
+    volumes:
+      - ../:/var/www/html
   caddy:
     image: caddy:alpine
     container_name: ${APP_NAME:-laravel-app}-caddy-dev
@@ -74,12 +84,16 @@ services:
   postgres:
     image: postgres:15-alpine
     container_name: ${APP_NAME:-laravel-app}-postgres-dev
+    networks:
+      - laravel-network
     ports:
       - "5432:5432"
 
   redis:
     image: redis:7-alpine
     container_name: ${APP_NAME:-laravel-app}-redis-dev
+    networks:
+      - laravel-network
     volumes:
       - redis_data:/data
 
