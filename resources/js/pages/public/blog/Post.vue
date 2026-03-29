@@ -24,7 +24,7 @@ const props = defineProps<{
     navigation?: Navigation;
     locale?: string;
     seo?: SEO;
-    viewStats: ViewStats | null;
+    viewStats?: ViewStats | null;
 }>();
 
 const { t } = useI18n();
