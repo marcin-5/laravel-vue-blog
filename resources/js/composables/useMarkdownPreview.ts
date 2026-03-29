@@ -9,21 +9,20 @@ export function useMarkdownPreview(routeName: string = 'markdown.preview') {
     const previewLayout = ref<PreviewLayout>('vertical');
     const previewHtml = ref('');
     const MARKDOWN_RENDER_ERROR_HTML = '<p class="text-error">Error rendering markdown</p>';
-    const http = useHttp();
+    const http = useHttp<
+        {
+            content: string;
+        },
+        { html: string }
+    >({ content: '' });
 
     async function fetchMarkdownPreview(content: string): Promise<string> {
+        if (!content) return '';
+
         try {
-            const response = await http.post(
-                route(routeName),
-                { content },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Accept: 'application/json',
-                    },
-                },
-            );
-            return response.data.html;
+            http.content = content;
+            const response = await http.post(route(routeName));
+            return response.html;
         } catch (error) {
             console.error('Markdown preview fetch error:', error);
             throw new Error('Failed to fetch markdown preview');
