@@ -42,8 +42,11 @@ const http = useHttp();
 const fetchBlogs = async () => {
     isLoadingBlogs.value = true;
     try {
-        const response = await http.get(route('blogger.data.blogs'));
-        availableBlogs.value = response.data;
+        availableBlogs.value = (await http.get(route('blogger.data.blogs'))) as unknown as {
+            id: number;
+            name: string;
+            slug: string;
+        }[];
     } catch (error) {
         console.error('Failed to fetch blogs', error);
     } finally {
@@ -58,8 +61,10 @@ const fetchPosts = async (blogId: string) => {
     }
     isLoadingPosts.value = true;
     try {
-        const response = await http.get(route('blogger.data.posts', { blog: blogId }));
-        availablePosts.value = response.data;
+        availablePosts.value = (await http.get(route('blogger.data.posts', { blog: blogId }))) as unknown as {
+            id: number;
+            title: string;
+        }[];
     } catch (error) {
         console.error('Failed to fetch posts', error);
     } finally {
