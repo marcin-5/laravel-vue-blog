@@ -26,6 +26,18 @@
 
 {{ $post->excerpt }}
 
+@if($post->extensions->isNotEmpty())
+@php
+    $extensionsToDisplay = $post->extensions->where('visibility', Post::VIS_EXTENSION);
+@endphp
+@if($extensionsToDisplay->isNotEmpty())
+**{{ __('newsletter.email.added_extensions') }}:**
+@foreach($extensionsToDisplay as $ext)
+- {{ $ext->title }}
+@endforeach
+@endif
+@endif
+
 <x-mail::button :url="$buttonUrl">
 {{ __('newsletter.email.read_more') }}
 </x-mail::button>

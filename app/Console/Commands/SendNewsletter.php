@@ -56,6 +56,9 @@ class SendNewsletter extends Command
                         'parentPosts' => function ($query) {
                             $query->whereIn('visibility', [Post::VIS_PUBLIC, Post::VIS_UNLISTED]);
                         },
+                        'extensions' => function ($query) use ($since) {
+                            $query->wherePivot('created_at', '>=', $since);
+                        },
                     ])
                     ->where('blog_id', $subscription->blog_id)
                     ->forNewsletter($since)
@@ -66,12 +69,26 @@ class SendNewsletter extends Command
                     ->get();
 
                 if ($posts->isNotEmpty()) {
-                    $data->push([
-                        'subscription' => $subscription,
-                        'blog' => $subscription->blog,
-                        'posts' => $posts,
-                    ]);
-                    $processedSubscriptions->push($subscription);
+                    // Filter out extensions if their parent is already in the list
+                    $regularPostIds = $posts->where('visibility', '!=', Post::VIS_EXTENSION)->pluck('id')->all();
+
+                    $filteredPosts = $posts->reject(function (Post $post) use ($regularPostIds) {
+                        if ($post->visibility !== Post::VIS_EXTENSION) {
+                            return false;
+                        }
+
+                        // Check if ANY parent of this extension is already in the list of regular posts to be sent
+                        return $post->parentPosts->contains(fn($parent) => in_array($parent->id, $regularPostIds));
+                    });
+
+                    if ($filteredPosts->isNotEmpty()) {
+                        $data->push([
+                            'subscription' => $subscription,
+                            'blog' => $subscription->blog,
+                            'posts' => $filteredPosts,
+                        ]);
+                        $processedSubscriptions->push($subscription);
+                    }
                 }
             }
 

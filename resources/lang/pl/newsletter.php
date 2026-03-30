@@ -51,5 +51,6 @@ return [
         'thanks' => 'Dziękujemy, że jesteś z nami!',
         'manage_subscription' => 'Jeśli chcesz zmienić ustawienia subskrypcji lub z niej zrezygnować, kliknij poniższy link:',
         'manage_link' => 'Zarządzaj subskrypcją',
+        'added_extensions' => 'Dodane uzupełnienia',
     ],
 ];

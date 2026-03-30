@@ -38,7 +38,8 @@ it('sends newsletter with newly attached extensions', function () {
         'updated_at' => now(),
     ]);
 
-    $this->artisan('newsletter:send daily')
+    $this
+        ->artisan('newsletter:send daily')
         ->assertSuccessful();
 
     Mail::assertSent(NewsletterPostNotification::class, function ($mail) use ($subscription, $extension, $mainPost) {
@@ -115,6 +116,42 @@ it('uses attached_at alias', function () {
 
     $extensionWithPivot = $mainPost->extensions()->first();
 
-    expect($extensionWithPivot->attached_at)->not->toBeNull()
+    expect($extensionWithPivot->attached_at)->not
+        ->toBeNull()
         ->and($extensionWithPivot->attached_at)->toBeInstanceOf(Carbon::class);
+});
+
+it('does not send extension if parent post is in the same newsletter batch', function () {
+    Mail::fake();
+
+    $blog = createBlog();
+    $subscription = createSubscription($blog, [
+        'frequency' => 'daily',
+        'send_time' => now()->format('H:i'),
+        'send_time_weekend' => now()->format('H:i'),
+    ]);
+
+    // Parent post published NOW
+    $mainPost = createPost($blog, [
+        'visibility' => Post::VIS_PUBLIC,
+        'published_at' => now(),
+    ]);
+
+    // Extension attached NOW
+    $extension = createPost($blog, [
+        'visibility' => Post::VIS_EXTENSION,
+        'published_at' => now(),
+    ]);
+
+    $mainPost->extensions()->attach($extension->id, ['created_at' => now()]);
+
+    $this
+        ->artisan('newsletter:send daily')
+        ->assertSuccessful();
+
+    // Only the main post should be sent, because the extension is attached to the post, which is also in this batch.
+    Mail::assertSent(NewsletterPostNotification::class, function ($mail) use ($mainPost) {
+        $posts = $mail->data->first()['posts'];
+        return $posts->count() === 1 && $posts->first()->id === $mainPost->id;
+    });
 });

@@ -51,5 +51,6 @@ return [
         'thanks' => 'Thank you for being with us!',
         'manage_subscription' => 'If you want to change your subscription settings or unsubscribe, click the link below:',
         'manage_link' => 'Manage subscription',
+        'added_extensions' => 'Added extensions',
     ],
 ];
