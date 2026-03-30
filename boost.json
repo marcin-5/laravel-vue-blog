@@ -6,7 +6,8 @@
     "herd_mcp": false,
     "mcp": true,
     "packages": [
-        "spatie/laravel-permission"
+        "spatie/laravel-permission",
+        "fruitcake/laravel-debugbar"
     ],
     "sail": false,
     "skills": [
