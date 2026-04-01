@@ -27,7 +27,7 @@ describe('useMarkdownPreviewSection', () => {
     });
 
     it('exposes handleInput as an alias for renderMarkdown', async () => {
-        postMock.mockResolvedValueOnce({ data: { html: '<p>Handled</p>' } });
+        postMock.mockResolvedValueOnce({ html: '<p>Handled</p>' });
 
         const { previewHtml, handleInput } = useMarkdownPreviewSection();
         await handleInput('# Handled');
@@ -52,7 +52,7 @@ describe('useMarkdownPreviewSection', () => {
     });
 
     it('togglePreview toggles isPreviewMode and renders markdown', async () => {
-        postMock.mockResolvedValueOnce({ data: { html: '<p>Preview</p>' } });
+        postMock.mockResolvedValueOnce({ html: '<p>Preview</p>' });
 
         const { isPreviewMode, previewHtml, togglePreview } = useMarkdownPreviewSection();
         await togglePreview('# Preview');
@@ -62,7 +62,7 @@ describe('useMarkdownPreviewSection', () => {
     });
 
     it('toggleFullPreview toggles isFullPreview and renders markdown', async () => {
-        postMock.mockResolvedValueOnce({ data: { html: '<p>Full</p>' } });
+        postMock.mockResolvedValueOnce({ html: '<p>Full</p>' });
 
         const { isFullPreview, previewHtml, toggleFullPreview } = useMarkdownPreviewSection();
         await toggleFullPreview('# Full');
@@ -72,7 +72,7 @@ describe('useMarkdownPreviewSection', () => {
     });
 
     it('uses custom routeName when provided', async () => {
-        postMock.mockResolvedValueOnce({ data: { html: '<p>ok</p>' } });
+        postMock.mockResolvedValueOnce({ html: '<p>ok</p>' });
 
         const { handleInput } = useMarkdownPreviewSection('custom.route');
         await handleInput('content');

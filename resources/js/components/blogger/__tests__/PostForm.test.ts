@@ -34,6 +34,19 @@ vi.mock('@vueuse/core', () => ({
     useDebounceFn: vi.fn((fn) => fn),
 }));
 
+vi.mock('@/composables/useMarkdownPreviewSection', () => ({
+    useMarkdownPreviewSection: vi.fn(() => ({
+        isPreviewMode: { value: false },
+        isFullPreview: { value: false },
+        previewLayout: { value: 'vertical' },
+        previewHtml: { value: '' },
+        handleInput: vi.fn(),
+        togglePreview: vi.fn(),
+        toggleFullPreview: vi.fn(),
+        setLayout: vi.fn(),
+    })),
+}));
+
 vi.mock('@/composables/useMarkdownPreview', () => ({
     useMarkdownPreview: vi.fn(() => ({
         isPreviewMode: { value: false },
@@ -255,43 +268,47 @@ describe('PostForm.vue', () => {
     });
 
     it('calls togglePreview when MarkdownPreviewSection emits toggle-preview', async () => {
-        const { useMarkdownPreview } = await import('@/composables/useMarkdownPreview');
+        const { useMarkdownPreviewSection } = await import('@/composables/useMarkdownPreviewSection');
         const togglePreviewMock = vi.fn();
-        vi.mocked(useMarkdownPreview).mockReturnValueOnce({
+        vi.mocked(useMarkdownPreviewSection).mockReturnValue({
             isPreviewMode: { value: false } as any,
             isFullPreview: { value: false } as any,
             previewLayout: { value: 'vertical' } as any,
             previewHtml: { value: '' } as any,
-            renderMarkdown: vi.fn(),
+            handleInput: vi.fn(),
             togglePreview: togglePreviewMock,
             toggleFullPreview: vi.fn(),
             setLayout: vi.fn(),
         });
 
         const wrapper = mount(PostForm);
-        const markdownSection = wrapper.findComponent({ name: 'MarkdownPreviewSection' });
-        await markdownSection.vm.$emit('toggle-preview');
+        const markdownSections = wrapper.findAllComponents({ name: 'MarkdownPreviewSection' });
+        // Content section is the second one
+        const contentSection = markdownSections[1];
+        await contentSection.vm.$emit('toggle-preview');
 
         expect(togglePreviewMock).toHaveBeenCalled();
     });
 
     it('calls toggleFullPreview when MarkdownPreviewSection emits toggle-full-preview', async () => {
-        const { useMarkdownPreview } = await import('@/composables/useMarkdownPreview');
+        const { useMarkdownPreviewSection } = await import('@/composables/useMarkdownPreviewSection');
         const toggleFullPreviewMock = vi.fn();
-        vi.mocked(useMarkdownPreview).mockReturnValueOnce({
+        vi.mocked(useMarkdownPreviewSection).mockReturnValue({
             isPreviewMode: { value: false } as any,
             isFullPreview: { value: false } as any,
             previewLayout: { value: 'vertical' } as any,
             previewHtml: { value: '' } as any,
-            renderMarkdown: vi.fn(),
+            handleInput: vi.fn(),
             togglePreview: vi.fn(),
             toggleFullPreview: toggleFullPreviewMock,
             setLayout: vi.fn(),
         });
 
         const wrapper = mount(PostForm);
-        const markdownSection = wrapper.findComponent({ name: 'MarkdownPreviewSection' });
-        await markdownSection.vm.$emit('toggle-full-preview');
+        const markdownSections = wrapper.findAllComponents({ name: 'MarkdownPreviewSection' });
+        // Content section is the second one
+        const contentSection = markdownSections[1];
+        await contentSection.vm.$emit('toggle-full-preview');
 
         expect(toggleFullPreviewMock).toHaveBeenCalled();
     });
