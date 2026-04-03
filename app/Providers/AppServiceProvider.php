@@ -5,9 +5,11 @@ namespace App\Providers;
 use App\Models\Blog;
 use App\Models\Category;
 use App\Models\PageView;
+use App\Models\Post;
 use App\Models\User;
 use App\Observers\BlogObserver;
 use App\Observers\CategoryObserver;
+use App\Observers\IndexNowObserver;
 use App\Observers\PageViewObserver;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -29,6 +31,8 @@ class AppServiceProvider extends ServiceProvider
     {
         // Model observers for cross-cutting slug generation logic
         Blog::observe(BlogObserver::class);
+        Blog::observe(IndexNowObserver::class);
+        Post::observe(IndexNowObserver::class);
         Category::observe(CategoryObserver::class);
         PageView::observe(PageViewObserver::class);
 
