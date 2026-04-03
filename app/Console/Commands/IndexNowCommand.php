@@ -72,6 +72,8 @@ class IndexNowCommand extends Command
         } else {
             $this->error('Failed to submit URLs.');
         }
+
+        $this->displayRecentLogs();
     }
 
     protected function getAllUrls(): array
@@ -99,5 +101,39 @@ class IndexNowCommand extends Command
         });
 
         return $urls;
+    }
+
+    /**
+     * Displays the most recent lines from the Laravel log file.
+     *
+     * This method reads the log file located at 'storage/logs/laravel.log'
+     * and outputs a specified number of recent lines using the `tail` command
+     * for efficiency. If the log file does not exist or is empty, appropriate
+     * warnings will be displayed.
+     *
+     * @param  int  $lines  The number of recent log lines to display. Defaults to 5.
+     *
+     * @return void
+     */
+    protected function displayRecentLogs(int $lines = 5): void
+    {
+        $logPath = storage_path('logs/laravel.log');
+
+        if (!file_exists($logPath)) {
+            $this->warn('Log file not found at: ' . $logPath);
+            return;
+        }
+
+        $this->newLine();
+        $this->info("Recent logs from laravel.log:");
+
+        // Wykorzystanie systemowej komendy 'tail' dla wydajności
+        $output = shell_exec("tail -n $lines " . escapeshellarg($logPath));
+
+        if ($output) {
+            $this->line($output);
+        } else {
+            $this->warn('Could not read log file or it is empty.');
+        }
     }
 }
