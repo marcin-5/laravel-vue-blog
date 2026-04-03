@@ -2,6 +2,8 @@
 FROM node:25-trixie-slim AS node-builder
 WORKDIR /app
 
+RUN npm install -g npm@latest
+
 # It's better to install all dependencies for building
 COPY package*.json ./
 RUN npm ci
