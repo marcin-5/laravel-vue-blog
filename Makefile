@@ -140,7 +140,7 @@ DOCKER_COMPOSE_PROD = docker compose --env-file .env -p $(DOCKER_PROJECT_NAME_PR
         prod-migrate prod-optimize prod-deploy prod-update prod-wait \
         prod-maintenance-on prod-maintenance-off prod-rebuild-pg-redis \
         prod-versions prod-check-assets prod-logs-queue prod-logs-app \
-        prod-health-queue prod-queue-diag
+        prod-health-queue prod-queue-diag prod-indexnow
 
 prod-up: ## Start production services
 	$(DOCKER_COMPOSE_PROD) up -d
@@ -162,6 +162,9 @@ prod-logs-queue: ## Tail only queue container logs
 
 prod-logs-app: ## Tail only app container logs
 	$(DOCKER_COMPOSE_PROD) logs -f app
+
+prod-indexnow: ## 🚀 Run IndexNow command in production (Usage: make prod-indexnow ARGS="blog_slug/post_slug")
+	$(DOCKER_COMPOSE_PROD) exec -T app php artisan blog:indexnow $(ARGS)
 
 prod-queue-clear-logs: ## 🧹 Clear the queue worker log file
 	$(DOCKER_COMPOSE_PROD) exec -T queue sh -c '> /var/www/html/storage/logs/supervisor_queue.log'
