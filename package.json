@@ -12,14 +12,14 @@
         "test:frontend:run": "vitest run"
     },
     "devDependencies": {
-        "@eslint/js": "^9.39.2",
+        "@eslint/js": "^10.0.1",
         "@fontsource/cinzel": "^5.2.8",
         "@fontsource/cinzel-decorative": "^5.2.8",
         "@types/node": "^25.5.2",
         "@vitest/coverage-v8": "^4.1.2",
         "@vue/eslint-config-typescript": "^14.7.0",
         "@vue/test-utils": "^2.4.6",
-        "eslint": "^9.39.2",
+        "eslint": "^10.1.0",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-vue": "^10.8.0",
         "jsdom": "^29.0.1",
