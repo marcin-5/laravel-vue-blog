@@ -20,7 +20,11 @@ class IndexNowObserver
             return;
         }
 
-        $shouldSubmit = $this->indexNowService->shouldSubmit($url, $this->getVisibility($model), $model->is_published);
+        $shouldSubmit = $this->indexNowService->shouldSubmit(
+            $url,
+            $this->getVisibility($model),
+            (bool) ($model->is_published ?? false),
+        );
 
         if ($shouldSubmit) {
             IndexNowQueuedUrl::updateOrCreate(['url' => $url]);
