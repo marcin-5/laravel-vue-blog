@@ -163,6 +163,7 @@
     "blogger": {
         "title": "Blogs",
         "stats_title": "Statistics",
+        "all_blogs": "All blogs",
         "all_my_blogs": "All my blogs",
         "badges": {
             "draft": "Draft",

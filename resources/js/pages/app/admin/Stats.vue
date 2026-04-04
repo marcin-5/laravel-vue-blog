@@ -39,7 +39,6 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: t('admin.stats.title'), href: '/
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <StatsPage
-            :blog-filter-label="t('common.all')"
             :blog-filters="blogFilters"
             :blog-options="blogOptions"
             :bloggers="bloggers"

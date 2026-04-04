@@ -2,12 +2,14 @@
 import StatsPage from '@/components/stats/StatsPage.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
-import type { BlogOption, BlogRow, FilterState, PostRow, VisitorRow } from '@/types/stats';
-import { Head } from '@inertiajs/vue3';
+import type { BlogOption, BlogRow, FilterState, PostRow, UserOption, VisitorRow } from '@/types/stats';
+import { Head, usePage } from '@inertiajs/vue3';
 
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
+const page = usePage();
+const isAdmin = page.props.auth.user.role === 'admin';
 
 interface Props {
     blogFilters: FilterState;
@@ -20,6 +22,7 @@ interface Props {
     visitorsFromSpecial: VisitorRow[];
     blogOptions: BlogOption[];
     visitorBlogOptions?: BlogOption[];
+    bloggers?: UserOption[];
 }
 
 defineProps<Props>();
@@ -37,12 +40,13 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: t('blogger.stats_title'), href: 
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <StatsPage
-            :blog-filter-label="t('blogger.all_my_blogs')"
             :blog-filters="blogFilters"
             :blog-options="blogOptions"
+            :bloggers="bloggers"
             :blogs="blogs"
             :post-filters="postFilters"
             :posts="posts"
+            :show-blogger-filter="isAdmin"
             :special-visitor-filters="specialVisitorFilters"
             :visitor-blog-options="visitorBlogOptions"
             :visitor-filters="visitorFilters"

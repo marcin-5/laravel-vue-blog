@@ -1,15 +1,13 @@
 <script lang="ts" setup>
 import { useStatsFilters } from '@/composables/useStatsFilters';
-import {
-    BLOG_SORT_OPTIONS,
-    POST_SORT_OPTIONS,
-    SPECIAL_VISITOR_SORT_OPTIONS,
-    VISITOR_SORT_OPTIONS
-} from '@/constants/stats';
+import { BLOG_SORT_OPTIONS, POST_SORT_OPTIONS, SPECIAL_VISITOR_SORT_OPTIONS, VISITOR_SORT_OPTIONS } from '@/constants/stats';
 import type { BlogOption, BlogRow, FilterState, PostRow, UserOption, VisitorRow } from '@/types/stats';
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import StatsFilters from './StatsFilters.vue';
 import StatsTable from './StatsTable.vue';
+
+const { t } = useI18n();
 
 interface Props {
     blogFilters: FilterState;
@@ -33,7 +31,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
     showBloggerFilter: false,
     showBloggerColumn: false,
-    blogFilterLabel: 'All',
+    blogFilterLabel: undefined,
     postBlogOptions: undefined,
     visitorBlogOptions: undefined,
     visitorFilters: undefined,
@@ -41,6 +39,18 @@ const props = withDefaults(defineProps<Props>(), {
     visitorsFromPage: () => [],
     visitorsFromSpecial: () => [],
 });
+
+const getEffectiveBlogFilterLabel = (selectedBloggerId?: number | null) => {
+    if (props.blogFilterLabel) {
+        return props.blogFilterLabel;
+    }
+
+    if (props.showBloggerFilter) {
+        return selectedBloggerId ? t('blogger.all_my_blogs') : t('blogger.all_blogs');
+    }
+
+    return t('blogger.all_my_blogs');
+};
 
 const createFilterStates = () => {
     return {
@@ -119,7 +129,7 @@ const visitorInfoKey = computed(() => 'user_agent');
                 v-model:selected-range="blogState.range"
                 v-model:selected-size="blogState.size"
                 v-model:selected-sort="blogState.sort"
-                :blog-filter-label="blogFilterLabel"
+                :blog-filter-label="getEffectiveBlogFilterLabel(blogState.blogger_id)"
                 :blog-options="blogOptions"
                 :bloggers="bloggers"
                 :show-blog-filter="false"
@@ -140,7 +150,7 @@ const visitorInfoKey = computed(() => 'user_agent');
                 v-model:selected-range="postState.range"
                 v-model:selected-size="postState.size"
                 v-model:selected-sort="postState.sort"
-                :blog-filter-label="blogFilterLabel"
+                :blog-filter-label="getEffectiveBlogFilterLabel(postState.blogger_id)"
                 :blog-options="effectivePostBlogOptions"
                 :bloggers="bloggers"
                 :show-blogger-filter="showBloggerFilter"
@@ -160,7 +170,7 @@ const visitorInfoKey = computed(() => 'user_agent');
                 v-model:selected-range="visitorState.range"
                 v-model:selected-size="visitorState.size"
                 v-model:selected-sort="visitorState.sort"
-                :blog-filter-label="blogFilterLabel"
+                :blog-filter-label="getEffectiveBlogFilterLabel(visitorState.blogger_id)"
                 :blog-options="effectiveVisitorBlogOptions"
                 :show-blog-filter="true"
                 :show-blogger-filter="false"
@@ -179,7 +189,7 @@ const visitorInfoKey = computed(() => 'user_agent');
                 v-model:selected-size="specialVisitorState.size"
                 v-model:selected-sort="specialVisitorState.sort"
                 v-model:selected-visitor-type="specialVisitorState.visitor_type"
-                :blog-filter-label="blogFilterLabel"
+                :blog-filter-label="getEffectiveBlogFilterLabel(specialVisitorState.blogger_id)"
                 :blog-options="effectiveVisitorBlogOptions"
                 :show-blog-filter="true"
                 :show-blogger-filter="false"

@@ -163,6 +163,7 @@
     "blogger": {
         "title": "Blogi",
         "stats_title": "Statystyki",
+        "all_blogs": "Wszystkie blogi",
         "all_my_blogs": "Wszystkie moje blogi",
         "badges": {
             "draft": "Szkic",

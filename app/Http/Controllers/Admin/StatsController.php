@@ -28,7 +28,7 @@ class StatsController extends AuthenticatedController
         $statsData = $this->getStatsData($request);
 
         $bloggers = User::query()
-            ->where('role', UserRole::Blogger->value)
+            ->whereIn('role', [UserRole::Admin->value, UserRole::Blogger->value])
             ->select(['id', 'name'])
             ->orderBy('name')
             ->get();
