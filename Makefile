@@ -163,7 +163,7 @@ prod-logs-queue: ## Tail only queue container logs
 prod-logs-app: ## Tail only app container logs
 	$(DOCKER_COMPOSE_PROD) logs -f app
 
-prod-indexnow: ## 🚀 Run IndexNow command in production (Usage: make prod-indexnow ARGS="blog_slug/post_slug")
+prod-indexnow: ## 🚀 Run IndexNow command in production (Examples: make prod-indexnow ARGS="blog_slug/post_slug", make prod-indexnow ARGS="--engine=yandex", make prod-indexnow ARGS="blog_slug --engine=bing")
 	$(DOCKER_COMPOSE_PROD) exec -T app php artisan blog:indexnow $(ARGS)
 
 prod-queue-clear-logs: ## 🧹 Clear the queue worker log file

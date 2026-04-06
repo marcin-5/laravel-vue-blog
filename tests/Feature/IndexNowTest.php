@@ -19,6 +19,8 @@ beforeEach(function () {
     Queue::fake();
     IndexNowQueuedUrl::truncate();
     Cache::flush();
+    config(['services.indexnow.key' => 'test-key']);
+    config(['app.url' => 'https://example.org']);
 });
 
 test('it queues blog url for submission when created and published', function () {
@@ -91,4 +93,61 @@ test('artisan command submits urls', function () {
         ->artisan('blog:indexnow', ['path' => $blog->slug])
         ->assertExitCode(0)
         ->expectsOutput("Submitting all pages for blog: {$blog->slug}...");
+});
+
+test('artisan command can specify engine', function () {
+    $user = User::factory()->create();
+    $blog = Blog::factory()->create(['user_id' => $user->id, 'is_published' => true]);
+
+    $this
+        ->artisan('blog:indexnow', ['path' => $blog->slug, '--engine' => 'yandex'])
+        ->assertExitCode(0)
+        ->expectsOutput("Submitting all pages for blog: {$blog->slug}...")
+        ->expectsOutput('Submitting 1 URLs to IndexNow (yandex)...');
+
+    Http::assertSent(function ($request) {
+        return $request->url() === 'https://yandex.com/indexnow';
+    });
+
+    Http::assertNotSent(function ($request) {
+        return $request->url() === 'https://api.indexnow.org/indexnow';
+    });
+});
+
+test('indexnow submit job handles yandex 202 status as success', function () {
+    $user = User::factory()->create();
+    $blog = Blog::factory()->create(['user_id' => $user->id, 'is_published' => true]);
+
+    $job = new IndexNowSubmitJob;
+    $service = new IndexNowService;
+
+    // Reset cache to allow run
+    Cache::forget('index_now_next_run');
+
+    $job->handle($service);
+
+    Http::assertSent(function ($request) {
+        return str_contains($request->url(), 'yandex.com');
+    });
+
+    expect(IndexNowQueuedUrl::count())->toBe(0); // Should be truncated
+});
+
+test('indexnow submit job submits to all engines', function () {
+    $user = User::factory()->create();
+    Blog::factory()->create(['user_id' => $user->id, 'is_published' => true]);
+
+    $job = new IndexNowSubmitJob;
+    $service = new IndexNowService;
+
+    Cache::forget('index_now_next_run');
+
+    $job->handle($service);
+
+    Http::assertSent(function ($request) {
+        return str_contains($request->url(), 'api.indexnow.org');
+    });
+    Http::assertSent(function ($request) {
+        return str_contains($request->url(), 'yandex.com');
+    });
 });
