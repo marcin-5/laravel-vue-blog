@@ -9,7 +9,7 @@ use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
-#[Signature('blog:indexnow {path? : blog_slug or blog_slug/post_slug} {--engine= : Search engine (bing, yandex)}')]
+#[Signature('blog:indexnow {path? : blog_slug or blog_slug/post_slug}')]
 #[Description('Submit URLs to IndexNow API')]
 class IndexNowCommand extends Command
 {
@@ -19,12 +19,6 @@ class IndexNowCommand extends Command
     public function handle(IndexNowService $indexNowService): void
     {
         $path = $this->argument('path');
-        $engine = $this->option('engine');
-
-        if ($engine && !in_array($engine, ['bing', 'yandex'])) {
-            $this->error("Invalid engine: {$engine}. Available engines: bing, yandex.");
-            return;
-        }
 
         if (!$path) {
             // Submit all pages
@@ -72,8 +66,8 @@ class IndexNowCommand extends Command
             return;
         }
 
-        $this->info('Submitting ' . count($filteredUrls) . ' URLs to IndexNow (' . ($engine ?: 'all') . ')...');
-        if ($indexNowService->submitUrls($filteredUrls, $engine)) {
+        $this->info('Submitting ' . count($filteredUrls) . ' URLs to IndexNow...');
+        if ($indexNowService->submitUrls($filteredUrls)) {
             $this->info('Successfully submitted URLs.');
         } else {
             $this->error('Failed to submit URLs.');

@@ -10,22 +10,16 @@ use Illuminate\Support\Facades\Log;
 class IndexNowService
 {
     /**
-     * Submit a list of URLs to the IndexNow API engines.
+     * Submit a list of URLs to the IndexNow API.
      *
      * @param  array<string>  $urls  The list of URLs to submit.
-     * @param  string|null  $engine  The engine to submit to (bing, yandex, or null for both).
      */
-    public function submitUrls(array $urls, ?string $engine = null): bool
+    public function submitUrls(array $urls): bool
     {
-        $engines = [
-            'bing' => 'https://api.indexnow.org/indexnow',
-            'yandex' => 'https://yandex.com/indexnow',
-        ];
-
-        $targetEngines = $engine ? [$engine => $engines[$engine] ?? null] : $engines;
+        $endpoint = 'https://api.indexnow.org/indexnow';
 
         if (app()->environment('local') && !app()->runningUnitTests()) {
-            Log::info('IndexNow submission skipped in local environment.', ['urls' => $urls, 'engine' => $engine]);
+            Log::info('IndexNow submission skipped in local environment.', ['urls' => $urls]);
             return true;
         }
 
@@ -54,33 +48,21 @@ class IndexNowService
             'urlList' => $urls,
         ];
 
-        $allSuccessful = true;
+        try {
+            $response = Http::post($endpoint, $payload);
 
-        foreach ($targetEngines as $name => $endpoint) {
-            if (!$endpoint) {
-                Log::warning("IndexNow engine '{$name}' not found.");
-                continue;
-            }
+            Log::info('IndexNow API response', [
+                'status' => $response->status(),
+                'body' => $response->json(),
+                'urls_count' => count($urls),
+            ]);
 
-            try {
-                $response = Http::post($endpoint, $payload);
+            return $response->successful();
+        } catch (Exception $e) {
+            Log::error('IndexNow API request failed: ' . $e->getMessage());
 
-                Log::info("IndexNow API response from {$name}", [
-                    'status' => $response->status(),
-                    'body' => $response->json(),
-                    'urls_count' => count($urls),
-                ]);
-
-                if (!in_array($response->status(), [200, 202])) {
-                    $allSuccessful = false;
-                }
-            } catch (Exception $e) {
-                Log::error("IndexNow API request failed for {$name}: " . $e->getMessage());
-                $allSuccessful = false;
-            }
+            return false;
         }
-
-        return $allSuccessful;
     }
 
     /**
@@ -152,9 +134,9 @@ class IndexNowService
             if (stripos($line, 'User-agent:') === 0) {
                 $ua = trim(substr($line, 11));
                 $userAgentApplies = ($ua === '*' || stripos($ua, 'IndexNow') !== false || stripos(
-                        $ua,
-                        'Bingbot',
-                    ) !== false);
+                    $ua,
+                    'Bingbot',
+                ) !== false);
                 continue;
             }
 

@@ -41,7 +41,7 @@ class IndexNowSubmitJob implements ShouldQueue
             IndexNowQueuedUrl::truncate();
             Log::info('IndexNowSubmitJob: Successfully submitted ' . count($urls) . ' URLs.');
         } else {
-            Log::error('IndexNowSubmitJob: Failed to submit URLs to one or more engines.');
+            Log::error('IndexNowSubmitJob: Failed to submit URLs.');
         }
     }
 }
