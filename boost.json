@@ -16,6 +16,8 @@
         "inertia-vue-development",
         "tailwindcss-development",
         "laravel-permission-development",
+        "debug-using-debugbar",
+        "laravel-inertia-vue",
         "laravel-performance-caching",
         "laravel-query-builders",
         "laravel-routes-best-practices",
