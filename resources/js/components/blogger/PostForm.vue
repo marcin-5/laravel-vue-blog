@@ -298,41 +298,6 @@ const excerptClass = computed(() => {
             />
 
             <MarkdownPreviewSection
-                :id="`${fieldIdPrefix}-summary`"
-                v-model="form.summary"
-                :error="form.errors.summary"
-                :is-edit="props.isEdit"
-                :is-full-preview="summaryPreview.isFullPreview.value"
-                :is-preview-mode="summaryPreview.isPreviewMode.value"
-                :is-processing="form.processing"
-                :label="translationKeys.summary"
-                :placeholder="translationKeys.summaryPlaceholder"
-                :preview-html="summaryPreview.previewHtml.value"
-                :preview-layout="summaryPreview.previewLayout.value"
-                :rows="props.isEdit ? 4 : 6"
-                :translations="{
-                    cancel: translationKeys.cancel,
-                    create: translationKeys.create,
-                    save: translationKeys.save,
-                    exitPreview: translationKeys.exitPreview,
-                    markdownLabel: translationKeys.markdownLabel,
-                    previewLabel: translationKeys.previewLabel,
-                    previewModeTitle: translationKeys.previewModeTitle,
-                    toggleLayout: translationKeys.previewToggleLayout(summaryPreview.previewLayout.value),
-                    closePreview: translationKeys.closePreview,
-                    preview: translationKeys.preview,
-                    fullPreview: translationKeys.fullPreview,
-                    splitView: translationKeys.splitView,
-                }"
-                @cancel="handleCancel"
-                @input="handleSummaryInput"
-                @submit="handleSubmit"
-                @set-layout="summaryPreview.setLayout"
-                @toggle-full-preview="handleToggleSummaryFullPreview"
-                @toggle-preview="handleToggleSummaryPreview"
-            />
-
-            <MarkdownPreviewSection
                 :id="`${fieldIdPrefix}-content`"
                 v-model="form.content"
                 :error="form.errors.content"
@@ -365,6 +330,41 @@ const excerptClass = computed(() => {
                 @set-layout="contentPreview.setLayout"
                 @toggle-full-preview="handleToggleContentFullPreview"
                 @toggle-preview="handleToggleContentPreview"
+            />
+
+            <MarkdownPreviewSection
+                :id="`${fieldIdPrefix}-summary`"
+                v-model="form.summary"
+                :error="form.errors.summary"
+                :is-edit="props.isEdit"
+                :is-full-preview="summaryPreview.isFullPreview.value"
+                :is-preview-mode="summaryPreview.isPreviewMode.value"
+                :is-processing="form.processing"
+                :label="translationKeys.summary"
+                :placeholder="translationKeys.summaryPlaceholder"
+                :preview-html="summaryPreview.previewHtml.value"
+                :preview-layout="summaryPreview.previewLayout.value"
+                :rows="props.isEdit ? 4 : 6"
+                :translations="{
+                    cancel: translationKeys.cancel,
+                    create: translationKeys.create,
+                    save: translationKeys.save,
+                    exitPreview: translationKeys.exitPreview,
+                    markdownLabel: translationKeys.markdownLabel,
+                    previewLabel: translationKeys.previewLabel,
+                    previewModeTitle: translationKeys.previewModeTitle,
+                    toggleLayout: translationKeys.previewToggleLayout(summaryPreview.previewLayout.value),
+                    closePreview: translationKeys.closePreview,
+                    preview: translationKeys.preview,
+                    fullPreview: translationKeys.fullPreview,
+                    splitView: translationKeys.splitView,
+                }"
+                @cancel="handleCancel"
+                @input="handleSummaryInput"
+                @submit="handleSubmit"
+                @set-layout="summaryPreview.setLayout"
+                @toggle-full-preview="handleToggleSummaryFullPreview"
+                @toggle-preview="handleToggleSummaryPreview"
             />
 
             <PostRelatedPostsSection
