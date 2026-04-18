@@ -74,7 +74,7 @@ class StorePostRequest extends FormRequest
         $validated = $this->validated();
         $config = config('blogger.posts.defaults', []);
 
-        return [
+        $data = [
             'blog_id' => $validated['blog_id'] ?? null,
             'group_id' => $validated['group_id'] ?? null,
             'title' => $validated['title'],
@@ -87,6 +87,16 @@ class StorePostRequest extends FormRequest
             'related_posts' => $validated['related_posts'] ?? [],
             'external_links' => $validated['external_links'] ?? [],
         ];
+
+        if ($data['visibility'] === 'extension') {
+            $data['seo_title'] = null;
+            $data['excerpt'] = null;
+            $data['summary'] = null;
+            $data['related_posts'] = [];
+            $data['external_links'] = [];
+        }
+
+        return $data;
     }
 
     public function getBlog(): ?Blog

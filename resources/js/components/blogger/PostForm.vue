@@ -224,6 +224,17 @@ if (!props.form) {
     );
 }
 
+// Watcher for isExtension to clear fields when true
+watch(isExtension, (newValue) => {
+    if (newValue) {
+        form.seo_title = '';
+        form.excerpt = '';
+        form.summary = '';
+        form.related_posts = [];
+        form.external_links = [];
+    }
+});
+
 // Event handlers
 const handleSubmit = () => emit('submit', form);
 
@@ -264,6 +275,14 @@ const excerptClass = computed(() => {
 <template>
     <div class="mt-4 border-t pt-4">
         <form class="space-y-4" @submit.prevent="handleSubmit">
+            <div class="flex flex-wrap items-center gap-4">
+                <FormCheckboxField :id="`${fieldIdPrefix}-published`" v-model="form.is_published" :label="translationKeys.published" />
+
+                <FormCheckboxField :id="`${fieldIdPrefix}-unlisted`" v-model="isUnlisted" :label="translationKeys.unlisted" />
+
+                <FormCheckboxField :id="`${fieldIdPrefix}-extension`" v-model="isExtension" :label="translationKeys.extension" />
+            </div>
+
             <PostFormField
                 :id="`${fieldIdPrefix}-title`"
                 v-model="form.title"
@@ -274,28 +293,30 @@ const excerptClass = computed(() => {
                 type="input"
             />
 
-            <PostFormField
-                v-if="!props.groupId && !form.group_id"
-                :id="`${fieldIdPrefix}-seo-title`"
-                v-model="form.seo_title"
-                :error="form.errors?.seo_title"
-                :input-class="seoTitleClass"
-                :label="translationKeys.seoTitle"
-                :placeholder="translationKeys.seoTitlePlaceholder"
-                type="input"
-            />
+            <template v-if="!isExtension">
+                <PostFormField
+                    v-if="!props.groupId && !form.group_id"
+                    :id="`${fieldIdPrefix}-seo-title`"
+                    v-model="form.seo_title"
+                    :error="form.errors?.seo_title"
+                    :input-class="seoTitleClass"
+                    :label="translationKeys.seoTitle"
+                    :placeholder="translationKeys.seoTitlePlaceholder"
+                    type="input"
+                />
 
-            <PostFormField
-                :id="`${fieldIdPrefix}-excerpt`"
-                v-model="form.excerpt"
-                :error="form.errors?.excerpt"
-                :hint="`${form.excerpt?.length || 0} ${translationKeys.characters}`"
-                :input-class="excerptClass"
-                :label="translationKeys.excerpt"
-                :placeholder="translationKeys.excerptPlaceholder"
-                :rows="2"
-                type="textarea"
-            />
+                <PostFormField
+                    :id="`${fieldIdPrefix}-excerpt`"
+                    v-model="form.excerpt"
+                    :error="form.errors?.excerpt"
+                    :hint="`${form.excerpt?.length || 0} ${translationKeys.characters}`"
+                    :input-class="excerptClass"
+                    :label="translationKeys.excerpt"
+                    :placeholder="translationKeys.excerptPlaceholder"
+                    :rows="2"
+                    type="textarea"
+                />
+            </template>
 
             <MarkdownPreviewSection
                 :id="`${fieldIdPrefix}-content`"
@@ -333,6 +354,7 @@ const excerptClass = computed(() => {
             />
 
             <MarkdownPreviewSection
+                v-if="!isExtension"
                 :id="`${fieldIdPrefix}-summary`"
                 v-model="form.summary"
                 :error="form.errors.summary"
@@ -367,31 +389,25 @@ const excerptClass = computed(() => {
                 @toggle-preview="handleToggleSummaryPreview"
             />
 
-            <PostRelatedPostsSection
-                :id-prefix="fieldIdPrefix"
-                :items="form.related_posts"
-                :translations="relatedPostsTranslations"
-                @remove="removeRelatedPost"
-                @add-item="addRelatedPost"
-            />
+            <template v-if="!isExtension">
+                <PostRelatedPostsSection
+                    :id-prefix="fieldIdPrefix"
+                    :items="form.related_posts"
+                    :translations="relatedPostsTranslations"
+                    @remove="removeRelatedPost"
+                    @add-item="addRelatedPost"
+                />
 
-            <PostExternalLinksSection
-                :errors="externalLinksErrors"
-                :id-prefix="fieldIdPrefix"
-                :items="form.external_links"
-                :translations="externalLinksTranslations"
-                @remove="removeExternalLink"
-                @add-item="addExternalLink"
-                @update-item="updateExternalLink"
-            />
-
-            <div class="flex flex-wrap items-center gap-4">
-                <FormCheckboxField :id="`${fieldIdPrefix}-published`" v-model="form.is_published" :label="translationKeys.published" />
-
-                <FormCheckboxField :id="`${fieldIdPrefix}-unlisted`" v-model="isUnlisted" :label="translationKeys.unlisted" />
-
-                <FormCheckboxField :id="`${fieldIdPrefix}-extension`" v-model="isExtension" :label="translationKeys.extension" />
-            </div>
+                <PostExternalLinksSection
+                    :errors="externalLinksErrors"
+                    :id-prefix="fieldIdPrefix"
+                    :items="form.external_links"
+                    :translations="externalLinksTranslations"
+                    @remove="removeExternalLink"
+                    @add-item="addExternalLink"
+                    @update-item="updateExternalLink"
+                />
+            </template>
 
             <FormSubmitActions
                 :is-edit="props.isEdit"

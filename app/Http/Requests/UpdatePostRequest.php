@@ -103,6 +103,16 @@ class UpdatePostRequest extends FormRequest
             $data['external_links'] = $validated['external_links'];
         }
 
+        $visibility = $data['visibility'] ?? $this->route('post')->visibility;
+
+        if ($visibility === 'extension') {
+            $data['seo_title'] = null;
+            $data['excerpt'] = null;
+            $data['summary'] = null;
+            $data['related_posts'] = [];
+            $data['external_links'] = [];
+        }
+
         return $data;
     }
 
