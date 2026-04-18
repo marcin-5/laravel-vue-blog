@@ -159,6 +159,7 @@ class Blog extends Model
                         'title',
                         'slug',
                         'excerpt',
+                        'summary',
                         'content',
                         'is_published',
                         'visibility',
