@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue';
 import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
 import { configDefaults } from 'vitest/config';
+// import logFileChanges from './vite-log-plugin.js';
 
 const appUrl = process.env.APP_URL ?? '';
 const isHttps = appUrl.startsWith('https://') || process.env.VITE_DEV_HTTPS === 'true';
@@ -27,6 +28,7 @@ export default defineConfig({
                 },
             },
         }),
+        // logFileChanges(),
     ],
     // Ensure Vue and vue-i18n feature flags are defined during both client and SSR builds
     define: {
@@ -43,7 +45,20 @@ export default defineConfig({
     server: {
         host: true,
         watch: {
-            ignored: ['**/node_modules/**', '**/.idea/**', '**/.git/**', '**/storage/**', '**/bootstrap/cache/**', '**/vendor/**'],
+            ignored: [
+                '**/.git/**',
+                '**/.idea/**',
+                '**/.junie/**',
+                '**/bootstrap/cache/**',
+                '**/node_modules/**',
+                '**/storage/**',
+                '**/vendor/**',
+                '**/*.php',
+                '**/*.blade.php',
+                '**/*.log',
+                '**/*.tmp',
+                '**/*.swp',
+            ],
             ...(usePolling ? { usePolling: true } : {}),
         },
         hmr: {
