@@ -9,7 +9,7 @@ use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
-#[Signature('blog:indexnow {path? : blog_slug or blog_slug/post_slug}')]
+#[Signature('blog:indexnow {path? : blog_slug or blog_slug/post_slug} {--logs : Show only recent logs}')]
 #[Description('Submit URLs to IndexNow API')]
 class IndexNowCommand extends Command
 {
@@ -18,6 +18,12 @@ class IndexNowCommand extends Command
      */
     public function handle(IndexNowService $indexNowService): void
     {
+        if ($this->option('logs')) {
+            $this->displayRecentLogs(20);
+
+            return;
+        }
+
         $path = $this->argument('path');
 
         if (!$path) {
@@ -115,25 +121,28 @@ class IndexNowCommand extends Command
      *
      * @return void
      */
-    protected function displayRecentLogs(int $lines = 5): void
+    protected function displayRecentLogs(int $lines = 10): void
     {
         $logPath = storage_path('logs/laravel.log');
 
         if (!file_exists($logPath)) {
             $this->warn('Log file not found at: ' . $logPath);
+
             return;
         }
 
         $this->newLine();
-        $this->info('Recent logs from laravel.log:');
+        $this->info('Recent IndexNow logs from laravel.log:');
 
-        // Wykorzystanie systemowej komendy 'tail' dla wydajności
-        $output = shell_exec("tail -n $lines " . escapeshellarg($logPath));
+        // Escaping double quotes for shell command
+        $pattern = escapeshellarg('IndexNow API response');
+        $filePath = escapeshellarg($logPath);
+        $output = shell_exec("grep -a $pattern $filePath | tail -n $lines");
 
         if ($output) {
             $this->line($output);
         } else {
-            $this->warn('Could not read log file or it is empty.');
+            $this->warn('No IndexNow log entries found or log file is empty.');
         }
     }
 }
