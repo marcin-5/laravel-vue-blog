@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Blog;
+use App\Models\IndexNowQueuedUrl;
 use App\Models\Post;
 use App\Services\IndexNowService;
 use Illuminate\Console\Attributes\Description;
@@ -82,6 +83,57 @@ class IndexNowCommand extends Command
         $this->displayRecentLogs();
     }
 
+    /**
+     * Displays the most recent lines from the Laravel log file and the status of the pending queue.
+     *
+     * This method reads the log file located at 'storage/logs/laravel.log'
+     * and outputs a specified number of recent lines using the \`tail\` command
+     * for efficiency. If the log file does not exist or is empty, appropriate
+     * warnings will be displayed.
+     *
+     * @param  int  $lines  The number of recent log lines to display. Defaults to 10.
+     *
+     * @return void
+     */
+    protected function displayRecentLogs(int $lines = 10): void
+    {
+        $this->displayPendingQueueStatus();
+
+        $logPath = storage_path('logs/laravel.log');
+
+        if (!file_exists($logPath)) {
+            $this->warn('Log file not found at: ' . $logPath);
+
+            return;
+        }
+
+        $this->newLine();
+        $this->info('Recent IndexNow logs from laravel.log:');
+
+        // Escaping double quotes for shell command
+        $pattern = escapeshellarg('IndexNow API response');
+        $filePath = escapeshellarg($logPath);
+        $output = shell_exec("grep -a $pattern $filePath | tail -n $lines");
+
+        if ($output) {
+            $this->line($output);
+        } else {
+            $this->warn('No IndexNow log entries found or log file is empty.');
+        }
+    }
+
+    /**
+     * Display the current status of the pending URLs queue.
+     *
+     * @return void
+     */
+    protected function displayPendingQueueStatus(): void
+    {
+        $pendingCount = IndexNowQueuedUrl::count();
+        $this->newLine();
+        $this->info("Pending IndexNow URL queue: $pendingCount URL(s) waiting to be submitted.");
+    }
+
     protected function getAllUrls(): array
     {
         $urls = [];
@@ -107,42 +159,5 @@ class IndexNowCommand extends Command
         });
 
         return $urls;
-    }
-
-    /**
-     * Displays the most recent lines from the Laravel log file.
-     *
-     * This method reads the log file located at 'storage/logs/laravel.log'
-     * and outputs a specified number of recent lines using the `tail` command
-     * for efficiency. If the log file does not exist or is empty, appropriate
-     * warnings will be displayed.
-     *
-     * @param  int  $lines  The number of recent log lines to display. Defaults to 5.
-     *
-     * @return void
-     */
-    protected function displayRecentLogs(int $lines = 10): void
-    {
-        $logPath = storage_path('logs/laravel.log');
-
-        if (!file_exists($logPath)) {
-            $this->warn('Log file not found at: ' . $logPath);
-
-            return;
-        }
-
-        $this->newLine();
-        $this->info('Recent IndexNow logs from laravel.log:');
-
-        // Escaping double quotes for shell command
-        $pattern = escapeshellarg('IndexNow API response');
-        $filePath = escapeshellarg($logPath);
-        $output = shell_exec("grep -a $pattern $filePath | tail -n $lines");
-
-        if ($output) {
-            $this->line($output);
-        } else {
-            $this->warn('No IndexNow log entries found or log file is empty.');
-        }
     }
 }

@@ -95,3 +95,12 @@ test('artisan command submits urls', function () {
         ->expectsOutput("Submitting all pages for blog: {$blog->slug}...")
         ->expectsOutput('Submitting 1 URLs to IndexNow...');
 });
+
+test('artisan command shows pending queue status', function () {
+    IndexNowQueuedUrl::create(['url' => 'https://example.org/pending-1']);
+    IndexNowQueuedUrl::create(['url' => 'https://example.org/pending-2']);
+
+    $this->artisan('blog:indexnow', ['--logs' => true])
+        ->assertExitCode(0)
+        ->expectsOutput('Pending IndexNow URL queue: 2 URL(s) waiting to be submitted.');
+});
