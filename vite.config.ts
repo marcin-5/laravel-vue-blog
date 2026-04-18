@@ -42,7 +42,10 @@ export default defineConfig({
     },
     server: {
         host: true,
-        watch: usePolling ? { usePolling: true } : undefined,
+        watch: {
+            ignored: ['**/node_modules/**', '**/.idea/**', '**/.git/**', '**/storage/**', '**/bootstrap/cache/**', '**/vendor/**'],
+            ...(usePolling ? { usePolling: true } : {}),
+        },
         hmr: {
             host: hmrHost,
             protocol: hmrProtocol,
