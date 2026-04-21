@@ -38,7 +38,7 @@ export interface HistoryItem {
     snapshot: any;
 }
 
-export function useEnneagramStage1(questions: Question[], config: Config) {
+export function useEnneagramStage1(questions: Question[], config: Config, emit: any) {
     const currentPart = ref(1);
     const currentIndex = ref(0);
     const history = ref<HistoryItem[]>([]);
@@ -200,6 +200,40 @@ export function useEnneagramStage1(questions: Question[], config: Config) {
         advanceFlowAfterAnswer();
     }
 
+    function determineSecondaryInstinct(s1: Record<string, number>, s2: Record<string, number>): string {
+        // According to requirement:
+        // Dominant = Winner of Part 1 (already determined as part1Winner)
+        // Secondary = Winner of Part 2 (middle instinct, not dominant, not weakest)
+
+        // We need to find which instinct is "middle"
+        // Let's assume scores are compared
+        const totalScores = {
+            sp: (s1.sp || 0) + (s2.sp || 0),
+            so: (s1.so || 0) + (s2.so || 0),
+            sx: (s1.sx || 0) + (s2.sx || 0),
+        };
+
+        const sorted = Object.entries(totalScores).sort((a, b) => b[1] - a[1]);
+        // sorted[0] is dominant, sorted[1] is secondary, sorted[2] is weakest
+        // But the requirement says: "jeżeli w etapie pierwszym dominującym instynktem był 'sp'... a w części 2 'so', to dla etapu 2 część 3 i 4 używany będzie zestaw zaczynający się od id 'sx-'"
+        // WAIT. Let me re-read: "Jeżeli w etapie 1 części 1 wyszło 'sp', a w części 2 'so', to dla etapu 2 część 3 i 4 używany będzie zestaw zaczynający się od id 'sx-'"
+        // "używamy drugiego z kolei instynktu a nie 3 najsłabszego, który wyszedł w etapie 1 część 2"
+        // This is a bit confusing. If sp was dominant in P1, and so was "winner" in P2, then sx is the second one?
+        // Let's look at how Stage 1 Part 2 works. Part 2 asks about the LEAST important instinct.
+        // So winner of Part 2 is actually the WEAKEST instinct.
+        // Thus:
+        // Dominant = Winner of P1
+        // Weakest = Winner of P2
+        // Secondary = The one that is neither Dominant nor Weakest.
+
+        const instincts = ['sp', 'so', 'sx'];
+        const dominant = part1Winner.value;
+        const weakest = getLeader(s2);
+
+        const secondary = instincts.find((i) => i !== dominant && i !== weakest);
+        return secondary || instincts.find((i) => i !== dominant) || 'so';
+    }
+
     function advanceFlowAfterAnswer() {
         if (currentPart.value === 1) {
             const thX: number = Number(config.part1.thresholdX ?? 0);
@@ -243,9 +277,15 @@ export function useEnneagramStage1(questions: Question[], config: Config) {
         }
 
         if (endByX || endByY || reachedMax2 || currentIndex.value >= partQuestions.value.length - 1) {
-            const statsP1 = `P1 -> SP:${scoresPart1.value.sp}, SC:${scoresPart1.value.so}, SX:${scoresPart1.value.sx}`;
-            const statsP2 = `P2 -> SP:${scoresPart2.value.sp}, SC:${scoresPart2.value.so}, SX:${scoresPart2.value.sx}`;
-            alert(`Etap 1 zakończony\n\n${statsP1}\n${statsP2}`);
+            const results = {
+                scoresPart1: { ...scoresPart1.value },
+                scoresPart2: { ...scoresPart2.value },
+                part1Winner: part1Winner.value,
+                dominant: part1Winner.value,
+                // Determine secondary (middle) instinct
+                secondary: determineSecondaryInstinct(scoresPart1.value, scoresPart2.value),
+            };
+            emit('complete', results);
             return;
         }
 
@@ -281,9 +321,14 @@ export function useEnneagramStage1(questions: Question[], config: Config) {
                     skips.value = 0;
                     selectedAnswers.value = [];
                 } else {
-                    const statsP1 = `P1 -> SP:${scoresPart1.value.sp}, SC:${scoresPart1.value.so}, SX:${scoresPart1.value.sx}`;
-                    const statsP2 = `P2 -> SP:${scoresPart2.value.sp}, SC:${scoresPart2.value.so}, SX:${scoresPart2.value.sx}`;
-                    alert(`Etap 1 zakończony (koniec pytań)\n\n${statsP1}\n${statsP2}`);
+                    const results = {
+                        scoresPart1: { ...scoresPart1.value },
+                        scoresPart2: { ...scoresPart2.value },
+                        part1Winner: part1Winner.value,
+                        dominant: part1Winner.value,
+                        secondary: determineSecondaryInstinct(scoresPart1.value, scoresPart2.value),
+                    };
+                    emit('complete', results);
                 }
             }
         }

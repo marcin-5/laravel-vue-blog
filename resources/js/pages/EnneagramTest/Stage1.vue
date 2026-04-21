@@ -21,6 +21,8 @@ const props = defineProps({
     },
 });
 
+const emit = defineEmits(['complete']);
+
 const {
     currentPart,
     currentIndex,
@@ -42,7 +44,7 @@ const {
     confirmAnswers,
     handleSkip,
     goBack,
-} = useEnneagramStage1(props.questions, props.config);
+} = useEnneagramStage1(props.questions, props.config, emit);
 </script>
 
 <template>

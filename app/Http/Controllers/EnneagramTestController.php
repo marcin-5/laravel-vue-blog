@@ -33,6 +33,9 @@ class EnneagramTestController extends Controller
         }
 
         $data = json_decode(File::get($path), true);
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($data)) {
+            abort(500, 'Error decoding questions.json: ' . json_last_error_msg());
+        }
 
         // Randomize questions (by priority) and answers on each fresh visit
         // so every reopening of the test gets a new draw. While the user
