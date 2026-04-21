@@ -35,3 +35,4 @@ require __DIR__ . '/auth.php';
 
 // Public routes must be loaded last
 require __DIR__ . '/public.php';
+require __DIR__ . '/enneagram.php';

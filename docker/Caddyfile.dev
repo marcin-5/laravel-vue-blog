@@ -1,3 +1,9 @@
+enneagram-test.localhost {
+    root * /var/www/html/public
+    php_fastcgi app:9000
+    file_server
+}
+
 :80 {
   root * /var/www/html/public
   encode zstd gzip
