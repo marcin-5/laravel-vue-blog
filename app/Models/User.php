@@ -69,8 +69,8 @@ class User extends Authenticatable
             if ($user->isDirty('role')) {
                 // If switching to blogger, default to 1 (unless explicitly set in code)
                 if ($user->role === UserRole::Blogger->value && $user->getOriginal(
-                        'role',
-                    ) !== UserRole::Blogger->value) {
+                    'role',
+                ) !== UserRole::Blogger->value) {
                     // Only set when not explicitly provided by code performing the update
                     if ($user->blog_quota === null) {
                         $user->blog_quota = 1;
@@ -206,7 +206,6 @@ class User extends Authenticatable
         return false;
     }
 
-
     /**
      * Grupy, do których użytkownik należy.
      */
@@ -218,7 +217,6 @@ class User extends Authenticatable
             ->withPivot(['role', 'joined_at'])
             ->withTimestamps();
     }
-
 
     /**
      * Grupy, których użytkownik jest właścicielem.
