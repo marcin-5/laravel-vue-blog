@@ -1,4 +1,9 @@
 import { computed, ref } from 'vue';
+import { type EnneagramType, TYPE_IDS } from './shared/constants';
+import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
+import type { FlatOption, Instinct, SelectedAnswer } from './shared/types';
+import { useAnswerSelection } from './shared/useAnswerSelection';
+import { useHistory } from './shared/useHistory';
 
 export interface Question {
     id: string;
@@ -23,269 +28,175 @@ export interface Config {
     part4: PartConfig;
 }
 
-export interface FlatOption {
-    key: string;
-    value: string;
-    category: string;
+export interface Stage1Results {
+    dominant: Instinct;
+    secondary: Instinct;
 }
 
-export interface HistoryItem {
+interface Stage2Snapshot {
     part: number;
-    questionId: string;
-    answers: any[];
-    type: 'answer' | 'skip';
-    skipsAtThisPoint: number;
-    snapshot: any;
+    index: number;
+    typeScores: Record<EnneagramType, number>;
+    selectedInPart1: string[]; // Sets are serialized as arrays for snapshot simplicity
+    selectedInPart3: string[];
+    skips: number;
+    poolIndex: number;
+    instinct: Instinct;
 }
 
-export function useEnneagramStage2(questions: Question[], config: Config, resultsStage1: { dominant: string; secondary: string }) {
+type Stage2Emit = (event: 'complete', results: Record<EnneagramType, number>) => void;
+
+const DEFAULT_DOMINANT: Instinct = 'sp';
+const DEFAULT_SECONDARY: Instinct = 'so';
+const LAST_PART = 4;
+
+function createEmptyTypeScores(): Record<EnneagramType, number> {
+    return TYPE_IDS.reduce((acc, id) => ({ ...acc, [id]: 0 }), {} as Record<EnneagramType, number>);
+}
+
+export function useEnneagramStage2(questions: Question[], config: Config, resultsStage1: Stage1Results, emit?: Stage2Emit) {
+    const dominantInstinct: Instinct = resultsStage1?.dominant ?? DEFAULT_DOMINANT;
+    const secondaryInstinct: Instinct = resultsStage1?.secondary ?? DEFAULT_SECONDARY;
+
+    // --- State ---
     const currentPart = ref(1);
     const currentIndex = ref(0);
-    const history = ref<HistoryItem[]>([]);
     const skips = ref(0);
-    const selectedAnswers = ref<any[]>([]);
-
-    // Points for types 1-9
-    const typeScores = ref<Record<string, number>>({
-        '1': 0,
-        '2': 0,
-        '3': 0,
-        '4': 0,
-        '5': 0,
-        '6': 0,
-        '7': 0,
-        '8': 0,
-        '9': 0,
-    });
-
-    // Answers selected in part 1 (to filter in part 2)
+    const typeScores = ref<Record<EnneagramType, number>>(createEmptyTypeScores());
     const selectedInPart1 = ref<Set<string>>(new Set());
-    // Answers selected in part 3 (to filter in part 4)
     const selectedInPart3 = ref<Set<string>>(new Set());
-
     const shuffledAnswersPerQuestion = ref<Record<string, FlatOption[]>>({});
 
-    // Determine current instinct based on part
-    const currentInstinct = computed(() => {
-        if (!resultsStage1 || currentPart.value <= 2) return resultsStage1?.dominant || 'sp';
-        return resultsStage1?.secondary || 'so';
-    });
-
-    // Weighted shuffle logic
-    function shuffleByPriority(instinct: string): Question[] {
-        const pool = questions.filter((q) => q.id.startsWith(`${instinct}-`));
-        const weightedPool: string[] = [];
-
-        pool.forEach((q) => {
-            const weight = q.priority + 1; // 0->1, 1->2, 2->3 (as per req, though json has 0)
-            for (let i = 0; i < weight; i++) {
-                weightedPool.push(q.id);
-            }
-        });
-
-        // Shuffle weighted pool
-        for (let i = weightedPool.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [weightedPool[i], weightedPool[j]] = [weightedPool[j], weightedPool[i]];
-        }
-
-        // Keep first occurrence to maintain uniqueness while respecting weighted shuffle
-        const uniqueIds = Array.from(new Set(weightedPool));
-        return uniqueIds.map((id) => pool.find((q) => q.id === id)!);
-    }
-
-    // Initialize pools
-    const dominantPool = shuffleByPriority(resultsStage1?.dominant || 'sp');
-    const secondaryPool = shuffleByPriority(resultsStage1?.secondary || 'so');
-
-    const partQuestions = computed(() => {
-        if (currentPart.value <= 2) return dominantPool;
-        return secondaryPool;
-    });
-
-    const currentConfig = computed(() => {
-        const key = `part${currentPart.value}` as keyof Config;
-        return config[key];
-    });
-
-    // Global index for each instinct pool to avoid repeating questions across parts
     const instinctPoolIndices = ref<Record<string, number>>({
-        [resultsStage1?.dominant || 'sp']: 0,
-        [resultsStage1?.secondary || 'so']: 0,
+        [dominantInstinct]: 0,
+        [secondaryInstinct]: 0,
     });
 
-    const currentQuestion = computed(() => {
-        const instinct = currentInstinct.value;
-        const indexInPool = instinctPoolIndices.value[instinct];
-        return partQuestions.value[indexInPool];
-    });
+    // --- Computed ---
+    const currentInstinct = computed<Instinct>(() => (currentPart.value <= 2 ? dominantInstinct : secondaryInstinct));
 
-    function buildShuffledFlatOptions(q: Question): FlatOption[] {
-        const flat: FlatOption[] = [];
-        Object.entries(q.answerLists).forEach(([category, value]) => {
-            flat.push({
-                key: category,
-                value: Array.isArray(value) ? value[0] : String(value),
-                category,
-            });
-        });
+    const currentConfig = computed(() => config[`part${currentPart.value}` as keyof Config]);
 
-        for (let i = flat.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [flat[i], flat[j]] = [flat[j], flat[i]];
-        }
-        return flat;
-    }
+    const partQuestions = computed(() => (currentPart.value <= 2 ? dominantPool : secondaryPool));
 
+    const currentQuestion = computed(() => partQuestions.value[instinctPoolIndices.value[currentInstinct.value]]);
+
+    const maxAnswersPerQuestion = computed(() => currentConfig.value.answersPerQuestion);
+
+    const dominantPool = shuffleByPriority(questions.filter((q) => q.id.startsWith(`${dominantInstinct}-`)));
+    const secondaryPool = shuffleByPriority(questions.filter((q) => q.id.startsWith(`${secondaryInstinct}-`)));
+
+    // --- Flat options with per-part filtering ---
     const flatOptions = computed<FlatOption[]>(() => {
         const q = currentQuestion.value;
         if (!q) return [];
 
-        const questionId = q.id;
-        if (!shuffledAnswersPerQuestion.value[questionId]) {
-            shuffledAnswersPerQuestion.value[questionId] = buildShuffledFlatOptions(q);
+        if (!shuffledAnswersPerQuestion.value[q.id]) {
+            shuffledAnswersPerQuestion.value[q.id] = buildShuffledFlatOptions(q);
         }
+        const flat = shuffledAnswersPerQuestion.value[q.id];
 
-        const flat = shuffledAnswersPerQuestion.value[questionId];
-
-        // Filter options for parts 2 and 4
-        if (currentPart.value === 2) {
-            return flat.filter((opt) => selectedInPart1.value.has(opt.category));
+        // Part 2: only categories chosen in Part 1.
+        // Part 4: only categories chosen in Part 1 OR Part 3.
+        switch (currentPart.value) {
+            case 2:
+                return flat.filter((opt) => selectedInPart1.value.has(opt.category));
+            case 4:
+                return flat.filter((opt) => selectedInPart1.value.has(opt.category) || selectedInPart3.value.has(opt.category));
+            default:
+                return flat;
         }
-        if (currentPart.value === 4) {
-            // "te, które chociaż raz zostały wskazane w części pierwszej i trzeciej"
-            // Actually description says: "tylko te odpowiedzi, które chociaż raz zostały wskazane w części pierwszej" for part 2
-            // and "analogicznie w części 3 i 4" - so for 4 we use results from 3?
-            // WAIT: User said: "4 (wyświetlane tylko te, które chociaż raz były wskazane w części 1 i 3)"
-            // Let's re-read carefully: "wyświetlamy tylko te odpowiedzi, które chociaż raz zostały wskazane w części pierwszej" (for part 2)
-            // "Analogicznie postępujemy w części 3 i 4... używamy zestawu sx-"
-            // Then later: "4 (wyświetlane tylko te, które chociaż raz były wskazane w części 1 i 3)"
-            // OK, so Part 4 = filter by (Selected in Part 1 OR Selected in Part 3)
-            return flat.filter((opt) => selectedInPart1.value.has(opt.category) || selectedInPart3.value.has(opt.category));
-        }
-
-        return flat;
     });
 
-    const maxAnswersPerQuestion = computed(() => currentConfig.value.answersPerQuestion);
-
-    const canSkip = computed(() => {
-        return selectedAnswers.value.length === 0 && skips.value < currentConfig.value.maxSkips;
+    // --- Submodules ---
+    const {
+        selectedAnswers,
+        toggleAnswer,
+        clear: clearSelection,
+    } = useAnswerSelection({
+        maxAnswers: maxAnswersPerQuestion,
+        onAutoConfirm: () => confirmAnswers(),
     });
 
-    function toggleAnswer(key: string | number, value: any, category?: string | number) {
-        const idx = selectedAnswers.value.findIndex((a) => String(a.key) === String(key));
-        if (idx > -1) {
-            selectedAnswers.value.splice(idx, 1);
-        } else {
-            if (selectedAnswers.value.length < maxAnswersPerQuestion.value) {
-                selectedAnswers.value.push({ key, value, category: category ?? '' });
-            } else if (maxAnswersPerQuestion.value === 1) {
-                selectedAnswers.value = [{ key, value, category: category ?? '' }];
-            }
-        }
+    const canSkip = computed(() => selectedAnswers.value.length === 0 && skips.value < currentConfig.value.maxSkips);
 
-        // If only 1 answer is required, confirm immediately after selecting
-        if (maxAnswersPerQuestion.value === 1 && selectedAnswers.value.length === 1) {
-            confirmAnswers();
-        }
-    }
-
-    function confirmAnswers() {
-        if (selectedAnswers.value.length === 0 && !canSkip.value) return;
-
-        const prev = {
-            typeScores: { ...typeScores.value },
-            selectedInPart1: new Set(selectedInPart1.value),
-            selectedInPart3: new Set(selectedInPart3.value),
-            skips: skips.value,
-            currentIndex: currentIndex.value,
-            currentPart: currentPart.value,
-        };
-
-        history.value.push({
+    const {
+        history,
+        recordAnswer,
+        recordSkip,
+        pop: popHistory,
+    } = useHistory<Stage2Snapshot>(
+        () => ({
             part: currentPart.value,
-            questionId: currentQuestion.value?.id,
-            answers: [...selectedAnswers.value],
-            type: 'answer',
-            skipsAtThisPoint: skips.value,
-            snapshot: {
-                ...prev,
-                poolIndex: instinctPoolIndices.value[currentInstinct.value],
-            },
-        });
+            index: currentIndex.value,
+            typeScores: { ...typeScores.value },
+            selectedInPart1: Array.from(selectedInPart1.value),
+            selectedInPart3: Array.from(selectedInPart3.value),
+            skips: skips.value,
+            poolIndex: instinctPoolIndices.value[currentInstinct.value],
+            instinct: currentInstinct.value,
+        }),
+        (s) => {
+            currentPart.value = s.part;
+            currentIndex.value = s.index;
+            skips.value = s.skips;
+            typeScores.value = { ...s.typeScores };
+            selectedInPart1.value = new Set(s.selectedInPart1);
+            selectedInPart3.value = new Set(s.selectedInPart3);
+            // Restore pool index using captured instinct to avoid reliance on currentInstinct order.
+            instinctPoolIndices.value[s.instinct] = s.poolIndex;
+        },
+    );
 
-        // Add to scores and selected trackers
-        selectedAnswers.value.forEach((ans) => {
-            const cat = String(ans.category);
-            typeScores.value[cat] = (typeScores.value[cat] || 0) + 1;
+    // --- Helpers ---
+    function applyAnswersToScores(answers: SelectedAnswer[]) {
+        for (const ans of answers) {
+            const cat = String(ans.category) as EnneagramType;
+            typeScores.value[cat] = (typeScores.value[cat] ?? 0) + 1;
             if (currentPart.value === 1) selectedInPart1.value.add(cat);
             if (currentPart.value === 3) selectedInPart3.value.add(cat);
-        });
-
-        selectedAnswers.value = [];
-        advance();
-    }
-
-    function handleSkip() {
-        if (skips.value < currentConfig.value.maxSkips) {
-            const prev = {
-                typeScores: { ...typeScores.value },
-                selectedInPart1: new Set(selectedInPart1.value),
-                selectedInPart3: new Set(selectedInPart3.value),
-                skips: skips.value,
-                currentIndex: currentIndex.value,
-                currentPart: currentPart.value,
-            };
-            history.value.push({
-                part: currentPart.value,
-                questionId: currentQuestion.value?.id,
-                answers: [],
-                type: 'skip',
-                skipsAtThisPoint: skips.value,
-                snapshot: {
-                    ...prev,
-                    poolIndex: instinctPoolIndices.value[currentInstinct.value],
-                },
-            });
-            skips.value++;
-            advance();
         }
     }
 
     function advance() {
-        const instinct = currentInstinct.value;
-        instinctPoolIndices.value[instinct]++;
+        instinctPoolIndices.value[currentInstinct.value]++;
         currentIndex.value++;
 
         const reachedMax = currentIndex.value >= currentConfig.value.maxQuestions;
-        const noMoreQuestions = instinctPoolIndices.value[instinct] >= partQuestions.value.length;
+        const noMoreQuestions = instinctPoolIndices.value[currentInstinct.value] >= partQuestions.value.length;
 
-        if (reachedMax || noMoreQuestions) {
-            if (currentPart.value < 4) {
-                currentPart.value++;
-                currentIndex.value = 0;
-                skips.value = 0;
-            } else {
-                alert('Test zakończony! Wyniki: ' + JSON.stringify(typeScores.value));
-            }
+        if (!(reachedMax || noMoreQuestions)) return;
+
+        if (currentPart.value < LAST_PART) {
+            currentPart.value++;
+            currentIndex.value = 0;
+            skips.value = 0;
+        } else {
+            emit?.('complete', { ...typeScores.value });
         }
     }
 
+    // --- Actions ---
+    function confirmAnswers() {
+        if (selectedAnswers.value.length === 0 && !canSkip.value) return;
+
+        recordAnswer(currentPart.value, selectedAnswers.value, skips.value);
+        applyAnswersToScores(selectedAnswers.value);
+        clearSelection();
+        advance();
+    }
+
+    function handleSkip() {
+        if (skips.value >= currentConfig.value.maxSkips) return;
+        recordSkip(currentPart.value, skips.value);
+        skips.value++;
+        advance();
+    }
+
     function goBack() {
-        if (history.value.length === 0) return;
-        const last = history.value.pop()!;
-
-        currentPart.value = last.part;
-        currentIndex.value = last.snapshot.currentIndex;
-        skips.value = last.skipsAtThisPoint;
-        typeScores.value = { ...last.snapshot.typeScores };
-        selectedInPart1.value = new Set(last.snapshot.selectedInPart1);
-        selectedInPart3.value = new Set(last.snapshot.selectedInPart3);
+        const last = popHistory();
+        if (!last) return;
         selectedAnswers.value = last.type === 'answer' ? [...last.answers] : [];
-
-        // Restore global pool index
-        instinctPoolIndices.value[currentInstinct.value] = last.snapshot.poolIndex;
     }
 
     return {
@@ -308,3 +219,5 @@ export function useEnneagramStage2(questions: Question[], config: Config, result
         instinctPoolIndices,
     };
 }
+
+export type { FlatOption } from './shared/types';
