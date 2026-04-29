@@ -24,7 +24,7 @@ class EnneagramTestController extends Controller
 
         return Inertia::render('EnneagramTest/Index', [
             'testData' => $data,
-            'appDebug' => (bool) config('app.debug'),
+            'appDebug' => (bool) config('enneagram.debug'),
         ]);
     }
 }

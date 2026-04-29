@@ -7,3 +7,10 @@
     php_fastcgi app:9000
     file_server
 }
+
+enneagram-test.{$APP_DOMAIN} {
+    root * /var/www/html/public
+    encode zstd gzip
+    php_fastcgi app:9000
+    file_server
+}
