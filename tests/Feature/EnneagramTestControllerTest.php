@@ -11,6 +11,11 @@ it('loads the enneagram test page with valid data', function () {
         ->has('testData')
         ->has('testData.questions')
         ->has('testData.testConfig.stages.stage2.part3')
-        ->has('testData.testConfig.stages.stage2.part4'),
+        ->has('testData.testConfig.stages.stage2.part4')
+        ->where('testData.questions', function ($questions) {
+            return collect($questions)->every(function ($question) {
+                return isset($question['id']);
+            });
+        }),
     );
 });
