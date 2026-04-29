@@ -26,7 +26,7 @@ const visibleItems = computed(() => (props.items ?? []).filter((i) => i.related_
 <template>
     <section v-if="visibleItems.length" class="mt-10 space-y-2">
         <div class="text-xl font-semibold text-foreground">{{ $t('blog.post.related_posts') }}</div>
-        <ul class="space-y-1">
+        <ul class="space-y-2">
             <li
                 v-for="item in visibleItems"
                 :key="`${item.blog_slug}-${item?.related_post?.slug}`"
