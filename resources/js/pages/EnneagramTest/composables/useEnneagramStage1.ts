@@ -1,5 +1,6 @@
 import { computed, ref, watch } from 'vue';
 import { SINGLE_ANSWER_AUTO_CONFIRM_DELAY_MS } from './shared/constants';
+import { isStage1Part1Question, isStage1Part2Question } from './shared/questionIds';
 import {
     createEmptyInstinctScores,
     determineSecondaryInstinct,
@@ -14,10 +15,8 @@ import { useHistory } from './shared/useHistory';
 
 export interface Question {
     id: string | number;
-    part: number;
     question: string;
     answerLists: Record<string, string | string[]>;
-    stage?: number;
     priority?: number;
 }
 
@@ -70,8 +69,9 @@ export function useEnneagramStage1(questions: Question[], config: Config, emit: 
     const extraAskedPart2 = ref(false);
     const shuffledPerQuestion = ref<Record<string, FlatOption[]>>({});
 
-    const poolPart1 = shuffleByPriority<Question>(questions.filter((q) => q.part === 1));
-    const poolPart2 = shuffleByPriority<Question>(questions.filter((q) => q.part === 2));
+    const poolPart1 = shuffleByPriority<Question>(questions.filter((q) => isStage1Part1Question(q)));
+    const poolPart2 = shuffleByPriority<Question>(questions.filter((q) => isStage1Part2Question(q)));
+    console.log(poolPart1);
 
     // --- Computed ---
     const currentConfig = computed(() => (currentPart.value === 1 ? config.part1 : config.part2));
@@ -137,7 +137,7 @@ export function useEnneagramStage1(questions: Question[], config: Config, emit: 
 
     // --- Helpers ---
     function questionKey(q: Question): string {
-        return String(q.id ?? `${q.stage}-${q.part}-${currentIndex.value}`);
+        return String(q.id ?? `${currentPart.value}-${currentIndex.value}`);
     }
 
     function isLastInPart(): boolean {

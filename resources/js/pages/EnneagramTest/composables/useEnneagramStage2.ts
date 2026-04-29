@@ -7,8 +7,6 @@ import { useHistory } from './shared/useHistory';
 
 export interface Question {
     id: string;
-    stage: number;
-    part: number;
     priority: number;
     question: string;
     answerLists: Record<string, string | string[]>;
