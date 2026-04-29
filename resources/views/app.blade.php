@@ -32,13 +32,6 @@
         }
     </style>
 
-    {{-- noinspection HtmlUnknownAttribute --}}
-    @if(isset($page['props']['seo']['title']))
-        <title data-inertia>{{ $page['props']['seo']['title'] }}</title>
-    @else
-        <title data-inertia>{{ config('app.name', 'Osobliwy Blog') }}</title>
-    @endif
-
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
