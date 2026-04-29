@@ -78,7 +78,7 @@ class EnneagramTestController extends Controller
             $byId[$id] = $q;
 
             $priority = (int) ($q['priority'] ?? 0);
-            $copies = max(1, min(3, $priority + 1)); // 0=>1, 1=>2, 2=>3
+            $copies = 1 + $priority; // priority indicates additional copies
             for ($i = 0; $i < $copies; $i++) {
                 $pool[] = $id;
             }
