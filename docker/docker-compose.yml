@@ -130,9 +130,9 @@ services:
             - caddy_data:/data
             - caddy_config:/config
         environment:
-            APP_DOMAIN: ${APP_DOMAIN:-your-domain.com}
-            APP_DOMAIN_WWW: ${APP_DOMAIN_WWW:-www.your-domain.com}
-            ENNEAGRAM_DOMAIN: ${ENNEAGRAM_DOMAIN:-enneagram-test.your-domain.com}
+            APP_DOMAIN: ${APP_DOMAIN:-osobliwy.blog}
+            APP_DOMAIN_WWW: ${APP_DOMAIN_WWW:-www.osobliwy.blog}
+            ENNEAGRAM_DOMAIN: ${ENNEAGRAM_DOMAIN:-enneagram-test.osobliwy.blog}
         depends_on:
             - app
         networks:
