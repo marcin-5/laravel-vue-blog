@@ -11,7 +11,7 @@ services:
     volumes:
       - public_files:/var/www/html/public:ro
     environment:
-      - ENNEAGRAM_DOMAIN=${ENNEAGRAM_DOMAIN:-enneagram-test.your-domain.com}
+      ENNEAGRAM_DOMAIN: ${ENNEAGRAM_DOMAIN:-enneagram-test.your-domain.com}
 
   queue:
     volumes:
