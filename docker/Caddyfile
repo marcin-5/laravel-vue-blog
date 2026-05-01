@@ -8,7 +8,7 @@
     file_server
 }
 
-enneagram-test.{$APP_DOMAIN} {
+enneagram-test.{$APP_DOMAIN}, {$ENNEAGRAM_DOMAIN} {
     root * /var/www/html/public
     encode zstd gzip
     php_fastcgi app:9000
