@@ -59,7 +59,7 @@ class SeoService
 
     private function buildBlogUrl(string $baseUrl, string $slug): string
     {
-        return $baseUrl . '/blogs/' . $slug;
+        return $baseUrl . '/' . $slug;
     }
 
     private function createAuthorOrganization(string $name): array
@@ -185,7 +185,7 @@ class SeoService
                         '@type' => 'Person',
                         'name' => $blog['author'],
                     ],
-                    'url' => $baseUrl . '/blogs/' . $blog['slug'],
+                    'url' => $baseUrl . '/' . $blog['slug'],
                     'abstract' => $this->safeStripTags($blog['descriptionHtml'] ?? ''),
                 ];
             })->all(),

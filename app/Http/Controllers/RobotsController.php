@@ -14,8 +14,9 @@ class RobotsController extends Controller
     public function generate(): Response
     {
         $content = "User-agent: *\n";
-        $content .= "Disallow: /blogs/\n";
         $content .= "Disallow: /dashboard\n";
+        $content .= "Disallow: /login\n";
+        $content .= "Disallow: /register\n";
 
         if (App::environment('production')) {
             $content .= "Allow: /\n\n";
