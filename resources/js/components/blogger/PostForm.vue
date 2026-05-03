@@ -325,6 +325,7 @@ const getThresholdClass = computed(() => (value: string | null, threshold1: numb
                 :id="`${fieldIdPrefix}-content`"
                 v-model="form.content"
                 :error="form.errors.content"
+                :hint="`${form.content?.length || 0} ${translationKeys.characters}`"
                 :is-edit="props.isEdit"
                 :is-full-preview="contentPreview.isFullPreview.value"
                 :is-preview-mode="contentPreview.isPreviewMode.value"

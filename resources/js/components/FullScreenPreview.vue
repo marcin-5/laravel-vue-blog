@@ -20,6 +20,7 @@ interface Props {
     markdownLabel: string;
     previewLabel: string;
     markdownPlaceholder?: string;
+    hint?: string;
     isEdit: boolean;
     isProcessing?: boolean;
     hideSaveButton?: boolean;
@@ -101,6 +102,7 @@ function handleCancel() {
                         :label="props.markdownLabel"
                         :model-value="props.content"
                         :placeholder="props.markdownPlaceholder"
+                        :hint="props.hint"
                         type="textarea"
                         @input="handleInput"
                         @update:model-value="(value: any) => emit('update:content', value || '')"

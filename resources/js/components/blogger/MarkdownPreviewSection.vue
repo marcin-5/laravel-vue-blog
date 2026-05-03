@@ -3,6 +3,7 @@ import FullScreenPreview from '@/components/FullScreenPreview.vue';
 import PostFormField from '@/components/blogger/PostFormField.vue';
 import MarkdownPreview from '@/components/MarkdownPreview.vue';
 import { Button } from '@/components/ui/button';
+import InputError from '@/components/InputError.vue';
 
 interface TranslationKeys {
     cancel: string;
@@ -35,6 +36,7 @@ interface Props {
     isProcessing?: boolean;
     translations: TranslationKeys;
     showSaveButton?: boolean;
+    hint?: string;
 }
 
 interface Emits {
@@ -77,6 +79,7 @@ function handleLayoutToggle() {
             :create-button-label="props.translations.create"
             :exit-preview-button-label="props.translations.exitPreview"
             :hide-save-button="!props.showSaveButton"
+            :hint="props.hint"
             :is-edit="props.isEdit"
             :is-processing="props.isProcessing"
             :markdown-label="props.translations.markdownLabel"
@@ -102,6 +105,7 @@ function handleLayoutToggle() {
                 <div :class="props.isPreviewMode && props.previewLayout === 'vertical' ? 'w-1/2' : ''">
                     <PostFormField
                         :id="props.id"
+                        :hint="props.hint"
                         :label="props.label"
                         :model-value="props.modelValue"
                         :placeholder="props.placeholder"
