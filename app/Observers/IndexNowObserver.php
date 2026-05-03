@@ -20,14 +20,29 @@ class IndexNowObserver
             return;
         }
 
+        $visibility = $this->getVisibility($model);
+        $isPublished = (bool) ($model->is_published ?? false);
+
         $shouldSubmit = $this->indexNowService->shouldSubmit(
             $url,
-            $this->getVisibility($model),
-            (bool) ($model->is_published ?? false),
+            $visibility,
+            $isPublished,
         );
 
         if ($shouldSubmit) {
             IndexNowQueuedUrl::updateOrCreate(['url' => $url]);
+
+            if ($model->wasChanged('slug')) {
+                $oldUrl = $this->getOldUrl($model);
+                if ($oldUrl) {
+                    IndexNowQueuedUrl::updateOrCreate(['url' => $oldUrl]);
+                }
+
+                if ($model instanceof Blog) {
+                    $this->queuePostsForBlog($model);
+                }
+            }
+
             $this->scheduleJob();
         } else {
             IndexNowQueuedUrl::where('url', $url)->delete();
@@ -50,6 +65,40 @@ class IndexNowObserver
     protected function getVisibility(Post|Blog $model): string
     {
         return $model->visibility ?? 'public';
+    }
+
+    protected function getOldUrl(Post|Blog $model): ?string
+    {
+        $oldSlug = $model->getOriginal('slug');
+        if (!$oldSlug || $oldSlug === $model->slug) {
+            return null;
+        }
+
+        if ($model instanceof Post && $model->blog) {
+            return route('blog.public.post', [$model->blog->slug, $oldSlug]);
+        }
+
+        if ($model instanceof Blog) {
+            return route('blog.public.landing', $oldSlug);
+        }
+
+        return null;
+    }
+
+    protected function queuePostsForBlog(Blog $blog): void
+    {
+        $oldBlogSlug = $blog->getOriginal('slug');
+        if (!$oldBlogSlug || $oldBlogSlug === $blog->slug) {
+            return;
+        }
+
+        $blog->posts()->published()->public()->each(function (Post $post) use ($blog, $oldBlogSlug) {
+            $newUrl = route('blog.public.post', [$blog->slug, $post->slug]);
+            $oldUrl = route('blog.public.post', [$oldBlogSlug, $post->slug]);
+
+            IndexNowQueuedUrl::updateOrCreate(['url' => $newUrl]);
+            IndexNowQueuedUrl::updateOrCreate(['url' => $oldUrl]);
+        });
     }
 
     protected function scheduleJob(): void
