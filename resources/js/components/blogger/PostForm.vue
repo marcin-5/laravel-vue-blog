@@ -287,6 +287,8 @@ const getThresholdClass = computed(() => (value: string | null, threshold1: numb
                 :id="`${fieldIdPrefix}-title`"
                 v-model="form.title"
                 :error="form.errors?.title"
+                :hint="`${form.title?.length || 0} ${translationKeys.characters}`"
+                :input-class="getRangeClass(form.title, 50, 60)"
                 :label="translationKeys.title"
                 :placeholder="translationKeys.titlePlaceholder"
                 required
@@ -299,6 +301,7 @@ const getThresholdClass = computed(() => (value: string | null, threshold1: numb
                     :id="`${fieldIdPrefix}-seo-title`"
                     v-model="form.seo_title"
                     :error="form.errors?.seo_title"
+                    :hint="`${form.seo_title?.length || 0} ${translationKeys.characters}`"
                     :input-class="getRangeClass(form.seo_title, 50, 60)"
                     :label="translationKeys.seoTitle"
                     :placeholder="translationKeys.seoTitlePlaceholder"
