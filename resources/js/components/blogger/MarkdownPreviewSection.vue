@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import FullScreenPreview from '@/components/FullScreenPreview.vue';
-import InputError from '@/components/InputError.vue';
+import PostFormField from '@/components/blogger/PostFormField.vue';
 import MarkdownPreview from '@/components/MarkdownPreview.vue';
 import { Button } from '@/components/ui/button';
 
@@ -57,12 +57,6 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>();
 
-function handleInput(event: Event) {
-    const target = event.target as HTMLTextAreaElement;
-    emit('update:modelValue', target.value);
-    emit('input');
-}
-
 function handleLayoutToggle() {
     const newLayout = props.previewLayout === 'vertical' ? 'horizontal' : 'vertical';
     emit('setLayout', newLayout);
@@ -106,13 +100,15 @@ function handleLayoutToggle() {
             <div :class="props.isPreviewMode && props.previewLayout === 'vertical' ? 'flex gap-4' : 'space-y-4'">
                 <!-- Markdown Editor -->
                 <div :class="props.isPreviewMode && props.previewLayout === 'vertical' ? 'w-1/2' : ''">
-                    <textarea
+                    <PostFormField
                         :id="props.id"
+                        :label="props.label"
+                        :model-value="props.modelValue"
                         :placeholder="props.placeholder"
                         :rows="props.isPreviewMode ? (props.isEdit ? 20 : 30) : props.rows"
-                        :value="props.modelValue"
-                        class="block w-full rounded-md border px-3 py-2"
-                        @input="handleInput"
+                        type="textarea"
+                        @input="emit('input')"
+                        @update:model-value="(value: any) => emit('update:modelValue', value)"
                     />
                 </div>
                 <!-- Preview Pane -->

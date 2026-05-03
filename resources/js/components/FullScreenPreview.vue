@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import MarkdownPreview from '@/components/MarkdownPreview.vue';
+import PostFormField from '@/components/blogger/PostFormField.vue';
 import { Button } from '@/components/ui/button';
 import { useAppearance } from '@/composables/useAppearance';
 import { MoonIcon, SunIcon } from '@heroicons/vue/24/outline';
@@ -50,10 +51,8 @@ function toggleTheme() {
     updateAppearance(isDarkMode.value ? 'light' : 'dark');
 }
 
-function handleInput(event: Event) {
-    const target = event.target as HTMLTextAreaElement;
-    emit('update:content', target.value);
-    emit('input', target.value);
+function handleInput() {
+    emit('input', props.content);
 }
 
 function toggleLayout() {
@@ -96,12 +95,15 @@ function handleCancel() {
         <div class="h-full overflow-auto p-4">
             <div :class="props.previewLayout === 'vertical' ? 'flex h-full gap-4' : 'space-y-4'">
                 <div :class="props.previewLayout === 'vertical' ? 'w-1/2' : ''">
-                    <h3 class="mb-2 text-sm font-medium">{{ props.markdownLabel }}</h3>
-                    <textarea
+                    <PostFormField
+                        id="fullscreen-markdown"
+                        :input-class="'h-96 font-mono text-sm'"
+                        :label="props.markdownLabel"
+                        :model-value="props.content"
                         :placeholder="props.markdownPlaceholder"
-                        :value="props.content"
-                        class="h-96 w-full rounded border border-border bg-background px-3 py-2 font-mono text-sm text-foreground"
+                        type="textarea"
                         @input="handleInput"
+                        @update:model-value="(value: any) => emit('update:content', value || '')"
                     />
                 </div>
                 <div :class="props.previewLayout === 'vertical' ? 'w-1/2' : ''">
