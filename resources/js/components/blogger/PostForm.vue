@@ -259,15 +259,15 @@ const handleToggleSummaryFullPreview = () => summaryPreview.toggleFullPreview(fo
 const handleSummaryInput = () => summaryPreview.handleInput(form.summary);
 
 // helpers for SEO data length validation
-const seoTitleClass = computed(() => {
-    const length = form.seo_title?.length || 0;
-    return length >= 50 && length <= 60 ? 'bg-secondary' : '';
+const getRangeClass = computed(() => (value: string | null, from: number, to: number): string => {
+    const length = value?.length || 0;
+    return length >= from && length <= to ? 'bg-secondary' : '';
 });
 
-const excerptClass = computed(() => {
-    const length = form.excerpt?.length || 0;
-    if (length > 160) return 'bg-destructive text-destructive-foreground';
-    if (length > 120) return 'bg-constructive text-constructive-foreground';
+const getThresholdClass = computed(() => (value: string | null, threshold1: number, threshold2: number): string => {
+    const length = value?.length || 0;
+    if (length > threshold2) return 'bg-destructive text-destructive-foreground';
+    if (length > threshold1) return 'bg-constructive text-constructive-foreground';
     return '';
 });
 </script>
@@ -299,7 +299,7 @@ const excerptClass = computed(() => {
                     :id="`${fieldIdPrefix}-seo-title`"
                     v-model="form.seo_title"
                     :error="form.errors?.seo_title"
-                    :input-class="seoTitleClass"
+                    :input-class="getRangeClass(form.seo_title, 50, 60)"
                     :label="translationKeys.seoTitle"
                     :placeholder="translationKeys.seoTitlePlaceholder"
                     type="input"
@@ -310,7 +310,7 @@ const excerptClass = computed(() => {
                     v-model="form.excerpt"
                     :error="form.errors?.excerpt"
                     :hint="`${form.excerpt?.length || 0} ${translationKeys.characters}`"
-                    :input-class="excerptClass"
+                    :input-class="getThresholdClass(form.excerpt, 120, 160)"
                     :label="translationKeys.excerpt"
                     :placeholder="translationKeys.excerptPlaceholder"
                     :rows="2"
