@@ -2,7 +2,7 @@
 import type { PropType } from 'vue';
 import QuestionCard from './components/QuestionCard.vue';
 import Stage1Debug from './components/Stage1Debug.vue';
-import Stage1Header from './components/Stage1Header.vue';
+import StageHeader from './components/StageHeader.vue';
 import type { Config, Question } from './composables/useEnneagramStage1';
 import { useEnneagramStage1 } from './composables/useEnneagramStage1';
 
@@ -49,7 +49,7 @@ const {
 
 <template>
     <div class="mx-auto max-w-2xl p-6">
-        <Stage1Header :description="formattedDesc" :part="currentPart" />
+        <StageHeader :description="formattedDesc" :part="currentPart" :stage="1" />
 
         <QuestionCard
             v-if="currentQuestion"

@@ -2,7 +2,7 @@
 import type { PropType } from 'vue';
 import { computed } from 'vue';
 import QuestionCard from './components/QuestionCard.vue';
-import Stage1Header from './components/Stage1Header.vue'; // We can reuse header style or create Stage2Header
+import StageHeader from './components/StageHeader.vue';
 import Stage2Debug from './components/Stage2Debug.vue';
 import type { Config, Question } from './composables/useEnneagramStage2';
 import { useEnneagramStage2 } from './composables/useEnneagramStage2';
@@ -17,7 +17,7 @@ const props = defineProps({
         required: true,
     },
     resultsStage1: {
-        type: Object as PropType<{ dominant: string; secondary: string }>,
+        type: Object as PropType<Stage1Results>,
         required: true,
     },
     debug: {
@@ -25,6 +25,8 @@ const props = defineProps({
         default: false,
     },
 });
+
+const emit = defineEmits(['complete']);
 
 const {
     currentPart,
@@ -44,7 +46,7 @@ const {
     goBack,
     currentInstinct,
     instinctPoolIndices,
-} = useEnneagramStage2(props.questions, props.config, props.resultsStage1);
+} = useEnneagramStage2(props.questions, props.config, props.resultsStage1, emit);
 
 const poolIndex = computed(() => {
     const instinct = currentInstinct.value;
@@ -62,7 +64,7 @@ const formattedDesc = computed(() => {
 
 <template>
     <div class="mx-auto max-w-2xl p-6">
-        <Stage1Header :description="formattedDesc" :part="currentPart" />
+        <StageHeader :description="formattedDesc" :part="currentPart" :stage="2" />
 
         <QuestionCard
             v-if="currentQuestion"
@@ -94,10 +96,10 @@ const formattedDesc = computed(() => {
             :history-length="history.length"
             :max-answers="maxAnswersPerQuestion"
             :max-skips="currentConfig.maxSkips"
+            :pool-index="poolIndex"
             :selected-count="selectedAnswers.length"
             :skips="skips"
             :type-scores="typeScores"
-            :pool-index="poolIndex"
         />
     </div>
 </template>
