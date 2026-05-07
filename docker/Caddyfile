@@ -4,6 +4,7 @@
 
     root * /var/www/html/public
     encode zstd gzip
+    header /build/assets/* Cache-Control "public, max-age=31536000, immutable"
     php_fastcgi app:9000
     file_server
 }
@@ -11,6 +12,7 @@
 enneagram-test.{$APP_DOMAIN}, {$ENNEAGRAM_DOMAIN} {
     root * /var/www/html/public
     encode zstd gzip
+    header /build/assets/* Cache-Control "public, max-age=31536000, immutable"
     php_fastcgi app:9000
     file_server
 }
