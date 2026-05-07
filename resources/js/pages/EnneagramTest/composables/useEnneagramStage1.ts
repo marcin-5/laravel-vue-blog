@@ -1,13 +1,7 @@
 import { computed, ref, watch } from 'vue';
 import { SINGLE_ANSWER_AUTO_CONFIRM_DELAY_MS } from './shared/constants';
 import { isStage1Part1Question, isStage1Part2Question } from './shared/questionIds';
-import {
-    createEmptyInstinctScores,
-    determineSecondaryInstinct,
-    getLeader,
-    hasLead,
-    isTopTwoTie
-} from './shared/scoring';
+import { createEmptyInstinctScores, determineSecondaryInstinct, getLeader, hasLead, isTopTwoTie } from './shared/scoring';
 import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
 import type { FlatOption, Instinct, InstinctScores } from './shared/types';
 import { useAnswerSelection } from './shared/useAnswerSelection';
@@ -41,6 +35,7 @@ export interface CompleteResults {
     part1Winner: Instinct | null;
     dominant: Instinct | null;
     secondary: Instinct;
+    weakest: Instinct;
     isUnresolvable?: boolean;
 }
 
@@ -170,6 +165,7 @@ export function useEnneagramStage1(questions: Question[], config: Config, emit: 
             part1Winner: part1Winner.value,
             dominant: part1Winner.value,
             secondary: determineSecondaryInstinct(part1Winner.value, scoresPart2.value),
+            weakest: getLeader(scoresPart2.value),
             isUnresolvable,
         };
     }

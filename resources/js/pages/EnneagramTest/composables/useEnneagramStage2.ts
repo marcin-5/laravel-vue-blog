@@ -29,6 +29,7 @@ export interface Config {
 export interface Stage1Results {
     dominant: Instinct;
     secondary: Instinct;
+    weakest?: Instinct;
 }
 
 interface Stage2Snapshot {

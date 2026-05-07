@@ -48,16 +48,13 @@ function restart() {
             </div>
 
             <div v-if="!stage1Results?.isUnresolvable" class="mb-8 border-t pt-6 text-left">
-                <h3 class="mb-4 text-xl font-bold">Twoje instynkty:</h3>
-                <div class="flex items-center justify-around">
-                    <div class="text-center">
-                        <div class="text-sm text-muted-foreground uppercase">Dominujący</div>
-                        <div class="text-2xl font-bold uppercase">{{ stage1Results?.dominant }}</div>
-                    </div>
-                    <div class="border-l pl-8 text-center">
-                        <div class="text-sm text-muted-foreground uppercase">Środkowy</div>
-                        <div class="text-2xl font-bold uppercase">{{ stage1Results?.secondary }}</div>
-                    </div>
+                <h3 class="mb-4 text-xl font-bold text-primary-foreground">Kolejność instynktów:</h3>
+                <div class="flex items-center justify-around text-2xl font-bold uppercase">
+                    <div>{{ stage1Results?.dominant }}</div>
+                    <div>/</div>
+                    <div>{{ stage1Results?.secondary }}</div>
+                    <div>/</div>
+                    <div>{{ stage1Results?.weakest }}</div>
                 </div>
             </div>
 
