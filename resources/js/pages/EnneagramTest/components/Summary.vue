@@ -30,7 +30,7 @@ function restart() {
     <div class="mx-auto max-w-2xl bg-card p-6">
         <div class="rounded-lg p-8 text-center shadow-lg">
             <h2 class="mb-6 text-3xl font-bold text-foreground">
-                {{ stage1Results?.isUnresolvable ? 'Nie można ustalić kolejności' : 'Podsumowanie Testu' }}
+                {{ stage1Results?.isUnresolvable ? 'Nie udało się dokończyć testu' : 'Podsumowanie Testu' }}
             </h2>
 
             <div v-if="stage1Results?.isUnresolvable" class="mb-8 text-center">
