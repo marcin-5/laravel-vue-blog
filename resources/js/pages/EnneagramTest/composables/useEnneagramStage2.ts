@@ -167,6 +167,23 @@ export function useEnneagramStage2(questions: Question[], config: Config, result
 
         if (currentPart.value < LAST_PART) {
             currentPart.value++;
+
+            // Skip Part 2 if only 0 or 1 category was selected in Part 1
+            if (currentPart.value === 2 && selectedInPart1.value.size <= 1) {
+                currentPart.value++;
+            }
+
+            // Skip Part 4 if only 0 or 1 category was selected in Part 3
+            if (currentPart.value === 4 && selectedInPart3.value.size <= 1) {
+                // If we skip Part 4, we might be completing the stage
+                if (currentPart.value < LAST_PART) {
+                    currentPart.value++;
+                } else {
+                    emit?.('complete', { ...typeScores.value });
+                    return;
+                }
+            }
+
             currentIndex.value = 0;
             skips.value = 0;
         } else {
