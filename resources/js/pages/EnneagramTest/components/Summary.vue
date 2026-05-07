@@ -29,9 +29,17 @@ function restart() {
 <template>
     <div class="mx-auto max-w-2xl bg-card p-6">
         <div class="rounded-lg p-8 text-center shadow-lg">
-            <h2 class="mb-6 text-3xl font-bold text-foreground">Podsumowanie Testu</h2>
+            <h2 class="mb-6 text-3xl font-bold text-foreground">
+                {{ stage1Results?.isUnresolvable ? 'Nie można ustalić kolejności' : 'Podsumowanie Testu' }}
+            </h2>
 
-            <div class="mb-8">
+            <div v-if="stage1Results?.isUnresolvable" class="mb-8 text-center">
+                <p class="text-lg text-muted-foreground">
+                    Niestety, na podstawie Twoich odpowiedzi nie udało się jednoznacznie określić kolejności instynktów.
+                </p>
+            </div>
+
+            <div v-else class="mb-8">
                 <p class="mb-2 text-lg text-muted-foreground">Twój najbardziej prawdopodobny typ to:</p>
                 <div v-if="topType" class="inline-block rounded-full bg-primary px-6 py-3 text-4xl font-black text-primary-foreground">
                     Typ {{ topType.type }}
@@ -39,7 +47,7 @@ function restart() {
                 <div v-else class="text-xl font-bold text-red-500">Brak wyników</div>
             </div>
 
-            <div class="mb-8 border-t pt-6 text-left">
+            <div v-if="!stage1Results?.isUnresolvable" class="mb-8 border-t pt-6 text-left">
                 <h3 class="mb-4 text-xl font-bold">Twoje instynkty:</h3>
                 <div class="flex items-center justify-around">
                     <div class="text-center">

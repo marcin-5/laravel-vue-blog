@@ -41,6 +41,7 @@ export interface CompleteResults {
     part1Winner: Instinct | null;
     dominant: Instinct | null;
     secondary: Instinct;
+    isUnresolvable?: boolean;
 }
 
 interface Stage1Snapshot {
@@ -158,12 +159,18 @@ export function useEnneagramStage1(questions: Question[], config: Config, emit: 
     }
 
     function buildResults(): CompleteResults {
+        // Unresolvable if exhausted all questions in Part 2 and still a tie, or same winner as Part 1 persists
+        const exhausted = answeredCountPart2.value >= Number(config.part2.maxQuestions ?? 0) || isLastInPart();
+        const isUnresolvable =
+            exhausted && (isTopTwoTie(scoresPart2.value) || (part1Winner.value !== null && getLeader(scoresPart2.value) === part1Winner.value));
+
         return {
             scoresPart1: { ...scoresPart1.value },
             scoresPart2: { ...scoresPart2.value },
             part1Winner: part1Winner.value,
             dominant: part1Winner.value,
             secondary: determineSecondaryInstinct(part1Winner.value, scoresPart2.value),
+            isUnresolvable,
         };
     }
 
@@ -189,14 +196,33 @@ export function useEnneagramStage1(questions: Question[], config: Config, emit: 
     function shouldEndPart1(): boolean {
         const reachedLead = hasLead(scoresPart1.value, Number(config.part1.thresholdX ?? 0));
         const reachedMax = answeredCountPart1.value >= Number(config.part1.maxQuestions ?? 0);
+
+        // If we reached max questions but there's a tie, don't end yet (if questions available)
+        if (reachedMax && isTopTwoTie(scoresPart1.value) && !isLastInPart()) {
+            return false;
+        }
+
         return reachedLead || reachedMax || isLastInPart();
     }
 
     function shouldEndPart2(): boolean {
-        const endByX = hasLead(scoresPart2.value, Number(config.part2.thresholdX ?? 0));
+        const sameWinner = part1Winner.value !== null && getLeader(scoresPart2.value) === part1Winner.value;
+        const reachedMax = answeredCountPart2.value >= Number(config.part2.maxQuestions ?? 0);
+
+        // If reached max questions and it's a tie, don't end yet (if questions available)
+        if (reachedMax && isTopTwoTie(scoresPart2.value) && !isLastInPart()) {
+            return false;
+        }
+
+        // Check for same winner as Part 1 loop condition
+        if (reachedMax && sameWinner && !isLastInPart()) {
+            return false;
+        }
+
+        const endByX = !sameWinner && hasLead(scoresPart2.value, Number(config.part2.thresholdX ?? 0));
         const specialYApplicable = part1Winner.value != null && (scoresPart2.value[part1Winner.value] ?? 0) === 0;
         const endByY = specialYApplicable && hasLead(scoresPart2.value, Number(config.part2.thresholdY ?? 0));
-        const reachedMax = answeredCountPart2.value >= Number(config.part2.maxQuestions ?? 0);
+
         return endByX || endByY || reachedMax || isLastInPart();
     }
 
