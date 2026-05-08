@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
+import type { CompleteStage1Results, Stage2Results } from '../composables/shared/types';
 
 const props = defineProps<{
-    stage1Results: any;
-    stage2Results: any;
+    stage1Results: CompleteStage1Results | null;
+    stage2Results: Stage2Results | null;
     debug?: boolean;
 }>();
 
@@ -48,7 +49,7 @@ function restart() {
             </div>
 
             <div v-if="!stage1Results?.isUnresolvable" class="mb-8 border-t pt-6 text-left">
-                <h3 class="mb-4 text-xl font-bold text-primary-foreground">Kolejność instynktów:</h3>
+                <h3 class="mb-4 text-xl font-bold text-foreground">Kolejność instynktów:</h3>
                 <div class="flex items-center justify-around text-2xl font-bold uppercase">
                     <div>{{ stage1Results?.dominant }}</div>
                     <div>/</div>
@@ -59,7 +60,7 @@ function restart() {
             </div>
 
             <div v-if="debug" class="mt-12 rounded border-t border-dashed bg-muted/40 p-4 pt-6 text-left">
-                <h3 class="mb-4 text-lg font-bold text-primary-foreground">Dane Debugowania:</h3>
+                <h3 class="mb-4 text-lg font-bold text-foreground">Dane Debugowania:</h3>
 
                 <div class="mb-4">
                     <h4 class="mb-2 text-sm font-bold text-foreground uppercase">Etap 1 (Instynkty):</h4>

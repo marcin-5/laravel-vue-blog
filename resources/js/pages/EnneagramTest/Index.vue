@@ -4,15 +4,17 @@ import Stage1 from './Stage1.vue';
 import Stage2 from './Stage2.vue';
 import Summary from './components/Summary.vue';
 import { isStage1Question, isStage2Question, type QuestionIdHolder } from './composables/shared/questionIds';
-import type { CompleteResults } from './composables/useEnneagramStage1';
+import type { CompleteStage1Results, Stage2Results, TestData } from './composables/shared/types';
 
 const props = defineProps<{
-    testData: any;
+    testData: TestData;
     appDebug?: boolean;
 }>();
 
-const currentStage = ref(1);
-const stage1Results = ref<CompleteResults | null>(null);
+type CurrentView = 'stage1' | 'stage2' | 'summary';
+
+const currentView = ref<CurrentView>('stage1');
+const stage1Results = ref<CompleteStage1Results | null>(null);
 const stage2Results = ref<any>(null);
 
 const stage1Questions = computed(() => {
@@ -33,31 +35,35 @@ const stage2Config = computed(() => {
 
 const appDebug = computed(() => props.appDebug);
 
-function handleStage1Complete(results: CompleteResults) {
+function handleStage1Complete(results: CompleteStage1Results) {
     stage1Results.value = results;
     if (results.isUnresolvable) {
-        currentStage.value = 0;
+        currentView.value = 'summary';
     } else {
-        currentStage.value = 2;
+        currentView.value = 'stage2';
     }
 }
 
-function handleStage2Complete(results: any) {
+function handleStage2Complete(results: Stage2Results) {
     stage2Results.value = results;
-    currentStage.value = 0; // 0 for summary
+    currentView.value = 'summary';
 }
-
-console.log(props.testData);
 </script>
 
 <template>
     <div class="p-6">
         <h1 class="mb-6 text-center text-2xl font-bold">Enneagram Test</h1>
 
-        <Stage1 v-if="currentStage === 1" :config="stage1Config" :debug="appDebug" :questions="stage1Questions" @complete="handleStage1Complete" />
+        <Stage1
+            v-if="currentView === 'stage1'"
+            :config="stage1Config"
+            :debug="appDebug"
+            :questions="stage1Questions"
+            @complete="handleStage1Complete"
+        />
 
         <Stage2
-            v-if="currentStage === 2"
+            v-if="currentView === 'stage2'"
             :config="stage2Config"
             :debug="appDebug"
             :questions="stage2Questions"
@@ -65,6 +71,6 @@ console.log(props.testData);
             @complete="handleStage2Complete"
         />
 
-        <Summary v-if="currentStage === 0" :debug="appDebug" :stage1-results="stage1Results" :stage2-results="stage2Results" />
+        <Summary v-if="currentView === 'summary'" :debug="appDebug" :stage1-results="stage1Results" :stage2-results="stage2Results" />
     </div>
 </template>

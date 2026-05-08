@@ -1,41 +1,15 @@
 import { computed, ref } from 'vue';
 import { type EnneagramType, TYPE_IDS } from './shared/constants';
 import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
-import type { FlatOption, Instinct, SelectedAnswer } from './shared/types';
+import type { CompleteStage1Results, Config, FlatOption, Instinct, Question, SelectedAnswer, Stage2Results } from './shared/types';
 import { useAnswerSelection } from './shared/useAnswerSelection';
 import { useHistory } from './shared/useHistory';
-
-export interface Question {
-    id: string;
-    priority: number;
-    question: string;
-    answerLists: Record<string, string | string[]>;
-}
-
-export interface PartConfig {
-    maxQuestions: number;
-    maxSkips: number;
-    answersPerQuestion: number;
-    desc: string;
-}
-
-export interface Config {
-    part1: PartConfig;
-    part2: PartConfig;
-    part3: PartConfig;
-    part4: PartConfig;
-}
-
-export interface Stage1Results {
-    dominant: Instinct;
-    secondary: Instinct;
-    weakest?: Instinct;
-}
 
 interface Stage2Snapshot {
     part: number;
     index: number;
     typeScores: Record<EnneagramType, number>;
+    scoresPerPart: Record<number, Record<EnneagramType, number>>;
     selectedInPart1: string[]; // Sets are serialized as arrays for snapshot simplicity
     selectedInPart3: string[];
     skips: number;
@@ -43,7 +17,7 @@ interface Stage2Snapshot {
     instinct: Instinct;
 }
 
-type Stage2Emit = (event: 'complete', results: Record<EnneagramType, number>) => void;
+type Stage2Emit = (event: 'complete', results: Stage2Results) => void;
 
 const DEFAULT_DOMINANT: Instinct = 'sp';
 const DEFAULT_SECONDARY: Instinct = 'so';
@@ -53,9 +27,14 @@ function createEmptyTypeScores(): Record<EnneagramType, number> {
     return TYPE_IDS.reduce((acc, id) => ({ ...acc, [id]: 0 }), {} as Record<EnneagramType, number>);
 }
 
-export function useEnneagramStage2(questions: Question[], config: Config, resultsStage1: Stage1Results, emit?: Stage2Emit) {
-    const dominantInstinct: Instinct = resultsStage1?.dominant ?? DEFAULT_DOMINANT;
-    const secondaryInstinct: Instinct = resultsStage1?.secondary ?? DEFAULT_SECONDARY;
+export function useEnneagramStage2(
+    questions: Question[],
+    config: Config['stages']['stage2'],
+    resultsStage1: CompleteStage1Results,
+    emit?: Stage2Emit,
+) {
+    const dominantInstinct: Instinct = resultsStage1.isUnresolvable ? DEFAULT_DOMINANT : (resultsStage1.dominant ?? DEFAULT_DOMINANT);
+    const secondaryInstinct: Instinct = resultsStage1.isUnresolvable ? DEFAULT_SECONDARY : (resultsStage1.secondary ?? DEFAULT_SECONDARY);
 
     // --- State ---
     const currentPart = ref(1);
@@ -80,7 +59,7 @@ export function useEnneagramStage2(questions: Question[], config: Config, result
     // --- Computed ---
     const currentInstinct = computed<Instinct>(() => (currentPart.value <= 2 ? dominantInstinct : secondaryInstinct));
 
-    const currentConfig = computed(() => config[`part${currentPart.value}` as keyof Config]);
+    const currentConfig = computed(() => config[`part${currentPart.value}` as keyof typeof config]);
 
     const partQuestions = computed(() => (currentPart.value <= 2 ? dominantPool : secondaryPool));
 
@@ -135,6 +114,7 @@ export function useEnneagramStage2(questions: Question[], config: Config, result
             part: currentPart.value,
             index: currentIndex.value,
             typeScores: { ...typeScores.value },
+            scoresPerPart: JSON.parse(JSON.stringify(scoresPerPart.value)),
             selectedInPart1: Array.from(selectedInPart1.value),
             selectedInPart3: Array.from(selectedInPart3.value),
             skips: skips.value,
@@ -146,6 +126,7 @@ export function useEnneagramStage2(questions: Question[], config: Config, result
             currentIndex.value = s.index;
             skips.value = s.skips;
             typeScores.value = { ...s.typeScores };
+            scoresPerPart.value = JSON.parse(JSON.stringify(s.scoresPerPart));
             selectedInPart1.value = new Set(s.selectedInPart1);
             selectedInPart3.value = new Set(s.selectedInPart3);
             // Restore pool index using captured instinct to avoid reliance on currentInstinct order.
@@ -164,6 +145,26 @@ export function useEnneagramStage2(questions: Question[], config: Config, result
         }
     }
 
+    function shouldSkipPart(part: number): boolean {
+        if (part === 2) return selectedInPart1.value.size <= 1;
+        if (part === 4) return selectedInPart3.value.size <= 1;
+        return false;
+    }
+
+    function moveToNextAvailablePart(): boolean {
+        while (currentPart.value < LAST_PART) {
+            currentPart.value++;
+
+            if (!shouldSkipPart(currentPart.value)) {
+                currentIndex.value = 0;
+                skips.value = 0;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     function advance() {
         instinctPoolIndices.value[currentInstinct.value]++;
         currentIndex.value++;
@@ -173,30 +174,11 @@ export function useEnneagramStage2(questions: Question[], config: Config, result
 
         if (!(reachedMax || noMoreQuestions)) return;
 
-        if (currentPart.value < LAST_PART) {
-            currentPart.value++;
-
-            // Skip Part 2 if only 0 or 1 category was selected in Part 1
-            if (currentPart.value === 2 && selectedInPart1.value.size <= 1) {
-                currentPart.value++;
-            }
-
-            // Skip Part 4 if only 0 or 1 category was selected in Part 3
-            if (currentPart.value === 4 && selectedInPart3.value.size <= 1) {
-                // If we skip Part 4, we might be completing the stage
-                if (currentPart.value < LAST_PART) {
-                    currentPart.value++;
-                } else {
-                    emit?.('complete', { typeScores: { ...typeScores.value }, scoresPerPart: { ...scoresPerPart.value } });
-                    return;
-                }
-            }
-
-            currentIndex.value = 0;
-            skips.value = 0;
-        } else {
-            emit?.('complete', { typeScores: { ...typeScores.value }, scoresPerPart: { ...scoresPerPart.value } });
+        if (moveToNextAvailablePart()) {
+            return;
         }
+
+        emit?.('complete', { typeScores: { ...typeScores.value }, scoresPerPart: { ...scoresPerPart.value } });
     }
 
     // --- Actions ---

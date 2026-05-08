@@ -1,52 +1,27 @@
 <script lang="ts" setup>
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { PropType } from 'vue';
-import type { FlatOption, Question } from '../composables/useEnneagramStage1';
+import type { FlatOption, Question, SelectedAnswer } from '../composables/shared/types';
 
-defineProps({
-    question: {
-        type: Object as PropType<Question>,
-        required: true,
-    },
-    options: {
-        type: Array as PropType<FlatOption[]>,
-        required: true,
-    },
-    selectedAnswers: {
-        type: Array as PropType<any[]>,
-        required: true,
-    },
-    canSkip: {
-        type: Boolean,
-        required: true,
-    },
-    skips: {
-        type: Number,
-        required: true,
-    },
-    maxSkips: {
-        type: Number,
-        required: true,
-    },
-    maxAnswers: {
-        type: Number,
-        required: true,
-    },
-    historyLength: {
-        type: Number,
-        required: true,
-    },
-});
+defineProps<{
+    question: Question;
+    options: FlatOption[];
+    selectedAnswers: SelectedAnswer[];
+    canSkip: boolean;
+    skips: number;
+    maxSkips: number;
+    maxAnswers: number;
+    historyLength: number;
+}>();
 
 const emit = defineEmits<{
-    toggle: [key: string | number, value: any, category?: string | number];
+    toggle: [key: string | number, value: any, category?: string];
     confirm: [];
     skip: [];
     back: [];
 }>();
 
-function isSelected(selectedAnswers: any[], key: string | number) {
+function isSelected(selectedAnswers: SelectedAnswer[], key: string | number) {
     return selectedAnswers.some((a) => String(a.key) === String(key));
 }
 </script>

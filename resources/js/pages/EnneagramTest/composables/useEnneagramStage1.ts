@@ -1,43 +1,12 @@
 import { computed, ref, watch } from 'vue';
 import { SINGLE_ANSWER_AUTO_CONFIRM_DELAY_MS } from './shared/constants';
+import { formatStageDescription } from './shared/formatters';
 import { isStage1Part1Question, isStage1Part2Question } from './shared/questionIds';
 import { createEmptyInstinctScores, determineSecondaryInstinct, getLeader, hasLead, isTopTwoTie } from './shared/scoring';
 import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
-import type { FlatOption, Instinct, InstinctScores } from './shared/types';
+import type { CompleteStage1Results, Config, FlatOption, Instinct, InstinctScores, Question } from './shared/types';
 import { useAnswerSelection } from './shared/useAnswerSelection';
 import { useHistory } from './shared/useHistory';
-
-export interface Question {
-    id: string | number;
-    question: string;
-    answerLists: Record<string, string | string[]>;
-    priority?: number;
-}
-
-export interface PartConfig {
-    desc: string;
-    answersPerQuestion: number;
-    maxSkips: number;
-    fixedQuestions: number;
-    thresholdX?: number;
-    thresholdY?: number;
-    maxQuestions?: number;
-}
-
-export interface Config {
-    part1: PartConfig;
-    part2: PartConfig;
-}
-
-export interface CompleteResults {
-    scoresPart1: InstinctScores;
-    scoresPart2: InstinctScores;
-    part1Winner: Instinct | null;
-    dominant: Instinct | null;
-    secondary: Instinct;
-    weakest: Instinct;
-    isUnresolvable?: boolean;
-}
 
 interface Stage1Snapshot {
     part: number;
@@ -50,9 +19,9 @@ interface Stage1Snapshot {
     extraAskedPart2: boolean;
 }
 
-type EmitFn = (event: 'complete', results: CompleteResults) => void;
+type EmitFn = (event: 'complete', results: CompleteStage1Results) => void;
 
-export function useEnneagramStage1(questions: Question[], config: Config, emit: EmitFn) {
+export function useEnneagramStage1(questions: Question[], config: Config['stages']['stage1'], emit: EmitFn) {
     // --- State ---
     const currentPart = ref(1);
     const currentIndex = ref(0);
@@ -67,7 +36,6 @@ export function useEnneagramStage1(questions: Question[], config: Config, emit: 
 
     const poolPart1 = shuffleByPriority<Question>(questions.filter((q) => isStage1Part1Question(q)));
     const poolPart2 = shuffleByPriority<Question>(questions.filter((q) => isStage1Part2Question(q)));
-    console.log(poolPart1);
 
     // --- Computed ---
     const currentConfig = computed(() => (currentPart.value === 1 ? config.part1 : config.part2));
@@ -77,10 +45,11 @@ export function useEnneagramStage1(questions: Question[], config: Config, emit: 
     const currentQuestion = computed(() => partQuestions.value[currentIndex.value]);
 
     const formattedDesc = computed(() =>
-        (currentConfig.value.desc || '')
-            .replace(/%answersPerQuestion/g, String(maxAnswersPerQuestion.value))
-            .replace(/%maxSkips/g, String(currentConfig.value.maxSkips))
-            .replace(/%fixedQuestions/g, String(currentConfig.value.fixedQuestions)),
+        formatStageDescription(currentConfig.value.desc || '', {
+            answersPerQuestion: maxAnswersPerQuestion.value,
+            maxSkips: currentConfig.value.maxSkips,
+            fixedQuestions: currentConfig.value.fixedQuestions ?? 0,
+        }),
     );
 
     const flatShuffledOptions = computed<FlatOption[]>(() => {
@@ -153,20 +122,39 @@ export function useEnneagramStage1(questions: Question[], config: Config, emit: 
         clearSelection();
     }
 
-    function buildResults(): CompleteResults {
+    function buildResults(): CompleteStage1Results {
         // Unresolvable if exhausted all questions in Part 2 and still a tie, or same winner as Part 1 persists
         const exhausted = answeredCountPart2.value >= Number(config.part2.maxQuestions ?? 0) || isLastInPart();
-        const isUnresolvable =
-            exhausted && (isTopTwoTie(scoresPart2.value) || (part1Winner.value !== null && getLeader(scoresPart2.value) === part1Winner.value));
+        const winnerPart2 = getLeader(scoresPart2.value);
 
-        return {
+        const isUnresolvable = exhausted && (isTopTwoTie(scoresPart2.value) || (part1Winner.value !== null && winnerPart2 === part1Winner.value));
+
+        const base = {
             scoresPart1: { ...scoresPart1.value },
             scoresPart2: { ...scoresPart2.value },
             part1Winner: part1Winner.value,
-            dominant: part1Winner.value,
-            secondary: determineSecondaryInstinct(part1Winner.value, scoresPart2.value),
-            weakest: getLeader(scoresPart2.value),
-            isUnresolvable,
+        };
+
+        if (isUnresolvable || part1Winner.value === null) {
+            return {
+                ...base,
+                isUnresolvable: true,
+                dominant: null,
+                secondary: null,
+                weakest: null,
+            };
+        }
+
+        const dominant = part1Winner.value;
+        const secondary = determineSecondaryInstinct(dominant, scoresPart2.value);
+        const weakest = (['sp', 'so', 'sx'] as Instinct[]).find((i) => i !== dominant && i !== secondary)!;
+
+        return {
+            ...base,
+            isUnresolvable: false,
+            dominant,
+            secondary,
+            weakest,
         };
     }
 

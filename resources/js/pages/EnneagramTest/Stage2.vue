@@ -1,30 +1,18 @@
 <script lang="ts" setup>
-import type { PropType } from 'vue';
 import { computed } from 'vue';
 import QuestionCard from './components/QuestionCard.vue';
-import StageHeader from './components/StageHeader.vue';
 import Stage2Debug from './components/Stage2Debug.vue';
-import type { Config, Question } from './composables/useEnneagramStage2';
+import StageHeader from './components/StageHeader.vue';
+import { formatStageDescription } from './composables/shared/formatters';
+import type { CompleteStage1Results, Question, Stage2Config } from './composables/shared/types';
 import { useEnneagramStage2 } from './composables/useEnneagramStage2';
 
-const props = defineProps({
-    questions: {
-        type: Array as PropType<Question[]>,
-        required: true,
-    },
-    config: {
-        type: Object as PropType<Config>,
-        required: true,
-    },
-    resultsStage1: {
-        type: Object as PropType<Stage1Results>,
-        required: true,
-    },
-    debug: {
-        type: Boolean,
-        default: false,
-    },
-});
+const props = defineProps<{
+    questions: Question[];
+    config: Stage2Config;
+    resultsStage1: CompleteStage1Results;
+    debug?: boolean;
+}>();
 
 const emit = defineEmits(['complete']);
 
@@ -54,13 +42,13 @@ const poolIndex = computed(() => {
     return instinctPoolIndices.value[instinct] ?? 0;
 });
 
-const formattedDesc = computed(() => {
-    let desc = currentConfig.value.desc || '';
-    desc = desc.replace(/%maxQuestions/g, String(currentConfig.value.maxQuestions));
-    desc = desc.replace(/%maxSkips/g, String(currentConfig.value.maxSkips));
-    desc = desc.replace(/%answersPerQuestion/g, String(maxAnswersPerQuestion.value));
-    return desc;
-});
+const formattedDesc = computed(() =>
+    formatStageDescription(currentConfig.value.desc || '', {
+        maxQuestions: currentConfig.value.maxQuestions,
+        maxSkips: currentConfig.value.maxSkips,
+        answersPerQuestion: maxAnswersPerQuestion.value,
+    }),
+);
 </script>
 
 <template>

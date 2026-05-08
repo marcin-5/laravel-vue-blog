@@ -1,25 +1,15 @@
 <script lang="ts" setup>
-import type { PropType } from 'vue';
 import QuestionCard from './components/QuestionCard.vue';
 import Stage1Debug from './components/Stage1Debug.vue';
 import StageHeader from './components/StageHeader.vue';
-import type { Config, Question } from './composables/useEnneagramStage1';
+import type { Question, Stage1Config } from './composables/shared/types';
 import { useEnneagramStage1 } from './composables/useEnneagramStage1';
 
-const props = defineProps({
-    questions: {
-        type: Array as PropType<Question[]>,
-        required: true,
-    },
-    config: {
-        type: Object as PropType<Config>,
-        required: true,
-    },
-    debug: {
-        type: Boolean,
-        default: false,
-    },
-});
+const props = defineProps<{
+    questions: Question[];
+    config: Stage1Config;
+    debug?: boolean;
+}>();
 
 const emit = defineEmits(['complete']);
 
@@ -74,8 +64,6 @@ const {
             :answered-count2="answeredCountPart2"
             :current-index="currentIndex"
             :current-part="currentPart"
-            :scores-part1="scoresPart1"
-            :scores-part2="scoresPart2"
             :debug="debug"
             :history-length="history.length"
             :max-answers="maxAnswersPerQuestion"
@@ -84,6 +72,8 @@ const {
             :max-skips="currentConfig.maxSkips"
             :part-questions-length="partQuestions.length"
             :part1-winner="part1Winner"
+            :scores-part1="scoresPart1"
+            :scores-part2="scoresPart2"
             :selected-count="selectedAnswers.length"
             :skips="skips"
         />
