@@ -63,7 +63,7 @@ function handleStage2Complete(results: Stage2Results) {
         />
 
         <Stage2
-            v-if="currentView === 'stage2'"
+            v-if="currentView === 'stage2' && stage1Results"
             :config="stage2Config"
             :debug="appDebug"
             :questions="stage2Questions"
