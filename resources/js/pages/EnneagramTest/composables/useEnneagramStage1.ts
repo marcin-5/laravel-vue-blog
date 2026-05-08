@@ -1,4 +1,5 @@
 import { computed, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { SINGLE_ANSWER_AUTO_CONFIRM_DELAY_MS } from './shared/constants';
 import { formatStageDescription } from './shared/formatters';
 import { isStage1Part1Question, isStage1Part2Question } from './shared/questionIds';
@@ -37,6 +38,8 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
     const poolPart1 = shuffleByPriority<Question>(questions.filter((q) => isStage1Part1Question(q)));
     const poolPart2 = shuffleByPriority<Question>(questions.filter((q) => isStage1Part2Question(q)));
 
+    const { t } = useI18n();
+
     // --- Computed ---
     const currentConfig = computed(() => (currentPart.value === 1 ? config.part1 : config.part2));
     const currentScores = computed(() => (currentPart.value === 1 ? scoresPart1.value : scoresPart2.value));
@@ -49,13 +52,14 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
     const partQuestions = computed(() => (currentPart.value === 1 ? poolPart1 : poolPart2));
     const currentQuestion = computed(() => partQuestions.value[currentIndex.value]);
 
-    const formattedDesc = computed(() =>
-        formatStageDescription(currentConfig.value.desc || '', {
+    const formattedDesc = computed(() => {
+        const descKey = `stage_descriptions.stage1.part${currentPart.value}`;
+        return formatStageDescription(t(descKey), {
             answersPerQuestion: maxAnswersPerQuestion.value,
             maxSkips: currentConfig.value.maxSkips,
             fixedQuestions: currentConfig.value.fixedQuestions ?? 0,
-        }),
-    );
+        });
+    });
 
     const flatShuffledOptions = computed<FlatOption[]>(() => {
         const q = currentQuestion.value;

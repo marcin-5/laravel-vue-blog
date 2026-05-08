@@ -1,9 +1,12 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Button } from '@/components/ui/button';
 import Stage1 from './Stage1.vue';
 import Stage2 from './Stage2.vue';
 import Summary from './components/Summary.vue';
+import en from './locales/en.json';
+import pl from './locales/pl.json';
 import {
     isStage1Part1Question,
     isStage1Part2Question,
@@ -16,6 +19,25 @@ const props = defineProps<{
     testData: TestData;
     appDebug?: boolean;
 }>();
+
+const { t, tm, locale, mergeLocaleMessage } = useI18n();
+
+// Load component-specific translations
+mergeLocaleMessage('en', en);
+mergeLocaleMessage('pl', pl);
+
+// Determine initial locale if not already set or specifically for this component
+// If browser language is 'pl', use 'pl', otherwise 'en'
+const browserLang = typeof navigator !== 'undefined' ? navigator.language.split('-')[0] : 'en';
+if (browserLang === 'pl') {
+    locale.value = 'pl';
+} else {
+    locale.value = 'en';
+}
+
+function toggleLanguage() {
+    locale.value = locale.value === 'pl' ? 'en' : 'pl';
+}
 
 type CurrentView = 'start' | 'stage1' | 'stage2' | 'summary';
 
@@ -144,32 +166,38 @@ function handleStage2Complete(results: Stage2Results) {
 
 <template>
     <div class="p-4 md:p-6">
-        <h1 class="mb-6 text-center text-3xl font-bold text-secondary-foreground">Test Enneagramu</h1>
+        <div class="mx-auto mb-6 flex max-w-4xl items-center justify-end">
+            <Button size="sm" variant="ghost" @click="toggleLanguage">
+                {{ locale === 'pl' ? 'EN' : 'PL' }}
+            </Button>
+        </div>
+
+        <h1 class="mb-6 text-center text-3xl font-bold text-secondary-foreground">{{ t('title') }}</h1>
 
         <div v-if="currentView === 'start'" class="mx-auto max-w-4xl rounded-lg bg-card p-8 shadow-md">
-            <h2 class="mb-4 text-xl font-semibold text-foreground">Witaj w teście Enneagramu</h2>
+            <h2 class="mb-4 text-xl font-semibold text-foreground">{{ t('welcome') }}</h2>
             <p class="mb-4 text-primary">
-                Ten test pomoże Ci odkryć Twój typ osobowości oraz kolejność instynktów. Składa się on z kilku etapów, w których będziesz wybierać
-                stwierdzenia najlepiej opisujące Twoje zachowania i motywacje.
+                {{ t('description') }}
             </p>
             <div class="mb-6 space-y-2 text-primary">
-                <p><strong>Zasady:</strong></p>
+                <p>
+                    <strong>{{ t('rules_title') }}</strong>
+                </p>
                 <ul class="list-inside list-disc">
-                    <li>Czytaj uważnie każde pytanie i dostępne odpowiedzi.</li>
-                    <li>Wybieraj odpowiedzi, które najbardziej do Ciebie pasują (nie zawsze musisz wybrać maksymalną liczbę).</li>
-                    <li>Jeśli naprawdę nie możesz się zdecydować, możesz skorzystać z ograniczonej puli pominięć.</li>
-                    <li>Test najlepiej wypełniać w skupieniu, kierując się pierwszą intuicją.</li>
+                    <li v-for="(rule, index) in tm('rules')" :key="index">
+                        {{ rule }}
+                    </li>
                 </ul>
             </div>
 
             <div class="flex flex-col gap-4 sm:flex-row">
-                <Button class="flex-1 py-6 font-medium" size="lg" @click="startTest(false)"> Rozpocznij test (standardowy) </Button>
+                <Button class="flex-1 py-6 font-medium" size="lg" @click="startTest(false)"> {{ t('start_standard') }} </Button>
                 <Button class="flex-1 py-6 font-medium" size="lg" variant="outline" @click="startTest(true)">
-                    Wersja rozszerzona (dokładniejsza)
+                    {{ t('start_extended') }}
                 </Button>
             </div>
             <p class="mt-4 text-center text-sm text-muted-foreground">
-                Wersja rozszerzona zadaje więcej pytań dla uzyskania bardziej precyzyjnego wyniku.
+                {{ t('extended_info') }}
             </p>
         </div>
 

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import QuestionCard from './components/QuestionCard.vue';
 import Stage2Debug from './components/Stage2Debug.vue';
 import StageHeader from './components/StageHeader.vue';
@@ -15,6 +16,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(['complete']);
+
+const { t } = useI18n();
 
 const {
     currentPart,
@@ -42,13 +45,14 @@ const poolIndex = computed(() => {
     return instinctPoolIndices.value[instinct] ?? 0;
 });
 
-const formattedDesc = computed(() =>
-    formatStageDescription(currentConfig.value.desc || '', {
+const formattedDesc = computed(() => {
+    const descKey = `stage_descriptions.stage2.part${currentPart.value}`;
+    return formatStageDescription(t(descKey), {
         maxQuestions: currentConfig.value.maxQuestions,
         maxSkips: currentConfig.value.maxSkips,
         answersPerQuestion: maxAnswersPerQuestion.value,
-    }),
-);
+    });
+});
 </script>
 
 <template>
@@ -71,10 +75,10 @@ const formattedDesc = computed(() =>
             @toggle="toggleAnswer"
         />
 
-        <div v-else class="rounded-lg bg-white p-12 text-center shadow">Brak pytań dla wybranej konfiguracji.</div>
+        <div v-else class="rounded-lg bg-white p-12 text-center shadow">{{ t('no_questions') }}</div>
 
         <div v-if="debug" class="my-4 text-center text-sm font-medium text-secondary-foreground">
-            Etap 2: Skupienie na instynkcie <span class="font-bold uppercase">{{ currentInstinct }}</span>
+            {{ t('focus_on_instinct', { instinct: currentInstinct.toUpperCase() }) }}
         </div>
 
         <Stage2Debug

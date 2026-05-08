@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useI18n } from 'vue-i18n';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { FlatOption, Question, SelectedAnswer } from '../composables/shared/types';
@@ -20,6 +21,8 @@ const emit = defineEmits<{
     skip: [];
     back: [];
 }>();
+
+const { t } = useI18n();
 
 function isSelected(selectedAnswers: SelectedAnswer[], key: string | number) {
     return selectedAnswers.some((a) => String(a.key) === String(key));
@@ -49,14 +52,14 @@ function isSelected(selectedAnswers: SelectedAnswer[], key: string | number) {
 
             <div class="mt-6 flex items-center justify-between">
                 <div class="flex gap-2">
-                    <Button :disabled="historyLength === 0" variant="outline" @click="emit('back')"> Wstecz </Button>
+                    <Button :disabled="historyLength === 0" variant="outline" @click="emit('back')"> {{ t('back') }} </Button>
                     <Button v-if="canSkip" :disabled="skips >= maxSkips" variant="muted" @click="emit('skip')">
-                        Pomiń ({{ skips }}/{{ maxSkips }})
+                        {{ t('skip') }} ({{ skips }}/{{ maxSkips }})
                     </Button>
                 </div>
 
                 <Button v-if="maxAnswers > 1" :disabled="selectedAnswers.length < 1" class="px-6" variant="secondary" @click="emit('confirm')">
-                    Dalej
+                    {{ t('next') }}
                 </Button>
             </div>
         </CardContent>

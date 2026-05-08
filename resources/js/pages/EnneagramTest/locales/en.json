@@ -1,0 +1,52 @@
+{
+    "title": "Enneagram Test",
+    "welcome": "Welcome to the Enneagram Test",
+    "description": "This test will help you discover your personality type and instinctual variant. It consists of several stages where you will select statements that best describe your behaviors and motivations.",
+    "rules_title": "Rules:",
+    "rules": [
+        "Read each question and available answers carefully.",
+        "Select the answers that best fit you (you don't always have to select the maximum number).",
+        "If you really can't decide, you can use a limited pool of skips.",
+        "The test is best taken in focus, following your first intuition."
+    ],
+    "start_standard": "Start test (standard)",
+    "start_extended": "Extended version (more precise)",
+    "extended_info": "The extended version asks more questions for a more precise result.",
+    "stage": "Stage",
+    "part": "Part",
+    "back": "Back",
+    "skip": "Skip",
+    "next": "Next",
+    "restart": "Restart",
+    "summary_title": "Test Summary",
+    "unresolvable_title": "Could not complete the test",
+    "unresolvable_instincts": "Unfortunately, based on your answers, it was not possible to clearly determine the order of instincts.",
+    "unresolvable_type": "Unfortunately, based on your answers, it was not possible to clearly determine your Enneagram type.",
+    "most_likely_type": "Your most likely type is:",
+    "type_label": "Type {type}",
+    "no_results": "No results",
+    "instinct_order": "Instinct order:",
+    "debug_data": "Debug Data:",
+    "stage1_instincts": "Stage 1 (Instincts):",
+    "stage2_types": "Stage 2 (Types):",
+    "results_by_part": "Results by part:",
+    "total_sum": "Total sum:",
+    "no_questions": "No questions for selected configuration.",
+    "focus_on_instinct": "Stage 2: Focusing on instinct {instinct}",
+    "language_switch": "Change language",
+    "stage_descriptions": {
+        "stage1": {
+            "part1": "Select up to %answersPerQuestion answers. You can skip %maxSkips question.",
+            "part2": "Select up to %answersPerQuestion answers. You can skip %maxSkips question."
+        },
+        "stage2": {
+            "part1": "Answer %maxQuestions questions. You can skip %maxSkips question.",
+            "part2": "Additional questions. You can skip %maxSkips question.",
+            "part3": "Answer %maxQuestions questions. You can skip %maxSkips question.",
+            "part4": "Additional questions. You can skip %maxSkips question."
+        }
+    },
+    "exceptions": {
+        "unresolvableTie": "It was not possible to clearly determine your type based on the answers provided. This may be due to ambiguous choices. Please restart the test."
+    }
+}

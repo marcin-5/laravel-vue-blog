@@ -1,0 +1,52 @@
+{
+    "title": "Test Enneagramu",
+    "welcome": "Witaj w teście Enneagramu",
+    "description": "Ten test pomoże Ci odkryć Twój typ osobowości oraz kolejność instynktów. Składa się on z kilku etapów, w których będziesz wybierać stwierdzenia najlepiej opisujące Twoje zachowania i motywacje.",
+    "rules_title": "Zasady:",
+    "rules": [
+        "Czytaj uważnie każde pytanie i dostępne odpowiedzi.",
+        "Wybieraj odpowiedzi, które najbardziej do Ciebie pasują (nie zawsze musisz wybrać maksymalną liczbę).",
+        "Jeśli naprawdę nie możesz się zdecydować, możesz skorzystać z ograniczonej puli pominięć.",
+        "Test najlepiej wypełniać w skupieniu, kierując się pierwszą intuicją."
+    ],
+    "start_standard": "Rozpocznij test (standardowy)",
+    "start_extended": "Wersja rozszerzona (dokładniejsza)",
+    "extended_info": "Wersja rozszerzona zadaje więcej pytań dla uzyskania bardziej precyzyjnego wyniku.",
+    "stage": "Etap",
+    "part": "Część",
+    "back": "Wstecz",
+    "skip": "Pomiń",
+    "next": "Dalej",
+    "restart": "Zacznij od nowa",
+    "summary_title": "Podsumowanie Testu",
+    "unresolvable_title": "Nie udało się dokończyć testu",
+    "unresolvable_instincts": "Niestety, na podstawie Twoich odpowiedzi nie udało się jednoznacznie określić kolejności instynktów.",
+    "unresolvable_type": "Niestety, na podstawie Twoich odpowiedzi nie udało się jednoznacznie określić Twojego typu enneagramu.",
+    "most_likely_type": "Twój najbardziej prawdopodobny typ to:",
+    "type_label": "Typ {type}",
+    "no_results": "Brak wyników",
+    "instinct_order": "Kolejność instynktów:",
+    "debug_data": "Dane Debugowania:",
+    "stage1_instincts": "Etap 1 (Instynkty):",
+    "stage2_types": "Etap 2 (Typy):",
+    "results_by_part": "Wyniki wg części:",
+    "total_sum": "Suma całkowita:",
+    "no_questions": "Brak pytań dla wybranej konfiguracji.",
+    "focus_on_instinct": "Etap 2: Skupienie na instynkcie {instinct}",
+    "language_switch": "Zmień język",
+    "stage_descriptions": {
+        "stage1": {
+            "part1": "Wybierz maksymalnie %answersPerQuestion odpowiedzi. Możesz pominąć %maxSkips pytanie.",
+            "part2": "Wybierz maksymalnie %answersPerQuestion odpowiedzi. Możesz pominąć %maxSkips pytanie."
+        },
+        "stage2": {
+            "part1": "Odpowiedz na %maxQuestions pytań. Możesz pominąć %maxSkips pytanie.",
+            "part2": "Dodatkowe pytania. Możesz pominąć %maxSkips pytanie.",
+            "part3": "Odpowiedz na %maxQuestions pytań. Możesz pominąć %maxSkips pytanie.",
+            "part4": "Dodatkowe pytania. Możesz pominąć %maxSkips pytanie."
+        }
+    },
+    "exceptions": {
+        "unresolvableTie": "Nie udało się jednoznacznie określić Twojego typu na podstawie udzielonych odpowiedzi. Może to wynikać z niejednoznacznych wyborów. Prosimy o rozpoczęcie testu od nowa."
+    }
+}
