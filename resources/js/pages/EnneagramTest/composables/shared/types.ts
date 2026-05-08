@@ -52,6 +52,7 @@ export type CompleteStage1Results = ResolvedStage1Results | UnresolvedStage1Resu
 export interface Stage2Results {
     typeScores: Record<EnneagramType, number>;
     scoresPerPart: Record<number, Record<EnneagramType, number>>;
+    isUnresolvable?: boolean;
 }
 
 export interface PartConfig {

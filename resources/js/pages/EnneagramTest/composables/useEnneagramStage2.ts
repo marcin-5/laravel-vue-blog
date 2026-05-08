@@ -1,7 +1,15 @@
 import { computed, ref } from 'vue';
 import { type EnneagramType, TYPE_IDS } from './shared/constants';
 import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
-import type { CompleteStage1Results, Config, FlatOption, Instinct, Question, SelectedAnswer, Stage2Results } from './shared/types';
+import type {
+    CompleteStage1Results,
+    Config,
+    FlatOption,
+    Instinct,
+    Question,
+    SelectedAnswer,
+    Stage2Results
+} from './shared/types';
 import { useAnswerSelection } from './shared/useAnswerSelection';
 import { useHistory } from './shared/useHistory';
 
@@ -135,6 +143,22 @@ export function useEnneagramStage2(
     );
 
     // --- Helpers ---
+    function hasTieBreakingLead(scores: Record<EnneagramType, number>): boolean {
+        const sorted = Object.values(scores).sort((a, b) => b - a);
+        return sorted.length >= 2 && sorted[0] - sorted[1] >= 2;
+    }
+
+    function isCurrentPartTieBreaker(): boolean {
+        return currentPart.value === 2 || currentPart.value === 4;
+    }
+
+    function shouldContinueForTieBreaking(): boolean {
+        if (!isCurrentPartTieBreaker()) return false;
+        const noMoreQuestions = instinctPoolIndices.value[currentInstinct.value] >= partQuestions.value.length;
+        if (noMoreQuestions) return false;
+        return !hasTieBreakingLead(typeScores.value);
+    }
+
     function applyAnswersToScores(answers: SelectedAnswer[]) {
         for (const ans of answers) {
             const cat = String(ans.category) as EnneagramType;
@@ -165,6 +189,11 @@ export function useEnneagramStage2(
         return false;
     }
 
+    function isTiedAtTop(scores: Record<EnneagramType, number>): boolean {
+        const sorted = Object.values(scores).sort((a, b) => b - a);
+        return sorted.length >= 2 && sorted[0] === sorted[1];
+    }
+
     function advance() {
         instinctPoolIndices.value[currentInstinct.value]++;
         currentIndex.value++;
@@ -174,11 +203,15 @@ export function useEnneagramStage2(
 
         if (!(reachedMax || noMoreQuestions)) return;
 
+        // For parts 2 and 4: keep asking if no type has +2 lead and pool not exhausted
+        if (shouldContinueForTieBreaking()) return;
+
         if (moveToNextAvailablePart()) {
             return;
         }
 
-        emit?.('complete', { typeScores: { ...typeScores.value }, scoresPerPart: { ...scoresPerPart.value } });
+        const isUnresolvable = isTiedAtTop(typeScores.value);
+        emit?.('complete', { typeScores: { ...typeScores.value }, scoresPerPart: { ...scoresPerPart.value }, isUnresolvable });
     }
 
     // --- Actions ---

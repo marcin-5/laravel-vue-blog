@@ -31,12 +31,18 @@ function restart() {
     <div class="mx-auto max-w-2xl bg-card p-6">
         <div class="rounded-lg p-8 text-center shadow-lg">
             <h2 class="mb-6 text-3xl font-bold text-foreground">
-                {{ stage1Results?.isUnresolvable ? 'Nie udało się dokończyć testu' : 'Podsumowanie Testu' }}
+                {{ stage1Results?.isUnresolvable || stage2Results?.isUnresolvable ? 'Nie udało się dokończyć testu' : 'Podsumowanie Testu' }}
             </h2>
 
             <div v-if="stage1Results?.isUnresolvable" class="mb-8 text-center">
                 <p class="text-lg text-muted-foreground">
                     Niestety, na podstawie Twoich odpowiedzi nie udało się jednoznacznie określić kolejności instynktów.
+                </p>
+            </div>
+
+            <div v-else-if="stage2Results?.isUnresolvable" class="mb-8 text-center">
+                <p class="text-lg text-muted-foreground">
+                    Niestety, na podstawie Twoich odpowiedzi nie udało się jednoznacznie określić Twojego typu enneagramu.
                 </p>
             </div>
 
@@ -48,7 +54,7 @@ function restart() {
                 <div v-else class="text-xl font-bold text-red-500">Brak wyników</div>
             </div>
 
-            <div v-if="!stage1Results?.isUnresolvable" class="mb-8 border-t pt-6 text-left">
+            <div v-if="!stage1Results?.isUnresolvable && !stage2Results?.isUnresolvable" class="mb-8 border-t pt-6 text-left">
                 <h3 class="mb-4 text-xl font-bold text-foreground">Kolejność instynktów:</h3>
                 <div class="flex items-center justify-around text-2xl font-bold uppercase">
                     <div>{{ stage1Results?.dominant }}</div>
