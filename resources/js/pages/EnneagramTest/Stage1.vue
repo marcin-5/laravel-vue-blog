@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { useI18n } from 'vue-i18n';
 import QuestionCard from './components/QuestionCard.vue';
 import Stage1Debug from './components/Stage1Debug.vue';
 import StageHeader from './components/StageHeader.vue';
@@ -13,8 +12,6 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(['complete']);
-
-const { t } = useI18n();
 
 const {
     currentPart,
