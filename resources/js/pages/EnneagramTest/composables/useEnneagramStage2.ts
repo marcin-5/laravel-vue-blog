@@ -1,15 +1,7 @@
 import { computed, ref } from 'vue';
 import { type EnneagramType, TYPE_IDS } from './shared/constants';
 import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
-import type {
-    CompleteStage1Results,
-    Config,
-    FlatOption,
-    Instinct,
-    Question,
-    SelectedAnswer,
-    Stage2Results
-} from './shared/types';
+import type { CompleteStage1Results, Config, FlatOption, Instinct, Question, SelectedAnswer, Stage2Results } from './shared/types';
 import { useAnswerSelection } from './shared/useAnswerSelection';
 import { useHistory } from './shared/useHistory';
 
