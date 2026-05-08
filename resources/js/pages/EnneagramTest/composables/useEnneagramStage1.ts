@@ -40,7 +40,12 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
     // --- Computed ---
     const currentConfig = computed(() => (currentPart.value === 1 ? config.part1 : config.part2));
     const currentScores = computed(() => (currentPart.value === 1 ? scoresPart1.value : scoresPart2.value));
-    const maxAnswersPerQuestion = computed(() => Number(currentConfig.value.answersPerQuestion ?? 1));
+    const maxAnswersPerQuestion = computed(() => {
+        if (currentPart.value === 1 && answeredCountPart1.value >= Number(currentConfig.value.maxQuestions ?? 0)) {
+            return 1;
+        }
+        return Number(currentConfig.value.answersPerQuestion ?? 1);
+    });
     const partQuestions = computed(() => (currentPart.value === 1 ? poolPart1 : poolPart2));
     const currentQuestion = computed(() => partQuestions.value[currentIndex.value]);
 
@@ -124,7 +129,8 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
 
     function buildResults(): CompleteStage1Results {
         // Unresolvable if exhausted all questions in Part 2 and still a tie, or same winner as Part 1 persists
-        const exhausted = answeredCountPart2.value >= Number(config.part2.maxQuestions ?? 0) || isLastInPart();
+        const reachedMax = answeredCountPart2.value >= Number(currentConfig.value.maxQuestions ?? 0);
+        const exhausted = reachedMax || isLastInPart();
         const winnerPart2 = getLeader(scoresPart2.value);
 
         const isUnresolvable = exhausted && (isTopTwoTie(scoresPart2.value) || (part1Winner.value !== null && winnerPart2 === part1Winner.value));
@@ -178,11 +184,13 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
     }
 
     function shouldEndPart1(): boolean {
-        const reachedLead = hasLead(scoresPart1.value, Number(config.part1.thresholdX ?? 0));
-        const reachedMax = answeredCountPart1.value >= Number(config.part1.maxQuestions ?? 0);
+        const thresholdX = Number(currentConfig.value.thresholdX ?? 0);
+        const reachedLead = hasLead(scoresPart1.value, thresholdX);
+        const reachedMax = answeredCountPart1.value >= Number(currentConfig.value.maxQuestions ?? 0);
+        const isTie = isTopTwoTie(scoresPart1.value);
 
-        // If we reached max questions but there's a tie, don't end yet (if questions available)
-        if (reachedMax && isTopTwoTie(scoresPart1.value) && !isLastInPart()) {
+        // After reaching max questions, we only continue if there is a tie between the top two
+        if (reachedMax && !reachedLead && isTie && !isLastInPart()) {
             return false;
         }
 
@@ -190,34 +198,31 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
     }
 
     function shouldEndPart2(): boolean {
-        const sameWinner = part1Winner.value !== null && getLeader(scoresPart2.value) === part1Winner.value;
-        const reachedMax = answeredCountPart2.value >= Number(config.part2.maxQuestions ?? 0);
-
-        // If reached max questions and it's a tie, don't end yet (if questions available)
-        if (reachedMax && isTopTwoTie(scoresPart2.value) && !isLastInPart()) {
-            return false;
-        }
-
-        // Check for same winner as Part 1 loop condition
-        if (reachedMax && sameWinner && !isLastInPart()) {
-            return false;
-        }
-
-        const endByX = !sameWinner && hasLead(scoresPart2.value, Number(config.part2.thresholdX ?? 0));
+        const leader = getLeader(scoresPart2.value);
+        const sameWinner = part1Winner.value !== null && leader === part1Winner.value;
+        const reachedMax = answeredCountPart2.value >= Number(currentConfig.value.maxQuestions ?? 0);
+        const thresholdX = Number(currentConfig.value.thresholdX ?? 0);
+        const thresholdY = Number(currentConfig.value.thresholdY ?? 0);
+        const endByX = !sameWinner && hasLead(scoresPart2.value, thresholdX);
         const specialYApplicable = part1Winner.value != null && (scoresPart2.value[part1Winner.value] ?? 0) === 0;
-        const endByY = specialYApplicable && hasLead(scoresPart2.value, Number(config.part2.thresholdY ?? 0));
+        const endByY = specialYApplicable && hasLead(scoresPart2.value, thresholdY);
+
+        // If reached max questions but no conclusion yet (no X, no Y, or same winner), continue if possible
+        if (reachedMax && !endByX && !endByY && !isLastInPart()) {
+            return false;
+        }
 
         return endByX || endByY || reachedMax || isLastInPart();
     }
 
     function shouldAskExtraTieBreaker(): boolean {
-        const reachedMax = answeredCountPart2.value >= Number(config.part2.maxQuestions ?? 0);
+        const reachedMax = answeredCountPart2.value >= Number(currentConfig.value.maxQuestions ?? 0);
         return (
             reachedMax &&
             !extraAskedPart2.value &&
             isTopTwoTie(scoresPart2.value) &&
             !isLastInPart() &&
-            !hasLead(scoresPart2.value, Number(config.part2.thresholdX ?? 0))
+            !hasLead(scoresPart2.value, Number(currentConfig.value.thresholdX ?? 0))
         );
     }
 
