@@ -52,7 +52,7 @@ const formattedDesc = computed(() =>
 </script>
 
 <template>
-    <div class="mx-auto max-w-2xl p-6">
+    <div class="mx-auto max-w-4xl p-4 md:p-6">
         <StageHeader :description="formattedDesc" :part="currentPart" :stage="2" />
 
         <QuestionCard

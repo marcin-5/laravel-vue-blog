@@ -143,10 +143,10 @@ function handleStage2Complete(results: Stage2Results) {
 </script>
 
 <template>
-    <div class="p-6">
+    <div class="p-4 md:p-6">
         <h1 class="mb-6 text-center text-3xl font-bold text-secondary-foreground">Test Enneagramu</h1>
 
-        <div v-if="currentView === 'start'" class="mx-auto max-w-2xl rounded-lg bg-card p-8 shadow-md">
+        <div v-if="currentView === 'start'" class="mx-auto max-w-4xl rounded-lg bg-card p-8 shadow-md">
             <h2 class="mb-4 text-xl font-semibold text-foreground">Witaj w teście Enneagramu</h2>
             <p class="mb-4 text-primary">
                 Ten test pomoże Ci odkryć Twój typ osobowości oraz kolejność instynktów. Składa się on z kilku etapów, w których będziesz wybierać
