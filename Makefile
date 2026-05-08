@@ -354,6 +354,21 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 	@echo "If SSR still doesn't work, check your Dockerfile to ensure 'npm run build' creates bootstrap/ssr/"
 	$(MAKE) prod-maintenance-off
 
+# Shorthand target to update application data only
+prod-update-data: ## Pull code and rebuild only the app container for data/code updates
+	$(MAKE) prod-maintenance-on
+	git fetch --all
+	git pull --ff-only
+	@echo "🔨 Building fresh image for app service..."
+	$(DOCKER_COMPOSE_PROD) build app
+	@echo "🚀 Recreating app service..."
+	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps app
+	$(MAKE) prod-wait
+	@echo "🧹 Clearing Laravel caches..."
+	-$(DOCKER_COMPOSE_PROD) exec -T app php artisan optimize:clear
+	$(MAKE) prod-maintenance-off
+	@echo "✅ Data update complete."
+
 # =============================
 # Rebuild Postgres & Redis (production)
 # =============================
