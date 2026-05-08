@@ -11,19 +11,25 @@ class EnneagramTestController extends Controller
     public function index(Request $request)
     {
         $locale = 'pl'; // For now, hardcode or detect
-        $path = resource_path("data/enneagram/{$locale}/questions.json");
+        $questionsPath = resource_path("data/enneagram/{$locale}/questions.json");
+        $configPath = resource_path('data/enneagram/config.json');
 
-        if (!File::exists($path)) {
+        if (!File::exists($questionsPath) || !File::exists($configPath)) {
             abort(404);
         }
 
-        $data = json_decode(File::get($path), true);
-        if (json_last_error() !== JSON_ERROR_NONE || !is_array($data)) {
-            abort(500, 'Error decoding questions.json: ' . json_last_error_msg());
+        $questions = json_decode(File::get($questionsPath), true);
+        $testConfig = json_decode(File::get($configPath), true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            abort(500, 'Error decoding enneagram data: ' . json_last_error_msg());
         }
 
         return Inertia::render('EnneagramTest/Index', [
-            'testData' => $data,
+            'testData' => [
+                'questions' => $questions,
+                'testConfig' => $testConfig['testConfig'],
+            ],
             'appDebug' => (bool) config('enneagram.debug'),
         ]);
     }
