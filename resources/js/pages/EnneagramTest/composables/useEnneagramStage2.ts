@@ -62,6 +62,12 @@ export function useEnneagramStage2(questions: Question[], config: Config, result
     const currentIndex = ref(0);
     const skips = ref(0);
     const typeScores = ref<Record<EnneagramType, number>>(createEmptyTypeScores());
+    const scoresPerPart = ref<Record<number, Record<EnneagramType, number>>>({
+        1: createEmptyTypeScores(),
+        2: createEmptyTypeScores(),
+        3: createEmptyTypeScores(),
+        4: createEmptyTypeScores(),
+    });
     const selectedInPart1 = ref<Set<string>>(new Set());
     const selectedInPart3 = ref<Set<string>>(new Set());
     const shuffledAnswersPerQuestion = ref<Record<string, FlatOption[]>>({});
@@ -152,6 +158,7 @@ export function useEnneagramStage2(questions: Question[], config: Config, result
         for (const ans of answers) {
             const cat = String(ans.category) as EnneagramType;
             typeScores.value[cat] = (typeScores.value[cat] ?? 0) + 1;
+            scoresPerPart.value[currentPart.value][cat] = (scoresPerPart.value[currentPart.value][cat] ?? 0) + 1;
             if (currentPart.value === 1) selectedInPart1.value.add(cat);
             if (currentPart.value === 3) selectedInPart3.value.add(cat);
         }
@@ -180,7 +187,7 @@ export function useEnneagramStage2(questions: Question[], config: Config, result
                 if (currentPart.value < LAST_PART) {
                     currentPart.value++;
                 } else {
-                    emit?.('complete', { ...typeScores.value });
+                    emit?.('complete', { typeScores: { ...typeScores.value }, scoresPerPart: { ...scoresPerPart.value } });
                     return;
                 }
             }
@@ -188,7 +195,7 @@ export function useEnneagramStage2(questions: Question[], config: Config, result
             currentIndex.value = 0;
             skips.value = 0;
         } else {
-            emit?.('complete', { ...typeScores.value });
+            emit?.('complete', { typeScores: { ...typeScores.value }, scoresPerPart: { ...scoresPerPart.value } });
         }
     }
 
@@ -222,6 +229,7 @@ export function useEnneagramStage2(questions: Question[], config: Config, result
         skips,
         selectedAnswers,
         typeScores,
+        scoresPerPart,
         currentConfig,
         currentQuestion,
         flatOptions,

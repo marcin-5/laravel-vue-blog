@@ -32,6 +32,8 @@ const {
     answeredCountPart1,
     answeredCountPart2,
     part1Winner,
+    scoresPart1,
+    scoresPart2,
     currentScores,
     currentConfig,
     maxAnswersPerQuestion,
@@ -72,7 +74,8 @@ const {
             :answered-count2="answeredCountPart2"
             :current-index="currentIndex"
             :current-part="currentPart"
-            :current-scores="currentScores"
+            :scores-part1="scoresPart1"
+            :scores-part2="scoresPart2"
             :debug="debug"
             :history-length="history.length"
             :max-answers="maxAnswersPerQuestion"

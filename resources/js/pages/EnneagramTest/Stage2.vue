@@ -35,6 +35,7 @@ const {
     skips,
     selectedAnswers,
     typeScores,
+    scoresPerPart,
     currentConfig,
     currentQuestion,
     flatOptions,
@@ -84,7 +85,7 @@ const formattedDesc = computed(() => {
 
         <div v-else class="rounded-lg bg-white p-12 text-center shadow">Brak pytań dla wybranej konfiguracji.</div>
 
-        <div v-if="debug" class="my-4 text-center text-sm font-medium text-blue-600">
+        <div v-if="debug" class="my-4 text-center text-sm font-medium text-secondary-foreground">
             Etap 2: Skupienie na instynkcie <span class="font-bold uppercase">{{ currentInstinct }}</span>
         </div>
 
@@ -97,6 +98,8 @@ const formattedDesc = computed(() => {
             :max-answers="maxAnswersPerQuestion"
             :max-skips="currentConfig.maxSkips"
             :pool-index="poolIndex"
+            :results-stage1="resultsStage1"
+            :scores-per-part="scoresPerPart"
             :selected-count="selectedAnswers.length"
             :skips="skips"
             :type-scores="typeScores"

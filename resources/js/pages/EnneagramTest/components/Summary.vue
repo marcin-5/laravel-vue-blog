@@ -8,8 +8,8 @@ const props = defineProps<{
 }>();
 
 const sortedTypes = computed(() => {
-    if (!props.stage2Results) return [];
-    return Object.entries(props.stage2Results)
+    if (!props.stage2Results || !props.stage2Results.typeScores) return [];
+    return Object.entries(props.stage2Results.typeScores)
         .map(([type, score]) => ({ type, score: score as number }))
         .sort((a, b) => b.score - a.score);
 });
@@ -40,7 +40,7 @@ function restart() {
             </div>
 
             <div v-else class="mb-8">
-                <p class="mb-2 text-lg text-muted-foreground">Twój najbardziej prawdopodobny typ to:</p>
+                <p class="mb-4 text-lg text-muted-foreground">Twój najbardziej prawdopodobny typ to:</p>
                 <div v-if="topType" class="inline-block rounded-full bg-primary px-6 py-3 text-4xl font-black text-primary-foreground">
                     Typ {{ topType.type }}
                 </div>
@@ -61,22 +61,41 @@ function restart() {
             <div v-if="debug" class="mt-12 rounded border-t border-dashed bg-muted/40 p-4 pt-6 text-left">
                 <h3 class="mb-4 text-lg font-bold text-primary-foreground">Dane Debugowania:</h3>
 
-                <div class="mb-6">
+                <div class="mb-4">
                     <h4 class="mb-2 text-sm font-bold text-foreground uppercase">Etap 1 (Instynkty):</h4>
                     <div class="grid grid-cols-2 gap-4 text-xs">
-                        <div>
+                        <div class="space-y-2">
                             <p class="font-semibold">Część 1:</p>
-                            <pre>{{ stage1Results?.scoresPart1 }}</pre>
+                            <span class="text-foreground">
+                                SP={{ stage1Results?.scoresPart1.sp }}, SO={{ stage1Results?.scoresPart1.so }}, SX={{ stage1Results?.scoresPart1.sx }}
+                            </span>
                         </div>
-                        <div>
+                        <div class="space-y-2">
                             <p class="font-semibold">Część 2:</p>
-                            <pre>{{ stage1Results?.scoresPart2 }}</pre>
+                            <span class="text-foreground">
+                                SP={{ stage1Results?.scoresPart2.sp }}, SO={{ stage1Results?.scoresPart2.so }}, SX={{ stage1Results?.scoresPart2.sx }}
+                            </span>
                         </div>
                     </div>
                 </div>
 
                 <div>
                     <h4 class="mb-2 text-sm font-bold text-foreground uppercase">Etap 2 (Typy):</h4>
+
+                    <div class="mb-4">
+                        <p class="mb-1 text-xs font-semibold">Wyniki wg części:</p>
+                        <div class="grid grid-cols-2 gap-2 text-xs md:grid-cols-4">
+                            <div v-for="(scores, part) in stage2Results?.scoresPerPart" :key="part" class="rounded border border-muted p-2">
+                                <p class="mb-1 border-b border-muted pb-1 font-bold">Część {{ part }}</p>
+                                <div v-for="(score, type) in scores" :key="type" class="flex justify-between">
+                                    <span>Typ {{ type }}:</span>
+                                    <span>{{ score }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="mb-1 text-xs font-semibold">Suma całkowita:</p>
                     <div class="grid grid-cols-3 gap-2 text-xs">
                         <div
                             v-for="item in sortedTypes"
