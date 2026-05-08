@@ -24,7 +24,6 @@ const {
     part1Winner,
     scoresPart1,
     scoresPart2,
-    currentScores,
     currentConfig,
     maxAnswersPerQuestion,
     formattedDesc,
