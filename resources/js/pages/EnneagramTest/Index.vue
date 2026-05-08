@@ -35,7 +35,11 @@ const appDebug = computed(() => props.appDebug);
 
 function handleStage1Complete(results: CompleteResults) {
     stage1Results.value = results;
-    currentStage.value = 2;
+    if (results.isUnresolvable) {
+        currentStage.value = 0;
+    } else {
+        currentStage.value = 2;
+    }
 }
 
 function handleStage2Complete(results: any) {
