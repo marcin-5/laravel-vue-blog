@@ -1,14 +1,13 @@
-{$APP_DOMAIN}, {$APP_DOMAIN_WWW} {
-    @www host {$APP_DOMAIN_WWW}
-    redir @www https://{$APP_DOMAIN}{uri} permanent
-
+{$APP_DOMAIN}, {$APP_DOMAIN_WWW}, enneagram-test.{$APP_DOMAIN}, {$ENNEAGRAM_DOMAIN} {
+    # Serve a static maintenance page for all hosts (main + enneagram subdomain)
     root * /var/www/html/public
     encode zstd gzip
-    # Always serve the static maintenance page when maintenance mode is enabled.
-    # If the file exists, it will be served.
-    handle {
-        # Rewrite every request to the maintenance file and let file_server serve it.
-        rewrite * /maintenance.html
-        file_server
+
+    # Keep long cache for versioned assets if requested directly
+    header /build/assets/* Cache-Control "public, max-age=31536000, immutable"
+
+    # Respond with 503 for every request while in maintenance
+    respond * 503 {
+        body file /var/www/html/public/maintenance.html
     }
 }

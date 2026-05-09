@@ -395,6 +395,16 @@ prod-maintenance-on: ## Enable Caddy maintenance mode (serve static maintenance.
 	@printf '%s\n' '[prod-maintenance-on] Copying maintenance Caddyfile into container...'
 	@docker cp docker/Caddyfile.maintenance $$($(DOCKER_COMPOSE_PROD) ps -q caddy):/etc/caddy/Caddyfile.maintenance
 
+	@printf '%s\n' '[prod-maintenance-on] Validating maintenance Caddyfile...'
+	@cid=$$($(DOCKER_COMPOSE_PROD) ps -q caddy); \
+	if [ -n "$$cid" ]; then \
+	  if $(DOCKER_COMPOSE_PROD) exec -T caddy caddy validate --config /etc/caddy/Caddyfile.maintenance; then \
+	    printf '%s\n' '[prod-maintenance-on] Caddyfile.maintenance is valid.'; \
+	  else \
+	    printf '%s\n' '[prod-maintenance-on] Warning: Caddyfile.maintenance validation failed! Attempting reload anyway...'; \
+	  fi; \
+	fi
+
 	@cid=$$($(DOCKER_COMPOSE_PROD) ps -q caddy); \
 	if [ -z "$$cid" ]; then \
 	  printf '%s\n' '[prod-maintenance-on] Caddy container not found; skipping reload.'; \
