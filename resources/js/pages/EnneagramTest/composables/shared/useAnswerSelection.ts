@@ -5,11 +5,13 @@ import type { SelectedAnswer } from './types';
 interface Options {
     maxAnswers: Ref<number>;
     onAutoConfirm: () => void;
+    /** Master switch to enable/disable auto-confirm for single-answer questions (controlled from UI). */
+    enableAutoConfirmSingle?: Ref<boolean>;
     /** If > 0, auto-confirm for single-answer questions is deferred (used by Stage 1). */
     autoConfirmDelayMs?: number;
 }
 
-export function useAnswerSelection({ maxAnswers, onAutoConfirm, autoConfirmDelayMs = 0 }: Options) {
+export function useAnswerSelection({ maxAnswers, onAutoConfirm, enableAutoConfirmSingle, autoConfirmDelayMs = 0 }: Options) {
     const selectedAnswers = ref<SelectedAnswer[]>([]);
 
     function isSelected(key: string | number): boolean {
@@ -28,7 +30,8 @@ export function useAnswerSelection({ maxAnswers, onAutoConfirm, autoConfirmDelay
             selectedAnswers.value = [answer];
         }
 
-        if (maxAnswers.value === 1 && selectedAnswers.value.length === 1) {
+        const autoEnabled = enableAutoConfirmSingle?.value ?? true;
+        if (autoEnabled && maxAnswers.value === 1 && selectedAnswers.value.length === 1) {
             if (autoConfirmDelayMs > 0) {
                 setTimeout(onAutoConfirm, autoConfirmDelayMs ?? SINGLE_ANSWER_AUTO_CONFIRM_DELAY_MS);
             } else {

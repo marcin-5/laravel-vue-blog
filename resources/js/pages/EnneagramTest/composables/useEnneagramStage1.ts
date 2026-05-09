@@ -1,4 +1,4 @@
-import { computed, ref, watch } from 'vue';
+import { computed, ref, type Ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { SINGLE_ANSWER_AUTO_CONFIRM_DELAY_MS } from './shared/constants';
 import { isStage1Part1Question, isStage1Part2Question } from './shared/questionIds';
@@ -21,7 +21,7 @@ interface Stage1Snapshot {
 
 type EmitFn = (event: 'complete', results: CompleteStage1Results) => void;
 
-export function useEnneagramStage1(questions: Question[], config: Config['stages']['stage1'], emit: EmitFn) {
+export function useEnneagramStage1(questions: Question[], config: Config['stages']['stage1'], emit: EmitFn, enableAutoConfirmSingle?: Ref<boolean>) {
     // --- State ---
     const currentPart = ref(1);
     const currentIndex = ref(0);
@@ -68,6 +68,7 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
     } = useAnswerSelection({
         maxAnswers: maxAnswersPerQuestion,
         onAutoConfirm: () => confirmAnswers(),
+        enableAutoConfirmSingle,
         autoConfirmDelayMs: SINGLE_ANSWER_AUTO_CONFIRM_DELAY_MS,
     });
 

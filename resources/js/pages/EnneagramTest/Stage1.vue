@@ -9,6 +9,7 @@ const props = defineProps<{
     questions: Question[];
     config: Stage1Config;
     debug?: boolean;
+    autoConfirmSingleEnabled?: boolean;
 }>();
 
 const emit = defineEmits(['complete']);
@@ -35,7 +36,12 @@ const {
     confirmAnswers,
     handleSkip,
     goBack,
-} = useEnneagramStage1(props.questions, props.config, emit);
+} = useEnneagramStage1(
+    props.questions,
+    props.config,
+    emit,
+    computed(() => props.autoConfirmSingleEnabled ?? true),
+);
 </script>
 
 <template>

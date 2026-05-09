@@ -18,6 +18,7 @@ import type { CompleteStage1Results, Config, Stage2Results, TestData } from './c
 const props = defineProps<{
     testData: TestData;
     appDebug?: boolean;
+    autoConfirmSingleDefault?: boolean;
 }>();
 
 const { t, tm, locale, mergeLocaleMessage } = useI18n();
@@ -43,6 +44,7 @@ type CurrentView = 'start' | 'stage1' | 'stage2' | 'summary';
 
 const currentView = ref<CurrentView>('start');
 const isExtended = ref(false);
+const autoConfirmSingle = ref<boolean>(props.autoConfirmSingleDefault ?? true);
 const stage1Results = ref<CompleteStage1Results | null>(null);
 const stage2Results = ref<any>(null);
 
@@ -190,6 +192,16 @@ function handleStage2Complete(results: Stage2Results) {
                 </ul>
             </div>
 
+            <div class="mb-6 rounded-md border p-4">
+                <label class="flex items-start gap-3">
+                    <input v-model="autoConfirmSingle" class="mt-1 size-4" type="checkbox" />
+                    <span class="flex flex-col">
+                        <span class="font-medium">{{ t('auto_confirm_single_label') }}</span>
+                        <span class="text-sm text-muted-foreground">{{ t('auto_confirm_single_help') }}</span>
+                    </span>
+                </label>
+            </div>
+
             <div class="flex flex-col gap-4 sm:flex-row">
                 <Button class="flex-1 py-6 font-medium" size="lg" @click="startTest(false)"> {{ t('start_standard') }} </Button>
                 <Button class="flex-1 py-6 font-medium" size="lg" variant="outline" @click="startTest(true)">
@@ -203,6 +215,7 @@ function handleStage2Complete(results: Stage2Results) {
 
         <Stage1
             v-if="currentView === 'stage1'"
+            :auto-confirm-single-enabled="autoConfirmSingle"
             :config="stage1Config"
             :debug="appDebug"
             :questions="stage1Questions"
@@ -211,6 +224,7 @@ function handleStage2Complete(results: Stage2Results) {
 
         <Stage2
             v-if="currentView === 'stage2' && stage1Results"
+            :auto-confirm-single-enabled="autoConfirmSingle"
             :config="stage2Config"
             :debug="appDebug"
             :questions="stage2Questions"

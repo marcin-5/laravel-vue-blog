@@ -14,6 +14,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Auto confirm single-answer questions
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, selecting an answer in single-choice questions will
+    | automatically confirm and advance to the next question. This can be
+    | overridden by the user on the test start screen.
+    |
+    */
+    'auto_confirm_single' => env('ENNEAGRAM_AUTO_CONFIRM_SINGLE', true),
+
+    /*
+    |--------------------------------------------------------------------------
     | Enneagram Test Domain
     |--------------------------------------------------------------------------
     |

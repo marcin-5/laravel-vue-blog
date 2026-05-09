@@ -12,6 +12,7 @@ const props = defineProps<{
     config: Stage2Config;
     resultsStage1: CompleteStage1Results;
     debug?: boolean;
+    autoConfirmSingleEnabled?: boolean;
 }>();
 
 const emit = defineEmits(['complete']);
@@ -37,7 +38,13 @@ const {
     goBack,
     currentInstinct,
     instinctPoolIndices,
-} = useEnneagramStage2(props.questions, props.config, props.resultsStage1, emit);
+} = useEnneagramStage2(
+    props.questions,
+    props.config,
+    props.resultsStage1,
+    emit,
+    computed(() => props.autoConfirmSingleEnabled ?? true),
+);
 
 const poolIndex = computed(() => {
     const instinct = currentInstinct.value;

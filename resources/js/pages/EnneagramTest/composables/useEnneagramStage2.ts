@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue';
+import { computed, ref, type Ref } from 'vue';
 import { type EnneagramType, TYPE_IDS } from './shared/constants';
 import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
 import type { CompleteStage1Results, Config, FlatOption, Instinct, Question, SelectedAnswer, Stage2Results } from './shared/types';
@@ -32,6 +32,7 @@ export function useEnneagramStage2(
     config: Config['stages']['stage2'],
     resultsStage1: CompleteStage1Results,
     emit?: Stage2Emit,
+    enableAutoConfirmSingle?: Ref<boolean>,
 ) {
     const dominantInstinct: Instinct = resultsStage1.isUnresolvable ? DEFAULT_DOMINANT : (resultsStage1.dominant ?? DEFAULT_DOMINANT);
     const secondaryInstinct: Instinct = resultsStage1.isUnresolvable ? DEFAULT_SECONDARY : (resultsStage1.secondary ?? DEFAULT_SECONDARY);
@@ -100,6 +101,7 @@ export function useEnneagramStage2(
     } = useAnswerSelection({
         maxAnswers: maxAnswersPerQuestion,
         onAutoConfirm: () => confirmAnswers(),
+        enableAutoConfirmSingle,
     });
 
     const canSkip = computed(() => selectedAnswers.value.length === 0 && skips.value < currentConfig.value.maxSkips);

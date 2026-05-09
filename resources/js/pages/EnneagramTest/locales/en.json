@@ -36,6 +36,8 @@
     "language_switch": "Change language",
     "skips_remaining": "Number of questions you can skip: {count}",
     "max_answers": "Maximum number of answers: {maxAnswers}",
+    "auto_confirm_single_label": "Auto-advance on single-choice questions",
+    "auto_confirm_single_help": "When a question allows only one answer, selecting it will immediately confirm and move to the next question.",
     "exceptions": {
         "unresolvableTie": "It was not possible to clearly determine your type based on the answers provided. This may be due to ambiguous choices. Please restart the test."
     }

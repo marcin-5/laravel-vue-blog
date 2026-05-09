@@ -36,6 +36,8 @@
     "language_switch": "Zmień język",
     "skips_remaining": "Liczba pytań, które możesz pominąć: {count}",
     "max_answers": "Maksymalna liczba odpowiedzi: {maxAnswers}",
+    "auto_confirm_single_label": "Automatyczne przechodzenie dalej przy pytaniach jednokrotnego wyboru",
+    "auto_confirm_single_help": "Gdy w pytaniu można wybrać tylko jedną odpowiedź, zaznaczenie od razu potwierdza wybór i przechodzi do następnego pytania.",
     "exceptions": {
         "unresolvableTie": "Nie udało się jednoznacznie określić Twojego typu na podstawie udzielonych odpowiedzi. Może to wynikać z niejednoznacznych wyborów. Prosimy o rozpoczęcie testu od nowa."
     }

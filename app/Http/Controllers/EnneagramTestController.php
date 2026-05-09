@@ -31,6 +31,7 @@ class EnneagramTestController extends Controller
                 'testConfig' => $testConfig['testConfig'],
             ],
             'appDebug' => (bool) config('enneagram.debug'),
+            'autoConfirmSingleDefault' => (bool) config('enneagram.auto_confirm_single'),
         ]);
     }
 }
