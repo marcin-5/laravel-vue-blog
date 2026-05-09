@@ -167,7 +167,7 @@ function handleStage2Complete(results: Stage2Results) {
 </script>
 
 <template>
-    <div class="p-4 md:p-6">
+    <div class="p-2 md:p-3 lg:p-6">
         <div class="mx-auto mb-6 flex max-w-4xl items-center justify-end">
             <Button size="sm" variant="ghost" @click="toggleLanguage">
                 {{ locale === 'pl' ? 'EN' : 'PL' }}

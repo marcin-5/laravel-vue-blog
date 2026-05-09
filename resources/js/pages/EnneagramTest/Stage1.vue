@@ -46,7 +46,7 @@ const {
 </script>
 
 <template>
-    <div class="mx-auto max-w-4xl p-4 md:p-6">
+    <div class="mx-auto max-w-4xl p-1 md:p-3 lg:p-6">
         <StageHeader
             :can-skip="canSkip"
             :description="formattedDesc"

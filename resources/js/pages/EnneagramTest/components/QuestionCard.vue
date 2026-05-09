@@ -30,19 +30,19 @@ function isSelected(selectedAnswers: SelectedAnswer[], key: string | number) {
 </script>
 
 <template>
-    <Card v-if="question">
+    <Card v-if="question" class="mx-1 font-quicksand">
         <CardHeader>
-            <CardTitle class="font-quicksand text-lg text-pretty break-words">
+            <CardTitle class="text-base text-pretty break-words md:text-lg">
                 {{ question.question }}
             </CardTitle>
         </CardHeader>
-        <CardContent>
-            <div class="space-y-3">
+        <CardContent class="px-2 md:px-3 lg:px-4">
+            <div class="space-y-4 font-nunito md:space-y-3 lg:font-inter">
                 <Button
                     v-for="opt in options"
                     :key="opt.key"
                     :variant="isSelected(selectedAnswers, opt.key) ? 'secondary' : 'outline'"
-                    class="w-full justify-start py-6 text-left font-recursive text-pretty break-words whitespace-normal"
+                    class="w-full justify-start rounded-lg px-1 py-4 text-left text-sm leading-snug text-pretty break-words whitespace-normal md:px-4 md:py-5 md:text-base"
                     size="lg"
                     @click="emit('toggle', opt.key, opt.value, opt.category)"
                 >
