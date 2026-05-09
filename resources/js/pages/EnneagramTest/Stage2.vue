@@ -55,7 +55,7 @@ const formattedDesc = computed(() => t('max_answers', { maxAnswers: maxAnswersPe
 </script>
 
 <template>
-    <div class="mx-auto max-w-4xl p-1 md:p-3 lg:p-6">
+    <div class="mx-auto max-w-4xl p-2 md:p-3 lg:p-6">
         <StageHeader
             :can-skip="canSkip"
             :description="formattedDesc"
