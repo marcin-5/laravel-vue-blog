@@ -6,8 +6,9 @@
     # Keep long cache for versioned assets if requested directly
     header /build/assets/* Cache-Control "public, max-age=31536000, immutable"
 
-    # Respond with 503 for every request while in maintenance
-    respond * 503 {
-        body file /var/www/html/public/maintenance.html
+    # Respond with 503 for every request while in maintenance (Caddy v2 block syntax)
+    respond * {
+        status 503
+        body {file /var/www/html/public/maintenance.html}
     }
 }
