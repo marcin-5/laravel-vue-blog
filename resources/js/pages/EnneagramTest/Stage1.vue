@@ -40,7 +40,14 @@ const {
 
 <template>
     <div class="mx-auto max-w-4xl p-4 md:p-6">
-        <StageHeader :description="formattedDesc" :part="currentPart" :stage="1" />
+        <StageHeader
+            :can-skip="canSkip"
+            :description="formattedDesc"
+            :max-skips="currentConfig.maxSkips"
+            :part="currentPart"
+            :skips="skips"
+            :stage="1"
+        />
 
         <QuestionCard
             v-if="currentQuestion"

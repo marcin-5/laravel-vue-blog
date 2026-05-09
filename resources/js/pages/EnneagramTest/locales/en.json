@@ -34,16 +34,17 @@
     "no_questions": "No questions for selected configuration.",
     "focus_on_instinct": "Stage 2: Focusing on instinct {instinct}",
     "language_switch": "Change language",
+    "skips_remaining": "Number of questions you can skip: {count}",
     "stage_descriptions": {
         "stage1": {
-            "part1": "Select up to %answersPerQuestion answers. You can skip %maxSkips question.",
-            "part2": "Select up to %answersPerQuestion answers. You can skip %maxSkips question."
+            "part1": "Select up to %answersPerQuestion answers.",
+            "part2": "Select up to %answersPerQuestion answers."
         },
         "stage2": {
-            "part1": "Answer %maxQuestions questions. You can skip %maxSkips question.",
-            "part2": "Additional questions. You can skip %maxSkips question.",
-            "part3": "Answer %maxQuestions questions. You can skip %maxSkips question.",
-            "part4": "Additional questions. You can skip %maxSkips question."
+            "part1": "Answer %maxQuestions questions.",
+            "part2": "Additional questions.",
+            "part3": "Answer %maxQuestions questions.",
+            "part4": "Additional questions."
         }
     },
     "exceptions": {

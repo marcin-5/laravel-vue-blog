@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { FlatOption, Question, SelectedAnswer } from '../composables/shared/types';
 
-defineProps<{
+const props = defineProps<{
     question: Question;
     options: FlatOption[];
     selectedAnswers: SelectedAnswer[];
@@ -52,13 +52,19 @@ function isSelected(selectedAnswers: SelectedAnswer[], key: string | number) {
 
             <div class="mt-6 flex items-center justify-between">
                 <div class="flex gap-2">
-                    <Button :disabled="historyLength === 0" variant="outline" @click="emit('back')"> {{ t('back') }} </Button>
-                    <Button v-if="canSkip" :disabled="skips >= maxSkips" variant="muted" @click="emit('skip')">
-                        {{ t('skip') }} ({{ skips }}/{{ maxSkips }})
+                    <Button :disabled="props.historyLength === 0" variant="outline" @click="emit('back')"> {{ t('back') }} </Button>
+                    <Button :disabled="!props.canSkip || props.skips >= props.maxSkips" variant="muted" @click="emit('skip')">
+                        {{ t('skip') }} ({{ props.skips }}/{{ props.maxSkips }})
                     </Button>
                 </div>
 
-                <Button v-if="maxAnswers > 1" :disabled="selectedAnswers.length < 1" class="px-6" variant="secondary" @click="emit('confirm')">
+                <Button
+                    v-if="props.maxAnswers > 1"
+                    :disabled="props.selectedAnswers.length < 1"
+                    class="px-6"
+                    variant="secondary"
+                    @click="emit('confirm')"
+                >
                     {{ t('next') }}
                 </Button>
             </div>

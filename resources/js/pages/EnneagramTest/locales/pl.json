@@ -34,16 +34,17 @@
     "no_questions": "Brak pytań dla wybranej konfiguracji.",
     "focus_on_instinct": "Etap 2: Skupienie na instynkcie {instinct}",
     "language_switch": "Zmień język",
+    "skips_remaining": "Liczba pytań, które możesz pominąć: {count}",
     "stage_descriptions": {
         "stage1": {
-            "part1": "Wybierz maksymalnie %answersPerQuestion odpowiedzi. Możesz pominąć %maxSkips pytanie.",
-            "part2": "Wybierz maksymalnie %answersPerQuestion odpowiedzi. Możesz pominąć %maxSkips pytanie."
+            "part1": "Wybierz maksymalnie %answersPerQuestion odpowiedzi.",
+            "part2": "Wybierz maksymalnie %answersPerQuestion odpowiedzi."
         },
         "stage2": {
-            "part1": "Odpowiedz na %maxQuestions pytań. Możesz pominąć %maxSkips pytanie.",
-            "part2": "Dodatkowe pytania. Możesz pominąć %maxSkips pytanie.",
-            "part3": "Odpowiedz na %maxQuestions pytań. Możesz pominąć %maxSkips pytanie.",
-            "part4": "Dodatkowe pytania. Możesz pominąć %maxSkips pytanie."
+            "part1": "Odpowiedz na %maxQuestions pytań",
+            "part2": "Dodatkowe pytania.",
+            "part3": "Odpowiedz na %maxQuestions pytań.",
+            "part4": "Dodatkowe pytania."
         }
     },
     "exceptions": {
