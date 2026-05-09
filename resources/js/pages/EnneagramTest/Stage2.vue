@@ -4,7 +4,6 @@ import { useI18n } from 'vue-i18n';
 import QuestionCard from './components/QuestionCard.vue';
 import Stage2Debug from './components/Stage2Debug.vue';
 import StageHeader from './components/StageHeader.vue';
-import { formatStageDescription } from './composables/shared/formatters';
 import type { CompleteStage1Results, Question, Stage2Config } from './composables/shared/types';
 import { useEnneagramStage2 } from './composables/useEnneagramStage2';
 
@@ -45,19 +44,19 @@ const poolIndex = computed(() => {
     return instinctPoolIndices.value[instinct] ?? 0;
 });
 
-const formattedDesc = computed(() => {
-    const descKey = `stage_descriptions.stage2.part${currentPart.value}`;
-    return formatStageDescription(t(descKey), {
-        maxQuestions: currentConfig.value.maxQuestions,
-        maxSkips: currentConfig.value.maxSkips,
-        answersPerQuestion: maxAnswersPerQuestion.value,
-    });
-});
+const formattedDesc = computed(() => t('max_answers', { maxAnswers: maxAnswersPerQuestion.value }));
 </script>
 
 <template>
     <div class="mx-auto max-w-4xl p-4 md:p-6">
-        <StageHeader :can-skip="canSkip" :description="formattedDesc" :max-skips="currentConfig.maxSkips" :part="currentPart" :stage="2" />
+        <StageHeader
+            :can-skip="canSkip"
+            :description="formattedDesc"
+            :max-skips="currentConfig.maxSkips"
+            :part="currentPart"
+            :skips="skips"
+            :stage="2"
+        />
 
         <QuestionCard
             v-if="currentQuestion"

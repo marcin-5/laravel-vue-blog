@@ -53,7 +53,7 @@ function isSelected(selectedAnswers: SelectedAnswer[], key: string | number) {
             <div class="mt-6 flex items-center justify-between">
                 <div class="flex gap-2">
                     <Button :disabled="props.historyLength === 0" variant="outline" @click="emit('back')"> {{ t('back') }} </Button>
-                    <Button :disabled="!props.canSkip || props.skips >= props.maxSkips" variant="muted" @click="emit('skip')">
+                    <Button :disabled="props.selectedAnswers.length > 0 || props.skips >= props.maxSkips" variant="muted" @click="emit('skip')">
                         {{ t('skip') }} ({{ props.skips }}/{{ props.maxSkips }})
                     </Button>
                 </div>

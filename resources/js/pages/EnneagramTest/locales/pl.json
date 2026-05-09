@@ -35,18 +35,7 @@
     "focus_on_instinct": "Etap 2: Skupienie na instynkcie {instinct}",
     "language_switch": "Zmień język",
     "skips_remaining": "Liczba pytań, które możesz pominąć: {count}",
-    "stage_descriptions": {
-        "stage1": {
-            "part1": "Wybierz maksymalnie %answersPerQuestion odpowiedzi.",
-            "part2": "Wybierz maksymalnie %answersPerQuestion odpowiedzi."
-        },
-        "stage2": {
-            "part1": "Odpowiedz na %maxQuestions pytań",
-            "part2": "Dodatkowe pytania.",
-            "part3": "Odpowiedz na %maxQuestions pytań.",
-            "part4": "Dodatkowe pytania."
-        }
-    },
+    "max_answers": "Maksymalna liczba odpowiedzi: {maxAnswers}",
     "exceptions": {
         "unresolvableTie": "Nie udało się jednoznacznie określić Twojego typu na podstawie udzielonych odpowiedzi. Może to wynikać z niejednoznacznych wyborów. Prosimy o rozpoczęcie testu od nowa."
     }
