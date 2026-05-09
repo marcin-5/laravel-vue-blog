@@ -174,10 +174,10 @@ function handleStage2Complete(results: Stage2Results) {
             </Button>
         </div>
 
-        <h1 class="mb-6 text-center text-3xl font-bold text-secondary-foreground">{{ t('title') }}</h1>
+        <h1 class="mb-6 text-center font-recursive text-3xl font-bold text-secondary-foreground">{{ t('title') }}</h1>
 
         <div v-if="currentView === 'start'" class="mx-auto max-w-4xl rounded-lg bg-card p-8 shadow-md">
-            <h2 class="mb-4 text-xl font-semibold text-foreground">{{ t('welcome') }}</h2>
+            <h2 class="mb-4 font-quicksand text-xl font-semibold text-foreground">{{ t('welcome') }}</h2>
             <p class="mb-4 text-primary">
                 {{ t('description') }}
             </p>

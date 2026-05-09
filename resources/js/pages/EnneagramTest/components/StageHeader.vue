@@ -21,7 +21,7 @@ const { t } = useI18n();
 
 <template>
     <div class="mx-1 mb-6 px-2 md:px-3 lg:px-4">
-        <h2 class="mb-4 text-xl font-bold text-foreground">{{ t('stage') }} {{ stage }}: {{ t('part') }} {{ part }}</h2>
+        <h2 class="mb-4 font-quicksand text-xl font-bold text-foreground">{{ t('stage') }} {{ stage }}: {{ t('part') }} {{ part }}</h2>
         <div class="justify-between text-muted-foreground md:flex">
             <p>{{ description }}</p>
             <p v-if="props.canSkip && props.maxSkips - props.skips > 0">
