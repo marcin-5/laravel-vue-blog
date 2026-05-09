@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { computed } from 'vue';
 import QuestionCard from './components/QuestionCard.vue';
 import Stage1Debug from './components/Stage1Debug.vue';
 import StageHeader from './components/StageHeader.vue';
