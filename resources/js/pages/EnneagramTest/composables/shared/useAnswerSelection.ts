@@ -8,7 +8,7 @@ interface Options {
     /** Master switch to enable/disable auto-confirm for single-answer questions (controlled from UI). */
     enableAutoConfirmSingle?: Ref<boolean>;
     /** If > 0, auto-confirm for single-answer questions is deferred (used by Stage 1). */
-    autoConfirmDelayMs?: number;
+    autoConfirmDelayMs?: Ref<number> | number;
 }
 
 export function useAnswerSelection({ maxAnswers, onAutoConfirm, enableAutoConfirmSingle, autoConfirmDelayMs = 0 }: Options) {
@@ -32,8 +32,9 @@ export function useAnswerSelection({ maxAnswers, onAutoConfirm, enableAutoConfir
 
         const autoEnabled = enableAutoConfirmSingle?.value ?? true;
         if (autoEnabled && maxAnswers.value === 1 && selectedAnswers.value.length === 1) {
-            if (autoConfirmDelayMs > 0) {
-                setTimeout(onAutoConfirm, autoConfirmDelayMs ?? SINGLE_ANSWER_AUTO_CONFIRM_DELAY_MS);
+            const delay = typeof autoConfirmDelayMs === 'number' ? autoConfirmDelayMs : autoConfirmDelayMs.value;
+            if (delay > 0) {
+                setTimeout(onAutoConfirm, delay ?? SINGLE_ANSWER_AUTO_CONFIRM_DELAY_MS);
             } else {
                 onAutoConfirm();
             }

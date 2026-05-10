@@ -59,7 +59,7 @@ function isSelected(selectedAnswers: SelectedAnswer[], key: string | number) {
                 </div>
 
                 <Button
-                    v-if="props.maxAnswers > 1"
+                    v-if="props.maxAnswers > 1 || (props.maxAnswers === 1 && props.selectedAnswers.length > 0)"
                     :disabled="props.selectedAnswers.length < 1"
                     class="px-6"
                     variant="secondary"
