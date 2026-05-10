@@ -10,8 +10,12 @@
 
     # Always serve the static maintenance page with 503 status for all requests.
     handle {
-        rewrite * /maintenance.html
         header Cache-Control "no-store"
+        error "Maintenance" 503
+    }
+
+    handle_errors {
+        rewrite * /maintenance.html
         file_server
     }
 }
