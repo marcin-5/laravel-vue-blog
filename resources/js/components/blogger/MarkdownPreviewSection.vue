@@ -67,10 +67,6 @@ function handleLayoutToggle() {
 
 <template>
     <div>
-        <div class="mb-1">
-            <label :for="props.id" class="block text-sm font-medium">{{ props.label }}</label>
-        </div>
-
         <!-- Full Preview Mode -->
         <FullScreenPreview
             v-if="props.isFullPreview"
