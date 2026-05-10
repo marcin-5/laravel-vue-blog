@@ -300,6 +300,18 @@ prod-versions: ## Show runtime versions for debugging (Node/NPM in SSR container
 	$(DOCKER_COMPOSE_PROD) exec -T ssr npm -v || true
 	@echo ""
 
+prod-ready: ## Check if the app is ready to handle requests (PHP-FPM/DB)
+	@echo "⏳ Waiting for HTTP application endpoint to be reachable..."
+	@for i in $$(seq 1 15); do \
+	  if $(DOCKER_COMPOSE_PROD) exec -T app php artisan migrate:status >/dev/null 2>&1; then \
+	    echo "✅ Application is ready (PHP-FPM/DB reachable)."; \
+	    exit 0; \
+	  fi; \
+	  echo "⏳ App not ready yet ($$i/15); waiting..."; \
+	  sleep 2; \
+	done; \
+	echo "❌ App failed to become ready in time."; exit 1
+
 # Shorthand target to update code and restart selected services
 prod-update: ## Update code from Git and restart selected services with zero-502 maintenance
 	$(MAKE) prod-maintenance-on
@@ -315,15 +327,7 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 	@echo "🚀 Recreating core services without touching caddy..."
 	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps app ssr queue scheduler
 	$(MAKE) prod-wait
-	@echo "⏳ Waiting for HTTP application endpoint (/up) to be reachable..."
-	@for i in $$(seq 1 15); do \
-	  if $(DOCKER_COMPOSE_PROD) exec -T app php artisan migrate:status >/dev/null 2>&1; then \
-	    echo "✅ Application is ready (PHP-FPM/DB reachable)."; \
-	    break; \
-	  fi; \
-	  echo "⏳ App not ready yet ($$i/15); waiting..."; \
-	  sleep 2; \
-	done
+	$(MAKE) prod-ready
 	$(MAKE) prod-versions
 	@echo ""
 	@echo "🔍 Checking production assets..."
@@ -364,6 +368,7 @@ prod-update-data: ## Pull code and rebuild only the app container for data/code 
 	@echo "🚀 Recreating app service..."
 	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps app
 	$(MAKE) prod-wait
+	$(MAKE) prod-ready
 	@echo "🧹 Clearing Laravel caches..."
 	-$(DOCKER_COMPOSE_PROD) exec -T app php artisan optimize:clear
 	$(MAKE) prod-maintenance-off
