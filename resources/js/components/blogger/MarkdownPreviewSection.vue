@@ -102,7 +102,7 @@ function handleLayoutToggle() {
                     <PostFormField
                         :id="props.id"
                         :hint="props.hint"
-                        :label="props.label"
+                        :label="props.isPreviewMode ? props.translations.markdownLabel : props.label"
                         :model-value="props.modelValue"
                         :placeholder="props.placeholder"
                         :rows="props.isPreviewMode ? (props.isEdit ? 20 : 30) : props.rows"
@@ -113,6 +113,7 @@ function handleLayoutToggle() {
                 </div>
                 <!-- Preview Pane -->
                 <div v-if="props.isPreviewMode" :class="props.previewLayout === 'vertical' ? 'w-1/2' : ''">
+                    <h3 class="mb-1 text-sm font-medium">{{ props.translations.previewLabel }}</h3>
                     <MarkdownPreview :class="`min-h-[${props.minHeight}]`" :html="props.previewHtml" />
                 </div>
             </div>
