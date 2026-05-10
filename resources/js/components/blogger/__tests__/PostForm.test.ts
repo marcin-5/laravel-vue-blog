@@ -79,8 +79,8 @@ vi.mock('@/components/blogger/PostFormField.vue', () => ({
 vi.mock('@/components/blogger/PostRelatedPostsSection.vue', () => ({
     default: {
         name: 'PostRelatedPostsSection',
-        props: ['translations'],
-        template: '<div><h3>{{ translations.label }}</h3>PostRelatedPostsSection</div>',
+        props: ['translations', 'currentPostId'],
+        template: '<div><h3>{{ translations.label }}</h3>PostRelatedPostsSection (ID: {{ currentPostId }})</div>',
     },
 }));
 vi.mock('@/components/blogger/PostExternalLinksSection.vue', () => ({

@@ -395,6 +395,7 @@ const getThresholdClass = computed(() => (value: string | null, threshold1: numb
 
             <template v-if="!isExtension">
                 <PostRelatedPostsSection
+                    :current-post-id="props.post?.id"
                     :id-prefix="fieldIdPrefix"
                     :items="form.related_posts"
                     :translations="relatedPostsTranslations"

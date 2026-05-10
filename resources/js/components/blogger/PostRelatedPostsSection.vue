@@ -6,11 +6,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import type { RelatedPostItem } from '@/types/blog.types';
 import { Link, useHttp } from '@inertiajs/vue3';
 import { Plus, Trash2 } from 'lucide-vue-next';
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 interface Props {
     items: RelatedPostItem[];
     idPrefix: string;
+    currentPostId?: number;
     translations: {
         label: string;
         addItem: string;
@@ -25,11 +26,18 @@ interface Emits {
     (e: 'remove', index: number): void;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 const availableBlogs = ref<{ id: number; name: string; slug: string }[]>([]);
-const availablePosts = ref<{ id: number; title: string }[]>([]);
+const allAvailablePosts = ref<{ id: number; title: string }[]>([]);
+
+const availablePosts = computed(() => {
+    if (!props.currentPostId) {
+        return allAvailablePosts.value;
+    }
+    return allAvailablePosts.value.filter((post) => post.id !== props.currentPostId);
+});
 
 const selectedBlogId = ref<string>('');
 const selectedPostId = ref<string>('');
@@ -56,12 +64,12 @@ const fetchBlogs = async () => {
 
 const fetchPosts = async (blogId: string) => {
     if (!blogId) {
-        availablePosts.value = [];
+        allAvailablePosts.value = [];
         return;
     }
     isLoadingPosts.value = true;
     try {
-        availablePosts.value = (await http.get(route('blogger.data.posts', { blog: blogId }))) as unknown as {
+        allAvailablePosts.value = (await http.get(route('blogger.data.posts', { blog: blogId }))) as unknown as {
             id: number;
             title: string;
         }[];
@@ -101,7 +109,7 @@ const getPostTitle = (rp: RelatedPostItem) => {
     if (rp.related_post?.title) {
         return rp.related_post.title;
     }
-    return availablePosts.value.find((p) => p.id === rp.related_post_id)?.title || `Post ID: ${rp.related_post_id}`;
+    return allAvailablePosts.value.find((p) => p.id === rp.related_post_id)?.title || `Post ID: ${rp.related_post_id}`;
 };
 
 const getPostUrl = (rp: RelatedPostItem) => {
