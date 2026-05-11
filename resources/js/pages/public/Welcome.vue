@@ -6,7 +6,7 @@ import NoBlogs from '@/components/blog/NoBlogs.vue';
 import UserGroupsList from '@/components/blog/UserGroupsList.vue';
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import type { BlogItem, CategoryItem } from '@/types/blog.types';
-import { router, usePage } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -58,6 +58,7 @@ function clearFilter() {
 </script>
 
 <template>
+    <Head :title="t('meta.welcomeTitle')" />
     <div class="flex min-h-screen flex-col">
         <PublicNavbar />
         <div class="mx-auto w-full max-w-[1024px] p-6 lg:p-8">
