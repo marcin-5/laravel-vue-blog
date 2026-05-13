@@ -10,11 +10,14 @@ use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\TrackPageViews;
 use App\Http\Middleware\UpdateVisitorOnLogin;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\StartSession;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -34,6 +37,13 @@ return Application::configure(basePath: dirname(__DIR__))
             ContentSecurityPolicy::class,
             EnsureVisitorId::class,
             UpdateVisitorOnLogin::class,
+        ]);
+
+        $middleware->priority([
+            EncryptCookies::class,
+            StartSession::class,
+            SetLocale::class,
+            SubstituteBindings::class,
         ]);
 
         $middleware->alias([

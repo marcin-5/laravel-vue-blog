@@ -24,8 +24,8 @@ class SetLocale
 
         if ($locale === null) {
             $locale =
-                optional($request->user())->locale
-                ?? $request->session()->get('locale')
+                ($request->user() ? $request->user()->locale : null)
+                ?? ($request->hasSession() ? $request->session()->get('locale') : null)
                 ?? $request->cookie('locale');
         }
 
