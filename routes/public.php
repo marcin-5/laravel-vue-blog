@@ -5,9 +5,13 @@ use App\Http\Controllers\PublicBlogController;
 use App\Http\Controllers\PublicHomeController;
 use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Middleware\ContentSecurityPolicy;
+use App\Http\Middleware\EnsureVisitorId;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\HandleTranslations;
 use App\Http\Middleware\TrackMarkdownRequests;
+use App\Http\Middleware\UpdateVisitorOnLogin;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Support\Facades\Route;
 use Spatie\MarkdownResponse\Middleware\ProvideMarkdownResponse;
@@ -17,6 +21,10 @@ Route::withoutMiddleware([
     HandleInertiaRequests::class,
     AddLinkHeadersForPreloadedAssets::class,
     HandleAppearance::class,
+    HandleTranslations::class,
+    ContentSecurityPolicy::class,
+    EnsureVisitorId::class,
+    UpdateVisitorOnLogin::class,
 ])
     ->group(function () {
         Route::get('robots.txt', [RobotsController::class, 'generate']);

@@ -69,7 +69,7 @@ class DomainSitemapTest extends TestCase
         // Request sitemap from Polish domain
         $responsePl = $this->get('http://blog.pl/sitemap.xml');
         $responsePl->assertStatus(200);
-        
+
         $contentPl = $responsePl->getContent();
         $this->assertStringContainsString('polski-blog', $contentPl);
         $this->assertStringNotContainsString('english-blog', $contentPl);
@@ -77,7 +77,7 @@ class DomainSitemapTest extends TestCase
         // Request sitemap from English domain
         $responseEn = $this->get('http://blog.com/sitemap.xml');
         $responseEn->assertStatus(200);
-        
+
         $contentEn = $responseEn->getContent();
         $this->assertStringContainsString('english-blog', $contentEn);
         $this->assertStringNotContainsString('polski-blog', $contentEn);
@@ -112,5 +112,41 @@ class DomainSitemapTest extends TestCase
         $responseEn = $this->get('http://blog.com/sitemap.xml');
         $contentEn = $responseEn->getContent();
         $this->assertStringContainsString('http://blog.com/english-blog', $contentEn);
+    }
+
+    public function test_sitemap_has_correct_headers_and_no_css_selectors()
+    {
+        $response = $this->get('http://blog.pl/sitemap.xml');
+
+        $response->assertStatus(200)
+            ->assertHeader('Content-Type', 'application/xml; charset=utf-8')
+            ->assertHeader('X-Content-Type-Options', 'nosniff');
+
+        $content = $response->getContent();
+        $this->assertStringNotContainsString('.common li', $content);
+        $this->assertStringNotContainsString('.common span', $content);
+        $this->assertStringNotContainsString('.common a', $content);
+        $this->assertStringNotContainsString('.common input', $content);
+    }
+
+    public function test_it_deletes_physical_sitemap_and_robots_files()
+    {
+        $sitemapPath = public_path('sitemap.xml');
+        $robotsPath = public_path('robots.txt');
+
+        File::put($sitemapPath, 'dummy content');
+        File::put($robotsPath, 'dummy content');
+
+        $this->assertTrue(File::exists($sitemapPath));
+        $this->assertTrue(File::exists($robotsPath));
+
+        // Trigger sitemap generation which should delete the physical file
+        $this->get('http://blog.pl/sitemap.xml');
+
+        $this->assertFalse(File::exists($sitemapPath));
+
+        // Trigger robots generation which should delete the physical file
+        $this->get('http://blog.pl/robots.txt');
+        $this->assertFalse(File::exists($robotsPath));
     }
 }
