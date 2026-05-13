@@ -65,6 +65,12 @@ class Blog extends Model
 
     protected static function booted(): void
     {
+        static::addGlobalScope('locale', function (Builder $builder) {
+            if (!app()->runningInConsole() && !request()->is('dashboard*', 'settings*', 'admin*', '_/*', 'api/admin/*')) {
+                $builder->where('blogs.locale', app()->getLocale());
+            }
+        });
+
         static::created(fn() => app(SitemapObserver::class)->regenerateSitemap());
         static::updated(fn() => app(SitemapObserver::class)->regenerateSitemap());
         static::deleted(fn() => app(SitemapObserver::class)->regenerateSitemap());

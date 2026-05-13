@@ -54,9 +54,10 @@ class WelcomeQuery
         $cacheKey = "welcome_blogs_{$locale}_{$categoryFilter}";
         $ttl = app()->isLocal() ? 5 : 3600;
 
-        return Cache::remember($cacheKey, $ttl, function () use ($selectedCategoryIds) {
+        return Cache::remember($cacheKey, $ttl, function () use ($selectedCategoryIds, $locale) {
             $blogs = Blog::query()
                 ->where('is_published', true)
+                ->where('locale', $locale)
                 ->with([
                     'categories:id,slug,name',
                     'user:id,name',

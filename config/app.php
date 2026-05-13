@@ -81,18 +81,28 @@ return [
     'locale' => env('APP_LOCALE', 'en'),
     'locale_override_accept_language' => env('APP_LOCALE_OVERRIDE_ACCEPT_LANGUAGE', true),
 
-    'supported_locales' => array_values(
-        array_filter(
-            array_map(
-                static fn(string $v): string => trim($v),
-                explode(',', (string) env('APP_SUPPORTED_LOCALES', 'en,pl')),
-            ),
-        ),
-    ),
+    'supported_locales' => explode(',', (string) env('APP_SUPPORTED_LOCALES', 'en,pl'))
+            |> (fn($x) => array_map(static fn(string $v): string => trim($v), $x))
+            |> array_filter(...)
+            |> array_values(...),
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Domain Mapping
+    |--------------------------------------------------------------------------
+    |
+    | This map defines which locale should be used for a given domain.
+    |
+    */
+
+    'domain_locales' => [
+        env('APP_DOMAIN', 'osobliwy.blog') => 'pl',
+        env('APP_DOMAIN_SECONDARY', 'peculiarmatters.blog') => 'en',
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -110,9 +120,9 @@ return [
     'key' => env('APP_KEY'),
 
     'previous_keys' => [
-        ...array_filter(
-            explode(',', env('APP_PREVIOUS_KEYS', '')),
-        ),
+        ...env('APP_PREVIOUS_KEYS', '')
+                |> (fn($x) => explode(',', $x))
+                |> array_filter(...),
     ],
 
     /*

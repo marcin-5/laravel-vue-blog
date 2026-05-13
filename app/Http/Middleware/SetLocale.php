@@ -17,11 +17,17 @@ class SetLocale
     public function handle(Request $request, Closure $next): Response
     {
         $supported = (array) config('app.supported_locales', []);
+        $domainLocales = (array) config('app.domain_locales', []);
+        $host = $request->getHost();
 
-        $locale =
-            optional($request->user())->locale
-            ?? $request->session()->get('locale')
-            ?? $request->cookie('locale');
+        $locale = $domainLocales[$host] ?? null;
+
+        if ($locale === null) {
+            $locale =
+                optional($request->user())->locale
+                ?? $request->session()->get('locale')
+                ?? $request->cookie('locale');
+        }
 
         if ($locale === null) {
             $overrideAcceptLanguage = (bool) config('app.locale_override_accept_language');

@@ -132,6 +132,7 @@ services:
         environment:
             APP_DOMAIN: ${APP_DOMAIN:-osobliwy.blog}
             APP_DOMAIN_WWW: ${APP_DOMAIN_WWW:-www.osobliwy.blog}
+            APP_DOMAIN_SECONDARY: ${APP_DOMAIN_SECONDARY:-osobliwy.com}
             ENNEAGRAM_DOMAIN: ${ENNEAGRAM_DOMAIN:-enneagram-test.osobliwy.blog}
         depends_on:
             - app
