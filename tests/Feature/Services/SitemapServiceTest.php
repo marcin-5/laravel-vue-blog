@@ -16,6 +16,7 @@ it('generates sitemap with home page, published blogs, and public published post
         'name' => 'Published Blog',
         'slug' => 'published-blog',
         'is_published' => true,
+        'locale' => config('app.locale'),
     ]);
 
     Blog::factory()->create([
@@ -23,6 +24,7 @@ it('generates sitemap with home page, published blogs, and public published post
         'name' => 'Unpublished Blog',
         'slug' => 'unpublished-blog',
         'is_published' => false,
+        'locale' => config('app.locale'),
     ]);
 
     $publishedPublicPost = Post::factory()->create([
@@ -54,14 +56,12 @@ it('generates sitemap with home page, published blogs, and public published post
         'published_at' => now()->subDay(),
     ]);
 
-    app(SitemapService::class)->generate();
+    $xml = app(SitemapService::class)->getSitemap(config('app.locale'));
 
-    $sitemapXml = file_get_contents(public_path('sitemap.xml'));
-
-    expect($sitemapXml)->toContain('/')
-        ->and($sitemapXml)->toContain('published-blog')
-        ->and($sitemapXml)->toContain('published-public-post')
-        ->and($sitemapXml)->not->toContain('unpublished-blog')
-        ->and($sitemapXml)->not->toContain('unpublished-post')
-        ->and($sitemapXml)->not->toContain('published-private-post');
+    expect($xml)->toContain('/')
+        ->and($xml)->toContain('published-blog')
+        ->and($xml)->toContain('published-public-post')
+        ->and($xml)->not->toContain('unpublished-blog')
+        ->and($xml)->not->toContain('unpublished-post')
+        ->and($xml)->not->toContain('published-private-post');
 });

@@ -2,42 +2,22 @@
 
 namespace App\Observers;
 
-use App\Services\SitemapService;
-use Exception;
-use Log;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class SitemapObserver
 {
-    public function __construct(protected SitemapService $sitemapService)
-    {
-    }
-
     /**
-     * Regenerate the sitemap file.
+     * Clear sitemap cache.
      */
     public function regenerateSitemap(): void
     {
-        $sitemapPath = public_path('sitemap.xml');
-        $beforeHash = file_exists($sitemapPath) ? @sha1_file($sitemapPath) : null;
+        $locales = config('app.supported_locales', [config('app.locale')]);
 
-        try {
-            $this->sitemapService->generate();
-
-            $afterHash = file_exists($sitemapPath) ? @sha1_file($sitemapPath) : null;
-
-            if ($afterHash && $afterHash !== $beforeHash) {
-                Log::info('Sitemap regenerated', [
-                    'changed' => true,
-                    'path' => $sitemapPath,
-                ]);
-            } else {
-                Log::info('Sitemap regenerate executed but no content change detected', [
-                    'changed' => false,
-                    'path' => $sitemapPath,
-                ]);
-            }
-        } catch (Exception $e) {
-            Log::error('Failed to regenerate sitemap: ' . $e->getMessage());
+        foreach ($locales as $locale) {
+            Cache::forget("sitemap_{$locale}");
         }
+
+        Log::info('Sitemap cache cleared for all supported locales.');
     }
 }

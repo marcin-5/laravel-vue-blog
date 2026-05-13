@@ -7,7 +7,6 @@ use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
-use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\TrackMarkdownRequests;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Support\Facades\Route;
@@ -18,7 +17,6 @@ Route::withoutMiddleware([
     HandleInertiaRequests::class,
     AddLinkHeadersForPreloadedAssets::class,
     HandleAppearance::class,
-    SetLocale::class,
 ])
     ->group(function () {
         Route::get('robots.txt', [RobotsController::class, 'generate']);
