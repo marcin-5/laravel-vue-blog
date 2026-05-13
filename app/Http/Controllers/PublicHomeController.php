@@ -54,9 +54,9 @@ class PublicHomeController extends BasePublicController
         $seoDescription = data_get($messages, 'meta.welcomeDescription') ?? ('Welcome to ' . config('app.name'));
 
         $canonicalUrl = $baseUrl . (empty($data['selectedCategoryIds']) ? '' : '?categories=' . implode(
-            ',',
-            $data['selectedCategoryIds'],
-        ));
+                    ',',
+                    $data['selectedCategoryIds'],
+                ));
 
         $alternateLinks = [
             ['hreflang' => 'pl', 'href' => $canonicalUrl],
@@ -129,6 +129,8 @@ class PublicHomeController extends BasePublicController
 
         return $this->renderWithTranslations('public/About', 'about', [
             'locale' => $locale,
+            'aboutHeading' => data_get($messages, 'about.heading'),
+            'aboutHtml' => data_get($messages, 'about.content'),
             // Pass preprocessed translations (about.content already converted to HTML)
             'translations' => [
                 'messages' => $messages,
