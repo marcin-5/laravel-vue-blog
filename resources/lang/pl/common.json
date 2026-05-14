@@ -1,5 +1,6 @@
 {
     "common": {
+        "appName": "Osobliwy Blog",
         "nav": {
             "about": "O nas",
             "contact": "Kontakt",
