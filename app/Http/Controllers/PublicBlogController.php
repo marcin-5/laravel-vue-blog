@@ -65,7 +65,7 @@ class PublicBlogController extends BasePublicController
             title: $seoTitle,
             description: $metaDescription,
             canonicalUrl: $baseUrl . '/' . $blog->slug,
-            ogImage: $baseUrl . '/og-image.png',
+            ogImage: $baseUrl . '/' . (app()->getLocale() === 'pl' ? 'pl' : 'en') . '/og-image.png',
             ogType: 'blog',
             locale: app()->getLocale(),
             structuredData: $this->seo->generateBlogStructuredData(
@@ -131,7 +131,7 @@ class PublicBlogController extends BasePublicController
             title: $seoTitle,
             description: $metaDescription,
             canonicalUrl: $baseUrl . '/' . $blog->slug . '/' . $post->slug,
-            ogImage: $baseUrl . '/og-image.png',
+            ogImage: $baseUrl . '/' . (app()->getLocale() === 'pl' ? 'pl' : 'en') . '/og-image.png',
             ogType: 'article',
             locale: app()->getLocale(),
             structuredData: $this->seo->generatePostStructuredData($blog, $post, $baseUrl, $metaDescription),

@@ -32,9 +32,10 @@
         }
     </style>
 
-    <link rel="icon" href="/favicon.ico" sizes="any">
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    @php($iconsLocale = app()->getLocale() === 'pl' ? 'pl' : 'en')
+    <link rel="icon" href="/{{ $iconsLocale }}/favicon.ico" sizes="any">
+    <link rel="icon" href="/{{ $iconsLocale }}/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/{{ $iconsLocale }}/apple-touch-icon.png">
 
     {{-- SEO Meta Tags for SSR --}}
     @if(isset($page['props']['seo']))

@@ -54,9 +54,9 @@ class PublicHomeController extends BasePublicController
         $seoDescription = data_get($messages, 'meta.welcomeDescription') ?? ('Welcome to ' . config('app.name'));
 
         $canonicalUrl = $baseUrl . (empty($data['selectedCategoryIds']) ? '' : '?categories=' . implode(
-                    ',',
-                    $data['selectedCategoryIds'],
-                ));
+            ',',
+            $data['selectedCategoryIds'],
+        ));
 
         $alternateLinks = [
             ['hreflang' => 'pl', 'href' => $canonicalUrl],
@@ -68,7 +68,7 @@ class PublicHomeController extends BasePublicController
             title: $seoTitle,
             description: $seoDescription,
             canonicalUrl: $canonicalUrl,
-            ogImage: $baseUrl . '/og-image.png',
+            ogImage: $baseUrl . '/' . ($data['locale'] === 'pl' ? 'pl' : 'en') . '/og-image.png',
             ogType: 'website',
             locale: $data['locale'],
             structuredData: $this->seoService->generateHomeStructuredData(
@@ -109,7 +109,7 @@ class PublicHomeController extends BasePublicController
         $seoTitle = data_get($messages, 'about.meta.title') ?? 'About';
         $seoDescription = data_get($messages, 'about.meta.description') ?? 'About this site';
         $canonicalUrl = rtrim($baseUrl, '/') . '/about';
-        $ogImage = rtrim($baseUrl, '/') . '/og-image.png';
+        $ogImage = rtrim($baseUrl, '/') . '/' . ($locale === 'pl' ? 'pl' : 'en') . '/og-image.png';
 
         $seoData = new SeoData(
             title: $seoTitle,
@@ -155,7 +155,7 @@ class PublicHomeController extends BasePublicController
         $seoTitle = data_get($messages, 'contact.meta.title') ?? 'Contact';
         $seoDescription = data_get($messages, 'contact.meta.description') ?? 'Get in touch';
         $canonicalUrl = rtrim($baseUrl, '/') . '/contact';
-        $ogImage = rtrim($baseUrl, '/') . '/og-image.png';
+        $ogImage = rtrim($baseUrl, '/') . '/' . ($locale === 'pl' ? 'pl' : 'en') . '/og-image.png';
 
         $seoData = new SeoData(
             title: $seoTitle,
