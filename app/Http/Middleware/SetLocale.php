@@ -43,6 +43,10 @@ class SetLocale
 
         AppFacade::setLocale($locale);
 
+        config([
+            'app.name' => $locale === 'pl' ? 'Osobliwy Blog' : 'Peculiar Matters Blog',
+        ]);
+
         return $next($request);
     }
 }

@@ -13,7 +13,13 @@ return [
     |
     */
 
-    'name' => env('LARAVEL_APP_NAME', 'Osobliwy Blog'),
+    'name' => (function () {
+        $host = $_SERVER['HTTP_HOST'] ?? '';
+
+        return $host === env('APP_DOMAIN_SECONDARY', 'peculiarmatters.blog')
+            ? 'Peculiar Matters Blog'
+            : env('LARAVEL_APP_NAME', 'Osobliwy Blog');
+    })(),
 
     /*
     |--------------------------------------------------------------------------

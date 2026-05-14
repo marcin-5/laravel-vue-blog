@@ -42,10 +42,10 @@ initializeVisitorId();
 initializeTheme();
 initializeFontSize();
 
-const appName = import.meta.env.VITE_APP_NAME || 'Osobliwy Blog';
+const getAppName = (locale: string) => (locale === 'pl' ? 'Osobliwy Blog' : 'Peculiar Matters Blog');
 
 createInertiaApp({
-    title: (title) => title || appName,
+    title: (title) => title || getAppName(i18n.global.locale.value),
     resolve: (name) => resolvePageComponent(`./pages/${name}.vue`, import.meta.glob<DefineComponent>('./pages/**/*.vue')),
     setup({ el, App, props, plugin }) {
         if (!el) {
