@@ -40,19 +40,21 @@ class BotDashboardStatsTest extends TestCase
             ->assertOk()
             ->assertInertia(fn(Assert $page) => $page
                 ->component('app/Dashboard')
-                ->has('botStats')
-                ->where('botStats.total_hits', 60)
-                ->has('botStats.last_seen', 2)
-                ->where('botStats.last_seen.0.name', 'UnknownCrawler/1.0')
-                ->where('botStats.last_seen.0.matched_fragment', 'UnknownCrawler/1.0')
-                ->where(
-                    'botStats.last_seen.1.name',
-                    'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
-                )
-                ->where('botStats.last_seen.1.matched_fragment', 'googlebot') // Found in config/bots.php
-                ->has('botStats.top_hits', 2)
-                ->where('botStats.top_hits.0.name', 'UnknownCrawler/1.0')
-                ->where('botStats.top_hits.0.hits', 50),
+                ->loadDeferredProps(fn(Assert $page) => $page
+                    ->has('botStats')
+                    ->where('botStats.total_hits', 60)
+                    ->has('botStats.last_seen', 2)
+                    ->where('botStats.last_seen.0.name', 'UnknownCrawler/1.0')
+                    ->where('botStats.last_seen.0.matched_fragment', 'UnknownCrawler/1.0')
+                    ->where(
+                        'botStats.last_seen.1.name',
+                        'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+                    )
+                    ->where('botStats.last_seen.1.matched_fragment', 'googlebot') // Found in config/bots.php
+                    ->has('botStats.top_hits', 2)
+                    ->where('botStats.top_hits.0.name', 'UnknownCrawler/1.0')
+                    ->where('botStats.top_hits.0.hits', 50),
+                ),
             );
     }
 
@@ -65,7 +67,9 @@ class BotDashboardStatsTest extends TestCase
             ->assertOk()
             ->assertInertia(fn(Assert $page) => $page
                 ->component('app/Dashboard')
-                ->where('botStats', null),
+                ->loadDeferredProps(fn(Assert $page) => $page
+                    ->where('botStats', null),
+                ),
             );
     }
 }

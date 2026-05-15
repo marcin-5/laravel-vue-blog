@@ -6,6 +6,7 @@ use App\Models\NewsletterSubscription;
 use App\Models\PageView;
 use App\Models\Post;
 use App\Models\User;
+use Inertia\Testing\AssertableInertia as Assert;
 
 test('blogger sees their blog statistics', function () {
     $user = User::factory()->create(['role' => UserRole::Blogger->value]);
@@ -37,16 +38,19 @@ test('blogger sees their blog statistics', function () {
 
     $response->assertStatus(200);
     $response->assertInertia(fn($page) => $page
-        ->has('blogStats', 1)
-        ->where('blogStats.0.name', $blog->name)
-        ->where('blogStats.0.posts_count', 4)
-        ->where('blogStats.0.lifetime_views', 5)
-        ->where('blogStats.0.daily_subscriptions_count', 2)
-        ->where('blogStats.0.weekly_subscriptions_count', 3)
-        ->has('postsStats.timeline')
-        ->has('postsStats.performance')
-        ->where('postsStats.timeline.0.title', $post->title)
-        ->where('postsStats.timeline.0.views.total', 5)
-        ->where('postsStats.performance.0.title', $post->title),
+        ->component('app/Dashboard')
+        ->loadDeferredProps(fn(Assert $page) => $page
+            ->has('blogStats', 1)
+            ->where('blogStats.0.name', $blog->name)
+            ->where('blogStats.0.posts_count', 4)
+            ->where('blogStats.0.lifetime_views', 5)
+            ->where('blogStats.0.daily_subscriptions_count', 2)
+            ->where('blogStats.0.weekly_subscriptions_count', 3)
+            ->has('postsStats.timeline')
+            ->has('postsStats.performance')
+            ->where('postsStats.timeline.0.title', $post->title)
+            ->where('postsStats.timeline.0.views.total', 5)
+            ->where('postsStats.performance.0.title', $post->title),
+        )
     );
 });

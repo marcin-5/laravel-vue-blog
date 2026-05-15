@@ -39,16 +39,18 @@ test('dashboard displays latest unique newsletter subscriptions for admin', func
     $response->assertStatus(200);
     $response->assertInertia(fn(Assert $page) => $page
         ->component('app/Dashboard')
-        ->has('newsletterSubscriptions', 2)
-        ->where('newsletterSubscriptions.0.email', 'user1@example.com')
-        ->where('newsletterSubscriptions.0.subscriptions', [
-            ['blog' => 'Blog 2', 'frequency' => 'daily'],
-            ['blog' => 'Blog 1', 'frequency' => 'daily'],
-        ])
-        ->where('newsletterSubscriptions.1.email', 'user2@example.com')
-        ->where('newsletterSubscriptions.1.subscriptions', [
-            ['blog' => 'Blog 1', 'frequency' => 'daily'],
-        ]),
+        ->loadDeferredProps(fn(Assert $page) => $page
+            ->has('newsletterSubscriptions', 2)
+            ->where('newsletterSubscriptions.0.email', 'user1@example.com')
+            ->where('newsletterSubscriptions.0.subscriptions', [
+                ['blog' => 'Blog 2', 'frequency' => 'daily'],
+                ['blog' => 'Blog 1', 'frequency' => 'daily'],
+            ])
+            ->where('newsletterSubscriptions.1.email', 'user2@example.com')
+            ->where('newsletterSubscriptions.1.subscriptions', [
+                ['blog' => 'Blog 1', 'frequency' => 'daily'],
+            ]),
+        ),
     );
 });
 
@@ -68,6 +70,8 @@ test('dashboard does not display newsletter subscriptions for non-admin', functi
     $response->assertStatus(200);
     $response->assertInertia(fn(Assert $page) => $page
         ->component('app/Dashboard')
-        ->where('newsletterSubscriptions', []),
+        ->loadDeferredProps(fn(Assert $page) => $page
+            ->where('newsletterSubscriptions', []),
+        ),
     );
 });
