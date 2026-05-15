@@ -106,6 +106,35 @@ readonly class PublicHomeSeoBuilder
         );
     }
 
+    /**
+     * Build SEO data for the newsletter page.
+     */
+    public function buildNewsletterSeo(array $messages): SeoData
+    {
+        $baseUrl = config('app.url');
+        $locale = app()->getLocale();
+        $canonicalUrl = rtrim($baseUrl, '/') . '/newsletter';
+
+        $title = data_get($messages, 'title.subscribe') ?? 'Newsletter';
+        $description = data_get($messages, 'description.subscribe') ?? 'Subscribe to our newsletter';
+
+        return new SeoData(
+            title: $title,
+            description: strip_tags($description),
+            canonicalUrl: $canonicalUrl,
+            ogImage: $this->getOgImage($baseUrl, $locale),
+            ogType: 'website',
+            locale: $locale,
+            structuredData: [
+                '@context' => 'https://schema.org',
+                '@type' => 'WebPage',
+                'name' => $title,
+                'url' => $canonicalUrl,
+                'description' => strip_tags($description),
+            ],
+        );
+    }
+
     private function getOgImage(string $baseUrl, string $locale): string
     {
         return rtrim($baseUrl, '/') . '/' . ($locale === 'pl' ? 'pl' : 'en') . '/og-image.png';

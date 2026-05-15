@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Builders\PublicHomeSeoBuilder;
 use App\Http\Requests\StoreNewsletterSubscriptionRequest;
 use App\Http\Requests\UnsubscribeNewsletterRequest;
 use App\Models\Blog;
@@ -9,6 +10,7 @@ use App\Models\NewsletterSubscription;
 use App\Services\IdentityResolver;
 use App\Services\NewsletterService;
 use App\Services\TranslationService;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -23,10 +25,14 @@ class NewsletterController extends BasePublicController
         protected TranslationService $translations,
         private readonly IdentityResolver $identityResolver,
         private readonly NewsletterService $newsletterService,
+        private readonly PublicHomeSeoBuilder $seoBuilder,
     ) {
         parent::__construct($translations);
     }
 
+    /**
+     * @throws FileNotFoundException
+     */
     public function index(Request $request): Response
     {
         $selectedBlogId = $request->integer('blog_id');
@@ -34,12 +40,15 @@ class NewsletterController extends BasePublicController
 
         $this->setLocaleFromBlog($blogs, $selectedBlogId);
 
+        $messages = $this->translations->getPageTranslations('newsletter');
+
         return $this->renderWithTranslations('public/Newsletter', 'newsletter', [
             'blogs' => $blogs,
             'selectedBlogId' => $selectedBlogId,
             'userEmail' => $request->user()?->email,
             'mode' => 'subscribe',
             'config' => config('newsletter'),
+            'seo' => $this->seoBuilder->buildNewsletterSeo($messages)->toArray(),
         ]);
     }
 
@@ -77,6 +86,9 @@ class NewsletterController extends BasePublicController
         return back()->with('message', __('newsletter.messages.success_subscribe'));
     }
 
+    /**
+     * @throws FileNotFoundException
+     */
     public function manage(Request $request): Response
     {
         if (!$request->hasValidSignature()) {
@@ -93,6 +105,8 @@ class NewsletterController extends BasePublicController
 
         $blogs = $this->getPublishedBlogs();
 
+        $messages = $this->translations->getPageTranslations('newsletter');
+
         return $this->renderWithTranslations('public/Newsletter', 'newsletter', [
             'blogs' => $blogs,
             'email' => $email,
@@ -101,6 +115,7 @@ class NewsletterController extends BasePublicController
             'unsubscribeUrl' => URL::signedRoute('newsletter.unsubscribe', ['email' => $email]),
             'mode' => 'manage',
             'config' => config('newsletter'),
+            'seo' => $this->seoBuilder->buildNewsletterSeo($messages)->toArray(),
         ]);
     }
 
