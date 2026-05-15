@@ -27,6 +27,7 @@ class NewsletterStatsQuery
 
         $subscriptions = NewsletterSubscription::with('blog')
             ->whereIn('email', $latestEmails)
+            ->latest()
             ->get()
             ->groupBy('email');
 
