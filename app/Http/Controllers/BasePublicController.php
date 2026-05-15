@@ -21,6 +21,10 @@ class BasePublicController extends Controller
      */
     protected function renderWithTranslations(string $component, string $pageType, array $data = []): Response
     {
+        if (!isset($data['seo'])) {
+            throw new \RuntimeException("The 'seo' key is required for public pages in " . static::class);
+        }
+
         $locale = app()->getLocale();
 
         // Respect provided translations override, if any
