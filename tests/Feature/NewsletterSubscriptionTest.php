@@ -143,3 +143,38 @@ test('can unsubscribe from all via management page', function () {
 
     expect(NewsletterSubscription::where('email', 'test@example.com')->count())->toBe(0);
 });
+
+test('newsletter update requires valid signature', function () {
+    $blog = createBlog(['is_published' => true]);
+
+    $response = $this->post(route('newsletter.update', ['email' => 'test@example.com']), [
+        'email' => 'test@example.com',
+        'subscriptions' => [
+            ['blog_id' => $blog->id, 'frequency' => 'daily'],
+        ],
+    ]);
+
+    $response->assertStatus(403);
+});
+
+test('newsletter unsubscribe requires valid signature', function () {
+    $response = $this->post(route('newsletter.unsubscribe', ['email' => 'test@example.com']), [
+        'email' => 'test@example.com',
+    ]);
+
+    $response->assertStatus(403);
+});
+
+test('newsletter management page fails with expired signature', function () {
+    $url = URL::temporarySignedRoute(
+        'newsletter.manage',
+        now()->addMinutes(1),
+        ['email' => 'test@example.com']
+    );
+
+    $this->travel(2)->minutes();
+
+    $response = $this->get($url);
+
+    $response->assertStatus(403);
+});
