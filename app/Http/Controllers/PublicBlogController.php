@@ -2,17 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\DataTransferObjects\SeoData;
+use App\Builders\PublicBlogSeoBuilder;
 use App\Http\Controllers\Concerns\FormatsDatesForLocale;
 use App\Http\Controllers\Concerns\FormatsPaginator;
 use App\Http\Controllers\Concerns\HandlesViewStats;
+use App\Http\Resources\PublicBlogDetailResource;
 use App\Http\Resources\PublicBlogResource;
+use App\Http\Resources\PublicPostDetailResource;
 use App\Http\Resources\PublicPostResource;
 use App\Models\Blog;
-use App\Models\ExternalLink;
-use App\Models\LandingPage;
 use App\Models\Post;
-use App\Models\RelatedPost;
 use App\Queries\Public\PublicBlogPostsQuery;
 use App\Services\BlogNavigationService;
 use App\Services\MarkdownService;
@@ -31,6 +30,7 @@ class PublicBlogController extends BasePublicController
     public function __construct(
         private readonly MarkdownService $markdown,
         private readonly SeoService $seo,
+        private readonly PublicBlogSeoBuilder $seoBuilder,
         private readonly BlogNavigationService $navigation,
         private readonly StatsService $stats,
         protected TranslationService $translations,
@@ -45,52 +45,27 @@ class PublicBlogController extends BasePublicController
     public function landing(Request $request, Blog $blog, PublicBlogPostsQuery $query): Response
     {
         $this->ensureBlogIsPublic($blog);
+        $blog->load(['landingPage', 'user']);
 
-        $landing = $blog->landingPage;
         $paginator = $query->handle($blog);
 
-        // Remove strip markers from the description
         $descriptionHtml = str_replace('-!-', '', $this->markdown->convertToHtml($blog->description));
-
         $metaDescription = $this->seo->generateMetaDescription(
-            $descriptionHtml ?: $landing?->content_html ?: $blog->name,
-        );
-
-        // If blog has an explicit SEO title, use it as-is (without appending app name).
-        // Otherwise, fall back to "{blog name} - {app name}".
-        $seoTitle = $blog->seo_title ?: ($blog->name . ' - ' . config('app.name'));
-
-        $baseUrl = config('app.url');
-        $seoData = new SeoData(
-            title: $seoTitle,
-            description: $metaDescription,
-            canonicalUrl: $baseUrl . '/' . $blog->slug,
-            ogImage: $baseUrl . '/' . (app()->getLocale() === 'pl' ? 'pl' : 'en') . '/og-image.png',
-            ogType: 'blog',
-            locale: app()->getLocale(),
-            structuredData: $this->seo->generateBlogStructuredData(
-                $blog,
-                $paginator->items(),
-                $baseUrl,
-                $metaDescription,
-            ),
+            $descriptionHtml ?: $blog->landingPage?->content_html ?: $blog->name,
         );
 
         return $this->renderWithTranslations('public/blog/Landing', 'blog', [
             'locale' => app()->getLocale(),
-            'blog' => new PublicBlogResource($blog)->toArray($request) + [
-                    'descriptionHtml' => $descriptionHtml,
-                    'authorName' => $blog->user?->name,
-                    'authorEmail' => $blog->user?->email,
-                ],
-            'landingHtml' => $landing?->content_html ?? '',
+            'blog' => new PublicBlogDetailResource($blog),
+            'landingHtml' => $blog->landingPage?->content_html ?? '',
             'footerHtml' => $this->markdown->convertToHtml($blog->footer),
             'metaDescription' => $metaDescription,
-            'posts' => PublicPostResource::collection($paginator->items())->toArray($request),
+            'posts' => PublicPostResource::collection($paginator->items()),
             'pagination' => $this->formatPagination($paginator),
             'sidebar' => (int) ($blog->sidebar ?? 0),
+            'sidebarPosition' => $blog->sidebar_position,
             'navigation' => $this->navigation->getLandingNavigation($blog),
-            'seo' => $seoData->toArray(),
+            'seo' => $this->seoBuilder->buildLandingSeo($blog, $paginator, $metaDescription)->toArray(),
             'viewStats' => Inertia::defer(fn() => $this->getViewStats(Blog::class, $blog->id, $blog->user_id)),
         ]);
     }
@@ -117,109 +92,29 @@ class PublicBlogController extends BasePublicController
         $post = $blog
             ->posts()
             ->findBySlugForPublic($postSlug)
+            ->with([
+                'user',
+                'extensions' => fn($q) => $q->where('is_published', true)->oldest(),
+                'relatedPosts' => fn($q) => $q->orderBy('display_order'),
+                'relatedPosts.relatedPost.blog',
+                'externalLinks' => fn($q) => $q->orderBy('display_order'),
+            ])
             ->firstOrFail();
 
         $paginator = $query->handle($blog);
         $metaDescription = $post->excerpt ?: $this->seo->generateMetaDescription($post->content_html);
 
-        $baseUrl = config('app.url');
-        // If post has an explicit SEO title, use it as-is (without appending blog name).
-        // Otherwise, fall back to "{post title} - {blog name}".
-        $seoTitle = $post->seo_title ?: ($post->title . ' - ' . $blog->name);
-
-        $seoData = new SeoData(
-            title: $seoTitle,
-            description: $metaDescription,
-            canonicalUrl: $baseUrl . '/' . $blog->slug . '/' . $post->slug,
-            ogImage: $baseUrl . '/' . (app()->getLocale() === 'pl' ? 'pl' : 'en') . '/og-image.png',
-            ogType: 'article',
-            locale: app()->getLocale(),
-            structuredData: $this->seo->generatePostStructuredData($blog, $post, $baseUrl, $metaDescription),
-            publishedTime: $post->published_at?->toIso8601String(),
-            modifiedTime: $post->updated_at?->toIso8601String(),
-        );
-
         return $this->renderWithTranslations('public/blog/Post', 'post', [
             'locale' => app()->getLocale(),
-            'blog' => new PublicBlogResource($blog)->toArray($request),
-            'post' => [
-                'id' => $post->id,
-                'title' => $post->title,
-                'slug' => $post->slug,
-                'author' => $post->user?->name ?? $blog->user->name,
-                'author_email' => $post->user?->email ?? $blog->user->email,
-                'summaryHtml' => $post->summary_html,
-                'contentHtml' => $post->content_html,
-                'published_at' => $post->published_at?->format('Y-m-d'),
-                'visibility' => $post->visibility,
-                'excerpt' => $post->excerpt,
-                'summary' => $post->summary,
-                'extensions' => $post
-                    ->extensions()
-                    ->where('is_published', true)
-                    ->oldest()
-                    ->get()
-                    ->map(fn($ext) => [
-                        'id' => $ext->id,
-                        'title' => $ext->title,
-                        'contentHtml' => $ext->content_html,
-                    ]),
-                // Related posts (optional)
-                'relatedPosts' => RelatedPost::query()
-                    ->where('post_id', $post->id)
-                    ->orderBy('display_order')
-                    ->get()
-                    ->map(function ($rp) {
-                        $related = $rp->relatedPost()->with(['blog'])->first();
-                        return [
-                            'id' => $rp->id,
-                            'blog_id' => $rp->blog_id,
-                            'related_post_id' => $rp->related_post_id,
-                            'reason' => $rp->reason,
-                            'excerpt' => $related?->excerpt,
-                            'display_order' => $rp->display_order,
-                            'blog_slug' => $related?->blog?->slug,
-                            'related_post' => $related ? [
-                                'id' => $related->id,
-                                'title' => $related->title,
-                                'slug' => $related->slug,
-                            ] : null,
-                        ];
-                    }),
-                // External links (optional)
-                'externalLinks' => ExternalLink::query()
-                    ->where('post_id', $post->id)
-                    ->orderBy('display_order')
-                    ->get()
-                    ->map(fn($el) => [
-                        'id' => $el->id,
-                        'title' => $el->title,
-                        'url' => $el->url,
-                        'description' => $el->description,
-                        'reason' => $el->reason,
-                        'display_order' => $el->display_order,
-                    ]),
-            ],
-            'posts' => PublicPostResource::collection($paginator->items())->toArray($request),
+            'blog' => new PublicBlogResource($blog),
+            'post' => new PublicPostDetailResource($post),
+            'posts' => PublicPostResource::collection($paginator->items()),
             'pagination' => $this->formatPagination($paginator),
-            'sidebarPosition' => $this->getSidebarPosition($blog),
             'sidebar' => (int) ($blog->sidebar ?? 0),
+            'sidebarPosition' => $blog->sidebar_position,
             'navigation' => $this->navigation->getPostNavigation($blog, $post),
-            'seo' => $seoData->toArray(),
+            'seo' => $this->seoBuilder->buildPostSeo($blog, $post, $metaDescription)->toArray(),
             'viewStats' => Inertia::defer(fn() => $this->getViewStats(Post::class, $post->id, $blog->user_id)),
         ]);
-    }
-
-    /**
-     * Determine sidebar placement from landing page settings.
-     */
-    private function getSidebarPosition(Blog $blog): string
-    {
-        // kept for backward compatibility (used on Post page props)
-        if (($blog->sidebar ?? 0) === 0) {
-            return LandingPage::SIDEBAR_NONE;
-        }
-
-        return ($blog->sidebar ?? 0) < 0 ? LandingPage::SIDEBAR_LEFT : LandingPage::SIDEBAR_RIGHT;
     }
 }

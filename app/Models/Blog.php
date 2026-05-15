@@ -66,7 +66,13 @@ class Blog extends Model
     protected static function booted(): void
     {
         static::addGlobalScope('locale', function (Builder $builder) {
-            if (!app()->runningInConsole() && !request()->is('dashboard*', 'settings*', 'admin*', '_/*', 'api/admin/*')) {
+            if (!app()->runningInConsole() && !request()->is(
+                    'dashboard*',
+                    'settings*',
+                    'admin*',
+                    '_/*',
+                    'api/admin/*',
+                )) {
                 $builder->where('blogs.locale', app()->getLocale());
             }
         });
@@ -138,6 +144,20 @@ class Blog extends Model
     public function getSeoTitleWithFallback(): string
     {
         return $this->seo_title ?: $this->name;
+    }
+
+    /**
+     * Determine sidebar placement from landing page settings.
+     */
+    public function getSidebarPositionAttribute(): string
+    {
+        $sidebar = (int) ($this->sidebar ?? 0);
+
+        if ($sidebar === 0) {
+            return LandingPage::SIDEBAR_NONE;
+        }
+
+        return $sidebar < 0 ? LandingPage::SIDEBAR_LEFT : LandingPage::SIDEBAR_RIGHT;
     }
 
     /**

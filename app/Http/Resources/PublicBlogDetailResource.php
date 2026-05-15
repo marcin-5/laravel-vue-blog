@@ -1,0 +1,35 @@
+<?php
+
+namespace App\Http\Resources;
+
+use App\Services\MarkdownService;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class PublicBlogDetailResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        /** @var MarkdownService $markdown */
+        $markdown = app(MarkdownService::class);
+        $descriptionHtml = str_replace('-!-', '', $markdown->convertToHtml($this->description));
+
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'slug' => $this->slug,
+            'motto' => $this->motto,
+            'theme' => $this->theme,
+            'descriptionHtml' => $descriptionHtml,
+            'footerHtml' => $markdown->convertToHtml($this->footer),
+            'authorName' => $this->user?->name,
+            'authorEmail' => $this->user?->email,
+            'sidebar' => (int) ($this->sidebar ?? 0),
+        ];
+    }
+}
