@@ -12,6 +12,7 @@ readonly class VisitorStatsRow
         public int $lifetimeViews,
         public ?string $userAgent,
         public ?string $lastSeenAt = null,
+        public ?string $rowId = null,
     ) {
     }
 
@@ -25,6 +26,7 @@ readonly class VisitorStatsRow
             lifetimeViews: (int) $row->lifetime_views,
             userAgent: isset($row->user_agent) ? (string) $row->user_agent : null,
             lastSeenAt: isset($row->last_seen_at) ? (string) $row->last_seen_at : null,
+            rowId: isset($row->row_id) ? (string) $row->row_id : null,
         );
     }
 
@@ -38,6 +40,7 @@ readonly class VisitorStatsRow
             'lifetime_views' => $this->lifetimeViews,
             'user_agent' => $this->userAgent,
             'last_seen_at' => $this->lastSeenAt,
+            'row_id' => $this->rowId,
         ];
     }
 }

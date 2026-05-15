@@ -3,34 +3,18 @@
 namespace App\Services;
 
 use App\Enums\StatsSort;
-use App\Models\PageView;
 use App\Queries\Stats\BlogViewsQuery;
-use App\Queries\Stats\BotViewsQuery;
 use App\Queries\Stats\PostViewsQuery;
 use App\Queries\Stats\VisitorViewsQuery;
-use App\Services\Stats\UniqueViewerKeyBuilder;
 use Illuminate\Support\Collection;
 
 readonly class StatsService
 {
     public function __construct(
-        private UniqueViewerKeyBuilder $uniqueViewerKeyBuilder,
         private BlogViewsQuery $blogViewsQuery,
         private PostViewsQuery $postViewsQuery,
         private VisitorViewsQuery $visitorViewsQuery,
-        private BotViewsQuery $botViewsQuery,
-    ) {
-    }
-
-    /**
-     * Returns aggregated views for bots for the given criteria.
-     *
-     * @return Collection<int, array{user_agent:string,hits:int,last_seen_at:string}>
-     */
-    public function botViews(StatsCriteria $criteria): Collection
-    {
-        return $this->botViewsQuery->execute($criteria);
-    }
+    ) {}
 
     /**
      * Returns aggregated views for blogs within the given period.
@@ -113,6 +97,7 @@ readonly class StatsService
                     $existing['views'] += $row['views'];
                     $existing['lifetime_views'] += $row['lifetime_views'];
                     $existing['user_agent'] = $existing['user_agent'] ?? $row['user_agent'];
+                    $existing['row_id'] = $existing['row_id'] ?? $row['row_id'];
                     if (isset($row['last_seen_at'])) {
                         if (!isset($existing['last_seen_at']) || $row['last_seen_at'] > $existing['last_seen_at']) {
                             $existing['last_seen_at'] = $row['last_seen_at'];
@@ -125,31 +110,20 @@ readonly class StatsService
 
         // Apply sorting & limiting to merged collection similar to query
         $specialVisitors = $merged->values();
-        switch ($criteria->sort) {
-            case StatsSort::ViewsAsc:
-                $specialVisitors = $specialVisitors->sortBy('views')->values();
-                break;
-            case StatsSort::LastSeenAsc:
-                $specialVisitors = $specialVisitors->sortBy('last_seen_at')->values();
-                break;
-            case StatsSort::LastSeenDesc:
-                $specialVisitors = $specialVisitors->sortByDesc('last_seen_at')->values();
-                break;
-            case StatsSort::NameAsc:
-                $specialVisitors = $specialVisitors->sortBy(
-                    'visitor_label',
-                    SORT_NATURAL | SORT_FLAG_CASE,
-                )->values();
-                break;
-            case StatsSort::NameDesc:
-                $specialVisitors = $specialVisitors->sortByDesc(
-                    'visitor_label',
-                    SORT_NATURAL | SORT_FLAG_CASE,
-                )->values();
-                break;
-            default:
-                $specialVisitors = $specialVisitors->sortByDesc('views')->values();
-        }
+        $specialVisitors = match ($criteria->sort) {
+            StatsSort::ViewsAsc => $specialVisitors->sortBy('views')->values(),
+            StatsSort::LastSeenAsc => $specialVisitors->sortBy('last_seen_at')->values(),
+            StatsSort::LastSeenDesc => $specialVisitors->sortByDesc('last_seen_at')->values(),
+            StatsSort::NameAsc => $specialVisitors->sortBy(
+                'visitor_label',
+                SORT_NATURAL | SORT_FLAG_CASE,
+            )->values(),
+            StatsSort::NameDesc => $specialVisitors->sortByDesc(
+                'visitor_label',
+                SORT_NATURAL | SORT_FLAG_CASE,
+            )->values(),
+            default => $specialVisitors->sortByDesc('views')->values(),
+        };
 
         if ($criteria->limit !== null) {
             $specialVisitors = $specialVisitors->take(max(1, $criteria->limit))->values();
@@ -166,19 +140,5 @@ readonly class StatsService
     public function visitorViews(StatsCriteria $criteria): Collection
     {
         return $this->visitorViewsQuery->execute($criteria);
-    }
-
-    public function countUniqueViews(string $morphClass, int $id): int
-    {
-        $uniqueViewerKeySql = $this->uniqueViewerKeyBuilder->build('page_views');
-
-        /** @var int $count */
-        $count = PageView::query()
-            ->where('viewable_type', $morphClass)
-            ->where('viewable_id', $id)
-            ->selectRaw("COUNT(DISTINCT ($uniqueViewerKeySql)) as cnt")
-            ->value('cnt');
-
-        return $count;
     }
 }

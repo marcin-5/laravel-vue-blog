@@ -52,7 +52,7 @@ class VisitorViewsQuery
     }
 
     /**
-     * @param class-string<BotView|AnonymousView|MarkdownView> $modelClass
+     * @param  class-string<BotView|AnonymousView|MarkdownView>  $modelClass
      */
     private function executeAggregatedViews(StatsCriteria $criteria, string $modelClass, string $tableName): Collection
     {
@@ -65,12 +65,13 @@ class VisitorViewsQuery
         $query = $modelClass::query()
             ->when(
                 !$isMarkdown,
-                fn(Builder $q) => $q->join('user_agents', 'user_agents.id', '=', "{$tableName}.user_agent_id"),
+                fn(Builder $q) => $q->join('user_agents', 'user_agents.id', '=', "$tableName.user_agent_id"),
             )
-            ->when($bounds, fn(Builder $q) => $q->whereBetween("{$tableName}.last_seen_at", $bounds))
+            ->when($bounds, fn(Builder $q) => $q->whereBetween("$tableName.last_seen_at", $bounds))
             ->selectRaw(
-                ($isMarkdown ? "COALESCE({$tableName}.user_agent, 'Unknown') as visitor_label," : 'user_agents.name as visitor_label,') .
-                ($isMarkdown ? "COALESCE({$tableName}.user_agent, 'Unknown') as user_agent," : ' user_agents.name as user_agent,') .
+                ($isMarkdown ? "COALESCE($tableName.user_agent, 'Unknown') as visitor_label," : 'user_agents.name as visitor_label,') .
+                ($isMarkdown ? "COALESCE($tableName.user_agent, 'Unknown') as row_id," : 'user_agents.name as row_id,') .
+                ($isMarkdown ? "COALESCE($tableName.user_agent, 'Unknown') as user_agent," : ' user_agents.name as user_agent,') .
                 ' SUM(CASE WHEN viewable_type = ? THEN hits ELSE 0 END) as blog_views,' .
                 ' SUM(CASE WHEN viewable_type = ? THEN hits ELSE 0 END) as post_views,' .
                 ' SUM(hits) as views,' .
@@ -92,7 +93,7 @@ class VisitorViewsQuery
                 $criteria->blogId,
                 fn(Builder $q) => $this->applyBlogIdFilter($q, $criteria, $blogMorphClass, $postMorphClass, $tableName),
             )
-            ->groupByRaw($isMarkdown ? "COALESCE({$tableName}.user_agent, 'Unknown')" : 'user_agents.name');
+            ->groupByRaw($isMarkdown ? "COALESCE($tableName.user_agent, 'Unknown')" : 'user_agents.name');
 
         $this->applySort($query, $criteria->sort);
         $this->applyLimit($query, $criteria->limit);
@@ -122,16 +123,16 @@ class VisitorViewsQuery
                 ->whereExists(function (QueryBuilder $existsQuery) use ($criteria, $blogMorphClass, $tableName) {
                     $existsQuery
                         ->from('blogs')
-                        ->whereColumn('blogs.id', "{$tableName}.viewable_id")
-                        ->where("{$tableName}.viewable_type", '=', $blogMorphClass)
+                        ->whereColumn('blogs.id', "$tableName.viewable_id")
+                        ->where("$tableName.viewable_type", '=', $blogMorphClass)
                         ->where('blogs.user_id', '=', $criteria->bloggerId);
                 })
                 ->orWhereExists(function (QueryBuilder $existsQuery) use ($criteria, $postMorphClass, $tableName) {
                     $existsQuery
                         ->from('blogs')
                         ->join('posts', 'posts.blog_id', '=', 'blogs.id')
-                        ->whereColumn('posts.id', "{$tableName}.viewable_id")
-                        ->where("{$tableName}.viewable_type", '=', $postMorphClass)
+                        ->whereColumn('posts.id', "$tableName.viewable_id")
+                        ->where("$tableName.viewable_type", '=', $postMorphClass)
                         ->where('blogs.user_id', '=', $criteria->bloggerId);
                 });
         });
@@ -147,14 +148,17 @@ class VisitorViewsQuery
         $query->where(function (Builder $innerQuery) use ($criteria, $blogMorphClass, $postMorphClass, $tableName) {
             $innerQuery
                 ->where(function (Builder $q) use ($criteria, $blogMorphClass, $tableName) {
-                    $q->where("{$tableName}.viewable_type", $blogMorphClass)
-                        ->where("{$tableName}.viewable_id", $criteria->blogId);
+                    $q
+                        ->where("$tableName.viewable_type", $blogMorphClass)
+                        ->where("$tableName.viewable_id", $criteria->blogId);
                 })
                 ->orWhere(function (Builder $q) use ($criteria, $postMorphClass, $tableName) {
-                    $q->where("{$tableName}.viewable_type", $postMorphClass)
+                    $q
+                        ->where("$tableName.viewable_type", $postMorphClass)
                         ->whereExists(function (QueryBuilder $existsQuery) use ($criteria, $tableName) {
-                            $existsQuery->from('posts')
-                                ->whereColumn('posts.id', "{$tableName}.viewable_id")
+                            $existsQuery
+                                ->from('posts')
+                                ->whereColumn('posts.id', "$tableName.viewable_id")
                                 ->where('posts.blog_id', $criteria->blogId);
                         });
                 });
@@ -198,7 +202,8 @@ class VisitorViewsQuery
                 'ns.visitor_id',
             )
             ->leftJoin('posts', function ($join) use ($postMorphClass) {
-                $join->on('posts.id', '=', 'page_views.viewable_id')
+                $join
+                    ->on('posts.id', '=', 'page_views.viewable_id')
                     ->where('page_views.viewable_type', '=', $postMorphClass);
             })
             ->when($bounds, fn(Builder $q) => $q->whereBetween('page_views.created_at', $bounds))
@@ -212,7 +217,7 @@ class VisitorViewsQuery
                     'page_views',
                 ),
             )
-            ->groupBy('visitor_label', $visitorLabelColumn, 'page_views.user_agent')
+            ->groupBy('visitor_label', $visitorLabelColumn)
             ->when($criteria->visitorType === 'anonymous', function (Builder $query) {
                 $query->whereNull('page_views.user_id');
             });
@@ -236,11 +241,13 @@ class VisitorViewsQuery
 
         $lifetimeViewsSubquery = $this->buildLifetimeViewsSubquery($groupByColumn);
         $visitorLabelSelect = $this->buildVisitorLabelSelect($criteria, $visitorLabelColumn);
+        $rowIdSelect = "$visitorLabelColumn as row_id,";
 
         if ($criteria->blogId === null) {
             $this->applySelectWithoutBlogFilter(
                 $query,
                 $visitorLabelSelect,
+                $rowIdSelect,
                 $blogMorphClass,
                 $postMorphClass,
                 $lifetimeViewsSubquery,
@@ -249,6 +256,7 @@ class VisitorViewsQuery
             $this->applySelectWithBlogFilter(
                 $query,
                 $visitorLabelSelect,
+                $rowIdSelect,
                 $criteria->blogId,
                 $blogMorphClass,
                 $postMorphClass,
@@ -282,13 +290,15 @@ class VisitorViewsQuery
     private function applySelectWithoutBlogFilter(
         Builder $query,
         string $visitorLabelSelect,
+        string $rowIdSelect,
         string $blogMorphClass,
         string $postMorphClass,
         string $lifetimeViewsSubquery,
     ): void {
         $query->selectRaw(
             $visitorLabelSelect .
-            ' page_views.user_agent,' .
+            $rowIdSelect .
+            ' MAX(page_views.user_agent) as user_agent,' .
             ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) as blog_views,' .
             ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) as post_views,' .
             ' (COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? THEN page_views.viewable_id END) + ' .
@@ -304,6 +314,7 @@ class VisitorViewsQuery
     private function applySelectWithBlogFilter(
         Builder $query,
         string $visitorLabelSelect,
+        string $rowIdSelect,
         int $blogId,
         string $blogMorphClass,
         string $postMorphClass,
@@ -311,7 +322,8 @@ class VisitorViewsQuery
     ): void {
         $query->selectRaw(
             $visitorLabelSelect .
-            ' page_views.user_agent,' .
+            $rowIdSelect .
+            ' MAX(page_views.user_agent) as user_agent,' .
             ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? AND page_views.viewable_id = ? THEN page_views.viewable_id END) as blog_views,' .
             ' COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? AND posts.blog_id = ? THEN page_views.viewable_id END) as post_views,' .
             ' (COUNT(DISTINCT CASE WHEN page_views.viewable_type = ? AND page_views.viewable_id = ? THEN page_views.viewable_id END) + ' .
@@ -338,11 +350,13 @@ class VisitorViewsQuery
         $query->where(function (Builder $inner) use ($criteria, $blogMorphClass, $postMorphClass) {
             $inner
                 ->where(function (Builder $q) use ($criteria, $blogMorphClass) {
-                    $q->where('page_views.viewable_type', '=', $blogMorphClass)
+                    $q
+                        ->where('page_views.viewable_type', '=', $blogMorphClass)
                         ->where('page_views.viewable_id', '=', $criteria->blogId);
                 })
                 ->orWhere(function (Builder $q) use ($criteria, $postMorphClass) {
-                    $q->where('page_views.viewable_type', '=', $postMorphClass)
+                    $q
+                        ->where('page_views.viewable_type', '=', $postMorphClass)
                         ->where('posts.blog_id', '=', $criteria->blogId);
                 });
         });

@@ -177,7 +177,7 @@ const visitorInfoKey = computed(() => 'user_agent');
                 :show-group-by-filter="true"
                 :sort-options="visitorSortOptions"
             />
-            <StatsTable :columns="pageVisitorColumns" :data="visitorsFromPage" :info-key="visitorInfoKey" row-key="visitor_label" />
+            <StatsTable :columns="pageVisitorColumns" :data="visitorsFromPage ?? []" :info-key="visitorInfoKey" row-key="row_id" />
         </div>
 
         <div class="flex flex-col gap-4">
@@ -197,7 +197,7 @@ const visitorInfoKey = computed(() => 'user_agent');
                 :show-visitor-type-filter="true"
                 :sort-options="specialVisitorSortOptions"
             />
-            <StatsTable :columns="specialVisitorColumns" :data="visitorsFromSpecial" row-key="visitor_label" />
+            <StatsTable :columns="specialVisitorColumns" :data="visitorsFromSpecial ?? []" row-key="row_id" />
         </div>
     </div>
 </template>
