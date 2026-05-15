@@ -59,7 +59,6 @@ class PublicBlogController extends BasePublicController
             'blog' => new PublicBlogDetailResource($blog),
             'landingHtml' => $blog->landingPage?->content_html ?? '',
             'footerHtml' => $this->markdown->convertToHtml($blog->footer),
-            'metaDescription' => $metaDescription,
             'posts' => PublicPostResource::collection($paginator->items()),
             'pagination' => $this->formatPagination($paginator),
             'sidebar' => (int) ($blog->sidebar ?? 0),

@@ -36,7 +36,6 @@ it('returns 200 for published blog on landing page and sets locale', function ()
         ->has('navigation')
         ->has('landingHtml')
         ->has('footerHtml')
-        ->has('metaDescription')
         ->where('locale', 'pl')
         ->loadDeferredProps(fn(Assert $reload) => $reload
             ->has('viewStats')
