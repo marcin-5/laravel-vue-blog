@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Builders\SimpleSeoBuilder;
 use App\Http\Controllers\AuthenticatedController;
 use App\Http\Controllers\Concerns\ValidatesLocale;
 use App\Http\Requests\Admin\StoreCategoryRequest;
 use App\Http\Requests\Admin\UpdateCategoryRequest;
 use App\Models\Category;
+use App\Services\TranslationService;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -16,10 +18,18 @@ class CategoriesController extends AuthenticatedController
 {
     use ValidatesLocale;
 
+    public function __construct(
+        private readonly TranslationService $translations,
+        private readonly SimpleSeoBuilder $seoBuilder,
+    ) {
+        parent::__construct();
+    }
+
     /**
      * Display a listing of categories with blog counts (admin only).
+     * @throws FileNotFoundException
      */
-    public function index(Request $request): Response
+    public function index(): Response
     {
         $this->authorize('viewAny', Category::class);
 
@@ -30,6 +40,11 @@ class CategoriesController extends AuthenticatedController
 
         return Inertia::render('app/admin/Categories', [
             'categories' => $categories,
+            'translations' => [
+                'locale' => app()->getLocale(),
+                'messages' => $this->translations->getPageTranslations('dashboard'),
+            ],
+            'seo' => $this->seoBuilder->build('Categories')->toArray(),
         ]);
     }
 
@@ -69,7 +84,7 @@ class CategoriesController extends AuthenticatedController
     /**
      * Remove the specified category from storage.
      */
-    public function destroy(Request $request, Category $category): RedirectResponse
+    public function destroy(Category $category): RedirectResponse
     {
         $this->authorize('delete', $category);
 

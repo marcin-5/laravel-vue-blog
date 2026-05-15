@@ -54,18 +54,6 @@ export interface PostDetails extends PostItem {
     externalLinks?: ExternalLinkItem[];
 }
 
-export interface PaginationLink {
-    url: string | null;
-    label: string;
-    active: boolean;
-}
-
-export interface Pagination {
-    links: PaginationLink[];
-    prevUrl?: string | null;
-    nextUrl?: string | null;
-}
-
 export interface NavPost {
     title: string;
     slug: string;
@@ -91,8 +79,6 @@ export interface CategoryItem {
     name: string | Record<string, string>;
     slug?: string;
 }
-
-export type SidebarPosition = 'left' | 'right' | 'none';
 
 // Admin types (from resources/js/types/index.d.ts)
 export interface Category {

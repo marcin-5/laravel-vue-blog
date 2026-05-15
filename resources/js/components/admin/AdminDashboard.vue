@@ -2,6 +2,7 @@
 import BotStats from '@/components/admin/BotStats.vue';
 import RecentSubscriptions from '@/components/admin/RecentSubscriptions.vue';
 import UserAgentStats from '@/components/admin/UserAgentStats.vue';
+import StatsSkeleton from '@/components/StatsSkeleton.vue';
 import type { NewsletterSubscription } from '@/types/admin.types';
 import type { BotStats as BotStatsType, UserAgentStats as UserAgentStatsType } from '@/types/stats';
 import PlaceholderPattern from '../PlaceholderPattern.vue';
@@ -19,24 +20,19 @@ defineProps<{
             <div v-if="newsletterSubscriptions" class="relative aspect-video overflow-hidden">
                 <RecentSubscriptions :subscriptions="newsletterSubscriptions" />
             </div>
-            <div v-else class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                <PlaceholderPattern />
-            </div>
+            <StatsSkeleton v-else class="aspect-video" />
 
             <div v-if="userAgentStats" class="relative aspect-video overflow-hidden">
                 <UserAgentStats :stats="userAgentStats" />
             </div>
-            <div v-else class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                <PlaceholderPattern />
-            </div>
+            <StatsSkeleton v-else class="aspect-video" />
+
             <div v-if="botStats" class="relative aspect-video overflow-hidden">
                 <BotStats :stats="botStats" />
             </div>
-            <div v-else class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                <PlaceholderPattern />
-            </div>
+            <StatsSkeleton v-else class="aspect-video" />
         </div>
-        <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
+        <div class="relative min-h-screen flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
             <PlaceholderPattern />
         </div>
     </div>

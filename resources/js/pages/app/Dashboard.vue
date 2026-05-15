@@ -7,7 +7,6 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { type NewsletterSubscription } from '@/types/admin.types';
 import { type BlogStats, type BotStats, type PostsStats, type UserAgentStats } from '@/types/stats';
-import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -27,8 +26,6 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [{ title: t('dashboard.titl
 </script>
 
 <template>
-    <Head :title="t('dashboard.title')" />
-
     <AppLayout :breadcrumbs="breadcrumbs">
         <AdminDashboard
             v-if="currentView === 'admin'"

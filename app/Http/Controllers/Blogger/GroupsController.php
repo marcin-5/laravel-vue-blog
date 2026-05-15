@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Blogger;
 
+use App\Builders\SimpleSeoBuilder;
 use App\Http\Controllers\AuthenticatedController;
 use App\Http\Requests\StoreGroupRequest;
 use App\Http\Requests\UpdateGroupRequest;
 use App\Models\Group;
 use App\Services\GroupService;
+use App\Services\TranslationService;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,6 +19,8 @@ class GroupsController extends AuthenticatedController
 {
     public function __construct(
         private readonly GroupService $groupService,
+        private readonly TranslationService $translations,
+        private readonly SimpleSeoBuilder $seoBuilder,
     ) {
         parent::__construct();
         $this->authorizeResource(Group::class, 'group');
@@ -23,6 +28,7 @@ class GroupsController extends AuthenticatedController
 
     /**
      * Display a listing of the authenticated user's groups.
+     * @throws FileNotFoundException
      */
     public function index(Request $request): Response
     {
@@ -34,6 +40,11 @@ class GroupsController extends AuthenticatedController
         return Inertia::render('app/blogger/Groups', [
             'groups' => $groups,
             'canCreate' => $user->isBlogger() || $user->isAdmin(), // Or a more specific check if needed
+            'translations' => [
+                'locale' => app()->getLocale(),
+                'messages' => $this->translations->getPageTranslations('dashboard'),
+            ],
+            'seo' => $this->seoBuilder->build('My Groups')->toArray(),
         ]);
     }
 

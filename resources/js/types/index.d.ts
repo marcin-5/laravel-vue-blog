@@ -29,6 +29,33 @@ export interface UserGroup {
     slug: string;
 }
 
+export interface Translations {
+    locale: string;
+    messages: Record<string, any>;
+}
+
+export interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
+export interface Pagination {
+    links: PaginationLink[];
+    prevUrl: string | null;
+    nextUrl: string | null;
+    current_page: number;
+    last_page: number;
+    total: number;
+}
+
+export interface InertiaPageProps {
+    seo?: SEO;
+    translations?: Translations;
+    pagination?: Pagination;
+    [key: string]: unknown;
+}
+
 export type AppPageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
     name: string;
     quote: { message: string; author: string };

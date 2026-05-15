@@ -3,6 +3,7 @@ import AppContent from '@/components/AppContent.vue';
 import AppShell from '@/components/AppShell.vue';
 import AppSidebar from '@/components/AppSidebar.vue';
 import AppSidebarHeader from '@/components/AppSidebarHeader.vue';
+import HeadSEO from '@/components/HeadSEO.vue';
 import type { BreadcrumbItemType } from '@/types';
 
 interface Props {
@@ -15,6 +16,7 @@ withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
+    <HeadSEO />
     <AppShell variant="sidebar">
         <AppSidebar class="text-foreground" />
         <AppContent class="overflow-x-hidden text-primary" variant="sidebar">

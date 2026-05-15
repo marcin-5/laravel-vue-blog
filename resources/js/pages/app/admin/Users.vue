@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { type UserWithQuota, useUserPermissions } from '@/composables/useUserPermissions';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head, router } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -111,8 +111,6 @@ function saveUser(user: UserRow) {
 </script>
 
 <template>
-    <Head :title="$t('admin.users.title')" />
-
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <div class="relative flex-1 rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border">
@@ -142,7 +140,7 @@ function saveUser(user: UserRow) {
                                 <td class="py-2 pr-4">{{ u.email }}</td>
                                 <td class="py-2 pr-4">
                                     <Select v-model="u.role">
-                                        <SelectTrigger class="h-8 w-[120px]">
+                                        <SelectTrigger class="h-8 w-30">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>

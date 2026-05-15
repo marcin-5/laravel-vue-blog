@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import PublicNavbar from '@/components/PublicNavbar.vue';
+import HeadSEO from '@/components/HeadSEO.vue';
 import { useBlogTheme } from '@/composables/useBlogTheme';
 import { useSidebarLayout } from '@/composables/useSidebarLayout';
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
@@ -30,6 +31,7 @@ const textClass = computed(() => (props.isPublic ? 'text-primary' : 'text-foregr
 </script>
 
 <template>
+    <HeadSEO />
     <div :class="['flex min-h-screen flex-col bg-background antialiased', textClass]" :style="mergedThemeStyle">
         <PublicNavbar :maxWidth="navbarMaxWidth" />
 

@@ -4,9 +4,9 @@ import BlogsGrid from '@/components/blog/BlogsGrid.vue';
 import CategoriesFilter from '@/components/blog/CategoriesFilter.vue';
 import NoBlogs from '@/components/blog/NoBlogs.vue';
 import UserGroupsList from '@/components/blog/UserGroupsList.vue';
-import PublicNavbar from '@/components/PublicNavbar.vue';
+import PublicHomeLayout from '@/layouts/PublicHomeLayout.vue';
 import type { BlogItem, CategoryItem } from '@/types/blog.types';
-import { Head, router, usePage } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -58,31 +58,27 @@ function clearFilter() {
 </script>
 
 <template>
-    <Head :title="t('meta.welcomeTitle')" />
-    <div class="flex min-h-screen flex-col">
-        <PublicNavbar />
-        <div class="mx-auto w-full max-w-[1024px] p-6 lg:p-8">
-            <div class="mb-12 text-center">
-                <AppLogo />
-                <p class="mt-4 font-slogan text-lg opacity-80 sm:text-xl md:text-2xl dark:text-white">— {{ randomSlogan }} —</p>
-            </div>
-
-            <!-- Groups list -->
-            <UserGroupsList />
-
-            <!-- Categories Filter -->
-            <CategoriesFilter
-                :categories="categories"
-                :clear-label="t('actions.clear', 'Clear filter')"
-                :selected-ids="selected"
-                class="mb-6"
-                @clear="clearFilter"
-                @toggle="toggleCategory"
-            />
-
-            <!-- Blogs Grid -->
-            <BlogsGrid v-if="blogs.length > 0" :blogs="blogs" />
-            <NoBlogs v-else />
+    <PublicHomeLayout>
+        <div class="mb-12 text-center">
+            <AppLogo />
+            <p class="mt-4 font-slogan text-lg opacity-80 sm:text-xl md:text-2xl dark:text-white">— {{ randomSlogan }} —</p>
         </div>
-    </div>
+
+        <!-- Groups list -->
+        <UserGroupsList />
+
+        <!-- Categories Filter -->
+        <CategoriesFilter
+            :categories="categories"
+            :clear-label="t('actions.clear', 'Clear filter')"
+            :selected-ids="selected"
+            class="mb-6"
+            @clear="clearFilter"
+            @toggle="toggleCategory"
+        />
+
+        <!-- Blogs Grid -->
+        <BlogsGrid v-if="blogs.length > 0" :blogs="blogs" />
+        <NoBlogs v-else />
+    </PublicHomeLayout>
 </template>

@@ -3,13 +3,13 @@ import StatsPage from '@/components/stats/StatsPage.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import type { BlogOption, BlogRow, FilterState, PostRow, UserOption, VisitorRow } from '@/types/stats';
-import { Head, usePage } from '@inertiajs/vue3';
+import { usePage } from '@inertiajs/vue3';
 
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 const page = usePage();
-const isAdmin = page.props.auth.user.role === 'admin';
+const isAdmin = page.props.auth.user?.role === 'admin';
 
 interface Props {
     blogFilters: FilterState;
@@ -31,13 +31,6 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: t('blogger.stats_title'), href: 
 </script>
 
 <template>
-    <Head :title="t('blogger.stats_title')">
-        <!-- Prevent indexing for non-public pages -->
-        <template>
-            <meta content="noindex, nofollow" name="robots" />
-        </template>
-    </Head>
-
     <AppLayout :breadcrumbs="breadcrumbs">
         <StatsPage
             :blog-filters="blogFilters"

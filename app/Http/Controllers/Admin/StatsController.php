@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Builders\SimpleSeoBuilder;
 use App\Enums\UserRole;
 use App\Http\Controllers\AuthenticatedController;
 use App\Http\Controllers\Concerns\HandlesStatsFilters;
 use App\Models\User;
 use App\Services\StatsService;
 use App\Services\TranslationService;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -19,10 +21,14 @@ class StatsController extends AuthenticatedController
     public function __construct(
         private readonly StatsService $stats,
         protected TranslationService $translations,
+        private readonly SimpleSeoBuilder $seoBuilder,
     ) {
         parent::__construct();
     }
 
+    /**
+     * @throws FileNotFoundException
+     */
     public function index(Request $request): Response
     {
         $statsData = $this->getStatsData($request);
@@ -42,6 +48,7 @@ class StatsController extends AuthenticatedController
                 'locale' => app()->getLocale(),
                 'messages' => $this->translations->getPageTranslations('stats'),
             ],
+            'seo' => $this->seoBuilder->build('Statistics')->toArray(),
         ]));
     }
 }

@@ -8,9 +8,9 @@ import PostExtensions from '@/components/blog/PostExtensions.vue';
 import PostExternalLinks from '@/components/blog/PostExternalLinks.vue';
 import PostHeader from '@/components/blog/PostHeader.vue';
 import PostRelatedPosts from '@/components/blog/PostRelatedPosts.vue';
-import type { SEO } from '@/types';
-import type { Blog, Navigation, Pagination, PostDetails, PostItem, ViewStats } from '@/types/blog.types';
-import { Head, router } from '@inertiajs/vue3';
+import type { Pagination, SEO } from '@/types';
+import type { Blog, Navigation, PostDetails, PostItem, ViewStats } from '@/types/blog.types';
+import { router } from '@inertiajs/vue3';
 import { ArrowLeft } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -62,8 +62,6 @@ const navigateBack = () => {
 </script>
 
 <template>
-    <Head v-if="seo?.title" :title="seo.title" />
-
     <BlogLayout v-if="blog" :isPublic="true" :sidebar="sidebar" :theme="blog.theme">
         <template #top-divider>
             <BorderDivider class="mb-4" />

@@ -9,7 +9,6 @@ import { useUIState } from '@/composables/useUIState';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import type { AdminBlog as Blog, Category } from '@/types/blog.types';
-import { Head } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{ blogs: Blog[]; canCreate: boolean; categories: Category[] }>();
@@ -144,7 +143,6 @@ function handleToggleCreate() {
 </script>
 
 <template>
-    <Head :title="$t('blogger.title')" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
             <CreateEntitySection
@@ -194,11 +192,11 @@ function handleToggleCreate() {
                     @cancel-edit-post="cancelEditPost"
                     @toggle-extensions="handleToggleExtensions"
                     @create-extension="handleStartCreateExtension"
-                    @submit-create-extension="($event, post) => submitCreateExtension(post)"
+                    @submit-create-extension="(_, post) => submitCreateExtension(post)"
                     @cancel-create-extension="cancelCreateExtension"
                     @edit-extension="handleStartEditExtension"
-                    @submit-edit-extension="(form, ext) => submitEditExtension(ext)"
-                    @apply-edit-extension="(form, ext) => submitEditExtension(ext, false)"
+                    @submit-edit-extension="(_, ext) => submitEditExtension(ext)"
+                    @apply-edit-extension="(_, ext) => submitEditExtension(ext, false)"
                     @cancel-edit-extension="cancelEditExtension"
                 />
 

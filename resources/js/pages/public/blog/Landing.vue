@@ -6,11 +6,11 @@ import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import ScrollToPostsLink from '@/components/blog/ScrollToPostsLink.vue';
-import type { Blog, Navigation, Pagination, PostItem, ViewStats } from '@/types/blog.types';
+import type { Blog, Navigation, PostItem, ViewStats } from '@/types/blog.types';
 import { handleContentClick } from '@/utils/domUtils';
 import { hasContent, selectRandomMotto } from '@/utils/stringUtils';
-import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { Pagination } from '@/types';
 
 const props = defineProps<{
     blog: Blog;
@@ -40,8 +40,6 @@ const postsListSpacingClass = computed(() => (hasLandingContent.value ? 'mt-6' :
 </script>
 
 <template>
-    <Head v-if="seo?.title" :title="seo.title" />
-
     <BlogLayout v-if="blog" :isPublic="true" :sidebar="sidebar" :theme="blog.theme">
         <template #top-divider>
             <BorderDivider class="mb-4" />

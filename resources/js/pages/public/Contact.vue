@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import PublicNavbar from '@/components/PublicNavbar.vue';
+import PublicHomeLayout from '@/layouts/PublicHomeLayout.vue';
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 
@@ -39,71 +39,68 @@ function submit() {
 </script>
 
 <template>
-    <div class="flex min-h-screen flex-col">
-        <PublicNavbar />
-        <main class="mx-auto w-full max-w-[768px] p-6 lg:p-8">
-            <h1 class="mb-6 font-serif text-3xl font-semibold text-shadow-stone-700 dark:text-shadow-stone-50">
-                {{ t('contact.heading', 'Contact') }}
-            </h1>
-            <form class="grid gap-4" @submit="submit">
-                <div>
-                    <label :class="LABEL_CLASSES" for="name">{{ t('contact.form.name', 'Name') }}</label>
-                    <input
-                        id="name"
-                        v-model="form.name"
-                        :class="INPUT_CLASSES"
-                        :placeholder="t('contact.form.placeholders.name', 'Your name')"
-                        autocomplete="name"
-                        required
-                        type="text"
-                        @keydown.stop
-                    />
-                </div>
-                <div>
-                    <label :class="LABEL_CLASSES" for="email">{{ t('contact.form.email', 'Email') }}</label>
-                    <input
-                        id="email"
-                        v-model="form.email"
-                        :class="INPUT_CLASSES"
-                        :placeholder="t('contact.form.placeholders.email', 'Your email')"
-                        autocomplete="email"
-                        required
-                        type="email"
-                        @keydown.stop
-                    />
-                </div>
-                <div>
-                    <label :class="LABEL_CLASSES" for="subject">{{ t('contact.form.subject', 'Subject') }}</label>
-                    <input
-                        id="subject"
-                        v-model="form.subject"
-                        :class="INPUT_CLASSES"
-                        :placeholder="t('contact.form.placeholders.subject', 'Subject')"
-                        autocomplete="off"
-                        required
-                        type="text"
-                        @keydown.stop
-                    />
-                </div>
-                <div>
-                    <label :class="LABEL_CLASSES" for="message">{{ t('contact.form.message', 'Message') }}</label>
-                    <textarea
-                        id="message"
-                        v-model="form.message"
-                        :class="INPUT_CLASSES"
-                        :placeholder="t('contact.form.placeholders.message', 'Write your message...')"
-                        autocomplete="off"
-                        required
-                        rows="6"
-                        @keydown.stop
-                    />
-                </div>
-                <div class="mt-2">
-                    <button :class="BUTTON_CLASSES" type="submit">
-                        {{ t('contact.form.submit', 'Send message') }}
-                    </button>
-                </div>
-            </form>
-        </main>
-    </div>
+    <PublicHomeLayout maxWidth="max-w-[768px]">
+        <h1 class="mb-6 font-serif text-3xl font-semibold text-shadow-stone-700 dark:text-shadow-stone-50">
+            {{ t('contact.heading', 'Contact') }}
+        </h1>
+        <form class="grid gap-4" @submit.prevent="submit">
+            <div>
+                <label :class="LABEL_CLASSES" for="name">{{ t('contact.form.name', 'Name') }}</label>
+                <input
+                    id="name"
+                    v-model="form.name"
+                    :class="INPUT_CLASSES"
+                    :placeholder="t('contact.form.placeholders.name', 'Your name')"
+                    autocomplete="name"
+                    required
+                    type="text"
+                    @keydown.stop
+                />
+            </div>
+            <div>
+                <label :class="LABEL_CLASSES" for="email">{{ t('contact.form.email', 'Email') }}</label>
+                <input
+                    id="email"
+                    v-model="form.email"
+                    :class="INPUT_CLASSES"
+                    :placeholder="t('contact.form.placeholders.email', 'Your email')"
+                    autocomplete="email"
+                    required
+                    type="email"
+                    @keydown.stop
+                />
+            </div>
+            <div>
+                <label :class="LABEL_CLASSES" for="subject">{{ t('contact.form.subject', 'Subject') }}</label>
+                <input
+                    id="subject"
+                    v-model="form.subject"
+                    :class="INPUT_CLASSES"
+                    :placeholder="t('contact.form.placeholders.subject', 'Subject')"
+                    autocomplete="off"
+                    required
+                    type="text"
+                    @keydown.stop
+                />
+            </div>
+            <div>
+                <label :class="LABEL_CLASSES" for="message">{{ t('contact.form.message', 'Message') }}</label>
+                <textarea
+                    id="message"
+                    v-model="form.message"
+                    :class="INPUT_CLASSES"
+                    :placeholder="t('contact.form.placeholders.message', 'Write your message...')"
+                    autocomplete="off"
+                    required
+                    rows="6"
+                    @keydown.stop
+                />
+            </div>
+            <div class="mt-2">
+                <button :class="BUTTON_CLASSES" type="submit">
+                    {{ t('contact.form.submit', 'Send message') }}
+                </button>
+            </div>
+        </form>
+    </PublicHomeLayout>
 </template>

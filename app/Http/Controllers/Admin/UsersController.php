@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Builders\SimpleSeoBuilder;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreUserRequest;
 use App\Http\Requests\Admin\UpdateUserRequest;
 use App\Models\User;
+use App\Services\TranslationService;
 use App\Services\UserManagementService;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,12 +17,15 @@ use Inertia\Response;
 
 class UsersController extends Controller
 {
-    public function __construct(private readonly UserManagementService $userManagementService)
-    {
-    }
+    public function __construct(
+        private readonly UserManagementService $userManagementService,
+        private readonly TranslationService $translations,
+        private readonly SimpleSeoBuilder $seoBuilder,
+    ) {}
 
     /**
      * Display a listing of users (admin only).
+     * @throws FileNotFoundException
      */
     public function index(Request $request): Response
     {
@@ -32,6 +38,11 @@ class UsersController extends Controller
         return Inertia::render('app/admin/Users', [
             'users' => $users,
             'currentUserIsAdmin' => $request->user()?->isAdmin() ?? false,
+            'translations' => [
+                'locale' => app()->getLocale(),
+                'messages' => $this->translations->getPageTranslations('dashboard'),
+            ],
+            'seo' => $this->seoBuilder->build('Users')->toArray(),
         ]);
     }
 

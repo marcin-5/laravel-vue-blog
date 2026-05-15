@@ -9,7 +9,7 @@ import { useUIState } from '@/composables/useUIState';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import type { AdminGroup as Group } from '@/types/blog.types';
-import { Head, router } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{ groups: Group[]; canCreate: boolean }>();
@@ -108,7 +108,6 @@ function handleToggleCreate() {
 </script>
 
 <template>
-    <Head :title="$t('blogger.groups.title')" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
             <CreateEntitySection

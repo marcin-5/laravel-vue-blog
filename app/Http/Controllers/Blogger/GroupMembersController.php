@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Blogger;
 
+use App\Builders\SimpleSeoBuilder;
+use App\Http\Controllers\Concerns\FormatsPaginator;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Blogger\StoreGroupMemberRequest;
 use App\Http\Requests\Blogger\UpdateGroupMemberRequest;
@@ -10,6 +12,8 @@ use App\Models\GroupMember;
 use App\Models\User;
 use App\Queries\Blogger\GroupMembersQuery;
 use App\Services\Blogger\GroupMemberService;
+use App\Services\TranslationService;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,13 +22,17 @@ use Inertia\Response;
 
 class GroupMembersController extends Controller
 {
-    use AuthorizesRequests;
+    use AuthorizesRequests, FormatsPaginator;
 
     public function __construct(
         private readonly GroupMemberService $memberService,
-    ) {
-    }
+        private readonly TranslationService $translations,
+        private readonly SimpleSeoBuilder $seoBuilder,
+    ) {}
 
+    /**
+     * @throws FileNotFoundException
+     */
     public function index(Request $request, GroupMembersQuery $query): Response
     {
         $user = $request->user();
@@ -57,15 +65,21 @@ class GroupMembersController extends Controller
         return Inertia::render('app/blogger/GroupMembers', [
             'filters' => [
                 'group_id' => $request->integer('group_id') ?: null,
-                'per_page' => $request->get('per_page', 10),
-                'sort_by' => $request->get('sort_by', 'email'),
-                'sort_dir' => $request->get('sort_dir', 'asc') === 'desc' ? 'desc' : 'asc',
+                'per_page' => $request->query('per_page', 10),
+                'sort_by' => $request->query('sort_by', 'email'),
+                'sort_dir' => $request->query('sort_dir', 'asc') === 'desc' ? 'desc' : 'asc',
                 'owner_id' => $ownerId,
             ],
             'isAdmin' => $isAdmin,
             'groups' => $groups,
-            'members' => $members,
+            'members' => $members->items(),
+            'pagination' => $this->formatPagination($members),
             'owners' => $owners,
+            'translations' => [
+                'locale' => app()->getLocale(),
+                'messages' => $this->translations->getPageTranslations('dashboard'),
+            ],
+            'seo' => $this->seoBuilder->build('Group Members')->toArray(),
         ]);
     }
 
@@ -74,7 +88,7 @@ class GroupMembersController extends Controller
         $this->memberService->addMember(
             $group,
             $request->validated('email'),
-            $request->validated('role', GroupMember::ROLE_MEMBER)
+            $request->validated('role', GroupMember::ROLE_MEMBER),
         );
 
         return back()->with('success', __('Member added'));
@@ -89,7 +103,7 @@ class GroupMembersController extends Controller
         return back()->with('success', __('Role updated'));
     }
 
-    public function destroy(Request $request, Group $group, User $user): RedirectResponse
+    public function destroy(Group $group, User $user): RedirectResponse
     {
         $this->authorize('update', $group);
 

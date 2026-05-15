@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/AppLayout.vue';
-import type { BreadcrumbItem } from '@/types';
-import { Head, router } from '@inertiajs/vue3';
+import type { BreadcrumbItem, Pagination } from '@/types';
+import { router } from '@inertiajs/vue3';
 import { AcceptableValue } from 'reka-ui';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -15,7 +15,8 @@ const props = defineProps<{
     filters: { group_id?: number | null; per_page: number | string; sort_by: string; sort_dir: 'asc' | 'desc'; owner_id?: number };
     groups: SimpleGroup[];
     isAdmin: boolean;
-    members: any; // Inertia pagination object
+    members: any[]; // Array of members
+    pagination?: Pagination;
     owners?: { id: number; name: string; email: string }[];
 }>();
 
@@ -76,7 +77,6 @@ function removeMember(row: any) {
 </script>
 
 <template>
-    <Head :title="$t('blogger.groups.members.title')" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <!-- Filters -->
@@ -189,13 +189,13 @@ function removeMember(row: any) {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="u in props.members?.data ?? []" :key="u.id" class="border-b">
+                        <tr v-for="u in props.members" :key="u.id" class="border-b">
                             <td class="py-2 pr-2">{{ u.email }}</td>
                             <td class="py-2 pr-2">{{ u.name }}</td>
                             <td class="py-2 pr-2">{{ u.joined_at }}</td>
                             <td class="py-2 pr-2">
                                 <Select :model-value="u.role" @update:modelValue="(val) => changeRole(u, val as string)">
-                                    <SelectTrigger class="w-[160px]">
+                                    <SelectTrigger class="w-40">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -210,7 +210,7 @@ function removeMember(row: any) {
                                 <Button variant="destructive" @click="removeMember(u)">{{ $t('list.remove') }}</Button>
                             </td>
                         </tr>
-                        <tr v-if="(props.members?.data ?? []).length === 0">
+                        <tr v-if="props.members.length === 0">
                             <td class="py-4 text-center text-muted-foreground" colspan="5">{{ $t('list.no_results') }}</td>
                         </tr>
                     </tbody>
@@ -218,9 +218,9 @@ function removeMember(row: any) {
             </div>
 
             <!-- Pagination (basic) -->
-            <div v-if="props.members?.links" class="flex flex-wrap items-center gap-2">
+            <div v-if="props.pagination?.links" class="flex flex-wrap items-center gap-2">
                 <Button
-                    v-for="l in props.members.links"
+                    v-for="l in props.pagination.links"
                     :key="l.url + String(l.label)"
                     :disabled="!l.url"
                     :variant="l.active ? 'default' : 'outline'"

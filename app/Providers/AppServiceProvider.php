@@ -40,8 +40,17 @@ class AppServiceProvider extends ServiceProvider
         PageView::observe(PageViewObserver::class);
 
         // Implicitly grant "Admin" role all permissions
-        Gate::before(function (User $user, string $ability) {
+        Gate::before(function (User $user) {
             return $user->isAdmin() ? true : null;
+        });
+
+        // Authorization gates to control dashboard access and blog management
+        Gate::define('view_blogs', function (User $user): bool {
+            return $user->isBlogger() || $user->isAdmin();
+        });
+
+        Gate::define('view_admin_stats', function (User $user): bool {
+            return $user->isAdmin();
         });
 
         // Authorization gate to control who can create a blog (fallback when not using policies)
