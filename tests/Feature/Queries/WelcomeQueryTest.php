@@ -52,10 +52,10 @@ it('filters blogs by categories', function () {
     $category1 = Category::factory()->create(['name' => ['en' => 'Cat 1']]);
     $category2 = Category::factory()->create(['name' => ['en' => 'Cat 2']]);
 
-    $blog1 = Blog::factory()->create(['is_published' => true, 'name' => 'Blog 1', 'user_id' => User::factory()]);
+    $blog1 = Blog::factory()->create(['is_published' => true, 'name' => 'Blog 1', 'user_id' => User::factory(), 'locale' => 'en']);
     $blog1->categories()->attach($category1);
 
-    $blog2 = Blog::factory()->create(['is_published' => true, 'name' => 'Blog 2', 'user_id' => User::factory()]);
+    $blog2 = Blog::factory()->create(['is_published' => true, 'name' => 'Blog 2', 'user_id' => User::factory(), 'locale' => 'en']);
     $blog2->categories()->attach($category2);
 
     // Request with category1
@@ -69,8 +69,8 @@ it('filters blogs by categories', function () {
 });
 
 it('orders blogs by latest_post_at', function () {
-    $blog1 = Blog::factory()->create(['is_published' => true, 'name' => 'Oldest Blog', 'user_id' => User::factory()]);
-    $blog2 = Blog::factory()->create(['is_published' => true, 'name' => 'Newest Blog', 'user_id' => User::factory()]);
+    $blog1 = Blog::factory()->create(['is_published' => true, 'name' => 'Oldest Blog', 'user_id' => User::factory(), 'locale' => 'en']);
+    $blog2 = Blog::factory()->create(['is_published' => true, 'name' => 'Newest Blog', 'user_id' => User::factory(), 'locale' => 'en']);
 
     Post::factory()->create([
         'blog_id' => $blog1->id,
