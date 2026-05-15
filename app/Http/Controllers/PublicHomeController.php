@@ -2,23 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\DataTransferObjects\SeoData;
+use App\Actions\SubmitContactFormAction;
+use App\Builders\PublicHomeSeoBuilder;
 use App\Http\Requests\ContactSubmitRequest;
-use App\Mail\ContactMessageMail;
 use App\Queries\Public\WelcomeQuery;
 use App\Services\MarkdownService;
-use App\Services\SeoService;
 use App\Services\TranslationService;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 use Inertia\Response;
 
 class PublicHomeController extends BasePublicController
 {
     public function __construct(
         private readonly MarkdownService $markdown,
-        private readonly SeoService $seoService,
+        private readonly PublicHomeSeoBuilder $seoBuilder,
+        private readonly SubmitContactFormAction $submitAction,
         protected TranslationService $translations,
     ) {
         parent::__construct($translations);
@@ -32,56 +31,23 @@ class PublicHomeController extends BasePublicController
     {
         $data = $query->handle($request);
 
-        if (auth()->check()) {
-            $data['userGroups'] = auth()
-                ->user()
-                ->groups()
-                ->select('groups.id', 'groups.name', 'groups.slug')
-                ->get()
+        $data['userGroups'] = auth()->check()
+            ? auth()->user()->groups()->select('groups.id', 'groups.name', 'groups.slug')->get()
                 ->map(fn($group) => [
                     'id' => $group->id,
                     'name' => $group->name,
                     'slug' => $group->slug,
-                ]);
-        } else {
-            $data['userGroups'] = [];
-        }
-
-        $baseUrl = config('app.url');
+                ])
+            : [];
 
         $messages = $this->translations->getPageTranslations('home');
-        $seoTitle = data_get($messages, 'meta.welcomeTitle') ?? config('app.name');
-        $seoDescription = data_get($messages, 'meta.welcomeDescription') ?? ('Welcome to ' . config('app.name'));
-
-        $canonicalUrl = $baseUrl . (empty($data['selectedCategoryIds']) ? '' : '?categories=' . implode(
-            ',',
-            $data['selectedCategoryIds'],
-        ));
-
-        $alternateLinks = [
-            ['hreflang' => 'pl', 'href' => $canonicalUrl],
-            ['hreflang' => 'en', 'href' => $canonicalUrl],
-            ['hreflang' => 'x-default', 'href' => $canonicalUrl],
-        ];
-
-        $seoData = new SeoData(
-            title: $seoTitle,
-            description: $seoDescription,
-            canonicalUrl: $canonicalUrl,
-            ogImage: $baseUrl . '/' . ($data['locale'] === 'pl' ? 'pl' : 'en') . '/og-image.png',
-            ogType: 'website',
-            locale: $data['locale'],
-            structuredData: $this->seoService->generateHomeStructuredData(
-                $data['blogs']->toArray(),
-                $seoTitle,
-                $seoDescription,
-                $baseUrl,
-            ),
-            alternateLinks: $alternateLinks,
-        );
 
         return $this->renderWithTranslations('public/Welcome', 'home', array_merge($data, [
-            'seo' => $seoData->toArray(),
+            'seo' => $this->seoBuilder->buildWelcomeSeo(
+                $data['blogs'],
+                $messages,
+                $data['selectedCategoryIds'],
+            )->toArray(),
         ]));
     }
 
@@ -94,50 +60,19 @@ class PublicHomeController extends BasePublicController
     public function about(): Response
     {
         $locale = app()->getLocale();
-
-        // Start with about page messages from the service
         $messages = $this->translations->getPageTranslations('about');
 
         // Convert about.content markdown to HTML if present
-        $aboutContent = data_get($messages, 'about.content');
-        if (is_string($aboutContent) && $aboutContent !== '') {
-            $html = $this->markdown->convertToHtml($aboutContent);
-            data_set($messages, 'about.content', $html);
+        if ($aboutContent = data_get($messages, 'about.content')) {
+            data_set($messages, 'about.content', $this->markdown->convertToHtml($aboutContent));
         }
-
-        $baseUrl = config('app.url');
-        $seoTitle = data_get($messages, 'about.meta.title') ?? 'About';
-        $seoDescription = data_get($messages, 'about.meta.description') ?? 'About this site';
-        $canonicalUrl = rtrim($baseUrl, '/') . '/about';
-        $ogImage = rtrim($baseUrl, '/') . '/' . ($locale === 'pl' ? 'pl' : 'en') . '/og-image.png';
-
-        $seoData = new SeoData(
-            title: $seoTitle,
-            description: $seoDescription,
-            canonicalUrl: $canonicalUrl,
-            ogImage: $ogImage,
-            ogType: 'website',
-            locale: $locale,
-            structuredData: [
-                '@context' => 'https://schema.org',
-                '@type' => 'AboutPage',
-                'name' => $seoTitle,
-                'url' => $canonicalUrl,
-                'description' => $seoDescription,
-            ],
-        );
 
         return $this->renderWithTranslations('public/About', 'about', [
             'locale' => $locale,
             'aboutHeading' => data_get($messages, 'about.heading'),
             'aboutHtml' => data_get($messages, 'about.content'),
-            // Pass preprocessed translations (about.content already converted to HTML)
-            'translations' => [
-                'messages' => $messages,
-            ],
-            'seo' => $seoData->toArray(),
-            // Optionally expose pre-rendered about messages if your front-end expects them under a specific prop
-            // 'aboutMessages' => data_get($messages, 'about'),
+            'translations' => ['messages' => $messages],
+            'seo' => $this->seoBuilder->buildAboutSeo($messages)->toArray(),
         ]);
     }
 
@@ -147,48 +82,17 @@ class PublicHomeController extends BasePublicController
      */
     public function contact(): Response
     {
-        $locale = app()->getLocale();
-
         $messages = $this->translations->getPageTranslations('contact');
 
-        $baseUrl = config('app.url');
-        $seoTitle = data_get($messages, 'contact.meta.title') ?? 'Contact';
-        $seoDescription = data_get($messages, 'contact.meta.description') ?? 'Get in touch';
-        $canonicalUrl = rtrim($baseUrl, '/') . '/contact';
-        $ogImage = rtrim($baseUrl, '/') . '/' . ($locale === 'pl' ? 'pl' : 'en') . '/og-image.png';
-
-        $seoData = new SeoData(
-            title: $seoTitle,
-            description: $seoDescription,
-            canonicalUrl: $canonicalUrl,
-            ogImage: $ogImage,
-            ogType: 'website',
-            locale: $locale,
-            structuredData: [
-                '@context' => 'https://schema.org',
-                '@type' => 'ContactPage',
-                'name' => $seoTitle,
-                'url' => $canonicalUrl,
-                'description' => $seoDescription,
-            ],
-        );
-
         return $this->renderWithTranslations('public/Contact', 'contact', [
-            'locale' => $locale,
-            'translations' => [
-                'messages' => $messages,
-            ],
-            'seo' => $seoData->toArray(),
+            'locale' => app()->getLocale(),
+            'seo' => $this->seoBuilder->buildContactSeo($messages)->toArray(),
         ]);
     }
 
     public function submit(ContactSubmitRequest $request)
     {
-        $data = $request->validated();
-
-        // Send the email (synchronous). If you want to queue, see notes below.
-        Mail::to(config('mail.contact_to'))
-            ->send(new ContactMessageMail($data));
+        $this->submitAction->execute($request->validated());
 
         return response()->json([
             'message' => 'Thanks for your message. We will get back to you soon.',
