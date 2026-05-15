@@ -32,7 +32,15 @@ it('returns 200 for published blog on landing page and sets locale', function ()
         ->has('blog')
         ->has('posts')
         ->has('seo')
-        ->where('locale', 'pl'),
+        ->has('pagination')
+        ->has('navigation')
+        ->has('landingHtml')
+        ->has('footerHtml')
+        ->has('metaDescription')
+        ->where('locale', 'pl')
+        ->loadDeferredProps(fn(Assert $reload) => $reload
+            ->has('viewStats')
+        ),
     );
 });
 
@@ -111,8 +119,15 @@ it('returns 200 for published post on published blog and checks sidebar position
         ->component('public/blog/Post')
         ->has('blog')
         ->has('post')
+        ->has('posts')
+        ->has('pagination')
         ->has('seo')
-        ->where('sidebarPosition', 'left'),
+        ->has('navigation')
+        ->has('sidebarPosition')
+        ->where('sidebarPosition', 'left')
+        ->loadDeferredProps(fn(Assert $reload) => $reload
+            ->has('viewStats')
+        ),
     );
 });
 
