@@ -41,6 +41,7 @@ return [
         'success_title' => 'Sukces!',
         'error_title' => 'Błąd!',
         'unsubscribed_title' => 'Wypisano!',
+        'invalid_signature' => 'Link wygasł lub jest nieprawidłowy.',
     ],
     'email' => [
         'subject' => 'Nowe wpisy na Twoich subskrybowanych blogach',

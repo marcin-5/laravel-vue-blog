@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreNewsletterSubscriptionRequest;
+use App\Http\Requests\UnsubscribeNewsletterRequest;
 use App\Models\Blog;
 use App\Models\NewsletterSubscription;
 use App\Services\IdentityResolver;
+use App\Services\NewsletterService;
 use App\Services\TranslationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,12 +15,14 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\URL;
 use Inertia\Response;
 use LaravelIdea\Helper\App\Models\_IH_Blog_C;
+use Throwable;
 
 class NewsletterController extends BasePublicController
 {
     public function __construct(
         protected TranslationService $translations,
         private readonly IdentityResolver $identityResolver,
+        private readonly NewsletterService $newsletterService,
     ) {
         parent::__construct($translations);
     }
@@ -59,39 +63,24 @@ class NewsletterController extends BasePublicController
         }
     }
 
+    /**
+     * @throws Throwable
+     */
     public function store(StoreNewsletterSubscriptionRequest $request): RedirectResponse
     {
-        $this->processSubscriptions($request);
+        $this->newsletterService->subscribe(
+            $request->validated('email'),
+            $request->validated('subscriptions'),
+            $this->identityResolver->resolvedVisitorId($request),
+        );
 
         return back()->with('message', __('newsletter.messages.success_subscribe'));
-    }
-
-    private function processSubscriptions(StoreNewsletterSubscriptionRequest $request): void
-    {
-        $visitorId = $this->identityResolver->resolvedVisitorId($request);
-        $data = $request->validated();
-
-        foreach ($data['subscriptions'] as $sub) {
-            NewsletterSubscription::query()->updateOrCreate(
-                [
-                    'email' => $data['email'],
-                    'blog_id' => $sub['blog_id'],
-                ],
-                [
-                    'frequency' => $sub['frequency'],
-                    'send_time' => $sub['send_time'] ?? null,
-                    'send_time_weekend' => $sub['send_time_weekend'] ?? null,
-                    'send_day' => $sub['send_day'] ?? null,
-                    'visitor_id' => $visitorId,
-                ],
-            );
-        }
     }
 
     public function manage(Request $request): Response
     {
         if (!$request->hasValidSignature()) {
-            abort(403, 'Link do zarządzania subskrypcją wygasł lub jest nieprawidłowy.');
+            abort(403, __('newsletter.messages.invalid_signature'));
         }
 
         $email = $request->query('email');
@@ -138,38 +127,31 @@ class NewsletterController extends BasePublicController
         ]);
     }
 
+    /**
+     * @throws Throwable
+     */
     public function update(StoreNewsletterSubscriptionRequest $request): RedirectResponse
     {
         if (!$request->hasValidSignature()) {
-            abort(403);
+            abort(403, __('newsletter.messages.invalid_signature'));
         }
 
-        $this->removeUnselectedSubscriptions($request);
-        $this->processSubscriptions($request);
+        $this->newsletterService->updateSubscriptions(
+            $request->validated('email'),
+            $request->validated('subscriptions'),
+            $this->identityResolver->resolvedVisitorId($request),
+        );
 
         return back()->with('message', __('newsletter.messages.success_manage'));
     }
 
-    private function removeUnselectedSubscriptions(StoreNewsletterSubscriptionRequest $request): void
-    {
-        $data = $request->validated();
-        $email = $data['email'];
-        $blogIds = collect($data['subscriptions'])->pluck('blog_id');
-
-        NewsletterSubscription::query()
-            ->where('email', $email)
-            ->whereNotIn('blog_id', $blogIds)
-            ->delete();
-    }
-
-    public function unsubscribe(Request $request): RedirectResponse
+    public function unsubscribe(UnsubscribeNewsletterRequest $request): RedirectResponse
     {
         if (!$request->hasValidSignature()) {
-            abort(403);
+            abort(403, __('newsletter.messages.invalid_signature'));
         }
 
-        $email = $request->input('email');
-        NewsletterSubscription::query()->where('email', $email)->delete();
+        $this->newsletterService->unsubscribe($request->validated('email'));
 
         return redirect()->route('home')->with('message', __('newsletter.messages.unsubscribed'));
     }

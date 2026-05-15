@@ -41,6 +41,7 @@ return [
         'success_title' => 'Success!',
         'error_title' => 'Error!',
         'unsubscribed_title' => 'Unsubscribed!',
+        'invalid_signature' => 'The link has expired or is invalid.',
     ],
     'email' => [
         'subject' => 'New posts on your subscribed blogs',
