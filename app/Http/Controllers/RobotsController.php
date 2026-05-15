@@ -2,22 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Infrastructure\FileManagementService;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\URL;
 
 class RobotsController extends Controller
 {
+    public function __construct(
+        private readonly FileManagementService $fileService
+    ) {
+    }
+
     /**
      * Generate the robots.txt file.
      */
     public function generate(): Response
     {
         // Ensure no physical file blocks dynamic generation.
-        if (File::exists(public_path('robots.txt'))) {
-            File::delete(public_path('robots.txt'));
-        }
+        $this->fileService->deletePublicFile('robots.txt');
 
         $content = "User-agent: *\n";
         $content .= "Disallow: /dashboard\n";
