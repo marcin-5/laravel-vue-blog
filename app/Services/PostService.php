@@ -75,4 +75,62 @@ class PostService
             ->when($blogId, fn(Builder $q) => $q->where('blog_id', $blogId))
             ->orderByDesc('created_at');
     }
+
+    /**
+     * Get available extensions for a post.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, Post>
+     */
+    public function getAvailableExtensions(Post $post): \Illuminate\Database\Eloquent\Collection
+    {
+        $attachedIds = $post->extensions()->pluck('extension_post_id');
+
+        $query = Post::query()
+            ->extensionType()
+            ->whereNotIn('id', $attachedIds)
+            ->where('id', '!=', $post->id)
+            ->select(['id', 'title', 'excerpt']);
+
+        if ($post->group_id) {
+            $query->where('group_id', $post->group_id);
+        } else {
+            $query->where('blog_id', $post->blog_id);
+        }
+
+        return $query->get();
+    }
+
+    /**
+     * Attach an extension to a post.
+     */
+    public function attachExtension(Post $post, int $extensionId, int $displayOrder = 0): void
+    {
+        $post->extensions()->syncWithoutDetaching([
+            $extensionId => [
+                'display_order' => $displayOrder,
+            ],
+        ]);
+    }
+
+    /**
+     * Detach an extension from a post.
+     */
+    public function detachExtension(Post $post, int $extensionId): void
+    {
+        $post->extensions()->detach($extensionId);
+    }
+
+    /**
+     * Reorder extensions for a post.
+     *
+     * @param array<int, array{id: int, display_order: int}> $extensions
+     */
+    public function reorderExtensions(Post $post, array $extensions): void
+    {
+        foreach ($extensions as $extension) {
+            $post->extensions()->updateExistingPivot($extension['id'], [
+                'display_order' => $extension['display_order'],
+            ]);
+        }
+    }
 }

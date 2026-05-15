@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\Blogger;
 
 use App\Http\Controllers\AuthenticatedController;
+use App\Http\Requests\Blogger\AttachPostExtensionRequest;
+use App\Http\Requests\Blogger\ReorderPostExtensionsRequest;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Models\Post;
 use App\Services\PostService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 
 class PostsController extends AuthenticatedController
 {
@@ -63,21 +64,7 @@ class PostsController extends AuthenticatedController
      */
     public function availableExtensions(Post $post): JsonResponse
     {
-        $attachedIds = $post->extensions()->pluck('extension_post_id');
-
-        $query = Post::query()
-            ->extensionType()
-            ->whereNotIn('id', $attachedIds)
-            ->where('id', '!=', $post->id)
-            ->select(['id', 'title', 'excerpt']);
-
-        if ($post->group_id) {
-            $query->where('group_id', $post->group_id);
-        } else {
-            $query->where('blog_id', $post->blog_id);
-        }
-
-        $extensions = $query->get();
+        $extensions = $this->postService->getAvailableExtensions($post);
 
         return response()->json($extensions);
     }
@@ -85,18 +72,13 @@ class PostsController extends AuthenticatedController
     /**
      * Przypisz rozszerzenie do posta
      */
-    public function attachExtension(Request $request, Post $post): JsonResponse
+    public function attachExtension(AttachPostExtensionRequest $request, Post $post): JsonResponse
     {
-        $validated = $request->validate([
-            'extension_post_id' => 'required|exists:posts,id',
-            'display_order' => 'nullable|integer|min:0',
-        ]);
-
-        $post->extensions()->syncWithoutDetaching([
-            $validated['extension_post_id'] => [
-                'display_order' => $validated['display_order'] ?? 0,
-            ],
-        ]);
+        $this->postService->attachExtension(
+            $post,
+            $request->validated('extension_post_id'),
+            $request->validated('display_order', 0),
+        );
 
         return response()->json(['message' => 'Extension attached successfully']);
     }
@@ -104,9 +86,9 @@ class PostsController extends AuthenticatedController
     /**
      * Odłącz rozszerzenie od posta
      */
-    public function detachExtension(Request $request, Post $post, int $extensionPostId): JsonResponse
+    public function detachExtension(Post $post, int $extensionPostId): JsonResponse
     {
-        $post->extensions()->detach($extensionPostId);
+        $this->postService->detachExtension($post, $extensionPostId);
 
         return response()->json(['message' => 'Extension detached successfully']);
     }
@@ -114,19 +96,9 @@ class PostsController extends AuthenticatedController
     /**
      * Aktualizuj kolejność rozszerzeń
      */
-    public function reorderExtensions(Request $request, Post $post): JsonResponse
+    public function reorderExtensions(ReorderPostExtensionsRequest $request, Post $post): JsonResponse
     {
-        $validated = $request->validate([
-            'extensions' => 'required|array',
-            'extensions.*.id' => 'required|exists:posts,id',
-            'extensions.*.display_order' => 'required|integer|min:0',
-        ]);
-
-        foreach ($validated['extensions'] as $extension) {
-            $post->extensions()->updateExistingPivot($extension['id'], [
-                'display_order' => $extension['display_order'],
-            ]);
-        }
+        $this->postService->reorderExtensions($post, $request->validated('extensions'));
 
         return response()->json(['message' => 'Extensions reordered successfully']);
     }
