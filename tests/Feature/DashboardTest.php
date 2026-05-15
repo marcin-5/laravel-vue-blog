@@ -24,11 +24,13 @@ test('authenticated users without permissions see empty stats', function () {
         ->assertSuccessful()
         ->assertInertia(fn(Assert $page) => $page
             ->component('app/Dashboard')
-            ->where('newsletterSubscriptions', [])
-            ->where('blogStats', [])
-            ->where('postsStats', [])
-            ->where('userAgentStats', null)
-            ->where('botStats', null)
+            ->loadDeferredProps(fn(Assert $page) => $page
+                ->where('newsletterSubscriptions', [])
+                ->where('blogStats', [])
+                ->where('postsStats', [])
+                ->where('userAgentStats', null)
+                ->where('botStats', null)
+            )
         );
 });
 
@@ -44,13 +46,15 @@ test('authenticated users with view_blogs permission see blog stats', function (
         ->assertSuccessful()
         ->assertInertia(fn(Assert $page) => $page
             ->component('app/Dashboard')
-            ->has('blogStats', 1)
-            ->where('blogStats.0.name', 'Test Blog')
-            ->has('postsStats.timeline')
-            ->has('postsStats.performance')
-            ->where('newsletterSubscriptions', [])
-            ->where('userAgentStats', null)
-            ->where('botStats', null)
+            ->loadDeferredProps(fn(Assert $page) => $page
+                ->has('blogStats', 1)
+                ->where('blogStats.0.name', 'Test Blog')
+                ->has('postsStats.timeline')
+                ->has('postsStats.performance')
+                ->where('newsletterSubscriptions', [])
+                ->where('userAgentStats', null)
+                ->where('botStats', null)
+            )
         );
 });
 
@@ -66,12 +70,14 @@ test('authenticated users with view_admin_stats permission see admin stats', fun
         ->assertSuccessful()
         ->assertInertia(fn(Assert $page) => $page
             ->component('app/Dashboard')
-            ->has('newsletterSubscriptions', 1)
-            ->where('newsletterSubscriptions.0.email', 'subscriber@example.com')
-            ->has('userAgentStats')
-            ->has('botStats')
-            ->where('blogStats', [])
-            ->where('postsStats', [])
+            ->loadDeferredProps(fn(Assert $page) => $page
+                ->has('newsletterSubscriptions', 1)
+                ->where('newsletterSubscriptions.0.email', 'subscriber@example.com')
+                ->has('userAgentStats')
+                ->has('botStats')
+                ->where('blogStats', [])
+                ->where('postsStats', [])
+            )
         );
 });
 
@@ -87,11 +93,13 @@ test('authenticated users with all permissions see all stats', function () {
         ->assertSuccessful()
         ->assertInertia(fn(Assert $page) => $page
             ->component('app/Dashboard')
-            ->has('newsletterSubscriptions')
-            ->has('blogStats')
-            ->has('postsStats')
-            ->has('userAgentStats')
-            ->has('botStats')
+            ->loadDeferredProps(fn(Assert $page) => $page
+                ->has('newsletterSubscriptions')
+                ->has('blogStats')
+                ->has('postsStats')
+                ->has('userAgentStats')
+                ->has('botStats')
+            )
             ->has('translations')
         );
 });

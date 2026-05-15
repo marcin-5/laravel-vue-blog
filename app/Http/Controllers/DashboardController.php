@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Queries\Dashboard\BlogStatsQuery;
 use App\Queries\Dashboard\BotStatsQuery;
 use App\Queries\Dashboard\NewsletterStatsQuery;
@@ -31,42 +30,17 @@ class DashboardController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
-        $dashboardData = $this->prepareDashboardData($user);
 
         return Inertia::render('app/Dashboard', [
-            ...$dashboardData,
+            'newsletterSubscriptions' => Inertia::defer(fn() => $user->can('view_admin_stats') ? $this->newsletterQuery->handle() : []),
+            'blogStats' => Inertia::defer(fn() => $user->can('view_blogs') ? $this->blogQuery->handle($user) : []),
+            'postsStats' => Inertia::defer(fn() => $user->can('view_blogs') ? $this->postQuery->handle($user) : []),
+            'userAgentStats' => Inertia::defer(fn() => $user->can('view_admin_stats') ? $this->botQuery->handle()['userAgentStats'] : null),
+            'botStats' => Inertia::defer(fn() => $user->can('view_admin_stats') ? $this->botQuery->handle()['botStats'] : null),
             'translations' => [
                 'locale' => app()->getLocale(),
                 'messages' => $this->translations->getPageTranslations('dashboard'),
             ],
         ]);
-    }
-
-    /**
-     * Prepare data for the dashboard based on user permissions.
-     */
-    private function prepareDashboardData(User $user): array
-    {
-        $data = [
-            'newsletterSubscriptions' => [],
-            'blogStats' => [],
-            'postsStats' => [],
-            'userAgentStats' => null,
-            'botStats' => null,
-        ];
-
-        if ($user->can('view_admin_stats')) {
-            $data['newsletterSubscriptions'] = $this->newsletterQuery->handle();
-            $botStats = $this->botQuery->handle();
-            $data['userAgentStats'] = $botStats['userAgentStats'];
-            $data['botStats'] = $botStats['botStats'];
-        }
-
-        if ($user->can('view_blogs')) {
-            $data['blogStats'] = $this->blogQuery->handle($user);
-            $data['postsStats'] = $this->postQuery->handle($user);
-        }
-
-        return $data;
     }
 }
