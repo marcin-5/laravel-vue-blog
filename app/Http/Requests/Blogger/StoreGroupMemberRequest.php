@@ -16,8 +16,8 @@ class StoreGroupMemberRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'email'],
-            'role' => ['nullable', 'string'],
+            'email' => ['required', 'email', 'exists:users,email'],
+            'role' => ['nullable', 'string', \Illuminate\Validation\Rule::enum(\App\Enums\GroupRole::class)],
         ];
     }
 }

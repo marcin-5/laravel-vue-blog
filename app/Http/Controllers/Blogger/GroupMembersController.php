@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Blogger;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Blogger\StoreGroupMemberRequest;
+use App\Http\Requests\Blogger\UpdateGroupMemberRequest;
 use App\Models\Group;
 use App\Models\GroupMember;
 use App\Models\User;
 use App\Queries\Blogger\GroupMembersQuery;
+use App\Services\Blogger\GroupMemberService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,6 +19,11 @@ use Inertia\Response;
 class GroupMembersController extends Controller
 {
     use AuthorizesRequests;
+
+    public function __construct(
+        private readonly GroupMemberService $memberService,
+    ) {
+    }
 
     public function index(Request $request, GroupMembersQuery $query): Response
     {
@@ -64,38 +71,20 @@ class GroupMembersController extends Controller
 
     public function store(StoreGroupMemberRequest $request, Group $group): RedirectResponse
     {
-        $validated = $request->validated();
-
-        $userToAdd = User::where('email', $validated['email'])->first();
-        if (!$userToAdd) {
-            return back()->withErrors(['email' => __('validation.exists', ['attribute' => 'email'])]);
-        }
-
-        $role = $validated['role'] ?? GroupMember::ROLE_MEMBER;
-
-        $group->members()->syncWithoutDetaching([
-            $userToAdd->id => [
-                'role' => $role,
-                'joined_at' => now(),
-            ],
-        ]);
+        $this->memberService->addMember(
+            $group,
+            $request->validated('email'),
+            $request->validated('role', GroupMember::ROLE_MEMBER)
+        );
 
         return back()->with('success', __('Member added'));
     }
 
-    public function update(Request $request, Group $group, User $user): RedirectResponse
+    public function update(UpdateGroupMemberRequest $request, Group $group, User $user): RedirectResponse
     {
         $this->authorize('update', $group);
 
-        $validated = $request->validate([
-            'role' => ['required', 'string'],
-        ]);
-
-        $role = $validated['role'];
-
-        $group->members()->updateExistingPivot($user->id, [
-            'role' => $role,
-        ]);
+        $this->memberService->updateMember($group, $user, $request->validated('role'));
 
         return back()->with('success', __('Role updated'));
     }
@@ -104,7 +93,7 @@ class GroupMembersController extends Controller
     {
         $this->authorize('update', $group);
 
-        $group->members()->detach($user->id);
+        $this->memberService->removeMember($group, $user);
 
         return back()->with('success', __('Member removed'));
     }
