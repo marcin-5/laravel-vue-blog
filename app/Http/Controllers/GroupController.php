@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Builders\GroupSeoBuilder;
 use App\Http\Controllers\Concerns\FormatsPaginator;
+use App\Http\Resources\GroupPostResource;
+use App\Http\Resources\GroupResource;
 use App\Models\Group;
-use App\Models\Post;
 use App\Queries\App\GroupPostsQuery;
 use App\Services\BlogNavigationService;
 use App\Services\TranslationService;
@@ -20,19 +22,21 @@ class GroupController extends Controller
     public function __construct(
         private readonly BlogNavigationService $navigation,
         private readonly TranslationService $translations,
+        private readonly GroupSeoBuilder $seoBuilder,
     ) {}
 
     public function landing(Request $request, Group $group, GroupPostsQuery $query): Response
     {
         $this->authorize('view', $group);
 
+        $group->load('user');
         $posts = $query->handle($group);
 
         return Inertia::render('app/group/Landing', [
-            'group' => $this->formatGroup($group),
+            'group' => new GroupResource($group),
             'authorName' => $group->user?->name,
             'authorEmail' => $group->user?->email,
-            'posts' => $posts->items(),
+            'posts' => GroupPostResource::collection($posts->items()),
             'pagination' => $this->formatPagination($posts),
             'theme' => $group->theme,
             'sidebar' => $group->sidebar,
@@ -41,20 +45,8 @@ class GroupController extends Controller
                 'locale' => app()->getLocale(),
                 'messages' => $this->translations->getPageTranslations('blog'),
             ],
+            'seo' => $this->seoBuilder->buildLandingSeo($group)->toArray(),
         ]);
-    }
-
-    private function formatGroup(Group $group): array
-    {
-        return [
-            'id' => $group->id,
-            'name' => $group->name,
-            'slug' => $group->slug,
-            'content' => $group->content_html,
-            'footer' => $group->footer_html,
-            'created_at' => $group->created_at?->format('Y-m-d H:i'),
-            'updated_at' => $group->updated_at?->format('Y-m-d H:i'),
-        ];
     }
 
     public function post(Request $request, Group $group, string $postSlug, GroupPostsQuery $query): Response
@@ -65,14 +57,15 @@ class GroupController extends Controller
             ->posts()
             ->where('slug', $postSlug)
             ->forGroupView()
+            ->with(['user', 'extensions', 'group.user'])
             ->firstOrFail();
 
         $paginatedPosts = $query->handle($group);
 
         return Inertia::render('app/group/Post', [
-            'group' => $group,
-            'post' => $this->formatPost($post, $group),
-            'posts' => $paginatedPosts->items(),
+            'group' => new GroupResource($group),
+            'post' => new GroupPostResource($post),
+            'posts' => GroupPostResource::collection($paginatedPosts->items()),
             'pagination' => $this->formatPagination($paginatedPosts),
             'theme' => $group->theme,
             'sidebar' => $group->sidebar,
@@ -81,32 +74,7 @@ class GroupController extends Controller
                 'locale' => app()->getLocale(),
                 'messages' => $this->translations->getPageTranslations('post'),
             ],
+            'seo' => $this->seoBuilder->buildPostSeo($group, $post)->toArray(),
         ]);
-    }
-
-    private function formatPost(Post $post, Group $group): array
-    {
-        return [
-            'id' => $post->id,
-            'title' => $post->title,
-            'slug' => $post->slug,
-            'author' => $post->user?->name ?? $group->user?->name,
-            'author_email' => $post->user?->email ?? $group->user?->email,
-            'summaryHtml' => $post->summary_html,
-            'contentHtml' => $post->content_html,
-            'published_at' => $post->published_at?->format('Y-m-d H:i'),
-            'excerpt' => $post->excerpt,
-            'summary' => $post->summary,
-            'extensions' => $post
-                ->extensions()
-                ->where('is_published', true)
-                ->oldest()
-                ->get()
-                ->map(fn($ext) => [
-                    'id' => $ext->id,
-                    'title' => $ext->title,
-                    'contentHtml' => $ext->content_html,
-                ]),
-        ];
     }
 }

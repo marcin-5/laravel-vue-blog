@@ -1,0 +1,27 @@
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class GroupResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'slug' => $this->slug,
+            'content' => $this->content_html,
+            'footer' => $this->footer_html,
+            'created_at' => $this->created_at?->format('Y-m-d H:i'),
+            'updated_at' => $this->updated_at?->format('Y-m-d H:i'),
+        ];
+    }
+}
