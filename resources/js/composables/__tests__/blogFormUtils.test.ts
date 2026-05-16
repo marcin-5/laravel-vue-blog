@@ -7,7 +7,7 @@ import {
     createFormDataFromGroup,
     ensureThemeStructure,
     populateFormFromBlog,
-    populateFormFromGroup
+    populateFormFromGroup,
 } from '../blogFormUtils';
 
 describe('blogFormUtils', () => {

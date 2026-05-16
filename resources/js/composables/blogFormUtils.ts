@@ -1,4 +1,4 @@
-import type { AdminBlog as Blog, AdminGroup as Group, BlogFormData, BlogTheme, GroupFormData } from '@/types/blog.types';
+import type { AdminBlog as Blog, BlogFormData, BlogTheme, AdminGroup as Group, GroupFormData } from '@/types/blog.types';
 import type { InertiaForm } from '@inertiajs/vue3';
 
 export function ensureThemeStructure(theme: BlogTheme | null | undefined): BlogTheme {

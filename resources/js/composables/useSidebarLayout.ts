@@ -1,5 +1,5 @@
-import { computed } from 'vue';
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
+import { computed } from 'vue';
 
 // Tailwind xl breakpoint width (used for calculating sidebar width from percentage)
 const XL_BREAKPOINT_WIDTH = 1280;
