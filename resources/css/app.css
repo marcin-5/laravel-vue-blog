@@ -24,7 +24,6 @@
     --font-vollkorn: 'Vollkorn Variable', serif;
     --font-yrsa: 'Yrsa Variable', serif;
 
-
     --font-sans: var(--font-montserrat);
     --font-serif: var(--font-faustina);
 
@@ -237,14 +236,13 @@
 
 @layer base {
     * {
-        @apply border-gray-200 border-border outline-ring/50;
+        @apply border-border border-gray-200 outline-ring/50;
     }
 
     body {
         @apply bg-background text-foreground;
     }
 }
-
 
 @layer base {
     select option {
@@ -327,7 +325,7 @@
         margin-top: 1.25em;
         margin-bottom: 1.25em;
     }
-    
+
     .prose p a {
         text-decoration: underline;
     }
@@ -337,7 +335,7 @@
     }
 
     .prose blockquote {
-        @apply text-muted-foreground border-l-border;
+        @apply border-l-border text-muted-foreground;
         font-family: var(--blog-motto-font), serif;
         font-size: calc(1rem * var(--blog-motto-scale));
         font-weight: 500;
@@ -383,7 +381,7 @@
     }
 
     .prose code {
-        @apply text-foreground bg-muted;
+        @apply bg-muted text-foreground;
         font-weight: 600;
         font-size: 0.875em;
         border-radius: 0.375rem;
@@ -391,7 +389,7 @@
     }
 
     .prose pre {
-        @apply text-foreground bg-muted border border-border;
+        @apply border border-border bg-muted text-foreground;
         font-size: 0.875em;
         line-height: 1.7142857;
         margin-top: 1.7142857em;
@@ -421,7 +419,7 @@
 
     /* Dark mode adjustments */
     .dark .prose blockquote {
-        @apply text-muted-foreground border-l-border;
+        @apply border-l-border text-muted-foreground;
     }
 
     .eo {

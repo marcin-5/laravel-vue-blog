@@ -67,12 +67,12 @@ class Blog extends Model
     {
         static::addGlobalScope('locale', function (Builder $builder) {
             if (!app()->runningInConsole() && !request()->is(
-                    'dashboard*',
-                    'settings*',
-                    'admin*',
-                    '_/*',
-                    'api/admin/*',
-                )) {
+                'dashboard*',
+                'settings*',
+                'admin*',
+                '_/*',
+                'api/admin/*',
+            )) {
                 $builder->where('blogs.locale', app()->getLocale());
             }
         });

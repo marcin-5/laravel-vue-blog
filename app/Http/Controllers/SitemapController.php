@@ -43,8 +43,8 @@ class SitemapController extends Controller
             ->header('X-Content-Type-Options', 'nosniff');
 
         if ($request->isMethodSafe() && ($request->header('If-None-Match') === $etag || (strtotime(
-                        $request->header('If-Modified-Since') ?? '',
-                    ) >= $mtime))) {
+            $request->header('If-Modified-Since') ?? '',
+        ) >= $mtime))) {
             $response->setStatusCode(304);
         }
 
