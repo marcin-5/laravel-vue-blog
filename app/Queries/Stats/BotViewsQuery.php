@@ -3,7 +3,7 @@
 namespace App\Queries\Stats;
 
 use App\Models\BotView;
-use App\Services\StatsCriteria;
+use App\DataTransferObjects\Stats\StatsCriteria;
 use Illuminate\Support\Collection;
 
 class BotViewsQuery

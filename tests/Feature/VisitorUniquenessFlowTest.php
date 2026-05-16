@@ -1,5 +1,6 @@
 <?php
 
+use App\DataTransferObjects\Stats\StatsCriteria;
 use App\Enums\StatsRange;
 use App\Http\Middleware\UpdateVisitorOnLogin;
 use App\Jobs\StorePageView;
@@ -7,8 +8,8 @@ use App\Models\Blog;
 use App\Models\PageView;
 use App\Models\Post;
 use App\Models\User;
-use App\Services\StatsCriteria;
 use App\Services\StatsService;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Session\Middleware\StartSession;
@@ -16,6 +17,9 @@ use Illuminate\Support\Carbon;
 
 uses(RefreshDatabase::class);
 
+/**
+ * @throws BindingResolutionException
+ */
 function runLoginSyncMiddleware(Request $request, ?User $user = null): void
 {
     /** @var UpdateVisitorOnLogin $mw */
@@ -69,7 +73,7 @@ it('keeps unique entries across anon → login → logout transitions', function
     expect(PageView::count())->toBe(2);
 
     // 2) Login: mapping + reassociation of previous anonymous rows to user_id
-    $reqLogin = Request::create('/login-callback', 'GET');
+    $reqLogin = Request::create('/login-callback');
     $reqLogin->cookies->set('visitor_id', $visitorId);
     session()->start();
     runLoginSyncMiddleware($reqLogin, $user);

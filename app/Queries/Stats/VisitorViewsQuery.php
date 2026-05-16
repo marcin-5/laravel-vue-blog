@@ -11,7 +11,7 @@ use App\Models\MarkdownView;
 use App\Models\NewsletterSubscription;
 use App\Models\PageView;
 use App\Models\Post;
-use App\Services\StatsCriteria;
+use App\DataTransferObjects\Stats\StatsCriteria;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Collection;
@@ -28,6 +28,10 @@ class VisitorViewsQuery
      */
     public function execute(StatsCriteria $criteria): Collection
     {
+        if ($criteria->visitorType === 'special') {
+            return $this->executeSpecialViews($criteria);
+        }
+
         if ($criteria->visitorType === 'bots') {
             return $this->executeAggregatedViews($criteria, BotView::class, 'bot_views');
         }
@@ -51,23 +55,13 @@ class VisitorViewsQuery
         return $query->get()->map(fn(object $row) => VisitorStatsRow::fromRow($row)->toArray());
     }
 
-    /**
-     * @param  class-string<BotView|AnonymousView|MarkdownView>  $modelClass
-     */
     private function executeAggregatedViews(StatsCriteria $criteria, string $modelClass, string $tableName): Collection
     {
         $blogMorphClass = $this->getBlogMorphClass();
         $postMorphClass = $this->getPostMorphClass();
-        $bounds = $criteria->range->bounds();
-
         $isMarkdown = $modelClass === MarkdownView::class;
 
-        $query = $modelClass::query()
-            ->when(
-                !$isMarkdown,
-                fn(Builder $q) => $q->join('user_agents', 'user_agents.id', '=', "$tableName.user_agent_id"),
-            )
-            ->when($bounds, fn(Builder $q) => $q->whereBetween("$tableName.last_seen_at", $bounds))
+        $query = $this->buildAggregatedBaseQuery($criteria, $modelClass, $tableName)
             ->selectRaw(
                 ($isMarkdown ? "COALESCE($tableName.user_agent, 'Unknown') as visitor_label," : 'user_agents.name as visitor_label,') .
                 ($isMarkdown ? "COALESCE($tableName.user_agent, 'Unknown') as row_id," : 'user_agents.name as row_id,') .
@@ -79,6 +73,80 @@ class VisitorViewsQuery
                 ' MAX(last_seen_at) as last_seen_at',
                 [$blogMorphClass, $postMorphClass],
             )
+            ->groupByRaw($isMarkdown ? "COALESCE($tableName.user_agent, 'Unknown')" : 'user_agents.name');
+
+        $this->applySort($query, $criteria->sort);
+        $this->applyLimit($query, $criteria->limit);
+
+        return $query->get()->map(fn(object $row) => VisitorStatsRow::fromRow($row)->toArray());
+    }
+
+    /**
+     * @return Collection<int, array{visitor_label:string,blog_views:int,post_views:int,views:int,lifetime_views:int,user_agent:string|null}>
+     */
+    private function executeSpecialViews(StatsCriteria $criteria): Collection
+    {
+        $blogMorphClass = $this->getBlogMorphClass();
+        $postMorphClass = $this->getPostMorphClass();
+
+        $subqueries = [
+            ['model' => BotView::class, 'table' => 'bot_views', 'markdown' => false],
+            ['model' => AnonymousView::class, 'table' => 'anonymous_views', 'markdown' => false],
+            ['model' => MarkdownView::class, 'table' => 'markdown_views', 'markdown' => true],
+        ];
+
+        $unions = [];
+        foreach ($subqueries as $config) {
+            $tableName = $config['table'];
+            $isMarkdown = $config['markdown'];
+
+            $q = $this->buildAggregatedBaseQuery($criteria, $config['model'], $tableName)
+                ->selectRaw(
+                    ($isMarkdown ? "COALESCE($tableName.user_agent, 'Unknown') as visitor_label," : 'user_agents.name as visitor_label,') .
+                    'viewable_type, hits, last_seen_at'
+                );
+            $unions[] = $q->toBase();
+        }
+
+        $first = array_shift($unions);
+        foreach ($unions as $u) {
+            $first->unionAll($u);
+        }
+
+        $query = DB::table(DB::raw("({$first->toSql()}) as combined_views"))
+            ->mergeBindings($first)
+            ->selectRaw(
+                'visitor_label,' .
+                'visitor_label as row_id,' .
+                'visitor_label as user_agent,' .
+                'SUM(CASE WHEN viewable_type = ? THEN hits ELSE 0 END) as blog_views,' .
+                'SUM(CASE WHEN viewable_type = ? THEN hits ELSE 0 END) as post_views,' .
+                'SUM(hits) as views,' .
+                'SUM(hits) as lifetime_views,' .
+                'MAX(last_seen_at) as last_seen_at',
+                [$blogMorphClass, $postMorphClass]
+            )
+            ->groupBy('visitor_label');
+
+        $this->applySort($query, $criteria->sort);
+        $this->applyLimit($query, $criteria->limit);
+
+        return $query->get()->map(fn(object $row) => VisitorStatsRow::fromRow($row)->toArray());
+    }
+
+    private function buildAggregatedBaseQuery(StatsCriteria $criteria, string $modelClass, string $tableName): Builder
+    {
+        $blogMorphClass = $this->getBlogMorphClass();
+        $postMorphClass = $this->getPostMorphClass();
+        $bounds = $criteria->range->bounds();
+        $isMarkdown = $modelClass === MarkdownView::class;
+
+        return $modelClass::query()
+            ->when(
+                !$isMarkdown,
+                fn(Builder $q) => $q->join('user_agents', 'user_agents.id', '=', "$tableName.user_agent_id"),
+            )
+            ->when($bounds, fn(Builder $q) => $q->whereBetween("$tableName.last_seen_at", $bounds))
             ->when(
                 $criteria->bloggerId,
                 fn(Builder $q) => $this->applyBloggerIdFilter(
@@ -92,13 +160,7 @@ class VisitorViewsQuery
             ->when(
                 $criteria->blogId,
                 fn(Builder $q) => $this->applyBlogIdFilter($q, $criteria, $blogMorphClass, $postMorphClass, $tableName),
-            )
-            ->groupByRaw($isMarkdown ? "COALESCE($tableName.user_agent, 'Unknown')" : 'user_agents.name');
-
-        $this->applySort($query, $criteria->sort);
-        $this->applyLimit($query, $criteria->limit);
-
-        return $query->get()->map(fn(object $row) => VisitorStatsRow::fromRow($row)->toArray());
+            );
     }
 
     private function getBlogMorphClass(): string
@@ -165,7 +227,7 @@ class VisitorViewsQuery
         });
     }
 
-    private function applySort(Builder $query, StatsSort $sort): void
+    private function applySort(Builder|QueryBuilder $query, StatsSort $sort): void
     {
         match ($sort) {
             StatsSort::ViewsAsc => $query->orderBy('views', 'asc'),
@@ -177,7 +239,7 @@ class VisitorViewsQuery
         };
     }
 
-    private function applyLimit(Builder $query, ?int $limit): void
+    private function applyLimit(Builder|QueryBuilder $query, ?int $limit): void
     {
         if ($limit !== null) {
             $query->limit(max(1, $limit));

@@ -74,7 +74,7 @@ test('it does not queue post url when visibility is restricted', function () {
 });
 
 test('it handles robots.txt restriction', function () {
-    $service = new IndexNowService;
+    $service = app(IndexNowService::class);
     $robotsPath = public_path('robots.txt');
 
     File::put($robotsPath, "User-agent: *\nDisallow: /blocked");

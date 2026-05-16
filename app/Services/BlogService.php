@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Blog;
@@ -7,7 +9,7 @@ use App\Models\Category;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
-class BlogService
+readonly class BlogService
 {
     private const array BLOG_FIELDS = [
         'id',

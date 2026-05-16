@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Concerns;
 use App\Enums\StatsRange;
 use App\Enums\StatsSort;
 use App\Models\Blog;
-use App\Services\StatsCriteria;
+use App\DataTransferObjects\Stats\StatsCriteria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 

@@ -1,14 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Blog;
 use App\Models\Post;
-use Illuminate\Support\Facades\URL;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url as SitemapUrl;
 
-class SitemapService
+readonly class SitemapService
 {
     public function getSitemap(string $locale): string
     {
@@ -18,7 +19,9 @@ class SitemapService
 
         if ($domain) {
             $scheme = parse_url($originalRootUrl, PHP_URL_SCHEME) ?: 'https';
-            URL::forceRootUrl($scheme . '://' . $domain);
+            // `forceRootUrl` is deprecated. Temporarily override the application's URL
+            // so generated routes use the correct host for the given locale.
+            config()->set('app.url', $scheme . '://' . $domain);
         }
 
         $sitemap = Sitemap::create();
@@ -32,7 +35,8 @@ class SitemapService
         $xml = $sitemap->render();
 
         if ($domain) {
-            URL::forceRootUrl(null);
+            // Restore the original application URL after generation
+            config()->set('app.url', $originalRootUrl);
         }
 
         return $xml;
@@ -77,7 +81,8 @@ class SitemapService
             ->published()
             ->public()
             ->whereHas('blog', function ($query) use ($locale): void {
-                $query->where('is_published', true)
+                $query
+                    ->where('is_published', true)
                     ->where('locale', $locale);
             })
             ->cursor()

@@ -9,7 +9,7 @@ use App\Models\PageView;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\UserAgent;
-use App\Services\StatsCriteria;
+use App\DataTransferObjects\Stats\StatsCriteria;
 use App\Services\StatsService;
 
 it('includes bot and anonymous views in post stats', function () {

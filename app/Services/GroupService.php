@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
-class GroupService
+readonly class GroupService
 {
     private const array POST_FIELDS = [
         'id',

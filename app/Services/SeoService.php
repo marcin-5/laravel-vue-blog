@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Blog;
@@ -7,7 +9,7 @@ use App\Models\Post;
 use DateTimeInterface;
 use Illuminate\Support\Str;
 
-class SeoService
+readonly class SeoService
 {
     private const array MARKDOWN_PATTERNS = [
         '/!\[([^]]*)]\([^)]+\)/' => '$1',    // images -> alt

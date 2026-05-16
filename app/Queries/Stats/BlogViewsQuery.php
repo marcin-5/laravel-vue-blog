@@ -8,7 +8,7 @@ use App\Models\Blog;
 use App\Models\PageView;
 use App\Models\Post;
 use App\Services\Stats\UniqueViewerKeyBuilder;
-use App\Services\StatsCriteria;
+use App\DataTransferObjects\Stats\StatsCriteria;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;

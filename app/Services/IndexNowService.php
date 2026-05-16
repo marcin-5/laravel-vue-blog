@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use Exception;
@@ -7,8 +9,12 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class IndexNowService
+readonly class IndexNowService
 {
+    public function __construct(
+        private RobotsParser $robotsParser,
+    ) {}
+
     /**
      * Submit a list of URLs to the IndexNow API.
      *
@@ -86,7 +92,7 @@ class IndexNowService
         $path = public_path($key . '.txt');
         if (!File::exists($path)) {
             File::put($path, $key);
-            Log::info("IndexNow key file created at {$path}");
+            Log::info("IndexNow key file created at $path");
         }
     }
 
@@ -113,41 +119,6 @@ class IndexNowService
      */
     public function isAllowedByRobots(string $url): bool
     {
-        $robotsPath = public_path('robots.txt');
-        if (!File::exists($robotsPath)) {
-            return true;
-        }
-
-        $robotsContent = File::get($robotsPath);
-        $parsedUrl = parse_url($url);
-        $path = ($parsedUrl['path'] ?? '/') . (isset($parsedUrl['query']) ? '?' . $parsedUrl['query'] : '');
-
-        $lines = explode("\n", $robotsContent);
-        $userAgentApplies = true;
-
-        foreach ($lines as $line) {
-            $line = trim($line);
-            if (empty($line) || str_starts_with($line, '#')) {
-                continue;
-            }
-
-            if (stripos($line, 'User-agent:') === 0) {
-                $ua = trim(substr($line, 11));
-                $userAgentApplies = ($ua === '*' || stripos($ua, 'IndexNow') !== false || stripos(
-                    $ua,
-                    'Bingbot',
-                ) !== false);
-                continue;
-            }
-
-            if ($userAgentApplies && stripos($line, 'Disallow:') === 0) {
-                $disallowPath = trim(substr($line, 9));
-                if (!empty($disallowPath) && str_starts_with($path, $disallowPath)) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
+        return $this->robotsParser->isAllowed($url, 'IndexNow');
     }
 }

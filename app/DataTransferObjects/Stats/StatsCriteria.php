@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\DataTransferObjects\Stats;
 
 use App\Enums\StatsRange;
 use App\Enums\StatsSort;

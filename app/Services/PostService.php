@@ -1,13 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Blog;
 use App\Models\Group;
 use App\Models\Post;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
-class PostService
+readonly class PostService
 {
     public function createPost(?Blog $blog, array $postData, ?int $userId = null, ?Group $group = null): Post
     {
@@ -79,9 +82,9 @@ class PostService
     /**
      * Get available extensions for a post.
      *
-     * @return \Illuminate\Database\Eloquent\Collection<int, Post>
+     * @return Collection<int, Post>
      */
-    public function getAvailableExtensions(Post $post): \Illuminate\Database\Eloquent\Collection
+    public function getAvailableExtensions(Post $post): Collection
     {
         $attachedIds = $post->extensions()->pluck('extension_post_id');
 
@@ -123,7 +126,7 @@ class PostService
     /**
      * Reorder extensions for a post.
      *
-     * @param array<int, array{id: int, display_order: int}> $extensions
+     * @param  array<int, array{id: int, display_order: int}>  $extensions
      */
     public function reorderExtensions(Post $post, array $extensions): void
     {

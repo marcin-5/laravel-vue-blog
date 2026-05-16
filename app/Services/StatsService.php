@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Enums\StatsSort;
+use App\DataTransferObjects\Stats\StatsCriteria;
 use App\Queries\Stats\BlogViewsQuery;
 use App\Queries\Stats\PostViewsQuery;
 use App\Queries\Stats\VisitorViewsQuery;
@@ -43,93 +43,21 @@ readonly class StatsService
      */
     public function specialVisitorViews(StatsCriteria $criteria): Collection
     {
-        if ($criteria->visitorType === 'bots' || $criteria->visitorType === 'anonymous' || $criteria->visitorType === 'markdown') {
+        if ($criteria->visitorType !== 'all') {
             return $this->visitorViews($criteria);
         }
 
-        // 'all' selected -> merge anonymous, bots and markdown
-        $anonymous = $this->visitorViews(
+        return $this->visitorViews(
             new StatsCriteria(
                 range: $criteria->range,
                 bloggerId: $criteria->bloggerId,
                 blogId: $criteria->blogId,
-                limit: null, // merge then apply limit manually
+                limit: $criteria->limit,
                 sort: $criteria->sort,
                 visitorGroupBy: $criteria->visitorGroupBy,
-                visitorType: 'anonymous',
+                visitorType: 'special',
             ),
         );
-
-        $bots = $this->visitorViews(
-            new StatsCriteria(
-                range: $criteria->range,
-                bloggerId: $criteria->bloggerId,
-                blogId: $criteria->blogId,
-                limit: null,
-                sort: $criteria->sort,
-                visitorGroupBy: $criteria->visitorGroupBy,
-                visitorType: 'bots',
-            ),
-        );
-
-        $markdown = $this->visitorViews(
-            new StatsCriteria(
-                range: $criteria->range,
-                bloggerId: $criteria->bloggerId,
-                blogId: $criteria->blogId,
-                limit: null,
-                sort: $criteria->sort,
-                visitorGroupBy: $criteria->visitorGroupBy,
-                visitorType: 'markdown',
-            ),
-        );
-
-        $merged = collect();
-        foreach ([$anonymous, $bots, $markdown] as $set) {
-            foreach ($set as $row) {
-                $key = $row['visitor_label'];
-                if (!$merged->has($key)) {
-                    $merged->put($key, $row);
-                } else {
-                    $existing = $merged->get($key);
-                    $existing['blog_views'] += $row['blog_views'];
-                    $existing['post_views'] += $row['post_views'];
-                    $existing['views'] += $row['views'];
-                    $existing['lifetime_views'] += $row['lifetime_views'];
-                    $existing['user_agent'] = $existing['user_agent'] ?? $row['user_agent'];
-                    $existing['row_id'] = $existing['row_id'] ?? $row['row_id'];
-                    if (isset($row['last_seen_at'])) {
-                        if (!isset($existing['last_seen_at']) || $row['last_seen_at'] > $existing['last_seen_at']) {
-                            $existing['last_seen_at'] = $row['last_seen_at'];
-                        }
-                    }
-                    $merged->put($key, $existing);
-                }
-            }
-        }
-
-        // Apply sorting & limiting to merged collection similar to query
-        $specialVisitors = $merged->values();
-        $specialVisitors = match ($criteria->sort) {
-            StatsSort::ViewsAsc => $specialVisitors->sortBy('views')->values(),
-            StatsSort::LastSeenAsc => $specialVisitors->sortBy('last_seen_at')->values(),
-            StatsSort::LastSeenDesc => $specialVisitors->sortByDesc('last_seen_at')->values(),
-            StatsSort::NameAsc => $specialVisitors->sortBy(
-                'visitor_label',
-                SORT_NATURAL | SORT_FLAG_CASE,
-            )->values(),
-            StatsSort::NameDesc => $specialVisitors->sortByDesc(
-                'visitor_label',
-                SORT_NATURAL | SORT_FLAG_CASE,
-            )->values(),
-            default => $specialVisitors->sortByDesc('views')->values(),
-        };
-
-        if ($criteria->limit !== null) {
-            $specialVisitors = $specialVisitors->take(max(1, $criteria->limit))->values();
-        }
-
-        return $specialVisitors;
     }
 
     /**

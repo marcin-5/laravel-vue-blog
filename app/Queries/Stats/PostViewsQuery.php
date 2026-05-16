@@ -3,11 +3,11 @@
 namespace App\Queries\Stats;
 
 use App\DataTransferObjects\Stats\PostStatsRow;
+use App\DataTransferObjects\Stats\StatsCriteria;
 use App\Enums\StatsSort;
 use App\Models\PageView;
 use App\Models\Post;
 use App\Services\Stats\UniqueViewerKeyBuilder;
-use App\Services\StatsCriteria;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -86,7 +86,7 @@ class PostViewsQuery
     ): QueryBuilder {
         return DB::query()
             ->from($table)
-            ->selectRaw("viewable_id, SUM(hits) as {$columnAlias}")
+            ->selectRaw("viewable_id, SUM(hits) as $columnAlias")
             ->where('viewable_type', '=', $postClass)
             ->when($from && $to, fn($q) => $q->whereBetween('last_seen_at', [$from, $to]))
             ->groupBy('viewable_id');

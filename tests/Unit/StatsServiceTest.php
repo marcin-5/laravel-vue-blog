@@ -7,7 +7,7 @@ use App\Models\Blog;
 use App\Models\PageView;
 use App\Models\Post;
 use App\Models\User;
-use App\Services\StatsCriteria;
+use App\DataTransferObjects\Stats\StatsCriteria;
 use App\Services\StatsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;

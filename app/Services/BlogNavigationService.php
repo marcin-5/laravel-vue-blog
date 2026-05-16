@@ -1,15 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Blog;
 use App\Models\Group;
 use App\Models\Post;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Cache;
 
-class BlogNavigationService
+readonly class BlogNavigationService
 {
     public function getLandingNavigation(Blog|Group $entity): array
+    {
+        return Cache::remember(
+            "landing_navigation:{$entity->getMorphClass()}:$entity->id",
+            now()->addMinutes(30),
+            fn() => $this->buildLandingNavigation($entity),
+        );
+    }
+
+    private function buildLandingNavigation(Blog|Group $entity): array
     {
         $query = $entity instanceof Blog
             ? $entity->posts()->forPublicListing()
@@ -72,6 +84,15 @@ class BlogNavigationService
 
     public function getPostNavigation(Blog|Group $entity, Post $post): array
     {
+        return Cache::remember(
+            "post_navigation:{$entity->getMorphClass()}:$entity->id:$post->id",
+            now()->addMinutes(30),
+            fn() => $this->buildPostNavigation($entity, $post),
+        );
+    }
+
+    private function buildPostNavigation(Blog|Group $entity, Post $post): array
+    {
         $prevPost = $this->getAdjacentPost($entity, $post, 'previous');
         $nextPost = $this->getAdjacentPost($entity, $post, 'next');
 
@@ -101,9 +122,11 @@ class BlogNavigationService
         return $query
             ->select(['id', 'title', 'slug', 'published_at', 'created_at'])
             ->where(function (Builder $query) use ($post, $compare) {
-                $query->where('published_at', $compare, $post->published_at)
+                $query
+                    ->where('published_at', $compare, $post->published_at)
                     ->orWhere(function (Builder $subQuery) use ($post, $compare) {
-                        $subQuery->where('published_at', '=', $post->published_at)
+                        $subQuery
+                            ->where('published_at', '=', $post->published_at)
                             ->where('created_at', $compare, $post->created_at);
                     });
             })

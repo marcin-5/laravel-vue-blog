@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\VisitorLink;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\Request;
 
-class IdentityResolver
+readonly class IdentityResolver
 {
-    public function __construct(public Guard $auth)
+    public function __construct(private Guard $auth)
     {
     }
 

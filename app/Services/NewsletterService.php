@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\NewsletterSubscription;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
-class NewsletterService
+readonly class NewsletterService
 {
     /**
      * Update existing subscriptions for an email. Removes unselected and adds/updates others.

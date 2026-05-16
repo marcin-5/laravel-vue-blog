@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Jobs\StoreAnonymousView;
@@ -10,7 +12,6 @@ use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Database\ClassMorphViolationException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -56,56 +57,15 @@ readonly class PageViewTracker
             return;
         }
 
-        $isNewVisitor = (bool) $request->attributes->get('visitor_id_is_new', true);
-
-        // If client sent X-Visitor-Id header, they are likely a real user with LocalStorage support
-        $headerVisitorId = $request->header('X-Visitor-Id');
-        if ($headerVisitorId && $isNewVisitor) {
-            $isNewVisitor = false;
-            // Update request for consistency
-            $request->cookies->set('visitor_id', $headerVisitorId);
-        }
-
-        // Check for a pending visit from this IP/UA/Fingerprint (for returning visitors)
-        if (!$isNewVisitor) {
-            $this->processPendingVisit($viewable, $request);
+        // Handle visitor ID from header if it's a new visitor (likely first request from SPA)
+        if ($request->attributes->get('visitor_id_is_new', true)) {
+            $headerVisitorId = $request->header('X-Visitor-Id');
+            if ($headerVisitorId) {
+                $request->cookies->set('visitor_id', $headerVisitorId);
+            }
         }
 
         $this->recordView($viewable, $request);
-    }
-
-    /**
-     * @throws InvalidArgumentException
-     */
-    private function processPendingVisit(Model $viewable, Request $request): void
-    {
-        $key = $this->getPendingVisitKey($viewable, $request);
-        $pending = $this->cache->get($key);
-
-        if ($pending) {
-            $this->cache->forget($key);
-
-            $visitorId = $request->cookie('visitor_id');
-
-            StorePageView::dispatch([
-                ...$pending,
-                'visitor_id' => $visitorId,
-                'user_id' => $this->auth->user()?->getAuthIdentifier(),
-                'fingerprint' => $this->fingerprintGenerator->generate($request),
-            ]);
-        }
-    }
-
-    private function getPendingVisitKey(Model $viewable, Request $request): string
-    {
-        $fingerprint = $this->fingerprintGenerator->generate($request);
-
-        return sprintf(
-            'pending_visit:%s:%s:%s',
-            $viewable->getMorphClass(),
-            $viewable->getKey(),
-            $fingerprint ?? hash('sha256', $request->ip() . $request->header('User-Agent')),
-        );
     }
 
     /**
@@ -155,30 +115,5 @@ readonly class PageViewTracker
             'user_agent' => (string) $request->header('User-Agent', ''),
             'fingerprint' => $fingerprint,
         ]);
-    }
-
-    private function storePendingVisit(Model $viewable, Request $request): void
-    {
-        $key = $this->getPendingVisitKey($viewable, $request);
-
-        $this->cache->put($key, [
-            'viewable_type' => $viewable->getMorphClass(),
-            'viewable_id' => $viewable->getKey(),
-            'ip_address' => $request->ip(),
-            'user_agent' => (string) $request->header('User-Agent', ''),
-            'session_id' => $request->session()->getId(),
-        ], 600); // 10 minutes
-    }
-
-    private function resolveVisitorId(Request $request): ?string
-    {
-        // If already exists in cookie, use it
-        $current = (string) $request->cookie('visitor_id', '');
-        if ($current !== '') {
-            return $current;
-        }
-
-        // Generate a new one (only for logic purposes; middleware handles cookie writing)
-        return (string) Str::uuid();
     }
 }
