@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use DeviceDetector\DeviceDetector;
 use Exception;
 use Illuminate\Support\Str;
+use Jaybizzle\CrawlerDetect\CrawlerDetect;
 use UAParser\Exception\FileNotFoundException;
 use UAParser\Parser;
 
@@ -20,17 +20,15 @@ readonly class UserAgentNormalizer
             return 'Unknown';
         }
 
-        // Prefer Matomo DeviceDetector for bot identification
-        $dd = new DeviceDetector($userAgent);
-        $dd->parse();
-        if ($dd->isBot()) {
-            $bot = $dd->getBot();
-            $botName = is_array($bot) ? ($bot['name'] ?? null) : null;
+        // Prefer Jaybizzle CrawlerDetect for bot identification
+        $cd = new CrawlerDetect();
+        if ($cd->isCrawler($userAgent)) {
+            $botName = $cd->getMatches();
             if (!empty($botName)) {
-                return Str::ucfirst((string) $botName);
+                return Str::ucfirst($botName);
             }
 
-            // Fallback to configured fragments if DeviceDetector lacks a friendly name
+            // Fallback to configured fragments if CrawlerDetect lacks a friendly name
             $fragments = config('bots.fragments', []);
             if (Str::contains($userAgent, $fragments, ignoreCase: true)) {
                 $sortedFragments = self::getSortedBotFragments();

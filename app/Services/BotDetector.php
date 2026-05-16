@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use DeviceDetector\DeviceDetector;
-use Exception;
 use Illuminate\Http\Request;
+use Jaybizzle\CrawlerDetect\CrawlerDetect;
 
 readonly class BotDetector
 {
     /**
      * Return detector-reported bot name, or null when not a bot.
-     * @throws Exception
      */
     public function getBotName(Request|string|null $requestOrUa): ?string
     {
@@ -21,15 +19,12 @@ readonly class BotDetector
             return null;
         }
 
-        $dd = new DeviceDetector($ua);
-        $dd->parse();
-
-        if (!$dd->isBot()) {
+        $cd = new CrawlerDetect();
+        if (!$cd->isCrawler($ua)) {
             return null;
         }
 
-        $info = $dd->getBot();
-        $name = is_array($info) ? ($info['name'] ?? null) : null;
+        $name = $cd->getMatches();
 
         return $name !== null && $name !== '' ? $name : 'Bot';
     }
@@ -44,8 +39,7 @@ readonly class BotDetector
     }
 
     /**
-     * Quick bot check using Matomo DeviceDetector signatures.
-     * @throws Exception
+     * Quick bot check using Jaybizzle CrawlerDetect signatures.
      */
     public function isBot(Request|string|null $requestOrUa): bool
     {
@@ -54,9 +48,8 @@ readonly class BotDetector
             return false;
         }
 
-        $dd = new DeviceDetector($ua);
-        $dd->parse();
+        $cd = new CrawlerDetect();
 
-        return $dd->isBot();
+        return $cd->isCrawler($ua);
     }
 }
