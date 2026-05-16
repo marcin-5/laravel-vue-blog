@@ -6,7 +6,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Toaster } from '@/components/ui/toast';
 import { useToast } from '@/composables/useToast';
 import type { Blog, InertiaForm } from '@/types/blog.types';
 import type { ExistingSubscription, NewsletterConfig, NewsletterFormData, NewsletterSubscription } from '@/types/newsletter.types';
@@ -132,7 +131,6 @@ const unsubscribe = () => {
 
 <template>
     <PublicHomeLayout>
-        <Toaster />
         <div class="mx-auto max-w-2xl py-12">
             <h1 class="mb-6 text-3xl font-bold text-accent-foreground">
                 {{ title }}

@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import PublicHomeLayout from '@/layouts/PublicHomeLayout.vue';
+import { useToast } from '@/composables/useToast';
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
+const { toast } = useToast();
 
 const INPUT_CLASSES =
     'w-full rounded-md border border-[#19140035] bg-white/70 p-2 text-sm text-[#1b1b18] placeholder:text-[#686862] focus:ring-2 focus:ring-[#19140035] focus:outline-none dark:border-[#3E3E3A] dark:bg-[#262622] dark:text-[#EDEDEC] dark:placeholder:text-[#A1A1A1]';
@@ -23,15 +25,19 @@ function submit() {
         preserveScroll: true,
         onSuccess: () => {
             form.reset();
-            // TODO: Replace alert with a non-disruptive toast notification or inline message.
-            alert(t('contact.form.submitted', 'Your message has been sent.'));
+            toast({
+                title: t('contact.form.submitted', 'Your message has been sent.'),
+                variant: 'success',
+            });
         },
         onError: (errors) => {
             // 'errors' will be automatically populated in form.errors.
-            // This alert is a fallback for non-validation errors.
-            // TODO: Replace alert with a proper notification component.
+            // This toast is a fallback for non-validation errors.
             if (Object.keys(errors).length === 0) {
-                alert(t('contact.form.error', 'Unable to send your message.'));
+                toast({
+                    title: t('contact.form.error', 'Unable to send your message.'),
+                    variant: 'destructive',
+                });
             }
         },
     });

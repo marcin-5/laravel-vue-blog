@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import HeadSEO from '@/components/HeadSEO.vue';
+import { Toaster } from '@/components/ui/toast';
 
 defineProps<{
     maxWidth?: string;
@@ -15,4 +16,5 @@ defineProps<{
             <slot />
         </main>
     </div>
+    <Toaster />
 </template>
