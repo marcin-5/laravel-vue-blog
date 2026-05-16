@@ -35,9 +35,8 @@ readonly class RobotsParser
 
             if (stripos($line, 'User-agent:') === 0) {
                 $ua = trim(substr($line, 11));
-                $userAgentApplies = ($ua === '*' || stripos($ua, $userAgent) !== false || $this->isSearchEngineBot(
-                    $ua,
-                ));
+                // Apply rules when group matches provided UA or wildcard
+                $userAgentApplies = ($ua === '*' || stripos($userAgent, $ua) !== false);
                 continue;
             }
 
@@ -50,13 +49,5 @@ readonly class RobotsParser
         }
 
         return true;
-    }
-
-    private function isSearchEngineBot(string $ua): bool
-    {
-        return stripos($ua, 'IndexNow') !== false || stripos($ua, 'Bingbot') !== false || stripos(
-            $ua,
-            'Googlebot',
-        ) !== false;
     }
 }
