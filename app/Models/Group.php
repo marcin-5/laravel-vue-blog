@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Builders\GroupBuilder;
 use App\Models\Concerns\HasMarkdownContent;
 use App\Viewable;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
+#[UseEloquentBuilder(GroupBuilder::class)]
 class Group extends Model
 {
     use HasFactory;
