@@ -72,7 +72,20 @@ if [ -d /opt/built/public/img ]; then
     cp -a /opt/built/public/img/. /var/www/html/public/img/
 fi
 
-# 3) Public root files (favicon, icons, etc.)
+# 3) Locale-specific public files (pl, en)
+if [ -d /opt/built/public/pl ]; then
+    echo "Syncing Polish locale assets (public/pl)..."
+    mkdir -p /var/www/html/public/pl
+    cp -a /opt/built/public/pl/. /var/www/html/public/pl/
+fi
+
+if [ -d /opt/built/public/en ]; then
+    echo "Syncing English locale assets (public/en)..."
+    mkdir -p /var/www/html/public/en
+    cp -a /opt/built/public/en/. /var/www/html/public/en/
+fi
+
+# 4) Public root files (favicon, icons, etc.)
 if [ -d /opt/built/public ]; then
     echo "Syncing public root files..."
     # Copy all files from /opt/built/public to /var/www/html/public/

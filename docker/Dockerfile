@@ -85,9 +85,11 @@ COPY --from=node-builder /app/public/build ./public/build
 COPY --from=node-builder /app/bootstrap/ssr ./bootstrap/ssr
 
 # Prepare snapshots of built assets for seeding into mounted volumes at runtime
-RUN mkdir -p /opt/built/public/build /opt/built/public/img /opt/built/bootstrap/ssr \
+RUN mkdir -p /opt/built/public/build /opt/built/public/img /opt/built/public/pl /opt/built/public/en /opt/built/bootstrap/ssr \
     && cp -a /var/www/html/public/build/. /opt/built/public/build/ \
     && cp -a /var/www/html/public/img/. /opt/built/public/img/ \
+    && cp -a /var/www/html/public/pl/. /opt/built/public/pl/ \
+    && cp -a /var/www/html/public/en/. /opt/built/public/en/ \
     && cp -a /var/www/html/bootstrap/ssr/. /opt/built/bootstrap/ssr/ \
     && cp /var/www/html/public/*.ico /var/www/html/public/*.png /var/www/html/public/*.svg /var/www/html/public/*.xml /var/www/html/public/*.html /var/www/html/public/index.php /var/www/html/public/.htaccess /opt/built/public/ 2>/dev/null || true \
     && chown -R www-data:www-data /var/www/html \
@@ -151,9 +153,11 @@ RUN mkdir -p /root/.local/share/fish /root/.config/fish
 VOLUME ["/root/.local/share/fish", "/root/.config/fish"]
 
 # Prepare snapshots of built assets for dev image too (useful when mounting volumes)
-RUN mkdir -p /opt/built/public/build /opt/built/public/img /opt/built/bootstrap/ssr \
+RUN mkdir -p /opt/built/public/build /opt/built/public/img /opt/built/public/pl /opt/built/public/en /opt/built/bootstrap/ssr \
     && cp -a /var/www/html/public/build/. /opt/built/public/build/ \
     && cp -a /var/www/html/public/img/. /opt/built/public/img/ \
+    && cp -a /var/www/html/public/pl/. /opt/built/public/pl/ \
+    && cp -a /var/www/html/public/en/. /opt/built/public/en/ \
     && cp -a /var/www/html/bootstrap/ssr/. /opt/built/bootstrap/ssr/ \
     && cp /var/www/html/public/*.ico /var/www/html/public/*.png /var/www/html/public/*.svg /var/www/html/public/*.xml /var/www/html/public/*.html /var/www/html/public/index.php /var/www/html/public/.htaccess /opt/built/public/ 2>/dev/null || true \
     && chown -R www-data:www-data /var/www/html \
