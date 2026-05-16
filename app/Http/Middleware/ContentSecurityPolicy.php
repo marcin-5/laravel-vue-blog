@@ -14,7 +14,7 @@ class ContentSecurityPolicy
         if (app()->environment('local')) {
             $response->headers->set(
                 'Content-Security-Policy',
-                "default-src 'self' http: https: data: blob: 'unsafe-inline'; connect-src 'self' ws://localhost:5173; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173",
+                "default-src 'self' http: https: data: blob: 'unsafe-inline'; connect-src 'self' ws://localhost:5173 ws://*.localhost:5173; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173 blob:; worker-src 'self' blob:",
             );
         } else {
             // production CSP
