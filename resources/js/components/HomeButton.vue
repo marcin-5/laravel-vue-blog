@@ -9,14 +9,14 @@ const isHomePage = computed(() => page.url === '/');
 
 // Check if current URL is a post page (format: /{blog}/{post})
 const isPostPage = computed(() => {
-    const urlParts = page.url.split('/').filter(part => part.length > 0);
+    const urlParts = page.url.split('/').filter((part) => part.length > 0);
     return urlParts.length === 2;
 });
 
 // Extract blog slug from post URL
 const blogSlug = computed(() => {
     if (isPostPage.value) {
-        return page.url.split('/').filter(part => part.length > 0)[0];
+        return page.url.split('/').filter((part) => part.length > 0)[0];
     }
     return null;
 });
