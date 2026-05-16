@@ -21,25 +21,11 @@ readonly class UserAgentNormalizer
         }
 
         // Prefer Jaybizzle CrawlerDetect for bot identification
-        $cd = new CrawlerDetect();
+        $cd = new CrawlerDetect;
         if ($cd->isCrawler($userAgent)) {
             $botName = $cd->getMatches();
-            if (!empty($botName)) {
-                return Str::ucfirst($botName);
-            }
 
-            // Fallback to configured fragments if CrawlerDetect lacks a friendly name
-            $fragments = config('bots.fragments', []);
-            if (Str::contains($userAgent, $fragments, ignoreCase: true)) {
-                $sortedFragments = self::getSortedBotFragments();
-                $matchingFragment = collect($sortedFragments)
-                    ->first(fn(string $fragment) => Str::contains($userAgent, $fragment, ignoreCase: true));
-                if ($matchingFragment !== null) {
-                    return Str::ucfirst($matchingFragment);
-                }
-            }
-
-            return 'Bot';
+            return !empty($botName) ? Str::ucfirst($botName) : 'Bot';
         }
 
         $parser = Parser::create();
@@ -50,16 +36,5 @@ readonly class UserAgentNormalizer
         $deviceFamily = $result->device->family ?? 'Unknown';
 
         return trim("$uaFamily on $osFamily ($deviceFamily) ");
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    public static function getSortedBotFragments(): array
-    {
-        return collect(config('bots.fragments', []))
-            ->sortByDesc(static fn(string $fragment) => strlen($fragment))
-            ->values()
-            ->all();
     }
 }
