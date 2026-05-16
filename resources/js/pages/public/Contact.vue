@@ -52,7 +52,10 @@ function submit() {
                     :class="INPUT_CLASSES"
                     :placeholder="t('contact.form.placeholders.name', 'Your name')"
                     autocomplete="name"
+                    data-gramm="false"
+                    data-lt-active="false"
                     required
+                    spellcheck="false"
                     type="text"
                     @keydown.stop
                 />
@@ -65,7 +68,10 @@ function submit() {
                     :class="INPUT_CLASSES"
                     :placeholder="t('contact.form.placeholders.email', 'Your email')"
                     autocomplete="email"
+                    data-gramm="false"
+                    data-lt-active="false"
                     required
+                    spellcheck="false"
                     type="email"
                     @keydown.stop
                 />
@@ -78,7 +84,10 @@ function submit() {
                     :class="INPUT_CLASSES"
                     :placeholder="t('contact.form.placeholders.subject', 'Subject')"
                     autocomplete="off"
+                    data-gramm="false"
+                    data-lt-active="false"
                     required
+                    spellcheck="false"
                     type="text"
                     @keydown.stop
                 />
@@ -91,7 +100,10 @@ function submit() {
                     :class="INPUT_CLASSES"
                     :placeholder="t('contact.form.placeholders.message', 'Write your message...')"
                     autocomplete="off"
+                    data-gramm="false"
+                    data-lt-active="false"
                     required
+                    spellcheck="false"
                     rows="6"
                     @keydown.stop
                 />
