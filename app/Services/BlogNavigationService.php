@@ -14,7 +14,7 @@ readonly class BlogNavigationService
 {
     public function getLandingNavigation(Blog|Group $entity): array
     {
-        return Cache::remember(
+        return Cache::tags(["navigation:{$entity->getMorphClass()}:$entity->id"])->remember(
             "landing_navigation:{$entity->getMorphClass()}:$entity->id",
             now()->addMinutes(30),
             fn() => $this->buildLandingNavigation($entity),
@@ -84,7 +84,7 @@ readonly class BlogNavigationService
 
     public function getPostNavigation(Blog|Group $entity, Post $post): array
     {
-        return Cache::remember(
+        return Cache::tags(["navigation:{$entity->getMorphClass()}:$entity->id"])->remember(
             "post_navigation:{$entity->getMorphClass()}:$entity->id:$post->id",
             now()->addMinutes(30),
             fn() => $this->buildPostNavigation($entity, $post),

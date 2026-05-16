@@ -15,6 +15,22 @@ use Illuminate\Database\Eloquent\Builder;
 class BlogBuilder extends Builder
 {
     /**
+     * Scope: Blogs that are published.
+     */
+    public function published(): self
+    {
+        return $this->where('is_published', true);
+    }
+
+    /**
+     * Scope: Blogs for a specific locale.
+     */
+    public function forLocale(string $locale): self
+    {
+        return $this->where('locale', $locale);
+    }
+
+    /**
      * Scope: Load posts for the index view with proper ordering and fields.
      */
     public function withPostsForIndex(): self

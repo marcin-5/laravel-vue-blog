@@ -62,8 +62,8 @@ readonly class SitemapService
 
     private function addPublishedBlogs(Sitemap $sitemap, string $locale): void
     {
-        Blog::where('is_published', true)
-            ->where('locale', $locale)
+        Blog::published()
+            ->forLocale($locale)
             ->cursor()
             ->each(function (Blog $blog) use ($sitemap): void {
                 $sitemap->add(

@@ -11,6 +11,7 @@ use App\Observers\BlogObserver;
 use App\Observers\CategoryObserver;
 use App\Observers\IndexNowObserver;
 use App\Observers\PageViewObserver;
+use App\Observers\PostObserver;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -35,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
         // Model observers for cross-cutting slug generation logic
         Blog::observe(BlogObserver::class);
         Blog::observe(IndexNowObserver::class);
+        Post::observe(PostObserver::class);
         Post::observe(IndexNowObserver::class);
         Category::observe(CategoryObserver::class);
         PageView::observe(PageViewObserver::class);
