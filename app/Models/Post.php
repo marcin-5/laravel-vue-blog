@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use App\Builders\PostBuilder;
 use App\Models\Concerns\HasMarkdownContent;
 use App\Observers\SitemapObserver;
 use App\Viewable;
-use DateTimeInterface;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
+#[UseEloquentBuilder(PostBuilder::class)]
 class Post extends Model
 {
     use HasFactory;
@@ -176,137 +177,6 @@ class Post extends Model
         }
 
         $this->attributes['slug'] = Str::slug($source);
-    }
-
-    /**
-     * Scope for extension posts
-     */
-    public function scopeExtensionType(Builder $query): Builder
-    {
-        return $query->where('visibility', self::VIS_EXTENSION);
-    }
-
-    /**
-     * Scope for regular (non-extension) posts
-     */
-    public function scopeRegularPosts(Builder $query): Builder
-    {
-        return $query->where('visibility', '!=', self::VIS_EXTENSION);
-    }
-
-    /**
-     * Scope to only published posts (published_at is set and not in the future)
-     */
-    public function scopePublished(Builder $query): Builder
-    {
-        return $query
-            ->whereNotNull('published_at')
-            ->where('published_at', '<=', now());
-    }
-
-    /**
-     * Scope to only public posts (visibility = 'public')
-     */
-    public function scopePublic(Builder $query): Builder
-    {
-        return $query->where('visibility', self::VIS_PUBLIC);
-    }
-
-    /**
-     * Scope to order by publication date (published_at, then created_at)
-     */
-    public function scopeOrderByPublicationDate(Builder $query, string $direction = 'desc'): Builder
-    {
-        return $query
-            ->orderBy('published_at', $direction)
-            ->orderBy('created_at', $direction);
-    }
-
-    /**
-     * Composite scope: published + public + ordered
-     */
-    public function scopeForPublicView(Builder $query): Builder
-    {
-        return $query
-            ->published()
-            ->whereIn('visibility', [self::VIS_PUBLIC, self::VIS_UNLISTED])
-            ->orderByPublicationDate();
-    }
-
-    /**
-     * Scope for posts and extensions relevant for newsletter
-     */
-    public function scopeForNewsletter(Builder $query, DateTimeInterface $since): Builder
-    {
-        return $query
-            ->published()
-            ->where(function (Builder $q) use ($since) {
-                // Regular posts published since $since
-                $q
-                    ->where(function (Builder $q2) use ($since) {
-                        $q2
-                            ->whereIn('visibility', [self::VIS_PUBLIC, self::VIS_UNLISTED])
-                            ->where('published_at', '>=', $since);
-                    })
-                    // OR Extensions attached to public posts since $since
-                    ->orWhere(function (Builder $q2) use ($since) {
-                        $q2
-                            ->extensionType()
-                            ->whereHas('parentPosts', function (Builder $q3) use ($since) {
-                                $q3
-                                    ->whereIn('visibility', [self::VIS_PUBLIC, self::VIS_UNLISTED])
-                                    ->where('post_extensions.created_at', '>=', $since);
-                            });
-                    });
-            });
-    }
-
-    /**
-     * Scope for public listing views (includes common select fields)
-     */
-    public function scopeForPublicListing(Builder $query): Builder
-    {
-        return $query
-            ->published()
-            ->public()
-            ->regularPosts()
-            ->orderByPublicationDate()
-            ->select(['id', 'blog_id', 'title', 'slug', 'excerpt', 'published_at', 'created_at', 'visibility']);
-    }
-
-    /**
-     * Scope to find post by slug within published public posts
-     */
-    public function scopeFindBySlugForPublic(Builder $query, string $slug): Builder
-    {
-        return $query
-            ->forPublicView()
-            ->where('slug', $slug);
-    }
-
-    /**
-     * Scope for posts manageable by a given user
-     */
-    public function scopeManageableBy(Builder $query, int|User $user): Builder
-    {
-        $userId = $user instanceof User ? $user->id : (int) $user;
-
-        return $query->where(function (Builder $q) use ($userId) {
-            $q
-                ->whereHas('blog', fn(Builder $bq) => $bq->where('user_id', $userId))
-                ->orWhereHas('group', fn(Builder $gq) => $gq->where('user_id', $userId));
-        });
-    }
-
-    /**
-     * Scope for group posts, visible to logged-in members
-     */
-    public function scopeForGroupView(Builder $query): Builder
-    {
-        return $query
-            ->published()
-            ->regularPosts()
-            ->orderByPublicationDate();
     }
 
     /**
