@@ -7,12 +7,7 @@ import Stage2 from './Stage2.vue';
 import Summary from './components/Summary.vue';
 import en from './locales/en.json';
 import pl from './locales/pl.json';
-import {
-    isStage1Part1Question,
-    isStage1Part2Question,
-    isStage2Question,
-    type QuestionIdHolder
-} from './composables/shared/questionIds';
+import { isStage1Part1Question, isStage1Part2Question, isStage2Question, type QuestionIdHolder } from './composables/shared/questionIds';
 import type { CompleteStage1Results, Config, Stage2Results, TestData } from './composables/shared/types';
 
 const props = defineProps<{

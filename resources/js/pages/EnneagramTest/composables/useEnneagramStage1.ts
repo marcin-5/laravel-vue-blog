@@ -2,13 +2,7 @@ import { computed, ref, type Ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { SINGLE_ANSWER_AUTO_CONFIRM_DELAY_MS } from './shared/constants';
 import { isStage1Part1Question, isStage1Part2Question } from './shared/questionIds';
-import {
-    createEmptyInstinctScores,
-    determineSecondaryInstinct,
-    getLeader,
-    hasLead,
-    isTopTwoTie
-} from './shared/scoring';
+import { createEmptyInstinctScores, determineSecondaryInstinct, getLeader, hasLead, isTopTwoTie } from './shared/scoring';
 import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
 import type { CompleteStage1Results, Config, FlatOption, Instinct, InstinctScores, Question } from './shared/types';
 import { useAnswerSelection } from './shared/useAnswerSelection';
