@@ -2,12 +2,13 @@
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useBlogExcerpts } from '@/composables/useBlogExcerpts';
-import type { Pagination, PostItem } from '@/types/blog.types';
+import type { PostItem } from '@/types/blog.types';
 import { formatDate } from '@/utils/dateUtils';
 import { Link } from '@inertiajs/vue3';
 import { Info } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { Pagination } from '@/types';
 
 const props = defineProps<{
     posts: PostItem[];
@@ -115,7 +116,7 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
 
         <!-- Newsletter link -->
         <div v-if="!isGroup" class="mt-4 flex">
-            <Link :href="route('newsletter.index', { blog_id: blogId })" class="text-sm font-medium text-primary hover:text-primary">
+            <Link :href="route('newsletter.index', { blog_id: blogId })" class="text-sm font-medium text-link-hover hover:text-primary">
                 {{ t('blog.posts_list.newsletter_subscribe') }}
             </Link>
         </div>
