@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Queries\Public;
 
 use App\Models\Blog;

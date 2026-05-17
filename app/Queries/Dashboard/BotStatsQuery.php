@@ -1,15 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Queries\Dashboard;
 
 use App\Models\BotView;
 use App\Models\PageView;
 use App\Models\UserAgent;
-use App\Services\UserAgentNormalizer;
+use App\Services\BotDetector;
 use Illuminate\Support\Collection;
 
 class BotStatsQuery
 {
+    public function __construct(
+        private readonly BotDetector $botDetector,
+    ) {}
+
     /**
      * Get bot and user agent statistics.
      *
@@ -57,19 +63,15 @@ class BotStatsQuery
 
     private function getLastBotViews(): Collection
     {
-        $sortedFragments = UserAgentNormalizer::getSortedBotFragments();
-
         return BotView::query()
             ->with('userAgent:id,name')
             ->latest('last_seen_at')
             ->get()
             ->unique('user_agent_id')
             ->take(5)
-            ->map(function (BotView $botView) use ($sortedFragments) {
+            ->map(function (BotView $botView) {
                 $userAgentName = $botView->userAgent->name;
-                $matchedFragment = collect($sortedFragments)->first(
-                    fn($f) => stripos($userAgentName, (string) $f) !== false,
-                );
+                $matchedFragment = $this->botDetector->getBotName($userAgentName);
 
                 return [
                     'id' => $botView->userAgent->id,
@@ -84,8 +86,6 @@ class BotStatsQuery
 
     private function getMostActiveBots(): Collection
     {
-        $sortedFragments = UserAgentNormalizer::getSortedBotFragments();
-
         return BotView::query()
             ->selectRaw('user_agent_id, SUM(hits) as total_hits, MAX(last_seen_at) as last_seen_at')
             ->groupBy('user_agent_id')
@@ -93,11 +93,9 @@ class BotStatsQuery
             ->with('userAgent:id,name')
             ->limit(5)
             ->get()
-            ->map(function ($botView) use ($sortedFragments) {
+            ->map(function ($botView) {
                 $userAgentName = $botView->userAgent->name;
-                $matchedFragment = collect($sortedFragments)->first(
-                    fn($f) => stripos($userAgentName, (string) $f) !== false,
-                );
+                $matchedFragment = $this->botDetector->getBotName($userAgentName);
 
                 return [
                     'id' => $botView->userAgent->id,

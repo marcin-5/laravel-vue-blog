@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Queries\Stats;
 
 use App\DataTransferObjects\Stats\BlogStatsRow;
+use App\DataTransferObjects\Stats\StatsCriteria;
 use App\Enums\StatsSort;
 use App\Models\Blog;
 use App\Models\PageView;
 use App\Models\Post;
 use App\Services\Stats\UniqueViewerKeyBuilder;
-use App\DataTransferObjects\Stats\StatsCriteria;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -55,7 +57,7 @@ class BlogViewsQuery
         $blogClass = $this->getBlogMorphClass();
         $uniqueViewerKeySql = $this->uniqueViewerKeyBuilder->build('page_views');
 
-        $markdownSub = $this->buildAggregateSubquery('markdown_views', 'markdown_views', $blogClass, $from, $to);
+        $markdownSub = $this->buildAggregateSubquery($blogClass, $from, $to);
 
         return PageView::query()
             ->selectRaw(
@@ -74,15 +76,13 @@ class BlogViewsQuery
     }
 
     private function buildAggregateSubquery(
-        string $table,
-        string $columnAlias,
         string $morphClass,
         ?DateTimeInterface $from,
         ?DateTimeInterface $to,
     ): QueryBuilder {
         return DB::query()
-            ->from($table)
-            ->selectRaw("viewable_id, SUM(hits) as {$columnAlias}")
+            ->from('markdown_views')
+            ->selectRaw('viewable_id, SUM(hits) as markdown_views')
             ->where('viewable_type', '=', $morphClass)
             ->when($from && $to, fn($q) => $q->whereBetween('last_seen_at', [$from, $to]))
             ->groupBy('viewable_id');
@@ -95,7 +95,7 @@ class BlogViewsQuery
         $postClass = $this->getPostMorphClass();
         $uniqueViewerKeySql = $this->uniqueViewerKeyBuilder->build('page_views');
 
-        $markdownSub = $this->buildAggregateSubquery('markdown_views', 'markdown_views', $postClass, $from, $to);
+        $markdownSub = $this->buildAggregateSubquery($postClass, $from, $to);
 
         return PageView::query()
             ->selectRaw('posts.blog_id')

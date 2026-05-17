@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Queries\Blogger;
 
 use App\Models\User;
@@ -26,7 +28,7 @@ class GroupMembersQuery
         return $query
             ->when($request->integer('group_id'), fn(Builder $q, int $id) => $q->where('g.id', $id))
             ->when(
-                $this->isValidSort($request->get('sort_by')),
+                $this->isValidSort($request->input('sort_by')),
                 fn(Builder $q) => $q->orderBy($this->getSortColumn($request), $this->getSortDirection($request)),
                 fn(Builder $q) => $q->orderBy('users.email', 'asc'),
             )
@@ -47,11 +49,11 @@ class GroupMembersQuery
      */
     private function getSortColumn(Request $request): string
     {
-        $sortBy = $request->get('sort_by', 'email');
+        $sortBy = $request->input('sort_by', 'email');
 
         return match ($sortBy) {
-            'name', 'email' => "users.{$sortBy}",
-            'joined_at', 'role' => "gu.{$sortBy}",
+            'name', 'email' => "users.$sortBy",
+            'joined_at', 'role' => "gu.$sortBy",
             default => 'users.email',
         };
     }
@@ -61,7 +63,7 @@ class GroupMembersQuery
      */
     private function getSortDirection(Request $request): string
     {
-        return $request->get('sort_dir', 'asc') === 'desc' ? 'desc' : 'asc';
+        return $request->input('sort_dir', 'asc') === 'desc' ? 'desc' : 'asc';
     }
 
     /**
@@ -69,7 +71,7 @@ class GroupMembersQuery
      */
     private function getPerPage(Request $request): int
     {
-        $perPage = $request->get('per_page', 10);
+        $perPage = $request->input('per_page', 10);
 
         if ($perPage === 'all') {
             return self::MAX_ITEMS_PER_PAGE;

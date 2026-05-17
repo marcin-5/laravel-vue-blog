@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Queries\Public;
 
 use App\Http\Resources\WelcomeBlogResource;
@@ -51,7 +53,7 @@ class WelcomeQuery
     private function getWelcomeBlogs(array $selectedCategoryIds, string $locale): Collection
     {
         $categoryFilter = empty($selectedCategoryIds) ? 'all' : implode(',', $selectedCategoryIds);
-        $cacheKey = "welcome_blogs_{$locale}_{$categoryFilter}";
+        $cacheKey = "welcome_blogs_{$locale}_$categoryFilter";
         $ttl = app()->isLocal() ? 5 : 3600;
 
         return Cache::remember($cacheKey, $ttl, function () use ($selectedCategoryIds, $locale) {
@@ -78,12 +80,12 @@ class WelcomeQuery
      */
     private function getWelcomeCategories(string $locale): Collection
     {
-        $cacheKey = "welcome_categories_{$locale}";
+        $cacheKey = "welcome_categories_$locale";
 
         return Cache::remember($cacheKey, 3600, function () use ($locale) {
             return Category::query()
                 ->select(['id', 'slug', 'name'])
-                ->orderBy("name->{$locale}")
+                ->orderBy("name->$locale")
                 ->get()
                 ->map(fn(Category $c) => [
                     'id' => $c->id,
