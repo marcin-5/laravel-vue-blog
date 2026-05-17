@@ -13,6 +13,12 @@
     h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
     p { opacity: .9; line-height: 1.6; margin: 0; }
     .hint { opacity: .65; font-size: .9rem; margin-top: .75rem; }
+
+    /* Multilingual support */
+    [data-lang] { display: none; }
+    html[lang="pl"] [data-lang="pl"] { display: block; }
+    html[lang="en"] [data-lang="en"] { display: block; }
+
     @media (prefers-color-scheme: light) {
       body { background: #f7fafc; color: #0f172a; }
       .card { background: rgba(255,255,255,.9); }
@@ -21,23 +27,23 @@
 </head>
 <body>
   <div class="card" role="status" aria-live="polite">
-    <h1 id="title-pl">Trwa aktualizacja aplikacji</h1>
-    <h1 id="title-en" style="display:none">Application update in progress</h1>
-    
-    <p id="desc-pl">Przepraszamy za niedogodności. Spróbuj ponownie za kilka minut.</p>
-    <p id="desc-en" style="display:none">We apologize for the inconvenience. Please try again in a few minutes.</p>
-    
+    <h1 data-lang="pl">Trwa aktualizacja aplikacji</h1>
+    <h1 data-lang="en">Application update in progress</h1>
+
+    <p data-lang="pl">Przepraszamy za niedogodności. Spróbuj ponownie za kilka minut.</p>
+    <p data-lang="en">We apologize for the inconvenience. Please try again in a few minutes.</p>
+
     <p class="hint">Status HTTP: 503 Service Unavailable</p>
   </div>
   <script>
-    const isEnglish = navigator.language.startsWith('en') || 
-                      window.location.hostname.includes('peculiarmatters');
-    if (isEnglish) {
-      document.getElementById('title-pl').style.display = 'none';
-      document.getElementById('title-en').style.display = 'block';
-      document.getElementById('desc-pl').style.display = 'none';
-      document.getElementById('desc-en').style.display = 'block';
-    }
+    (function() {
+        const hostname = (window.location.hostname || '').toLowerCase();
+        const lang = (navigator.languages?.[0] || navigator.language || '').toLowerCase();
+        if (hostname.indexOf('peculiarmatters') !== -1 || lang.indexOf('en') === 0) {
+        document.documentElement.lang = 'en';
+        document.title = 'Site update';
+      }
+    })();
   </script>
 </body>
 </html>
