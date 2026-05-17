@@ -376,7 +376,7 @@ prod-update-data: ## Pull code and rebuild only the app container for data/code 
 	git fetch --all
 	git pull --ff-only
 	@echo "🔨 Building fresh image for app service..."
-	$(DOCKER_COMPOSE_PROD) build app
+	$(DOCKER_COMPOSE_PROD) build --no-cache app
 	@echo "🚀 Recreating app service..."
 	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps app
 	$(MAKE) prod-wait

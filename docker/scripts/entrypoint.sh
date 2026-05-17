@@ -62,6 +62,7 @@ fi
 if [ -d /opt/built/public/build ]; then
     echo "Syncing Vite build assets (public/build)..."
     mkdir -p /var/www/html/public/build
+    if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/public/build/*; fi
     cp -a /opt/built/public/build/. /var/www/html/public/build/
 fi
 
@@ -69,6 +70,7 @@ fi
 if [ -d /opt/built/public/img ]; then
     echo "Syncing public images (public/img)..."
     mkdir -p /var/www/html/public/img
+    if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/public/img/*; fi
     cp -a /opt/built/public/img/. /var/www/html/public/img/
 fi
 
@@ -76,12 +78,14 @@ fi
 if [ -d /opt/built/public/pl ]; then
     echo "Syncing Polish locale assets (public/pl)..."
     mkdir -p /var/www/html/public/pl
+    if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/public/pl/*; fi
     cp -a /opt/built/public/pl/. /var/www/html/public/pl/
 fi
 
 if [ -d /opt/built/public/en ]; then
     echo "Syncing English locale assets (public/en)..."
     mkdir -p /var/www/html/public/en
+    if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/public/en/*; fi
     cp -a /opt/built/public/en/. /var/www/html/public/en/
 fi
 
@@ -101,6 +105,7 @@ fi
 if [ -d /opt/built/bootstrap/ssr ]; then
     echo "Syncing SSR bundle (bootstrap/ssr)..."
     mkdir -p /var/www/html/bootstrap/ssr
+    if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/bootstrap/ssr/*; fi
     cp -a /opt/built/bootstrap/ssr/. /var/www/html/bootstrap/ssr/
 fi
 
