@@ -16,6 +16,8 @@ import '@fontsource-variable/rokkitt';
 import '@fontsource-variable/sofia-sans-semi-condensed';
 import '@fontsource-variable/vollkorn';
 import '@fontsource-variable/yrsa';
+import '@fontsource/cinzel-decorative/900.css';
+import '@fontsource/cinzel/700.css';
 import '../css/app.css';
 
 import { initializeVisitorId } from '@/composables/useVisitorId';

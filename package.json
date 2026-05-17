@@ -13,8 +13,6 @@
     },
     "devDependencies": {
         "@eslint/js": "^10.0.1",
-        "@fontsource/cinzel": "^5.2.8",
-        "@fontsource/cinzel-decorative": "^5.2.8",
         "@types/node": "^25.8.0",
         "@vitest/coverage-v8": "^4.1.6",
         "@vue/eslint-config-typescript": "^14.7.0",
@@ -31,6 +29,8 @@
         "vue-tsc": "^3.2.9"
     },
     "dependencies": {
+        "@fontsource/cinzel": "^5.2.8",
+        "@fontsource/cinzel-decorative": "^5.2.8",
         "@fontsource-variable/afacad": "^5.2.10",
         "@fontsource-variable/bitter": "^5.2.10",
         "@fontsource-variable/darker-grotesque": "^5.2.8",
