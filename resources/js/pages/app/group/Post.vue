@@ -6,8 +6,9 @@ import BorderDivider from '@/components/blog/BorderDivider.vue';
 import PostContent from '@/components/blog/PostContent.vue';
 import PostExtensions from '@/components/blog/PostExtensions.vue';
 import PostHeader from '@/components/blog/PostHeader.vue';
-import type { Navigation, Pagination, PostDetails, PostItem } from '@/types/blog.types';
+import type { Navigation, PostDetails, PostItem } from '@/types/blog.types';
 import { Head } from '@inertiajs/vue3';
+import { Pagination } from '@/types';
 
 defineProps<{
     group: {

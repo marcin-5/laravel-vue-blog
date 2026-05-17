@@ -5,10 +5,11 @@ import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import PostHeader from '@/components/blog/PostHeader.vue';
-import type { Navigation, Pagination, PostDetails, PostItem } from '@/types/blog.types';
+import type { Navigation, PostDetails, PostItem } from '@/types/blog.types';
 import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { Pagination } from '@/types';
 
 const props = defineProps<{
     group: {
