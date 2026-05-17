@@ -19,7 +19,7 @@ const { t } = useI18n();
 <template>
     <div class="mb-4 flex flex-col space-y-2 text-sm text-muted-foreground">
         <BorderDivider />
-        <Link :href="`#${targetId}`" class="flex items-center gap-2 hover:text-primary">
+        <Link :href="`#${targetId}`" class="flex items-center gap-2 font-semibold hover:text-primary">
             <ArrowDown class="size-4" />
             {{ t('blog.scroll_to_posts_list') }}
         </Link>
