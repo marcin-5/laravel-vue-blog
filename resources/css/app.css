@@ -183,8 +183,8 @@
     --sidebar-border: hsl(0 0% 91%);
     --sidebar-ring: hsl(217.2 91.2% 59.8%);
     --sidebar: hsl(0 0% 98%);
-    --breadcrumb-link: #534432ee;
-    --breadcrumb-link-active: #403020;
+    --breadcrumb-link: hsl(33, 20%, 50%);
+    --breadcrumb-link-active: hsl(30, 33%, 50%);
     --link: hsl(175 38% 34%);
     --link-hover: hsl(169 58% 21%);
 }
@@ -230,8 +230,8 @@
     --sidebar-border: hsl(0 0% 15.9%);
     --sidebar-ring: hsl(217.2 91.2% 59.8%);
     --sidebar: hsl(240 5.9% 10%);
-    --breadcrumb-link: #ccbb55aa;
-    --breadcrumb-link-active: #bbaa55dd;
+    --breadcrumb-link: hsl(50, 50%, 50%);
+    --breadcrumb-link-active: hsl(55, 55%, 55%);
     --link: hsl(169 25% 69%);
     --link-hover: hsl(169 69% 89%);
 }
