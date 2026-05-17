@@ -30,7 +30,9 @@
     <p class="hint">Status HTTP: 503 Service Unavailable</p>
   </div>
   <script>
-    if (navigator.language.startsWith('en')) {
+    const isEnglish = navigator.language.startsWith('en') || 
+                      window.location.hostname.includes('peculiarmatters');
+    if (isEnglish) {
       document.getElementById('title-pl').style.display = 'none';
       document.getElementById('title-en').style.display = 'block';
       document.getElementById('desc-pl').style.display = 'none';

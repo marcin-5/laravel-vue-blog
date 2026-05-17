@@ -1,4 +1,4 @@
-{$APP_DOMAIN}, {$APP_DOMAIN_WWW}, enneagram-test.{$APP_DOMAIN}, {$ENNEAGRAM_DOMAIN} {
+{$APP_DOMAIN}, {$APP_DOMAIN_WWW}, {$APP_DOMAIN_SECONDARY}, enneagram-test.{$APP_DOMAIN}, {$ENNEAGRAM_DOMAIN} {
     @www host {$APP_DOMAIN_WWW}
     redir @www https://{$APP_DOMAIN}{uri} permanent
 
