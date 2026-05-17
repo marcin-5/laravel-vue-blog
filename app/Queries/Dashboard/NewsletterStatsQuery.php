@@ -12,7 +12,7 @@ class NewsletterStatsQuery
     /**
      * Get the latest newsletter subscriptions grouped by email.
      *
-     * @return Collection<int, array{email: string, subscriptions: array{array{blog: string, frequency: string}}}>
+     * @return Collection<int, array{email: string, subscriptions: list<array{blog: string, frequency: string}>}>
      */
     public function handle(): Collection
     {
@@ -27,6 +27,7 @@ class NewsletterStatsQuery
             return collect();
         }
 
+        /** @var Collection<string, Collection<int, NewsletterSubscription>> $subscriptions */
         $subscriptions = NewsletterSubscription::with('blog:id,name')
             ->whereIn('email', $latestEmails)
             ->latest()
