@@ -13,7 +13,7 @@ class BotViewsQuery
     /**
      * @return Collection<int, array{user_agent:string,hits:int,last_seen_at:string}>
      */
-    public function execute(StatsCriteria $criteria): Collection
+    public function handle(StatsCriteria $criteria): Collection
     {
         return BotView::query()
             ->with('userAgent')

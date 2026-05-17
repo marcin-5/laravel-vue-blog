@@ -30,7 +30,7 @@ class BlogViewsQuery
     /**
      * @return Collection<int, array{blog_id:int,name:string,owner_id:int,owner_name:string,views:int,unique_views:int,post_views:int,unique_post_views:int,markdown_views:int}>
      */
-    public function execute(StatsCriteria $criteria): Collection
+    public function handle(StatsCriteria $criteria): Collection
     {
         $bounds = $criteria->range->bounds();
         $from = $bounds[0] ?? null;

@@ -27,7 +27,7 @@ class PostViewsQuery
     /**
      * @return Collection<int, array{post_id:int,title:string,views:int,unique_views:int,bot_views:int,anonymous_views:int,markdown_views:int}>
      */
-    public function execute(StatsCriteria $criteria): Collection
+    public function handle(StatsCriteria $criteria): Collection
     {
         $bounds = $criteria->range->bounds();
         $from = $bounds[0] ?? null;

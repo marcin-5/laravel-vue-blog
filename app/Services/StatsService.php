@@ -25,7 +25,7 @@ readonly class StatsService
      */
     public function blogViews(StatsCriteria $criteria): Collection
     {
-        return $this->blogViewsQuery->execute($criteria);
+        return $this->blogViewsQuery->handle($criteria);
     }
 
     /**
@@ -35,7 +35,7 @@ readonly class StatsService
      */
     public function postViews(StatsCriteria $criteria): Collection
     {
-        return $this->postViewsQuery->execute($criteria);
+        return $this->postViewsQuery->handle($criteria);
     }
 
     /**
@@ -69,6 +69,6 @@ readonly class StatsService
      */
     public function visitorViews(StatsCriteria $criteria): Collection
     {
-        return $this->visitorViewsQuery->execute($criteria);
+        return $this->visitorViewsQuery->handle($criteria);
     }
 }

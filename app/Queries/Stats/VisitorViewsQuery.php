@@ -28,7 +28,7 @@ class VisitorViewsQuery
     /**
      * @return Collection<int, array{visitor_label:string,blog_views:int,post_views:int,views:int,lifetime_views:int,user_agent:string|null}>
      */
-    public function execute(StatsCriteria $criteria): Collection
+    public function handle(StatsCriteria $criteria): Collection
     {
         if ($criteria->visitorType === 'special') {
             return $this->executeSpecialViews($criteria);
