@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Queries\Public;
 
+use App\Builders\BlogBuilder;
 use App\Http\Resources\WelcomeBlogResource;
 use App\Models\Blog;
 use App\Models\Category;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -65,8 +67,8 @@ class WelcomeQuery
                     'user:id,name',
                 ])
                 ->select(['id', 'name', 'slug', 'description', 'locale', 'user_id'])
-                ->when(!empty($selectedCategoryIds), function ($query) use ($selectedCategoryIds) {
-                    $query->whereHas('categories', fn($q) => $q->whereIn('categories.id', $selectedCategoryIds));
+                ->when(!empty($selectedCategoryIds), function (BlogBuilder $query) use ($selectedCategoryIds) {
+                    $query->whereHas('categories', fn(Builder $q) => $q->whereIn('categories.id', $selectedCategoryIds));
                 })
                 ->orderByLatestPost()
                 ->get();

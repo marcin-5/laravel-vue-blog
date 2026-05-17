@@ -19,7 +19,17 @@ class BotStatsQuery
     /**
      * Get bot and user agent statistics.
      *
-     * @return array
+     * @return array{
+     *   userAgentStats: array{
+     *     last_unique: Collection<int, array{id: int, name: string}>,
+     *     last_added: Collection<int, UserAgent>
+     *   },
+     *   botStats: array{
+     *     last_seen: Collection<int, array{id: int, name: string, matched_fragment: string, hits: int, last_seen_at: string}>,
+     *     top_hits: Collection<int, array{id: int, name: string, matched_fragment: string, hits: int, last_seen_at: string}>,
+     *     total_hits: int
+     *   }
+     * }
      */
     public function handle(): array
     {
@@ -64,12 +74,12 @@ class BotStatsQuery
     private function getLastBotViews(): Collection
     {
         return BotView::query()
+            ->aggregatedByUserAgent()
+            ->orderByDesc('last_seen_at')
             ->with('userAgent:id,name')
-            ->latest('last_seen_at')
+            ->limit(5)
             ->get()
-            ->unique('user_agent_id')
-            ->take(5)
-            ->map(function (BotView $botView) {
+            ->map(function ($botView) {
                 $userAgentName = $botView->userAgent->name;
                 $matchedFragment = $this->botDetector->getBotName($userAgentName);
 
@@ -77,18 +87,16 @@ class BotStatsQuery
                     'id' => $botView->userAgent->id,
                     'name' => $userAgentName,
                     'matched_fragment' => $matchedFragment ?? $userAgentName,
-                    'hits' => $botView->hits,
+                    'hits' => (int) $botView->total_hits,
                     'last_seen_at' => $botView->last_seen_at->toIso8601String(),
                 ];
-            })
-            ->values();
+            });
     }
 
     private function getMostActiveBots(): Collection
     {
         return BotView::query()
-            ->selectRaw('user_agent_id, SUM(hits) as total_hits, MAX(last_seen_at) as last_seen_at')
-            ->groupBy('user_agent_id')
+            ->aggregatedByUserAgent()
             ->orderByDesc('total_hits')
             ->with('userAgent:id,name')
             ->limit(5)

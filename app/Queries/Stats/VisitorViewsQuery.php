@@ -270,7 +270,7 @@ class VisitorViewsQuery
                     ->on('posts.id', '=', 'page_views.viewable_id')
                     ->where('page_views.viewable_type', '=', $postMorphClass);
             })
-            ->when($bounds, fn(Builder $q) => $q->whereBetween('page_views.created_at', $bounds))
+            ->withinDateRange($bounds)
             ->when(
                 $criteria->bloggerId,
                 fn(Builder $q) => $this->applyBloggerIdFilter(
@@ -415,12 +415,12 @@ class VisitorViewsQuery
             $inner
                 ->where(function (Builder $q) use ($criteria, $blogMorphClass) {
                     $q
-                        ->where('page_views.viewable_type', '=', $blogMorphClass)
+                        ->forMorphType($blogMorphClass)
                         ->where('page_views.viewable_id', '=', $criteria->blogId);
                 })
                 ->orWhere(function (Builder $q) use ($criteria, $postMorphClass) {
                     $q
-                        ->where('page_views.viewable_type', '=', $postMorphClass)
+                        ->forMorphType($postMorphClass)
                         ->where('posts.blog_id', '=', $criteria->blogId);
                 });
         });

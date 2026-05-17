@@ -65,8 +65,8 @@ class BlogViewsQuery
                 'COALESCE(markdown.markdown_views, 0) as markdown_views',
             )
             ->leftJoinSub($markdownSub, 'markdown', 'markdown.viewable_id', '=', 'page_views.viewable_id')
-            ->where('page_views.viewable_type', '=', $blogClass)
-            ->when($from && $to, fn($q) => $q->whereBetween('page_views.created_at', [$from, $to]))
+            ->forMorphType($blogClass)
+            ->withinDateRange($from, $to)
             ->groupBy('page_views.viewable_id', 'markdown.markdown_views');
     }
 

@@ -70,7 +70,7 @@ class PostViewsQuery
             ->leftJoinSub($botSub, 'bot', 'bot.viewable_id', '=', 'posts.id')
             ->leftJoinSub($anonSub, 'anon', 'anon.viewable_id', '=', 'posts.id')
             ->leftJoinSub($markdownSub, 'markdown', 'markdown.viewable_id', '=', 'posts.id')
-            ->when($from && $to, fn($q) => $q->whereBetween('page_views.created_at', [$from, $to]))
+            ->withinDateRange($from, $to)
             ->groupBy('posts.id', 'posts.title', 'bot.bot_views', 'anon.anonymous_views', 'markdown.markdown_views');
     }
 

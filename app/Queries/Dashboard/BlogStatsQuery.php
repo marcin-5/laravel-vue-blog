@@ -8,6 +8,7 @@ use App\Models\Blog;
 use App\Models\PageView;
 use App\Models\Post;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class BlogStatsQuery
@@ -16,7 +17,7 @@ class BlogStatsQuery
      * Get statistics for the user's blogs.
      *
      * @param User $user
-     * @return Collection
+     * @return Collection<int, array{id: int, name: string, posts_count: int, lifetime_views: int, daily_subscriptions_count: int, weekly_subscriptions_count: int}>
      */
     public function handle(User $user): Collection
     {
@@ -25,11 +26,11 @@ class BlogStatsQuery
             ->select(['id', 'name', 'user_id'])
             ->withCount('posts')
             ->withCount([
-                'newsletterSubscriptions as daily_subscriptions_count' => fn($query) => $query->where(
+                'newsletterSubscriptions as daily_subscriptions_count' => fn(Builder $query) => $query->where(
                     'frequency',
                     'daily',
                 ),
-                'newsletterSubscriptions as weekly_subscriptions_count' => fn($query) => $query->where(
+                'newsletterSubscriptions as weekly_subscriptions_count' => fn(Builder $query) => $query->where(
                     'frequency',
                     'weekly',
                 ),
@@ -62,7 +63,7 @@ class BlogStatsQuery
         return PageView::query()
             ->selectRaw('posts.blog_id, count(*) as count')
             ->join('posts', 'page_views.viewable_id', '=', 'posts.id')
-            ->where('page_views.viewable_type', $postMorphClass)
+            ->forMorphType($postMorphClass)
             ->whereIn('posts.blog_id', $blogs->pluck('id'))
             ->groupBy('posts.blog_id')
             ->pluck('count', 'blog_id');

@@ -17,10 +17,9 @@ class BotViewsQuery
     {
         return BotView::query()
             ->with('userAgent')
-            ->where('viewable_type', $criteria->morphClass)
+            ->forMorphType($criteria->morphClass)
             ->when($criteria->viewableId, fn($q) => $q->where('viewable_id', $criteria->viewableId))
-            ->orderBy('hits', 'desc')
-            ->limit($criteria->limit)
+            ->topByHits($criteria->limit)
             ->get()
             ->map(fn(BotView $botView) => [
                 'user_agent' => $botView->userAgent->name,

@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Builders\UserBuilder;
 use App\Enums\GroupRole;
 use App\Enums\UserRole;
 use Database\Factories\UserFactory;
@@ -21,6 +24,15 @@ class User extends Authenticatable
     use HasFactory, HasRoles, Notifiable;
 
     /**
+     * @param $query
+     * @return UserBuilder<static>
+     */
+    public function newEloquentBuilder($query): UserBuilder
+    {
+        return new UserBuilder($query);
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
@@ -35,6 +47,7 @@ class User extends Authenticatable
     ];
 
     // Ensure default role/blog_quota on create and adjust blog_quota when role changes
+
     /**
      * The attributes that should be hidden for serialization.
      *

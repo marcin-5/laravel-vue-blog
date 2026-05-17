@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use App\Builders\PageViewBuilder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,6 +29,15 @@ class PageView extends Model
     protected $casts = [
         'user_id' => 'integer',
     ];
+
+    /**
+     * @param $query
+     * @return PageViewBuilder<static>
+     */
+    public function newEloquentBuilder($query): PageViewBuilder
+    {
+        return new PageViewBuilder($query);
+    }
 
     public function user(): BelongsTo
     {
