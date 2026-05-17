@@ -1,11 +1,11 @@
 {
     "about": {
         "meta": {
-            "title": "O Osobliwy Blogu",
+            "title": "O blogach w serwisie osobliwy.blog",
             "description": "Miejsce, gdzie słowo pisane inspiruje, skłania do refleksji, odkryć i staje się początkiem konwersacji."
         },
         "heading": "O nas",
-        "content": "***„Osobliwy.blog”*** to więcej niż tylko zbiór wpisów, to miejsce, gdzie słowo pisane jest punktem wyjścia do refleksji i odkryć. Znajdziesz tu artykuły, które nie boją się stawiać odważnych tez, a także teksty mające jedną główną cechę – inspirować.\n\n###Przestrzeń dla myśli, pytań i inspiracji\n\nNaszym założeniem jest to, że żaden tekst nie jest ostatecznym, niepodważalnym monologiem. Traktujemy je raczej jako początek rozmowy. Nawet najbardziej przemyślany artykuł może stać się dla Ciebie inspiracją do podważenia którejś z tez – i bardzo dobrze! Jesteśmy otwarci na taki dialog i wierzymy, że dzięki krytyce wszyscy możemy poszerzać swoje horyzonty.\n\n###Głos naszej społeczności\n\nDoceniamy każdą konstruktywną opinię. Chociaż bezpośrednia możliwość komentowania pod wpisami jest w tej chwili w przygotowaniu, już teraz zachęcamy do dzielenia się swoimi przemyśleniami, zwłaszcza tymi krytycznymi, poprzez nasz [adres e-mail](mailto:admin@osobliwy.blog). Jeśli tylko wyrazisz na to zgodę, z chęcią opublikujemy Twój komentarz pod danym artykułem, czyniąc go żywym i wielogłosowym."
+        "content": "**\"Osobliwy.blog\"** to coś więcej niż zbiór wpisów; to miejsce, gdzie słowo pisane jest punktem wyjścia do refleksji i odkryć. Znajdziesz tu artykuły, które nie boją się stawiać odważnych tez, a także teksty mające jedną główną cechę – inspirować.\n\n### Przestrzeń dla myśli, pytań i inspiracji\n\nNaszym założeniem jest to, że żaden tekst nie jest ostatecznym, niepodważalnym monologiem. Traktujemy każdy z nich raczej jako początek rozmowy. Nawet najbardziej przemyślany artykuł może stać się dla Ciebie inspiracją do podważenia którejś z tez – i bardzo dobrze! Jesteśmy otwarci na taki dialog i wierzymy, że dzięki krytyce wszyscy możemy poszerzać swoje horyzonty.\n\n### Głos naszej społeczności\n\nDoceniamy każdą konstruktywną opinię. Chociaż bezpośrednia możliwość komentowania wpisów jest w tej chwili w przygotowaniu, już teraz zachęcamy do dzielenia się swoimi przemyśleniami, zwłaszcza tymi krytycznymi, poprzez nasz [adres e-mail](mailto:admin@osobliwy.blog). Jeśli tylko wyrazisz na to zgodę, z chęcią opublikujemy Twój komentarz pod danym artykułem, czyniąc w ten sposób dyskusję żywą i wielogłosową."
     },
     "contact": {
         "meta": {
@@ -14,14 +14,14 @@
         },
         "heading": "Kontakt",
         "form": {
-            "name": "Imię i nazwisko",
+            "name": "Imię",
             "email": "Email",
             "subject": "Temat",
             "message": "Wiadomość",
             "submit": "Wyślij wiadomość",
             "submitted": "Twoja wiadomość została wysłana.",
             "placeholders": {
-                "name": "Twoje imię i nazwisko",
+                "name": "Twoje imię",
                 "email": "Twój email",
                 "subject": "Temat",
                 "message": "Napisz swoją wiadomość..."
@@ -29,8 +29,8 @@
         }
     },
     "meta": {
-        "welcomeTitle": "Portal Osobliwy Blog",
-        "welcomeDescription": "Inspiracja do refleksji i odkryć: stawiamy odważne tezy, zadajemy ciekawe pytania, tworzymy przestrzeń do rozmowy, która poszerza horyzonty."
+        "welcomeTitle": "Osobliwy.blog",
+        "welcomeDescription": "Osobliwy.blog inspiruje do refleksji i odkryć. Stawiamy odważne tezy, zadajemy ciekawe pytania i tworzymy przestrzeń do rozmowy, która poszerza horyzonty."
     },
     "slogans": [
         "Rzeczy, o których istnieniu wie zbyt mało ludzi. Odkryjesz je?",
