@@ -36,7 +36,7 @@ class NewsletterStatsQuery
         // Maintain the order from $latestEmails
         return $latestEmails->map(fn($email) => [
             'email' => $email,
-            'subscriptions' => $subscriptions->get($email)->map(fn($sub) => [
+            'subscriptions' => $subscriptions->get($email, collect())->map(fn($sub) => [
                 'blog' => $sub->blog->name,
                 'frequency' => $sub->frequency,
             ])->values()->all(),

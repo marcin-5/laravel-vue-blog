@@ -46,10 +46,10 @@ class BlogStatsQuery
         return $blogs->map(fn(Blog $blog) => [
             'id' => $blog->id,
             'name' => $blog->name,
-            'posts_count' => $blog->posts_count,
+            'posts_count' => (int) $blog->getAttribute('posts_count'),
             'lifetime_views' => $viewCounts[$blog->id] ?? 0,
-            'daily_subscriptions_count' => $blog->daily_subscriptions_count,
-            'weekly_subscriptions_count' => $blog->weekly_subscriptions_count,
+            'daily_subscriptions_count' => (int) $blog->getAttribute('daily_subscriptions_count'),
+            'weekly_subscriptions_count' => (int) $blog->getAttribute('weekly_subscriptions_count'),
         ]);
     }
 

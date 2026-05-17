@@ -8,12 +8,14 @@ use App\Models\BotView;
 use App\Models\PageView;
 use App\Models\UserAgent;
 use App\Services\BotDetector;
+use Carbon\Carbon;
+use DateTimeInterface;
 use Illuminate\Support\Collection;
 
-class BotStatsQuery
+readonly class BotStatsQuery
 {
     public function __construct(
-        private readonly BotDetector $botDetector,
+        private BotDetector $botDetector,
     ) {}
 
     /**
@@ -79,18 +81,7 @@ class BotStatsQuery
             ->with('userAgent:id,name')
             ->limit(5)
             ->get()
-            ->map(function ($botView) {
-                $userAgentName = $botView->userAgent->name;
-                $matchedFragment = $this->botDetector->getBotName($userAgentName);
-
-                return [
-                    'id' => $botView->userAgent->id,
-                    'name' => $userAgentName,
-                    'matched_fragment' => $matchedFragment ?? $userAgentName,
-                    'hits' => (int) $botView->total_hits,
-                    'last_seen_at' => $botView->last_seen_at->toIso8601String(),
-                ];
-            });
+            ->map($this->mapBotViewToResponse(...));
     }
 
     private function getMostActiveBots(): Collection
@@ -101,17 +92,27 @@ class BotStatsQuery
             ->with('userAgent:id,name')
             ->limit(5)
             ->get()
-            ->map(function ($botView) {
-                $userAgentName = $botView->userAgent->name;
-                $matchedFragment = $this->botDetector->getBotName($userAgentName);
+            ->map($this->mapBotViewToResponse(...));
+    }
 
-                return [
-                    'id' => $botView->userAgent->id,
-                    'name' => $userAgentName,
-                    'matched_fragment' => $matchedFragment ?? $userAgentName,
-                    'hits' => (int) $botView->total_hits,
-                    'last_seen_at' => $botView->last_seen_at->toIso8601String(),
-                ];
-            });
+    /**
+     * @return array{id: int, name: string, matched_fragment: string, hits: int, last_seen_at: string}
+     */
+    private function mapBotViewToResponse(BotView $botView): array
+    {
+        $userAgentName = $botView->userAgent->name;
+        $matchedFragment = $this->botDetector->getBotName($userAgentName);
+        $lastSeenAt = $botView->getAttribute('last_seen_at');
+        $lastSeenAtIso = $lastSeenAt instanceof DateTimeInterface
+            ? $lastSeenAt->format(DATE_ATOM)
+            : Carbon::parse((string) $lastSeenAt)->toIso8601String();
+
+        return [
+            'id' => $botView->userAgent->id,
+            'name' => $userAgentName,
+            'matched_fragment' => $matchedFragment ?? $userAgentName,
+            'hits' => (int) $botView->getAttribute('total_hits'),
+            'last_seen_at' => $lastSeenAtIso,
+        ];
     }
 }

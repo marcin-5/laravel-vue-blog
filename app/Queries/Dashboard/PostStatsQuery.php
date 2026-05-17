@@ -57,12 +57,12 @@ class PostStatsQuery
             'published_at' => $post->published_at?->toIso8601String()
                 ?? $post->created_at->toIso8601String(),
             'views' => [
-                'total' => $post->total_views,
-                'year' => $post->year_views,
-                'half_year' => $post->half_year_views,
-                'month' => $post->month_views,
-                'week' => $post->week_views,
-                'day' => $post->day_views,
+                'total' => (int) $post->getAttribute('total_views'),
+                'year' => (int) $post->getAttribute('year_views'),
+                'half_year' => (int) $post->getAttribute('half_year_views'),
+                'month' => (int) $post->getAttribute('month_views'),
+                'week' => (int) $post->getAttribute('week_views'),
+                'day' => (int) $post->getAttribute('day_views'),
             ],
         ])->sortByDesc('published_at')->values();
     }
@@ -76,7 +76,7 @@ class PostStatsQuery
             return [
                 'id' => $post->id,
                 'title' => $post->title,
-                'ratio' => round($post->total_views / $daysSincePublished, 2),
+                'ratio' => round(((int) $post->getAttribute('total_views')) / $daysSincePublished, 2),
             ];
         })->sortByDesc('ratio')->values();
     }
