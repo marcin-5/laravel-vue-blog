@@ -17,7 +17,7 @@ return [
         $host = $_SERVER['HTTP_HOST'] ?? '';
 
         return $host === env('APP_DOMAIN_SECONDARY', 'peculiarmatters.blog')
-            ? 'Peculiar Matters Blog'
+            ? 'Peculiar Matters'
             : env('LARAVEL_APP_NAME', 'Osobliwy Blog');
     })(),
 

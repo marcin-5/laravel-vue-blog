@@ -42,7 +42,7 @@ initializeVisitorId();
 initializeTheme();
 initializeFontSize();
 
-const getAppName = (locale: string) => (locale === 'pl' ? 'Osobliwy Blog' : 'Peculiar Matters Blog');
+const getAppName = (locale: string) => (locale === 'pl' ? 'Osobliwy Blog' : 'Peculiar Matters');
 
 createInertiaApp({
     title: (title) => title || getAppName(i18n.global.locale.value),

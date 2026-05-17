@@ -12,7 +12,7 @@ class SetLocale
     /**
      * Handle an incoming request.
      *
-     * @param Closure(Request): (Response) $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -44,7 +44,7 @@ class SetLocale
         AppFacade::setLocale($locale);
 
         config([
-            'app.name' => $locale === 'pl' ? 'Osobliwy Blog' : 'Peculiar Matters Blog',
+            'app.name' => $locale === 'pl' ? 'Osobliwy Blog' : 'Peculiar Matters',
         ]);
 
         return $next($request);
