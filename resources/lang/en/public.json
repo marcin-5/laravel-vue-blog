@@ -82,5 +82,12 @@
     },
     "welcome": {
         "my_groups": "My groups"
+    },
+    "no_blogs": {
+        "welcome": "Welcome",
+        "nice_to_see_you": "Nice to have you here",
+        "no_blogs_yet": "There are no blogs on this page yet.",
+        "will_change_soon": "This will change soon and you will find interesting posts here.",
+        "invite_soon": "Come back soon"
     }
 }
