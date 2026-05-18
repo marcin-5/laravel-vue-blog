@@ -16,7 +16,7 @@ class Category extends Model
         'slug',
     ];
 
-    public $translatable = ['name'];
+    public array $translatable = ['name'];
 
     /**
      * Blogs assigned to this category.
