@@ -24,7 +24,7 @@ function updateCategories(categoryIds: number[]) {
 </script>
 
 <template>
-    <div>
+    <div class="rounded-md border border-sidebar-border/70 p-4 dark:border-sidebar-border">
         <div class="mb-1 block text-sm font-medium">Categories</div>
         <div class="flex flex-wrap gap-3">
             <label v-for="category in props.categories" :key="`${props.idPrefix}-${category.id}`" class="inline-flex items-center gap-2">
