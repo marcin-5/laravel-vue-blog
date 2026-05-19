@@ -130,6 +130,13 @@ export interface ExternalLinkItem {
     display_order: number;
 }
 
+export interface Tag {
+    id: number;
+    blog_id: number;
+    name: string;
+    slug: string;
+}
+
 export interface AdminPostItem {
     id: number;
     blog_id: number;
@@ -148,6 +155,7 @@ export interface AdminPostItem {
     extensions?: PostExtensionPivot[];
     related_posts?: RelatedPostItem[];
     external_links?: ExternalLinkItem[];
+    tags?: Tag[];
 }
 
 export interface AdminBlog {

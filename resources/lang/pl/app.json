@@ -375,7 +375,14 @@
             "external_link_url": "URL",
             "external_link_description": "Opis",
             "external_link_reason": "Wyjaśnienie powiązania",
-            "remove_item": "Usuń"
+            "remove_item": "Usuń",
+            "tags_label": "Tagi",
+            "tags_hint": "Kliknij, aby wybrać lub odznaczyć."
+        },
+        "tags": {
+            "section_title": "Tagi bloga",
+            "add_label": "Dodaj tag",
+            "add_button": "Dodaj"
         },
         "post_item": {
             "close_button": "Zamknij",

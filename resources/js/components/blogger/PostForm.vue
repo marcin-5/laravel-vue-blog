@@ -5,6 +5,7 @@ import MarkdownPreviewSection from '@/components/blogger/MarkdownPreviewSection.
 import PostExternalLinksSection from '@/components/blogger/PostExternalLinksSection.vue';
 import PostFormField from '@/components/blogger/PostFormField.vue';
 import PostRelatedPostsSection from '@/components/blogger/PostRelatedPostsSection.vue';
+import PostTagsSelector from '@/components/blogger/PostTagsSelector.vue';
 import { useMarkdownPreviewSection } from '@/composables/useMarkdownPreviewSection';
 import type { AdminPostItem as PostItem, ExternalLinkItem, RelatedPostItem } from '@/types/blog.types';
 import { useForm } from '@inertiajs/vue3';
@@ -55,6 +56,7 @@ const form =
         visibility: props.post?.visibility || 'public',
         related_posts: (props.post?.related_posts || []) as RelatedPostItem[],
         external_links: (props.post?.external_links || []) as ExternalLinkItem[],
+        tags: props.post?.tags?.map((t) => t.slug) || [],
     });
 
 // Ensure summary, related_posts and external_links are initialized if props.form was provided without them
@@ -66,6 +68,9 @@ if (form.related_posts === undefined) {
 }
 if (form.external_links === undefined) {
     form.external_links = (props.post?.external_links || []) as ExternalLinkItem[];
+}
+if (form.tags === undefined) {
+    form.tags = (props.post?.tags || []).map((t) => t.slug);
 }
 
 // Visibility computed properties
@@ -167,6 +172,7 @@ const updateFormFromPost = (post: PostItem) => {
     form.visibility = post.visibility ?? 'public';
     form.related_posts = (post.related_posts || []) as RelatedPostItem[];
     form.external_links = (post.external_links || []) as ExternalLinkItem[];
+    form.tags = (post.tags || []).map((t) => t.slug);
 };
 
 const addRelatedPost = (item: { blog_id: number; related_post_id: number; reason: string }) => {
@@ -232,6 +238,7 @@ watch(isExtension, (newValue) => {
         form.summary = '';
         form.related_posts = [];
         form.external_links = [];
+        form.tags = [];
     }
 });
 
@@ -411,6 +418,12 @@ const getThresholdClass = computed(() => (value: string | null, threshold1: numb
                     @remove="removeExternalLink"
                     @add-item="addExternalLink"
                     @update-item="updateExternalLink"
+                />
+
+                <PostTagsSelector
+                    v-model="form.tags"
+                    :blog-id="props.post?.blog_id || form.blog_id"
+                    :id-prefix="fieldIdPrefix"
                 />
             </template>
 

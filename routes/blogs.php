@@ -4,6 +4,7 @@ use App\Http\Controllers\Blogger\BlogsController;
 use App\Http\Controllers\Blogger\GroupMembersController;
 use App\Http\Controllers\Blogger\GroupsController;
 use App\Http\Controllers\Blogger\PostsController;
+use App\Http\Controllers\Blogger\TagsController;
 use App\Http\Controllers\Blogger\PublicDataController;
 use App\Http\Controllers\Blogger\StatsController as BloggerStatsController;
 use App\Http\Controllers\MarkdownController;
@@ -48,6 +49,14 @@ Route::middleware(['auth', 'verified', 'noindex'])->group(function () {
     // Posts routes
     Route::post('posts', [PostsController::class, 'store'])->name('posts.store');
     Route::patch('posts/{post}', [PostsController::class, 'update'])->name('posts.update');
+
+    // Blog Tags management
+    Route::prefix('blogs/{blog}')->group(function () {
+        Route::get('tags', [TagsController::class, 'index'])->name('blogger.tags.index');
+        Route::post('tags', [TagsController::class, 'store'])->name('blogger.tags.store');
+        Route::patch('tags/{tag}', [TagsController::class, 'update'])->name('blogger.tags.update');
+        Route::delete('tags/{tag}', [TagsController::class, 'destroy'])->name('blogger.tags.destroy');
+    });
 
     // Post Extensions (New pivot-based routes)
     Route::prefix('blogger/posts/{post}')->group(function () {

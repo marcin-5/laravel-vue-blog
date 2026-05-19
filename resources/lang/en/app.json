@@ -375,7 +375,14 @@
             "external_link_url": "URL",
             "external_link_description": "Description",
             "external_link_reason": "Clarification of association",
-            "remove_item": "Delete"
+            "remove_item": "Delete",
+            "tags_label": "Tags",
+            "tags_hint": "Click to toggle selection."
+        },
+        "tags": {
+            "section_title": "Blog tags",
+            "add_label": "Add tag",
+            "add_button": "Add"
         },
         "post_item": {
             "close_button": "Close",

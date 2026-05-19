@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Models\Blog;
 use App\Models\Group;
+use App\Models\Tag;
 use App\Models\Post;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -16,13 +17,17 @@ readonly class PostService
     {
         $relatedPosts = $postData['related_posts'] ?? [];
         $externalLinks = $postData['external_links'] ?? [];
-        unset($postData['related_posts'], $postData['external_links']);
+        $tags = $postData['tags'] ?? [];
+        unset($postData['related_posts'], $postData['external_links'], $postData['tags']);
 
         $data = array_merge($postData, ['user_id' => $userId]);
 
         $post = $group ? $group->posts()->create($data) : $blog->posts()->create($data);
 
         $this->syncRelations($post, $relatedPosts, $externalLinks);
+        if (!empty($tags)) {
+            $this->syncTags($post, $tags, $blog ?? $post->blog);
+        }
 
         return $post;
     }
@@ -59,12 +64,17 @@ readonly class PostService
     {
         $relatedPosts = $postData['related_posts'] ?? null;
         $externalLinks = $postData['external_links'] ?? null;
-        unset($postData['related_posts'], $postData['external_links']);
+        $tags = $postData['tags'] ?? null;
+        unset($postData['related_posts'], $postData['external_links'], $postData['tags']);
 
         $post->update($postData);
 
         if ($relatedPosts !== null || $externalLinks !== null) {
             $this->syncRelations($post, $relatedPosts ?? [], $externalLinks ?? []);
+        }
+
+        if ($tags !== null) {
+            $this->syncTags($post, $tags, $post->blog);
         }
 
         return $post;
@@ -135,5 +145,48 @@ readonly class PostService
                 'display_order' => $extension['display_order'],
             ]);
         }
+    }
+
+    /**
+     * Sync tags for a post ensuring tags exist for the given blog.
+     *
+     * @param  array<int, string|int|array{name?:string,slug?:string,id?:int}>  $tags
+     */
+    private function syncTags(Post $post, array $tags, Blog $blog): void
+    {
+        // Normalize incoming tags to tag IDs
+        $ids = [];
+        foreach ($tags as $tag) {
+            $id = null;
+            if (is_int($tag)) {
+                $id = $tag;
+            } elseif (is_string($tag)) {
+                // Only use existing tag by slug within the same blog; do not auto-create here
+                $existing = Tag::where('blog_id', $blog->id)
+                    ->where('slug', str($tag)->slug()->toString())
+                    ->first();
+                $id = $existing?->id;
+            } elseif (is_array($tag)) {
+                if (isset($tag['id'])) {
+                    $id = (int) $tag['id'];
+                } elseif (isset($tag['slug']) || isset($tag['name'])) {
+                    $name = (string) ($tag['name'] ?? $tag['slug']);
+                    $existing = Tag::where('blog_id', $blog->id)
+                        ->where('slug', str($name)->slug()->toString())
+                        ->first();
+                    $id = $existing?->id;
+                }
+            }
+
+            if ($id !== null) {
+                // Guard: ensure tag belongs to same blog
+                $belongs = Tag::whereKey($id)->where('blog_id', $blog->id)->exists();
+                if ($belongs) {
+                    $ids[] = $id;
+                }
+            }
+        }
+
+        $post->tags()->sync(array_unique($ids));
     }
 }

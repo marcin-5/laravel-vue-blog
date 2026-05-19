@@ -40,6 +40,9 @@ vi.mock('@/components/blogger/FormPublishingSettings.vue', () => ({
 vi.mock('@/components/blogger/FormSubmitActions.vue', () => ({
     default: { name: 'FormSubmitActions', template: '<div>FormSubmitActions</div>' },
 }));
+vi.mock('@/components/blogger/BlogTagsSection.vue', () => ({
+    default: { name: 'BlogTagsSection', template: '<div>BlogTagsSection</div>' },
+}));
 vi.mock('@/components/blogger/PostFormField.vue', () => ({
     default: { name: 'PostFormField', template: '<div>PostFormField</div>' },
 }));

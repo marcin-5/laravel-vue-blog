@@ -90,6 +90,9 @@ vi.mock('@/components/blogger/PostExternalLinksSection.vue', () => ({
         template: '<div><h3>{{ translations.label }}</h3>PostExternalLinksSection</div>',
     },
 }));
+vi.mock('@/components/blogger/PostTagsSelector.vue', () => ({
+    default: { name: 'PostTagsSelector', template: '<div>PostTagsSelector</div>' },
+}));
 
 (global as any).route = vi.fn(() => 'mock-route');
 

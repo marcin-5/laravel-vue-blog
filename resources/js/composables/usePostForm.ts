@@ -21,6 +21,7 @@ export function usePostForm() {
         visibility: 'public' as string,
         related_posts: [] as any[],
         external_links: [] as any[],
+        tags: [] as string[],
     });
 
     const postEditForm = useForm({
@@ -33,6 +34,7 @@ export function usePostForm() {
         visibility: 'public' as string,
         related_posts: [] as any[],
         external_links: [] as any[],
+        tags: [] as string[],
     });
 
     const extensionForm = useForm({
@@ -104,6 +106,7 @@ export function usePostForm() {
         postEditForm.visibility = post.visibility ?? 'public';
         postEditForm.related_posts = [...(post.related_posts || [])];
         postEditForm.external_links = [...(post.external_links || [])];
+        postEditForm.tags = (post as any).tags?.map((t: any) => t.slug) || [];
     }
 
     function cancelEditPost() {

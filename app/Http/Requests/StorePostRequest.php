@@ -2,12 +2,15 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\HandlesPostValidation;
 use App\Models\Blog;
 use App\Models\Group;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StorePostRequest extends FormRequest
 {
+    use HandlesPostValidation;
+
     public function authorize(): bool
     {
         $groupId = $this->input('group_id');
@@ -39,34 +42,11 @@ class StorePostRequest extends FormRequest
 
     public function rules(): array
     {
-        $config = config('blogger.posts', []);
-
-        return [
+        return array_merge([
             'blog_id' => ['nullable', 'integer', 'exists:blogs,id'],
             'group_id' => ['nullable', 'integer', 'exists:groups,id'],
             'title' => ['required', 'string', 'max:255'],
-            'seo_title' => ['nullable', 'string', 'max:255'],
-            'excerpt' => ['nullable', 'string', 'max:' . ($config['limits']['excerpt_max_length'] ?? 500)],
-            'summary' => ['nullable', 'string'],
-            'content' => ['nullable', 'string'],
-            'is_published' => ['sometimes', 'boolean'],
-            'visibility' => [
-                'sometimes',
-                'string',
-                'in:' . implode(',', $config['allowed_visibility'] ?? ['public', 'registered']),
-            ],
-            'related_posts' => ['nullable', 'array'],
-            'related_posts.*.blog_id' => ['required', 'integer', 'exists:blogs,id'],
-            'related_posts.*.related_post_id' => ['required', 'integer', 'exists:posts,id'],
-            'related_posts.*.reason' => ['nullable', 'string', 'max:500'],
-            'related_posts.*.display_order' => ['nullable', 'integer', 'min:0'],
-            'external_links' => ['nullable', 'array'],
-            'external_links.*.title' => ['required', 'string', 'max:255'],
-            'external_links.*.url' => ['required', 'url', 'max:255'],
-            'external_links.*.description' => ['nullable', 'string', 'max:500'],
-            'external_links.*.reason' => ['nullable', 'string', 'max:500'],
-            'external_links.*.display_order' => ['nullable', 'integer', 'min:0'],
-        ];
+        ], $this->postRules());
     }
 
     public function getPostData(): array
@@ -86,15 +66,10 @@ class StorePostRequest extends FormRequest
             'visibility' => $validated['visibility'] ?? $config['visibility'] ?? 'public',
             'related_posts' => $validated['related_posts'] ?? [],
             'external_links' => $validated['external_links'] ?? [],
+            'tags' => $validated['tags'] ?? [],
         ];
 
-        if ($data['visibility'] === 'extension') {
-            $data['seo_title'] = null;
-            $data['excerpt'] = null;
-            $data['summary'] = null;
-            $data['related_posts'] = [];
-            $data['external_links'] = [];
-        }
+        $this->applyExtensionVisibility($data, $data['visibility']);
 
         return $data;
     }

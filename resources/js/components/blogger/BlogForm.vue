@@ -5,6 +5,7 @@ import EntityThemeSection from '@/components/blogger/EntityThemeSection.vue';
 import FormPublishingSettings from '@/components/blogger/FormPublishingSettings.vue';
 import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
 import PostFormField from '@/components/blogger/PostFormField.vue';
+import BlogTagsSection from '@/components/blogger/BlogTagsSection.vue';
 import { useBlogFormLogic } from '@/composables/useBlogFormLogic';
 import { useBloggerFormTranslations } from '@/composables/useBloggerFormTranslations';
 import { useMarkdownPreviewSection } from '@/composables/useMarkdownPreviewSection';
@@ -178,6 +179,8 @@ const seoTitleClass = computed(() => {
             <div v-if="form.errors.categories" class="mt-1 text-sm font-semibold text-error">
                 {{ form.errors.categories }}
             </div>
+
+            <BlogTagsSection v-if="props.isEdit && props.blog" :blog-id="props.blog.id" :id-prefix="`${fieldIdPrefix}-tags`" />
 
             <FormSubmitActions
                 :is-edit="props.isEdit"

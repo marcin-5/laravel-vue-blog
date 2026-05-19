@@ -48,6 +48,7 @@ class BlogBuilder extends Builder
                         'relatedPosts.relatedPost',
                         'relatedPosts.blog',
                         'externalLinks',
+                        'tags',
                     ])
                     ->select(
                         'id',
