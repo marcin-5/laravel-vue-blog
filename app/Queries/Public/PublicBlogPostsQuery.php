@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Queries\Public;
 
 use App\Models\Blog;
+use App\Models\Tag;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Number;
 
 class PublicBlogPostsQuery
 {
-    public function handle(Blog $blog): LengthAwarePaginator
+    public function handle(Blog $blog, ?Tag $tag = null): LengthAwarePaginator
     {
         $size = Number::clamp(
             (int) ($blog->page_size ?? config('blog.default_page_size')),
@@ -18,8 +19,13 @@ class PublicBlogPostsQuery
             config('blog.max_page_size'),
         );
 
-        return $blog->posts()
-            ->forPublicListing()
+        $builder = $blog->posts()->forPublicListing();
+
+        if ($tag !== null) {
+            $builder->whereHas('tags', fn($q) => $q->whereKey($tag->id));
+        }
+
+        return $builder
             ->paginate($size)
             ->withQueryString();
     }

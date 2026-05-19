@@ -70,12 +70,12 @@ class Blog extends Model
     {
         static::addGlobalScope('locale', function (Builder $builder) {
             if (!app()->runningInConsole() && !request()->is(
-                'dashboard*',
-                'settings*',
-                'admin*',
-                '_/*',
-                'api/admin/*',
-            )) {
+                    'dashboard*',
+                    'settings*',
+                    'admin*',
+                    '_/*',
+                    'api/admin/*',
+                )) {
                 $builder->where('blogs.locale', app()->getLocale());
             }
         });
@@ -115,6 +115,14 @@ class Blog extends Model
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class, 'blog_category');
+    }
+
+    /**
+     * Tags defined for this blog.
+     */
+    public function tags(): HasMany
+    {
+        return $this->hasMany(Tag::class);
     }
 
     /**

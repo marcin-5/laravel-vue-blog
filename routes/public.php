@@ -55,6 +55,10 @@ Route::get('/newsletter/manage', [NewsletterController::class, 'manage'])->name(
 Route::post('/newsletter/update', [NewsletterController::class, 'update'])->name('newsletter.update');
 Route::post('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
+// Tag filtered listing must be before generic catch-all blog routes
+Route::get('{blog:slug}/tags/{tag:slug}', [PublicBlogController::class, 'tag'])
+    ->name('blog.public.tag');
+
 // Keep these at the very end to avoid conflicts.
 Route::get('{blog:slug}/{postSlug}', [PublicBlogController::class, 'post'])
     ->name('blog.public.post')

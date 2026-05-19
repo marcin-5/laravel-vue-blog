@@ -132,6 +132,14 @@ class Post extends Model
     }
 
     /**
+     * Tags assigned to this post.
+     */
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class)->withTimestamps();
+    }
+
+    /**
      * Accessor to get Markdown summary rendered as HTML.
      */
     public function getSummaryHtmlAttribute(): string

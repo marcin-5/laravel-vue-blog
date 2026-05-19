@@ -12,6 +12,7 @@ use App\Http\Resources\PublicPostDetailResource;
 use App\Http\Resources\PublicPostResource;
 use App\Models\Blog;
 use App\Models\Post;
+use App\Models\Tag;
 use App\Queries\Public\PublicBlogPostsQuery;
 use App\Services\BlogNavigationService;
 use App\Services\MarkdownService;
@@ -114,6 +115,46 @@ class PublicBlogController extends BasePublicController
             'navigation' => $this->navigation->getPostNavigation($blog, $post),
             'seo' => $this->seoBuilder->buildPostSeo($blog, $post, $metaDescription)->toArray(),
             'viewStats' => Inertia::defer(fn() => $this->getViewStats(Post::class, $post->id, $blog->user_id)),
+        ]);
+    }
+
+    /**
+     * Show posts filtered by tag within a blog.
+     * Route: /{blog:slug}/tags/{tag:slug}
+     */
+    public function tag(Request $request, Blog $blog, Tag $tag, PublicBlogPostsQuery $query): Response
+    {
+        $this->ensureBlogIsPublic($blog);
+
+        // Ensure tag belongs to the same blog
+        abort_unless($tag->blog_id === $blog->id, 404);
+
+        $blog->load(['landingPage', 'user']);
+
+        $paginator = $query->handle($blog, $tag);
+
+        $descriptionHtml = str_replace('-!-', '', $this->markdown->convertToHtml($blog->description));
+        $metaDescription = $this->seo->generateMetaDescription(
+            $descriptionHtml ?: $blog->landingPage?->content_html ?: $blog->name,
+        );
+
+        return $this->renderWithTranslations('public/blog/Landing', 'blog', [
+            'locale' => app()->getLocale(),
+            'blog' => new PublicBlogDetailResource($blog),
+            'landingHtml' => $blog->landingPage?->content_html ?? '',
+            'footerHtml' => $this->markdown->convertToHtml($blog->footer),
+            'posts' => PublicPostResource::collection($paginator->items()),
+            'pagination' => $this->formatPagination($paginator),
+            'sidebar' => (int) ($blog->sidebar ?? 0),
+            'sidebarPosition' => $blog->sidebar_position,
+            'navigation' => $this->navigation->getLandingNavigation($blog),
+            'seo' => $this->seoBuilder->buildLandingSeo($blog, $paginator, $metaDescription)->toArray(),
+            'activeTag' => [
+                'id' => $tag->id,
+                'name' => $tag->name,
+                'slug' => $tag->slug,
+            ],
+            'viewStats' => Inertia::defer(fn() => $this->getViewStats(Blog::class, $blog->id, $blog->user_id)),
         ]);
     }
 }
