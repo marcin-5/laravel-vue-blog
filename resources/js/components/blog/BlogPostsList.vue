@@ -2,7 +2,7 @@
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useBlogExcerpts } from '@/composables/useBlogExcerpts';
-import type { PostItem } from '@/types/blog.types';
+import type { PostItem, Tag } from '@/types/blog.types';
 import { formatDate } from '@/utils/dateUtils';
 import { Link } from '@inertiajs/vue3';
 import { Info } from 'lucide-vue-next';
@@ -21,6 +21,7 @@ const props = defineProps<{
         name: string;
         slug: string;
     } | null;
+    allTags?: Tag[];
 }>();
 
 const { t } = useI18n();
@@ -60,7 +61,8 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
     >
         <div class="mb-4 flex items-center justify-between gap-4">
             <h2 :style="{ fontFamily: 'var(--blog-header-font)' }" class="text-xl font-semibold text-primary opacity-90">
-                {{ t('blog.posts_list.title') }}
+                {{ !activeTag ? t('blog.posts_list.title') : t('blog.posts_list.active_tag') }}:
+                <span v-if="activeTag" class="font-semibold text-primary-foreground">{{ activeTag.name }}</span>
             </h2>
             <div class="flex items-center gap-2">
                 <span class="text-sm text-muted-foreground">{{ t('blog.posts_list.show_excerpts') }}</span>
@@ -68,14 +70,30 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
             </div>
         </div>
 
-        <div v-if="activeTag" class="mb-4 flex items-center gap-2">
-            <span class="text-sm text-muted-foreground">
-                {{ t('blog.posts_list.active_tag') }}:
-                <span class="font-semibold text-primary">{{ activeTag.name }}</span>
-            </span>
-            <Link :href="route('blog.public.landing', { blog: blogSlug })" class="text-xs text-link hover:underline">
-                {{ t('blog.posts_list.clear_filter') }}
-            </Link>
+        <div v-if="allTags && allTags.length > 0" class="mb-4">
+            <div v-if="activeTag" class="mb-2 flex items-center gap-2">
+                <Link :href="route('blog.public.landing', { blog: blogSlug })" class="text-xs text-link hover:underline">
+                    {{ t('blog.posts_list.clear_filter') }}
+                </Link>
+            </div>
+            <h3 v-else class="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                {{ t('blog.posts_list.all_tags') }}
+            </h3>
+            <div class="flex flex-wrap gap-2">
+                <Link
+                    v-for="tag in allTags"
+                    :key="tag.id"
+                    :class="[
+                        'rounded-full border px-2 py-0.5 text-xs font-medium transition-colors',
+                        activeTag?.id === tag.id
+                            ? 'border-link bg-link/10 text-link'
+                            : 'border-border bg-card text-muted-foreground hover:border-link hover:text-link',
+                    ]"
+                    :href="route('blog.public.tag', { blog: blogSlug, tag: tag.slug })"
+                >
+                    #{{ tag.name }}
+                </Link>
+            </div>
         </div>
 
         <p v-if="!hasPosts">
@@ -98,8 +116,11 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
                         <Link
                             v-for="tag in post.tags"
                             :key="tag.id"
+                            :class="[
+                                'text-xs font-medium transition-colors hover:text-link',
+                                tag.id === activeTag?.id ? 'text-link-hover' : 'text-muted-foreground',
+                            ]"
                             :href="route('blog.public.tag', { blog: blogSlug, tag: tag.slug })"
-                            class="text-xs font-medium text-muted-foreground transition-colors hover:text-link"
                         >
                             #{{ tag.name }}
                         </Link>

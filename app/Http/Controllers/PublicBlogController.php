@@ -10,6 +10,7 @@ use App\Http\Resources\PublicBlogDetailResource;
 use App\Http\Resources\PublicBlogResource;
 use App\Http\Resources\PublicPostDetailResource;
 use App\Http\Resources\PublicPostResource;
+use App\Http\Resources\TagResource;
 use App\Models\Blog;
 use App\Models\Post;
 use App\Models\Tag;
@@ -67,6 +68,7 @@ class PublicBlogController extends BasePublicController
             'navigation' => $this->navigation->getLandingNavigation($blog),
             'seo' => $this->seoBuilder->buildLandingSeo($blog, $paginator, $metaDescription)->toArray(),
             'viewStats' => Inertia::defer(fn() => $this->getViewStats(Blog::class, $blog->id, $blog->user_id)),
+            'allTags' => TagResource::collection($blog->tags),
         ]);
     }
 
@@ -115,6 +117,7 @@ class PublicBlogController extends BasePublicController
             'navigation' => $this->navigation->getPostNavigation($blog, $post),
             'seo' => $this->seoBuilder->buildPostSeo($blog, $post, $metaDescription)->toArray(),
             'viewStats' => Inertia::defer(fn() => $this->getViewStats(Post::class, $post->id, $blog->user_id)),
+            'allTags' => TagResource::collection($blog->tags),
         ]);
     }
 
@@ -155,6 +158,7 @@ class PublicBlogController extends BasePublicController
                 'slug' => $tag->slug,
             ],
             'viewStats' => Inertia::defer(fn() => $this->getViewStats(Blog::class, $blog->id, $blog->user_id)),
+            'allTags' => TagResource::collection($blog->tags),
         ]);
     }
 }

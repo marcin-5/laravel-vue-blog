@@ -6,7 +6,7 @@ import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import ScrollToPostsLink from '@/components/blog/ScrollToPostsLink.vue';
-import type { Blog, Navigation, PostItem, ViewStats } from '@/types/blog.types';
+import type { Blog, Navigation, PostItem, Tag, ViewStats } from '@/types/blog.types';
 import { handleContentClick } from '@/utils/domUtils';
 import { hasContent, selectRandomMotto } from '@/utils/stringUtils';
 import { computed } from 'vue';
@@ -32,6 +32,7 @@ const props = defineProps<{
         name: string;
         slug: string;
     } | null;
+    allTags?: Tag[];
 }>();
 
 // Content availability checks
@@ -67,6 +68,7 @@ const postsListSpacingClass = computed(() => (hasLandingContent.value ? 'mt-6' :
             <BlogPostsList
                 id="posts-list"
                 :activeTag="activeTag"
+                :allTags="allTags"
                 :blogId="blog.id"
                 :blogSlug="blog.slug"
                 :class="postsListSpacingClass"

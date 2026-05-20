@@ -9,7 +9,7 @@ import PostExternalLinks from '@/components/blog/PostExternalLinks.vue';
 import PostHeader from '@/components/blog/PostHeader.vue';
 import PostRelatedPosts from '@/components/blog/PostRelatedPosts.vue';
 import type { Pagination, SEO } from '@/types';
-import type { Blog, Navigation, PostDetails, PostItem, ViewStats } from '@/types/blog.types';
+import type { Blog, Navigation, PostDetails, PostItem, Tag, ViewStats } from '@/types/blog.types';
 import { router } from '@inertiajs/vue3';
 import { ArrowLeft } from 'lucide-vue-next';
 import { computed } from 'vue';
@@ -30,6 +30,7 @@ const props = defineProps<{
         name: string;
         slug: string;
     } | null;
+    allTags?: Tag[];
 }>();
 
 const { t } = useI18n();
@@ -55,6 +56,7 @@ const postHeaderProps = computed(() => ({
 
 const blogPostsListProps = computed(() => ({
     activeTag: props.activeTag,
+    allTags: props.allTags,
     blogId: props.blog.id,
     blogSlug: props.blog.slug,
     pagination: props.pagination,

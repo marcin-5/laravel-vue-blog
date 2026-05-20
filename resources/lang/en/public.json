@@ -45,12 +45,13 @@
         "scroll_to_posts_list": "Scroll to posts list",
         "posts_list": {
             "aria": "Posts list",
-            "title": "Posts:",
+            "title": "Posts",
             "empty": "No posts yet.",
             "show_excerpts": "Show excerpts",
             "view_excerpt": "View excerpt",
             "newsletter_subscribe": "Subscribe to newsletter",
             "active_tag": "Posts tagged",
+            "all_tags": "All tags",
             "clear_filter": "Clear"
         },
         "post_nav": {
