@@ -49,7 +49,9 @@
             "empty": "Brak wpisów.",
             "show_excerpts": "Pokaż skróty",
             "view_excerpt": "Zobacz skrót",
-            "newsletter_subscribe": "Zapisz się do newslettera"
+            "newsletter_subscribe": "Zapisz się do newslettera",
+            "active_tag": "Wpisy z tagiem",
+            "clear_filter": "Wyczyść"
         },
         "post_nav": {
             "aria": "Nawigacja między postami",

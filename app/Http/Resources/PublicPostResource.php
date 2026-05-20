@@ -19,6 +19,7 @@ class PublicPostResource extends JsonResource
             'slug' => $this->slug,
             'excerpt' => app(MarkdownService::class)->convertToHtml($this->excerpt),
             'published_at' => $this->published_at?->format('Y-m-d'),
+            'tags' => TagResource::collection($this->whenLoaded('tags')),
         ];
     }
 }

@@ -27,6 +27,11 @@ const props = defineProps<{
     seo?: {
         title: string;
     };
+    activeTag?: {
+        id: number;
+        name: string;
+        slug: string;
+    } | null;
 }>();
 
 // Content availability checks
@@ -61,6 +66,7 @@ const postsListSpacingClass = computed(() => (hasLandingContent.value ? 'mt-6' :
         <template #sidebar-content>
             <BlogPostsList
                 id="posts-list"
+                :activeTag="activeTag"
                 :blogId="blog.id"
                 :blogSlug="blog.slug"
                 :class="postsListSpacingClass"

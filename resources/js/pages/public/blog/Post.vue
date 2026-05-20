@@ -25,6 +25,11 @@ const props = defineProps<{
     locale?: string;
     seo?: SEO;
     viewStats?: ViewStats | null;
+    activeTag?: {
+        id: number;
+        name: string;
+        slug: string;
+    } | null;
 }>();
 
 const { t } = useI18n();
@@ -49,6 +54,7 @@ const postHeaderProps = computed(() => ({
 }));
 
 const blogPostsListProps = computed(() => ({
+    activeTag: props.activeTag,
     blogId: props.blog.id,
     blogSlug: props.blog.slug,
     pagination: props.pagination,

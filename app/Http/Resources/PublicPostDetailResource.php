@@ -53,6 +53,7 @@ class PublicPostDetailResource extends JsonResource
                 'reason' => $el->reason,
                 'display_order' => $el->display_order,
             ]),
+            'tags' => TagResource::collection($this->whenLoaded('tags')),
         ];
     }
 }

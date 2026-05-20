@@ -32,6 +32,7 @@ export interface PostItem {
     excerpt?: string | null;
     summary?: string | null;
     published_at?: string | null;
+    tags?: Tag[];
 }
 
 export interface PostExtension {

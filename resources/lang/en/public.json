@@ -49,7 +49,9 @@
             "empty": "No posts yet.",
             "show_excerpts": "Show excerpts",
             "view_excerpt": "View excerpt",
-            "newsletter_subscribe": "Subscribe to newsletter"
+            "newsletter_subscribe": "Subscribe to newsletter",
+            "active_tag": "Posts tagged",
+            "clear_filter": "Clear"
         },
         "post_nav": {
             "aria": "Post navigation",

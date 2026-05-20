@@ -19,7 +19,7 @@ class PublicBlogPostsQuery
             config('blog.max_page_size'),
         );
 
-        $builder = $blog->posts()->forPublicListing();
+        $builder = $blog->posts()->forPublicListing()->with('tags');
 
         if ($tag !== null) {
             $builder->whereHas('tags', fn($q) => $q->whereKey($tag->id));

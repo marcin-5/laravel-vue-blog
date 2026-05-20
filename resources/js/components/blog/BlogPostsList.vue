@@ -16,6 +16,11 @@ const props = defineProps<{
     blogId: number;
     pagination?: Pagination | null;
     isGroup?: boolean;
+    activeTag?: {
+        id: number;
+        name: string;
+        slug: string;
+    } | null;
 }>();
 
 const { t } = useI18n();
@@ -63,6 +68,16 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
             </div>
         </div>
 
+        <div v-if="activeTag" class="mb-4 flex items-center gap-2">
+            <span class="text-sm text-muted-foreground">
+                {{ t('blog.posts_list.active_tag') }}:
+                <span class="font-semibold text-primary">{{ activeTag.name }}</span>
+            </span>
+            <Link :href="route('blog.public.landing', { blog: blogSlug })" class="text-xs text-link hover:underline">
+                {{ t('blog.posts_list.clear_filter') }}
+            </Link>
+        </div>
+
         <p v-if="!hasPosts">
             {{ t('blog.posts_list.empty') }}
         </p>
@@ -77,6 +92,17 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
                         <small v-if="showExcerpts && post.published_at" class="text-muted-foreground"
                             ><span class="font-black"> · </span>{{ formatDate(post.published_at) }}
                         </small>
+                    </div>
+
+                    <div v-if="post.tags && post.tags.length > 0" class="mb-1 flex flex-wrap gap-x-2 gap-y-1">
+                        <Link
+                            v-for="tag in post.tags"
+                            :key="tag.id"
+                            :href="route('blog.public.tag', { blog: blogSlug, tag: tag.slug })"
+                            class="text-xs font-medium text-muted-foreground transition-colors hover:text-link"
+                        >
+                            #{{ tag.name }}
+                        </Link>
                     </div>
 
                     <div v-if="!showExcerpts" class="flex items-center gap-2">
