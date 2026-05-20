@@ -10,7 +10,7 @@ import type { Blog, Navigation, PostItem, Tag, ViewStats } from '@/types/blog.ty
 import { handleContentClick } from '@/utils/domUtils';
 import { hasContent, selectRandomMotto } from '@/utils/stringUtils';
 import { computed } from 'vue';
-import { Pagination } from '@/types';
+import { Pagination, SEO } from '@/types';
 
 const props = defineProps<{
     blog: Blog;
@@ -20,13 +20,10 @@ const props = defineProps<{
     pagination?: Pagination | null;
     /** Numeric sidebar value (-50..50). */
     sidebar?: number;
-    metaDescription: string;
     navigation?: Navigation;
     locale?: string;
-    viewStats: ViewStats | null;
-    seo?: {
-        title: string;
-    };
+    viewStats?: ViewStats | null;
+    seo?: SEO;
     activeTag?: {
         id: number;
         name: string;
