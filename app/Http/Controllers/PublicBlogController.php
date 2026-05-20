@@ -68,7 +68,7 @@ class PublicBlogController extends BasePublicController
             'navigation' => $this->navigation->getLandingNavigation($blog),
             'seo' => $this->seoBuilder->buildLandingSeo($blog, $paginator, $metaDescription)->toArray(),
             'viewStats' => Inertia::defer(fn() => $this->getViewStats(Blog::class, $blog->id, $blog->user_id)),
-            'allTags' => TagResource::collection($blog->tags),
+            'allTags' => TagResource::collection($blog->tags->sortBy('name')->values()),
         ]);
     }
 
@@ -117,7 +117,7 @@ class PublicBlogController extends BasePublicController
             'navigation' => $this->navigation->getPostNavigation($blog, $post),
             'seo' => $this->seoBuilder->buildPostSeo($blog, $post, $metaDescription)->toArray(),
             'viewStats' => Inertia::defer(fn() => $this->getViewStats(Post::class, $post->id, $blog->user_id)),
-            'allTags' => TagResource::collection($blog->tags),
+            'allTags' => TagResource::collection($blog->tags->sortBy('name')->values()),
         ]);
     }
 
@@ -158,7 +158,7 @@ class PublicBlogController extends BasePublicController
                 'slug' => $tag->slug,
             ],
             'viewStats' => Inertia::defer(fn() => $this->getViewStats(Blog::class, $blog->id, $blog->user_id)),
-            'allTags' => TagResource::collection($blog->tags),
+            'allTags' => TagResource::collection($blog->tags->sortBy('name')->values()),
         ]);
     }
 }
