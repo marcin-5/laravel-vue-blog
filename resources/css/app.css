@@ -79,7 +79,11 @@
     --color-destructive-foreground: var(--destructive-foreground);
     --color-destructive-hover: var(--destructive-hover);
 
-    --color-error: var(--destructive-hover);
+    --color-error: var(--error);
+    --color-error-hover: var(--error-hover);
+
+    --color-success: var(--success);
+    --color-success-hover: var(--success-hover);
 
     --color-warning: var(--warning);
     --color-warning-foreground: var(--warning-foreground);
@@ -163,10 +167,14 @@
     --secondary: hsl(102 21% 68%);
     --secondary-hover: hsl(102 20% 61%);
     --secondary-foreground: hsl(102 75% 5%);
+    --error: hsl(5 75% 65%);
+    --error-hover: hsl(5 65% 50%);
+    --success: hsl(135 50% 50%);
+    --success-hover: hsl(135 65% 35%);
     --warning: #eddaaede;
     --warning-foreground: #222010;
-    --border: hsl(0 0% 92.8%);
-    --input: hsl(0 0% 89.8%);
+    --border: hsl(100 10% 80%);
+    --input: hsl(100 15% 75%);
     --ring: hsl(0 0% 3.9%);
     --chart-1: hsl(12 76% 61%);
     --chart-2: hsl(173 58% 39%);
@@ -211,10 +219,14 @@
     --secondary: hsl(102 21% 12%);
     --secondary-hover: hsl(102 20% 25%);
     --secondary-foreground: hsl(102 75% 93%);
+    --error: hsl(5 75% 65%);
+    --error-hover: hsl(5 65% 75%);
+    --success: hsl(135 50% 50%);
+    --success-hover: hsl(135 65% 65%);
     --warning: #2c3726de;
     --warning-foreground: #eede9e;
-    --border: hsl(0 0% 14.9%);
-    --input: hsl(0 0% 14.9%);
+    --border: hsl(100 10% 15%);
+    --input: hsl(100 5% 15%);
     --ring: hsl(0 0% 83.1%);
     --chart-1: hsl(220 70% 50%);
     --chart-2: hsl(160 60% 45%);
@@ -238,7 +250,7 @@
 
 @layer base {
     * {
-        @apply border-border border-gray-200 outline-ring/50;
+        @apply border-border outline-ring/50;
     }
 
     body {
