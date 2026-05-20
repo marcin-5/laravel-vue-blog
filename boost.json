@@ -23,6 +23,7 @@
         "laravel-inertia-vue",
         "laravel-performance-caching",
         "laravel-query-builders",
+        "laravel-queue-patterns",
         "laravel-routes-best-practices",
         "laravel-security",
         "laravel-tdd",
