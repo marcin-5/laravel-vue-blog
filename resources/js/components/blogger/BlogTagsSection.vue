@@ -1,6 +1,15 @@
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue';
-import PostFormField from '@/components/blogger/PostFormField.vue';
+import { onMounted, ref } from 'vue';
+import { useHttp } from '@inertiajs/vue3';
+import { Input } from '@/components/ui/input';
+import { Check, Plus, X } from 'lucide-vue-next';
+
+interface Tag {
+    id: number;
+    name: string;
+    slug: string;
+    originalName: string;
+}
 
 interface Props {
     blogId: number;
@@ -11,68 +20,64 @@ const props = withDefaults(defineProps<Props>(), {
     idPrefix: 'blog-tags',
 });
 
-const tags = ref<Array<{ id: number; name: string; slug: string }>>([]);
-const loading = ref(false);
+const tags = ref<Tag[]>([]);
 const newTagName = ref('');
-const errors = ref<Record<string, string>>({});
+const http = useHttp({
+    name: '',
+    slug: '',
+});
 
-const fieldId = computed(() => `${props.idPrefix}-new`);
+function sortTags() {
+    tags.value.sort((a, b) => a.name.localeCompare(b.name));
+}
 
 async function loadTags() {
-    loading.value = true;
     try {
-        const res = await fetch(route('blogger.tags.index', { blog: props.blogId }), {
-            headers: { Accept: 'application/json' },
-        });
-        tags.value = await res.json();
-    } finally {
-        loading.value = false;
+        const data = (await http.get(route('blogger.tags.index', { blog: props.blogId }))) as any[];
+        tags.value = data.map((tag) => ({
+            ...tag,
+            originalName: tag.name,
+        }));
+        sortTags();
+    } catch (error) {
+        console.error('Failed to load tags', error);
     }
 }
 
 async function createTag() {
-    errors.value = {};
     if (!newTagName.value.trim()) {
         return;
     }
-    const payload = { name: newTagName.value };
-    const res = await fetch(route('blogger.tags.store', { blog: props.blogId }), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-        body: JSON.stringify(payload),
-    });
-    if (res.ok) {
-        const tag = await res.json();
-        tags.value.push(tag);
+    try {
+        http.name = newTagName.value;
+        const tag = (await http.post(route('blogger.tags.store', { blog: props.blogId }))) as any;
+        tags.value.push({ ...tag, originalName: tag.name });
         newTagName.value = '';
-    } else if (res.status === 422) {
-        const data = await res.json();
-        errors.value = data.errors || {};
+        sortTags();
+    } catch {
+        // Errors are automatically handled by http.errors
     }
 }
 
-async function updateTag(idx: number, name: string) {
-    const tag = tags.value[idx];
-    if (!tag) return;
-    const res = await fetch(route('blogger.tags.update', { blog: props.blogId, tag: tag.id }), {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-        body: JSON.stringify({ name }),
-    });
-    if (res.ok) {
-        tags.value[idx] = await res.json();
+async function updateTag(tag: Tag) {
+    try {
+        http.name = tag.name;
+        const updated = (await http.patch(route('blogger.tags.update', { blog: props.blogId, tag: tag.slug }))) as any;
+        tag.originalName = updated.name;
+        tag.name = updated.name;
+        tag.slug = updated.slug;
+        sortTags();
+    } catch {
+        // Errors are automatically handled by http.errors
     }
 }
 
-async function deleteTag(idx: number) {
-    const tag = tags.value[idx];
-    if (!tag) return;
-    const res = await fetch(route('blogger.tags.destroy', { blog: props.blogId, tag: tag.id }), {
-        method: 'DELETE',
-        headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-    });
-    if (res.ok) {
-        tags.value.splice(idx, 1);
+async function deleteTag(tag: Tag) {
+    try {
+        await http.delete(route('blogger.tags.destroy', { blog: props.blogId, tag: tag.slug }));
+        tags.value = tags.value.filter((t) => t.id !== tag.id);
+    } catch (error) {
+        console.error('Failed to delete tag', error);
     }
 }
 
@@ -83,15 +88,44 @@ onMounted(loadTags);
     <div class="rounded-md border border-sidebar-border/70 p-4 dark:border-sidebar-border">
         <h3 class="mb-2 text-sm font-semibold">{{ $t('blogger.tags.section_title') }}</h3>
         <div class="mt-3 flex flex-wrap gap-2">
-            <div v-for="(tag, idx) in tags" :key="tag.id" class="flex items-center gap-1 rounded bg-muted px-2 py-1">
-                <input :value="tag.name" class="bg-transparent outline-none" @change="(e: any) => updateTag(idx, e.target.value)" />
-                <button class="text-error" type="button" @click="deleteTag(idx)">×</button>
+            <div v-for="tag in tags" :key="tag.id" class="flex items-center gap-1 rounded bg-muted px-2 py-1">
+                <Input
+                    v-model="tag.name"
+                    class="h-7 w-auto min-w-32 border-none bg-transparent px-1 shadow-none focus-visible:ring-0"
+                    @keyup.enter="tag.name !== tag.originalName && updateTag(tag)"
+                />
+                <button
+                    :class="['text-success hover:text-success-hover', tag.name === tag.originalName && 'pointer-events-none invisible']"
+                    type="button"
+                    @click="updateTag(tag)"
+                >
+                    <Check class="h-4 w-4" />
+                </button>
+                <button class="text-error hover:text-error-hover" type="button" @click="deleteTag(tag)">
+                    <X class="h-4 w-4" />
+                </button>
+            </div>
+
+            <div
+                class="flex items-center gap-1 rounded border border-dashed border-muted-foreground/30 bg-transparent px-2 py-1 focus-within:border-primary/50"
+            >
+                <Input
+                    v-model="newTagName"
+                    :placeholder="$t('blogger.tags.add_placeholder')"
+                    class="h-7 w-auto min-w-32 border-none bg-transparent px-1 shadow-none focus-visible:ring-0"
+                    @keyup.enter="createTag"
+                />
+                <button
+                    :class="['text-primary hover:text-primary/80', !newTagName.trim() && 'pointer-events-none invisible']"
+                    type="button"
+                    @click="createTag"
+                >
+                    <Plus class="h-4 w-8" />
+                </button>
             </div>
         </div>
-        <div v-if="errors.slug" class="mt-1 text-sm font-semibold text-error">{{ errors.slug }}</div>
-        <div class="mt-3 flex items-end gap-2">
-            <PostFormField :id="fieldId" v-model="newTagName" :error="errors.name" :label="$t('blogger.tags.add_label')" type="input" />
-            <button :disabled="loading" class="btn btn-secondary h-10" type="button" @click="createTag">{{ $t('blogger.tags.add_button') }}</button>
+        <div v-if="http.errors.name || http.errors.slug" class="mt-2 text-sm font-semibold text-error">
+            {{ http.errors.name || http.errors.slug }}
         </div>
     </div>
 </template>

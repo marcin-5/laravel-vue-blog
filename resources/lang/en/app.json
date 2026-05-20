@@ -381,6 +381,7 @@
         },
         "tags": {
             "section_title": "Blog tags",
+            "add_placeholder": "New tag...",
             "add_label": "Add tag",
             "add_button": "Add"
         },
