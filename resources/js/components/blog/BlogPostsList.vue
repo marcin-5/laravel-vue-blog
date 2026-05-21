@@ -3,12 +3,20 @@ import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useBlogExcerpts } from '@/composables/useBlogExcerpts';
 import type { PostItem, Tag } from '@/types/blog.types';
+import type { Pagination } from '@/types';
 import { formatDate } from '@/utils/dateUtils';
 import { Link } from '@inertiajs/vue3';
 import { Info } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Pagination } from '@/types';
+
+type ActiveTag = Pick<Tag, 'id' | 'name' | 'slug'>;
+
+type PaginationLink = {
+    active: boolean;
+    url: string | null;
+    label: string | number;
+};
 
 const props = defineProps<{
     posts: PostItem[];
@@ -16,83 +24,138 @@ const props = defineProps<{
     blogId: number;
     pagination?: Pagination | null;
     isGroup?: boolean;
-    activeTag?: {
-        id: number;
-        name: string;
-        slug: string;
-    } | null;
+    activeTag?: ActiveTag | null;
     allTags?: Tag[];
 }>();
 
 const { t } = useI18n();
 const { showExcerpts } = useBlogExcerpts(props.blogSlug);
 
-const postUrlRoute = computed(() => (props.isGroup ? 'group.post' : 'blog.public.post'));
-const postUrlParams = (post: PostItem) =>
-    props.isGroup ? { group: props.blogSlug, postSlug: post.slug } : { blog: props.blogSlug, postSlug: post.slug };
+const POST_ROUTE_NAMES = {
+    group: 'group.post',
+    blog: 'blog.public.post',
+} as const;
 
-const paginationLabelsMap: Record<string, string> = {
+const ROUTE_NAMES = {
+    blogLanding: 'blog.public.landing',
+    blogTag: 'blog.public.tag',
+    newsletter: 'newsletter.index',
+} as const;
+
+const PAGINATION_LABEL_TRANSLATIONS: Record<string, string> = {
     previous: 'blog.pagination.previous',
     next: 'blog.pagination.next',
 };
 
-function translatePaginationLabel(rawLabel: string): string {
-    const cleaned = rawLabel.replace(/[«»]|&[lr]aquo;/g, '').trim();
-    return paginationLabelsMap[cleaned.toLowerCase()] ? t(paginationLabelsMap[cleaned.toLowerCase()]) : cleaned;
-}
+const PAGINATION_DECORATION_PATTERN = /[«»]|&[lr]aquo;/g;
 
+const sectionStyle = {
+    fontFamily: 'var(--blog-body-font)',
+    fontSize: 'calc(1rem * var(--blog-body-scale))',
+};
+
+const headerStyle = {
+    fontFamily: 'var(--blog-header-font)',
+};
+
+const excerptStyle = {
+    fontFamily: 'var(--blog-excerpt-font)',
+    fontSize: 'calc(1rem * var(--blog-excerpt-scale))',
+    fontWeight: 'var(--blog-excerpt-weight)',
+};
+
+const navigationStyle = {
+    fontFamily: 'var(--blog-nav-font)',
+};
+
+const tagLinkBaseClasses = 'rounded-full border px-2 py-0.5 text-xs font-medium transition-colors';
+const activeTagLinkClasses = 'border-link bg-link/10 text-link';
+const inactiveTagLinkClasses = 'border-border bg-card text-muted-foreground hover:border-link hover:text-link';
+
+const paginationBaseClasses = 'rounded border px-2 py-1 text-sm text-primary transition-colors';
+const activePaginationClasses = 'border-foreground bg-background';
+const inactivePaginationClasses = 'border-border bg-card';
+const enabledPaginationClasses = 'hover:bg-secondary';
+const disabledPaginationClasses = 'pointer-events-none opacity-50';
+
+const postRouteName = computed(() => (props.isGroup ? POST_ROUTE_NAMES.group : POST_ROUTE_NAMES.blog));
 const paginationLinks = computed(() => props.pagination?.links ?? []);
 const hasPosts = computed(() => props.posts.length > 0);
 const hasPagination = computed(() => paginationLinks.value.length > 0);
+const hasTags = computed(() => Boolean(props.allTags?.length));
+const postsListTitle = computed(() => (!props.activeTag ? t('blog.posts_list.title') : t('blog.posts_list.active_tag')));
 
-function getPaginationLinkClasses(link: { active: boolean; url: string | null }) {
+function getPostRouteParams(post: PostItem) {
+    return props.isGroup ? { group: props.blogSlug, postSlug: post.slug } : { blog: props.blogSlug, postSlug: post.slug };
+}
+
+function getPostHref(post: PostItem): string {
+    return route(postRouteName.value, getPostRouteParams(post));
+}
+
+function getBlogLandingHref(): string {
+    return route(ROUTE_NAMES.blogLanding, { blog: props.blogSlug });
+}
+
+function getTagHref(tag: Tag): string {
+    return route(ROUTE_NAMES.blogTag, { blog: props.blogSlug, tag: tag.slug });
+}
+
+function getNewsletterHref(): string {
+    return route(ROUTE_NAMES.newsletter, { blog_id: props.blogId });
+}
+
+function getTagLinkClasses(tag: Tag) {
+    return [tagLinkBaseClasses, props.activeTag?.id === tag.id ? activeTagLinkClasses : inactiveTagLinkClasses];
+}
+
+function getPostTagLinkClasses(tag: Tag) {
+    return ['text-xs font-medium transition-colors hover:text-link', tag.id === props.activeTag?.id ? 'text-link-hover' : 'text-muted-foreground'];
+}
+
+function translatePaginationLabel(rawLabel: string): string {
+    const cleanedLabel = rawLabel.replace(PAGINATION_DECORATION_PATTERN, '').trim();
+    const translationKey = PAGINATION_LABEL_TRANSLATIONS[cleanedLabel.toLowerCase()];
+
+    return translationKey ? t(translationKey) : cleanedLabel;
+}
+
+function getPaginationLinkClasses(link: PaginationLink) {
     return [
-        'rounded border px-2 py-1 text-sm text-primary transition-colors',
-        link.active ? 'border-foreground bg-background' : 'border-border bg-card',
-        link.url ? 'hover:bg-secondary' : 'pointer-events-none opacity-50',
+        paginationBaseClasses,
+        link.active ? activePaginationClasses : inactivePaginationClasses,
+        link.url ? enabledPaginationClasses : disabledPaginationClasses,
     ];
 }
 </script>
 
 <template>
-    <section
-        :aria-label="t('blog.posts_list.aria')"
-        :style="{ fontFamily: 'var(--blog-body-font)', fontSize: 'calc(1rem * var(--blog-body-scale))' }"
-    >
+    <section :aria-label="t('blog.posts_list.aria')" :style="sectionStyle">
         <div class="mb-4 flex items-center justify-between gap-4">
-            <h2 :style="{ fontFamily: 'var(--blog-header-font)' }" class="text-xl font-semibold text-primary opacity-90">
-                {{ !activeTag ? t('blog.posts_list.title') : t('blog.posts_list.active_tag') }}:
+            <h2 :style="headerStyle" class="text-xl font-semibold text-primary opacity-90">
+                {{ postsListTitle }}:
                 <span v-if="activeTag" class="font-semibold text-primary-foreground">{{ activeTag.name }}</span>
             </h2>
+
             <div class="flex items-center gap-2">
                 <span class="text-sm text-muted-foreground">{{ t('blog.posts_list.show_excerpts') }}</span>
                 <Switch v-model="showExcerpts" />
             </div>
         </div>
 
-        <div v-if="allTags && allTags.length > 0" class="mb-4">
+        <div v-if="hasTags" class="mb-4">
             <div v-if="activeTag" class="mb-2 flex items-center gap-2">
-                <Link :href="route('blog.public.landing', { blog: blogSlug })" class="text-xs text-link hover:underline">
+                <Link :href="getBlogLandingHref()" class="text-xs text-link hover:underline">
                     {{ t('blog.posts_list.clear_filter') }}
                 </Link>
             </div>
+
             <h3 v-else class="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                 {{ t('blog.posts_list.all_tags') }}
             </h3>
+
             <div class="flex flex-wrap gap-2">
-                <Link
-                    v-for="tag in allTags"
-                    :key="tag.id"
-                    :class="[
-                        'rounded-full border px-2 py-0.5 text-xs font-medium transition-colors',
-                        activeTag?.id === tag.id
-                            ? 'border-link bg-link/10 text-link'
-                            : 'border-border bg-card text-muted-foreground hover:border-link hover:text-link',
-                    ]"
-                    :href="route('blog.public.tag', { blog: blogSlug, tag: tag.slug })"
-                >
-                    #{{ tag.name }}
-                </Link>
+                <Link v-for="tag in allTags" :key="tag.id" :class="getTagLinkClasses(tag)" :href="getTagHref(tag)"> #{{ tag.name }} </Link>
             </div>
         </div>
 
@@ -104,24 +167,17 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
             <li v-for="post in posts" :key="post.id">
                 <div class="flex flex-col">
                     <div class="inline">
-                        <Link :href="route(postUrlRoute, postUrlParams(post))" class="font-semibold text-link hover:text-link-hover hover:underline">
+                        <Link :href="getPostHref(post)" class="font-semibold text-link hover:text-link-hover hover:underline">
                             {{ post.title }}
                         </Link>
-                        <small v-if="showExcerpts && post.published_at" class="text-muted-foreground"
-                            ><span class="font-black"> · </span>{{ formatDate(post.published_at) }}
+
+                        <small v-if="showExcerpts && post.published_at" class="text-muted-foreground">
+                            <span class="font-black"> · </span>{{ formatDate(post.published_at) }}
                         </small>
                     </div>
 
                     <div v-if="post.tags && post.tags.length > 0" class="mb-1 flex flex-wrap gap-x-2 gap-y-1">
-                        <Link
-                            v-for="tag in post.tags"
-                            :key="tag.id"
-                            :class="[
-                                'text-xs font-medium transition-colors hover:text-link',
-                                tag.id === activeTag?.id ? 'text-link-hover' : 'text-muted-foreground',
-                            ]"
-                            :href="route('blog.public.tag', { blog: blogSlug, tag: tag.slug })"
-                        >
+                        <Link v-for="tag in post.tags" :key="tag.id" :class="getPostTagLinkClasses(tag)" :href="getTagHref(tag)">
                             #{{ tag.name }}
                         </Link>
                     </div>
@@ -130,6 +186,7 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
                         <small v-if="post.published_at" class="text-muted-foreground">
                             {{ formatDate(post.published_at) }}
                         </small>
+
                         <TooltipProvider v-if="post.excerpt">
                             <Tooltip>
                                 <TooltipTrigger as-child>
@@ -140,6 +197,7 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
                                         <Info class="size-4" />
                                     </button>
                                 </TooltipTrigger>
+
                                 <TooltipContent class="max-w-md bg-secondary p-3">
                                     <div class="prose prose-sm prose-invert -my-5" v-html="post.excerpt" />
                                 </TooltipContent>
@@ -149,11 +207,7 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
 
                     <div
                         v-if="showExcerpts && post.excerpt"
-                        :style="{
-                            fontFamily: 'var(--blog-excerpt-font)',
-                            fontSize: 'calc(1rem * var(--blog-excerpt-scale))',
-                            fontWeight: 'var(--blog-excerpt-weight)',
-                        }"
+                        :style="excerptStyle"
                         class="my-1 max-w-none text-secondary-foreground opacity-90"
                         v-html="post.excerpt"
                     />
@@ -161,19 +215,13 @@ function getPaginationLinkClasses(link: { active: boolean; url: string | null })
             </li>
         </ul>
 
-        <!-- Newsletter link -->
         <div v-if="!isGroup" class="mt-4 flex">
-            <Link :href="route('newsletter.index', { blog_id: blogId })" class="text-sm font-medium text-link-hover hover:text-primary">
+            <Link :href="getNewsletterHref()" class="text-sm font-medium text-link-hover hover:text-primary">
                 {{ t('blog.posts_list.newsletter_subscribe') }}
             </Link>
         </div>
 
-        <nav
-            v-if="hasPagination"
-            :aria-label="t('blog.pagination.aria')"
-            :style="{ fontFamily: 'var(--blog-nav-font)' }"
-            class="mt-4 flex items-center gap-1"
-        >
+        <nav v-if="hasPagination" :aria-label="t('blog.pagination.aria')" :style="navigationStyle" class="mt-4 flex items-center gap-1">
             <Link
                 v-for="(link, index) in paginationLinks"
                 :key="index"
