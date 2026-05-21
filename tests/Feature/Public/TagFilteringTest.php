@@ -33,7 +33,8 @@ it('lists only posts assigned to the given tag within the blog', function () {
             ->etc(),
         )
         ->has('posts', 2)
-        ->has('pagination'),
+        ->has('pagination')
+        ->where('seo.canonicalUrl', config('app.url') . "/$blog->slug/tags/$tag->slug"),
     );
 });
 

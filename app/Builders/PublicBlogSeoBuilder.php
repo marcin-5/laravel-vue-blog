@@ -5,6 +5,7 @@ namespace App\Builders;
 use App\DataTransferObjects\SeoData;
 use App\Models\Blog;
 use App\Models\Post;
+use App\Models\Tag;
 use App\Services\SeoService;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -17,16 +18,30 @@ readonly class PublicBlogSeoBuilder
     /**
      * Build SEO data for the blog landing page.
      */
-    public function buildLandingSeo(Blog $blog, LengthAwarePaginator $paginator, string $metaDescription): SeoData
-    {
+    public function buildLandingSeo(
+        Blog $blog,
+        LengthAwarePaginator $paginator,
+        string $metaDescription,
+        ?Tag $tag = null,
+    ): SeoData {
         $seoTitle = $blog->seo_title ?: ($blog->name . ' - ' . config('app.name'));
+
+        if ($tag) {
+            $seoTitle = $tag->name . ' - ' . $blog->name;
+        }
+
         $baseUrl = config('app.url');
         $locale = app()->getLocale();
+
+        $canonicalUrl = $baseUrl . '/' . $blog->slug;
+        if ($tag) {
+            $canonicalUrl .= '/tags/' . $tag->slug;
+        }
 
         return new SeoData(
             title: $seoTitle,
             description: $metaDescription,
-            canonicalUrl: $baseUrl . '/' . $blog->slug,
+            canonicalUrl: $canonicalUrl,
             ogImage: $baseUrl . '/' . ($locale === 'pl' ? 'pl' : 'en') . '/og-image.png',
             ogType: 'blog',
             locale: $locale,

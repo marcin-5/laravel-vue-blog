@@ -158,3 +158,33 @@ it('uses seo_title for post when available and falls back to title', function ()
             ->where('seo.title', 'Original Title - ' . $blog->name),
         );
 });
+
+it('ensures pagination on post page points to blog landing page', function () {
+    $owner = User::factory()->create();
+    $blog = Blog::factory()->for($owner)->create([
+        'is_published' => true,
+        'page_size' => 5,
+    ]);
+
+    // Create 6 posts to trigger pagination (page 1 will have 5 posts, page 2 will have 1 post)
+    Post::factory()->count(6)->for($blog)->create([
+        'is_published' => true,
+        'published_at' => now()->subDay(),
+        'visibility' => Post::VIS_PUBLIC,
+    ]);
+
+    $post = $blog->posts()->first();
+
+    $response = $this->get("/{$blog->slug}/{$post->slug}");
+
+    $response->assertSuccessful();
+
+    $response->assertInertia(fn(Assert $page) => $page
+        ->where('pagination.nextUrl', function ($url) use ($blog, $post) {
+            // CURRENTLY: it probably contains the post slug.
+            // WE WANT: /blog-slug?page=2, NOT /blog-slug/post-slug?page=2
+            $expected = '/' . $blog->slug . '?page=2';
+            return str_contains($url, $expected) && !str_contains($url, "/{$blog->slug}/{$post->slug}");
+        })
+    );
+});

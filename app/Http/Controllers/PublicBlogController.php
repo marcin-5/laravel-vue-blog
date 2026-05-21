@@ -104,6 +104,8 @@ class PublicBlogController extends BasePublicController
             ->firstOrFail();
 
         $paginator = $query->handle($blog);
+        $paginator->setPath(route('blog.public.landing', ['blog' => $blog->slug]));
+
         $metaDescription = $post->excerpt ?: $this->seo->generateMetaDescription($post->content_html);
 
         return $this->renderWithTranslations('public/blog/Post', 'post', [
@@ -151,7 +153,7 @@ class PublicBlogController extends BasePublicController
             'sidebar' => (int) ($blog->sidebar ?? 0),
             'sidebarPosition' => $blog->sidebar_position,
             'navigation' => $this->navigation->getLandingNavigation($blog),
-            'seo' => $this->seoBuilder->buildLandingSeo($blog, $paginator, $metaDescription)->toArray(),
+            'seo' => $this->seoBuilder->buildLandingSeo($blog, $paginator, $metaDescription, $tag)->toArray(),
             'activeTag' => [
                 'id' => $tag->id,
                 'name' => $tag->name,
