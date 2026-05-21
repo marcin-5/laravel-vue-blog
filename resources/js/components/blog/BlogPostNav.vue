@@ -6,6 +6,16 @@ import clsx from 'clsx';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+type PostNavDirection = 'previous' | 'next';
+
+interface PostNavItem {
+    direction: PostNavDirection;
+    post?: NavPost | null;
+    labelKey: string;
+    arrow: string;
+    contentAlignmentClass: string;
+}
+
 const props = defineProps<{
     navigation?: Navigation;
 }>();
@@ -13,34 +23,64 @@ const props = defineProps<{
 const { t } = useI18n();
 
 const LINK_STYLES = {
-    base: 'inline-flex items-center rounded-sm px-3 py-2 text-sm transition-colors bg-card',
+    base: 'inline-flex items-center rounded-sm px-3 py-2 text-xs md:text-sm transition-colors bg-card',
     active: 'border border-border text-primary hover:bg-secondary',
     inactive: 'border border-border text-primary opacity-50 cursor-default',
 } as const;
 
-const buildLinkClasses = (isActive: boolean, ...extra: string[]) =>
-    clsx(LINK_STYLES.base, ...extra, isActive ? LINK_STYLES.active : LINK_STYLES.inactive);
+const BREADCRUMB_CLASSES = {
+    base: 'hover:underline',
+    active: 'text-breadcrumb-link-active',
+    inactive: 'text-breadcrumb-link',
+} as const;
 
-const getNavLinkClasses = (post: NavPost | null | undefined) => buildLinkClasses(!!post, 'gap-2');
+const POST_NAV_CONFIG = {
+    previous: {
+        labelKey: 'blog.post_nav.previous',
+        arrow: '←',
+        contentAlignmentClass: 'items-start',
+    },
+    next: {
+        labelKey: 'blog.post_nav.next',
+        arrow: '→',
+        contentAlignmentClass: 'items-end',
+    },
+} as const satisfies Record<PostNavDirection, Omit<PostNavItem, 'direction' | 'post'>>;
 
-const getBackLinkClasses = (isClickable: boolean) => buildLinkClasses(isClickable, 'font-medium');
+const getLinkStateClasses = (isClickable: boolean, ...extraClasses: string[]) =>
+    clsx(LINK_STYLES.base, ...extraClasses, isClickable ? LINK_STYLES.active : LINK_STYLES.inactive);
 
-// Breadcrumb helpers
+const getPostNavLinkClasses = (post?: NavPost | null) => getLinkStateClasses(!!post, 'gap-2');
+
+const getBackLinkClasses = (isClickable: boolean) => getLinkStateClasses(isClickable, 'font-medium');
+
 const breadcrumbs = computed(() => props.navigation?.breadcrumbs ?? []);
 const breadcrumbCount = computed(() => breadcrumbs.value.length);
 
 const isLastBreadcrumb = (index: number) => index === breadcrumbCount.value - 1;
+
 const isBreadcrumbLink = (index: number, url?: string | null) => !isLastBreadcrumb(index) && !!url;
+
 const getBreadcrumbClasses = (index: number) =>
-    clsx('hover:underline', isLastBreadcrumb(index) ? 'text-breadcrumb-link-active' : 'text-breadcrumb-link');
+    clsx(BREADCRUMB_CLASSES.base, isLastBreadcrumb(index) ? BREADCRUMB_CLASSES.active : BREADCRUMB_CLASSES.inactive);
+
+const createPostNavItem = (direction: PostNavDirection, post?: NavPost | null): PostNavItem => ({
+    direction,
+    post,
+    ...POST_NAV_CONFIG[direction],
+});
+
+const previousPostNavItem = computed(() => createPostNavItem('previous', props.navigation?.prevPost));
+const nextPostNavItem = computed(() => createPostNavItem('next', props.navigation?.nextPost));
+
+const backLinkLabel = computed(() => t(props.navigation?.isGroup ? 'blog.post_nav.back_to_group' : 'blog.post_nav.back_to_blog'));
 </script>
 
 <template>
     <nav v-if="navigation" :aria-label="t('blog.post_nav.aria')" :style="{ fontFamily: 'var(--blog-nav-font)' }">
         <BorderDivider class="my-4 pt-2" />
 
-        <!-- Breadcrumbs -->
-        <ol v-if="breadcrumbs.length" aria-label="Breadcrumb" class="flex flex-wrap items-center gap-1 text-sm">
+        <ol v-if="breadcrumbs.length" aria-label="Breadcrumb" class="flex flex-wrap items-center gap-1 text-xs md:text-sm">
             <li v-for="(crumb, index) in breadcrumbs" :key="index" class="flex items-center font-semibold">
                 <component
                     :is="isBreadcrumbLink(index, crumb.url) ? Link : 'span'"
@@ -50,6 +90,7 @@ const getBreadcrumbClasses = (index: number) =>
                 >
                     {{ crumb.label }}
                 </component>
+
                 <span v-if="!isLastBreadcrumb(index)" class="mx-2 text-breadcrumb-link opacity-60"> / </span>
             </li>
         </ol>
@@ -57,33 +98,42 @@ const getBreadcrumbClasses = (index: number) =>
         <BorderDivider class="mt-2 mb-4 pt-2" />
 
         <div class="flex items-center justify-between gap-4">
-            <!-- Previous Post Link -->
-            <component :is="navigation.prevPost ? Link : 'span'" :class="getNavLinkClasses(navigation.prevPost)" :href="navigation.prevPost?.url">
-                <span class="text-lg">←</span>
-                <div v-if="navigation.prevPost" class="flex flex-col items-start">
-                    <span class="text-xs opacity-75">{{ t('blog.post_nav.previous') }}</span>
-                    <span class="font-medium">{{ navigation.prevPost.title }}</span>
+            <component
+                :is="previousPostNavItem.post ? Link : 'span'"
+                :class="getPostNavLinkClasses(previousPostNavItem.post)"
+                :href="previousPostNavItem.post?.url"
+            >
+                <span class="text-lg">{{ previousPostNavItem.arrow }}</span>
+
+                <div v-if="previousPostNavItem.post" :class="previousPostNavItem.contentAlignmentClass" class="flex flex-col">
+                    <span class="text-xs opacity-75">{{ t(previousPostNavItem.labelKey) }}</span>
+                    <span class="font-medium">{{ previousPostNavItem.post.title }}</span>
                 </div>
-                <span v-else>{{ t('blog.post_nav.previous') }}</span>
+
+                <span v-else>{{ t(previousPostNavItem.labelKey) }}</span>
             </component>
 
-            <!-- Back to Blog Link -->
             <component
                 :is="navigation.isLandingPage ? 'span' : Link"
                 :class="getBackLinkClasses(!navigation.isLandingPage)"
                 :href="navigation.isLandingPage ? undefined : navigation.landingUrl"
             >
-                {{ t(navigation.isGroup ? 'blog.post_nav.back_to_group' : 'blog.post_nav.back_to_blog') }}
+                {{ backLinkLabel }}
             </component>
 
-            <!-- Next Post Link -->
-            <component :is="navigation.nextPost ? Link : 'span'" :class="getNavLinkClasses(navigation.nextPost)" :href="navigation.nextPost?.url">
-                <div v-if="navigation.nextPost" class="flex flex-col items-end">
-                    <span class="text-xs opacity-90">{{ t('blog.post_nav.next') }}</span>
-                    <span class="font-medium">{{ navigation.nextPost.title }}</span>
+            <component
+                :is="nextPostNavItem.post ? Link : 'span'"
+                :class="getPostNavLinkClasses(nextPostNavItem.post)"
+                :href="nextPostNavItem.post?.url"
+            >
+                <div v-if="nextPostNavItem.post" :class="nextPostNavItem.contentAlignmentClass" class="flex flex-col">
+                    <span class="text-xs opacity-90">{{ t(nextPostNavItem.labelKey) }}</span>
+                    <span class="font-medium">{{ nextPostNavItem.post.title }}</span>
                 </div>
-                <span v-else>{{ t('blog.post_nav.next') }}</span>
-                <span class="text-lg">→</span>
+
+                <span v-else>{{ t(nextPostNavItem.labelKey) }}</span>
+
+                <span class="text-lg">{{ nextPostNavItem.arrow }}</span>
             </component>
         </div>
     </nav>
