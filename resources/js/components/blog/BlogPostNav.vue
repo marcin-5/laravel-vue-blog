@@ -23,13 +23,13 @@ const props = defineProps<{
 
 const { t } = useI18n();
 
-const LINK_STYLES = {
+const NAV_LINK_CLASSES = {
     base: 'inline-flex items-center rounded-sm px-3 py-2 text-xs md:text-sm transition-colors bg-card',
     active: 'border border-border text-primary hover:bg-secondary',
     inactive: 'border border-border text-primary opacity-50 cursor-default',
 } as const;
 
-const POST_NAV_CONFIG = {
+const POST_NAV_ITEM_CONFIG = {
     previous: {
         labelKey: 'blog.post_nav.previous',
         arrow: '←',
@@ -43,22 +43,27 @@ const POST_NAV_CONFIG = {
 } as const satisfies Record<PostNavDirection, Omit<PostNavItem, 'direction' | 'post'>>;
 
 const getLinkStateClasses = (isClickable: boolean, ...extraClasses: string[]) =>
-    clsx(LINK_STYLES.base, ...extraClasses, isClickable ? LINK_STYLES.active : LINK_STYLES.inactive);
+    clsx(NAV_LINK_CLASSES.base, ...extraClasses, isClickable ? NAV_LINK_CLASSES.active : NAV_LINK_CLASSES.inactive);
 
 const getPostNavLinkClasses = (post?: NavPost | null) => getLinkStateClasses(!!post, 'gap-2');
 
 const getBackLinkClasses = (isClickable: boolean) => getLinkStateClasses(isClickable, 'font-medium');
 
+const getPostNavLabelClass = (direction: PostNavDirection) => clsx('text-xs', direction === 'previous' ? 'opacity-75' : 'opacity-90');
+
 const breadcrumbs = computed(() => props.navigation?.breadcrumbs ?? []);
 
-const createPostNavItem = (direction: PostNavDirection, post?: NavPost | null): PostNavItem => ({
+const getPostNavPost = (direction: PostNavDirection) => (direction === 'previous' ? props.navigation?.prevPost : props.navigation?.nextPost);
+
+const createPostNavItem = (direction: PostNavDirection): PostNavItem => ({
     direction,
-    post,
-    ...POST_NAV_CONFIG[direction],
+    post: getPostNavPost(direction),
+    ...POST_NAV_ITEM_CONFIG[direction],
 });
 
-const previousPostNavItem = computed(() => createPostNavItem('previous', props.navigation?.prevPost));
-const nextPostNavItem = computed(() => createPostNavItem('next', props.navigation?.nextPost));
+const postNavItems = computed(() => [createPostNavItem('previous'), createPostNavItem('next')]);
+
+const getPostNavComponent = (post?: NavPost | null) => (post ? Link : 'span');
 
 const backLinkLabel = computed(() => t(props.navigation?.isGroup ? 'blog.post_nav.back_to_group' : 'blog.post_nav.back_to_blog'));
 </script>
@@ -66,26 +71,22 @@ const backLinkLabel = computed(() => t(props.navigation?.isGroup ? 'blog.post_na
 <template>
     <nav v-if="navigation" :aria-label="t('blog.post_nav.aria')" :style="{ fontFamily: 'var(--blog-nav-font)' }">
         <BorderDivider class="my-4 pt-2" />
-
         <BlogBreadcrumbs :breadcrumbs="breadcrumbs" />
-
         <BorderDivider class="mt-2 mb-4 pt-2" />
 
         <!-- Desktop Navigation -->
         <div class="hidden items-center justify-between gap-4 md:flex">
             <component
-                :is="previousPostNavItem.post ? Link : 'span'"
-                :class="getPostNavLinkClasses(previousPostNavItem.post)"
-                :href="previousPostNavItem.post?.url"
+                :is="getPostNavComponent(postNavItems[0].post)"
+                :class="getPostNavLinkClasses(postNavItems[0].post)"
+                :href="postNavItems[0].post?.url"
             >
-                <span class="text-lg">{{ previousPostNavItem.arrow }}</span>
-
-                <div v-if="previousPostNavItem.post" :class="previousPostNavItem.contentAlignmentClass" class="flex flex-col">
-                    <span class="text-xs opacity-75">{{ t(previousPostNavItem.labelKey) }}</span>
-                    <span class="font-medium">{{ previousPostNavItem.post.title }}</span>
+                <span class="text-lg">{{ postNavItems[0].arrow }}</span>
+                <div v-if="postNavItems[0].post" :class="postNavItems[0].contentAlignmentClass" class="flex flex-col">
+                    <span :class="getPostNavLabelClass(postNavItems[0].direction)">{{ t(postNavItems[0].labelKey) }}</span>
+                    <span class="font-medium">{{ postNavItems[0].post.title }}</span>
                 </div>
-
-                <span v-else>{{ t(previousPostNavItem.labelKey) }}</span>
+                <span v-else>{{ t(postNavItems[0].labelKey) }}</span>
             </component>
 
             <component
@@ -97,18 +98,16 @@ const backLinkLabel = computed(() => t(props.navigation?.isGroup ? 'blog.post_na
             </component>
 
             <component
-                :is="nextPostNavItem.post ? Link : 'span'"
-                :class="getPostNavLinkClasses(nextPostNavItem.post)"
-                :href="nextPostNavItem.post?.url"
+                :is="getPostNavComponent(postNavItems[1].post)"
+                :class="getPostNavLinkClasses(postNavItems[1].post)"
+                :href="postNavItems[1].post?.url"
             >
-                <div v-if="nextPostNavItem.post" :class="nextPostNavItem.contentAlignmentClass" class="flex flex-col">
-                    <span class="text-xs opacity-90">{{ t(nextPostNavItem.labelKey) }}</span>
-                    <span class="font-medium">{{ nextPostNavItem.post.title }}</span>
+                <div v-if="postNavItems[1].post" :class="postNavItems[1].contentAlignmentClass" class="flex flex-col">
+                    <span :class="getPostNavLabelClass(postNavItems[1].direction)">{{ t(postNavItems[1].labelKey) }}</span>
+                    <span class="font-medium">{{ postNavItems[1].post.title }}</span>
                 </div>
-
-                <span v-else>{{ t(nextPostNavItem.labelKey) }}</span>
-
-                <span class="text-lg">{{ nextPostNavItem.arrow }}</span>
+                <span v-else>{{ t(postNavItems[1].labelKey) }}</span>
+                <span class="text-lg">{{ postNavItems[1].arrow }}</span>
             </component>
         </div>
 
