@@ -144,18 +144,11 @@ function getPaginationLinkClasses(link: PaginationLink) {
         </div>
 
         <div v-if="hasTags" class="mb-4">
-            <div v-if="activeTag" class="mb-2 flex items-center gap-2">
-                <Link :href="getBlogLandingHref()" class="text-xs text-link hover:underline">
-                    {{ t('blog.posts_list.clear_filter') }}
-                </Link>
-            </div>
-
-            <h3 v-else class="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-                {{ t('blog.posts_list.all_tags') }}
-            </h3>
-
             <div class="flex flex-wrap gap-2">
                 <Link v-for="tag in allTags" :key="tag.id" :class="getTagLinkClasses(tag)" :href="getTagHref(tag)"> #{{ tag.name }} </Link>
+                <Link v-if="activeTag" :class="[tagLinkBaseClasses, 'border-link bg-link-hover/10 text-link-hover']" :href="getBlogLandingHref()">
+                    {{ t('blog.posts_list.clear_filter') }}
+                </Link>
             </div>
         </div>
 
