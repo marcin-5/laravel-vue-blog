@@ -94,11 +94,13 @@ function getPostHref(post: PostItem): string {
 }
 
 function getBlogLandingHref(): string {
-    return route(ROUTE_NAMES.blogLanding, { blog: props.blogSlug });
+    const anchor = props.isGroup ? '#group-posts-list' : '#posts-list';
+    return `${route(ROUTE_NAMES.blogLanding, { blog: props.blogSlug })}${anchor}`;
 }
 
 function getTagHref(tag: Tag): string {
-    return route(ROUTE_NAMES.blogTag, { blog: props.blogSlug, tag: tag.slug });
+    const anchor = props.isGroup ? '#group-posts-list' : '#posts-list';
+    return `${route(ROUTE_NAMES.blogTag, { blog: props.blogSlug, tag: tag.slug })}${anchor}`;
 }
 
 function getNewsletterHref(): string {
@@ -130,7 +132,7 @@ function getPaginationLinkClasses(link: PaginationLink) {
 </script>
 
 <template>
-    <section :aria-label="t('blog.posts_list.aria')" :style="sectionStyle">
+    <section :id="props.isGroup ? 'group-posts-list' : 'posts-list'" :aria-label="t('blog.posts_list.aria')" :style="sectionStyle">
         <div class="mb-4 flex items-center justify-between gap-4">
             <h2 :style="headerStyle" class="text-xl font-semibold text-primary opacity-90">
                 {{ postsListTitle }}:
@@ -145,8 +147,15 @@ function getPaginationLinkClasses(link: PaginationLink) {
 
         <div v-if="hasTags" class="mb-4">
             <div class="flex flex-wrap gap-2">
-                <Link v-for="tag in allTags" :key="tag.id" :class="getTagLinkClasses(tag)" :href="getTagHref(tag)"> #{{ tag.name }} </Link>
-                <Link v-if="activeTag" :class="[tagLinkBaseClasses, 'border-link bg-link-hover/10 text-link-hover']" :href="getBlogLandingHref()">
+                <Link v-for="tag in allTags" :key="tag.id" :class="getTagLinkClasses(tag)" :href="getTagHref(tag)" preserve-scroll>
+                    #{{ tag.name }}
+                </Link>
+                <Link
+                    v-if="activeTag"
+                    :class="[tagLinkBaseClasses, 'border-link bg-link-hover/10 text-link-hover']"
+                    :href="getBlogLandingHref()"
+                    preserve-scroll
+                >
                     {{ t('blog.posts_list.clear_filter') }}
                 </Link>
             </div>
@@ -170,7 +179,7 @@ function getPaginationLinkClasses(link: PaginationLink) {
                     </div>
 
                     <div v-if="post.tags && post.tags.length > 0" class="mb-1 flex flex-wrap gap-x-2 gap-y-1">
-                        <Link v-for="tag in post.tags" :key="tag.id" :class="getPostTagLinkClasses(tag)" :href="getTagHref(tag)">
+                        <Link v-for="tag in post.tags" :key="tag.id" :class="getPostTagLinkClasses(tag)" :href="getTagHref(tag)" preserve-scroll>
                             #{{ tag.name }}
                         </Link>
                     </div>
