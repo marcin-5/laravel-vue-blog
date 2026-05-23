@@ -139,7 +139,7 @@ DOCKER_COMPOSE_PROD = docker compose --env-file .env -p $(DOCKER_PROJECT_NAME_PR
 .PHONY: prod-up prod-down prod-restart prod-build prod-logs \
         prod-migrate prod-optimize prod-deploy prod-update prod-wait \
         prod-maintenance-on prod-maintenance-off prod-rebuild-pg-redis \
-        prod-versions prod-check-assets prod-logs-queue prod-logs-app \
+        prod-prune prod-versions prod-check-assets prod-logs-queue prod-logs-app \
         prod-health-queue prod-queue-diag prod-indexnow
 
 prod-up: ## Start production services
@@ -400,6 +400,12 @@ prod-rebuild-pg-redis: ## Recreate postgres and redis services with zero-502 mai
 	sleep 5
 	@echo "✅ Postgres and Redis have been recreated. Disabling maintenance mode..."
 	$(MAKE) prod-maintenance-off
+
+prod-prune: ## 🧹 Safe Docker cleanup (removes unused images/cache but keeps stopped containers)
+	@echo "Cleaning up unused Docker resources (images, networks, and build cache)..."
+	docker image prune -a -f
+	docker builder prune -f
+	docker network prune -f
 
 # =============================
 # Production maintenance helpers
