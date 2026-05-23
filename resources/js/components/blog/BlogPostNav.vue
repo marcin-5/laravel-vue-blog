@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import BlogBreadcrumbs from '@/components/blog/BlogBreadcrumbs.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import type { Navigation, NavPost } from '@/types/blog.types';
 import { Link } from '@inertiajs/vue3';
@@ -28,12 +29,6 @@ const LINK_STYLES = {
     inactive: 'border border-border text-primary opacity-50 cursor-default',
 } as const;
 
-const BREADCRUMB_CLASSES = {
-    base: 'hover:underline',
-    active: 'text-breadcrumb-link-active',
-    inactive: 'text-breadcrumb-link',
-} as const;
-
 const POST_NAV_CONFIG = {
     previous: {
         labelKey: 'blog.post_nav.previous',
@@ -55,14 +50,6 @@ const getPostNavLinkClasses = (post?: NavPost | null) => getLinkStateClasses(!!p
 const getBackLinkClasses = (isClickable: boolean) => getLinkStateClasses(isClickable, 'font-medium');
 
 const breadcrumbs = computed(() => props.navigation?.breadcrumbs ?? []);
-const breadcrumbCount = computed(() => breadcrumbs.value.length);
-
-const isLastBreadcrumb = (index: number) => index === breadcrumbCount.value - 1;
-
-const isBreadcrumbLink = (index: number, url?: string | null) => !isLastBreadcrumb(index) && !!url;
-
-const getBreadcrumbClasses = (index: number) =>
-    clsx(BREADCRUMB_CLASSES.base, isLastBreadcrumb(index) ? BREADCRUMB_CLASSES.active : BREADCRUMB_CLASSES.inactive);
 
 const createPostNavItem = (direction: PostNavDirection, post?: NavPost | null): PostNavItem => ({
     direction,
@@ -80,20 +67,7 @@ const backLinkLabel = computed(() => t(props.navigation?.isGroup ? 'blog.post_na
     <nav v-if="navigation" :aria-label="t('blog.post_nav.aria')" :style="{ fontFamily: 'var(--blog-nav-font)' }">
         <BorderDivider class="my-4 pt-2" />
 
-        <ol v-if="breadcrumbs.length" aria-label="Breadcrumb" class="flex flex-wrap items-center gap-1 text-xs md:text-sm">
-            <li v-for="(crumb, index) in breadcrumbs" :key="index" class="flex items-center font-semibold">
-                <component
-                    :is="isBreadcrumbLink(index, crumb.url) ? Link : 'span'"
-                    :aria-current="isLastBreadcrumb(index) ? 'page' : undefined"
-                    :class="getBreadcrumbClasses(index)"
-                    :href="isBreadcrumbLink(index, crumb.url) ? crumb.url : undefined"
-                >
-                    {{ crumb.label }}
-                </component>
-
-                <span v-if="!isLastBreadcrumb(index)" class="mx-2 text-breadcrumb-link opacity-60"> / </span>
-            </li>
-        </ol>
+        <BlogBreadcrumbs :breadcrumbs="breadcrumbs" />
 
         <BorderDivider class="mt-2 mb-4 pt-2" />
 
