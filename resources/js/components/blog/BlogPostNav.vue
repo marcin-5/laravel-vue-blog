@@ -71,7 +71,8 @@ const backLinkLabel = computed(() => t(props.navigation?.isGroup ? 'blog.post_na
 
         <BorderDivider class="mt-2 mb-4 pt-2" />
 
-        <div class="flex items-center justify-between gap-4">
+        <!-- Desktop Navigation -->
+        <div class="hidden items-center justify-between gap-4 md:flex">
             <component
                 :is="previousPostNavItem.post ? Link : 'span'"
                 :class="getPostNavLinkClasses(previousPostNavItem.post)"
@@ -109,6 +110,35 @@ const backLinkLabel = computed(() => t(props.navigation?.isGroup ? 'blog.post_na
 
                 <span class="text-lg">{{ nextPostNavItem.arrow }}</span>
             </component>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div class="md:hidden">
+            <div class="flex flex-col gap-4 text-sm">
+                <div v-if="navigation.prevPost" class="flex flex-col">
+                    <span class="mb-1 text-xs opacity-70">← {{ t('blog.post_nav.previous') }}</span>
+                    <Link :href="navigation.prevPost.url" class="font-medium text-primary hover:underline">
+                        {{ navigation.prevPost.title }}
+                    </Link>
+                </div>
+
+                <div v-if="navigation.nextPost" class="flex flex-col">
+                    <span class="mb-1 text-xs opacity-70">{{ t('blog.post_nav.next') }} →</span>
+                    <Link :href="navigation.nextPost.url" class="font-medium text-primary hover:underline">
+                        {{ navigation.nextPost.title }}
+                    </Link>
+                </div>
+
+                <div class="mt-2">
+                    <component
+                        :is="navigation.isLandingPage ? 'span' : Link"
+                        :href="navigation.isLandingPage ? undefined : navigation.landingUrl"
+                        class="text-xs font-semibold tracking-wider uppercase opacity-60 transition-opacity hover:opacity-100"
+                    >
+                        {{ backLinkLabel }}
+                    </component>
+                </div>
+            </div>
         </div>
     </nav>
 </template>
