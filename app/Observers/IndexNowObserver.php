@@ -30,20 +30,26 @@ class IndexNowObserver
         );
 
         if ($shouldSubmit) {
-            IndexNowQueuedUrl::updateOrCreate(['url' => $url]);
+            $relevantAttributes = $model instanceof Post
+                ? ['title', 'seo_title', 'slug', 'excerpt', 'summary', 'content', 'is_published', 'visibility']
+                : ['name', 'seo_title', 'slug', 'description', 'motto', 'footer', 'is_published', 'visibility'];
 
-            if ($model->wasChanged('slug')) {
-                $oldUrl = $this->getOldUrl($model);
-                if ($oldUrl) {
-                    IndexNowQueuedUrl::updateOrCreate(['url' => $oldUrl]);
+            if ($model->wasRecentlyCreated || $model->wasChanged($relevantAttributes)) {
+                IndexNowQueuedUrl::updateOrCreate(['url' => $url]);
+
+                if ($model->wasChanged('slug')) {
+                    $oldUrl = $this->getOldUrl($model);
+                    if ($oldUrl) {
+                        IndexNowQueuedUrl::updateOrCreate(['url' => $oldUrl]);
+                    }
+
+                    if ($model instanceof Blog) {
+                        $this->queuePostsForBlog($model);
+                    }
                 }
 
-                if ($model instanceof Blog) {
-                    $this->queuePostsForBlog($model);
-                }
+                $this->scheduleJob();
             }
-
-            $this->scheduleJob();
         } else {
             IndexNowQueuedUrl::where('url', $url)->delete();
         }
