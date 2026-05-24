@@ -1,6 +1,6 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { MarkdownPreviewSection } from './useMarkdownPreviewSection';
+import type { MarkdownPreviewSection } from './useMarkdownPreview';
 
 export function useBloggerFormTranslations() {
     const { t } = useI18n();

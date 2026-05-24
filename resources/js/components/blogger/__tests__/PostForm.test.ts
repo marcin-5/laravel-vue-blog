@@ -282,6 +282,7 @@ describe('PostForm.vue', () => {
             togglePreview: togglePreviewMock,
             toggleFullPreview: vi.fn(),
             setLayout: vi.fn(),
+            renderMarkdown: vi.fn(),
         });
 
         const wrapper = mount(PostForm);
@@ -305,6 +306,7 @@ describe('PostForm.vue', () => {
             togglePreview: vi.fn(),
             toggleFullPreview: toggleFullPreviewMock,
             setLayout: vi.fn(),
+            renderMarkdown: vi.fn(),
         });
 
         const wrapper = mount(PostForm);

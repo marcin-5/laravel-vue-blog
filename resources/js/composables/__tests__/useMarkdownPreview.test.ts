@@ -114,4 +114,22 @@ describe('useMarkdownPreview', () => {
 
         expect((global as any).route).toHaveBeenCalledWith('custom.route');
     });
+
+    it('handleInput renders markdown after debounce', async () => {
+        postMock.mockResolvedValueOnce({ html: '<p>Debounced</p>' });
+
+        const { previewHtml, handleInput } = useMarkdownPreview();
+        await handleInput('# Debounced');
+
+        expect(previewHtml.value).toBe('<p>Debounced</p>');
+    });
+
+    it('handleInput clears previewHtml when content is empty', async () => {
+        const { previewHtml, handleInput } = useMarkdownPreview();
+
+        previewHtml.value = 'existing html';
+        await handleInput('');
+
+        expect(previewHtml.value).toBe('');
+    });
 });

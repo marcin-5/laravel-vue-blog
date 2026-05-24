@@ -1,9 +1,25 @@
 import { useHttp } from '@inertiajs/vue3';
+import { useDebounceFn } from '@vueuse/core';
 import { ref, type Ref } from 'vue';
 
-type PreviewLayout = 'horizontal' | 'vertical';
+export type PreviewLayout = 'horizontal' | 'vertical';
 
-export function useMarkdownPreview(routeName: string = 'markdown.preview') {
+export interface MarkdownPreviewSection {
+    isPreviewMode: Ref<boolean>;
+    isFullPreview: Ref<boolean>;
+    previewLayout: Ref<PreviewLayout>;
+    previewHtml: Ref<string>;
+    togglePreview: (content: string) => void;
+    toggleFullPreview: (content: string) => void;
+    setLayout: (layout: PreviewLayout) => void;
+    handleInput: (content: string) => void;
+    renderMarkdown: (content: string) => Promise<void>;
+}
+
+export function useMarkdownPreview(
+    routeName: string = 'markdown.preview',
+    debounceMs: number = 300,
+): MarkdownPreviewSection {
     const isPreviewMode = ref(false);
     const isFullPreview = ref(false);
     const previewLayout = ref<PreviewLayout>('vertical');
@@ -42,6 +58,10 @@ export function useMarkdownPreview(routeName: string = 'markdown.preview') {
         }
     }
 
+    const handleInput = useDebounceFn((content: string) => {
+        void renderMarkdown(content);
+    }, debounceMs);
+
     async function toggleModeAndRender(mode: Ref<boolean>, content: string) {
         mode.value = !mode.value;
         if (mode.value) {
@@ -70,5 +90,6 @@ export function useMarkdownPreview(routeName: string = 'markdown.preview') {
         togglePreview,
         toggleFullPreview,
         setLayout,
+        handleInput,
     };
 }
