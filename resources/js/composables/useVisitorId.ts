@@ -14,13 +14,13 @@ function getCookie(name: string): string | null {
     return null;
 }
 
+const LOCAL_STORAGE_KEY = 'visitor_id';
+
 /**
  * Initializes and maintains the visitor_id in localStorage and ensures it's sent to the server.
  */
 export function initializeVisitorId() {
     if (typeof window === 'undefined') return;
-
-    const LOCAL_STORAGE_KEY = 'visitor_id';
 
     const syncVisitorId = () => {
         let visitorId = localStorage.getItem(LOCAL_STORAGE_KEY);
