@@ -1,20 +1,7 @@
+import { type MarkdownPreviewSection, type PreviewLayout } from '@/types/blog.types';
 import { useHttp } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
 import { ref, type Ref } from 'vue';
-
-export type PreviewLayout = 'horizontal' | 'vertical';
-
-export interface MarkdownPreviewSection {
-    isPreviewMode: Ref<boolean>;
-    isFullPreview: Ref<boolean>;
-    previewLayout: Ref<PreviewLayout>;
-    previewHtml: Ref<string>;
-    togglePreview: (content: string) => void;
-    toggleFullPreview: (content: string) => void;
-    setLayout: (layout: PreviewLayout) => void;
-    handleInput: (content: string) => void;
-    renderMarkdown: (content: string) => Promise<void>;
-}
 
 export function useMarkdownPreview(
     routeName: string = 'markdown.preview',

@@ -1,4 +1,5 @@
-import { useMarkdownPreview, type MarkdownPreviewSection } from '@/composables/useMarkdownPreview';
+import { useMarkdownPreview } from '@/composables/useMarkdownPreview';
+import type { MarkdownPreviewSection } from '@/types/blog.types';
 
 export type { MarkdownPreviewSection };
 

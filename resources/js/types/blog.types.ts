@@ -2,6 +2,7 @@
 
 // Public blog types (from resources/js/types/blog.ts)
 import { useForm } from '@inertiajs/vue3';
+import type { Ref } from 'vue';
 
 export type BlogTheme = {
     light?: Record<string, string>;
@@ -243,6 +244,20 @@ export interface ManageableItem {
 }
 
 // ===== Blog form/composable shared types =====
+export type PreviewLayout = 'horizontal' | 'vertical';
+
+export interface MarkdownPreviewSection {
+    isPreviewMode: Ref<boolean>;
+    isFullPreview: Ref<boolean>;
+    previewLayout: Ref<PreviewLayout>;
+    previewHtml: Ref<string>;
+    togglePreview: (content: string) => void;
+    toggleFullPreview: (content: string) => void;
+    setLayout: (layout: PreviewLayout) => void;
+    handleInput: (content: string) => void;
+    renderMarkdown: (content: string) => Promise<void>;
+}
+
 export interface PostFormData {
     blog_id: number;
     title: string;
@@ -295,4 +310,10 @@ export interface UseBlogFormLogicOptions {
     blog?: AdminBlog;
     isEdit?: boolean;
     externalForm?: InertiaForm<BlogFormData>;
+}
+
+export interface UseGroupFormLogicOptions {
+    group?: AdminGroup;
+    isEdit?: boolean;
+    externalForm?: InertiaForm<GroupFormData>;
 }

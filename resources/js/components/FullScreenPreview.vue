@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { type PreviewLayout } from '@/types/blog.types';
 import MarkdownPreview from '@/components/MarkdownPreview.vue';
 import PostFormField from '@/components/blogger/PostFormField.vue';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,7 @@ import { computed } from 'vue';
 interface Props {
     content: string;
     previewHtml: string;
-    previewLayout: 'horizontal' | 'vertical';
+    previewLayout: PreviewLayout;
     saveButtonLabel: string;
     createButtonLabel?: string;
     cancelButtonLabel: string;
@@ -32,7 +33,7 @@ interface Emits {
     (e: 'save'): void;
     (e: 'cancel'): void;
     (e: 'exit'): void;
-    (e: 'layout', value: 'horizontal' | 'vertical'): void;
+    (e: 'layout', value: PreviewLayout): void;
 }
 
 const props = defineProps<Props>();

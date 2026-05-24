@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { type PreviewLayout } from '@/types/blog.types';
 import FullScreenPreview from '@/components/FullScreenPreview.vue';
 import PostFormField from '@/components/blogger/PostFormField.vue';
 import MarkdownPreview from '@/components/MarkdownPreview.vue';
@@ -28,7 +29,7 @@ interface Props {
     placeholder?: string;
     isPreviewMode: boolean;
     isFullPreview: boolean;
-    previewLayout: 'horizontal' | 'vertical';
+    previewLayout: PreviewLayout;
     previewHtml: string;
     rows?: number;
     minHeight?: string;
@@ -46,7 +47,7 @@ interface Emits {
     (e: 'submit'): void;
     (e: 'togglePreview', content: string): void;
     (e: 'toggleFullPreview', content?: string): void;
-    (e: 'setLayout', layout: 'horizontal' | 'vertical'): void;
+    (e: 'setLayout', layout: PreviewLayout): void;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -89,7 +90,7 @@ function handleLayoutToggle() {
             @cancel="emit('cancel')"
             @exit="emit('toggleFullPreview')"
             @input="emit('input')"
-            @layout="(layout: 'horizontal' | 'vertical') => emit('setLayout', layout)"
+            @layout="(layout: PreviewLayout) => emit('setLayout', layout)"
             @save="emit('submit')"
             @update:content="(value: string) => emit('update:modelValue', value)"
         />
