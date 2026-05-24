@@ -48,12 +48,15 @@ const textClass = computed(() => (props.isPublic ? 'text-primary' : 'text-foregr
 
                 <slot name="middle-divider"></slot>
 
+                <slot name="breadcrumbs"></slot>
+
                 <slot name="sidebar-content"></slot>
             </div>
 
             <!-- Desktop sidebar layout (xl+) -->
             <div v-if="hasSidebar" class="hidden items-start gap-8 xl:flex">
                 <aside :class="asideOrderClass" :style="asideStyle">
+                    <slot name="breadcrumbs"></slot>
                     <slot name="sidebar-content"></slot>
                 </aside>
 

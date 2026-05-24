@@ -1,12 +1,11 @@
 <script lang="ts" setup>
-import BlogBreadcrumbs from '@/components/blog/BlogBreadcrumbs.vue';
-import BorderDivider from '@/components/blog/BorderDivider.vue';
 import type { Navigation, NavPost } from '@/types/blog.types';
 import { Link } from '@inertiajs/vue3';
 import clsx from 'clsx';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { HomeIcon } from '@heroicons/vue/24/outline';
+import BorderDivider from '@/components/blog/BorderDivider.vue';
 
 type PostNavDirection = 'previous' | 'next';
 
@@ -52,8 +51,6 @@ const getBackLinkClasses = (isClickable: boolean) => getLinkStateClasses(isClick
 
 const getPostNavLabelClass = (direction: PostNavDirection) => clsx('text-xs', direction === 'previous' ? 'opacity-75' : 'opacity-90');
 
-const breadcrumbs = computed(() => props.navigation?.breadcrumbs ?? []);
-
 const getPostNavPost = (direction: PostNavDirection) => (direction === 'previous' ? props.navigation?.prevPost : props.navigation?.nextPost);
 
 const createPostNavItem = (direction: PostNavDirection): PostNavItem => ({
@@ -72,8 +69,6 @@ const backLinkLabel = computed(() => t(props.navigation?.isGroup ? 'blog.post_na
 <template>
     <nav v-if="navigation" :aria-label="t('blog.post_nav.aria')" :style="{ fontFamily: 'var(--blog-nav-font)' }">
         <BorderDivider class="my-4 pt-2" />
-        <BlogBreadcrumbs :breadcrumbs="breadcrumbs" />
-        <BorderDivider class="mt-2 mb-4 pt-2" />
 
         <!-- Desktop Navigation -->
         <div class="hidden items-center justify-between gap-4 md:flex">

@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import BlogBreadcrumbs from '@/components/blog/BlogBreadcrumbs.vue';
 import BlogLayout from '@/components/blog/BlogLayout.vue';
 import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
@@ -46,6 +47,10 @@ defineProps<{
 
         <template #middle-divider>
             <BorderDivider class="mt-12 mb-4" />
+        </template>
+
+        <template #breadcrumbs>
+            <BlogBreadcrumbs :breadcrumbs="navigation?.breadcrumbs ?? []" />
         </template>
 
         <template #sidebar-content>

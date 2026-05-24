@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import BlogBreadcrumbs from '@/components/blog/BlogBreadcrumbs.vue';
 import BlogFooter from '@/components/blog/BlogFooter.vue';
 import BlogLayout from '@/components/blog/BlogLayout.vue';
 import BlogPostNav from '@/components/blog/BlogPostNav.vue';
@@ -71,6 +72,10 @@ const postsListTitle = computed(() => t('blog.posts_list.title'));
 
         <template #middle-divider>
             <BorderDivider class="my-4" />
+        </template>
+
+        <template #breadcrumbs>
+            <BlogBreadcrumbs :breadcrumbs="navigation?.breadcrumbs ?? []" />
         </template>
 
         <template #sidebar-content>

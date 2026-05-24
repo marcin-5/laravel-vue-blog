@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import BlogBreadcrumbs from '@/components/blog/BlogBreadcrumbs.vue';
 import BlogFooter from '@/components/blog/BlogFooter.vue';
 import BlogHeader from '@/components/blog/BlogHeader.vue';
 import BlogLayout from '@/components/blog/BlogLayout.vue';
@@ -59,6 +60,10 @@ const postsListSpacingClass = computed(() => (hasLandingContent.value ? 'mt-6' :
 
         <template #middle-divider>
             <BorderDivider v-if="!sidebar" class="my-4" />
+        </template>
+
+        <template #breadcrumbs>
+            <BlogBreadcrumbs :breadcrumbs="navigation?.breadcrumbs ?? []" />
         </template>
 
         <template #sidebar-content>
