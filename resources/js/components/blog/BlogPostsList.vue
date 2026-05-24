@@ -6,7 +6,7 @@ import type { PostItem, Tag } from '@/types/blog.types';
 import type { Pagination } from '@/types';
 import { formatDate } from '@/utils/dateUtils';
 import { Link } from '@inertiajs/vue3';
-import { Info } from 'lucide-vue-next';
+import { Info, Mail } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -217,13 +217,12 @@ function getPaginationLinkClasses(link: PaginationLink) {
             </li>
         </ul>
 
-        <div v-if="!isGroup" class="mt-4 flex">
-            <Link :href="getNewsletterHref()" class="text-sm font-medium text-link-hover hover:text-primary">
-                {{ t('blog.posts_list.newsletter_subscribe') }}
-            </Link>
-        </div>
-
-        <nav v-if="hasPagination" :aria-label="t('blog.pagination.aria')" :style="navigationStyle" class="mt-4 flex items-center gap-1">
+        <nav
+            v-if="hasPagination"
+            :aria-label="t('blog.pagination.aria')"
+            :style="navigationStyle"
+            class="mt-4 flex items-center justify-center gap-1"
+        >
             <Link
                 v-for="(link, index) in paginationLinks"
                 :key="index"
@@ -234,5 +233,12 @@ function getPaginationLinkClasses(link: PaginationLink) {
                 {{ translatePaginationLabel(String(link.label)) }}
             </Link>
         </nav>
+
+        <div v-if="!isGroup" class="mt-4">
+            <Link :href="getNewsletterHref()" class="inline-flex items-center gap-1.5 text-sm font-medium text-link-hover hover:text-primary">
+                <Mail class="h-4 w-4 shrink-0" />
+                <span>{{ t('blog.posts_list.newsletter_subscribe') }}</span>
+            </Link>
+        </div>
     </section>
 </template>
