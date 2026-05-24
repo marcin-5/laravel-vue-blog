@@ -19,7 +19,7 @@ readonly class BotDetector
             return null;
         }
 
-        $cd = new CrawlerDetect();
+        $cd = new CrawlerDetect;
         if (!$cd->isCrawler($ua)) {
             return null;
         }
@@ -48,7 +48,7 @@ readonly class BotDetector
             return false;
         }
 
-        $cd = new CrawlerDetect();
+        $cd = new CrawlerDetect;
 
         return $cd->isCrawler($ua);
     }
