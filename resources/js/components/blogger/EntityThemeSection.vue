@@ -1,18 +1,24 @@
 <script lang="ts" setup>
 import FormThemeSection from '@/components/blogger/FormThemeSection.vue';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { type ThemeTranslations } from '@/composables/useThemeSection';
 import type { BlogTheme } from '@/types/blog.types';
 import { Info } from 'lucide-vue-next';
 import { computed } from 'vue';
+
+interface EntityThemeTranslations extends ThemeTranslations {
+    title: string;
+    description: string;
+    light: string;
+    dark: string;
+    advancedHint: string;
+}
 
 interface Props {
     modelValue: BlogTheme | null | undefined;
     errors: Record<string, string>;
     idPrefix: string;
-    translations: {
-        section: any; // themeSectionTranslations
-        theme: any; // themeTranslations
-    };
+    translations: EntityThemeTranslations;
 }
 
 const props = defineProps<Props>();
@@ -57,16 +63,16 @@ const themeDarkErrors = computed(() => filterErrorsByPrefix(props.errors, 'theme
 <template>
     <div class="mt-4 rounded-md border border-border p-4">
         <div class="mb-3 flex items-center gap-2">
-            <h3 class="text-lg font-semibold">{{ translations.section.title }}</h3>
+            <h3 class="text-lg font-semibold">{{ translations.title }}</h3>
             <TooltipProvider>
                 <Tooltip :delay-duration="0">
                     <TooltipTrigger as-child>
-                        <button class="flex items-center justify-center text-muted-foreground hover:text-foreground">
+                        <button class="flex items-center justify-center text-muted-foreground hover:text-foreground" type="button">
                             <Info class="h-4 w-4" />
                         </button>
                     </TooltipTrigger>
                     <TooltipContent class="max-w-xs" side="top">
-                        <p class="text-sm">{{ translations.section.description }}</p>
+                        <p class="text-sm">{{ translations.description }}</p>
                     </TooltipContent>
                 </Tooltip>
             </TooltipProvider>
@@ -76,19 +82,19 @@ const themeDarkErrors = computed(() => filterErrorsByPrefix(props.errors, 'theme
                 v-model:colors="themeLight"
                 :errors="themeLightErrors"
                 :id-prefix="`${idPrefix}-theme-light`"
-                :title="translations.section.light"
-                :translations="translations.theme"
+                :title="translations.light"
+                :translations="translations"
             />
             <FormThemeSection
                 v-model:colors="themeDark"
                 :errors="themeDarkErrors"
                 :id-prefix="`${idPrefix}-theme-dark`"
-                :title="translations.section.dark"
-                :translations="translations.theme"
+                :title="translations.dark"
+                :translations="translations"
             />
         </div>
         <div class="mt-2 text-xs text-muted-foreground">
-            {{ translations.section.advancedHint }}
+            {{ translations.advancedHint }}
         </div>
     </div>
 </template>

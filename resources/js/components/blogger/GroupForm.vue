@@ -13,7 +13,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
-const { actionTranslations, themeSectionTranslations, themeTranslations, createMarkdownTranslations } = useBloggerFormTranslations();
+const { actionTranslations, themeSectionTranslations, createMarkdownTranslations } = useBloggerFormTranslations();
 
 interface Props {
     group?: Group;
@@ -112,10 +112,7 @@ function handleCancel() {
                 v-model="form.theme"
                 :errors="form.errors"
                 :id-prefix="fieldIdPrefix"
-                :translations="{
-                    section: themeSectionTranslations,
-                    theme: themeTranslations,
-                }"
+                :translations="themeSectionTranslations"
             />
 
             <FormSubmitActions
