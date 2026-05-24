@@ -420,11 +420,7 @@ const getThresholdClass = computed(() => (value: string | null, threshold1: numb
                     @update-item="updateExternalLink"
                 />
 
-                <PostTagsSelector
-                    v-model="form.tags"
-                    :blog-id="props.post?.blog_id || form.blog_id"
-                    :id-prefix="fieldIdPrefix"
-                />
+                <PostTagsSelector v-model="form.tags" :blog-id="props.post?.blog_id || form.blog_id" :id-prefix="fieldIdPrefix" />
             </template>
 
             <FormSubmitActions
