@@ -1,68 +1,30 @@
-import type { AdminPostItem as PostItem } from '@/types/blog.types';
-import { useForm } from '@inertiajs/vue3';
+import type { UsePostFormLogicOptions } from '@/types/blog.types';
 import { computed, watch } from 'vue';
-
-interface PostFormData {
-    blog_id: number;
-    title: string;
-    excerpt: string;
-    content: string;
-    is_published: boolean;
-    visibility: string;
-    [key: string]: any; // Index signature for Inertia form compatibility
-}
-
-interface UsePostFormLogicOptions {
-    post?: PostItem;
-    blogId?: number;
-    isEdit?: boolean;
-    externalForm?: any;
-}
+import { createFormDataFromPost, populateFormFromPost } from './blogFormUtils';
+import { useEntityFormLogic } from './useEntityFormLogic';
 
 export function usePostFormLogic(options: UsePostFormLogicOptions = {}) {
-    const { post, blogId, isEdit = false, externalForm } = options;
+    const { isEdit = false, externalForm } = options;
 
-    const form =
-        externalForm ||
-        useForm<PostFormData>({
-            blog_id: blogId ?? post?.blog_id ?? 0,
-            title: post?.title ?? '',
-            excerpt: post?.excerpt ?? '',
-            summary: post?.summary ?? '',
-            content: post?.content ?? '',
-            is_published: post?.is_published ?? false,
-            visibility: post?.visibility ?? 'public',
-        });
-
-    const fieldIdPrefix = computed(() => {
-        const base = isEdit ? 'edit-post' : 'create-post';
-        const suffix = post?.id || blogId || 'new';
-        return `${base}-${suffix}`;
+    const { form, fieldIdPrefix: baseFieldIdPrefix } = useEntityFormLogic({
+        entity: () => options.post,
+        entityType: 'post',
+        isEdit,
+        externalForm,
+        createFormData: (entity) => createFormDataFromPost(entity, options.blogId),
+        populateForm: populateFormFromPost,
     });
 
-    const updateFormFromPost = (newPost: PostItem) => {
-        form.blog_id = newPost.blog_id;
-        form.title = newPost.title;
-        form.excerpt = newPost.excerpt ?? '';
-        form.summary = newPost.summary ?? '';
-        form.content = newPost.content ?? '';
-        form.is_published = newPost.is_published;
-        form.visibility = newPost.visibility ?? 'public';
-    };
+    const fieldIdPrefix = computed(() => {
+        if (!isEdit && !options.post && options.blogId) {
+            return `create-post-${options.blogId}`;
+        }
+        return baseFieldIdPrefix.value;
+    });
 
     if (!externalForm) {
         watch(
-            () => post,
-            (newPost) => {
-                if (newPost) {
-                    updateFormFromPost(newPost);
-                }
-            },
-            { immediate: true },
-        );
-
-        watch(
-            () => blogId,
+            () => options.blogId,
             (newBlogId) => {
                 if (newBlogId && !isEdit) {
                     form.blog_id = newBlogId;
@@ -75,6 +37,6 @@ export function usePostFormLogic(options: UsePostFormLogicOptions = {}) {
     return {
         form,
         fieldIdPrefix,
-        updateFormFromPost,
+        updateFormFromPost: (post: any) => populateFormFromPost(form, post),
     };
 }

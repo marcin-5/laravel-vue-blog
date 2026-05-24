@@ -243,6 +243,24 @@ export interface ManageableItem {
 }
 
 // ===== Blog form/composable shared types =====
+export interface PostFormData {
+    blog_id: number;
+    title: string;
+    excerpt: string;
+    summary: string;
+    content: string;
+    is_published: boolean;
+    visibility: string;
+    [key: string]: any; // Index signature for Inertia form compatibility
+}
+
+export interface UsePostFormLogicOptions {
+    post?: AdminPostItem;
+    blogId?: number;
+    isEdit?: boolean;
+    externalForm?: InertiaForm<PostFormData>;
+}
+
 export interface BlogFormData {
     name: string;
     seo_title: string | null;

@@ -1,4 +1,12 @@
-import type { AdminBlog as Blog, BlogFormData, BlogTheme, AdminGroup as Group, GroupFormData } from '@/types/blog.types';
+import type {
+    AdminBlog as Blog,
+    BlogFormData,
+    BlogTheme,
+    AdminGroup as Group,
+    GroupFormData,
+    AdminPostItem as Post,
+    PostFormData,
+} from '@/types/blog.types';
 import type { InertiaForm } from '@inertiajs/vue3';
 
 export function ensureThemeStructure(theme: BlogTheme | null | undefined): BlogTheme {
@@ -100,4 +108,42 @@ export function populateFormFromGroup(form: InertiaForm<GroupFormData>, group: G
     form.sidebar = data.sidebar;
     form.page_size = data.page_size;
     form.theme = data.theme;
+}
+
+export function createDefaultPostFormData(blogId?: number): PostFormData {
+    return {
+        blog_id: blogId ?? 0,
+        title: '',
+        excerpt: '',
+        summary: '',
+        content: '',
+        is_published: false,
+        visibility: 'public',
+    };
+}
+
+export function createFormDataFromPost(post: Post | undefined, blogId?: number): PostFormData {
+    if (!post) {
+        return createDefaultPostFormData(blogId);
+    }
+    return {
+        blog_id: post.blog_id ?? blogId ?? 0,
+        title: post.title,
+        excerpt: post.excerpt ?? '',
+        summary: post.summary ?? '',
+        content: post.content ?? '',
+        is_published: post.is_published,
+        visibility: post.visibility ?? 'public',
+    };
+}
+
+export function populateFormFromPost(form: InertiaForm<PostFormData>, post: Post): void {
+    const data = createFormDataFromPost(post);
+    form.blog_id = data.blog_id;
+    form.title = data.title;
+    form.excerpt = data.excerpt;
+    form.summary = data.summary;
+    form.content = data.content;
+    form.is_published = data.is_published;
+    form.visibility = data.visibility;
 }
