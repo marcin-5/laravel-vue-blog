@@ -71,7 +71,7 @@ const backLinkLabel = computed(() => t(props.navigation?.isGroup ? 'blog.post_na
         <BorderDivider class="my-4 pt-2" />
 
         <!-- Desktop Navigation -->
-        <div class="hidden items-center justify-between gap-4 md:flex">
+        <div class="hidden items-center justify-between gap-4 lg:flex">
             <component
                 :is="getPostNavComponent(postNavItems[0].post)"
                 :class="getPostNavLinkClasses(postNavItems[0].post)"
@@ -108,7 +108,7 @@ const backLinkLabel = computed(() => t(props.navigation?.isGroup ? 'blog.post_na
         </div>
 
         <!-- Mobile Navigation -->
-        <div class="md:hidden">
+        <div class="lg:hidden">
             <div class="flex flex-col gap-4 text-sm">
                 <div v-if="navigation.prevPost" class="flex flex-col">
                     <span class="mb-1 text-xs opacity-70">← {{ t('blog.post_nav.previous') }}</span>
