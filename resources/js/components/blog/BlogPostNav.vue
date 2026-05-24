@@ -19,6 +19,11 @@ interface PostNavItem {
 
 const props = defineProps<{
     navigation?: Navigation;
+    activeTag?: {
+        id: number;
+        name: string;
+        slug: string;
+    } | null;
 }>();
 
 const { t } = useI18n();

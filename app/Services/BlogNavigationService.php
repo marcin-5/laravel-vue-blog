@@ -7,52 +7,69 @@ namespace App\Services;
 use App\Models\Blog;
 use App\Models\Group;
 use App\Models\Post;
+use App\Models\Tag;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 
 readonly class BlogNavigationService
 {
-    public function getLandingNavigation(Blog|Group $entity): array
+    public function getLandingNavigation(Blog|Group $entity, ?Tag $tag = null): array
     {
+        $tagSuffix = $tag ? ":tag:{$tag->id}" : '';
+
         return Cache::tags(["navigation:{$entity->getMorphClass()}:$entity->id"])->remember(
-            "landing_navigation:{$entity->getMorphClass()}:$entity->id",
+            "landing_navigation:{$entity->getMorphClass()}:$entity->id$tagSuffix",
             now()->addMinutes(30),
-            fn() => $this->buildLandingNavigation($entity),
+            fn() => $this->buildLandingNavigation($entity, $tag),
         );
     }
 
-    private function buildLandingNavigation(Blog|Group $entity): array
+    private function buildLandingNavigation(Blog|Group $entity, ?Tag $tag = null): array
     {
         $query = $entity instanceof Blog
             ? $entity->posts()->forPublicListing()
             : $entity->posts()->forGroupView();
 
+        if ($tag) {
+            $query->whereHas('tags', fn(Builder $q) => $q->where('tags.id', $tag->id));
+        }
+
         $latestPost = $query->select(['id', 'title', 'slug'])->first();
 
         return [
             'prevPost' => null,
-            'nextPost' => $latestPost ? $this->formatPostLink($entity, $latestPost) : null,
-            'landingUrl' => $this->getLandingUrl($entity),
+            'nextPost' => $latestPost ? $this->formatPostLink($entity, $latestPost, $tag) : null,
+            'landingUrl' => $this->getLandingUrl($entity, $tag),
             'isLandingPage' => true,
             'isGroup' => $entity instanceof Group,
             'breadcrumbs' => $this->buildBreadcrumbs($entity),
         ];
     }
 
-    private function formatPostLink(Blog|Group $entity, Post $post): array
+    private function formatPostLink(Blog|Group $entity, Post $post, ?Tag $tag = null): array
     {
         $routeName = $entity instanceof Blog ? 'blog.public.post' : 'group.post';
         $paramName = $entity instanceof Blog ? 'blog' : 'group';
 
+        $params = [$paramName => $entity->slug, 'postSlug' => $post->slug];
+
+        if ($tag) {
+            $params['tag'] = $tag->slug;
+        }
+
         return [
             'title' => $post->title,
             'slug' => $post->slug,
-            'url' => route($routeName, [$paramName => $entity->slug, 'postSlug' => $post->slug]),
+            'url' => route($routeName, $params),
         ];
     }
 
-    private function getLandingUrl(Blog|Group $entity): string
+    private function getLandingUrl(Blog|Group $entity, ?Tag $tag = null): string
     {
+        if ($tag && $entity instanceof Blog) {
+            return route('blog.public.tag', ['blog' => $entity->slug, 'tag' => $tag->slug]);
+        }
+
         $routeName = $entity instanceof Blog ? 'blog.public.landing' : 'group.landing';
         $paramName = $entity instanceof Blog ? 'blog' : 'group';
 
@@ -82,31 +99,33 @@ readonly class BlogNavigationService
         return $breadcrumbs;
     }
 
-    public function getPostNavigation(Blog|Group $entity, Post $post): array
+    public function getPostNavigation(Blog|Group $entity, Post $post, ?Tag $tag = null): array
     {
+        $tagSuffix = $tag ? ":tag:{$tag->id}" : '';
+
         return Cache::tags(["navigation:{$entity->getMorphClass()}:$entity->id"])->remember(
-            "post_navigation:{$entity->getMorphClass()}:$entity->id:$post->id",
+            "post_navigation:{$entity->getMorphClass()}:$entity->id:$post->id$tagSuffix",
             now()->addMinutes(30),
-            fn() => $this->buildPostNavigation($entity, $post),
+            fn() => $this->buildPostNavigation($entity, $post, $tag),
         );
     }
 
-    private function buildPostNavigation(Blog|Group $entity, Post $post): array
+    private function buildPostNavigation(Blog|Group $entity, Post $post, ?Tag $tag = null): array
     {
-        $prevPost = $this->getAdjacentPost($entity, $post, 'previous');
-        $nextPost = $this->getAdjacentPost($entity, $post, 'next');
+        $prevPost = $this->getAdjacentPost($entity, $post, 'previous', $tag);
+        $nextPost = $this->getAdjacentPost($entity, $post, 'next', $tag);
 
         return [
-            'prevPost' => $prevPost ? $this->formatPostLink($entity, $prevPost) : null,
-            'nextPost' => $nextPost ? $this->formatPostLink($entity, $nextPost) : null,
-            'landingUrl' => $this->getLandingUrl($entity),
+            'prevPost' => $prevPost ? $this->formatPostLink($entity, $prevPost, $tag) : null,
+            'nextPost' => $nextPost ? $this->formatPostLink($entity, $nextPost, $tag) : null,
+            'landingUrl' => $this->getLandingUrl($entity, $tag),
             'isLandingPage' => false,
             'isGroup' => $entity instanceof Group,
             'breadcrumbs' => $this->buildBreadcrumbs($entity, $post),
         ];
     }
 
-    private function getAdjacentPost(Blog|Group $entity, Post $post, string $direction): ?Post
+    private function getAdjacentPost(Blog|Group $entity, Post $post, string $direction, ?Tag $tag = null): ?Post
     {
         $compare = $direction === 'next' ? '<' : '>';
         $order = $direction === 'next' ? 'desc' : 'asc';
@@ -117,6 +136,10 @@ readonly class BlogNavigationService
             $query->public();
         } else {
             $query->regularPosts();
+        }
+
+        if ($tag) {
+            $query->whereHas('tags', fn(Builder $q) => $q->where('tags.id', $tag->id));
         }
 
         return $query

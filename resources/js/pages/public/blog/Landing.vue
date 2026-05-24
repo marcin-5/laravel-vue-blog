@@ -80,7 +80,7 @@ const postsListSpacingClass = computed(() => (hasLandingContent.value ? 'mt-6' :
         </template>
 
         <template #navigation>
-            <BlogPostNav :navigation="navigation" />
+            <BlogPostNav :activeTag="activeTag" :navigation="navigation" />
         </template>
 
         <template #footer>

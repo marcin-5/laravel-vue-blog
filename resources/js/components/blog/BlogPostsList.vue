@@ -86,7 +86,13 @@ const hasTags = computed(() => Boolean(props.allTags?.length));
 const postsListTitle = computed(() => (!props.activeTag ? t('blog.posts_list.title') : t('blog.posts_list.active_tag')));
 
 function getPostRouteParams(post: PostItem) {
-    return props.isGroup ? { group: props.blogSlug, postSlug: post.slug } : { blog: props.blogSlug, postSlug: post.slug };
+    const params: Record<string, any> = props.isGroup ? { group: props.blogSlug, postSlug: post.slug } : { blog: props.blogSlug, postSlug: post.slug };
+
+    if (props.activeTag) {
+        params.tag = props.activeTag.slug;
+    }
+
+    return params;
 }
 
 function getPostHref(post: PostItem): string {

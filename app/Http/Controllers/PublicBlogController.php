@@ -91,6 +91,11 @@ class PublicBlogController extends BasePublicController
     {
         $this->ensureBlogIsPublic($blog);
 
+        $tag = null;
+        if ($request->has('tag')) {
+            $tag = $blog->tags()->where('slug', $request->query('tag'))->first();
+        }
+
         $post = $blog
             ->posts()
             ->findBySlugForPublic($postSlug)
@@ -103,7 +108,7 @@ class PublicBlogController extends BasePublicController
             ])
             ->firstOrFail();
 
-        $paginator = $query->handle($blog);
+        $paginator = $query->handle($blog, $tag);
         $paginator->setPath(route('blog.public.landing', ['blog' => $blog->slug]));
 
         $metaDescription = $post->excerpt ?: $this->seo->generateMetaDescription($post->content_html);
@@ -116,8 +121,13 @@ class PublicBlogController extends BasePublicController
             'pagination' => $this->formatPagination($paginator),
             'sidebar' => (int) ($blog->sidebar ?? 0),
             'sidebarPosition' => $blog->sidebar_position,
-            'navigation' => $this->navigation->getPostNavigation($blog, $post),
+            'navigation' => $this->navigation->getPostNavigation($blog, $post, $tag),
             'seo' => $this->seoBuilder->buildPostSeo($blog, $post, $metaDescription)->toArray(),
+            'activeTag' => $tag ? [
+                'id' => $tag->id,
+                'name' => $tag->name,
+                'slug' => $tag->slug,
+            ] : null,
             'viewStats' => Inertia::defer(fn() => $this->getViewStats(Post::class, $post->id, $blog->user_id)),
             'allTags' => TagResource::collection($blog->tags->sortBy('name')->values()),
         ]);
@@ -152,7 +162,7 @@ class PublicBlogController extends BasePublicController
             'pagination' => $this->formatPagination($paginator),
             'sidebar' => (int) ($blog->sidebar ?? 0),
             'sidebarPosition' => $blog->sidebar_position,
-            'navigation' => $this->navigation->getLandingNavigation($blog),
+            'navigation' => $this->navigation->getLandingNavigation($blog, $tag),
             'seo' => $this->seoBuilder->buildLandingSeo($blog, $paginator, $metaDescription, $tag)->toArray(),
             'activeTag' => [
                 'id' => $tag->id,

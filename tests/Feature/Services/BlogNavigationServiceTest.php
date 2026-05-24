@@ -2,6 +2,7 @@
 
 use App\Models\Blog;
 use App\Models\Post;
+use App\Models\Tag;
 use App\Models\User;
 use App\Services\BlogNavigationService;
 
@@ -135,4 +136,26 @@ test('getPostNavigation returns null for next when at newest post', function () 
     // From post2 (oldest), next should be null
     $navigation = $this->service->getPostNavigation($this->blog, $post2);
     expect($navigation['nextPost'])->toBeNull();
+});
+
+test('getPostNavigation filters by tag when provided', function () {
+    $tag = Tag::factory()->create(['blog_id' => $this->blog->id]);
+
+    $post1 = Post::factory()->create(['blog_id' => $this->blog->id, 'published_at' => now()->subDays(1), 'is_published' => true]);
+    $post2 = Post::factory()->create(['blog_id' => $this->blog->id, 'published_at' => now()->subDays(2), 'is_published' => true]);
+    $post3 = Post::factory()->create(['blog_id' => $this->blog->id, 'published_at' => now()->subDays(3), 'is_published' => true]);
+
+    $post1->tags()->attach($tag);
+    $post3->tags()->attach($tag);
+
+    // Without tag: post1 -> next: post2
+    $navNoTag = $this->service->getPostNavigation($this->blog, $post1);
+    expect($navNoTag['nextPost']['slug'])->toBe($post2->slug);
+
+    // With tag: post1 -> next: post3 (post2 is skipped)
+    $navWithTag = $this->service->getPostNavigation($this->blog, $post1, $tag);
+    expect($navWithTag['nextPost']['slug'])->toBe($post3->slug);
+
+    // Landing URL should include tag
+    expect($navWithTag['landingUrl'])->toContain('/tags/' . $tag->slug);
 });
