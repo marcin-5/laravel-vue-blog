@@ -36,7 +36,7 @@ const mediaQuery = () => {
 };
 
 const getStoredAppearance = () => {
-    if (typeof window === 'undefined') {
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
         return null;
     }
 
@@ -59,10 +59,13 @@ export function initializeTheme() {
     updateTheme(savedAppearance || 'system');
 
     // Set up system theme change listener...
-    mediaQuery()?.addEventListener('change', handleSystemThemeChange);
+    const mq = mediaQuery();
+    mq?.addEventListener('change', handleSystemThemeChange);
+
+    return () => mq?.removeEventListener('change', handleSystemThemeChange);
 }
 
-const appearance = ref<Appearance>(typeof window !== 'undefined' ? (localStorage.getItem('appearance') as Appearance | null) || 'system' : 'system');
+const appearance = ref<Appearance>(getStoredAppearance() || 'system');
 
 export function useAppearance() {
     function updateAppearance(value: Appearance) {
