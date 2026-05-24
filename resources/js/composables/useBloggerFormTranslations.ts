@@ -1,6 +1,6 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { useMarkdownPreviewSection } from './useMarkdownPreviewSection';
+import type { MarkdownPreviewSection } from './useMarkdownPreviewSection';
 
 export function useBloggerFormTranslations() {
     const { t } = useI18n();
@@ -93,7 +93,7 @@ export function useBloggerFormTranslations() {
         footerScale: t('blogger.form.theme_footer_scale'),
     }));
 
-    function createMarkdownTranslations(previewSection: ReturnType<typeof useMarkdownPreviewSection>) {
+    function createMarkdownTranslations(previewSection: MarkdownPreviewSection) {
         return computed(() => ({
             cancel: actionTranslations.value.cancel,
             create: actionTranslations.value.create,
