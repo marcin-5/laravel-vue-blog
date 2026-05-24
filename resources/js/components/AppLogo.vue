@@ -19,7 +19,7 @@ const words = computed(() => appName.value.split(' '));
 <template>
     <h1
         :class="[
-            'font-cinzel inline-block p-2 leading-none font-black tracking-tight text-slate-800 dark:text-slate-200',
+            'inline-block p-2 font-cinzel leading-none font-black tracking-tight text-slate-800 dark:text-slate-200',
             size === 'sm' && 'text-xl sm:text-2xl',
             size === 'md' && 'text-3xl sm:text-4xl',
             size === 'lg' && 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl',
@@ -28,7 +28,7 @@ const words = computed(() => appName.value.split(' '));
         <template v-for="(word, index) in words" :key="index">
             <span
                 :class="[
-                    'font-cinzel-decorative font-[900]',
+                    'font-cinzel-decorative font-black',
                     size !== 'lg' ? 'text-[1.0em]' : index !== words.length - 1 ? 'text-[1.0em]' : 'text-[1.2em]',
                 ]"
                 >{{ word[0] }}</span
