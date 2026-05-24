@@ -1,6 +1,7 @@
+import type { AdminPostItem, ListItemEmits, ManageableItem } from '@/types/blog.types';
 import { ref } from 'vue';
 
-export function useListItemActions<T, P>(emit: any) {
+export function useListItemActions<T extends ManageableItem, P extends AdminPostItem>(emit: ListItemEmits<T, P>) {
     const isEditing = ref(false);
     const isCreatingPost = ref(false);
     const isPostsExpanded = ref(false);
@@ -40,7 +41,7 @@ export function useListItemActions<T, P>(emit: any) {
     }
 
     function handleEditPost(post: P) {
-        editingPostId.value = editingPostId.value === (post as any).id ? null : (post as any).id;
+        editingPostId.value = editingPostId.value === post.id ? null : post.id;
         emit('editPost', post);
     }
 
