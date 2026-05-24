@@ -6,6 +6,7 @@ import { Link } from '@inertiajs/vue3';
 import clsx from 'clsx';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { HomeIcon } from '@heroicons/vue/24/outline';
 
 type PostNavDirection = 'previous' | 'next';
 
@@ -128,14 +129,14 @@ const backLinkLabel = computed(() => t(props.navigation?.isGroup ? 'blog.post_na
                     </Link>
                 </div>
 
-                <div class="mt-2">
-                    <component
-                        :is="navigation.isLandingPage ? 'span' : Link"
-                        :href="navigation.isLandingPage ? undefined : navigation.landingUrl"
-                        class="text-xs font-semibold tracking-wider uppercase opacity-60 transition-opacity hover:opacity-100"
+                <div v-if="!navigation.isLandingPage">
+                    <Link
+                        :href="navigation.landingUrl"
+                        class="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wider uppercase opacity-60 transition-opacity hover:opacity-100"
                     >
-                        {{ backLinkLabel }}
-                    </component>
+                        <HomeIcon class="h-4 w-4 shrink-0" />
+                        <span>{{ backLinkLabel }}</span>
+                    </Link>
                 </div>
             </div>
         </div>
