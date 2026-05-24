@@ -4,6 +4,7 @@ import { computed, ref } from 'vue';
 
 export type DashboardView = 'admin' | 'blogger' | 'user';
 
+// Singleton state — shared across all component instances
 const currentView = ref<DashboardView | null>(null);
 
 export function useDashboardView() {

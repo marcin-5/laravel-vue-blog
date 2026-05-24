@@ -65,6 +65,7 @@ export function initializeTheme() {
     return () => mq?.removeEventListener('change', handleSystemThemeChange);
 }
 
+// Singleton state — shared across all component instances
 const appearance = ref<Appearance>(getStoredAppearance() || 'system');
 
 export function useAppearance() {
