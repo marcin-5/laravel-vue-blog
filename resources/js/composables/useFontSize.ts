@@ -1,4 +1,5 @@
-import { onMounted, ref } from 'vue';
+import { useLocalStorage } from '@vueuse/core';
+import { onMounted } from 'vue';
 
 const STORAGE_KEY = 'font-size-adjust';
 const DEFAULT_SIZE = 100;
@@ -17,30 +18,35 @@ export function initializeFontSize() {
 
     const savedSize = localStorage.getItem(STORAGE_KEY);
     if (savedSize) {
-        const parsed = parseInt(savedSize, 10);
-        if (!isNaN(parsed)) {
-            applyFontSize(parsed);
+        let sizeValue: number | null = null;
+        try {
+            const parsed = JSON.parse(savedSize);
+            if (Array.isArray(parsed) && typeof parsed[0] === 'number') {
+                sizeValue = parsed[0];
+            } else if (typeof parsed === 'number') {
+                sizeValue = parsed;
+            }
+        } catch (e) {
+            const parsed = parseInt(savedSize, 10);
+            if (!isNaN(parsed)) {
+                sizeValue = parsed;
+            }
+        }
+
+        if (sizeValue !== null) {
+            applyFontSize(sizeValue);
             return;
         }
     }
     applyFontSize(DEFAULT_SIZE);
 }
 
-const fontSize = ref([DEFAULT_SIZE]);
+// Singleton state — shared across all component instances
+const fontSize = useLocalStorage<number[]>(STORAGE_KEY, [DEFAULT_SIZE]);
 
 export function useFontSize() {
     onMounted(() => {
-        if (typeof window === 'undefined') {
-            return;
-        }
-
-        const savedSize = localStorage.getItem(STORAGE_KEY);
-        if (savedSize) {
-            const parsed = parseInt(savedSize, 10);
-            if (!isNaN(parsed)) {
-                fontSize.value = [parsed];
-            }
-        }
+        initializeFontSize();
     });
 
     function updateFontSize(newSize: number[] | undefined) {
@@ -48,7 +54,6 @@ export function useFontSize() {
             return;
         }
         fontSize.value = newSize;
-        localStorage.setItem(STORAGE_KEY, newSize[0].toString());
         applyFontSize(newSize[0]);
     }
 
