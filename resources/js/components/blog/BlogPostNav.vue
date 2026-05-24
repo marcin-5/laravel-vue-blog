@@ -72,7 +72,11 @@ const backLinkLabel = computed(() => t(props.navigation?.isGroup ? 'blog.post_na
 </script>
 
 <template>
-    <nav v-if="navigation" :aria-label="t('blog.post_nav.aria')" :style="{ fontFamily: 'var(--blog-nav-font)' }">
+    <nav
+        v-if="navigation && (navigation.nextPost || navigation.prevPost || !navigation.isLandingPage)"
+        :aria-label="t('blog.post_nav.aria')"
+        :style="{ fontFamily: 'var(--blog-nav-font)' }"
+    >
         <BorderDivider class="my-4 pt-2" />
 
         <!-- Desktop Navigation -->
