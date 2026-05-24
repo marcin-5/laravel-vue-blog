@@ -5,18 +5,16 @@ export function useCssVariables(variableNames: string[]) {
 
     const updateVariables = () => {
         const style = getComputedStyle(document.documentElement);
-        const newVariables: Record<string, string> = {};
-        variableNames.forEach((name) => {
-            newVariables[name] = style.getPropertyValue(name).trim();
-        });
-        variables.value = newVariables;
+        variables.value = Object.fromEntries(variableNames.map((name) => [name, style.getPropertyValue(name).trim()]));
     };
+
+    let observer: MutationObserver | null = null;
 
     onMounted(() => {
         updateVariables();
 
         // Monitor dark mode changes via MutationObserver on <html> class
-        const observer = new MutationObserver((mutations) => {
+        observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
                     updateVariables();
@@ -28,10 +26,10 @@ export function useCssVariables(variableNames: string[]) {
             attributes: true,
             attributeFilter: ['class'],
         });
+    });
 
-        onUnmounted(() => {
-            observer.disconnect();
-        });
+    onUnmounted(() => {
+        observer?.disconnect();
     });
 
     return {
