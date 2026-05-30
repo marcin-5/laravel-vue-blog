@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Button } from '@/components/ui/button';
 import Stage1 from './Stage1.vue';
@@ -8,12 +8,7 @@ import Summary from './components/Summary.vue';
 import en from './locales/en.json';
 import pl from './locales/pl.json';
 import '@/../css/enneagram-test.css';
-import {
-    isStage1Part1Question,
-    isStage1Part2Question,
-    isStage2Question,
-    type QuestionIdHolder
-} from './composables/shared/questionIds';
+import { isStage1Part1Question, isStage1Part2Question, isStage2Question, type QuestionIdHolder } from './composables/shared/questionIds';
 import type { CompleteStage1Results, Config, Stage2Results, TestData } from './composables/shared/types';
 
 const props = defineProps<{
@@ -45,6 +40,20 @@ type CurrentView = 'start' | 'stage1' | 'stage2' | 'summary';
 
 const currentView = ref<CurrentView>('start');
 const selectedTheme = ref('theme-light-standard');
+
+// Load theme from localStorage on mount
+onMounted(() => {
+    const savedTheme = localStorage.getItem('enneagram-test-theme');
+    if (savedTheme && themes.includes(savedTheme)) {
+        selectedTheme.value = savedTheme;
+    }
+});
+
+// Persist theme to localStorage
+watch(selectedTheme, (newTheme) => {
+    localStorage.setItem('enneagram-test-theme', newTheme);
+});
+
 const isExtended = ref(false);
 const autoConfirmSingle = ref<boolean>(props.autoConfirmSingleDefault ?? true);
 const stage1Results = ref<CompleteStage1Results | null>(null);
