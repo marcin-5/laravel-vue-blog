@@ -191,6 +191,18 @@
     color: var(--et-secondary-foreground) !important;
 }
 
+/* Select and Option overrides to avoid global colors */
+.enneagram-test-container select {
+    border-color: var(--et-border) !important;
+    background-color: var(--et-card) !important;
+    color: var(--et-foreground) !important;
+}
+
+.enneagram-test-container select option {
+    background-color: var(--et-secondary) !important;
+    color: var(--et-secondary-foreground) !important;
+}
+
 /* Button overrides to ensure they use theme colors and have correct hover states */
 .enneagram-test-container [data-slot="button"] {
     transition: all 0.2s;
