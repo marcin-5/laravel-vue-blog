@@ -43,9 +43,11 @@
         "light-standard": "Jasny (Standardowy)",
         "light-blue": "Jasny (Niebieski)",
         "light-warm": "Jasny (Ciepły)",
+        "light-pastel": "Jasny (Pastelowy)",
         "dark-standard": "Ciemny (Noc)",
         "dark-forest": "Ciemny (Las)",
-        "dark-purple": "Ciemny (Fiolet)"
+        "dark-purple": "Ciemny (Fiolet)",
+        "dark-amber": "Ciemny (Bursztyn)"
     },
     "exceptions": {
         "unresolvableTie": "Nie udało się jednoznacznie określić Twojego typu na podstawie udzielonych odpowiedzi. Może to wynikać z niejednoznacznych wyborów. Prosimy o rozpoczęcie testu od nowa."

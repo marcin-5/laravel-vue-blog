@@ -43,9 +43,11 @@
         "light-standard": "Light (Standard)",
         "light-blue": "Light (Blue)",
         "light-warm": "Light (Warm)",
+        "light-pastel": "Light (Pastel)",
         "dark-standard": "Dark (Night)",
         "dark-forest": "Dark (Forest)",
-        "dark-purple": "Dark (Purple)"
+        "dark-purple": "Dark (Purple)",
+        "dark-amber": "Dark (Amber)"
     },
     "exceptions": {
         "unresolvableTie": "It was not possible to clearly determine your type based on the answers provided. This may be due to ambiguous choices. Please restart the test."

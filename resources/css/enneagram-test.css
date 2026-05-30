@@ -65,6 +65,21 @@
     --et-border: hsl(30 20% 88%);
 }
 
+/* Pastel Dream Light */
+.theme-light-pastel {
+    --et-background: hsl(10 25% 96%);
+    --et-foreground: hsl(280 30% 20%);
+    --et-card: hsl(80 20% 97%);
+    --et-card-foreground: hsl(80 30% 25%);
+    --et-primary: hsl(205 55% 60%);
+    --et-primary-foreground: hsl(270 25% 25%);
+    --et-secondary: hsl(10 40% 92%);
+    --et-secondary-foreground: hsl(330 50% 30%);
+    --et-muted: hsl(280 15% 93%);
+    --et-muted-foreground: hsl(280 15% 50%);
+    --et-border: hsl(280 20% 88%);
+}
+
 /* DARK SCHEMES */
 
 /* Deep Night Dark */
@@ -110,6 +125,21 @@
     --et-muted: hsl(270 20% 16%);
     --et-muted-foreground: hsl(270 10% 60%);
     --et-border: hsl(270 20% 20%);
+}
+
+/* Amber Gold Dark */
+.theme-dark-amber {
+    --et-background: hsl(30 25% 7%);
+    --et-foreground: hsl(40 10% 85%);
+    --et-card: hsl(30 25% 12%);
+    --et-card-foreground: hsl(40 10% 90%);
+    --et-primary: hsl(45 70% 45%);
+    --et-primary-foreground: hsl(30 25% 5%);
+    --et-secondary: hsl(30 60% 25%);
+    --et-secondary-foreground: hsl(40 80% 90%);
+    --et-muted: hsl(21 22% 15%);
+    --et-muted-foreground: hsl(40 10% 60%);
+    --et-border: hsl(30 50% 20%);
 }
 
 /* Application of variables to elements within the test scope */
