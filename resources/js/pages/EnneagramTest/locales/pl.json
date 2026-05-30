@@ -38,6 +38,15 @@
     "max_answers": "Maksymalna liczba odpowiedzi: {maxAnswers}",
     "auto_confirm_single_label": "Automatyczne przechodzenie dalej przy pytaniach jednokrotnego wyboru",
     "auto_confirm_single_help": "Gdy w pytaniu można wybrać tylko jedną odpowiedź, zaznaczenie od razu potwierdza wybór i przechodzi do następnego pytania.",
+    "theme_selection": "Wybierz schemat kolorystyczny:",
+    "themes": {
+        "light-standard": "Jasny (Standardowy)",
+        "light-blue": "Jasny (Niebieski)",
+        "light-warm": "Jasny (Ciepły)",
+        "dark-standard": "Ciemny (Noc)",
+        "dark-forest": "Ciemny (Las)",
+        "dark-purple": "Ciemny (Fiolet)"
+    },
     "exceptions": {
         "unresolvableTie": "Nie udało się jednoznacznie określić Twojego typu na podstawie udzielonych odpowiedzi. Może to wynikać z niejednoznacznych wyborów. Prosimy o rozpoczęcie testu od nowa."
     }

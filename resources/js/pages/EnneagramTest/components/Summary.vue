@@ -3,6 +3,8 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { CompleteStage1Results, Stage2Results } from '../composables/shared/types';
 
+import { Button } from '@/components/ui/button';
+
 const props = defineProps<{
     stage1Results: CompleteStage1Results | null;
     stage2Results: Stage2Results | null;
@@ -51,7 +53,7 @@ function restart() {
 
             <div v-else class="mb-8">
                 <p class="mb-4 text-lg text-muted-foreground">{{ t('most_likely_type') }}</p>
-                <div v-if="topType" class="inline-block rounded-full bg-primary px-6 py-3 text-4xl font-black text-primary-foreground">
+                <div v-if="topType" class="inline-block rounded-full bg-primary px-6 py-3 text-4xl font-black">
                     {{ t('type_label', { type: topType.type }) }}
                 </div>
                 <div v-else class="text-xl font-bold text-red-500">{{ t('no_results') }}</div>
@@ -120,9 +122,9 @@ function restart() {
             </div>
 
             <div class="mt-8">
-                <button class="rounded bg-secondary px-6 py-2 text-secondary-foreground transition hover:opacity-90" @click="restart">
+                <Button class="px-6 py-2 transition hover:opacity-90" variant="secondary" @click="restart">
                     {{ t('restart') }}
-                </button>
+                </Button>
             </div>
         </div>
     </div>

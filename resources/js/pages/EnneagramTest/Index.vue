@@ -7,7 +7,13 @@ import Stage2 from './Stage2.vue';
 import Summary from './components/Summary.vue';
 import en from './locales/en.json';
 import pl from './locales/pl.json';
-import { isStage1Part1Question, isStage1Part2Question, isStage2Question, type QuestionIdHolder } from './composables/shared/questionIds';
+import '@/../css/enneagram-test.css';
+import {
+    isStage1Part1Question,
+    isStage1Part2Question,
+    isStage2Question,
+    type QuestionIdHolder
+} from './composables/shared/questionIds';
 import type { CompleteStage1Results, Config, Stage2Results, TestData } from './composables/shared/types';
 
 const props = defineProps<{
@@ -38,6 +44,7 @@ function toggleLanguage() {
 type CurrentView = 'start' | 'stage1' | 'stage2' | 'summary';
 
 const currentView = ref<CurrentView>('start');
+const selectedTheme = ref('theme-light-standard');
 const isExtended = ref(false);
 const autoConfirmSingle = ref<boolean>(props.autoConfirmSingleDefault ?? true);
 const stage1Results = ref<CompleteStage1Results | null>(null);
@@ -141,6 +148,8 @@ const stage2Config = computed(() => {
 
 const appDebug = computed(() => props.appDebug);
 
+const themes = ['theme-light-standard', 'theme-light-blue', 'theme-light-warm', 'theme-dark-standard', 'theme-dark-forest', 'theme-dark-purple'];
+
 function startTest(extended: boolean) {
     isExtended.value = extended;
     currentView.value = 'stage1';
@@ -162,14 +171,23 @@ function handleStage2Complete(results: Stage2Results) {
 </script>
 
 <template>
-    <div class="p-2 md:p-3 lg:p-6">
-        <div class="mx-auto mb-6 flex max-w-4xl items-center justify-end">
+    <div :class="['enneagram-test-container p-2 md:p-3 lg:p-6', selectedTheme]">
+        <div class="mx-auto mb-6 flex max-w-4xl items-center justify-between">
+            <div v-if="currentView === 'start'" class="flex items-center gap-4">
+                <span class="text-sm font-medium text-foreground">{{ t('theme_selection') }}</span>
+                <select v-model="selectedTheme" class="rounded border border-border bg-card p-1 text-sm text-foreground outline-none">
+                    <option v-for="theme in themes" :key="theme" :value="theme">
+                        {{ t(`themes.${theme.replace('theme-', '')}`) }}
+                    </option>
+                </select>
+            </div>
+            <div v-else></div>
             <Button size="sm" variant="ghost" @click="toggleLanguage">
                 {{ locale === 'pl' ? 'EN' : 'PL' }}
             </Button>
         </div>
 
-        <h1 class="mb-6 text-center font-recursive text-3xl font-bold text-secondary-foreground">{{ t('title') }}</h1>
+        <h1 class="mb-6 text-center font-recursive text-3xl font-bold">{{ t('title') }}</h1>
 
         <div v-if="currentView === 'start'" class="mx-auto max-w-4xl rounded-lg bg-card p-8 shadow-md">
             <h2 class="mb-4 font-quicksand text-xl font-semibold text-foreground">{{ t('welcome') }}</h2>

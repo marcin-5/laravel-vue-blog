@@ -1,0 +1,217 @@
+/*
+ * Enneagram Test Color Schemes
+ *
+ * This file defines CSS variables for different color schemes used in the Enneagram Test.
+ * To add a new color scheme:
+ * 1. Define a new class (e.g., .theme-custom).
+ * 2. Set the variables:
+ *    --et-background: Background of the test container
+ *    --et-foreground: Main text color
+ *    --et-card: Background of the question cards
+ *    --et-card-foreground: Text color inside cards
+ *    --et-primary: Accent color (e.g., for buttons, highlighted results)
+ *    --et-primary-foreground: Text color on primary background
+ *    --et-secondary: Secondary accent color
+ *    --et-secondary-foreground: Text color on secondary background
+ *    --et-muted: Color for disabled or less important elements
+ *    --et-muted-foreground: Text color for muted elements
+ *    --et-border: Border color
+ */
+
+/* LIGHT SCHEMES */
+
+/* Standard Light - default like appearance but isolated */
+.theme-light-standard {
+    --et-background: hsl(60 22% 99%);
+    --et-foreground: hsl(0 0% 9%);
+    --et-card: hsl(0 0% 100%);
+    --et-card-foreground: hsl(0 0% 3.9%);
+    --et-primary: hsl(100 25% 35%);
+    --et-primary-foreground: hsl(111 95% 95%);
+    --et-secondary: hsl(102 21% 68%);
+    --et-secondary-foreground: hsl(102 75% 5%);
+    --et-muted: hsl(0 0% 96.1%);
+    --et-muted-foreground: hsl(0 0% 45.1%);
+    --et-border: hsl(100 10% 80%);
+}
+
+/* Soft Blue Light */
+.theme-light-blue {
+    --et-background: hsl(210 20% 98%);
+    --et-foreground: hsl(210 40% 10%);
+    --et-card: hsl(210 20% 100%);
+    --et-card-foreground: hsl(210 40% 15%);
+    --et-primary: hsl(210 80% 40%);
+    --et-primary-foreground: hsl(210 20% 98%);
+    --et-secondary: hsl(190 70% 85%);
+    --et-secondary-foreground: hsl(190 80% 20%);
+    --et-muted: hsl(210 10% 90%);
+    --et-muted-foreground: hsl(210 10% 40%);
+    --et-border: hsl(210 20% 85%);
+}
+
+/* Warm Peach Light */
+.theme-light-warm {
+    --et-background: hsl(30 30% 98%);
+    --et-foreground: hsl(30 40% 15%);
+    --et-card: hsl(30 20% 100%);
+    --et-card-foreground: hsl(30 40% 20%);
+    --et-primary: hsl(20 70% 35%);
+    --et-primary-foreground: hsl(30 30% 98%);
+    --et-secondary: hsl(35 80% 85%);
+    --et-secondary-foreground: hsl(35 80% 20%);
+    --et-muted: hsl(30 10% 92%);
+    --et-muted-foreground: hsl(30 10% 45%);
+    --et-border: hsl(30 20% 88%);
+}
+
+/* DARK SCHEMES */
+
+/* Deep Night Dark */
+.theme-dark-standard {
+    --et-background: hsl(220 20% 10%);
+    --et-foreground: hsl(220 10% 90%);
+    --et-card: hsl(220 20% 15%);
+    --et-card-foreground: hsl(220 10% 95%);
+    --et-primary: hsl(210 70% 60%);
+    --et-primary-foreground: hsl(220 20% 10%);
+    --et-secondary: hsl(220 20% 25%);
+    --et-secondary-foreground: hsl(220 10% 90%);
+    --et-muted: hsl(220 20% 18%);
+    --et-muted-foreground: hsl(220 10% 60%);
+    --et-border: hsl(220 20% 25%);
+}
+
+/* Forest Night Dark */
+.theme-dark-forest {
+    --et-background: hsl(150 20% 8%);
+    --et-foreground: hsl(150 10% 85%);
+    --et-card: hsl(150 20% 12%);
+    --et-card-foreground: hsl(150 10% 90%);
+    --et-primary: hsl(140 30% 70%);
+    --et-primary-foreground: hsl(150 20% 8%);
+    --et-secondary: hsl(150 20% 20%);
+    --et-secondary-foreground: hsl(150 10% 85%);
+    --et-muted: hsl(150 20% 15%);
+    --et-muted-foreground: hsl(150 10% 55%);
+    --et-border: hsl(150 20% 22%);
+}
+
+/* Deep Purple Dark */
+.theme-dark-purple {
+    --et-background: hsl(270 20% 8%);
+    --et-foreground: hsl(270 10% 90%);
+    --et-card: hsl(270 20% 12%);
+    --et-card-foreground: hsl(270 10% 95%);
+    --et-primary: hsl(270 50% 75%);
+    --et-primary-foreground: hsl(270 20% 8%);
+    --et-secondary: hsl(270 20% 22%);
+    --et-secondary-foreground: hsl(270 10% 90%);
+    --et-muted: hsl(270 20% 16%);
+    --et-muted-foreground: hsl(270 10% 60%);
+    --et-border: hsl(270 20% 20%);
+}
+
+/* Application of variables to elements within the test scope */
+.enneagram-test-container {
+    background-color: var(--et-background);
+    color: var(--et-foreground);
+    min-height: 100vh;
+}
+
+.enneagram-test-container .bg-card {
+    background-color: var(--et-card) !important;
+}
+
+.enneagram-test-container .text-foreground {
+    color: var(--et-foreground) !important;
+}
+
+.enneagram-test-container .text-card-foreground {
+    color: var(--et-card-foreground) !important;
+}
+
+.enneagram-test-container .text-primary {
+    color: var(--et-primary) !important;
+}
+
+.enneagram-test-container .text-muted-foreground {
+    color: var(--et-muted-foreground) !important;
+}
+
+.enneagram-test-container .border {
+    border-color: var(--et-border) !important;
+}
+
+.enneagram-test-container .bg-muted {
+    background-color: var(--et-muted) !important;
+}
+
+.enneagram-test-container .bg-primary {
+    background-color: var(--et-primary) !important;
+    color: var(--et-primary-foreground) !important;
+}
+
+.enneagram-test-container .bg-secondary {
+    background-color: var(--et-secondary) !important;
+    color: var(--et-secondary-foreground) !important;
+}
+
+/* Button overrides to ensure they use theme colors and have correct hover states */
+.enneagram-test-container [data-slot="button"] {
+    transition: all 0.2s;
+}
+
+/* Default variant override */
+.enneagram-test-container [data-slot="button"]:not([class*="variant-"]) {
+    background-color: var(--et-primary) !important;
+    color: var(--et-primary-foreground) !important;
+}
+
+.enneagram-test-container [data-slot="button"]:not([class*="variant-"]):hover {
+    filter: brightness(1.2) contrast(1.1);
+    background-color: var(--et-primary) !important;
+}
+
+/* Outline variant override */
+.enneagram-test-container [data-slot="button"].border-secondary,
+.enneagram-test-container [data-slot="button"][class*="variant-outline"] {
+    border-color: var(--et-secondary) !important;
+    background-color: transparent !important;
+    color: var(--et-foreground) !important;
+}
+
+.enneagram-test-container [data-slot="button"].border-secondary:hover,
+.enneagram-test-container [data-slot="button"][class*="variant-outline"]:hover {
+    background-color: var(--et-secondary) !important;
+    color: var(--et-secondary-foreground) !important;
+}
+
+/* Secondary variant override (used for selected answers and 'Next' button) */
+.enneagram-test-container [data-slot="button"][class*="variant-secondary"] {
+    background-color: var(--et-secondary) !important;
+    color: var(--et-secondary-foreground) !important;
+}
+
+.enneagram-test-container [data-slot="button"][class*="variant-secondary"]:hover {
+    filter: brightness(1.1);
+}
+
+/* Ghost variant override (used for language toggle) */
+.enneagram-test-container [data-slot="button"][class*="variant-ghost"] {
+    color: var(--et-foreground) !important;
+}
+
+.enneagram-test-container [data-slot="button"][class*="variant-ghost"]:hover {
+    background-color: var(--et-muted) !important;
+}
+
+/* Muted variant override (used for skip button) */
+.enneagram-test-container [data-slot="button"][class*="variant-muted"] {
+    background-color: var(--et-muted) !important;
+    color: var(--et-muted-foreground) !important;
+}
+
+.enneagram-test-container [data-slot="button"][class*="variant-muted"]:hover {
+    filter: brightness(1.1);
+}
