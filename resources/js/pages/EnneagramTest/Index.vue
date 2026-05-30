@@ -8,7 +8,12 @@ import Summary from './components/Summary.vue';
 import en from './locales/en.json';
 import pl from './locales/pl.json';
 import '@/../css/enneagram-test.css';
-import { isStage1Part1Question, isStage1Part2Question, isStage2Question, type QuestionIdHolder } from './composables/shared/questionIds';
+import {
+    isStage1Part1Question,
+    isStage1Part2Question,
+    isStage2Question,
+    type QuestionIdHolder
+} from './composables/shared/questionIds';
 import type { CompleteStage1Results, Config, Stage2Results, TestData } from './composables/shared/types';
 
 const props = defineProps<{
@@ -161,7 +166,16 @@ const stage2Config = computed(() => {
 
 const appDebug = computed(() => props.appDebug);
 
-const themes = ['theme-light-standard', 'theme-light-blue', 'theme-light-warm', 'theme-dark-standard', 'theme-dark-forest', 'theme-dark-purple'];
+const themes = [
+    'theme-light-standard',
+    'theme-light-blue',
+    'theme-light-warm',
+    'theme-light-pastel',
+    'theme-dark-standard',
+    'theme-dark-forest',
+    'theme-dark-purple',
+    'theme-dark-amber',
+];
 
 function startTest(extended: boolean) {
     isExtended.value = extended;
@@ -186,7 +200,7 @@ function handleStage2Complete(results: Stage2Results) {
 <template>
     <div :class="['enneagram-test-container p-2 md:p-3 lg:p-6', selectedTheme]">
         <div class="mx-auto mb-6 flex max-w-4xl items-center justify-between">
-            <div v-if="currentView === 'start'" class="flex items-center gap-4">
+            <div class="flex items-center gap-4">
                 <span class="text-sm font-medium text-foreground">{{ t('theme_selection') }}</span>
                 <select v-model="selectedTheme" class="rounded border border-border bg-card p-1 text-sm text-foreground outline-none">
                     <option v-for="theme in themes" :key="theme" :value="theme">
@@ -194,7 +208,6 @@ function handleStage2Complete(results: Stage2Results) {
                     </option>
                 </select>
             </div>
-            <div v-else></div>
             <Button size="sm" variant="ghost" @click="toggleLanguage">
                 {{ locale === 'pl' ? 'EN' : 'PL' }}
             </Button>

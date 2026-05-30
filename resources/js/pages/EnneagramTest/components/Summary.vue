@@ -60,7 +60,7 @@ function restart() {
             </div>
 
             <div v-if="!stage1Results?.isUnresolvable && !stage2Results?.isUnresolvable" class="mb-8 border-t pt-6 text-left">
-                <h3 class="mb-4 text-xl font-bold text-foreground">{{ t('instinct_order') }}</h3>
+                <h3 class="mb-4 text-xl font-bold text-secondary-foreground">{{ t('instinct_order') }}</h3>
                 <div class="flex items-center justify-around text-2xl font-bold uppercase">
                     <div>{{ stage1Results?.dominant }}</div>
                     <div>/</div>
@@ -70,7 +70,7 @@ function restart() {
                 </div>
             </div>
 
-            <div v-if="debug" class="mt-12 rounded border-t border-dashed bg-muted/40 p-4 pt-6 text-left">
+            <div v-if="debug" class="mt-12 rounded border-t border-dashed bg-muted p-4 pt-6 text-left">
                 <h3 class="mb-4 text-lg font-bold text-foreground">{{ t('debug_data') }}</h3>
 
                 <div class="mb-4">
@@ -112,8 +112,8 @@ function restart() {
                         <div
                             v-for="item in sortedTypes"
                             :key="item.type"
-                            :class="{ 'bg-secondary': item.score === maxScore, 'bg-background': item.score == 0 }"
-                            class="rounded border border-muted-foreground p-1"
+                            :class="{ 'bg-secondary': item.score === maxScore, 'bg-muted text-muted-foreground': item.score === 0 }"
+                            class="rounded border border-muted-foreground bg-muted/10 p-1"
                         >
                             {{ t('type_label', { type: item.type }) }}: <strong>{{ item.score }}</strong>
                         </div>
