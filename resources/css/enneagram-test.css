@@ -165,6 +165,10 @@
     color: var(--et-primary) !important;
 }
 
+.enneagram-test-container .text-secondary-foreground {
+    color: var(--et-secondary-foreground) !important;
+}
+
 .enneagram-test-container .text-muted-foreground {
     color: var(--et-muted-foreground) !important;
 }
