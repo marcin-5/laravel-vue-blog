@@ -46,6 +46,10 @@ onMounted(() => {
     const savedTheme = localStorage.getItem('enneagram-test-theme');
     if (savedTheme && themes.includes(savedTheme)) {
         selectedTheme.value = savedTheme;
+    } else {
+        // Default based on system preference
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        selectedTheme.value = prefersDark ? 'theme-dark-standard' : 'theme-light-standard';
     }
 });
 
