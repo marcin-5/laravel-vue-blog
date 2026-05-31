@@ -108,6 +108,8 @@ return [
     'domain_locales' => [
         env('APP_DOMAIN', 'osobliwy.blog') => 'pl',
         env('APP_DOMAIN_SECONDARY', 'peculiarmatters.blog') => 'en',
+        env('ENNEAGRAM_DOMAIN_PL', 'enneagram-test.osobliwy.blog') => 'pl',
+        env('ENNEAGRAM_DOMAIN_EN', 'enneagram-test.peculiarmatters.blog') => 'en',
     ],
 
     /*

@@ -8,16 +8,12 @@ import Summary from './components/Summary.vue';
 import en from './locales/en.json';
 import pl from './locales/pl.json';
 import '@/../css/enneagram-test.css';
-import {
-    isStage1Part1Question,
-    isStage1Part2Question,
-    isStage2Question,
-    type QuestionIdHolder
-} from './composables/shared/questionIds';
+import { isStage1Part1Question, isStage1Part2Question, isStage2Question, type QuestionIdHolder } from './composables/shared/questionIds';
 import type { CompleteStage1Results, Config, Stage2Results, TestData } from './composables/shared/types';
 
 const props = defineProps<{
     testData: TestData;
+    initialLocale: string;
     appDebug?: boolean;
     autoConfirmSingleDefault?: boolean;
 }>();
@@ -28,14 +24,8 @@ const { t, tm, locale, mergeLocaleMessage } = useI18n();
 mergeLocaleMessage('en', en);
 mergeLocaleMessage('pl', pl);
 
-// Determine initial locale if not already set or specifically for this component
-// If browser language is 'pl', use 'pl', otherwise 'en'
-const browserLang = typeof navigator !== 'undefined' ? navigator.language.split('-')[0] : 'en';
-if (browserLang === 'pl') {
-    locale.value = 'pl';
-} else {
-    locale.value = 'en';
-}
+// Determine initial locale from server-side prop
+locale.value = props.initialLocale || 'en';
 
 function toggleLanguage() {
     locale.value = locale.value === 'pl' ? 'en' : 'pl';

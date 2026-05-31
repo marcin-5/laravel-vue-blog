@@ -26,11 +26,15 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Enneagram Test Domain
+    | Enneagram Test Domains
     |--------------------------------------------------------------------------
     |
-    | The domain or subdomain where the Enneagram test is hosted.
+    | The domains or subdomains where the Enneagram test is hosted and their
+    | associated locales.
     |
     */
-    'domain' => env('ENNEAGRAM_DOMAIN', 'enneagram-test.localhost'),
+    'domains' => [
+        env('ENNEAGRAM_DOMAIN_PL', 'enneagram-test.osobliwy.localhost') => 'pl',
+        env('ENNEAGRAM_DOMAIN_EN', 'enneagram-test.peculiarmatters.localhost') => 'en',
+    ],
 ];

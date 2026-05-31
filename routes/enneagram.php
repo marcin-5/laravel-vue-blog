@@ -3,6 +3,10 @@
 use App\Http\Controllers\EnneagramTestController;
 use Illuminate\Support\Facades\Route;
 
-Route::domain(config('enneagram.domain'))->group(function () {
-    Route::get('/', [EnneagramTestController::class, 'index']);
-});
+$enneagramDomains = config('enneagram.domains');
+
+foreach ($enneagramDomains as $domain => $locale) {
+    Route::domain($domain)->group(function () {
+        Route::get('/', [EnneagramTestController::class, 'index']);
+    });
+}

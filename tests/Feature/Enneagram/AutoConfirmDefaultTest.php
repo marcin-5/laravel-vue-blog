@@ -6,10 +6,15 @@ use function Pest\Laravel\get;
 
 it('passes autoConfirmSingleDefault from config when enabled', function () {
     config()->set('enneagram.auto_confirm_single', true);
-    // Ensure domain matches route domain group
-    $host = config('enneagram.domain');
+    $domain = 'enneagram-test.osobliwy.localhost';
+    config([
+        'enneagram.domains' => [
+            'enneagram-test.osobliwy.localhost' => 'pl',
+            'enneagram-test.peculiarmatters.localhost' => 'en',
+        ],
+    ]);
 
-    get('http://' . $host . '/')
+    get('http://' . $domain)
         ->assertOk()
         ->assertInertia(fn(Assert $page) => $page
             ->component('EnneagramTest/Index')
@@ -20,9 +25,15 @@ it('passes autoConfirmSingleDefault from config when enabled', function () {
 
 it('passes autoConfirmSingleDefault from config when disabled', function () {
     config()->set('enneagram.auto_confirm_single', false);
-    $host = config('enneagram.domain');
+    $domain = 'enneagram-test.osobliwy.localhost';
+    config([
+        'enneagram.domains' => [
+            'enneagram-test.osobliwy.localhost' => 'pl',
+            'enneagram-test.peculiarmatters.localhost' => 'en',
+        ],
+    ]);
 
-    get('http://' . $host . '/')
+    get('http://' . $domain)
         ->assertOk()
         ->assertInertia(fn(Assert $page) => $page
             ->component('EnneagramTest/Index')

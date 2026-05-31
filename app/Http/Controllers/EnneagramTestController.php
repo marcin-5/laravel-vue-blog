@@ -10,7 +10,8 @@ class EnneagramTestController extends Controller
 {
     public function index(Request $request)
     {
-        $locale = 'pl'; // For now, hardcode or detect
+        $locale = app()->getLocale();
+
         $questionsPath = resource_path("data/enneagram/{$locale}/questions.json");
         $configPath = resource_path('data/enneagram/config.json');
 
@@ -30,6 +31,7 @@ class EnneagramTestController extends Controller
                 'questions' => $questions,
                 'testConfig' => $testConfig['testConfig'],
             ],
+            'initialLocale' => $locale,
             'appDebug' => (bool) config('enneagram.debug'),
             'autoConfirmSingleDefault' => (bool) config('enneagram.auto_confirm_single'),
         ]);
