@@ -55,12 +55,15 @@ describe('useMarkdownPreview', () => {
     });
 
     it('renderMarkdown sets error html on fetch failure', async () => {
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
         postMock.mockRejectedValueOnce(new Error('Network error'));
 
         const { previewHtml, renderMarkdown } = useMarkdownPreview();
         await renderMarkdown('# Hello');
 
         expect(previewHtml.value).toBe('<p class="text-error">Error rendering markdown</p>');
+        expect(consoleSpy).toHaveBeenCalled();
+        consoleSpy.mockRestore();
     });
 
     it('togglePreview toggles isPreviewMode and renders markdown when enabled', async () => {

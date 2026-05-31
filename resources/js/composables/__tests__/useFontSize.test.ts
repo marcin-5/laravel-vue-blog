@@ -1,4 +1,6 @@
+import { mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { defineComponent } from 'vue';
 
 const localStorageMock = {
     getItem: vi.fn(),
@@ -33,10 +35,24 @@ describe('useFontSize', () => {
 
     it('useFontSize returns ref and update function', async () => {
         const { useFontSize } = await import('../useFontSize');
-        const { fontSize, updateFontSize } = useFontSize();
-        
-        updateFontSize([115]);
-        expect(fontSize.value).toEqual([115]);
+
+        let fontSizeResult: any;
+        let updateFontSizeResult: any;
+
+        const TestComponent = defineComponent({
+            setup() {
+                const { fontSize, updateFontSize } = useFontSize();
+                fontSizeResult = fontSize;
+                updateFontSizeResult = updateFontSize;
+                return {};
+            },
+            template: '<div></div>',
+        });
+
+        mount(TestComponent);
+
+        updateFontSizeResult([115]);
+        expect(fontSizeResult.value).toEqual([115]);
         expect(document.documentElement.style.fontSize).toBe('115%');
     });
 });
