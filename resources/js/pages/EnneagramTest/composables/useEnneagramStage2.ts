@@ -250,6 +250,7 @@ export function useEnneagramStage2(
         goBack,
         currentInstinct,
         instinctPoolIndices,
+        partQuestions,
     };
 }
 

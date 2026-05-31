@@ -38,6 +38,7 @@ const {
     goBack,
     currentInstinct,
     instinctPoolIndices,
+    partQuestions,
 } = useEnneagramStage2(
     props.questions,
     props.config,
