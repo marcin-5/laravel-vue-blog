@@ -39,6 +39,13 @@
     "auto_confirm_single_label": "Auto-advance on single-choice questions",
     "auto_confirm_single_help": "When a question allows only one answer, selecting it will immediately confirm and move to the next question.",
     "theme_selection": "Choose color scheme:",
+    "progress": "Progress",
+    "tie_breaker_active": "Tie-breaker in progress!",
+    "standard_phase": "Standard phase",
+    "tie_breaker_point": "Tie-breaker starting point",
+    "min_questions_point": "Minimum questions point",
+    "target": "target",
+    "min": "min",
     "themes": {
         "light-standard": "Light (Standard)",
         "light-blue": "Light (Blue)",

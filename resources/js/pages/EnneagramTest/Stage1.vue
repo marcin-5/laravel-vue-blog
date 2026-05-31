@@ -43,6 +43,13 @@ const {
     emit,
     computed(() => props.autoConfirmSingleEnabled ?? true),
 );
+
+const minQuestions = computed(() => {
+    const thresholdX = currentConfig.value.thresholdX ?? 0;
+    const answersPerQuestion = maxAnswersPerQuestion.value ?? 1;
+    if (thresholdX === 0) return 1;
+    return Math.ceil(thresholdX / answersPerQuestion);
+});
 </script>
 
 <template>
@@ -54,6 +61,10 @@ const {
             :part="currentPart"
             :skips="skips"
             :stage="1"
+            :current-question-number="currentPart === 1 ? answeredCountPart1 : answeredCountPart2"
+            :max-questions-standard="currentConfig.maxQuestions"
+            :total-pool-size="partQuestions.length"
+            :min-questions-standard="minQuestions"
         />
 
         <QuestionCard

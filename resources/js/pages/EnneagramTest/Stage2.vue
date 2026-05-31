@@ -46,6 +46,15 @@ const {
     computed(() => props.autoConfirmSingleEnabled ?? true),
 );
 
+const minQuestions = computed(() => {
+    // Stage 2 usually has a lead requirement of 2 points.
+    // Part 1 & 3: answersPerQuestion usually 2 (min = 1)
+    // Part 2 & 4: answersPerQuestion usually 1 (min = 2)
+    const threshold = 2;
+    const answersPerQuestion = currentConfig.value.answersPerQuestion || 1;
+    return Math.ceil(threshold / answersPerQuestion);
+});
+
 const poolIndex = computed(() => {
     const instinct = currentInstinct.value;
     return instinctPoolIndices.value[instinct] ?? 0;
@@ -63,6 +72,10 @@ const formattedDesc = computed(() => t('max_answers', { maxAnswers: maxAnswersPe
             :part="currentPart"
             :skips="skips"
             :stage="2"
+            :current-question-number="currentIndex"
+            :max-questions-standard="currentConfig.maxQuestions"
+            :total-pool-size="partQuestions.length"
+            :min-questions-standard="minQuestions"
         />
 
         <QuestionCard

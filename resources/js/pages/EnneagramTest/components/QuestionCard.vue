@@ -32,7 +32,7 @@ function isSelected(selectedAnswers: SelectedAnswer[], key: string | number) {
 <template>
     <Card v-if="question" class="mx-1 bg-card font-quicksand text-card-foreground">
         <CardHeader class="mx-2 px-2 md:px-3 lg:px-4">
-            <CardTitle class="text-base text-pretty wrap-break-word md:text-lg">
+            <CardTitle class="text-base text-pretty wrap-break-word text-foreground md:text-lg">
                 {{ question.question }}
             </CardTitle>
         </CardHeader>

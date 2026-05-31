@@ -39,6 +39,13 @@
     "auto_confirm_single_label": "Automatyczne przechodzenie dalej przy pytaniach jednokrotnego wyboru",
     "auto_confirm_single_help": "Gdy w pytaniu można wybrać tylko jedną odpowiedź, zaznaczenie od razu potwierdza wybór i przechodzi do następnego pytania.",
     "theme_selection": "Wybierz schemat kolorystyczny:",
+    "progress": "Postęp",
+    "tie_breaker_active": "Trwa dogrywka!",
+    "standard_phase": "Faza podstawowa",
+    "tie_breaker_point": "Punkt rozpoczęcia dogrywki",
+    "min_questions_point": "Punkt minimalnej liczby pytań",
+    "target": "cel",
+    "min": "min",
     "themes": {
         "light-standard": "Jasny (Standardowy)",
         "light-blue": "Jasny (Niebieski)",
