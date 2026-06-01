@@ -20,22 +20,26 @@
                 "part1": {
                     "maxQuestions": 5,
                     "maxSkips": 1,
-                    "answersPerQuestion": 2
+                    "answersPerQuestion": 2,
+                    "minLead": 4
                 },
                 "part2": {
                     "maxQuestions": 2,
                     "maxSkips": 1,
-                    "answersPerQuestion": 1
+                    "answersPerQuestion": 1,
+                    "minLead": 2
                 },
                 "part3": {
                     "maxQuestions": 2,
                     "maxSkips": 1,
-                    "answersPerQuestion": 2
+                    "answersPerQuestion": 2,
+                    "minLead": 2
                 },
                 "part4": {
                     "maxQuestions": 2,
                     "maxSkips": 1,
-                    "answersPerQuestion": 1
+                    "answersPerQuestion": 1,
+                    "minLead": 2
                 }
             }
         }

@@ -1,4 +1,5 @@
 import { computed, ref, type Ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { type EnneagramType, TYPE_IDS } from './shared/constants';
 import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
 import type { CompleteStage1Results, Config, FlatOption, Instinct, Question, SelectedAnswer, Stage2Results } from './shared/types';
@@ -37,6 +38,8 @@ export function useEnneagramStage2(
     const dominantInstinct: Instinct = resultsStage1.isUnresolvable ? DEFAULT_DOMINANT : (resultsStage1.dominant ?? DEFAULT_DOMINANT);
     const secondaryInstinct: Instinct = resultsStage1.isUnresolvable ? DEFAULT_SECONDARY : (resultsStage1.secondary ?? DEFAULT_SECONDARY);
 
+    const { t } = useI18n();
+
     // --- State ---
     const currentPart = ref(1);
     const currentIndex = ref(0);
@@ -59,6 +62,18 @@ export function useEnneagramStage2(
 
     // --- Computed ---
     const currentInstinct = computed<Instinct>(() => (currentPart.value <= 2 ? dominantInstinct : secondaryInstinct));
+    const isPhase1 = computed(() => currentPart.value <= 2);
+
+    const currentPhaseScores = computed(() => {
+        const pA = isPhase1.value ? 1 : 3;
+        const pB = isPhase1.value ? 2 : 4;
+
+        const scores = createEmptyTypeScores();
+        for (const id of TYPE_IDS) {
+            scores[id] = (scoresPerPart.value[pA][id] ?? 0) + (scoresPerPart.value[pB][id] ?? 0);
+        }
+        return scores;
+    });
 
     const currentConfig = computed(() => config[`part${currentPart.value}` as keyof typeof config]);
 
@@ -67,6 +82,41 @@ export function useEnneagramStage2(
     const currentQuestion = computed(() => partQuestions.value[instinctPoolIndices.value[currentInstinct.value]]);
 
     const maxAnswersPerQuestion = computed(() => currentConfig.value.answersPerQuestion);
+
+    const minQuestions = computed(() => {
+        return currentConfig.value.minLead ?? 0;
+    });
+
+    const leads = computed(() => {
+        const scores = currentPhaseScores.value;
+        const config = currentConfig.value;
+        const sorted = (Object.entries(scores) as [EnneagramType, number][])
+            .map(([key, score]) => ({ key, score }))
+            .sort((a, b) => b.score - a.score);
+
+        const leader = sorted[0];
+        const second = sorted[1];
+        const third = sorted[2];
+
+        const results = [];
+        const requiredLead = config.minLead ?? 2;
+
+        results.push({
+            label: t('lead_leader_vs_second'),
+            current: leader.score - second.score,
+            target: requiredLead,
+            color: 'bg-secondary-foreground',
+        });
+
+        results.push({
+            label: t('lead_second_vs_third'),
+            current: second.score - third.score,
+            target: requiredLead,
+            color: 'bg-foreground',
+        });
+
+        return results;
+    });
 
     const dominantPool = shuffleByPriority(questions.filter((q) => q.id.startsWith(`${dominantInstinct}-`)));
     const secondaryPool = shuffleByPriority(questions.filter((q) => q.id.startsWith(`${secondaryInstinct}-`)));
@@ -151,7 +201,7 @@ export function useEnneagramStage2(
         if (!isCurrentPartTieBreaker()) return false;
         const noMoreQuestions = instinctPoolIndices.value[currentInstinct.value] >= partQuestions.value.length;
         if (noMoreQuestions) return false;
-        return !hasTieBreakingLead(typeScores.value);
+        return !hasTieBreakingLead(currentPhaseScores.value);
     }
 
     function applyAnswersToScores(answers: SelectedAnswer[]) {
@@ -189,14 +239,17 @@ export function useEnneagramStage2(
         return sorted.length >= 2 && sorted[0] === sorted[1];
     }
 
-    function advance() {
+    function advance(isAnswer = true) {
         instinctPoolIndices.value[currentInstinct.value]++;
-        currentIndex.value++;
+        if (isAnswer) {
+            currentIndex.value++;
+        }
 
         const reachedMax = currentIndex.value >= currentConfig.value.maxQuestions;
         const noMoreQuestions = instinctPoolIndices.value[currentInstinct.value] >= partQuestions.value.length;
+        const canEndEarly = !isCurrentPartTieBreaker() && hasTieBreakingLead(currentPhaseScores.value);
 
-        if (!(reachedMax || noMoreQuestions)) return;
+        if (!(reachedMax || noMoreQuestions || canEndEarly)) return;
 
         // For parts 2 and 4: keep asking if no type has +2 lead and pool not exhausted
         if (shouldContinueForTieBreaking()) return;
@@ -216,14 +269,14 @@ export function useEnneagramStage2(
         recordAnswer(currentPart.value, selectedAnswers.value, skips.value);
         applyAnswersToScores(selectedAnswers.value);
         clearSelection();
-        advance();
+        advance(true);
     }
 
     function handleSkip() {
         if (skips.value >= currentConfig.value.maxSkips) return;
         recordSkip(currentPart.value, skips.value);
         skips.value++;
-        advance();
+        advance(false);
     }
 
     function goBack() {
@@ -244,6 +297,8 @@ export function useEnneagramStage2(
         currentQuestion,
         flatOptions,
         maxAnswersPerQuestion,
+        minQuestions,
+        leads,
         canSkip,
         toggleAnswer,
         confirmAnswers,
