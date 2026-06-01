@@ -16,6 +16,7 @@ interface Stage2Snapshot {
     skips: number;
     poolIndex: number;
     instinct: Instinct;
+    bonusPointsPerPart: Record<number, number>;
 }
 
 type Stage2Emit = (event: 'complete', results: Stage2Results) => void;
@@ -53,6 +54,7 @@ export function useEnneagramStage2(
     });
     const selectedInPart1 = ref<Set<string>>(new Set());
     const selectedInPart3 = ref<Set<string>>(new Set());
+    const bonusPointsPerPart = ref<Record<number, number>>({ 1: 0, 2: 0, 3: 0, 4: 0 });
     const shuffledAnswersPerQuestion = ref<Record<string, FlatOption[]>>({});
 
     const instinctPoolIndices = ref<Record<string, number>>({
@@ -82,9 +84,10 @@ export function useEnneagramStage2(
     const currentQuestion = computed(() => partQuestions.value[instinctPoolIndices.value[currentInstinct.value]]);
 
     const maxAnswersPerQuestion = computed(() => currentConfig.value.answersPerQuestion);
-
     const minQuestions = computed(() => {
-        return currentConfig.value.minLead ?? 0;
+        const base = currentConfig.value.minLead ?? 0;
+        const bonus = bonusPointsPerPart.value[currentPart.value] ?? 0;
+        return Math.max(0, base - bonus);
     });
 
     const leads = computed(() => {
@@ -172,6 +175,7 @@ export function useEnneagramStage2(
             skips: skips.value,
             poolIndex: instinctPoolIndices.value[currentInstinct.value],
             instinct: currentInstinct.value,
+            bonusPointsPerPart: { ...bonusPointsPerPart.value },
         }),
         (s) => {
             currentPart.value = s.part;
@@ -181,6 +185,7 @@ export function useEnneagramStage2(
             scoresPerPart.value = JSON.parse(JSON.stringify(s.scoresPerPart));
             selectedInPart1.value = new Set(s.selectedInPart1);
             selectedInPart3.value = new Set(s.selectedInPart3);
+            bonusPointsPerPart.value = { ...s.bonusPointsPerPart };
             // Restore pool index using captured instinct to avoid reliance on currentInstinct order.
             instinctPoolIndices.value[s.instinct] = s.poolIndex;
         },
@@ -267,6 +272,12 @@ export function useEnneagramStage2(
         if (selectedAnswers.value.length === 0 && !canSkip.value) return;
 
         recordAnswer(currentPart.value, selectedAnswers.value, skips.value);
+
+        // Calculate bonus points for multiple answers of the same category
+        const categories = selectedAnswers.value.map((a) => String(a.category || a.key));
+        const uniqueCategories = new Set(categories);
+        bonusPointsPerPart.value[currentPart.value] += categories.length - uniqueCategories.size;
+
         applyAnswersToScores(selectedAnswers.value);
         clearSelection();
         advance(true);

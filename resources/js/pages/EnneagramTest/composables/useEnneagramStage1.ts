@@ -17,6 +17,7 @@ interface Stage1Snapshot {
     answered2: number;
     part1Winner: Instinct | null;
     extraAskedPart2: boolean;
+    doubleAnswersCountPart1: number;
 }
 
 type EmitFn = (event: 'complete', results: CompleteStage1Results) => void;
@@ -32,6 +33,7 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
     const answeredCountPart2 = ref(0);
     const part1Winner = ref<Instinct | null>(null);
     const extraAskedPart2 = ref(false);
+    const doubleAnswersCountPart1 = ref(0);
     const shuffledPerQuestion = ref<Record<string, FlatOption[]>>({});
 
     const poolPart1 = shuffleByPriority<Question>(questions.filter((q) => isStage1Part1Question(q)));
@@ -61,7 +63,11 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
                 return config.minLeadAlternative;
             }
         }
-        return config.minLead ?? 0;
+        let min = config.minLead ?? 0;
+        if (currentPart.value === 1) {
+            min -= doubleAnswersCountPart1.value;
+        }
+        return Math.max(0, min);
     });
 
     const leads = computed(() => {
@@ -137,6 +143,7 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
             answered2: answeredCountPart2.value,
             part1Winner: part1Winner.value,
             extraAskedPart2: extraAskedPart2.value,
+            doubleAnswersCountPart1: doubleAnswersCountPart1.value,
         }),
         (s) => {
             currentPart.value = s.part;
@@ -147,6 +154,7 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
             answeredCountPart2.value = s.answered2;
             part1Winner.value = s.part1Winner;
             extraAskedPart2.value = s.extraAskedPart2;
+            doubleAnswersCountPart1.value = s.doubleAnswersCountPart1;
         },
     );
 
@@ -214,6 +222,12 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
     // --- Actions ---
     function confirmAnswers() {
         recordAnswer(currentPart.value, selectedAnswers.value, skips.value);
+
+        if (currentPart.value === 1) {
+            const categories = selectedAnswers.value.map((a) => String(a.category || a.key));
+            const uniqueCategories = new Set(categories);
+            doubleAnswersCountPart1.value += categories.length - uniqueCategories.size;
+        }
 
         const target = currentPart.value === 1 ? scoresPart1.value : scoresPart2.value;
         for (const answer of selectedAnswers.value) {
