@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 interface Lead {
@@ -21,6 +21,12 @@ interface Props {
 
 const props = defineProps<Props>();
 const { t } = useI18n();
+
+const showExplanation = ref(false);
+
+const descriptionKey = computed(() => {
+    return props.stage === 2 ? 'lead_progress_desc_stage2' : 'lead_progress_desc';
+});
 
 const minPercent = computed(() => {
     if (props.total === 0 || props.min === undefined) return 0;
@@ -87,7 +93,7 @@ const isExtra = computed(() => props.current > props.max);
             </div>
         </div>
 
-        <div class="relative mt-1 flex h-4 justify-between px-1 text-[10px] text-muted-foreground">
+        <div class="relative mt-1 flex h-4 justify-between px-1 text-xs text-muted-foreground">
             <span>0</span>
             <span
                 v-if="min !== undefined && min !== max"
@@ -105,7 +111,7 @@ const isExtra = computed(() => props.current > props.max);
         <!-- Lead indicators -->
         <div v-if="leads && leads.length > 0" class="mt-4 space-y-3 rounded-lg border border-border/50 bg-secondary/10 p-2 md:p-3">
             <div v-for="(lead, index) in leads" :key="index" class="space-y-1.5">
-                <div class="flex justify-between text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+                <div class="flex justify-between text-xs font-bold tracking-wider text-muted-foreground uppercase">
                     <span class="flex items-center gap-1.5">
                         <span :class="['h-2 w-2 rounded-full', lead.color || 'bg-primary']"></span>
                         {{ lead.label }}
@@ -126,9 +132,37 @@ const isExtra = computed(() => props.current > props.max);
                     <div class="absolute top-0 right-0 h-full w-px bg-foreground/20"></div>
                 </div>
             </div>
-            <p v-if="leads.length > 0" class="mt-1 text-center text-[9px] text-muted/90 italic">
-                {{ t('lead_progress_desc') }}
-            </p>
+            <div v-if="leads.length > 0" class="mt-2 flex flex-col items-center">
+                <button
+                    class="group flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                    type="button"
+                    @click="showExplanation = !showExplanation"
+                >
+                    {{ showExplanation ? t('hide_explanation') : t('show_explanation') }}
+                    <svg
+                        :class="['h-3 w-3 transition-transform duration-200', showExplanation ? 'rotate-180' : '']"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path d="m19.5 8.25-7.5 7.5-7.5-7.5" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" />
+                    </svg>
+                </button>
+
+                <transition
+                    enter-active-class="transition duration-200 ease-out"
+                    enter-from-class="scale-95 transform opacity-0"
+                    enter-to-class="scale-100 transform opacity-100"
+                    leave-active-class="transition duration-150 ease-in"
+                    leave-from-class="scale-100 transform opacity-100"
+                    leave-to-class="scale-95 transform opacity-0"
+                >
+                    <p v-if="showExplanation" class="mt-2 text-center text-sm leading-relaxed text-muted italic">
+                        {{ t(descriptionKey) }}
+                    </p>
+                </transition>
+            </div>
         </div>
     </div>
 </template>

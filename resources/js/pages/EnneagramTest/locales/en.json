@@ -49,6 +49,9 @@
     "lead_leader_vs_second": "Leader's advantage over next",
     "lead_second_vs_third": "Second's advantage over last",
     "lead_progress_desc": "Progress bars show the distance of individual instincts from the required difference thresholds.",
+    "lead_progress_desc_stage2": "Progress bars show the distance of individual Enneagram types from the required difference thresholds.",
+    "show_explanation": "Show indicators description",
+    "hide_explanation": "Hide description",
     "themes": {
         "light-standard": "Light (Standard)",
         "light-blue": "Light (Blue)",

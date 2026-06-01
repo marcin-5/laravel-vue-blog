@@ -49,6 +49,9 @@
     "lead_leader_vs_second": "Przewaga lidera nad następnym",
     "lead_second_vs_third": "Przewaga drugiego nad ostatnim",
     "lead_progress_desc": "Paski postępu obrazują dystans dzielący poszczególne instynkty od wymaganych progów różnicy.",
+    "lead_progress_desc_stage2": "Paski postępu obrazują dystans dzielący poszczególne typy enneagramu od wymaganych progów różnicy.",
+    "show_explanation": "Pokaż opis wskaźników",
+    "hide_explanation": "Ukryj opis",
     "themes": {
         "light-standard": "Jasny (Standardowy)",
         "light-blue": "Jasny (Niebieski)",
