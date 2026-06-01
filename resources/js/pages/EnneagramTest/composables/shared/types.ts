@@ -61,8 +61,8 @@ export interface PartConfig {
     answersPerQuestion: number;
     desc?: string;
     threshold?: number;
-    thresholdX?: number;
-    thresholdY?: number;
+    minLead?: number;
+    minLeadAlternative?: number;
     fixedQuestions?: number;
 }
 

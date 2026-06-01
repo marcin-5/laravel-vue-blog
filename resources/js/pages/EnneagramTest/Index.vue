@@ -91,14 +91,14 @@ function calculateExtendedConfig(originalConfig: Config): Config {
         config.stages.stage1.part2.maxQuestions = Math.max(originalConfig.stages.stage1.part2.maxQuestions, Math.floor((p2Pool - 1) * 0.4));
     }
 
-    if (config.stages.stage1.part1.thresholdX !== undefined) {
-        config.stages.stage1.part1.thresholdX += 1;
+    if (config.stages.stage1.part1.minLead !== undefined) {
+        config.stages.stage1.part1.minLead += 1;
     }
-    if (config.stages.stage1.part2.thresholdX !== undefined) {
-        config.stages.stage1.part2.thresholdX += 1;
+    if (config.stages.stage1.part2.minLead !== undefined) {
+        config.stages.stage1.part2.minLead += 1;
     }
-    if (config.stages.stage1.part2.thresholdY !== undefined) {
-        config.stages.stage1.part2.thresholdY += 1;
+    if (config.stages.stage1.part2.minLeadAlternative !== undefined) {
+        config.stages.stage1.part2.minLeadAlternative += 1;
     }
 
     // Stage 2 - Parts 1 & 2
@@ -125,11 +125,11 @@ function calculateExtendedConfig(originalConfig: Config): Config {
         config.stages.stage2.part2.maxQuestions = Math.max(originalConfig.stages.stage2.part2.maxQuestions, Math.floor((minPool - 1) * 0.4));
     }
 
-    if (config.stages.stage2.part1.thresholdX !== undefined) {
-        config.stages.stage2.part1.thresholdX += 1;
+    if (config.stages.stage2.part1.minLead !== undefined) {
+        config.stages.stage2.part1.minLead += 1;
     }
-    if (config.stages.stage2.part2.thresholdX !== undefined) {
-        config.stages.stage2.part2.thresholdX += 1;
+    if (config.stages.stage2.part2.minLead !== undefined) {
+        config.stages.stage2.part2.minLead += 1;
     }
 
     return config;

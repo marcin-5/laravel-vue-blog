@@ -57,11 +57,11 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
         const config = currentConfig.value;
         if (currentPart.value === 2 && part1Winner.value) {
             const leaderPart1ScoreInPart2 = scoresPart2.value[part1Winner.value] ?? 0;
-            if (leaderPart1ScoreInPart2 === 0 && config.thresholdY) {
-                return config.thresholdY;
+            if (leaderPart1ScoreInPart2 === 0 && config.minLeadAlternative) {
+                return config.minLeadAlternative;
             }
         }
-        return config.thresholdX ?? 0;
+        return config.minLead ?? 0;
     });
 
     const leads = computed(() => {
@@ -76,15 +76,15 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
         const results = [];
 
         // Lead 1: Leader vs Second
-        let targetX = config.thresholdX ?? 0;
-        if (currentPart.value === 2 && part1Winner.value && (scores[part1Winner.value] ?? 0) === 0 && config.thresholdY) {
-            targetX = config.thresholdY;
+        let requiredLead = config.minLead ?? 0;
+        if (currentPart.value === 2 && part1Winner.value && (scores[part1Winner.value] ?? 0) === 0 && config.minLeadAlternative) {
+            requiredLead = config.minLeadAlternative;
         }
 
         results.push({
             label: t('lead_leader_vs_second'),
             current: leader.score - second.score,
-            target: targetX,
+            target: requiredLead,
             color: 'bg-secondary-foreground',
         });
 
@@ -92,7 +92,7 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
         results.push({
             label: t('lead_second_vs_third'),
             current: second.score - third.score,
-            target: config.thresholdX ?? 0,
+            target: config.minLead ?? 0,
             color: 'bg-foreground',
         });
 
@@ -231,8 +231,8 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
     }
 
     function shouldEndPart1(): boolean {
-        const thresholdX = Number(currentConfig.value.thresholdX ?? 0);
-        const reachedLead = hasLead(scoresPart1.value, thresholdX);
+        const minLead = Number(currentConfig.value.minLead ?? 0);
+        const reachedLead = hasLead(scoresPart1.value, minLead);
         const reachedMax = answeredCountPart1.value >= Number(currentConfig.value.maxQuestions ?? 0);
         const isTie = isTopTwoTie(scoresPart1.value);
 
@@ -248,18 +248,18 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
         const leader = getLeader(scoresPart2.value);
         const sameWinner = part1Winner.value !== null && leader === part1Winner.value;
         const reachedMax = answeredCountPart2.value >= Number(currentConfig.value.maxQuestions ?? 0);
-        const thresholdX = Number(currentConfig.value.thresholdX ?? 0);
-        const thresholdY = Number(currentConfig.value.thresholdY ?? 0);
-        const endByX = !sameWinner && hasLead(scoresPart2.value, thresholdX);
-        const specialYApplicable = part1Winner.value != null && (scoresPart2.value[part1Winner.value] ?? 0) === 0;
-        const endByY = specialYApplicable && hasLead(scoresPart2.value, thresholdY);
+        const minLead = Number(currentConfig.value.minLead ?? 0);
+        const minLeadAlternative = Number(currentConfig.value.minLeadAlternative ?? 0);
+        const isStandardLeadMet = !sameWinner && hasLead(scoresPart2.value, minLead);
+        const isAlternativeLeadApplicable = part1Winner.value != null && (scoresPart2.value[part1Winner.value] ?? 0) === 0;
+        const isAlternativeLeadMet = isAlternativeLeadApplicable && hasLead(scoresPart2.value, minLeadAlternative);
 
         // If reached max questions but no conclusion yet (no X, no Y, or same winner), continue if possible
-        if (reachedMax && !endByX && !endByY && !isLastInPart()) {
+        if (reachedMax && !isStandardLeadMet && !isAlternativeLeadMet && !isLastInPart()) {
             return false;
         }
 
-        return endByX || endByY || reachedMax || isLastInPart();
+        return isStandardLeadMet || isAlternativeLeadMet || reachedMax || isLastInPart();
     }
 
     function shouldAskExtraTieBreaker(): boolean {
@@ -269,7 +269,7 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
             !extraAskedPart2.value &&
             isTopTwoTie(scoresPart2.value) &&
             !isLastInPart() &&
-            !hasLead(scoresPart2.value, Number(currentConfig.value.thresholdX ?? 0))
+            !hasLead(scoresPart2.value, Number(currentConfig.value.minLead ?? 0))
         );
     }
 

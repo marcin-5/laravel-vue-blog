@@ -139,7 +139,8 @@ export function useEnneagramStage2(
     // --- Helpers ---
     function hasTieBreakingLead(scores: Record<EnneagramType, number>): boolean {
         const sorted = Object.values(scores).sort((a, b) => b - a);
-        return sorted.length >= 2 && sorted[0] - sorted[1] >= 2;
+        const requiredLead = currentConfig.value.minLead ?? 2;
+        return sorted.length >= 2 && sorted[0] - sorted[1] >= requiredLead;
     }
 
     function isCurrentPartTieBreaker(): boolean {
