@@ -67,14 +67,14 @@
 
 /* Pastel Dream Light */
 .theme-light-pastel {
-    --et-background: hsl(10 25% 96%);
-    --et-foreground: hsl(120, 50%, 45%);
+    --et-background: hsl(27 27% 97%);
+    --et-foreground: hsl(330, 50%, 45%);
     --et-card: hsl(80 20% 97%);
     --et-card-foreground: hsl(80 30% 25%);
     --et-primary: hsl(205 55% 60%);
     --et-primary-foreground: hsl(270 25% 25%);
     --et-secondary: hsl(10 40% 92%);
-    --et-secondary-foreground: hsl(330 50% 30%);
+    --et-secondary-foreground: hsl(160 50% 35%);
     --et-muted: hsl(280 15% 93%);
     --et-muted-foreground: hsl(280 15% 50%);
     --et-border: hsl(280 20% 88%);
@@ -193,6 +193,35 @@
 .enneagram-test-container .bg-secondary {
     background-color: var(--et-secondary) !important;
     color: var(--et-secondary-foreground) !important;
+}
+
+.enneagram-test-container .bg-foreground {
+    background-color: var(--et-foreground) !important;
+}
+
+.enneagram-test-container .bg-secondary-foreground {
+    background-color: var(--et-secondary-foreground) !important;
+}
+
+/* Opacity variants for progress bars and indicators */
+.enneagram-test-container .bg-secondary\/30 {
+    background-color: color-mix(in srgb, var(--et-secondary), transparent 70%) !important;
+}
+
+.enneagram-test-container .bg-secondary\/10 {
+    background-color: color-mix(in srgb, var(--et-secondary), transparent 90%) !important;
+}
+
+.enneagram-test-container .bg-foreground\/50 {
+    background-color: color-mix(in srgb, var(--et-foreground), transparent 50%) !important;
+}
+
+.enneagram-test-container .bg-foreground\/20 {
+    background-color: color-mix(in srgb, var(--et-foreground), transparent 80%) !important;
+}
+
+.enneagram-test-container .border-border\/50 {
+    border-color: color-mix(in srgb, var(--et-border), transparent 50%) !important;
 }
 
 /* Select and Option overrides to avoid global colors */
