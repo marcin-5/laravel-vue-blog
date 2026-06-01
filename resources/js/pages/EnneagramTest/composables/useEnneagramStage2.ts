@@ -64,18 +64,6 @@ export function useEnneagramStage2(
 
     // --- Computed ---
     const currentInstinct = computed<Instinct>(() => (currentPart.value <= 2 ? dominantInstinct : secondaryInstinct));
-    const isPhase1 = computed(() => currentPart.value <= 2);
-
-    const currentPhaseScores = computed(() => {
-        const pA = isPhase1.value ? 1 : 3;
-        const pB = isPhase1.value ? 2 : 4;
-
-        const scores = createEmptyTypeScores();
-        for (const id of TYPE_IDS) {
-            scores[id] = (scoresPerPart.value[pA][id] ?? 0) + (scoresPerPart.value[pB][id] ?? 0);
-        }
-        return scores;
-    });
 
     const currentConfig = computed(() => config[`part${currentPart.value}` as keyof typeof config]);
 
@@ -91,7 +79,7 @@ export function useEnneagramStage2(
     });
 
     const leads = computed(() => {
-        const scores = currentPhaseScores.value;
+        const scores = scoresPerPart.value[currentPart.value];
         const config = currentConfig.value;
         const sorted = (Object.entries(scores) as [EnneagramType, number][])
             .map(([key, score]) => ({ key, score }))
@@ -206,7 +194,7 @@ export function useEnneagramStage2(
         if (!isCurrentPartTieBreaker()) return false;
         const noMoreQuestions = instinctPoolIndices.value[currentInstinct.value] >= partQuestions.value.length;
         if (noMoreQuestions) return false;
-        return !hasTieBreakingLead(currentPhaseScores.value);
+        return !hasTieBreakingLead(scoresPerPart.value[currentPart.value]);
     }
 
     function applyAnswersToScores(answers: SelectedAnswer[]) {
@@ -252,7 +240,7 @@ export function useEnneagramStage2(
 
         const reachedMax = currentIndex.value >= currentConfig.value.maxQuestions;
         const noMoreQuestions = instinctPoolIndices.value[currentInstinct.value] >= partQuestions.value.length;
-        const canEndEarly = !isCurrentPartTieBreaker() && hasTieBreakingLead(currentPhaseScores.value);
+        const canEndEarly = !isCurrentPartTieBreaker() && hasTieBreakingLead(scoresPerPart.value[currentPart.value]);
 
         if (!(reachedMax || noMoreQuestions || canEndEarly)) return;
 
