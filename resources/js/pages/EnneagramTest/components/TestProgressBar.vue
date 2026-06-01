@@ -78,7 +78,7 @@ const isExtra = computed(() => props.current > props.max);
 
             <!-- Min Questions marker -->
             <div
-                v-if="min !== undefined"
+                v-if="min !== undefined && min !== max"
                 :style="{ left: `${minPercent}%` }"
                 :title="t('min_questions_point')"
                 class="absolute top-0 z-10 h-full w-0.5 bg-green-500/50"
@@ -90,7 +90,7 @@ const isExtra = computed(() => props.current > props.max);
         <div class="relative mt-1 flex h-4 justify-between px-1 text-[10px] text-muted-foreground">
             <span>0</span>
             <span
-                v-if="min !== undefined"
+                v-if="min !== undefined && min !== max"
                 :style="{ left: `${minPercent}%`, transform: 'translateX(-50%)' }"
                 class="absolute font-medium whitespace-nowrap text-green-600"
             >
