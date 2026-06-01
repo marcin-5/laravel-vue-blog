@@ -15,6 +15,12 @@ export function isTopTwoTie(scores: InstinctScores): boolean {
     return values[0] === values[1];
 }
 
+export function getSortedScores(scores: InstinctScores): { key: Instinct; score: number }[] {
+    return (Object.entries(scores) as [Instinct, number][])
+        .map(([key, score]) => ({ key, score }))
+        .sort((a, b) => b.score - a.score);
+}
+
 export function getLeader(scores: InstinctScores): Instinct {
     return INSTINCTS.reduce((best, k) => ((scores[k] ?? 0) > (scores[best] ?? 0) ? k : best), INSTINCTS[0]);
 }

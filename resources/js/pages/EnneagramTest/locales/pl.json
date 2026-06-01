@@ -46,6 +46,9 @@
     "min_questions_point": "Punkt minimalnej liczby pytań",
     "target": "cel",
     "min": "min",
+    "lead_leader_vs_second": "Przewaga lidera nad następnym",
+    "lead_second_vs_third": "Przewaga drugiego nad ostatnim",
+    "lead_progress_desc": "Paski postępu obrazują dystans dzielący poszczególne instynkty od wymaganych progów różnicy.",
     "themes": {
         "light-standard": "Jasny (Standardowy)",
         "light-blue": "Jasny (Niebieski)",

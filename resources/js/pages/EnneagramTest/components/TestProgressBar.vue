@@ -2,6 +2,13 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+interface Lead {
+    label: string;
+    current: number;
+    target: number;
+    color?: string;
+}
+
 interface Props {
     current: number;
     min?: number;
@@ -9,6 +16,7 @@ interface Props {
     total: number;
     stage?: number;
     part?: number;
+    leads?: Lead[];
 }
 
 const props = defineProps<Props>();
@@ -52,28 +60,28 @@ const isExtra = computed(() => props.current > props.max);
 
         <div class="relative h-4 w-full overflow-hidden rounded-full border border-border bg-secondary/30">
             <!-- Standard progress -->
-            <div class="absolute top-0 left-0 h-full bg-primary transition-all duration-500 ease-out" :style="{ width: `${currentPercent}%` }"></div>
+            <div :style="{ width: `${currentPercent}%` }" class="absolute top-0 left-0 h-full bg-primary transition-all duration-500 ease-out"></div>
 
             <!-- Extra (tie-breaker) progress -->
             <div
-                class="absolute top-0 h-full bg-orange-400 transition-all duration-500 ease-out"
                 :style="{
                     left: `${maxPercent}%`,
                     width: `${extraPercent}%`,
                 }"
+                class="absolute top-0 h-full bg-orange-400 transition-all duration-500 ease-out"
             ></div>
 
             <!-- Max Questions marker -->
-            <div class="absolute top-0 z-10 h-full w-0.5 bg-foreground/50" :style="{ left: `${maxPercent}%` }" :title="t('tie_breaker_point')">
+            <div :style="{ left: `${maxPercent}%` }" :title="t('tie_breaker_point')" class="absolute top-0 z-10 h-full w-0.5 bg-foreground/50">
                 <div class="absolute -top-1 -left-1 h-2 w-2 rounded-full bg-foreground/50"></div>
             </div>
 
             <!-- Min Questions marker -->
             <div
                 v-if="min !== undefined"
-                class="absolute top-0 z-10 h-full w-0.5 bg-green-500/50"
                 :style="{ left: `${minPercent}%` }"
                 :title="t('min_questions_point')"
+                class="absolute top-0 z-10 h-full w-0.5 bg-green-500/50"
             >
                 <div class="absolute -bottom-1 -left-1 h-2 w-2 rounded-full bg-green-500/50"></div>
             </div>
@@ -92,6 +100,35 @@ const isExtra = computed(() => props.current > props.max);
                 {{ max }} ({{ t('target') }})
             </span>
             <span class="ml-auto">{{ total }}</span>
+        </div>
+
+        <!-- Lead indicators -->
+        <div v-if="leads && leads.length > 0" class="mt-4 space-y-3 rounded-lg border border-border/50 bg-secondary/10 p-2 md:p-3">
+            <div v-for="(lead, index) in leads" :key="index" class="space-y-1.5">
+                <div class="flex justify-between text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+                    <span class="flex items-center gap-1.5">
+                        <span :class="['h-2 w-2 rounded-full', lead.color || 'bg-primary']"></span>
+                        {{ lead.label }}
+                    </span>
+                    <span class="font-mono">{{ Math.max(0, lead.current) }} / {{ lead.target }}</span>
+                </div>
+                <div
+                    :title="`${lead.label}: ${lead.current}/${lead.target}`"
+                    class="relative h-2 w-full overflow-hidden rounded-full bg-secondary/30 shadow-inner"
+                >
+                    <div
+                        :class="[lead.color || 'bg-primary', lead.current >= lead.target ? 'animate-pulse' : '']"
+                        :style="{ width: `${Math.min(100, (Math.max(0, lead.current) / lead.target) * 100)}%` }"
+                        class="h-full transition-all duration-700 ease-out"
+                    ></div>
+
+                    <!-- Target marker -->
+                    <div class="absolute top-0 right-0 h-full w-px bg-foreground/20"></div>
+                </div>
+            </div>
+            <p v-if="leads.length > 0" class="mt-1 text-center text-[9px] text-muted/90 italic">
+                {{ t('lead_progress_desc') }}
+            </p>
         </div>
     </div>
 </template>

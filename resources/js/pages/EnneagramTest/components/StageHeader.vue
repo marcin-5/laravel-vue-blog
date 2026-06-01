@@ -13,6 +13,7 @@ type Props = {
     minQuestionsStandard?: number;
     maxQuestionsStandard?: number;
     totalPoolSize?: number;
+    leads?: any[];
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -36,6 +37,7 @@ const { t } = useI18n();
                 :part="part"
                 :stage="stage"
                 :total="totalPoolSize"
+                :leads="leads"
             />
         </div>
 

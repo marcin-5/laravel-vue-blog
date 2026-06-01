@@ -27,6 +27,8 @@ const {
     scoresPart1,
     scoresPart2,
     currentConfig,
+    minQuestions,
+    leads,
     maxAnswersPerQuestion,
     formattedDesc,
     partQuestions,
@@ -43,13 +45,6 @@ const {
     emit,
     computed(() => props.autoConfirmSingleEnabled ?? true),
 );
-
-const minQuestions = computed(() => {
-    const thresholdX = currentConfig.value.thresholdX ?? 0;
-    const answersPerQuestion = maxAnswersPerQuestion.value ?? 1;
-    if (thresholdX === 0) return 1;
-    return Math.ceil(thresholdX / answersPerQuestion);
-});
 </script>
 
 <template>
@@ -65,6 +60,7 @@ const minQuestions = computed(() => {
             :max-questions-standard="currentConfig.maxQuestions"
             :total-pool-size="partQuestions.length"
             :min-questions-standard="minQuestions"
+            :leads="leads"
         />
 
         <QuestionCard

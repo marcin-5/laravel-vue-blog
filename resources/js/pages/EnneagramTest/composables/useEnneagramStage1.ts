@@ -2,7 +2,7 @@ import { computed, ref, type Ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { SINGLE_ANSWER_AUTO_CONFIRM_DELAY_MS } from './shared/constants';
 import { isStage1Part1Question, isStage1Part2Question } from './shared/questionIds';
-import { createEmptyInstinctScores, determineSecondaryInstinct, getLeader, hasLead, isTopTwoTie } from './shared/scoring';
+import { createEmptyInstinctScores, determineSecondaryInstinct, getLeader, getSortedScores, hasLead, isTopTwoTie } from './shared/scoring';
 import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
 import type { CompleteStage1Results, Config, FlatOption, Instinct, InstinctScores, Question } from './shared/types';
 import { useAnswerSelection } from './shared/useAnswerSelection';
@@ -52,6 +52,52 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
     const currentQuestion = computed(() => partQuestions.value[currentIndex.value]);
 
     const formattedDesc = computed(() => t('max_answers', { maxAnswers: maxAnswersPerQuestion.value }));
+
+    const minQuestions = computed(() => {
+        const config = currentConfig.value;
+        if (currentPart.value === 2 && part1Winner.value) {
+            const leaderPart1ScoreInPart2 = scoresPart2.value[part1Winner.value] ?? 0;
+            if (leaderPart1ScoreInPart2 === 0 && config.thresholdY) {
+                return config.thresholdY;
+            }
+        }
+        return config.thresholdX ?? 0;
+    });
+
+    const leads = computed(() => {
+        const scores = currentScores.value;
+        const config = currentConfig.value;
+        const values = getSortedScores(scores);
+
+        const leader = values[0];
+        const second = values[1];
+        const third = values[2];
+
+        const results = [];
+
+        // Lead 1: Leader vs Second
+        let targetX = config.thresholdX ?? 0;
+        if (currentPart.value === 2 && part1Winner.value && (scores[part1Winner.value] ?? 0) === 0 && config.thresholdY) {
+            targetX = config.thresholdY;
+        }
+
+        results.push({
+            label: t('lead_leader_vs_second'),
+            current: leader.score - second.score,
+            target: targetX,
+            color: 'bg-secondary-foreground',
+        });
+
+        // Lead 2: Second vs Third
+        results.push({
+            label: t('lead_second_vs_third'),
+            current: second.score - third.score,
+            target: config.thresholdX ?? 0,
+            color: 'bg-foreground',
+        });
+
+        return results;
+    });
 
     const flatShuffledOptions = computed<FlatOption[]>(() => {
         const q = currentQuestion.value;
@@ -299,6 +345,8 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
         // Computed
         currentScores,
         currentConfig,
+        minQuestions,
+        leads,
         maxAnswersPerQuestion,
         formattedDesc,
         partQuestions,
