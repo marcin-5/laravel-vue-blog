@@ -21,6 +21,23 @@ interface Stage1Snapshot {
 
 type EmitFn = (event: 'complete', results: CompleteStage1Results) => void;
 
+function countDuplicateCategories(answers: SelectedAnswer[]): number {
+    const categories = answers.map((answer) => String(answer.category || answer.key));
+    const uniqueCategories = new Set(categories);
+
+    return answers.length - uniqueCategories.size;
+}
+
+function incrementScores(target: InstinctScores, answers: SelectedAnswer[]): void {
+    for (const answer of answers) {
+        const category = String(answer.category || answer.key) as Instinct;
+
+        if (target[category] !== undefined) {
+            target[category] += 1;
+        }
+    }
+}
+
 export function useEnneagramStage1(questions: Question[], config: Config['stages']['stage1'], emit: EmitFn, enableAutoConfirmSingle?: Ref<boolean>) {
     // --- State ---
     const currentIndex = ref(0);
@@ -193,21 +210,15 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
             doubleAnswersCountPart1.value = s.doubleAnswersCountPart1;
         },
         onConfirm: (answers: SelectedAnswer[]) => {
-            if (state.currentPart.value === 1) {
-                const categories = answers.map((a) => String(a.category || a.key));
-                const uniqueCategories = new Set(categories);
-                doubleAnswersCountPart1.value += answers.length - uniqueCategories.size;
+            const isPart1 = state.currentPart.value === 1;
+
+            if (isPart1) {
+                doubleAnswersCountPart1.value += countDuplicateCategories(answers);
             }
 
-            const target = state.currentPart.value === 1 ? scoresPart1.value : scoresPart2.value;
-            for (const answer of answers) {
-                const category = String(answer.category || answer.key);
-                if (target[category as Instinct] !== undefined) {
-                    target[category as Instinct] += 1;
-                }
-            }
+            incrementScores(isPart1 ? scoresPart1.value : scoresPart2.value, answers);
 
-            if (state.currentPart.value === 1) {
+            if (isPart1) {
                 answeredCountPart1.value += 1;
             } else {
                 answeredCountPart2.value += 1;

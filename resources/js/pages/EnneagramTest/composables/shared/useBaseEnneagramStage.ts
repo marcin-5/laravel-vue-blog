@@ -1,5 +1,5 @@
-import { computed, ref, type Ref, type ComputedRef } from 'vue';
-import type { PartConfig, FlatOption, SelectedAnswer } from './types';
+import { computed, type ComputedRef, ref, type Ref } from 'vue';
+import type { FlatOption, PartConfig, SelectedAnswer } from './types';
 import { useAnswerSelection } from './useAnswerSelection';
 import { useHistory } from './useHistory';
 
@@ -26,38 +26,18 @@ export function useBaseEnneagramStage<TSnapshot>(factory: (state: BaseStageState
     const skips = ref(0);
     const shuffledPerQuestion = ref<Record<string, FlatOption[]>>({});
 
-    // We need to pass a partial state to the factory or just use a proxy-like approach.
-    // However, getPartConfig is needed for currentConfig.
-    // Let's first create a minimal state and then initialize props.
+    const propsRef = {} as { value: BaseStageProps<TSnapshot> };
 
-    // To avoid chicken-and-egg problem, we need to know getPartConfig before currentConfig.
-    // But getPartConfig is in props.
-    
-    // Actually, we can just define a dummy currentConfig and update it, 
-    // but better to just pass what's needed.
-    
-    // Revised approach: factory takes the refs, and we build props from them.
-    const stateRefs = {
+    const currentConfig = computed(() => propsRef.value.getPartConfig(currentPart.value));
+
+    propsRef.value = factory({
         currentPart,
         skips,
         shuffledPerQuestion,
-    };
+        currentConfig,
+    });
 
-    // We need props to get getPartConfig for currentConfig.
-    // So we call factory first, but it needs currentConfig... 
-    // This is still tricky if currentConfig is in state.
-    
-    // Let's change BaseStageState to NOT include currentConfig if it's derived.
-    // Or just pass a function to get it.
-    
-    const props = factory({
-        ...stateRefs,
-        get currentConfig() {
-            return currentConfig;
-        }
-    } as BaseStageState);
-
-    const currentConfig = computed(() => props.getPartConfig(currentPart.value));
+    const props = propsRef.value;
 
     const {
         selectedAnswers,
@@ -71,14 +51,13 @@ export function useBaseEnneagramStage<TSnapshot>(factory: (state: BaseStageState
         autoConfirmDelayMs: props.autoConfirmDelayMs,
     });
 
-    const {
-        history,
-        recordAnswer,
-        recordSkip,
-        pop: popHistory,
-    } = useHistory<TSnapshot>(props.createSnapshot, props.restoreSnapshot);
+    const { history, recordAnswer, recordSkip, pop: popHistory } = useHistory<TSnapshot>(props.createSnapshot, props.restoreSnapshot);
 
-    const canSkip = computed(() => selectedAnswers.value.length === 0 && (currentConfig.value.maxSkips === undefined || skips.value < currentConfig.value.maxSkips));
+    const hasReachedMaxSkips = computed(() => {
+        return currentConfig.value.maxSkips !== undefined && skips.value >= currentConfig.value.maxSkips;
+    });
+
+    const canSkip = computed(() => selectedAnswers.value.length === 0 && !hasReachedMaxSkips.value);
 
     function confirmAnswers() {
         if (selectedAnswers.value.length === 0 && !canSkip.value) {
@@ -92,7 +71,7 @@ export function useBaseEnneagramStage<TSnapshot>(factory: (state: BaseStageState
     }
 
     function handleSkip() {
-        if (currentConfig.value.maxSkips !== undefined && skips.value >= currentConfig.value.maxSkips) {
+        if (hasReachedMaxSkips.value) {
             return;
         }
 
@@ -103,9 +82,11 @@ export function useBaseEnneagramStage<TSnapshot>(factory: (state: BaseStageState
 
     function goBack() {
         const last = popHistory();
+
         if (!last) {
             return;
         }
+
         skips.value = last.skipsAtThisPoint;
         selectedAnswers.value = last.type === 'answer' ? [...last.answers] : [];
     }

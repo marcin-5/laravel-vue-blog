@@ -3,7 +3,16 @@ import { useI18n } from 'vue-i18n';
 import { type EnneagramType, TYPE_IDS } from './shared/constants';
 import { hasLead as hasScoringLead, isTopTwoTie as isScoringTiedAtTop } from './shared/scoring';
 import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
-import type { CompleteStage1Results, Config, FlatOption, Instinct, PartConfig, Question, SelectedAnswer, Stage2Results } from './shared/types';
+import type {
+    CompleteStage1Results,
+    Config,
+    FlatOption,
+    Instinct,
+    PartConfig,
+    Question,
+    SelectedAnswer,
+    Stage2Results
+} from './shared/types';
 import { useBaseEnneagramStage } from './shared/useBaseEnneagramStage';
 
 interface Stage2Snapshot {
@@ -27,6 +36,20 @@ const LAST_PART = 4;
 
 function createEmptyTypeScores(): Record<EnneagramType, number> {
     return TYPE_IDS.reduce((acc, id) => ({ ...acc, [id]: 0 }), {} as Record<EnneagramType, number>);
+}
+
+function cloneScoresPerPart(scores: Record<number, Record<EnneagramType, number>>): Record<number, Record<EnneagramType, number>> {
+    return Object.fromEntries(Object.entries(scores).map(([part, partScores]) => [Number(part), { ...partScores }])) as Record<
+        number,
+        Record<EnneagramType, number>
+    >;
+}
+
+function countDuplicateCategories(answers: SelectedAnswer[]): number {
+    const categories = answers.map((answer) => String(answer.category || answer.key));
+    const uniqueCategories = new Set(categories);
+
+    return answers.length - uniqueCategories.size;
 }
 
 export function useEnneagramStage2(
@@ -147,16 +170,17 @@ export function useEnneagramStage2(
         getPartConfig: (part) => config[`part${part}` as keyof typeof config],
         createSnapshot: () => {
             const instinct = getInstinct(state.currentPart.value);
+
             return {
                 part: state.currentPart.value,
                 index: currentIndex.value,
                 typeScores: { ...typeScores.value },
-                scoresPerPart: JSON.parse(JSON.stringify(scoresPerPart.value)),
+                scoresPerPart: cloneScoresPerPart(scoresPerPart.value),
                 selectedInPart1: Array.from(selectedInPart1.value),
                 selectedInPart3: Array.from(selectedInPart3.value),
                 skips: state.skips.value,
                 poolIndex: instinctPoolIndices.value[instinct],
-                instinct: instinct,
+                instinct,
                 bonusPointsPerPart: { ...bonusPointsPerPart.value },
             };
         },
@@ -165,18 +189,14 @@ export function useEnneagramStage2(
             currentIndex.value = s.index;
             state.skips.value = s.skips;
             typeScores.value = { ...s.typeScores };
-            scoresPerPart.value = JSON.parse(JSON.stringify(s.scoresPerPart));
+            scoresPerPart.value = cloneScoresPerPart(s.scoresPerPart);
             selectedInPart1.value = new Set(s.selectedInPart1);
             selectedInPart3.value = new Set(s.selectedInPart3);
             bonusPointsPerPart.value = { ...s.bonusPointsPerPart };
-            // Restore pool index using captured instinct to avoid reliance on currentInstinct order.
             instinctPoolIndices.value[s.instinct] = s.poolIndex;
         },
         onConfirm: (answers: SelectedAnswer[]) => {
-            // Calculate bonus points for multiple answers of the same category
-            const categories = answers.map((a) => String(a.category || a.key));
-            const uniqueCategories = new Set(categories);
-            bonusPointsPerPart.value[state.currentPart.value] += answers.length - uniqueCategories.size;
+            bonusPointsPerPart.value[state.currentPart.value] += countDuplicateCategories(answers);
 
             applyAnswersToScores(answers, state.currentPart.value);
         },
