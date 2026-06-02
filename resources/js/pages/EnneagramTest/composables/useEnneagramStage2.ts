@@ -1,4 +1,4 @@
-import { computed, ComputedRef, ref, type Ref } from 'vue';
+import { computed, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { answerCategory, countDuplicateAnswerCategories } from './shared/answers';
 import { type EnneagramType } from './shared/constants';
@@ -8,7 +8,7 @@ import {
     createEmptyTypeScores,
     hasLead as hasScoringLead,
     incrementScore,
-    isTopTwoTie as isScoringTiedAtTop,
+    isTopTwoTie as isScoringTiedAtTop
 } from './shared/scoring';
 import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
 import type {
@@ -21,14 +21,14 @@ import type {
     SelectedAnswer,
     Stage2Results
 } from './shared/types';
-import { useBaseEnneagramStage } from './shared/useBaseEnneagramStage';
+import { type BaseStageState, useBaseEnneagramStage } from './shared/useBaseEnneagramStage';
 
 interface Stage2Snapshot {
     part: number;
     index: number;
     typeScores: Record<EnneagramType, number>;
     scoresPerPart: Record<number, Record<EnneagramType, number>>;
-    selectedInPart1: string[]; // Sets are serialized as arrays for snapshot simplicity
+    selectedInPart1: string[];
     selectedInPart3: string[];
     skips: number;
     poolIndex: number;
@@ -37,6 +37,8 @@ interface Stage2Snapshot {
 }
 
 type Stage2Emit = (event: 'complete', results: Stage2Results) => void;
+type StageTransitionState = Pick<BaseStageState, 'currentPart' | 'skips'>;
+type StageFlowState = Pick<BaseStageState, 'currentPart' | 'skips' | 'currentConfig'>;
 
 const DEFAULT_DOMINANT: Instinct = 'sp';
 const DEFAULT_SECONDARY: Instinct = 'so';
@@ -120,7 +122,7 @@ export function useEnneagramStage2(
         return false;
     }
 
-    function moveToNextAvailablePart(state: { currentPart: Ref<number>; skips: Ref<number> }): boolean {
+    function moveToNextAvailablePart(state: StageTransitionState): boolean {
         while (state.currentPart.value < LAST_PART) {
             state.currentPart.value++;
 
@@ -134,7 +136,7 @@ export function useEnneagramStage2(
         return false;
     }
 
-    function advance(state: { currentPart: Ref<number>; skips: Ref<number>; currentConfig: ComputedRef<PartConfig> }, isAnswer = true) {
+    function advance(state: StageFlowState, isAnswer = true) {
         const part = state.currentPart.value;
         const config = state.currentConfig.value;
         const instinct = getInstinct(part);

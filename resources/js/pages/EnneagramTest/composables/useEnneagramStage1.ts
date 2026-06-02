@@ -1,4 +1,4 @@
-import { computed, ComputedRef, ref, type Ref, watch } from 'vue';
+import { computed, ref, type Ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { answerCategory, countDuplicateAnswerCategories } from './shared/answers';
 import { SINGLE_ANSWER_AUTO_CONFIRM_DELAY_MS } from './shared/constants';
@@ -14,7 +14,7 @@ import {
 } from './shared/scoring';
 import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
 import type { CompleteStage1Results, Config, FlatOption, Instinct, InstinctScores, PartConfig, Question, SelectedAnswer } from './shared/types';
-import { useBaseEnneagramStage } from './shared/useBaseEnneagramStage';
+import { type BaseStageState, useBaseEnneagramStage } from './shared/useBaseEnneagramStage';
 
 interface Stage1Snapshot {
     part: number;
@@ -29,6 +29,8 @@ interface Stage1Snapshot {
 }
 
 type EmitFn = (event: 'complete', results: CompleteStage1Results) => void;
+type StageTransitionState = Pick<BaseStageState, 'currentPart' | 'skips'>;
+type StageFlowState = Pick<BaseStageState, 'currentPart' | 'skips' | 'currentConfig'>;
 
 function incrementScores(target: InstinctScores, answers: SelectedAnswer[]): void {
     for (const answer of answers) {
@@ -69,7 +71,7 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
         indexRef.value = Math.min(indexRef.value + 1, pool.length - 1);
     }
 
-    function moveToPart2(state: { currentPart: Ref<number>; skips: Ref<number> }, clearSelection?: () => void): void {
+    function moveToPart2(state: StageTransitionState, clearSelection?: () => void): void {
         part1Winner.value = getLeader(scoresPart1.value);
         state.currentPart.value = 2;
         currentIndex.value = 0;
@@ -155,11 +157,7 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
         );
     }
 
-    function advanceFlow(
-        state: { currentPart: Ref<number>; skips: Ref<number>; currentConfig: ComputedRef<PartConfig> },
-        isAnswer: boolean,
-        clearSelection?: () => void,
-    ) {
+    function advanceFlow(state: StageFlowState, isAnswer: boolean, clearSelection?: () => void) {
         const part = state.currentPart.value;
         const config = state.currentConfig.value;
 
