@@ -40,9 +40,40 @@ type Stage2Emit = (event: 'complete', results: Stage2Results) => void;
 type StageTransitionState = Pick<BaseStageState, 'currentPart' | 'skips'>;
 type StageFlowState = Pick<BaseStageState, 'currentPart' | 'skips' | 'currentConfig'>;
 
+interface Stage2Instincts {
+    dominant: Instinct;
+    secondary: Instinct;
+}
+
+interface Stage2Pools {
+    dominant: Question[];
+    secondary: Question[];
+}
+
 const DEFAULT_DOMINANT: Instinct = 'sp';
 const DEFAULT_SECONDARY: Instinct = 'so';
 const LAST_PART = 4;
+
+function resolveStage2Instincts(resultsStage1: CompleteStage1Results): Stage2Instincts {
+    if (resultsStage1.isUnresolvable) {
+        return {
+            dominant: DEFAULT_DOMINANT,
+            secondary: DEFAULT_SECONDARY,
+        };
+    }
+
+    return {
+        dominant: resultsStage1.dominant ?? DEFAULT_DOMINANT,
+        secondary: resultsStage1.secondary ?? DEFAULT_SECONDARY,
+    };
+}
+
+function createStage2Pools(questions: Question[], instincts: Stage2Instincts): Stage2Pools {
+    return {
+        dominant: shuffleByPriority(questions.filter((question) => question.id.startsWith(`${instincts.dominant}-`))),
+        secondary: shuffleByPriority(questions.filter((question) => question.id.startsWith(`${instincts.secondary}-`))),
+    };
+}
 
 export function useEnneagramStage2(
     questions: Question[],
@@ -51,8 +82,8 @@ export function useEnneagramStage2(
     emit?: Stage2Emit,
     enableAutoConfirmSingle?: Ref<boolean>,
 ) {
-    const dominantInstinct: Instinct = resultsStage1.isUnresolvable ? DEFAULT_DOMINANT : (resultsStage1.dominant ?? DEFAULT_DOMINANT);
-    const secondaryInstinct: Instinct = resultsStage1.isUnresolvable ? DEFAULT_SECONDARY : (resultsStage1.secondary ?? DEFAULT_SECONDARY);
+    const instincts = resolveStage2Instincts(resultsStage1);
+    const pools = createStage2Pools(questions, instincts);
 
     const { t } = useI18n();
 
@@ -70,16 +101,13 @@ export function useEnneagramStage2(
     const bonusPointsPerPart = ref<Record<number, number>>({ 1: 0, 2: 0, 3: 0, 4: 0 });
 
     const instinctPoolIndices = ref<Record<string, number>>({
-        [dominantInstinct]: 0,
-        [secondaryInstinct]: 0,
+        [instincts.dominant]: 0,
+        [instincts.secondary]: 0,
     });
 
-    const dominantPool = shuffleByPriority(questions.filter((q) => q.id.startsWith(`${dominantInstinct}-`)));
-    const secondaryPool = shuffleByPriority(questions.filter((q) => q.id.startsWith(`${secondaryInstinct}-`)));
-
     // --- Helpers ---
-    const getInstinct = (part: number) => (part <= 2 ? dominantInstinct : secondaryInstinct);
-    const getPartQuestions = (part: number) => (part <= 2 ? dominantPool : secondaryPool);
+    const getInstinct = (part: number) => (part <= 2 ? instincts.dominant : instincts.secondary);
+    const getPartQuestions = (part: number) => (part <= 2 ? pools.dominant : pools.secondary);
 
     function hasTieBreakingLead(scores: Record<EnneagramType, number>, config: PartConfig): boolean {
         const requiredLead = config.minLead ?? 2;
@@ -136,7 +164,51 @@ export function useEnneagramStage2(
         return false;
     }
 
-    function advance(state: StageFlowState, isAnswer = true) {
+    function completeStage2(): void {
+        const isUnresolvable = isScoringTiedAtTop(typeScores.value);
+
+        emit?.('complete', {
+            typeScores: { ...typeScores.value },
+            scoresPerPart: cloneScoresPerPart(scoresPerPart.value),
+            isUnresolvable,
+        });
+    }
+
+    function createStage2Snapshot(state: StageFlowState): Stage2Snapshot {
+        const instinct = getInstinct(state.currentPart.value);
+
+        return {
+            part: state.currentPart.value,
+            index: currentIndex.value,
+            typeScores: { ...typeScores.value },
+            scoresPerPart: cloneScoresPerPart(scoresPerPart.value),
+            selectedInPart1: Array.from(selectedInPart1.value),
+            selectedInPart3: Array.from(selectedInPart3.value),
+            skips: state.skips.value,
+            poolIndex: instinctPoolIndices.value[instinct],
+            instinct,
+            bonusPointsPerPart: { ...bonusPointsPerPart.value },
+        };
+    }
+
+    function restoreStage2Snapshot(state: StageFlowState, snapshot: Stage2Snapshot): void {
+        state.currentPart.value = snapshot.part;
+        currentIndex.value = snapshot.index;
+        state.skips.value = snapshot.skips;
+        typeScores.value = { ...snapshot.typeScores };
+        scoresPerPart.value = cloneScoresPerPart(snapshot.scoresPerPart);
+        selectedInPart1.value = new Set(snapshot.selectedInPart1);
+        selectedInPart3.value = new Set(snapshot.selectedInPart3);
+        bonusPointsPerPart.value = { ...snapshot.bonusPointsPerPart };
+        instinctPoolIndices.value[snapshot.instinct] = snapshot.poolIndex;
+    }
+
+    function handleStage2Confirm(state: StageFlowState, answers: SelectedAnswer[]): void {
+        bonusPointsPerPart.value[state.currentPart.value] += countDuplicateAnswerCategories(answers);
+        applyAnswersToScores(answers, state.currentPart.value);
+    }
+
+    function advanceStage2Flow(state: StageFlowState, isAnswer = true): void {
         const part = state.currentPart.value;
         const config = state.currentConfig.value;
         const instinct = getInstinct(part);
@@ -160,53 +232,17 @@ export function useEnneagramStage2(
             return;
         }
 
-        const isUnresolvable = isScoringTiedAtTop(typeScores.value);
-        emit?.('complete', {
-            typeScores: { ...typeScores.value },
-            scoresPerPart: cloneScoresPerPart(scoresPerPart.value),
-            isUnresolvable,
-        });
+        completeStage2();
     }
 
     const getPartConfig = (part: number) => config[`part${part}` as keyof typeof config];
 
     // --- Base Composable ---
     const base = useBaseEnneagramStage<Stage2Snapshot>(getPartConfig, (state) => ({
-        createSnapshot: () => {
-            const instinct = getInstinct(state.currentPart.value);
-
-            return {
-                part: state.currentPart.value,
-                index: currentIndex.value,
-                typeScores: { ...typeScores.value },
-                scoresPerPart: cloneScoresPerPart(scoresPerPart.value),
-                selectedInPart1: Array.from(selectedInPart1.value),
-                selectedInPart3: Array.from(selectedInPart3.value),
-                skips: state.skips.value,
-                poolIndex: instinctPoolIndices.value[instinct],
-                instinct,
-                bonusPointsPerPart: { ...bonusPointsPerPart.value },
-            };
-        },
-        restoreSnapshot: (s) => {
-            state.currentPart.value = s.part;
-            currentIndex.value = s.index;
-            state.skips.value = s.skips;
-            typeScores.value = { ...s.typeScores };
-            scoresPerPart.value = cloneScoresPerPart(s.scoresPerPart);
-            selectedInPart1.value = new Set(s.selectedInPart1);
-            selectedInPart3.value = new Set(s.selectedInPart3);
-            bonusPointsPerPart.value = { ...s.bonusPointsPerPart };
-            instinctPoolIndices.value[s.instinct] = s.poolIndex;
-        },
-        onConfirm: (answers: SelectedAnswer[]) => {
-            bonusPointsPerPart.value[state.currentPart.value] += countDuplicateAnswerCategories(answers);
-
-            applyAnswersToScores(answers, state.currentPart.value);
-        },
-        onAdvance: (isAnswer: boolean) => {
-            advance(state, isAnswer);
-        },
+        createSnapshot: () => createStage2Snapshot(state),
+        restoreSnapshot: (snapshot) => restoreStage2Snapshot(state, snapshot),
+        onConfirm: (answers) => handleStage2Confirm(state, answers),
+        onAdvance: (isAnswer) => advanceStage2Flow(state, isAnswer),
         enableAutoConfirmSingle,
     }));
 
