@@ -1,9 +1,17 @@
-import { answerCategory, countDuplicateAnswerCategories } from '@/pages/EnneagramTest/composables/shared/answers';
 import { computed, ComputedRef, ref, type Ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { answerCategory, countDuplicateAnswerCategories } from './shared/answers';
 import { SINGLE_ANSWER_AUTO_CONFIRM_DELAY_MS } from './shared/constants';
 import { isStage1Part1Question, isStage1Part2Question } from './shared/questionIds';
-import { createEmptyInstinctScores, determineSecondaryInstinct, getLeader, getSortedScores, hasLead, isTopTwoTie } from './shared/scoring';
+import {
+    createEmptyInstinctScores,
+    determineSecondaryInstinct,
+    getLeader,
+    getSortedScores,
+    hasLead,
+    incrementScore,
+    isTopTwoTie,
+} from './shared/scoring';
 import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
 import type { CompleteStage1Results, Config, FlatOption, Instinct, InstinctScores, PartConfig, Question, SelectedAnswer } from './shared/types';
 import { useBaseEnneagramStage } from './shared/useBaseEnneagramStage';
@@ -27,7 +35,7 @@ function incrementScores(target: InstinctScores, answers: SelectedAnswer[]): voi
         const category = answerCategory(answer) as Instinct;
 
         if (target[category] !== undefined) {
-            target[category] += 1;
+            incrementScore(target, category);
         }
     }
 }

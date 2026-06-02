@@ -1,7 +1,30 @@
+import { type EnneagramType, TYPE_IDS } from './constants';
 import { type Instinct, INSTINCTS, type InstinctScores } from './types';
 
 export function createEmptyInstinctScores(): InstinctScores {
     return { sp: 0, so: 0, sx: 0 };
+}
+
+export function createEmptyTypeScores(): Record<EnneagramType, number> {
+    return TYPE_IDS.reduce(
+        (scores, type) => {
+            scores[type] = 0;
+
+            return scores;
+        },
+        {} as Record<EnneagramType, number>,
+    );
+}
+
+export function cloneScoresPerPart<K extends string>(scores: Record<number, Record<K, number>>): Record<number, Record<K, number>> {
+    return Object.fromEntries(Object.entries(scores).map(([part, partScores]) => [Number(part), { ...partScores }])) as Record<
+        number,
+        Record<K, number>
+    >;
+}
+
+export function incrementScore<K extends string>(scores: Record<K, number>, key: K, amount = 1): void {
+    scores[key] = (scores[key] ?? 0) + amount;
 }
 
 /**

@@ -1,8 +1,14 @@
 import { computed, ComputedRef, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { answerCategory, countDuplicateAnswerCategories } from './shared/answers';
-import { type EnneagramType, TYPE_IDS } from './shared/constants';
-import { hasLead as hasScoringLead, isTopTwoTie as isScoringTiedAtTop } from './shared/scoring';
+import { type EnneagramType } from './shared/constants';
+import {
+    cloneScoresPerPart,
+    createEmptyTypeScores,
+    hasLead as hasScoringLead,
+    incrementScore,
+    isTopTwoTie as isScoringTiedAtTop
+} from './shared/scoring';
 import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
 import type {
     CompleteStage1Results,
@@ -34,17 +40,6 @@ type Stage2Emit = (event: 'complete', results: Stage2Results) => void;
 const DEFAULT_DOMINANT: Instinct = 'sp';
 const DEFAULT_SECONDARY: Instinct = 'so';
 const LAST_PART = 4;
-
-function createEmptyTypeScores(): Record<EnneagramType, number> {
-    return TYPE_IDS.reduce((acc, id) => ({ ...acc, [id]: 0 }), {} as Record<EnneagramType, number>);
-}
-
-function cloneScoresPerPart(scores: Record<number, Record<EnneagramType, number>>): Record<number, Record<EnneagramType, number>> {
-    return Object.fromEntries(Object.entries(scores).map(([part, partScores]) => [Number(part), { ...partScores }])) as Record<
-        number,
-        Record<EnneagramType, number>
-    >;
-}
 
 export function useEnneagramStage2(
     questions: Question[],
@@ -105,8 +100,8 @@ export function useEnneagramStage2(
         for (const answer of answers) {
             const category = answerCategory(answer) as EnneagramType;
 
-            typeScores.value[category] = (typeScores.value[category] ?? 0) + 1;
-            scoresPerPart.value[part][category] = (scoresPerPart.value[part][category] ?? 0) + 1;
+            incrementScore(typeScores.value, category);
+            incrementScore(scoresPerPart.value[part], category);
 
             if (part === 1) {
                 selectedInPart1.value.add(category);
