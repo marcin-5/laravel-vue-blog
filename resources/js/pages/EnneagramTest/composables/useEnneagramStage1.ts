@@ -4,10 +4,10 @@ import { answerCategory, countDuplicateAnswerCategories } from './shared/answers
 import { SINGLE_ANSWER_AUTO_CONFIRM_DELAY_MS } from './shared/constants';
 import { isStage1Part1Question, isStage1Part2Question } from './shared/questionIds';
 import {
+    buildTopThreeLeadIndicators,
     createEmptyInstinctScores,
     determineSecondaryInstinct,
     getLeader,
-    getSortedScores,
     hasLead,
     incrementScore,
     isTopTwoTie,
@@ -291,36 +291,24 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
     const leads = computed(() => {
         const scores = currentScores.value;
         const config = currentConfig.value;
-        const values = getSortedScores(scores);
 
-        const leader = values[0];
-        const second = values[1];
-        const third = values[2];
+        let leaderVsSecondTarget = config.minLead ?? 0;
 
-        const results = [];
-
-        // Lead 1: Leader vs Second
-        let requiredLead = config.minLead ?? 0;
         if (currentPart.value === 2 && part1Winner.value && (scores[part1Winner.value] ?? 0) === 0 && config.minLeadAlternative) {
-            requiredLead = config.minLeadAlternative;
+            leaderVsSecondTarget = config.minLeadAlternative;
         }
 
-        results.push({
-            label: t('lead_leader_vs_second'),
-            current: leader.score - second.score,
-            target: requiredLead,
-            color: 'bg-secondary-foreground',
-        });
-
-        // Lead 2: Second vs Third
-        results.push({
-            label: t('lead_second_vs_third'),
-            current: second.score - third.score,
-            target: config.minLead ?? 0,
-            color: 'bg-foreground',
-        });
-
-        return results;
+        return buildTopThreeLeadIndicators(
+            scores,
+            {
+                leaderVsSecond: t('lead_leader_vs_second'),
+                secondVsThird: t('lead_second_vs_third'),
+            },
+            {
+                leaderVsSecond: leaderVsSecondTarget,
+                secondVsThird: config.minLead ?? 0,
+            },
+        );
     });
 
     const flatShuffledOptions = computed<FlatOption[]>(() => {

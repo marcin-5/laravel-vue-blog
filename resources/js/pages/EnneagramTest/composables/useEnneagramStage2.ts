@@ -3,11 +3,12 @@ import { useI18n } from 'vue-i18n';
 import { answerCategory, countDuplicateAnswerCategories } from './shared/answers';
 import { type EnneagramType } from './shared/constants';
 import {
+    buildTopThreeLeadIndicators,
     cloneScoresPerPart,
     createEmptyTypeScores,
     hasLead as hasScoringLead,
     incrementScore,
-    isTopTwoTie as isScoringTiedAtTop
+    isTopTwoTie as isScoringTiedAtTop,
 } from './shared/scoring';
 import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
 import type {
@@ -236,34 +237,19 @@ export function useEnneagramStage2(
     });
 
     const leads = computed(() => {
-        const scores = scoresPerPart.value[currentPart.value];
-        const config = currentConfig.value;
-        const sorted = (Object.entries(scores) as [EnneagramType, number][])
-            .map(([key, score]) => ({ key, score }))
-            .sort((a, b) => b.score - a.score);
+        const requiredLead = currentConfig.value.minLead ?? 2;
 
-        const leader = sorted[0];
-        const second = sorted[1];
-        const third = sorted[2];
-
-        const results = [];
-        const requiredLead = config.minLead ?? 2;
-
-        results.push({
-            label: t('lead_leader_vs_second'),
-            current: leader.score - second.score,
-            target: requiredLead,
-            color: 'bg-secondary-foreground',
-        });
-
-        results.push({
-            label: t('lead_second_vs_third'),
-            current: second.score - third.score,
-            target: requiredLead,
-            color: 'bg-foreground',
-        });
-
-        return results;
+        return buildTopThreeLeadIndicators(
+            scoresPerPart.value[currentPart.value],
+            {
+                leaderVsSecond: t('lead_leader_vs_second'),
+                secondVsThird: t('lead_second_vs_third'),
+            },
+            {
+                leaderVsSecond: requiredLead,
+                secondVsThird: requiredLead,
+            },
+        );
     });
 
     // --- Flat options with per-part filtering ---

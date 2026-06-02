@@ -1,13 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-
-interface Lead {
-    label: string;
-    current: number;
-    target: number;
-    color?: string;
-}
+import type { LeadIndicator } from '../composables/shared/types';
 
 interface Props {
     current: number;
@@ -16,7 +10,7 @@ interface Props {
     total: number;
     stage?: number;
     part?: number;
-    leads?: Lead[];
+    leads?: LeadIndicator[];
 }
 
 const props = defineProps<Props>();
@@ -38,7 +32,7 @@ function toPercent(value: number): number {
     return Math.min((value / props.total) * 100, 100);
 }
 
-function leadPercent(lead: Lead): number {
+function leadPercent(lead: LeadIndicator): number {
     if (lead.target <= 0) {
         return 0;
     }

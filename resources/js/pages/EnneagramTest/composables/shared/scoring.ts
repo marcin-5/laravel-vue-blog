@@ -1,5 +1,5 @@
 import { type EnneagramType, TYPE_IDS } from './constants';
-import { type Instinct, INSTINCTS, type InstinctScores } from './types';
+import { type Instinct, INSTINCTS, type InstinctScores, type LeadIndicator } from './types';
 
 export function createEmptyInstinctScores(): InstinctScores {
     return { sp: 0, so: 0, sx: 0 };
@@ -59,6 +59,35 @@ export function isTopTwoTie<K extends string>(scores: Record<K, number>, keys?: 
  */
 export function getSortedScores<K extends string>(scores: Record<K, number>): { key: K; score: number }[] {
     return (Object.entries(scores) as [K, number][]).map(([key, score]) => ({ key, score })).sort((a, b) => b.score - a.score);
+}
+
+export function buildTopThreeLeadIndicators<K extends string>(
+    scores: Record<K, number>,
+    labels: {
+        leaderVsSecond: string;
+        secondVsThird: string;
+    },
+    targets: {
+        leaderVsSecond: number;
+        secondVsThird: number;
+    },
+): LeadIndicator[] {
+    const [leader, second, third] = getSortedScores(scores);
+
+    return [
+        {
+            label: labels.leaderVsSecond,
+            current: leader.score - second.score,
+            target: targets.leaderVsSecond,
+            color: 'bg-secondary-foreground',
+        },
+        {
+            label: labels.secondVsThird,
+            current: second.score - third.score,
+            target: targets.secondVsThird,
+            color: 'bg-foreground',
+        },
+    ];
 }
 
 /**

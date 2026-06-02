@@ -16,6 +16,13 @@ export interface SelectedAnswer {
     category: string;
 }
 
+export interface LeadIndicator {
+    label: string;
+    current: number;
+    target: number;
+    color?: string;
+}
+
 export interface BaseHistoryItem<TSnapshot> {
     part: number;
     type: 'answer' | 'skip';
