@@ -10,10 +10,19 @@ import {
     getLeader,
     hasLead,
     incrementScore,
-    isTopTwoTie,
+    isTopTwoTie
 } from './shared/scoring';
 import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
-import type { CompleteStage1Results, Config, FlatOption, Instinct, InstinctScores, PartConfig, Question, SelectedAnswer } from './shared/types';
+import type {
+    CompleteStage1Results,
+    Config,
+    FlatOption,
+    Instinct,
+    InstinctScores,
+    PartConfig,
+    Question,
+    SelectedAnswer
+} from './shared/types';
 import { type BaseStageState, useBaseEnneagramStage } from './shared/useBaseEnneagramStage';
 
 interface Stage1Snapshot {
@@ -157,7 +166,49 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
         );
     }
 
-    function advanceFlow(state: StageFlowState, isAnswer: boolean, clearSelection?: () => void) {
+    function createStage1Snapshot(state: StageFlowState): Stage1Snapshot {
+        return {
+            part: state.currentPart.value,
+            index: currentIndex.value,
+            scoresPart1: { ...scoresPart1.value },
+            scoresPart2: { ...scoresPart2.value },
+            answered1: answeredCountPart1.value,
+            answered2: answeredCountPart2.value,
+            part1Winner: part1Winner.value,
+            extraAskedPart2: extraAskedPart2.value,
+            doubleAnswersCountPart1: doubleAnswersCountPart1.value,
+        };
+    }
+
+    function restoreStage1Snapshot(state: StageFlowState, snapshot: Stage1Snapshot): void {
+        state.currentPart.value = snapshot.part;
+        currentIndex.value = snapshot.index;
+        scoresPart1.value = { ...snapshot.scoresPart1 };
+        scoresPart2.value = { ...snapshot.scoresPart2 };
+        answeredCountPart1.value = snapshot.answered1;
+        answeredCountPart2.value = snapshot.answered2;
+        part1Winner.value = snapshot.part1Winner;
+        extraAskedPart2.value = snapshot.extraAskedPart2;
+        doubleAnswersCountPart1.value = snapshot.doubleAnswersCountPart1;
+    }
+
+    function handleStage1Confirm(state: StageFlowState, answers: SelectedAnswer[]): void {
+        const isPart1 = state.currentPart.value === 1;
+
+        if (isPart1) {
+            doubleAnswersCountPart1.value += countDuplicateAnswerCategories(answers);
+        }
+
+        incrementScores(isPart1 ? scoresPart1.value : scoresPart2.value, answers);
+
+        if (isPart1) {
+            answeredCountPart1.value += 1;
+        } else {
+            answeredCountPart2.value += 1;
+        }
+    }
+
+    function advanceStage1Flow(state: StageFlowState, isAnswer: boolean, clearSelection?: () => void): void {
         const part = state.currentPart.value;
         const config = state.currentConfig.value;
 
@@ -188,46 +239,10 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
 
     // --- Base Composable ---
     const base = useBaseEnneagramStage<Stage1Snapshot>(getPartConfig, (state) => ({
-        createSnapshot: () => ({
-            part: state.currentPart.value,
-            index: currentIndex.value,
-            scoresPart1: { ...scoresPart1.value },
-            scoresPart2: { ...scoresPart2.value },
-            answered1: answeredCountPart1.value,
-            answered2: answeredCountPart2.value,
-            part1Winner: part1Winner.value,
-            extraAskedPart2: extraAskedPart2.value,
-            doubleAnswersCountPart1: doubleAnswersCountPart1.value,
-        }),
-        restoreSnapshot: (s) => {
-            state.currentPart.value = s.part;
-            currentIndex.value = s.index;
-            scoresPart1.value = { ...s.scoresPart1 };
-            scoresPart2.value = { ...s.scoresPart2 };
-            answeredCountPart1.value = s.answered1;
-            answeredCountPart2.value = s.answered2;
-            part1Winner.value = s.part1Winner;
-            extraAskedPart2.value = s.extraAskedPart2;
-            doubleAnswersCountPart1.value = s.doubleAnswersCountPart1;
-        },
-        onConfirm: (answers: SelectedAnswer[]) => {
-            const isPart1 = state.currentPart.value === 1;
-
-            if (isPart1) {
-                doubleAnswersCountPart1.value += countDuplicateAnswerCategories(answers);
-            }
-
-            incrementScores(isPart1 ? scoresPart1.value : scoresPart2.value, answers);
-
-            if (isPart1) {
-                answeredCountPart1.value += 1;
-            } else {
-                answeredCountPart2.value += 1;
-            }
-        },
-        onAdvance: (isAnswer: boolean) => {
-            advanceFlow(state, isAnswer);
-        },
+        createSnapshot: () => createStage1Snapshot(state),
+        restoreSnapshot: (snapshot) => restoreStage1Snapshot(state, snapshot),
+        onConfirm: (answers) => handleStage1Confirm(state, answers),
+        onAdvance: (isAnswer) => advanceStage1Flow(state, isAnswer),
         maxAnswersOverride: computed(() => {
             if (state.currentPart.value === 1 && answeredCountPart1.value >= Number(config.part1.maxQuestions ?? 0)) {
                 return 1;
