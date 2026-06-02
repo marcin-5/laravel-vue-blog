@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +17,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    toggle: [key: string | number, value: any, category?: string];
+    toggle: [key: string | number, value: string, category?: string];
     confirm: [];
     skip: [];
     back: [];
@@ -24,8 +25,14 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-function isSelected(selectedAnswers: SelectedAnswer[], key: string | number) {
-    return selectedAnswers.some((a) => String(a.key) === String(key));
+const selectedAnswerKeys = computed(() => new Set(props.selectedAnswers.map((answer) => String(answer.key))));
+
+const canGoBack = computed(() => props.historyLength > 0);
+const canConfirm = computed(() => props.selectedAnswers.length > 0);
+const canSkipQuestion = computed(() => props.canSkip && props.selectedAnswers.length === 0 && props.skips < props.maxSkips);
+
+function isSelected(key: string | number) {
+    return selectedAnswerKeys.value.has(String(key));
 }
 </script>
 
@@ -36,12 +43,13 @@ function isSelected(selectedAnswers: SelectedAnswer[], key: string | number) {
                 {{ question.question }}
             </CardTitle>
         </CardHeader>
+
         <CardContent class="px-2 md:px-3 lg:px-4">
             <div class="space-y-4 font-nunito md:space-y-3 lg:font-inter">
                 <Button
                     v-for="opt in options"
                     :key="opt.key"
-                    :variant="isSelected(selectedAnswers, opt.key) ? 'secondary' : 'outline'"
+                    :variant="isSelected(opt.key) ? 'secondary' : 'outline'"
                     class="w-full justify-start rounded-lg border px-1 py-4 text-left text-sm leading-snug text-pretty wrap-break-word whitespace-normal md:px-4 md:py-6 md:text-base"
                     size="lg"
                     @click="emit('toggle', opt.key, opt.value, opt.category)"
@@ -52,13 +60,14 @@ function isSelected(selectedAnswers: SelectedAnswer[], key: string | number) {
 
             <div class="mt-6 flex items-center justify-between">
                 <div class="flex gap-2">
-                    <Button :disabled="props.historyLength === 0" variant="outline" @click="emit('back')"> {{ t('back') }} </Button>
-                    <Button :disabled="props.selectedAnswers.length > 0 || props.skips >= props.maxSkips" variant="muted" @click="emit('skip')">
-                        {{ t('skip') }} ({{ props.skips }}/{{ props.maxSkips }})
+                    <Button :disabled="!canGoBack" variant="outline" @click="emit('back')">
+                        {{ t('back') }}
                     </Button>
+
+                    <Button :disabled="!canSkipQuestion" variant="muted" @click="emit('skip')"> {{ t('skip') }} ({{ skips }}/{{ maxSkips }}) </Button>
                 </div>
 
-                <Button :disabled="props.selectedAnswers.length < 1" class="px-6" variant="secondary" @click="emit('confirm')">
+                <Button :disabled="!canConfirm" class="px-6" variant="secondary" @click="emit('confirm')">
                     {{ t('next') }}
                 </Button>
             </div>
