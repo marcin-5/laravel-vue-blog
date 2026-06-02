@@ -9,22 +9,22 @@ use Jaybizzle\CrawlerDetect\CrawlerDetect;
 
 readonly class BotDetector
 {
+    public function __construct(
+        private CrawlerDetect $crawlerDetect = new CrawlerDetect(),
+    ) {}
+
     /**
      * Return detector-reported bot name, or null when not a bot.
      */
     public function getBotName(Request|string|null $requestOrUa): ?string
     {
-        $ua = $this->extractUserAgent($requestOrUa);
-        if ($ua === '') {
+        $userAgent = $this->extractUserAgent($requestOrUa);
+
+        if ($userAgent === '' || !$this->crawlerDetect->isCrawler($userAgent)) {
             return null;
         }
 
-        $cd = new CrawlerDetect;
-        if (!$cd->isCrawler($ua)) {
-            return null;
-        }
-
-        $name = $cd->getMatches();
+        $name = $this->crawlerDetect->getMatches();
 
         return $name !== null && $name !== '' ? $name : 'Bot';
     }
@@ -43,13 +43,8 @@ readonly class BotDetector
      */
     public function isBot(Request|string|null $requestOrUa): bool
     {
-        $ua = $this->extractUserAgent($requestOrUa);
-        if ($ua === '') {
-            return false;
-        }
+        $userAgent = $this->extractUserAgent($requestOrUa);
 
-        $cd = new CrawlerDetect;
-
-        return $cd->isCrawler($ua);
+        return $userAgent !== '' && $this->crawlerDetect->isCrawler($userAgent);
     }
 }
