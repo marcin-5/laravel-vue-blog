@@ -184,9 +184,10 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
         advanceIndex(currentIndex, poolPart2);
     }
 
+    const getPartConfig = (part: number) => (part === 1 ? config.part1 : config.part2);
+
     // --- Base Composable ---
-    const base = useBaseEnneagramStage<Stage1Snapshot>((state) => ({
-        getPartConfig: (part) => (part === 1 ? config.part1 : config.part2),
+    const base = useBaseEnneagramStage<Stage1Snapshot>(getPartConfig, (state) => ({
         createSnapshot: () => ({
             part: state.currentPart.value,
             index: currentIndex.value,
@@ -231,6 +232,7 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
             if (state.currentPart.value === 1 && answeredCountPart1.value >= Number(config.part1.maxQuestions ?? 0)) {
                 return 1;
             }
+
             return Number(state.currentConfig.value.answersPerQuestion ?? 1);
         }),
         autoConfirmDelayMs: computed(() =>

@@ -162,12 +162,17 @@ export function useEnneagramStage2(
         }
 
         const isUnresolvable = isScoringTiedAtTop(typeScores.value);
-        emit?.('complete', { typeScores: { ...typeScores.value }, scoresPerPart: { ...scoresPerPart.value }, isUnresolvable });
+        emit?.('complete', {
+            typeScores: { ...typeScores.value },
+            scoresPerPart: cloneScoresPerPart(scoresPerPart.value),
+            isUnresolvable,
+        });
     }
 
+    const getPartConfig = (part: number) => config[`part${part}` as keyof typeof config];
+
     // --- Base Composable ---
-    const base = useBaseEnneagramStage<Stage2Snapshot>((state) => ({
-        getPartConfig: (part) => config[`part${part}` as keyof typeof config],
+    const base = useBaseEnneagramStage<Stage2Snapshot>(getPartConfig, (state) => ({
         createSnapshot: () => {
             const instinct = getInstinct(state.currentPart.value);
 

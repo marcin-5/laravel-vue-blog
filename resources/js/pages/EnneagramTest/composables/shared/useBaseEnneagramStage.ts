@@ -11,7 +11,6 @@ export interface BaseStageState {
 }
 
 export interface BaseStageProps<TSnapshot> {
-    getPartConfig: (part: number) => PartConfig;
     createSnapshot: () => TSnapshot;
     restoreSnapshot: (snapshot: TSnapshot) => void;
     onConfirm: (answers: SelectedAnswer[]) => void;
@@ -21,23 +20,22 @@ export interface BaseStageProps<TSnapshot> {
     enableAutoConfirmSingle?: Ref<boolean>;
 }
 
-export function useBaseEnneagramStage<TSnapshot>(factory: (state: BaseStageState) => BaseStageProps<TSnapshot>) {
+export function useBaseEnneagramStage<TSnapshot>(
+    getPartConfig: (part: number) => PartConfig,
+    factory: (state: BaseStageState) => BaseStageProps<TSnapshot>,
+) {
     const currentPart = ref(1);
     const skips = ref(0);
     const shuffledPerQuestion = ref<Record<string, FlatOption[]>>({});
 
-    const propsRef = {} as { value: BaseStageProps<TSnapshot> };
+    const currentConfig = computed(() => getPartConfig(currentPart.value));
 
-    const currentConfig = computed(() => propsRef.value.getPartConfig(currentPart.value));
-
-    propsRef.value = factory({
+    const props = factory({
         currentPart,
         skips,
         shuffledPerQuestion,
         currentConfig,
     });
-
-    const props = propsRef.value;
 
     const {
         selectedAnswers,
@@ -53,9 +51,7 @@ export function useBaseEnneagramStage<TSnapshot>(factory: (state: BaseStageState
 
     const { history, recordAnswer, recordSkip, pop: popHistory } = useHistory<TSnapshot>(props.createSnapshot, props.restoreSnapshot);
 
-    const hasReachedMaxSkips = computed(() => {
-        return currentConfig.value.maxSkips !== undefined && skips.value >= currentConfig.value.maxSkips;
-    });
+    const hasReachedMaxSkips = computed(() => currentConfig.value.maxSkips !== undefined && skips.value >= currentConfig.value.maxSkips);
 
     const canSkip = computed(() => selectedAnswers.value.length === 0 && !hasReachedMaxSkips.value);
 
