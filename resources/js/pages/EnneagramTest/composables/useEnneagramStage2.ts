@@ -1,5 +1,6 @@
 import { computed, ComputedRef, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { answerCategory, countDuplicateAnswerCategories } from './shared/answers';
 import { type EnneagramType, TYPE_IDS } from './shared/constants';
 import { hasLead as hasScoringLead, isTopTwoTie as isScoringTiedAtTop } from './shared/scoring';
 import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
@@ -43,13 +44,6 @@ function cloneScoresPerPart(scores: Record<number, Record<EnneagramType, number>
         number,
         Record<EnneagramType, number>
     >;
-}
-
-function countDuplicateCategories(answers: SelectedAnswer[]): number {
-    const categories = answers.map((answer) => String(answer.category || answer.key));
-    const uniqueCategories = new Set(categories);
-
-    return answers.length - uniqueCategories.size;
 }
 
 export function useEnneagramStage2(
@@ -108,12 +102,19 @@ export function useEnneagramStage2(
     }
 
     function applyAnswersToScores(answers: SelectedAnswer[], part: number) {
-        for (const ans of answers) {
-            const cat = String(ans.category) as EnneagramType;
-            typeScores.value[cat] = (typeScores.value[cat] ?? 0) + 1;
-            scoresPerPart.value[part][cat] = (scoresPerPart.value[part][cat] ?? 0) + 1;
-            if (part === 1) selectedInPart1.value.add(cat);
-            if (part === 3) selectedInPart3.value.add(cat);
+        for (const answer of answers) {
+            const category = answerCategory(answer) as EnneagramType;
+
+            typeScores.value[category] = (typeScores.value[category] ?? 0) + 1;
+            scoresPerPart.value[part][category] = (scoresPerPart.value[part][category] ?? 0) + 1;
+
+            if (part === 1) {
+                selectedInPart1.value.add(category);
+            }
+
+            if (part === 3) {
+                selectedInPart3.value.add(category);
+            }
         }
     }
 
@@ -201,7 +202,7 @@ export function useEnneagramStage2(
             instinctPoolIndices.value[s.instinct] = s.poolIndex;
         },
         onConfirm: (answers: SelectedAnswer[]) => {
-            bonusPointsPerPart.value[state.currentPart.value] += countDuplicateCategories(answers);
+            bonusPointsPerPart.value[state.currentPart.value] += countDuplicateAnswerCategories(answers);
 
             applyAnswersToScores(answers, state.currentPart.value);
         },

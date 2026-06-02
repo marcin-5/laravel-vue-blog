@@ -1,3 +1,4 @@
+import { answerCategory, countDuplicateAnswerCategories } from '@/pages/EnneagramTest/composables/shared/answers';
 import { computed, ComputedRef, ref, type Ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { SINGLE_ANSWER_AUTO_CONFIRM_DELAY_MS } from './shared/constants';
@@ -21,16 +22,9 @@ interface Stage1Snapshot {
 
 type EmitFn = (event: 'complete', results: CompleteStage1Results) => void;
 
-function countDuplicateCategories(answers: SelectedAnswer[]): number {
-    const categories = answers.map((answer) => String(answer.category || answer.key));
-    const uniqueCategories = new Set(categories);
-
-    return answers.length - uniqueCategories.size;
-}
-
 function incrementScores(target: InstinctScores, answers: SelectedAnswer[]): void {
     for (const answer of answers) {
-        const category = String(answer.category || answer.key) as Instinct;
+        const category = answerCategory(answer) as Instinct;
 
         if (target[category] !== undefined) {
             target[category] += 1;
@@ -214,7 +208,7 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
             const isPart1 = state.currentPart.value === 1;
 
             if (isPart1) {
-                doubleAnswersCountPart1.value += countDuplicateCategories(answers);
+                doubleAnswersCountPart1.value += countDuplicateAnswerCategories(answers);
             }
 
             incrementScores(isPart1 ? scoresPart1.value : scoresPart2.value, answers);
