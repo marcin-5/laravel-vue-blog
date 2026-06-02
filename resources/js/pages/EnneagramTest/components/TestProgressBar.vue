@@ -24,32 +24,41 @@ const { t } = useI18n();
 
 const showExplanation = ref(false);
 
-const descriptionKey = computed(() => {
-    return props.stage === 2 ? 'lead_progress_desc_stage2' : 'lead_progress_desc';
-});
+const descriptionKey = computed(() => (props.stage === 2 ? 'lead_progress_desc_stage2' : 'lead_progress_desc'));
 
-const minPercent = computed(() => {
-    if (props.total === 0 || props.min === undefined) return 0;
-    return Math.min((props.min / props.total) * 100, 100);
-});
+const hasMinMarker = computed(() => props.min !== undefined && props.min !== props.max);
+const hasLeads = computed(() => props.leads !== undefined && props.leads.length > 0);
+const isExtra = computed(() => props.current > props.max);
 
-const maxPercent = computed(() => {
-    if (props.total === 0) return 0;
-    return Math.min((props.max / props.total) * 100, 100);
-});
+function toPercent(value: number): number {
+    if (props.total === 0) {
+        return 0;
+    }
 
-const currentPercent = computed(() => {
-    if (props.total === 0) return 0;
-    return Math.min((Math.min(props.current, props.max) / props.total) * 100, 100);
-});
+    return Math.min((value / props.total) * 100, 100);
+}
+
+function leadPercent(lead: Lead): number {
+    if (lead.target <= 0) {
+        return 0;
+    }
+
+    return Math.min(100, (Math.max(0, lead.current) / lead.target) * 100);
+}
+
+const minPercent = computed(() => (props.min === undefined ? 0 : toPercent(props.min)));
+const maxPercent = computed(() => toPercent(props.max));
+const currentPercent = computed(() => toPercent(Math.min(props.current, props.max)));
 
 const extraPercent = computed(() => {
-    if (props.total === 0 || props.current <= props.max) return 0;
-    const extraCount = Math.min(props.current, props.total) - props.max;
-    return Math.min((extraCount / props.total) * 100, 100 - maxPercent.value);
-});
+    if (!isExtra.value) {
+        return 0;
+    }
 
-const isExtra = computed(() => props.current > props.max);
+    const extraCount = Math.min(props.current, props.total) - props.max;
+
+    return Math.min(toPercent(extraCount), 100 - maxPercent.value);
+});
 </script>
 
 <template>
@@ -84,7 +93,7 @@ const isExtra = computed(() => props.current > props.max);
 
             <!-- Min Questions marker -->
             <div
-                v-if="min !== undefined && min !== max"
+                v-if="hasMinMarker"
                 :style="{ left: `${minPercent}%` }"
                 :title="t('min_questions_point')"
                 class="absolute top-0 z-10 h-full w-0.5 bg-green-500/50"
@@ -96,7 +105,7 @@ const isExtra = computed(() => props.current > props.max);
         <div class="relative mt-1 flex h-4 justify-between px-1 text-xs text-muted-foreground">
             <span>0</span>
             <span
-                v-if="min !== undefined && min !== max"
+                v-if="hasMinMarker"
                 :style="{ left: `${minPercent}%`, transform: 'translateX(-50%)' }"
                 class="absolute font-medium whitespace-nowrap text-green-600"
             >
@@ -109,8 +118,8 @@ const isExtra = computed(() => props.current > props.max);
         </div>
 
         <!-- Lead indicators -->
-        <div v-if="leads && leads.length > 0" class="mt-4 space-y-3 rounded-lg border border-border/50 bg-secondary/10 p-2 md:p-3">
-            <div v-for="(lead, index) in leads" :key="index" class="space-y-1.5">
+        <div v-if="hasLeads" class="mt-4 space-y-3 rounded-lg border border-border/50 bg-secondary/10 p-2 md:p-3">
+            <div v-for="lead in leads" :key="lead.label" class="space-y-1.5">
                 <div class="flex justify-between text-xs font-bold tracking-wider text-muted-foreground uppercase">
                     <span class="flex items-center gap-1.5">
                         <span :class="['h-2 w-2 rounded-full', lead.color || 'bg-primary']"></span>
@@ -124,7 +133,7 @@ const isExtra = computed(() => props.current > props.max);
                 >
                     <div
                         :class="[lead.color || 'bg-primary', lead.current >= lead.target ? 'animate-pulse' : '']"
-                        :style="{ width: `${Math.min(100, (Math.max(0, lead.current) / lead.target) * 100)}%` }"
+                        :style="{ width: `${leadPercent(lead)}%` }"
                         class="h-full transition-all duration-700 ease-out"
                     ></div>
 
@@ -132,13 +141,14 @@ const isExtra = computed(() => props.current > props.max);
                     <div class="absolute top-0 right-0 h-full w-px bg-foreground/20"></div>
                 </div>
             </div>
-            <div v-if="leads.length > 0" class="mt-2 flex flex-col items-center">
+            <div class="mt-2 flex flex-col items-center">
                 <button
                     class="group flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
                     type="button"
                     @click="showExplanation = !showExplanation"
                 >
                     {{ showExplanation ? t('hide_explanation') : t('show_explanation') }}
+
                     <svg
                         :class="['h-3 w-3 transition-transform duration-200', showExplanation ? 'rotate-180' : '']"
                         fill="none"
