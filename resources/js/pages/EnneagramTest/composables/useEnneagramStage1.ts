@@ -1,12 +1,11 @@
-import { computed, ref, type Ref, watch } from 'vue';
+import { computed, ComputedRef, ref, type Ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { SINGLE_ANSWER_AUTO_CONFIRM_DELAY_MS } from './shared/constants';
 import { isStage1Part1Question, isStage1Part2Question } from './shared/questionIds';
 import { createEmptyInstinctScores, determineSecondaryInstinct, getLeader, getSortedScores, hasLead, isTopTwoTie } from './shared/scoring';
 import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
-import type { CompleteStage1Results, Config, FlatOption, Instinct, InstinctScores, Question } from './shared/types';
-import { useAnswerSelection } from './shared/useAnswerSelection';
-import { useHistory } from './shared/useHistory';
+import type { CompleteStage1Results, Config, FlatOption, Instinct, InstinctScores, PartConfig, Question, SelectedAnswer } from './shared/types';
+import { useBaseEnneagramStage } from './shared/useBaseEnneagramStage';
 
 interface Stage1Snapshot {
     part: number;
@@ -24,9 +23,7 @@ type EmitFn = (event: 'complete', results: CompleteStage1Results) => void;
 
 export function useEnneagramStage1(questions: Question[], config: Config['stages']['stage1'], emit: EmitFn, enableAutoConfirmSingle?: Ref<boolean>) {
     // --- State ---
-    const currentPart = ref(1);
     const currentIndex = ref(0);
-    const skips = ref(0);
     const scoresPart1 = ref<InstinctScores>(createEmptyInstinctScores());
     const scoresPart2 = ref<InstinctScores>(createEmptyInstinctScores());
     const answeredCountPart1 = ref(0);
@@ -34,15 +31,221 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
     const part1Winner = ref<Instinct | null>(null);
     const extraAskedPart2 = ref(false);
     const doubleAnswersCountPart1 = ref(0);
-    const shuffledPerQuestion = ref<Record<string, FlatOption[]>>({});
 
     const poolPart1 = shuffleByPriority<Question>(questions.filter((q) => isStage1Part1Question(q)));
     const poolPart2 = shuffleByPriority<Question>(questions.filter((q) => isStage1Part2Question(q)));
 
     const { t } = useI18n();
 
+    // --- Helpers ---
+    function questionKey(q: Question, part: number, index: number): string {
+        return String(q.id ?? `${part}-${index}`);
+    }
+
+    function isLastInPart(index: number, pool: Question[]): boolean {
+        return index >= pool.length - 1;
+    }
+
+    function advanceIndex(indexRef: Ref<number>, pool: Question[]): void {
+        indexRef.value = Math.min(indexRef.value + 1, pool.length - 1);
+    }
+
+    function moveToPart2(state: { currentPart: Ref<number>; skips: Ref<number> }, clearSelection?: () => void): void {
+        part1Winner.value = getLeader(scoresPart1.value);
+        state.currentPart.value = 2;
+        currentIndex.value = 0;
+        state.skips.value = 0;
+        extraAskedPart2.value = false;
+        clearSelection?.();
+    }
+
+    function buildResults(index: number, config: PartConfig, pool: Question[]): CompleteStage1Results {
+        const reachedMax = answeredCountPart2.value >= Number(config.maxQuestions ?? 0);
+        const exhausted = reachedMax || isLastInPart(index, pool);
+        const winnerPart2 = getLeader(scoresPart2.value);
+
+        const isUnresolvable = exhausted && (isTopTwoTie(scoresPart2.value) || (part1Winner.value !== null && winnerPart2 === part1Winner.value));
+
+        const baseResults = {
+            scoresPart1: { ...scoresPart1.value },
+            scoresPart2: { ...scoresPart2.value },
+            part1Winner: part1Winner.value,
+        };
+
+        if (isUnresolvable || part1Winner.value === null) {
+            return {
+                ...baseResults,
+                isUnresolvable: true,
+                dominant: null,
+                secondary: null,
+                weakest: null,
+            };
+        }
+
+        const dominant = part1Winner.value;
+        const secondary = determineSecondaryInstinct(dominant, scoresPart2.value);
+        const weakest = (['sp', 'so', 'sx'] as Instinct[]).find((i) => i !== dominant && i !== secondary)!;
+
+        return {
+            ...baseResults,
+            isUnresolvable: false,
+            dominant,
+            secondary,
+            weakest,
+        };
+    }
+
+    function shouldEndPart1(config: PartConfig, index: number): boolean {
+        const minLead = Number(config.minLead ?? 0);
+        const reachedLead = hasLead(scoresPart1.value, minLead);
+        const reachedMax = answeredCountPart1.value >= Number(config.maxQuestions ?? 0);
+        const isTie = isTopTwoTie(scoresPart1.value);
+
+        if (reachedMax && !reachedLead && isTie && !isLastInPart(index, poolPart1)) {
+            return false;
+        }
+
+        return reachedLead || reachedMax || isLastInPart(index, poolPart1);
+    }
+
+    function shouldEndPart2(config: PartConfig, index: number): boolean {
+        const leader = getLeader(scoresPart2.value);
+        const sameWinner = part1Winner.value !== null && leader === part1Winner.value;
+        const reachedMax = answeredCountPart2.value >= Number(config.maxQuestions ?? 0);
+        const minLead = Number(config.minLead ?? 0);
+        const minLeadAlternative = Number(config.minLeadAlternative ?? 0);
+        const isStandardLeadMet = !sameWinner && hasLead(scoresPart2.value, minLead);
+        const isAlternativeLeadApplicable = part1Winner.value != null && (scoresPart2.value[part1Winner.value] ?? 0) === 0;
+        const isAlternativeLeadMet = isAlternativeLeadApplicable && hasLead(scoresPart2.value, minLeadAlternative);
+
+        if (reachedMax && !isStandardLeadMet && !isAlternativeLeadMet && !isLastInPart(index, poolPart2)) {
+            return false;
+        }
+
+        return isStandardLeadMet || isAlternativeLeadMet || reachedMax || isLastInPart(index, poolPart2);
+    }
+
+    function shouldAskExtraTieBreaker(config: PartConfig, index: number): boolean {
+        const reachedMax = answeredCountPart2.value >= Number(config.maxQuestions ?? 0);
+        return (
+            reachedMax &&
+            !extraAskedPart2.value &&
+            isTopTwoTie(scoresPart2.value) &&
+            !isLastInPart(index, poolPart2) &&
+            !hasLead(scoresPart2.value, Number(config.minLead ?? 0))
+        );
+    }
+
+    function advanceFlow(
+        state: { currentPart: Ref<number>; skips: Ref<number>; currentConfig: ComputedRef<PartConfig> },
+        isAnswer: boolean,
+        clearSelection?: () => void,
+    ) {
+        const part = state.currentPart.value;
+        const config = state.currentConfig.value;
+
+        if (part === 1) {
+            if (shouldEndPart1(config, currentIndex.value)) {
+                moveToPart2(state, clearSelection);
+            } else {
+                advanceIndex(currentIndex, poolPart1);
+            }
+            return;
+        }
+
+        if (isAnswer && shouldAskExtraTieBreaker(config, currentIndex.value)) {
+            extraAskedPart2.value = true;
+            advanceIndex(currentIndex, poolPart2);
+            return;
+        }
+
+        if (shouldEndPart2(config, currentIndex.value)) {
+            emit('complete', buildResults(currentIndex.value, config, poolPart2));
+            return;
+        }
+
+        advanceIndex(currentIndex, poolPart2);
+    }
+
+    // --- Base Composable ---
+    const base = useBaseEnneagramStage<Stage1Snapshot>((state) => ({
+        getPartConfig: (part) => (part === 1 ? config.part1 : config.part2),
+        createSnapshot: () => ({
+            part: state.currentPart.value,
+            index: currentIndex.value,
+            scoresPart1: { ...scoresPart1.value },
+            scoresPart2: { ...scoresPart2.value },
+            answered1: answeredCountPart1.value,
+            answered2: answeredCountPart2.value,
+            part1Winner: part1Winner.value,
+            extraAskedPart2: extraAskedPart2.value,
+            doubleAnswersCountPart1: doubleAnswersCountPart1.value,
+        }),
+        restoreSnapshot: (s) => {
+            state.currentPart.value = s.part;
+            currentIndex.value = s.index;
+            scoresPart1.value = { ...s.scoresPart1 };
+            scoresPart2.value = { ...s.scoresPart2 };
+            answeredCountPart1.value = s.answered1;
+            answeredCountPart2.value = s.answered2;
+            part1Winner.value = s.part1Winner;
+            extraAskedPart2.value = s.extraAskedPart2;
+            doubleAnswersCountPart1.value = s.doubleAnswersCountPart1;
+        },
+        onConfirm: (answers: SelectedAnswer[]) => {
+            if (state.currentPart.value === 1) {
+                const categories = answers.map((a) => String(a.category || a.key));
+                const uniqueCategories = new Set(categories);
+                doubleAnswersCountPart1.value += answers.length - uniqueCategories.size;
+            }
+
+            const target = state.currentPart.value === 1 ? scoresPart1.value : scoresPart2.value;
+            for (const answer of answers) {
+                const category = String(answer.category || answer.key);
+                if (target[category as Instinct] !== undefined) {
+                    target[category as Instinct] += 1;
+                }
+            }
+
+            if (state.currentPart.value === 1) {
+                answeredCountPart1.value += 1;
+            } else {
+                answeredCountPart2.value += 1;
+            }
+        },
+        onAdvance: (isAnswer: boolean) => {
+            advanceFlow(state, isAnswer);
+        },
+        maxAnswersOverride: computed(() => {
+            if (state.currentPart.value === 1 && answeredCountPart1.value >= Number(config.part1.maxQuestions ?? 0)) {
+                return 1;
+            }
+            return Number(state.currentConfig.value.answersPerQuestion ?? 1);
+        }),
+        autoConfirmDelayMs: computed(() =>
+            state.currentPart.value === 1 && answeredCountPart1.value >= Number(config.part1.maxQuestions ?? 0)
+                ? 0
+                : SINGLE_ANSWER_AUTO_CONFIRM_DELAY_MS,
+        ),
+        enableAutoConfirmSingle,
+    }));
+
+    const {
+        currentPart,
+        skips,
+        shuffledPerQuestion,
+        currentConfig,
+        selectedAnswers,
+        toggleAnswer,
+        clearSelection,
+        history,
+        canSkip,
+        confirmAnswers,
+        handleSkip: baseHandleSkip,
+        goBack,
+    } = base;
+
     // --- Computed ---
-    const currentConfig = computed(() => (currentPart.value === 1 ? config.part1 : config.part2));
     const currentScores = computed(() => (currentPart.value === 1 ? scoresPart1.value : scoresPart2.value));
     const maxAnswersPerQuestion = computed(() => {
         if (currentPart.value === 1 && answeredCountPart1.value >= Number(currentConfig.value.maxQuestions ?? 0)) {
@@ -108,226 +311,26 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
     const flatShuffledOptions = computed<FlatOption[]>(() => {
         const q = currentQuestion.value;
         if (!q?.answerLists) return [];
-        return shuffledPerQuestion.value[questionKey(q)] ?? [];
+        return shuffledPerQuestion.value[questionKey(q, currentPart.value, currentIndex.value)] ?? [];
     });
-
-    // --- Submodules ---
-    const {
-        selectedAnswers,
-        isSelected,
-        toggleAnswer,
-        clear: clearSelection,
-    } = useAnswerSelection({
-        maxAnswers: maxAnswersPerQuestion,
-        onAutoConfirm: () => confirmAnswers(),
-        enableAutoConfirmSingle,
-        autoConfirmDelayMs: computed(() =>
-            currentPart.value === 1 && answeredCountPart1.value >= Number(currentConfig.value.maxQuestions ?? 0)
-                ? 0
-                : SINGLE_ANSWER_AUTO_CONFIRM_DELAY_MS,
-        ),
-    });
-
-    const {
-        history,
-        recordAnswer,
-        recordSkip,
-        pop: popHistory,
-    } = useHistory<Stage1Snapshot>(
-        () => ({
-            part: currentPart.value,
-            index: currentIndex.value,
-            scoresPart1: { ...scoresPart1.value },
-            scoresPart2: { ...scoresPart2.value },
-            answered1: answeredCountPart1.value,
-            answered2: answeredCountPart2.value,
-            part1Winner: part1Winner.value,
-            extraAskedPart2: extraAskedPart2.value,
-            doubleAnswersCountPart1: doubleAnswersCountPart1.value,
-        }),
-        (s) => {
-            currentPart.value = s.part;
-            currentIndex.value = s.index;
-            scoresPart1.value = { ...s.scoresPart1 };
-            scoresPart2.value = { ...s.scoresPart2 };
-            answeredCountPart1.value = s.answered1;
-            answeredCountPart2.value = s.answered2;
-            part1Winner.value = s.part1Winner;
-            extraAskedPart2.value = s.extraAskedPart2;
-            doubleAnswersCountPart1.value = s.doubleAnswersCountPart1;
-        },
-    );
-
-    const canSkip = computed(() => selectedAnswers.value.length === 0 && skips.value < currentConfig.value.maxSkips);
-
-    // --- Helpers ---
-    function questionKey(q: Question): string {
-        return String(q.id ?? `${currentPart.value}-${currentIndex.value}`);
-    }
-
-    function isLastInPart(): boolean {
-        return currentIndex.value >= partQuestions.value.length - 1;
-    }
-
-    function advanceIndex(): void {
-        currentIndex.value = Math.min(currentIndex.value + 1, partQuestions.value.length - 1);
-    }
-
-    function moveToPart2(): void {
-        part1Winner.value = getLeader(scoresPart1.value);
-        currentPart.value = 2;
-        currentIndex.value = 0;
-        skips.value = 0;
-        extraAskedPart2.value = false;
-        clearSelection();
-    }
-
-    function buildResults(): CompleteStage1Results {
-        // Unresolvable if exhausted all questions in Part 2 and still a tie, or same winner as Part 1 persists
-        const reachedMax = answeredCountPart2.value >= Number(currentConfig.value.maxQuestions ?? 0);
-        const exhausted = reachedMax || isLastInPart();
-        const winnerPart2 = getLeader(scoresPart2.value);
-
-        const isUnresolvable = exhausted && (isTopTwoTie(scoresPart2.value) || (part1Winner.value !== null && winnerPart2 === part1Winner.value));
-
-        const base = {
-            scoresPart1: { ...scoresPart1.value },
-            scoresPart2: { ...scoresPart2.value },
-            part1Winner: part1Winner.value,
-        };
-
-        if (isUnresolvable || part1Winner.value === null) {
-            return {
-                ...base,
-                isUnresolvable: true,
-                dominant: null,
-                secondary: null,
-                weakest: null,
-            };
-        }
-
-        const dominant = part1Winner.value;
-        const secondary = determineSecondaryInstinct(dominant, scoresPart2.value);
-        const weakest = (['sp', 'so', 'sx'] as Instinct[]).find((i) => i !== dominant && i !== secondary)!;
-
-        return {
-            ...base,
-            isUnresolvable: false,
-            dominant,
-            secondary,
-            weakest,
-        };
-    }
-
-    // --- Actions ---
-    function confirmAnswers() {
-        recordAnswer(currentPart.value, selectedAnswers.value, skips.value);
-
-        if (currentPart.value === 1) {
-            const categories = selectedAnswers.value.map((a) => String(a.category || a.key));
-            const uniqueCategories = new Set(categories);
-            doubleAnswersCountPart1.value += categories.length - uniqueCategories.size;
-        }
-
-        const target = currentPart.value === 1 ? scoresPart1.value : scoresPart2.value;
-        for (const answer of selectedAnswers.value) {
-            const category = String(answer.category || answer.key);
-            if (target[category as Instinct] !== undefined) {
-                target[category as Instinct] += 1;
-            }
-        }
-
-        if (currentPart.value === 1) answeredCountPart1.value += 1;
-        else answeredCountPart2.value += 1;
-
-        clearSelection();
-        advanceFlowAfterAnswer();
-    }
-
-    function shouldEndPart1(): boolean {
-        const minLead = Number(currentConfig.value.minLead ?? 0);
-        const reachedLead = hasLead(scoresPart1.value, minLead);
-        const reachedMax = answeredCountPart1.value >= Number(currentConfig.value.maxQuestions ?? 0);
-        const isTie = isTopTwoTie(scoresPart1.value);
-
-        // After reaching max questions, we only continue if there is a tie between the top two
-        if (reachedMax && !reachedLead && isTie && !isLastInPart()) {
-            return false;
-        }
-
-        return reachedLead || reachedMax || isLastInPart();
-    }
-
-    function shouldEndPart2(): boolean {
-        const leader = getLeader(scoresPart2.value);
-        const sameWinner = part1Winner.value !== null && leader === part1Winner.value;
-        const reachedMax = answeredCountPart2.value >= Number(currentConfig.value.maxQuestions ?? 0);
-        const minLead = Number(currentConfig.value.minLead ?? 0);
-        const minLeadAlternative = Number(currentConfig.value.minLeadAlternative ?? 0);
-        const isStandardLeadMet = !sameWinner && hasLead(scoresPart2.value, minLead);
-        const isAlternativeLeadApplicable = part1Winner.value != null && (scoresPart2.value[part1Winner.value] ?? 0) === 0;
-        const isAlternativeLeadMet = isAlternativeLeadApplicable && hasLead(scoresPart2.value, minLeadAlternative);
-
-        // If reached max questions but no conclusion yet (no X, no Y, or same winner), continue if possible
-        if (reachedMax && !isStandardLeadMet && !isAlternativeLeadMet && !isLastInPart()) {
-            return false;
-        }
-
-        return isStandardLeadMet || isAlternativeLeadMet || reachedMax || isLastInPart();
-    }
-
-    function shouldAskExtraTieBreaker(): boolean {
-        const reachedMax = answeredCountPart2.value >= Number(currentConfig.value.maxQuestions ?? 0);
-        return (
-            reachedMax &&
-            !extraAskedPart2.value &&
-            isTopTwoTie(scoresPart2.value) &&
-            !isLastInPart() &&
-            !hasLead(scoresPart2.value, Number(currentConfig.value.minLead ?? 0))
-        );
-    }
-
-    function advanceFlowAfterAnswer() {
-        if (currentPart.value === 1) {
-            if (shouldEndPart1()) moveToPart2();
-            else advanceIndex();
-            return;
-        }
-
-        if (shouldAskExtraTieBreaker()) {
-            extraAskedPart2.value = true;
-            advanceIndex();
-            return;
-        }
-
-        if (shouldEndPart2()) {
-            emit('complete', buildResults());
-            return;
-        }
-
-        advanceIndex();
-    }
 
     function handleSkip() {
-        if (skips.value >= currentConfig.value.maxSkips) return;
-
-        recordSkip(currentPart.value, skips.value);
-        skips.value++;
-
-        if (!isLastInPart()) {
-            currentIndex.value++;
+        if (skips.value >= currentConfig.value.maxSkips) {
             return;
         }
 
-        if (currentPart.value === 1) moveToPart2();
-        else emit('complete', buildResults());
-    }
+        if (!isLastInPart(currentIndex.value, partQuestions.value)) {
+            baseHandleSkip();
+            return;
+        }
 
-    function goBack() {
-        const last = popHistory();
-        if (!last) return;
-        skips.value = last.skipsAtThisPoint;
-        selectedAnswers.value = last.type === 'answer' ? [...last.answers] : [];
+        // Specific logic for skip on last question
+        if (currentPart.value === 1) {
+            moveToPart2(base);
+            clearSelection();
+        } else {
+            emit('complete', buildResults(currentIndex.value, currentConfig.value, partQuestions.value));
+        }
     }
 
     // Lazily build & cache shuffled options per question.
@@ -336,7 +339,7 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
         () => {
             const q = currentQuestion.value;
             if (!q?.answerLists) return;
-            const key = questionKey(q);
+            const key = questionKey(q, currentPart.value, currentIndex.value);
             if (!shuffledPerQuestion.value[key]) {
                 shuffledPerQuestion.value[key] = buildShuffledFlatOptions(q);
             }
@@ -368,7 +371,6 @@ export function useEnneagramStage1(questions: Question[], config: Config['stages
         flatShuffledOptions,
         canSkip,
         // Methods
-        isSelected,
         toggleAnswer,
         confirmAnswers,
         handleSkip,
