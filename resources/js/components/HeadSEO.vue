@@ -12,13 +12,17 @@ const structuredDataJson = computed(() => (seo.value?.structuredData ? JSON.stri
     <Head v-if="seo">
         <title>{{ seo.title }}</title>
         <meta :content="seo.description" name="description" />
-        <link :href="seo.canonicalUrl" rel="canonical" />
+        <meta :content="seo.robots || 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'" name="robots" />
+        <link v-if="seo.canonicalUrl" :href="seo.canonicalUrl" rel="canonical" />
+        <meta :content="seo.locale" http-equiv="content-language" />
 
         <meta :content="seo.ogType" property="og:type" />
         <meta :content="seo.title" property="og:title" />
         <meta :content="seo.description" property="og:description" />
         <meta :content="seo.canonicalUrl" property="og:url" />
         <meta :content="seo.ogImage" property="og:image" />
+        <meta content="1024" property="og:image:width" />
+        <meta content="1024" property="og:image:height" />
         <meta :content="seo.locale" property="og:locale" />
 
         <meta v-if="seo.publishedTime" :content="seo.publishedTime" property="article:published_time" />

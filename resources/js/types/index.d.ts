@@ -86,6 +86,7 @@ export interface SEO {
     ogImage: string;
     ogType: string;
     locale: string;
+    robots?: string;
     publishedTime?: string | null;
     modifiedTime?: string | null;
     structuredData: Record<string, any>;
