@@ -10,7 +10,7 @@ use Jaybizzle\CrawlerDetect\CrawlerDetect;
 readonly class BotDetector
 {
     public function __construct(
-        private CrawlerDetect $crawlerDetect = new CrawlerDetect(),
+        private CrawlerDetect $crawlerDetect = new CrawlerDetect,
     ) {}
 
     /**
