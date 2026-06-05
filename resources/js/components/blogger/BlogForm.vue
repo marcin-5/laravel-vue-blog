@@ -160,12 +160,7 @@ const seoTitleClass = computed(() => {
                 :id-prefix="fieldIdPrefix"
             />
 
-            <EntityThemeSection
-                v-model="form.theme"
-                :errors="form.errors"
-                :id-prefix="fieldIdPrefix"
-                :translations="themeSectionTranslations"
-            />
+            <EntityThemeSection v-model="form.theme" :errors="form.errors" :id-prefix="fieldIdPrefix" :translations="themeSectionTranslations" />
 
             <CategorySelector
                 :categories="props.categories"

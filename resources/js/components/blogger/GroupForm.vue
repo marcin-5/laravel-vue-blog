@@ -108,12 +108,7 @@ function handleCancel() {
 
             <FormPublishingSettings v-model="form" :errors="form.errors" :id-prefix="fieldIdPrefix" />
 
-            <EntityThemeSection
-                v-model="form.theme"
-                :errors="form.errors"
-                :id-prefix="fieldIdPrefix"
-                :translations="themeSectionTranslations"
-            />
+            <EntityThemeSection v-model="form.theme" :errors="form.errors" :id-prefix="fieldIdPrefix" :translations="themeSectionTranslations" />
 
             <FormSubmitActions
                 :is-edit="props.isEdit"

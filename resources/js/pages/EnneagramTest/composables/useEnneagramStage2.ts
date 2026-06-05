@@ -8,19 +8,10 @@ import {
     createEmptyTypeScores,
     hasLead as hasScoringLead,
     incrementScore,
-    isTopTwoTie as isScoringTiedAtTop
+    isTopTwoTie as isScoringTiedAtTop,
 } from './shared/scoring';
 import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
-import type {
-    CompleteStage1Results,
-    Config,
-    FlatOption,
-    Instinct,
-    PartConfig,
-    Question,
-    SelectedAnswer,
-    Stage2Results
-} from './shared/types';
+import type { CompleteStage1Results, Config, FlatOption, Instinct, PartConfig, Question, SelectedAnswer, Stage2Results } from './shared/types';
 import { type BaseStageState, useBaseEnneagramStage } from './shared/useBaseEnneagramStage';
 
 interface Stage2Snapshot {

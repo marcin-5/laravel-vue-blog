@@ -47,7 +47,7 @@ describe('useVisitorId', () => {
 
     it('attaches X-Visitor-Id header to Inertia requests', () => {
         vi.mocked(localStorage.getItem).mockReturnValue('test-visitor-id');
-        
+
         let beforeHandler: any;
         vi.mocked(router.on).mockImplementation((event: string, handler: any) => {
             if (event === 'before') beforeHandler = handler;
@@ -82,11 +82,11 @@ describe('useVisitorId', () => {
         });
 
         initializeVisitorId();
-        
+
         // Initial sync happened. Now simulate success.
         vi.clearAllMocks();
         vi.mocked(localStorage.getItem).mockReturnValue(null);
-        
+
         successHandler();
 
         expect(localStorage.setItem).toHaveBeenCalledWith(LOCAL_STORAGE_KEY, 'refreshed-id');

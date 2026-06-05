@@ -3,10 +3,7 @@ import { useHttp } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
 import { ref, type Ref } from 'vue';
 
-export function useMarkdownPreview(
-    routeName: string = 'markdown.preview',
-    debounceMs: number = 300,
-): MarkdownPreviewSection {
+export function useMarkdownPreview(routeName: string = 'markdown.preview', debounceMs: number = 300): MarkdownPreviewSection {
     const isPreviewMode = ref(false);
     const isFullPreview = ref(false);
     const previewLayout = ref<PreviewLayout>('vertical');

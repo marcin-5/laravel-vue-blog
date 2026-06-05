@@ -10,19 +10,10 @@ import {
     getLeader,
     hasLead,
     incrementScore,
-    isTopTwoTie
+    isTopTwoTie,
 } from './shared/scoring';
 import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
-import type {
-    CompleteStage1Results,
-    Config,
-    FlatOption,
-    Instinct,
-    InstinctScores,
-    PartConfig,
-    Question,
-    SelectedAnswer
-} from './shared/types';
+import type { CompleteStage1Results, Config, FlatOption, Instinct, InstinctScores, PartConfig, Question, SelectedAnswer } from './shared/types';
 import { type BaseStageState, useBaseEnneagramStage } from './shared/useBaseEnneagramStage';
 
 interface Stage1Snapshot {

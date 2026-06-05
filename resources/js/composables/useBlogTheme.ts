@@ -69,9 +69,7 @@ export function useBlogTheme(theme: ComputedRef<BlogTheme | undefined>) {
     const { appearance } = useAppearance();
 
     // SSR-safe media query
-    const isSystemDark = typeof window !== 'undefined'
-        ? useMediaQuery('(prefers-color-scheme: dark)')
-        : ref(false);
+    const isSystemDark = typeof window !== 'undefined' ? useMediaQuery('(prefers-color-scheme: dark)') : ref(false);
 
     const isDark = computed(() => appearance.value === 'dark' || (appearance.value === 'system' && isSystemDark.value));
 

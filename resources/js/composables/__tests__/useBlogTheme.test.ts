@@ -1,7 +1,7 @@
 import { useAppearance } from '@/composables/useAppearance';
 import { useMediaQuery } from '@vueuse/core';
-import { computed, ref } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { computed, ref } from 'vue';
 import { useBlogTheme } from '../useBlogTheme';
 
 vi.mock('@/composables/useAppearance', () => ({
@@ -49,7 +49,7 @@ describe('useBlogTheme', () => {
             },
             dark: {
                 '--header-scale': '1.5',
-            }
+            },
         }));
 
         appearance.value = 'light';
@@ -76,7 +76,7 @@ describe('useBlogTheme', () => {
             light: {
                 '--header-scale': '1.0',
                 '--font-header': 'var(--font-yrsa)', // Correction is 1.1 in fonts.ts
-            }
+            },
         }));
 
         appearance.value = 'light';
@@ -89,7 +89,7 @@ describe('useBlogTheme', () => {
         const theme = computed<any>(() => ({
             light: {
                 '--font-header': 'var(--font-darker-grotesque)', // Weight correction is 500
-            }
+            },
         }));
 
         appearance.value = 'light';
