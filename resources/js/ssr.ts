@@ -200,6 +200,10 @@ function startSafeSsrServer(renderPage: (page: Page) => Promise<any>, port: numb
 
 setupProcessErrorHandling();
 
+/**
+ * The main render function required by Inertia v3's Vite plugin.
+ * This function is used by Vite in development mode to handle SSR.
+ */
 export default function render(page: Page) {
     return createInertiaApp({
         page,
@@ -236,4 +240,15 @@ export default function render(page: Page) {
             return app;
         },
     });
+}
+
+/**
+ * Standalone SSR server start.
+ * In production (standalone), we need to explicitly start the HTTP server.
+ * In development, Vite handles this automatically via the exported render function.
+ */
+const isProduction = process.env.NODE_ENV === 'production' || !process.env.VITE_DEV_SERVER_URL;
+
+if (isProduction) {
+    startSafeSsrServer(render);
 }
