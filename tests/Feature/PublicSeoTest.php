@@ -27,6 +27,8 @@ test('about page has single meta description without inertia', function () {
 
     $html = $response->getContent();
 
+    // dd($html);
+
     assertSingleMetaDescription($html);
 });
 
@@ -36,6 +38,8 @@ test('contact page has single meta description without inertia', function () {
     $response->assertSuccessful();
 
     $html = $response->getContent();
+
+    // dd($html);
 
     assertSingleMetaDescription($html);
 });
@@ -50,6 +54,8 @@ test('public blog landing page has single meta description without inertia', fun
     $response->assertSuccessful();
 
     $html = $response->getContent();
+
+    // dd($html);
 
     assertSingleMetaDescription($html);
 });
@@ -70,6 +76,8 @@ test('public blog post page has single meta description without inertia', functi
     $response->assertSuccessful();
 
     $html = $response->getContent();
+
+    // dd($html);
 
     assertSingleMetaDescription($html);
 });
