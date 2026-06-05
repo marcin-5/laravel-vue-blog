@@ -2,7 +2,7 @@ import { useAppearance } from '@/composables/useAppearance';
 import { getFontSizeCorrection, getFontWeightCorrection, SCALE_TO_FONT_MAP, SPECIAL_KEY_MAPPINGS } from '@/constants/fonts';
 import type { BlogTheme } from '@/types/blog.types';
 import { useMediaQuery } from '@vueuse/core';
-import { computed, type ComputedRef } from 'vue';
+import { computed, ref, type ComputedRef } from 'vue';
 
 function mapThemeKeyToStyles(key: string, value: string, style: Record<string, string>, currentTheme: Record<string, string>): void {
     let finalValue = value;
@@ -67,7 +67,11 @@ function processFontAndColorKeys(currentTheme: Record<string, string>, style: Re
 
 export function useBlogTheme(theme: ComputedRef<BlogTheme | undefined>) {
     const { appearance } = useAppearance();
-    const isSystemDark = useMediaQuery('(prefers-color-scheme: dark)');
+
+    // SSR-safe media query
+    const isSystemDark = typeof window !== 'undefined'
+        ? useMediaQuery('(prefers-color-scheme: dark)')
+        : ref(false);
 
     const isDark = computed(() => appearance.value === 'dark' || (appearance.value === 'system' && isSystemDark.value));
 
