@@ -5,7 +5,7 @@ import type { IncomingMessage, ServerResponse } from 'http';
 import { createServer as createHttpServer } from 'http';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { App, DefineComponent } from 'vue';
-import { createSSRApp, h } from 'vue';
+import { createSSRApp, h, Suspense } from 'vue';
 import { createI18n } from 'vue-i18n';
 import { route as ziggyRoute, ZiggyVue } from 'ziggy-js';
 import type { AppPageProps } from './types';
@@ -200,13 +200,18 @@ function startSafeSsrServer(renderPage: (page: Page) => Promise<any>, port: numb
 
 setupProcessErrorHandling();
 
-startSafeSsrServer((page: Page) =>
-    createInertiaApp({
+export default function render(page: Page) {
+    return createInertiaApp({
         page,
         render: renderToString,
         resolve: (name: string) => resolvePageComponent(`./pages/${name}.vue`, import.meta.glob<DefineComponent>('./pages/**/*.vue')),
         setup({ App, props, plugin }: { App: any; props: any; plugin: any }) {
-            const app = createSSRApp({ render: () => h(App, props) });
+            const app = createSSRApp({
+                render: () =>
+                    h(Suspense, null, {
+                        default: () => h(App, props),
+                    }),
+            });
             const pageProps = page.props as unknown as AppPageProps;
 
             configureVueErrorHandlers(app);
@@ -230,5 +235,5 @@ startSafeSsrServer((page: Page) =>
 
             return app;
         },
-    }),
-);
+    });
+}
