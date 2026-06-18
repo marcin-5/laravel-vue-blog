@@ -26,7 +26,7 @@ test('visitor stats displays user name if available, newsletter email otherwise,
         'visitor_id' => Str::uuid(),
         'viewable_type' => Blog::class,
         'viewable_id' => $blog->id,
-        'created_at' => $now->copy()->subDays(7),
+        'created_at' => $now->copy()->subDays(3),
     ]);
 
     // Case 2: Newsletter subscriber - shows email
@@ -42,7 +42,7 @@ test('visitor stats displays user name if available, newsletter email otherwise,
         'user_id' => null,
         'viewable_type' => Blog::class,
         'viewable_id' => $blog->id,
-        'created_at' => $now->copy()->subDays(7),
+        'created_at' => $now->copy()->subDays(3),
     ]);
 
     // Case 3: Anonymous no sub - shows visitor_id
@@ -52,7 +52,7 @@ test('visitor stats displays user name if available, newsletter email otherwise,
         'user_id' => null,
         'viewable_type' => Blog::class,
         'viewable_id' => $blog->id,
-        'created_at' => $now->copy()->subDays(7),
+        'created_at' => $now->copy()->subDays(3),
     ]);
 
     $response = $this->get(route('admin.stats.index') . '?visitors_limit=100&visitors_group_by=visitor_id');
