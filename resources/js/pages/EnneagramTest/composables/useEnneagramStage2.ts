@@ -1,4 +1,4 @@
-import { computed, ref, type Ref } from 'vue';
+import { computed, ref, shallowRef, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { answerCategory, countDuplicateAnswerCategories } from './shared/answers';
 import { type EnneagramType } from './shared/constants';
@@ -12,7 +12,7 @@ import {
 } from './shared/scoring';
 import { buildShuffledFlatOptions, shuffleByPriority } from './shared/shuffle';
 import type { CompleteStage1Results, Config, FlatOption, Instinct, PartConfig, Question, SelectedAnswer, Stage2Results } from './shared/types';
-import { type BaseStageState, useBaseEnneagramStage } from './shared/useBaseEnneagramStage';
+import { useBaseEnneagramStage, type BaseStageState } from './shared/useBaseEnneagramStage';
 
 interface Stage2Snapshot {
     part: number;
@@ -79,7 +79,7 @@ export function useEnneagramStage2(
     const { t } = useI18n();
 
     // --- State ---
-    const currentIndex = ref(0);
+    const currentIndex = shallowRef(0);
     const typeScores = ref<Record<EnneagramType, number>>(createEmptyTypeScores());
     const scoresPerPart = ref<Record<number, Record<EnneagramType, number>>>({
         1: createEmptyTypeScores(),

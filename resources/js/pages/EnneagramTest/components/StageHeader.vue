@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import TestProgressBar from './TestProgressBar.vue';
 
@@ -23,6 +24,9 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const { t } = useI18n();
+
+const remainingSkips = computed(() => props.maxSkips - props.skips);
+const shouldShowRemainingSkips = computed(() => props.canSkip && remainingSkips.value > 0);
 </script>
 
 <template>
@@ -43,8 +47,8 @@ const { t } = useI18n();
 
         <div class="justify-between text-muted-foreground md:flex">
             <p>{{ description }}</p>
-            <p v-if="props.canSkip && props.maxSkips - props.skips > 0">
-                {{ t('skips_remaining', { count: props.maxSkips - props.skips }) }}
+            <p v-if="shouldShowRemainingSkips">
+                {{ t('skips_remaining', { count: remainingSkips }) }}
             </p>
         </div>
     </div>

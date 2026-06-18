@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, shallowRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { LeadIndicator } from '../composables/shared/types';
 
@@ -16,7 +16,7 @@ interface Props {
 const props = defineProps<Props>();
 const { t } = useI18n();
 
-const showExplanation = ref(false);
+const showExplanation = shallowRef(false);
 
 const descriptionKey = computed(() => (props.stage === 2 ? 'lead_progress_desc_stage2' : 'lead_progress_desc'));
 
@@ -43,6 +43,10 @@ function leadPercent(lead: LeadIndicator): number {
 const minPercent = computed(() => (props.min === undefined ? 0 : toPercent(props.min)));
 const maxPercent = computed(() => toPercent(props.max));
 const currentPercent = computed(() => toPercent(Math.min(props.current, props.max)));
+const minMarkerStyle = computed(() => ({ left: `${minPercent.value}%` }));
+const maxMarkerStyle = computed(() => ({ left: `${maxPercent.value}%` }));
+const minLabelStyle = computed(() => ({ left: `${minPercent.value}%`, transform: 'translateX(-50%)' }));
+const maxLabelStyle = computed(() => ({ left: `${maxPercent.value}%`, transform: 'translateX(-50%)' }));
 
 const extraPercent = computed(() => {
     if (!isExtra.value) {
@@ -81,14 +85,14 @@ const extraPercent = computed(() => {
             ></div>
 
             <!-- Max Questions marker -->
-            <div :style="{ left: `${maxPercent}%` }" :title="t('tie_breaker_point')" class="absolute top-0 z-10 h-full w-0.5 bg-foreground/50">
+            <div :style="maxMarkerStyle" :title="t('tie_breaker_point')" class="absolute top-0 z-10 h-full w-0.5 bg-foreground/50">
                 <div class="absolute -top-1 -left-1 h-2 w-2 rounded-full bg-foreground/50"></div>
             </div>
 
             <!-- Min Questions marker -->
             <div
                 v-if="hasMinMarker"
-                :style="{ left: `${minPercent}%` }"
+                :style="minMarkerStyle"
                 :title="t('min_questions_point')"
                 class="absolute top-0 z-10 h-full w-0.5 bg-green-500/50"
             >
@@ -98,16 +102,10 @@ const extraPercent = computed(() => {
 
         <div class="relative mt-1 flex h-4 justify-between px-1 text-xs text-muted-foreground">
             <span>0</span>
-            <span
-                v-if="hasMinMarker"
-                :style="{ left: `${minPercent}%`, transform: 'translateX(-50%)' }"
-                class="absolute font-medium whitespace-nowrap text-green-600"
-            >
+            <span v-if="hasMinMarker" :style="minLabelStyle" class="absolute font-medium whitespace-nowrap text-green-600">
                 {{ min }} ({{ t('min') }})
             </span>
-            <span :style="{ left: `${maxPercent}%`, transform: 'translateX(-50%)' }" class="absolute whitespace-nowrap">
-                {{ max }} ({{ t('target') }})
-            </span>
+            <span :style="maxLabelStyle" class="absolute whitespace-nowrap"> {{ max }} ({{ t('target') }}) </span>
             <span class="ml-auto">{{ total }}</span>
         </div>
 

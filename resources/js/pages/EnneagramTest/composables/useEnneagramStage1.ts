@@ -1,4 +1,4 @@
-import { computed, ref, type Ref, watch } from 'vue';
+import { computed, ref, type Ref, shallowRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { answerCategory, countDuplicateAnswerCategories } from './shared/answers';
 import { SINGLE_ANSWER_AUTO_CONFIRM_DELAY_MS } from './shared/constants';
@@ -44,14 +44,14 @@ function incrementScores(target: InstinctScores, answers: SelectedAnswer[]): voi
 
 export function useEnneagramStage1(questions: Question[], config: Config['stages']['stage1'], emit: EmitFn, enableAutoConfirmSingle?: Ref<boolean>) {
     // --- State ---
-    const currentIndex = ref(0);
+    const currentIndex = shallowRef(0);
     const scoresPart1 = ref<InstinctScores>(createEmptyInstinctScores());
     const scoresPart2 = ref<InstinctScores>(createEmptyInstinctScores());
-    const answeredCountPart1 = ref(0);
-    const answeredCountPart2 = ref(0);
-    const part1Winner = ref<Instinct | null>(null);
-    const extraAskedPart2 = ref(false);
-    const doubleAnswersCountPart1 = ref(0);
+    const answeredCountPart1 = shallowRef(0);
+    const answeredCountPart2 = shallowRef(0);
+    const part1Winner = shallowRef<Instinct | null>(null);
+    const extraAskedPart2 = shallowRef(false);
+    const doubleAnswersCountPart1 = shallowRef(0);
 
     const poolPart1 = shuffleByPriority<Question>(questions.filter((q) => isStage1Part1Question(q)));
     const poolPart2 = shuffleByPriority<Question>(questions.filter((q) => isStage1Part2Question(q)));

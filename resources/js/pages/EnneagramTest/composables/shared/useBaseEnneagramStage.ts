@@ -1,4 +1,4 @@
-import { computed, type ComputedRef, ref, type Ref } from 'vue';
+import { computed, type ComputedRef, type Ref, shallowRef } from 'vue';
 import type { FlatOption, PartConfig, SelectedAnswer } from './types';
 import { useAnswerSelection } from './useAnswerSelection';
 import { useHistory } from './useHistory';
@@ -24,9 +24,9 @@ export function useBaseEnneagramStage<TSnapshot>(
     getPartConfig: (part: number) => PartConfig,
     factory: (state: BaseStageState) => BaseStageProps<TSnapshot>,
 ) {
-    const currentPart = ref(1);
-    const skips = ref(0);
-    const shuffledPerQuestion = ref<Record<string, FlatOption[]>>({});
+    const currentPart = shallowRef(1);
+    const skips = shallowRef(0);
+    const shuffledPerQuestion = shallowRef<Record<string, FlatOption[]>>({});
 
     const currentConfig = computed(() => getPartConfig(currentPart.value));
 
