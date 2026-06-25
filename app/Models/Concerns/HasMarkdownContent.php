@@ -31,7 +31,13 @@ trait HasMarkdownContent
         }
 
         $html = $parser->text($content);
-        $purifier = new HTMLPurifier(HTMLPurifier_Config::createDefault());
+        $config = HTMLPurifier_Config::createDefault();
+        $config->set('HTML.SafeIframe', false);
+        $config->set('URI.SafeIframeRegexp', null);
+        $config->set('CSS.AllowedProperties', []);
+        $config->set('HTML.TargetBlank', true);
+        $config->set('Attr.EnableID', true);
+        $purifier = new HTMLPurifier($config);
 
         return $purifier->purify($html);
     }

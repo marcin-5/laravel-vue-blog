@@ -29,6 +29,7 @@ class MarkdownService
         // Trust no CSS by default
         $config->set('CSS.AllowedProperties', []);
         $config->set('HTML.TargetBlank', true);
+        $config->set('Attr.EnableID', true);
         $this->purifier = new HTMLPurifier($config);
     }
 
