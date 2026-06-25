@@ -1,5 +1,5 @@
 # Stage 1: Build frontend assets
-FROM node:25-trixie-slim AS node-builder
+FROM node:26-trixie-slim AS node-builder
 WORKDIR /app
 
 RUN npm install -g npm@latest
@@ -172,7 +172,7 @@ EXPOSE 9000
 CMD ["php-fpm"]
 
 # Stage 5: SSR runtime image for running Inertia SSR server
-FROM node:25-trixie-slim AS ssr-runtime
+FROM node:26-trixie-slim AS ssr-runtime
 WORKDIR /var/www/html
 # Install only runtime Node dependencies required by the SSR server
 # We need netcat for the deploy.sh script's health check
