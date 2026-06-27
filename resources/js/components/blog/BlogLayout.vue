@@ -56,13 +56,14 @@ const textClass = computed(() => (props.isPublic ? 'text-primary' : 'text-foregr
             <!-- Desktop sidebar layout (xl+) -->
             <div v-if="hasSidebar" class="hidden items-start gap-8 xl:flex">
                 <aside :class="asideOrderClass" :style="asideStyle">
-                    <slot name="breadcrumbs"></slot>
                     <slot name="sidebar-content"></slot>
                 </aside>
 
                 <main :class="['min-w-0 flex-1', mainOrderClass]" :style="mainStyle">
                     <slot name="header"></slot>
                     <slot name="content"></slot>
+                    <slot name="middle-divider"></slot>
+                    <slot name="breadcrumbs"></slot>
                 </main>
             </div>
 
