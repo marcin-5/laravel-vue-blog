@@ -1,26 +1,45 @@
 import { router } from '@inertiajs/vue3';
 
-export function handleContentClick(event: MouseEvent): void {
+function findClickedLink(event: MouseEvent): HTMLAnchorElement | null {
     const target = event.target as HTMLElement | null;
-    const link = target?.closest('a') as HTMLAnchorElement | null;
 
-    if (link && link.href) {
-        // Ignore clicks with modifier keys (e.g., open in new tab)
-        if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) {
-            return;
-        }
+    return target?.closest('a') as HTMLAnchorElement | null;
+}
 
-        // Ignore links explicitly targeting a new window/tab
-        if (link.getAttribute('target') === '_blank') {
-            return;
-        }
+function hasModifierKey(event: MouseEvent): boolean {
+    return event.ctrlKey || event.metaKey || event.altKey || event.shiftKey;
+}
 
-        const url = new URL(link.href, window.location.origin);
+function opensInNewBrowsingContext(link: HTMLAnchorElement): boolean {
+    return link.getAttribute('target') === '_blank';
+}
 
-        // Only intercept same-origin links so Inertia can handle navigation
-        if (url.origin === window.location.origin) {
-            event.preventDefault();
-            router.visit(url.pathname + url.search + url.hash);
-        }
+function isSamePageNavigation(url: URL): boolean {
+    return url.pathname === window.location.pathname && url.search === window.location.search;
+}
+
+function shouldInterceptLinkClick(event: MouseEvent, link: HTMLAnchorElement, url: URL): boolean {
+    const isModifiedClick = hasModifierKey(event);
+    const isBlankTarget = opensInNewBrowsingContext(link);
+    const isSameOrigin = url.origin === window.location.origin;
+    const isSamePage = isSamePageNavigation(url);
+
+    return !isModifiedClick && !isBlankTarget && isSameOrigin && !isSamePage;
+}
+
+export function handleContentClick(event: MouseEvent): void {
+    const link = findClickedLink(event);
+
+    if (!link?.href) {
+        return;
     }
+
+    const url = new URL(link.href, window.location.origin);
+
+    if (!shouldInterceptLinkClick(event, link, url)) {
+        return;
+    }
+
+    event.preventDefault();
+    router.visit(`${url.pathname}${url.search}${url.hash}`);
 }

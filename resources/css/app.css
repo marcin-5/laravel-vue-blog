@@ -195,6 +195,8 @@
     --breadcrumb-link-active: hsl(30, 33%, 50%);
     --link: hsl(175 38% 34%);
     --link-hover: hsl(169 58% 21%);
+    /* Offset for sticky header used by native anchor scrolling */
+    --scroll-offset: 72px;
 }
 
 .dark {
@@ -262,6 +264,28 @@
     select option {
         background-color: var(--color-secondary);
         color: var(--color-secondary-foreground);
+    }
+}
+
+/* Native anchor scrolling improvements (works with any scroll container) */
+@layer base {
+    /* Smooth scroll for in-page anchors */
+    html {
+        scroll-behavior: smooth;
+    }
+
+    /* Compensate sticky header height for any element targeted by #hash */
+    [id] {
+        scroll-margin-top: var(--scroll-offset);
+    }
+
+    /* Ensure smooth scrolling and correct offset inside the actual scroll container (e.g., main) */
+    /* Firefox scrolls the nearest scrollable container on hash navigation. */
+    main,
+    [data-scroll-container] {
+        scroll-behavior: smooth;
+        /* Applies to fragment navigation and scrollIntoView inside this container */
+        scroll-padding-top: var(--scroll-offset);
     }
 }
 
