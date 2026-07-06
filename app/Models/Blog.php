@@ -88,28 +88,37 @@ class Blog extends Model
             // On blog subdomains (e.g. slug.osobliwy.localhost), we must NOT scope by app locale
             // because route-model binding needs to find the blog regardless of current locale.
             // We still want locale scoping on main domains (welcome page etc.).
-            $host = (string) request()->getHost();
-            $mainDomains = array_filter([
-                config('app.domain'),
-                config('app.domain_secondary'),
-            ]);
-
-            $isSubdomain = false;
-            foreach ($mainDomains as $domain) {
-                if ($domain && str_ends_with($host, '.' . $domain)) {
-                    $isSubdomain = true; // host is like slug.domain → subdomain
-                    break;
-                }
+            if (self::fromHost((string) request()->getHost())) {
+                return;
             }
 
-            if (!$isSubdomain) {
-                $builder->where('blogs.locale', app()->getLocale());
-            }
+            $builder->where('blogs.locale', app()->getLocale());
         });
 
         static::created(fn($blog) => app(SitemapObserver::class)->regenerateSitemap($blog));
         static::updated(fn($blog) => app(SitemapObserver::class)->regenerateSitemap($blog));
         static::deleted(fn($blog) => app(SitemapObserver::class)->regenerateSitemap($blog));
+    }
+
+    /**
+     * Resolve a blog instance from the given hostname.
+     */
+    public static function fromHost(string $host): ?self
+    {
+        $mainDomains = array_filter([
+            config('app.domain'),
+            config('app.domain_secondary'),
+        ]);
+
+        foreach ($mainDomains as $domain) {
+            if ($domain && str_ends_with($host, '.' . $domain)) {
+                $slug = str_replace('.' . $domain, '', $host);
+
+                return self::withoutGlobalScopes()->where('slug', $slug)->first();
+            }
+        }
+
+        return null;
     }
 
     /**

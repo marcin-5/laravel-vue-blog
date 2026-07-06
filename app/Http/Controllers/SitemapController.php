@@ -21,7 +21,7 @@ class SitemapController extends Controller
         $this->ensureNoPhysicalSitemap();
 
         $host = $request->getHost();
-        $blog = $this->getBlogFromHost($host);
+        $blog = Blog::fromHost($host);
 
         $locale = $blog ? ($blog->locale ?? app()->getLocale()) : app()->getLocale();
         $cacheKey = $blog ? "sitemap_blog_{$blog->id}" : "sitemap_main_$locale";
@@ -52,24 +52,6 @@ class SitemapController extends Controller
         }
 
         return $response;
-    }
-
-    protected function getBlogFromHost(string $host): ?Blog
-    {
-        $mainDomains = array_filter([
-            config('app.domain'),
-            config('app.domain_secondary'),
-        ]);
-
-        foreach ($mainDomains as $domain) {
-            if ($domain && str_ends_with($host, '.' . $domain)) {
-                $slug = str_replace('.' . $domain, '', $host);
-
-                return Blog::withoutGlobalScopes()->where('slug', $slug)->first();
-            }
-        }
-
-        return null;
     }
 
     protected function ensureNoPhysicalSitemap(): void
