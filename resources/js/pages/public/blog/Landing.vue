@@ -51,7 +51,7 @@ const postsListSpacingClass = computed(() => (hasLandingContent.value ? 'mt-6' :
 
         <template #header>
             <BlogHeader :blog="blog" :displayedMotto="displayedMotto" :viewStats="viewStats" />
-            <ScrollToPostsLink />
+            <ScrollToPostsLink :class="{ 'xl:hidden': sidebar }" />
         </template>
 
         <template #content>
@@ -59,7 +59,7 @@ const postsListSpacingClass = computed(() => (hasLandingContent.value ? 'mt-6' :
         </template>
 
         <template #middle-divider>
-            <BorderDivider v-if="!sidebar" class="my-4" />
+            <BorderDivider class="my-4" />
         </template>
 
         <template #breadcrumbs>
