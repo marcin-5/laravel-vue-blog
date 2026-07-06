@@ -1,9 +1,5 @@
-<script lang="ts" setup>
-defineProps<{
-    class?: string;
-}>();
-</script>
+<script lang="ts" setup></script>
 
 <template>
-    <div :class="['border-b border-border', $props.class]"></div>
+    <div class="border-b border-border"></div>
 </template>
