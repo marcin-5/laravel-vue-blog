@@ -63,9 +63,9 @@ class Post extends Model
             }
         });
 
-        static::created(fn() => app(SitemapObserver::class)->regenerateSitemap());
-        static::updated(fn() => app(SitemapObserver::class)->regenerateSitemap());
-        static::deleted(fn() => app(SitemapObserver::class)->regenerateSitemap());
+        static::created(fn($post) => app(SitemapObserver::class)->regenerateSitemap($post));
+        static::updated(fn($post) => app(SitemapObserver::class)->regenerateSitemap($post));
+        static::deleted(fn($post) => app(SitemapObserver::class)->regenerateSitemap($post));
     }
 
     public function blog(): BelongsTo

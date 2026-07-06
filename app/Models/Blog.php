@@ -107,9 +107,9 @@ class Blog extends Model
             }
         });
 
-        static::created(fn() => app(SitemapObserver::class)->regenerateSitemap());
-        static::updated(fn() => app(SitemapObserver::class)->regenerateSitemap());
-        static::deleted(fn() => app(SitemapObserver::class)->regenerateSitemap());
+        static::created(fn($blog) => app(SitemapObserver::class)->regenerateSitemap($blog));
+        static::updated(fn($blog) => app(SitemapObserver::class)->regenerateSitemap($blog));
+        static::deleted(fn($blog) => app(SitemapObserver::class)->regenerateSitemap($blog));
     }
 
     /**

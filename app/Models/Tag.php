@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Observers\SitemapObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,13 @@ use Illuminate\Support\Str;
 class Tag extends Model
 {
     use HasFactory;
+
+    protected static function booted(): void
+    {
+        static::created(fn($tag) => app(SitemapObserver::class)->regenerateSitemap($tag));
+        static::updated(fn($tag) => app(SitemapObserver::class)->regenerateSitemap($tag));
+        static::deleted(fn($tag) => app(SitemapObserver::class)->regenerateSitemap($tag));
+    }
 
     protected $fillable = [
         'blog_id',

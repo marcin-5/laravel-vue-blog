@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\Infrastructure\FileManagementService;
 use App\Services\SitemapService;
+use App\Models\Blog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -17,16 +18,18 @@ class SitemapController extends Controller
     public function generate(Request $request)
     {
         // Ensure no physical file blocks dynamic generation.
-        // Note: If the file exists, this controller might not be hit depending on web server config.
         $this->ensureNoPhysicalSitemap();
 
-        $locale = app()->getLocale();
-        $cacheKey = "sitemap_$locale";
+        $host = $request->getHost();
+        $blog = $this->getBlogFromHost($host);
+
+        $locale = $blog ? ($blog->locale ?? app()->getLocale()) : app()->getLocale();
+        $cacheKey = $blog ? "sitemap_blog_{$blog->id}" : "sitemap_main_$locale";
         $ttl = config('sitemap.ttl', 3600);
 
-        $data = Cache::remember($cacheKey, $ttl, function () use ($locale) {
+        $data = Cache::remember($cacheKey, $ttl, function () use ($locale, $blog) {
             return [
-                'xml' => $this->sitemapService->getSitemap($locale),
+                'xml' => $this->sitemapService->getSitemap($locale, $blog),
                 'updated_at' => now()->timestamp,
             ];
         });
@@ -49,6 +52,24 @@ class SitemapController extends Controller
         }
 
         return $response;
+    }
+
+    protected function getBlogFromHost(string $host): ?Blog
+    {
+        $mainDomains = array_filter([
+            config('app.domain'),
+            config('app.domain_secondary'),
+        ]);
+
+        foreach ($mainDomains as $domain) {
+            if ($domain && str_ends_with($host, '.' . $domain)) {
+                $slug = str_replace('.' . $domain, '', $host);
+
+                return Blog::withoutGlobalScopes()->where('slug', $slug)->first();
+            }
+        }
+
+        return null;
     }
 
     protected function ensureNoPhysicalSitemap(): void

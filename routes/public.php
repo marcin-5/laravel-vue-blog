@@ -18,7 +18,7 @@ use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Support\Facades\Route;
 use Spatie\MarkdownResponse\Middleware\ProvideMarkdownResponse;
 
-$reservedSlugs = 'about|contact|newsletter|enneagram-test|admin|api|dashboard|settings|_|robots|sitemap|login|register|logout|www|posts|blogs|groups|data|markdown';
+$reservedSlugs = 'about|contact|newsletter|enneagram-test|admin|api|dashboard|settings|_|robots|sitemap|sitemap\.xml|robots\.txt|login|register|logout|www|posts|blogs|groups|data|markdown';
 $reservedRegex = '^(?!(' . $reservedSlugs . ')($|/)).+$';
 
 // Robots.txt and Sitemap routes (without Inertia and appearance middleware)
@@ -40,7 +40,7 @@ Route::withoutMiddleware([
 Route::domain('{blog:slug}.{mainDomain}')
     // Ensure we only match real subdomains (e.g., blog.osobliwy.localhost), not main domains
     ->where(['mainDomain' => '.+\..+'])
-    ->group(function () {
+    ->group(function () use ($reservedRegex) {
         Route::get('/', [PublicBlogController::class, 'landing'])
             ->name('blog.public.landing')
             ->middleware(['track-page-views', TrackMarkdownRequests::class, ProvideMarkdownResponse::class]);
@@ -50,6 +50,7 @@ Route::domain('{blog:slug}.{mainDomain}')
 
         Route::get('/{postSlug}', [PublicBlogController::class, 'post'])
             ->name('blog.public.post')
+            ->where('postSlug', $reservedRegex)
             ->middleware(['track-page-views', TrackMarkdownRequests::class, ProvideMarkdownResponse::class]);
     });
 

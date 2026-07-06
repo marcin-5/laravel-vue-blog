@@ -11,33 +11,35 @@ use Spatie\Sitemap\Tags\Url as SitemapUrl;
 
 readonly class SitemapService
 {
-    public function getSitemap(string $locale): string
+    public function getSitemap(string $locale, ?Blog $blog = null): string
     {
         // Ensure links in sitemap use the correct domain for the locale
-        $domain = $this->getDomainForLocale($locale);
         $originalRootUrl = config('app.url');
 
-        if ($domain) {
-            $scheme = parse_url($originalRootUrl, PHP_URL_SCHEME) ?: 'https';
-            // `forceRootUrl` is deprecated. Temporarily override the application's URL
-            // so generated routes use the correct host for the given locale.
-            config()->set('app.url', $scheme . '://' . $domain);
+        if (!$blog) {
+            $domain = $this->getDomainForLocale($locale);
+            if ($domain) {
+                $scheme = parse_url($originalRootUrl, PHP_URL_SCHEME) ?: 'https';
+                config()->set('app.url', $scheme . '://' . $domain);
+            }
         }
 
         $sitemap = Sitemap::create();
 
-        $this->addHomepage($sitemap);
-
-        $this->addPublishedBlogs($sitemap, $locale);
-
-        $this->addPublishedPosts($sitemap, $locale);
+        if (!$blog) {
+            $this->addHomepage($sitemap);
+            $this->addSystemPages($sitemap);
+            $this->addPublishedBlogs($sitemap, $locale);
+        } else {
+            $this->addBlogLanding($sitemap, $blog);
+            $this->addBlogPosts($sitemap, $blog);
+            $this->addBlogTags($sitemap, $blog);
+        }
 
         $xml = $sitemap->render();
 
-        if ($domain) {
-            // Restore the original application URL after generation
-            config()->set('app.url', $originalRootUrl);
-        }
+        // Restore the original application URL after generation
+        config()->set('app.url', $originalRootUrl);
 
         return $xml;
     }
@@ -60,6 +62,22 @@ readonly class SitemapService
         );
     }
 
+    private function addSystemPages(Sitemap $sitemap): void
+    {
+        foreach (['about', 'contact', 'newsletter.index'] as $routeName) {
+            try {
+                $sitemap->add(
+                    SitemapUrl::create(route($routeName))
+                        ->setLastModificationDate(now())
+                        ->setChangeFrequency('monthly')
+                        ->setPriority(0.7),
+                );
+            } catch (\Throwable) {
+                // Skip routes that might not be defined
+            }
+        }
+    }
+
     private function addPublishedBlogs(Sitemap $sitemap, string $locale): void
     {
         Blog::published()
@@ -75,24 +93,53 @@ readonly class SitemapService
             });
     }
 
-    private function addPublishedPosts(Sitemap $sitemap, string $locale): void
+    private function addBlogLanding(Sitemap $sitemap, Blog $blog): void
     {
-        Post::with('blog')
+        $sitemap->add(
+            SitemapUrl::create($blog->public_url)
+                ->setLastModificationDate($blog->updated_at)
+                ->setChangeFrequency('daily')
+                ->setPriority(1.0),
+        );
+    }
+
+    private function addBlogPosts(Sitemap $sitemap, Blog $blog): void
+    {
+        $blog
+            ->posts()
             ->published()
             ->public()
-            ->whereHas('blog', function ($query) use ($locale): void {
-                $query
-                    ->where('is_published', true)
-                    ->where('locale', $locale);
-            })
+            ->whereNull('group_id') // Explicitly exclude group posts
             ->cursor()
             ->each(function (Post $post) use ($sitemap): void {
                 $sitemap->add(
                     SitemapUrl::create($post->public_url)
                         ->setLastModificationDate($post->updated_at)
                         ->setChangeFrequency('weekly')
-                        ->setPriority(0.6),
+                        ->setPriority(0.8),
                 );
             });
+    }
+
+    private function addBlogTags(Sitemap $sitemap, Blog $blog): void
+    {
+        $blog->tags->each(function ($tag) use ($sitemap, $blog): void {
+            try {
+                $url = route('blog.public.tag', [
+                    'blog' => $blog->slug,
+                    'tag' => $tag->slug,
+                    'mainDomain' => $blog->main_domain,
+                ]);
+
+                $sitemap->add(
+                    SitemapUrl::create($url)
+                        ->setLastModificationDate($tag->updated_at ?? $blog->updated_at)
+                        ->setChangeFrequency('weekly')
+                        ->setPriority(0.4),
+                );
+            } catch (\Throwable) {
+                // Skip if route generation fails
+            }
+        });
     }
 }
