@@ -22,13 +22,14 @@ vi.mock('@/components/blogger/FormSelectField.vue', () => ({
 vi.mock('@/components/ui/button', () => ({
     Button: {
         name: 'Button',
+        props: ['asChild'],
         template: '<button @click="$emit(\'click\')"><slot /></button>',
     },
 }));
 
 vi.mock('@/components/ui/popover', () => ({
     Popover: { template: '<div><slot /></div>' },
-    PopoverTrigger: { template: '<slot />' },
+    PopoverTrigger: { props: ['asChild'], template: '<slot />' },
     PopoverContent: { template: '<div><slot /></div>' },
 }));
 
