@@ -16,9 +16,13 @@ readonly class BlogNavigationService
     public function getLandingNavigation(Blog|Group $entity, ?Tag $tag = null): array
     {
         $tagSuffix = $tag ? ":tag:{$tag->id}" : '';
+        $locale = app()->getLocale();
+        $mainDomain = $locale === 'pl' ? config('app.domain') : config('app.domain_secondary');
+        $isExternal = request()->getHost() !== $mainDomain;
+        $contextKey = ":{$locale}:" . ($isExternal ? 'external' : 'internal');
 
         return Cache::tags(["navigation:{$entity->getMorphClass()}:$entity->id"])->remember(
-            "landing_navigation:{$entity->getMorphClass()}:$entity->id$tagSuffix",
+            "landing_navigation:{$entity->getMorphClass()}:$entity->id$tagSuffix$contextKey",
             now()->addMinutes(30),
             fn() => $this->buildLandingNavigation($entity, $tag),
         );
@@ -96,6 +100,7 @@ readonly class BlogNavigationService
             [
                 'label' => config('app.name'),
                 'url' => $homeUrl,
+                'is_external' => request()->getHost() !== $mainDomain,
             ],
             [
                 'label' => $entity->name,
@@ -116,9 +121,13 @@ readonly class BlogNavigationService
     public function getPostNavigation(Blog|Group $entity, Post $post, ?Tag $tag = null): array
     {
         $tagSuffix = $tag ? ":tag:{$tag->id}" : '';
+        $locale = app()->getLocale();
+        $mainDomain = $locale === 'pl' ? config('app.domain') : config('app.domain_secondary');
+        $isExternal = request()->getHost() !== $mainDomain;
+        $contextKey = ":{$locale}:" . ($isExternal ? 'external' : 'internal');
 
         return Cache::tags(["navigation:{$entity->getMorphClass()}:$entity->id"])->remember(
-            "post_navigation:{$entity->getMorphClass()}:$entity->id:$post->id$tagSuffix",
+            "post_navigation:{$entity->getMorphClass()}:$entity->id:$post->id$tagSuffix$contextKey",
             now()->addMinutes(30),
             fn() => $this->buildPostNavigation($entity, $post, $tag),
         );

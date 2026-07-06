@@ -29,7 +29,7 @@ const getBreadcrumbClasses = (index: number) =>
     <ol v-if="breadcrumbs.length" aria-label="Breadcrumb" class="flex flex-wrap items-center gap-1 text-xs md:text-sm">
         <li v-for="(crumb, index) in breadcrumbs" :key="index" class="flex items-center font-semibold">
             <component
-                :is="isBreadcrumbLink(index, crumb.url) ? Link : 'span'"
+                :is="isBreadcrumbLink(index, crumb.url) ? (crumb.is_external ? 'a' : Link) : 'span'"
                 :aria-current="isLastBreadcrumb(index) ? 'page' : undefined"
                 :class="getBreadcrumbClasses(index)"
                 :href="isBreadcrumbLink(index, crumb.url) ? crumb.url : undefined"

@@ -78,7 +78,13 @@ class PublicBlogController extends BasePublicController
     private function ensureBlogIsPublic(Blog $blog): void
     {
         abort_unless($blog->is_published, 404);
-        app()->setLocale($blog->locale ?? config('app.locale'));
+
+        $locale = $blog->locale ?? config('app.locale');
+        app()->setLocale($locale);
+
+        config([
+            'app.name' => \App\Http\Middleware\SetLocale::getAppNameForLocale($locale),
+        ]);
     }
 
     /**

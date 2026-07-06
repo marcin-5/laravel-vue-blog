@@ -67,6 +67,7 @@ export interface NavPost {
 export interface BreadcrumbItem {
     label: string;
     url?: string | null;
+    is_external?: boolean;
 }
 
 export interface Navigation {

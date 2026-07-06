@@ -9,6 +9,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SetLocale
 {
+    public static function getAppNameForLocale(string $locale): string
+    {
+        return $locale === 'pl' ? 'Osobliwy Blog' : 'Peculiar Matters';
+    }
+
     /**
      * Handle an incoming request.
      *
@@ -21,6 +26,15 @@ class SetLocale
         $host = $request->getHost();
 
         $locale = $domainLocales[$host] ?? null;
+
+        if ($locale === null) {
+            foreach ($domainLocales as $domain => $l) {
+                if (str_ends_with($host, '.' . $domain)) {
+                    $locale = $l;
+                    break;
+                }
+            }
+        }
 
         if ($locale === null) {
             $locale =
@@ -44,7 +58,7 @@ class SetLocale
         AppFacade::setLocale($locale);
 
         config([
-            'app.name' => $locale === 'pl' ? 'Osobliwy Blog' : 'Peculiar Matters',
+            'app.name' => self::getAppNameForLocale($locale),
         ]);
 
         return $next($request);
