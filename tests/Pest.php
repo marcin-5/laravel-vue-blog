@@ -74,3 +74,11 @@ function createPost(Blog $blog, array $attributes = []): Post
         'blog_id' => $blog->id,
     ], $attributes));
 }
+
+function getBlogUrl(Blog $blog, string $path = '/'): string
+{
+    $mainDomain = $blog->locale === 'pl' ? config('app.domain') : config('app.domain_secondary');
+    $path = ltrim($path, '/');
+
+    return "http://{$blog->slug}.{$mainDomain}" . ($path ? "/$path" : '');
+}

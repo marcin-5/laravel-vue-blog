@@ -27,7 +27,7 @@ test('it queues old and new url for submission when blog slug changes', function
     ]);
     $blog->refresh();
 
-    $oldUrl = route('blog.public.landing', $blog->slug);
+    $oldUrl = route('blog.public.landing', ['blog' => $blog->slug, 'mainDomain' => $blog->main_domain]);
     $allUrls = IndexNowQueuedUrl::pluck('url')->toArray();
     if (!in_array($oldUrl, $allUrls)) {
         throw new Exception('Old URL not found in queue. Available URLs: ' . implode(', ', $allUrls));
@@ -39,7 +39,7 @@ test('it queues old and new url for submission when blog slug changes', function
 
     $blog->update(['slug' => 'new-blog-slug']);
 
-    $newUrl = route('blog.public.landing', 'new-blog-slug');
+    $newUrl = route('blog.public.landing', ['blog' => 'new-blog-slug', 'mainDomain' => $blog->main_domain]);
 
     expect(IndexNowQueuedUrl::where('url', $newUrl)->exists())->toBeTrue();
     expect(IndexNowQueuedUrl::where('url', $oldUrl)->exists())->toBeTrue();
@@ -56,7 +56,7 @@ test('it queues old and new url for submission when post slug changes', function
         'visibility' => 'public',
     ]);
 
-    $oldUrl = route('blog.public.post', [$blog->slug, 'old-post-slug']);
+    $oldUrl = route('blog.public.post', ['blog' => $blog->slug, 'postSlug' => 'old-post-slug', 'mainDomain' => $blog->main_domain]);
     expect(IndexNowQueuedUrl::where('url', $oldUrl)->exists())->toBeTrue();
 
     // Clear queue
@@ -64,7 +64,7 @@ test('it queues old and new url for submission when post slug changes', function
 
     $post->update(['slug' => 'new-post-slug']);
 
-    $newUrl = route('blog.public.post', [$blog->slug, 'new-post-slug']);
+    $newUrl = route('blog.public.post', ['blog' => $blog->slug, 'postSlug' => 'new-post-slug', 'mainDomain' => $blog->main_domain]);
 
     expect(IndexNowQueuedUrl::where('url', $newUrl)->exists())->toBeTrue();
     expect(IndexNowQueuedUrl::where('url', $oldUrl)->exists())->toBeTrue();
@@ -87,7 +87,7 @@ test('it queues old urls for all posts when blog slug changes', function () {
     ]);
     $post->refresh();
 
-    $oldPostUrl = route('blog.public.post', [$blog->slug, $post->slug]);
+    $oldPostUrl = route('blog.public.post', ['blog' => $blog->slug, 'postSlug' => $post->slug, 'mainDomain' => $blog->main_domain]);
     expect(IndexNowQueuedUrl::where('url', $oldPostUrl)->exists())->toBeTrue();
 
     // Clear queue
@@ -96,10 +96,10 @@ test('it queues old urls for all posts when blog slug changes', function () {
     $oldBlogSlug = $blog->slug;
     $blog->update(['slug' => 'new-blog-slug']);
 
-    $newBlogUrl = route('blog.public.landing', 'new-blog-slug');
-    $oldBlogUrl = route('blog.public.landing', $oldBlogSlug);
-    $newPostUrl = route('blog.public.post', ['new-blog-slug', 'post-slug']);
-    $oldPostUrl = route('blog.public.post', [$oldBlogSlug, 'post-slug']);
+    $newBlogUrl = route('blog.public.landing', ['blog' => 'new-blog-slug', 'mainDomain' => $blog->main_domain]);
+    $oldBlogUrl = route('blog.public.landing', ['blog' => $oldBlogSlug, 'mainDomain' => $blog->main_domain]);
+    $newPostUrl = route('blog.public.post', ['blog' => 'new-blog-slug', 'postSlug' => 'post-slug', 'mainDomain' => $blog->main_domain]);
+    $oldPostUrl = route('blog.public.post', ['blog' => $oldBlogSlug, 'postSlug' => 'post-slug', 'mainDomain' => $blog->main_domain]);
 
     expect(IndexNowQueuedUrl::where('url', $newBlogUrl)->exists())->toBeTrue();
     expect(IndexNowQueuedUrl::where('url', $oldBlogUrl)->exists())->toBeTrue();

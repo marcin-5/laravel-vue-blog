@@ -21,7 +21,7 @@ class TrackMarkdownRequestsTest extends TestCase
         ]);
 
         // First request (should create a record)
-        $this->get("/{$blog->slug}", [
+        $this->get(getBlogUrl($blog), [
             'Accept' => 'text/markdown',
         ])->assertStatus(200);
 
@@ -32,7 +32,7 @@ class TrackMarkdownRequestsTest extends TestCase
         ]);
 
         // Second request (should increase hits)
-        $this->get("/{$blog->slug}", [
+        $this->get(getBlogUrl($blog), [
             'Accept' => 'text/markdown',
         ])->assertStatus(200);
 

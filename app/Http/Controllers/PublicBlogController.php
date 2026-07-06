@@ -44,7 +44,7 @@ class PublicBlogController extends BasePublicController
      * Show the public landing page for a blog by slug.
      * Route: /{blog:slug}
      */
-    public function landing(Request $request, Blog $blog, PublicBlogPostsQuery $query): Response
+    public function landing(Request $request, Blog $blog, string $mainDomain, PublicBlogPostsQuery $query): Response
     {
         $this->ensureBlogIsPublic($blog);
         $blog->load(['landingPage', 'user']);
@@ -87,7 +87,7 @@ class PublicBlogController extends BasePublicController
      *
      * @throws ModelNotFoundException
      */
-    public function post(Request $request, Blog $blog, string $postSlug, PublicBlogPostsQuery $query): Response
+    public function post(Request $request, Blog $blog, string $mainDomain, string $postSlug, PublicBlogPostsQuery $query): Response
     {
         $this->ensureBlogIsPublic($blog);
 
@@ -109,7 +109,7 @@ class PublicBlogController extends BasePublicController
             ->firstOrFail();
 
         $paginator = $query->handle($blog, $tag);
-        $paginator->setPath(route('blog.public.landing', ['blog' => $blog->slug]));
+        $paginator->setPath(route('blog.public.landing', ['blog' => $blog->slug, 'mainDomain' => $mainDomain]));
 
         $metaDescription = $post->excerpt ?: $this->seo->generateMetaDescription($post->content_html);
 
@@ -137,7 +137,7 @@ class PublicBlogController extends BasePublicController
      * Show posts filtered by tag within a blog.
      * Route: /{blog:slug}/tags/{tag:slug}
      */
-    public function tag(Request $request, Blog $blog, Tag $tag, PublicBlogPostsQuery $query): Response
+    public function tag(Request $request, Blog $blog, string $mainDomain, Tag $tag, PublicBlogPostsQuery $query): Response
     {
         $this->ensureBlogIsPublic($blog);
 

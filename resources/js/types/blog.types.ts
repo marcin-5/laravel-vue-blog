@@ -15,10 +15,12 @@ export interface Blog {
     id: number;
     name: string;
     slug: string;
+    url: string;
     description?: string | null;
     descriptionHtml?: string | null;
     motto?: string | null;
     theme?: BlogTheme;
+    main_domain?: string | null;
 }
 
 export interface BlogItem extends Blog {

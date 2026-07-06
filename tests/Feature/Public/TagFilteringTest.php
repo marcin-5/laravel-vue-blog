@@ -23,7 +23,7 @@ it('lists only posts assigned to the given tag within the blog', function () {
     $posts[0]->tags()->attach($tag->id);
     $posts[1]->tags()->attach($tag->id);
 
-    $response = $this->get("/$blog->slug/tags/$tag->slug");
+    $response = $this->get(getBlogUrl($blog, "/tags/$tag->slug"));
 
     $response->assertOk();
     $response->assertInertia(fn(Assert $page) => $page
@@ -34,7 +34,7 @@ it('lists only posts assigned to the given tag within the blog', function () {
         )
         ->has('posts', 2)
         ->has('pagination')
-        ->where('seo.canonicalUrl', config('app.url') . "/$blog->slug/tags/$tag->slug"),
+        ->where('seo.canonicalUrl', getBlogUrl($blog, "/tags/$tag->slug")),
     );
 });
 
@@ -46,6 +46,6 @@ it('returns 404 when tag does not belong to the blog', function () {
     $tagB = Tag::factory()->for($blogB)->create();
 
     $this
-        ->get("/$blogA->slug/tags/$tagB->slug")
+        ->get(getBlogUrl($blogA, "/tags/$tagB->slug"))
         ->assertNotFound();
 });

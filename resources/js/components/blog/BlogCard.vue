@@ -12,7 +12,7 @@ const props = defineProps<{ blog: BlogItem }>();
 const { t } = useI18n();
 
 // Computed properties
-const blogUrl = computed(() => `/${props.blog.slug}`);
+const blogUrl = computed(() => props.blog.url || `/${props.blog.slug}`);
 const authorLabel = computed(() => t('blog.author', 'Author:'));
 const hasAuthor = computed(() => hasContent(props.blog.author));
 const hasDescription = computed(() => hasContent(props.blog.descriptionHtml));

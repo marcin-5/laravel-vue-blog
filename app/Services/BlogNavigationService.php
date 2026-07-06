@@ -53,6 +53,10 @@ readonly class BlogNavigationService
 
         $params = [$paramName => $entity->slug, 'postSlug' => $post->slug];
 
+        if ($entity instanceof Blog) {
+            $params['mainDomain'] = $entity->locale === 'pl' ? config('app.domain') : config('app.domain_secondary');
+        }
+
         if ($tag) {
             $params['tag'] = $tag->slug;
         }
@@ -67,21 +71,31 @@ readonly class BlogNavigationService
     private function getLandingUrl(Blog|Group $entity, ?Tag $tag = null): string
     {
         if ($tag && $entity instanceof Blog) {
-            return route('blog.public.tag', ['blog' => $entity->slug, 'tag' => $tag->slug]);
+            $mainDomain = $entity->locale === 'pl' ? config('app.domain') : config('app.domain_secondary');
+
+            return route('blog.public.tag', ['blog' => $entity->slug, 'tag' => $tag->slug, 'mainDomain' => $mainDomain]);
         }
 
         $routeName = $entity instanceof Blog ? 'blog.public.landing' : 'group.landing';
         $paramName = $entity instanceof Blog ? 'blog' : 'group';
 
-        return route($routeName, [$paramName => $entity->slug]);
+        $params = [$paramName => $entity->slug];
+        if ($entity instanceof Blog) {
+            $params['mainDomain'] = $entity->locale === 'pl' ? config('app.domain') : config('app.domain_secondary');
+        }
+
+        return route($routeName, $params);
     }
 
     private function buildBreadcrumbs(Blog|Group $entity, ?Post $post = null): array
     {
+        $mainDomain = app()->getLocale() === 'pl' ? config('app.domain') : config('app.domain_secondary');
+        $homeUrl = (request()->isSecure() ? 'https://' : 'http://') . $mainDomain;
+
         $breadcrumbs = [
             [
                 'label' => config('app.name'),
-                'url' => config('app.url'),
+                'url' => $homeUrl,
             ],
             [
                 'label' => $entity->name,

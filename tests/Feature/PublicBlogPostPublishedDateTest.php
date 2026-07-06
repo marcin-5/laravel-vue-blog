@@ -25,7 +25,7 @@ test('public blog post page sends published_at in Y-m-d format regardless of loc
         'title' => 'Test Post',
     ]);
 
-    $response = $this->get(route('blog.public.post', ['blog' => $blog->slug, 'postSlug' => $post->slug]));
+    $response = $this->get(getBlogUrl($blog, "/{$post->slug}"));
 
     $response->assertInertia(
         fn($page) => $page

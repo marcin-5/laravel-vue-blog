@@ -24,20 +24,24 @@ beforeEach(function () {
 });
 
 it('counts views for logged in admin', function () {
+    $url = getBlogUrl($this->blog, "/{$this->post->slug}");
+
     $this
         ->actingAs($this->admin)
         ->withCookie('cookie_consent', 'accepted')
-        ->get("/{$this->blog->slug}/{$this->post->slug}")
+        ->get($url)
         ->assertStatus(200);
 
     Queue::assertPushed(StorePageView::class, 1);
 });
 
 it('counts views for logged in blogger (author)', function () {
+    $url = getBlogUrl($this->blog, "/{$this->post->slug}");
+
     $this
         ->actingAs($this->blogger)
         ->withCookie('cookie_consent', 'accepted')
-        ->get("/{$this->blog->slug}/{$this->post->slug}")
+        ->get($url)
         ->assertStatus(200);
 
     Queue::assertPushed(StorePageView::class, 1);

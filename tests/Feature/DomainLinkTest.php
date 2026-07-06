@@ -13,13 +13,19 @@ class DomainLinkTest extends TestCase
 {
     use RefreshDatabase;
 
+    private string $domain;
+
+    private string $domainSecondary;
+
     public function test_welcome_page_links_contain_correct_blog_slugs()
     {
+        $this->withoutExceptionHandling();
         $user = User::factory()->create();
 
         Blog::factory()->create([
             'user_id' => $user->id,
             'name' => 'Polski Blog',
+            'slug' => 'polski-blog',
             'locale' => 'pl',
             'is_published' => true,
         ]);
@@ -27,24 +33,27 @@ class DomainLinkTest extends TestCase
         Blog::factory()->create([
             'user_id' => $user->id,
             'name' => 'English Blog',
+            'slug' => 'english-blog',
             'locale' => 'en',
             'is_published' => true,
         ]);
 
         // On Polish domain, we should see the Polish blog
         $this
-            ->get('http://blog.pl/')
+            ->get('http://' . $this->domain . '/')
             ->assertInertia(fn($page) => $page
                 ->has('blogs', 1)
-                ->where('blogs.0.slug', 'polski-blog'),
+                ->where('blogs.0.slug', 'polski-blog')
+                ->where('blogs.0.url', 'http://polski-blog.' . $this->domain),
             );
 
         // On English domain, we should see the English blog
         $this
-            ->get('http://blog.com/')
+            ->get('http://' . $this->domainSecondary . '/')
             ->assertInertia(fn($page) => $page
                 ->has('blogs', 1)
-                ->where('blogs.0.slug', 'english-blog'),
+                ->where('blogs.0.slug', 'english-blog')
+                ->where('blogs.0.url', 'http://english-blog.' . $this->domainSecondary),
             );
     }
 
@@ -55,6 +64,7 @@ class DomainLinkTest extends TestCase
         $plBlog = Blog::factory()->create([
             'user_id' => $user->id,
             'name' => 'Polski Blog',
+            'slug' => 'polski-blog',
             'locale' => 'pl',
             'is_published' => true,
         ]);
@@ -68,9 +78,14 @@ class DomainLinkTest extends TestCase
             'visibility' => 'public',
         ]);
 
-        // Verify we can access the landing page and posts are correct
+        // Verify old URL redirects to subdomain
         $this
-            ->get('http://blog.pl/polski-blog')
+            ->get('http://' . $this->domain . '/polski-blog')
+            ->assertRedirect('http://polski-blog.' . $this->domain);
+
+        // Verify we can access the landing page and posts are correct on subdomain
+        $this
+            ->get('http://polski-blog.' . $this->domain)
             ->assertStatus(200)
             ->assertInertia(fn($page) => $page
                 ->has('posts', 1)
@@ -79,14 +94,18 @@ class DomainLinkTest extends TestCase
 
         // Verify that route() helper generates the correct absolute URL for the Polish domain
         $this->assertEquals(
-            'http://blog.pl/polski-blog/polski-post',
-            route('blog.public.post', ['blog' => 'polski-blog', 'postSlug' => 'polski-post']),
+            'http://polski-blog.' . $this->domain . '/polski-post',
+            route(
+                'blog.public.post',
+                ['blog' => 'polski-blog', 'postSlug' => 'polski-post', 'mainDomain' => $this->domain],
+            ),
         );
 
         // English domain
         $enBlog = Blog::factory()->create([
             'user_id' => $user->id,
             'name' => 'English Blog',
+            'slug' => 'english-blog',
             'locale' => 'en',
             'is_published' => true,
         ]);
@@ -100,8 +119,14 @@ class DomainLinkTest extends TestCase
             'visibility' => 'public',
         ]);
 
+        // Verify old URL redirects to subdomain
         $this
-            ->get('http://blog.com/english-blog')
+            ->get('http://' . $this->domainSecondary . '/english-blog')
+            ->assertRedirect('http://english-blog.' . $this->domainSecondary);
+
+        // Verify we can access the landing page and posts are correct on subdomain
+        $this
+            ->get('http://english-blog.' . $this->domainSecondary)
             ->assertStatus(200)
             ->assertInertia(fn($page) => $page
                 ->has('posts', 1)
@@ -109,10 +134,13 @@ class DomainLinkTest extends TestCase
             );
 
         // Test context for English domain - route() should point to the English domain
-        $this->prepareForDomain('blog.com');
+        $this->prepareForDomain($this->domainSecondary);
         $this->assertEquals(
-            'http://blog.com/english-blog/english-post',
-            route('blog.public.post', ['blog' => 'english-blog', 'postSlug' => 'english-post']),
+            'http://english-blog.' . $this->domainSecondary . '/english-post',
+            route(
+                'blog.public.post',
+                ['blog' => 'english-blog', 'postSlug' => 'english-post', 'mainDomain' => $this->domainSecondary],
+            ),
         );
     }
 
@@ -126,9 +154,15 @@ class DomainLinkTest extends TestCase
     {
         parent::setUp();
 
+        $this->domain = 'osobliwy.localhost';
+        $this->domainSecondary = 'peculiarmatters.localhost';
+
+        Config::set('app.domain', $this->domain);
+        Config::set('app.domain_secondary', $this->domainSecondary);
+
         Config::set('app.domain_locales', [
-            'blog.pl' => 'pl',
-            'blog.com' => 'en',
+            $this->domain => 'pl',
+            $this->domainSecondary => 'en',
         ]);
         Config::set('app.supported_locales', ['pl', 'en']);
     }

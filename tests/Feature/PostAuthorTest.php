@@ -73,7 +73,7 @@ it('uses fallback author in PublicBlogController when post user_id is null', fun
         'published_at' => now()->subDay(),
     ]);
 
-    $response = $this->get("/{$blog->slug}/{$post->slug}");
+    $response = $this->get(getBlogUrl($blog, "/{$post->slug}"));
 
     $response->assertInertia(fn($page) => $page
         ->where('post.author', 'Blog Owner')

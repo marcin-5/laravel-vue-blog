@@ -47,17 +47,17 @@ it('sets locale based on blog setting for landing and post pages', function () {
     $blogEn = Blog::factory()->create(['user_id' => $user->id, 'locale' => 'en', 'is_published' => true]);
 
     // Guest visiting Polish blog
-    $this->get("/{$blogPl->slug}")
+    $this->get(getBlogUrl($blogPl))
         ->assertInertia(fn(Assert $page) => $page->where('translations.locale', 'pl'));
 
     // Guest visiting English blog
-    $this->get("/{$blogEn->slug}")
+    $this->get(getBlogUrl($blogEn))
         ->assertInertia(fn(Assert $page) => $page->where('translations.locale', 'en'));
 
     // Authenticated user (with 'en' setting) visiting Polish blog - blog locale should win
     $authUser = User::factory()->create(['locale' => 'en']);
     $this->actingAs($authUser)
-        ->get("/{$blogPl->slug}")
+        ->get(getBlogUrl($blogPl))
         ->assertInertia(fn(Assert $page) => $page->where('translations.locale', 'pl'));
 });
 

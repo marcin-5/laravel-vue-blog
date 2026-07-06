@@ -12,7 +12,7 @@ it('displays public posts in landing page', function () {
         'published_at' => now()->subDay(),
     ]);
 
-    get(route('blog.public.landing', $blog->slug))
+    get(getBlogUrl($blog))
         ->assertSuccessful()
         ->assertSee($post->title);
 });
@@ -24,7 +24,7 @@ it('does not display unlisted posts in landing page', function () {
         'published_at' => now()->subDay(),
     ]);
 
-    get(route('blog.public.landing', $blog->slug))
+    get(getBlogUrl($blog))
         ->assertSuccessful()
         ->assertDontSee($unlistedPost->title);
 });
@@ -36,7 +36,7 @@ it('allows viewing unlisted post via direct link', function () {
         'published_at' => now()->subDay(),
     ]);
 
-    get(route('blog.public.post', [$blog->slug, $unlistedPost->slug]))
+    get(getBlogUrl($blog, "/{$unlistedPost->slug}"))
         ->assertSuccessful()
         ->assertSee($unlistedPost->title);
 });

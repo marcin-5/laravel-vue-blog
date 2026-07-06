@@ -16,12 +16,13 @@ beforeEach(function () {
     $this->owner = User::factory()->create();
     $this->blog = Blog::factory()->for($this->owner)->create(['is_published' => true]);
     $this->post = Post::factory()->for($this->blog)->create();
+    $this->url = "http://{$this->blog->slug}." . config('app.domain') . "/{$this->post->slug}";
 });
 
 it('tracks immediately for a new visitor without a cookie', function () {
     // First request - no visitor_id cookie, but cookie consent accepted
     $response = $this->withUnencryptedCookie('cookie_consent', 'accepted')
-        ->get("/{$this->blog->slug}/{$this->post->slug}");
+        ->get($this->url);
 
     // Should push to queue immediately (fingerprint-based identification)
     Queue::assertPushed(StorePageView::class, 1);
@@ -35,7 +36,7 @@ it('tracks immediately if X-Visitor-Id header is present (verified by JS)', func
 
     $this->withUnencryptedCookie('cookie_consent', 'accepted')
         ->withHeaders(['X-Visitor-Id' => $visitorId])
-        ->get("/{$this->blog->slug}/{$this->post->slug}");
+        ->get($this->url);
 
     // Should push immediately because header proves JS execution (LocalStorage)
     Queue::assertPushed(StorePageView::class, 1);
@@ -47,7 +48,7 @@ it('does not duplicate track if visit is within block period', function () {
     // First tracked visit
     $this->withUnencryptedCookie('cookie_consent', 'accepted')
         ->withHeaders(['X-Visitor-Id' => $visitorId])
-        ->get("/{$this->blog->slug}/{$this->post->slug}");
+        ->get($this->url);
 
     Queue::assertPushed(StorePageView::class, 1);
 
@@ -55,7 +56,7 @@ it('does not duplicate track if visit is within block period', function () {
     $this->withUnencryptedCookie('cookie_consent', 'accepted')
         ->withCookie('visitor_id', $visitorId)
         ->withHeaders(['X-Visitor-Id' => $visitorId])
-        ->get("/{$this->blog->slug}/{$this->post->slug}");
+        ->get($this->url);
 
     // Should still be 1
     Queue::assertPushed(StorePageView::class, 1);
@@ -64,7 +65,7 @@ it('does not duplicate track if visit is within block period', function () {
 it('does not set visitor cookie when consent rejected, tracks with StoreAnonymousView', function () {
     // Simulate user rejecting cookies: no visitor_id, consent rejected
     $response = $this->withUnencryptedCookie('cookie_consent', 'rejected')
-        ->get("/{$this->blog->slug}/{$this->post->slug}");
+        ->get($this->url);
 
     // Tracks anonymously via UA aggregation
     Queue::assertPushed(StoreAnonymousView::class, 1);
@@ -75,7 +76,7 @@ it('does not set visitor cookie when consent rejected, tracks with StoreAnonymou
 });
 
 it('tracks anonymously if no cookie consent', function () {
-    $response = $this->get("/{$this->blog->slug}/{$this->post->slug}");
+    $response = $this->get($this->url);
 
     Queue::assertPushed(StoreAnonymousView::class, 1);
     Queue::assertNotPushed(StorePageView::class);

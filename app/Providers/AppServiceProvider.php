@@ -33,6 +33,18 @@ class AppServiceProvider extends ServiceProvider
     {
         JsonResource::withoutWrapping();
 
+        // Dynamic session domain to support subdomains on multiple main domains
+        if (!app()->runningInConsole()) {
+            $host = request()->getHost();
+            $mainDomains = [config('app.domain'), config('app.domain_secondary')];
+            foreach ($mainDomains as $domain) {
+                if ($domain && (str_ends_with($host, $domain) || $host === $domain)) {
+                    config(['session.domain' => '.' . $domain]);
+                    break;
+                }
+            }
+        }
+
         // Model observers for cross-cutting slug generation logic
         Blog::observe(BlogObserver::class);
         Blog::observe(IndexNowObserver::class);

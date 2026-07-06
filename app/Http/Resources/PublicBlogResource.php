@@ -13,6 +13,8 @@ class PublicBlogResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
+            'main_domain' => $this->main_domain,
+            'url' => $this->public_url,
             'motto' => $this->motto,
             'theme' => $this->theme,
         ];

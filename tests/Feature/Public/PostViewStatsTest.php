@@ -56,7 +56,7 @@ it('exposes view stats (registered, anonymous, bots) on post page for owner', fu
         'hits' => 3,
     ]);
 
-    $response = $this->actingAs($owner)->get("/{$blog->slug}/{$post->slug}");
+    $response = $this->actingAs($owner)->get(getBlogUrl($blog, "/{$post->slug}"));
 
     $response->assertOk();
     $response->assertInertia(fn(Assert $page) => $page
@@ -98,7 +98,7 @@ it('exposes view stats (registered, anonymous, bots) on post page for admin', fu
         'hits' => 3,
     ]);
 
-    $response = $this->actingAs($admin)->get("/{$blog->slug}/{$post->slug}");
+    $response = $this->actingAs($admin)->get(getBlogUrl($blog, "/{$post->slug}"));
 
     $response->assertOk();
     $response->assertInertia(fn(Assert $page) => $page
@@ -119,7 +119,7 @@ it('does not expose view stats on post page to guests or non-owners', function (
     $post = Post::factory()->for($blog)->create();
 
     // Guest
-    $guestResponse = $this->get("/{$blog->slug}/{$post->slug}");
+    $guestResponse = $this->get(getBlogUrl($blog, "/{$post->slug}"));
     $guestResponse->assertOk();
     $guestResponse->assertInertia(fn(Assert $page) => $page
         ->component('public/blog/Post')
@@ -129,7 +129,7 @@ it('does not expose view stats on post page to guests or non-owners', function (
     );
 
     // Logged-in but not owner and not admin
-    $userResponse = $this->actingAs($other)->get("/{$blog->slug}/{$post->slug}");
+    $userResponse = $this->actingAs($other)->get(getBlogUrl($blog, "/{$post->slug}"));
     $userResponse->assertOk();
     $userResponse->assertInertia(fn(Assert $page) => $page
         ->component('public/blog/Post')

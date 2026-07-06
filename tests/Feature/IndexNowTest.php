@@ -27,14 +27,14 @@ test('it queues blog url for submission when created and published', function ()
     $user = User::factory()->create();
     $blog = Blog::factory()->create(['user_id' => $user->id, 'is_published' => true]);
 
-    expect(IndexNowQueuedUrl::where('url', route('blog.public.landing', $blog->slug))->exists())->toBeTrue();
+    expect(IndexNowQueuedUrl::where('url', route('blog.public.landing', ['blog' => $blog->slug, 'mainDomain' => $blog->main_domain]))->exists())->toBeTrue();
     Queue::assertPushed(IndexNowSubmitJob::class);
 });
 
 test('it removes url from queue when unpublished', function () {
     $user = User::factory()->create();
     $blog = Blog::factory()->create(['user_id' => $user->id, 'is_published' => true]);
-    $url = route('blog.public.landing', $blog->slug);
+    $url = route('blog.public.landing', ['blog' => $blog->slug, 'mainDomain' => $blog->main_domain]);
 
     expect(IndexNowQueuedUrl::where('url', $url)->exists())->toBeTrue();
 
@@ -53,7 +53,7 @@ test('it queues post url for submission when published and public', function () 
         'visibility' => 'public',
     ]);
 
-    expect(IndexNowQueuedUrl::where('url', route('blog.public.post', [$blog->slug, $post->slug]))->exists())->toBeTrue(
+    expect(IndexNowQueuedUrl::where('url', route('blog.public.post', ['blog' => $blog->slug, 'postSlug' => $post->slug, 'mainDomain' => $blog->main_domain]))->exists())->toBeTrue(
     );
     Queue::assertPushed(IndexNowSubmitJob::class);
 });
@@ -69,7 +69,7 @@ test('it does not queue post url when visibility is restricted', function () {
     ]);
 
     expect(IndexNowQueuedUrl::count())->toBe(1); // Only blog is queued
-    expect(IndexNowQueuedUrl::where('url', route('blog.public.post', [$blog->slug, $post->slug]))->exists())->toBeFalse(
+    expect(IndexNowQueuedUrl::where('url', route('blog.public.post', ['blog' => $blog->slug, 'postSlug' => $post->slug, 'mainDomain' => $blog->main_domain]))->exists())->toBeFalse(
     );
 });
 
@@ -131,6 +131,6 @@ test('it only queues for relevant attribute changes', function () {
 
     // Case 2: Important change (excerpt)
     $post->update(['excerpt' => 'New excerpt']);
-    expect(IndexNowQueuedUrl::where('url', route('blog.public.post', [$blog->slug, $post->slug]))->exists())->toBeTrue();
+    expect(IndexNowQueuedUrl::where('url', route('blog.public.post', ['blog' => $blog->slug, 'postSlug' => $post->slug, 'mainDomain' => $blog->main_domain]))->exists())->toBeTrue();
     Queue::assertPushed(IndexNowSubmitJob::class);
 });

@@ -16,11 +16,12 @@ it('tracks page views for bots in separate table', function () {
     $owner = User::factory()->create();
     $blog = Blog::factory()->for($owner)->create(['is_published' => true]);
     $post = Post::factory()->for($blog)->create();
+    $url = "http://{$blog->slug}." . config('app.domain') . "/{$post->slug}";
 
     // Request from a normal user
     $this->withUnencryptedCookie('cookie_consent', 'accepted')
         ->withCookie('visitor_id', 'test-visitor-id')
-        ->get("/{$blog->slug}/{$post->slug}", [
+        ->get($url, [
             'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         ]);
 
@@ -30,7 +31,7 @@ it('tracks page views for bots in separate table', function () {
     // Request from a bot (Googlebot)
     $botUserAgent = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
     $this->withCookie('visitor_id', 'test-visitor-id')
-        ->get("/{$blog->slug}/{$post->slug}", [
+        ->get($url, [
             'User-Agent' => $botUserAgent,
         ]);
 

@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Blog;
-use App\Models\Post;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -9,6 +8,8 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     config([
+        'app.domain' => 'osobliwy.localhost',
+        'app.domain_secondary' => 'peculiarmatters.localhost',
         'app.domain_locales' => [
             'osobliwy.localhost' => 'pl',
             'peculiarmatters.localhost' => 'en',
@@ -24,12 +25,19 @@ beforeEach(function () {
 
 it('allows blog access on main domains', function () {
     $user = User::factory()->create();
-    $blog = Blog::factory()->create(['name' => 'enneagram', 'user_id' => $user->id, 'is_published' => true]);
+    $blog = Blog::factory()->create(
+        ['name' => 'enneagram', 'slug' => 'enneagram', 'user_id' => $user->id, 'is_published' => true],
+    );
 
     $response = $this->get('http://osobliwy.localhost/about');
     $response->assertStatus(200);
 
+    // Old URL redirects to subdomain
     $response = $this->get('http://osobliwy.localhost/enneagram');
+    $response->assertRedirect('http://enneagram.osobliwy.localhost');
+
+    // New subdomain URL works
+    $response = $this->get('http://enneagram.osobliwy.localhost');
     $response->assertStatus(200);
 });
 

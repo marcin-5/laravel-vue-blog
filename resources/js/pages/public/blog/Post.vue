@@ -60,13 +60,14 @@ const blogPostsListProps = computed(() => ({
     allTags: props.allTags,
     blogId: props.blog.id,
     blogSlug: props.blog.slug,
+    mainDomain: props.blog.main_domain,
     pagination: props.pagination,
     posts: props.posts,
 }));
 
 // Navigation
 const navigateBack = () => {
-    router.visit(props.navigation?.landingUrl ?? `/${props.blog.slug}`);
+    router.visit(props.navigation?.landingUrl ?? props.blog.url);
 };
 </script>
 

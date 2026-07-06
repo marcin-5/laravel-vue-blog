@@ -17,7 +17,13 @@ class PublicDataController extends Controller
         $blogs = Blog::query()
             ->where('is_published', true)
             ->orderBy('name')
-            ->get(['id', 'name', 'slug']);
+            ->get(['id', 'name', 'slug', 'locale'])
+            ->map(fn($blog) => [
+                'id' => $blog->id,
+                'name' => $blog->name,
+                'slug' => $blog->slug,
+                'main_domain' => $blog->main_domain,
+            ]);
 
         return response()->json($blogs);
     }

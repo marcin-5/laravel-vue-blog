@@ -25,6 +25,7 @@ class WelcomeBlogResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
+            'url' => $this->public_url,
             'author' => $this->user?->name ?? '',
             'descriptionHtml' => $descriptionHtml,
             'categories' => $this->categories

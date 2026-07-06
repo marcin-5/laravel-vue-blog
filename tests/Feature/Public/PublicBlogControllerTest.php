@@ -10,7 +10,7 @@ it('returns 404 for unpublished blog on landing page', function () {
     $owner = User::factory()->create();
     $blog = Blog::factory()->for($owner)->create(['is_published' => false]);
 
-    $response = $this->get("/{$blog->slug}");
+    $response = $this->get(getBlogUrl($blog));
 
     $response->assertNotFound();
 });
@@ -22,7 +22,7 @@ it('returns 200 for published blog on landing page and sets locale', function ()
         'locale' => 'pl',
     ]);
 
-    $response = $this->get("/{$blog->slug}");
+    $response = $this->get(getBlogUrl($blog));
 
     $response->assertSuccessful();
     expect(App::getLocale())->toBe('pl');
@@ -38,7 +38,7 @@ it('returns 200 for published blog on landing page and sets locale', function ()
         ->has('footerHtml')
         ->where('locale', 'pl')
         ->loadDeferredProps(fn(Assert $reload) => $reload
-            ->has('viewStats')
+            ->has('viewStats'),
         ),
     );
 });
@@ -49,11 +49,12 @@ it('uses seo_title for blog landing when available and falls back to name', func
         'is_published' => true,
         'name' => 'My Blog',
         'seo_title' => 'My Awesome SEO Blog',
+        'locale' => 'pl',
     ]);
 
     // With seo_title set
     $this
-        ->get("/{$blog->slug}")
+        ->get(getBlogUrl($blog))
         ->assertInertia(fn(Assert $page) => $page
             ->where('seo.title', 'My Awesome SEO Blog'),
         );
@@ -62,7 +63,7 @@ it('uses seo_title for blog landing when available and falls back to name', func
     $blog->update(['seo_title' => null]);
 
     $this
-        ->get("/{$blog->slug}")
+        ->get(getBlogUrl($blog))
         ->assertInertia(fn(Assert $page) => $page
             ->where('seo.title', 'My Blog - ' . config('app.name')),
         );
@@ -77,7 +78,7 @@ it('returns 404 for unpublished blog on post page', function () {
         'visibility' => Post::VIS_PUBLIC,
     ]);
 
-    $response = $this->get("/{$blog->slug}/{$post->slug}");
+    $response = $this->get(getBlogUrl($blog, "/{$post->slug}"));
 
     $response->assertNotFound();
 });
@@ -90,7 +91,7 @@ it('returns 404 for unpublished post on public blog', function () {
         'published_at' => null,
     ]);
 
-    $response = $this->get("/{$blog->slug}/{$post->slug}");
+    $response = $this->get(getBlogUrl($blog, "/{$post->slug}"));
 
     $response->assertNotFound();
 });
@@ -109,7 +110,7 @@ it('returns 200 for published post on published blog and checks sidebar position
         'visibility' => Post::VIS_PUBLIC,
     ]);
 
-    $response = $this->get("/{$blog->slug}/{$post->slug}");
+    $response = $this->get(getBlogUrl($blog, "/{$post->slug}"));
 
     $response->assertSuccessful();
     expect(App::getLocale())->toBe('en');
@@ -125,14 +126,18 @@ it('returns 200 for published post on published blog and checks sidebar position
         ->has('sidebarPosition')
         ->where('sidebarPosition', 'left')
         ->loadDeferredProps(fn(Assert $reload) => $reload
-            ->has('viewStats')
+            ->has('viewStats'),
         ),
     );
 });
 
 it('uses seo_title for post when available and falls back to title', function () {
     $owner = User::factory()->create();
-    $blog = Blog::factory()->for($owner)->create(['is_published' => true, 'name' => 'BlogName']);
+    $blog = Blog::factory()->for($owner)->create([
+        'is_published' => true,
+        'name' => 'BlogName',
+        'locale' => 'en',
+    ]);
 
     $post = Post::factory()->for($blog)->create([
         'title' => 'Original Title',
@@ -144,7 +149,7 @@ it('uses seo_title for post when available and falls back to title', function ()
 
     // With seo_title set
     $this
-        ->get("/{$blog->slug}/{$post->slug}")
+        ->get(getBlogUrl($blog, "/{$post->slug}"))
         ->assertInertia(fn(Assert $page) => $page
             ->where('seo.title', 'SEO Optimized Title'),
         );
@@ -153,7 +158,7 @@ it('uses seo_title for post when available and falls back to title', function ()
     $post->update(['seo_title' => null]);
 
     $this
-        ->get("/{$blog->slug}/{$post->slug}")
+        ->get(getBlogUrl($blog, "/{$post->slug}"))
         ->assertInertia(fn(Assert $page) => $page
             ->where('seo.title', 'Original Title - ' . $blog->name),
         );
@@ -164,6 +169,7 @@ it('ensures pagination on post page points to blog landing page', function () {
     $blog = Blog::factory()->for($owner)->create([
         'is_published' => true,
         'page_size' => 5,
+        'locale' => 'pl',
     ]);
 
     // Create 6 posts to trigger pagination (page 1 will have 5 posts, page 2 will have 1 post)
@@ -175,16 +181,14 @@ it('ensures pagination on post page points to blog landing page', function () {
 
     $post = $blog->posts()->first();
 
-    $response = $this->get("/{$blog->slug}/{$post->slug}");
+    $response = $this->get(getBlogUrl($blog, "/{$post->slug}"));
 
     $response->assertSuccessful();
 
     $response->assertInertia(fn(Assert $page) => $page
-        ->where('pagination.nextUrl', function ($url) use ($blog, $post) {
-            // CURRENTLY: it probably contains the post slug.
-            // WE WANT: /blog-slug?page=2, NOT /blog-slug/post-slug?page=2
-            $expected = '/' . $blog->slug . '?page=2';
-            return str_contains($url, $expected) && !str_contains($url, "/{$blog->slug}/{$post->slug}");
-        })
+        ->where('pagination.nextUrl', function ($url) use ($blog) {
+            $expected = getBlogUrl($blog) . '?page=2';
+            return $url === $expected;
+        }),
     );
 });

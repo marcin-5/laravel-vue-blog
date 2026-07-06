@@ -17,6 +17,9 @@ class DomainSitemapTest extends TestCase
     {
         parent::setUp();
 
+        Config::set('app.domain', 'blog.pl');
+        Config::set('app.domain_secondary', 'blog.com');
+
         Config::set('app.domain_locales', [
             'blog.pl' => 'pl',
             'blog.com' => 'en',
@@ -106,12 +109,12 @@ class DomainSitemapTest extends TestCase
         // Test PL domain link in PL sitemap
         $responsePl = $this->get('http://blog.pl/sitemap.xml');
         $contentPl = $responsePl->getContent();
-        $this->assertStringContainsString('http://blog.pl/polski-blog', $contentPl);
+        $this->assertStringContainsString('http://polski-blog.blog.pl', $contentPl);
 
         // Test EN domain link in EN sitemap
         $responseEn = $this->get('http://blog.com/sitemap.xml');
         $contentEn = $responseEn->getContent();
-        $this->assertStringContainsString('http://blog.com/english-blog', $contentEn);
+        $this->assertStringContainsString('http://english-blog.blog.com', $contentEn);
     }
 
     public function test_sitemap_has_correct_headers_and_no_css_selectors()

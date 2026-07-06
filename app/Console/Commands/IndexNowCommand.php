@@ -53,7 +53,11 @@ class IndexNowCommand extends Command
                 return;
             }
             $this->info("Submitting post: $blogSlug/$postSlug...");
-            $urls = [route('blog.public.post', [$blogSlug, $postSlug])];
+            $urls = [route('blog.public.post', [
+                'blog' => $blogSlug,
+                'postSlug' => $postSlug,
+                'mainDomain' => $post->blog->main_domain,
+            ])];
         }
 
         if (empty($urls)) {
@@ -139,12 +143,16 @@ class IndexNowCommand extends Command
         $urls = [];
 
         Blog::where('is_published', true)->each(function ($blog) use (&$urls) {
-            $urls[] = route('blog.public.landing', $blog->slug);
+            $urls[] = $blog->public_url;
         });
 
         Post::published()->public()->whereHas('blog', fn($q) => $q->where('is_published', true))
             ->each(function ($post) use (&$urls) {
-                $urls[] = route('blog.public.post', [$post->blog->slug, $post->slug]);
+                $urls[] = route('blog.public.post', [
+                    'blog' => $post->blog->slug,
+                    'postSlug' => $post->slug,
+                    'mainDomain' => $post->blog->main_domain,
+                ]);
             });
 
         return $urls;
@@ -152,10 +160,14 @@ class IndexNowCommand extends Command
 
     protected function getBlogUrls(Blog $blog): array
     {
-        $urls = [route('blog.public.landing', $blog->slug)];
+        $urls = [$blog->public_url];
 
         $blog->posts()->published()->public()->each(function ($post) use ($blog, &$urls) {
-            $urls[] = route('blog.public.post', [$blog->slug, $post->slug]);
+            $urls[] = route('blog.public.post', [
+                'blog' => $blog->slug,
+                'postSlug' => $post->slug,
+                'mainDomain' => $blog->main_domain,
+            ]);
         });
 
         return $urls;

@@ -57,15 +57,20 @@ class IndexNowObserver
 
     protected function getUrl(Post|Blog $model): ?string
     {
-        if ($model instanceof Post && $model->blog) {
-            return route('blog.public.post', [$model->blog->slug, $model->slug]);
+        $blog = $model instanceof Post ? $model->blog : $model;
+        if (!$blog) {
+            return null;
         }
 
-        if ($model instanceof Blog) {
-            return route('blog.public.landing', $model->slug);
+        if ($model instanceof Post) {
+            return route('blog.public.post', [
+                'blog' => $blog->slug,
+                'postSlug' => $model->slug,
+                'mainDomain' => $blog->main_domain,
+            ]);
         }
 
-        return null;
+        return $blog->public_url;
     }
 
     protected function getVisibility(Post|Blog $model): string
@@ -80,15 +85,23 @@ class IndexNowObserver
             return null;
         }
 
-        if ($model instanceof Post && $model->blog) {
-            return route('blog.public.post', [$model->blog->slug, $oldSlug]);
+        $blog = $model instanceof Post ? $model->blog : $model;
+        if (!$blog) {
+            return null;
         }
 
-        if ($model instanceof Blog) {
-            return route('blog.public.landing', $oldSlug);
+        if ($model instanceof Post) {
+            return route('blog.public.post', [
+                'blog' => $blog->slug,
+                'postSlug' => $oldSlug,
+                'mainDomain' => $blog->main_domain,
+            ]);
         }
 
-        return null;
+        return route('blog.public.landing', [
+            'blog' => $oldSlug,
+            'mainDomain' => $blog->main_domain,
+        ]);
     }
 
     protected function queuePostsForBlog(Blog $blog): void
@@ -98,9 +111,19 @@ class IndexNowObserver
             return;
         }
 
-        $blog->posts()->published()->public()->each(function (Post $post) use ($blog, $oldBlogSlug) {
-            $newUrl = route('blog.public.post', [$blog->slug, $post->slug]);
-            $oldUrl = route('blog.public.post', [$oldBlogSlug, $post->slug]);
+        $mainDomain = $blog->main_domain;
+
+        $blog->posts()->published()->public()->each(function (Post $post) use ($blog, $oldBlogSlug, $mainDomain) {
+            $newUrl = route('blog.public.post', [
+                'blog' => $blog->slug,
+                'postSlug' => $post->slug,
+                'mainDomain' => $mainDomain,
+            ]);
+            $oldUrl = route('blog.public.post', [
+                'blog' => $oldBlogSlug,
+                'postSlug' => $post->slug,
+                'mainDomain' => $mainDomain,
+            ]);
 
             IndexNowQueuedUrl::updateOrCreate(['url' => $newUrl]);
             IndexNowQueuedUrl::updateOrCreate(['url' => $oldUrl]);

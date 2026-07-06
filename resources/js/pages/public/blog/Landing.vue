@@ -74,6 +74,7 @@ const postsListSpacingClass = computed(() => (hasLandingContent.value ? 'mt-6' :
                 :blogId="blog.id"
                 :blogSlug="blog.slug"
                 :class="postsListSpacingClass"
+                :mainDomain="blog.main_domain ?? undefined"
                 :pagination="pagination"
                 :posts="posts"
             />

@@ -15,8 +15,8 @@
         ? __('newsletter.email.supplement_to') . ' ' . $parentPost->title
         : $post->title;
     $buttonUrl = $isExtension && $parentPost
-        ? route('blog.public.post', ['blog' => $item['blog']->slug, 'postSlug' => $parentPost->slug])
-        : route('blog.public.post', ['blog' => $item['blog']->slug, 'postSlug' => $post->slug]);
+        ? $parentPost->public_url
+        : $post->public_url;
 @endphp
 
 ### {{ $displayTitle }}

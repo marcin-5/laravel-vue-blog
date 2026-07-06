@@ -28,7 +28,7 @@ class BlogFactory extends Factory
         return [
             'user_id' => null,
             'name' => $name,
-            'slug' => Str::slug($name) . '-' . Str::random(6),
+            'slug' => Str::slug($name),
             'description' => $this->faker->paragraph(random_int(1, 5)),
             'is_published' => $this->faker->boolean(70),
             'locale' => $this->faker->randomElement(['en', 'pl']),

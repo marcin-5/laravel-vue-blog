@@ -29,7 +29,7 @@ interface Emits {
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
-const availableBlogs = ref<{ id: number; name: string; slug: string }[]>([]);
+const availableBlogs = ref<{ id: number; name: string; slug: string; main_domain: string }[]>([]);
 const allAvailablePosts = ref<{ id: number; title: string }[]>([]);
 
 const availablePosts = computed(() => {
@@ -54,6 +54,7 @@ const fetchBlogs = async () => {
             id: number;
             name: string;
             slug: string;
+            main_domain: string;
         }[];
     } catch (error) {
         console.error('Failed to fetch blogs', error);
@@ -120,6 +121,7 @@ const getPostUrl = (rp: RelatedPostItem) => {
     if (blogSlug && postSlug) {
         return route('blog.public.post', {
             blog: blogSlug,
+            mainDomain: blog?.main_domain,
             postSlug,
         });
     }

@@ -57,6 +57,11 @@ class HandleInertiaRequests extends Middleware
                 ]) : null,
             ],
             'locale' => app()->getLocale(),
+            'mainDomain' => $mainDomain = (string) collect([config('app.domain'), config('app.domain_secondary')])
+                ->first(fn($d) => $d && str_ends_with((string) $request->getHost(), (string) $d)),
+            'currentBlogSlug' => $mainDomain && str_ends_with((string) $request->getHost(), '.' . $mainDomain)
+                ? str_replace('.' . $mainDomain, '', (string) $request->getHost())
+                : null,
             'ziggy' => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),

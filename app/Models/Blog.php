@@ -69,13 +69,40 @@ class Blog extends Model
     protected static function booted(): void
     {
         static::addGlobalScope('locale', function (Builder $builder) {
-            if (!app()->runningInConsole() && !request()->is(
+            // Do not apply the locale scope in console
+            if (app()->runningInConsole()) {
+                return;
+            }
+
+            // Skip locale scoping for admin/API areas where locale is managed differently
+            if (request()->is(
                 'dashboard*',
                 'settings*',
                 'admin*',
                 '_/*',
                 'api/admin/*',
             )) {
+                return;
+            }
+
+            // On blog subdomains (e.g. slug.osobliwy.localhost), we must NOT scope by app locale
+            // because route-model binding needs to find the blog regardless of current locale.
+            // We still want locale scoping on main domains (welcome page etc.).
+            $host = (string) request()->getHost();
+            $mainDomains = array_filter([
+                config('app.domain'),
+                config('app.domain_secondary'),
+            ]);
+
+            $isSubdomain = false;
+            foreach ($mainDomains as $domain) {
+                if ($domain && str_ends_with($host, '.' . $domain)) {
+                    $isSubdomain = true; // host is like slug.domain → subdomain
+                    break;
+                }
+            }
+
+            if (!$isSubdomain) {
                 $builder->where('blogs.locale', app()->getLocale());
             }
         });
@@ -169,5 +196,29 @@ class Blog extends Model
         }
 
         return $sidebar < 0 ? LandingPage::SIDEBAR_LEFT : LandingPage::SIDEBAR_RIGHT;
+    }
+
+    /**
+     * Get the main domain for the blog based on its locale.
+     */
+    public function getMainDomainAttribute(): string
+    {
+        return $this->locale === 'pl' ? config('app.domain') : config('app.domain_secondary');
+    }
+
+    /**
+     * Get the public URL for the blog landing page.
+     */
+    public function getPublicUrlAttribute(): string
+    {
+        if (empty($this->slug)) {
+            return '';
+        }
+
+        try {
+            return route('blog.public.landing', ['blog' => $this->slug, 'mainDomain' => $this->main_domain]);
+        } catch (\Throwable) {
+            return '';
+        }
     }
 }

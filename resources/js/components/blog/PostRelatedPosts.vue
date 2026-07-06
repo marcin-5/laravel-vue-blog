@@ -12,6 +12,7 @@ interface RelatedPostMinimal {
     excerpt?: string | null;
     display_order?: number;
     blog_slug?: string | null;
+    blog_main_domain?: string | null;
     related_post?: { id: number; title: string; slug: string } | null;
 }
 
@@ -33,7 +34,13 @@ const visibleItems = computed(() => (props.items ?? []).filter((i) => i.related_
                 class="rounded-md border border-border bg-card p-2"
             >
                 <Link
-                    :href="route('blog.public.post', { blog: item.blog_slug, postSlug: item?.related_post?.slug })"
+                    :href="
+                        route('blog.public.post', {
+                            blog: item.blog_slug,
+                            mainDomain: item.blog_main_domain,
+                            postSlug: item?.related_post?.slug,
+                        })
+                    "
                     class="font-medium text-primary hover:text-primary-foreground"
                 >
                     {{ item?.related_post?.title }}

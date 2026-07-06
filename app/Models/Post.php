@@ -47,6 +47,8 @@ class Post extends Model
         'published_at',
     ];
 
+    protected $appends = [];
+
     protected static function booted(): void
     {
         static::saving(function (Post $post) {
@@ -200,5 +202,33 @@ class Post extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Get the public URL for the post.
+     */
+    public function getPublicUrlAttribute(): string
+    {
+        if ($this->group_id && $this->group) {
+            try {
+                return route('group.post', ['group' => $this->group->slug, 'postSlug' => $this->slug]);
+            } catch (\Throwable) {
+                return '';
+            }
+        }
+
+        if (!$this->blog) {
+            return '';
+        }
+
+        try {
+            return route('blog.public.post', [
+                'blog' => $this->blog->slug,
+                'postSlug' => $this->slug,
+                'mainDomain' => $this->blog->main_domain,
+            ]);
+        } catch (\Throwable) {
+            return '';
+        }
     }
 }

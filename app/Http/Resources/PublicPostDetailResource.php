@@ -39,6 +39,7 @@ class PublicPostDetailResource extends JsonResource
                 'excerpt' => $rp->relatedPost?->excerpt,
                 'display_order' => $rp->display_order,
                 'blog_slug' => $rp->relatedPost?->blog?->slug,
+                'blog_main_domain' => $rp->relatedPost?->blog?->main_domain,
                 'related_post' => $rp->relatedPost ? [
                     'id' => $rp->relatedPost->id,
                     'title' => $rp->relatedPost->title,

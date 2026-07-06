@@ -5,31 +5,27 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const page = usePage();
-const isHomePage = computed(() => page.url === '/');
+const isHomePage = computed(() => page.url === '/' && !(page.props as any).currentBlogSlug);
 
-// Check if current URL is a post page (format: /{blog}/{post})
-const isPostPage = computed(() => {
-    const urlParts = page.url.split('/').filter((part) => part.length > 0);
-    return urlParts.length === 2;
-});
-
-// Extract blog slug from post URL
-const blogSlug = computed(() => {
-    if (isPostPage.value) {
-        return page.url.split('/').filter((part) => part.length > 0)[0];
-    }
-    return null;
-});
+const currentBlogSlug = computed(() => (page.props as any).currentBlogSlug);
+const mainDomain = computed(() => (page.props as any).mainDomain);
 
 // Determine the target URL for the home button
 const homeUrl = computed(() => {
-    if (isPostPage.value && blogSlug.value) {
-        return route('blog.public.landing', { blog: blogSlug.value });
+    if (currentBlogSlug.value) {
+        return route('blog.public.landing', { blog: currentBlogSlug.value, mainDomain: mainDomain.value });
     }
     return route('home');
 });
 
-const showButton = computed(() => !isHomePage.value);
+const showButton = computed(() => {
+    // Show if not on main home page
+    if (!currentBlogSlug.value) {
+        return !isHomePage.value;
+    }
+    // On subdomain, show if not on blog landing
+    return page.url !== '/';
+});
 </script>
 
 <template>

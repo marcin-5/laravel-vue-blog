@@ -21,6 +21,7 @@ type PaginationLink = {
 const props = defineProps<{
     posts: PostItem[];
     blogSlug: string;
+    mainDomain?: string;
     blogId: number;
     pagination?: Pagination | null;
     isGroup?: boolean;
@@ -88,7 +89,7 @@ const postsListTitle = computed(() => (!props.activeTag ? t('blog.posts_list.tit
 function getPostRouteParams(post: PostItem) {
     const params: Record<string, any> = props.isGroup
         ? { group: props.blogSlug, postSlug: post.slug }
-        : { blog: props.blogSlug, postSlug: post.slug };
+        : { blog: props.blogSlug, mainDomain: props.mainDomain, postSlug: post.slug };
 
     if (props.activeTag) {
         params.tag = props.activeTag.slug;
@@ -103,12 +104,16 @@ function getPostHref(post: PostItem): string {
 
 function getBlogLandingHref(): string {
     const anchor = props.isGroup ? '#group-posts-list' : '#posts-list';
-    return `${route(ROUTE_NAMES.blogLanding, { blog: props.blogSlug })}${anchor}`;
+    const params = props.isGroup ? { blog: props.blogSlug } : { blog: props.blogSlug, mainDomain: props.mainDomain };
+    return `${route(ROUTE_NAMES.blogLanding, params)}${anchor}`;
 }
 
 function getTagHref(tag: Tag): string {
     const anchor = props.isGroup ? '#group-posts-list' : '#posts-list';
-    return `${route(ROUTE_NAMES.blogTag, { blog: props.blogSlug, tag: tag.slug })}${anchor}`;
+    const params = props.isGroup
+        ? { blog: props.blogSlug, tag: tag.slug }
+        : { blog: props.blogSlug, mainDomain: props.mainDomain, tag: tag.slug };
+    return `${route(ROUTE_NAMES.blogTag, params)}${anchor}`;
 }
 
 function getNewsletterHref(): string {

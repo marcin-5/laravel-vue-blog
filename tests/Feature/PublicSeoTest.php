@@ -49,7 +49,7 @@ test('public blog landing page has single meta description without inertia', fun
         'is_published' => true,
     ]);
 
-    $response = get(route('blog.public.landing', ['blog' => $blog->slug]));
+    $response = get(getBlogUrl($blog));
 
     $response->assertSuccessful();
 
@@ -71,7 +71,7 @@ test('public blog post page has single meta description without inertia', functi
         'is_published' => true,
     ]);
 
-    $response = get(route('blog.public.post', ['blog' => $blog->slug, 'postSlug' => $post->slug]));
+    $response = get(getBlogUrl($blog, "/{$post->slug}"));
 
     $response->assertSuccessful();
 

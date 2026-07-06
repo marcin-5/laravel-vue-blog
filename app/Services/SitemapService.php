@@ -67,7 +67,7 @@ readonly class SitemapService
             ->cursor()
             ->each(function (Blog $blog) use ($sitemap): void {
                 $sitemap->add(
-                    SitemapUrl::create(route('blog.public.landing', $blog->slug))
+                    SitemapUrl::create($blog->public_url)
                         ->setLastModificationDate($blog->updated_at)
                         ->setChangeFrequency('weekly')
                         ->setPriority(0.8),
@@ -88,7 +88,7 @@ readonly class SitemapService
             ->cursor()
             ->each(function (Post $post) use ($sitemap): void {
                 $sitemap->add(
-                    SitemapUrl::create(route('blog.public.post', [$post->blog->slug, $post->slug]))
+                    SitemapUrl::create($post->public_url)
                         ->setLastModificationDate($post->updated_at)
                         ->setChangeFrequency('weekly')
                         ->setPriority(0.6),
