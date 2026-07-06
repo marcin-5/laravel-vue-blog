@@ -60,7 +60,7 @@ const blogPostsListProps = computed(() => ({
     allTags: props.allTags,
     blogId: props.blog.id,
     blogSlug: props.blog.slug,
-    mainDomain: props.blog.main_domain,
+    mainDomain: props.blog.main_domain ?? undefined,
     pagination: props.pagination,
     posts: props.posts,
 }));
