@@ -1,7 +1,24 @@
 <?php
 
-return [
+$currentHost = $_SERVER['HTTP_HOST'] ?? '';
 
+$primaryDomain = env('APP_DOMAIN', 'osobliwy.blog');
+$secondaryDomain = env('APP_DOMAIN_SECONDARY', 'peculiarmatters.blog');
+$enneagramDomainPl = env('ENNEAGRAM_DOMAIN_PL', 'enneagram-test.osobliwy.blog');
+$enneagramDomainEn = env('ENNEAGRAM_DOMAIN_EN', 'enneagram-test.peculiarmatters.blog');
+
+$csvToList = static function (string $value): array {
+    return explode(',', $value)
+            |> (fn($x) => array_map(static fn(string $item): string => trim($item), $x))
+            |> array_filter(...)
+            |> array_values(...);
+};
+
+$isSecondaryDomain = static function (string $host) use ($secondaryDomain): bool {
+    return $host === $secondaryDomain || str_ends_with($host, '.' . $secondaryDomain);
+};
+
+return [
     /*
     |--------------------------------------------------------------------------
     | Application Name
@@ -12,14 +29,9 @@ return [
     | other UI elements where an application name needs to be displayed.
     |
     */
-
-    'name' => (function () {
-        $host = $_SERVER['HTTP_HOST'] ?? '';
-
-        return $host === env('APP_DOMAIN_SECONDARY', 'peculiarmatters.blog')
-            ? 'Peculiar Matters'
-            : env('LARAVEL_APP_NAME', 'Osobliwy Blog');
-    })(),
+    'name' => $isSecondaryDomain($currentHost)
+        ? env('LARAVEL_APP_NAME_SECONDARY', 'Peculiar Matters')
+        : env('LARAVEL_APP_NAME', 'Osobliwy Blog'),
 
     /*
     |--------------------------------------------------------------------------
@@ -31,7 +43,6 @@ return [
     | services the application utilizes. Set this in your ".env" file.
     |
     */
-
     'env' => env('APP_ENV', 'production'),
 
     /*
@@ -44,7 +55,6 @@ return [
     | application. If disabled, a simple generic error page is shown.
     |
     */
-
     'debug' => (bool) env('APP_DEBUG', false),
 
     /*
@@ -57,7 +67,6 @@ return [
     | the application so that it's available within Artisan commands.
     |
     */
-
     'url' => env('APP_URL', 'http://localhost'),
 
     /*
@@ -70,7 +79,6 @@ return [
     | is set to "UTC" by default as it is suitable for most use cases.
     |
     */
-
     'timezone' => env('APP_TIMEZONE', 'UTC'),
 
     /*
@@ -83,17 +91,12 @@ return [
     | set to any locale for which you plan to have translation strings.
     |
     */
-
     'locale' => env('APP_LOCALE', 'en'),
     'locale_override_accept_language' => env('APP_LOCALE_OVERRIDE_ACCEPT_LANGUAGE', true),
-
-    'supported_locales' => explode(',', (string) env('APP_SUPPORTED_LOCALES', 'en,pl'))
-            |> (fn($x) => array_map(static fn(string $v): string => trim($v), $x))
-            |> array_filter(...)
-            |> array_values(...),
-
+    'supported_locales' => $csvToList((string) env('APP_SUPPORTED_LOCALES', 'en,pl')),
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
-
+    'domain' => $primaryDomain,
+    'domain_secondary' => $secondaryDomain,
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
     /*
@@ -104,12 +107,11 @@ return [
     | This map defines which locale should be used for a given domain.
     |
     */
-
     'domain_locales' => [
-        env('APP_DOMAIN', 'osobliwy.blog') => 'pl',
-        env('APP_DOMAIN_SECONDARY', 'peculiarmatters.blog') => 'en',
-        env('ENNEAGRAM_DOMAIN_PL', 'enneagram-test.osobliwy.blog') => 'pl',
-        env('ENNEAGRAM_DOMAIN_EN', 'enneagram-test.peculiarmatters.blog') => 'en',
+        $primaryDomain => 'pl',
+        $secondaryDomain => 'en',
+        $enneagramDomainPl => 'pl',
+        $enneagramDomainEn => 'en',
     ],
 
     /*
@@ -122,16 +124,9 @@ return [
     | are secure. You should do this prior to deploying the application.
     |
     */
-
     'cipher' => 'AES-256-CBC',
-
     'key' => env('APP_KEY'),
-
-    'previous_keys' => [
-        ...env('APP_PREVIOUS_KEYS', '')
-                |> (fn($x) => explode(',', $x))
-                |> array_filter(...),
-    ],
+    'previous_keys' => $csvToList((string) env('APP_PREVIOUS_KEYS', '')),
 
     /*
     |--------------------------------------------------------------------------
@@ -145,10 +140,8 @@ return [
     | Supported drivers: "file", "cache"
     |
     */
-
     'maintenance' => [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
-
 ];
