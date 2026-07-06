@@ -12,9 +12,14 @@ use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\HandleTranslations;
 use App\Http\Middleware\TrackMarkdownRequests;
 use App\Http\Middleware\UpdateVisitorOnLogin;
+use App\Models\Blog;
+use App\Models\Tag;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Support\Facades\Route;
 use Spatie\MarkdownResponse\Middleware\ProvideMarkdownResponse;
+
+$reservedSlugs = 'about|contact|newsletter|enneagram-test|admin|api|dashboard|settings|_|robots|sitemap|login|register|logout|www|posts|blogs|groups|data|markdown';
+$reservedRegex = '^(?!(' . $reservedSlugs . ')($|/)).+$';
 
 // Robots.txt and Sitemap routes (without Inertia and appearance middleware)
 Route::withoutMiddleware([
@@ -31,12 +36,43 @@ Route::withoutMiddleware([
         Route::get('sitemap.xml', [SitemapController::class, 'generate'])->name('sitemap');
     });
 
-// Redirect robots to the public route
-Route::get('blogs/{blog:slug}/{postSlug}', function (string $blogSlug, string $postSlug) {
-    return redirect()->to("/$blogSlug/$postSlug", 301);
+// Subdomain blog routes (must be registered BEFORE the generic '/' route)
+Route::domain('{blog:slug}.{mainDomain}')
+    // Ensure we only match real subdomains (e.g., blog.osobliwy.localhost), not main domains
+    ->where(['mainDomain' => '.+\..+'])
+    ->group(function () {
+        Route::get('/', [PublicBlogController::class, 'landing'])
+            ->name('blog.public.landing')
+            ->middleware(['track-page-views', TrackMarkdownRequests::class, ProvideMarkdownResponse::class]);
+
+        Route::get('/tags/{tag:slug}', [PublicBlogController::class, 'tag'])
+            ->name('blog.public.tag');
+
+        Route::get('/{postSlug}', [PublicBlogController::class, 'post'])
+            ->name('blog.public.post')
+            ->middleware(['track-page-views', TrackMarkdownRequests::class, ProvideMarkdownResponse::class]);
+    });
+
+// Redirect robots to the subdomain
+Route::get('blogs/{blog_slug}/{postSlug}', function (string $blog_slug, string $postSlug) {
+    $mainDomains = [config('app.domain'), config('app.domain_secondary')];
+    $blog = Blog::withoutGlobalScopes()->where('slug', $blog_slug)->firstOrFail();
+    $host = request()->getHost();
+    $mainDomain = collect($mainDomains)->first(fn($d) => str_ends_with($host, $d)) ?? $mainDomains[0];
+
+    return redirect()->to(
+        (request()->isSecure() ? 'https://' : 'http://') . $blog->slug . '.' . $mainDomain . '/' . $postSlug,
+        301,
+    );
 });
-Route::get('blogs/{blog:slug}', function (string $blogSlug) {
-    return redirect()->to("/$blogSlug", 301);
+
+Route::get('blogs/{blog_slug}', function (string $blog_slug) {
+    $mainDomains = [config('app.domain'), config('app.domain_secondary')];
+    $blog = Blog::withoutGlobalScopes()->where('slug', $blog_slug)->firstOrFail();
+    $host = request()->getHost();
+    $mainDomain = collect($mainDomains)->first(fn($d) => str_ends_with($host, $d)) ?? $mainDomains[0];
+
+    return redirect()->to((request()->isSecure() ? 'https://' : 'http://') . $blog->slug . '.' . $mainDomain, 301);
 });
 
 // Public About page (SSR): provide translations via props
@@ -55,17 +91,38 @@ Route::get('/newsletter/manage', [NewsletterController::class, 'manage'])->name(
 Route::post('/newsletter/update', [NewsletterController::class, 'update'])->name('newsletter.update');
 Route::post('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
-// Tag filtered listing must be before generic catch-all blog routes
-Route::get('{blog:slug}/tags/{tag:slug}', [PublicBlogController::class, 'tag'])
-    ->name('blog.public.tag');
+// Redirects for old URL structure on main domains
+Route::get('{blog_slug}/tags/{tag:slug}', function (string $blog_slug, Tag $tag) {
+    $mainDomains = [config('app.domain'), config('app.domain_secondary')];
+    $blog = Blog::withoutGlobalScopes()->where('slug', $blog_slug)->firstOrFail();
+    $host = request()->getHost();
+    $mainDomain = collect($mainDomains)->first(fn($d) => str_ends_with($host, $d)) ?? $mainDomains[0];
 
-// Keep these at the very end to avoid conflicts.
-Route::get('{blog:slug}/{postSlug}', [PublicBlogController::class, 'post'])
-    ->name('blog.public.post')
-    ->middleware(['track-page-views', TrackMarkdownRequests::class, ProvideMarkdownResponse::class]);
+    return redirect()->to(
+        (request()->isSecure() ? 'https://' : 'http://') . $blog->slug . '.' . $mainDomain . '/tags/' . $tag->slug,
+        301,
+    );
+})->where('blog_slug', $reservedRegex);
 
-Route::get('{blog:slug}', [PublicBlogController::class, 'landing'])
-    ->name('blog.public.landing')
-    ->middleware(['track-page-views', TrackMarkdownRequests::class, ProvideMarkdownResponse::class]);
+Route::get('{blog_slug}/{postSlug}', function (string $blog_slug, string $postSlug) {
+    $mainDomains = [config('app.domain'), config('app.domain_secondary')];
+    $blog = Blog::withoutGlobalScopes()->where('slug', $blog_slug)->firstOrFail();
+    $host = request()->getHost();
+    $mainDomain = collect($mainDomains)->first(fn($d) => str_ends_with($host, $d)) ?? $mainDomains[0];
+
+    return redirect()->to(
+        (request()->isSecure() ? 'https://' : 'http://') . $blog->slug . '.' . $mainDomain . '/' . $postSlug,
+        301,
+    );
+})->where('blog_slug', $reservedRegex);
+
+Route::get('{blog_slug}', function (string $blog_slug) {
+    $mainDomains = [config('app.domain'), config('app.domain_secondary')];
+    $blog = Blog::withoutGlobalScopes()->where('slug', $blog_slug)->firstOrFail();
+    $host = request()->getHost();
+    $mainDomain = collect($mainDomains)->first(fn($d) => str_ends_with($host, $d)) ?? $mainDomains[0];
+
+    return redirect()->to((request()->isSecure() ? 'https://' : 'http://') . $blog->slug . '.' . $mainDomain, 301);
+})->where('blog_slug', $reservedRegex);
 
 Route::get('/', [PublicHomeController::class, 'welcome'])->name('home');
