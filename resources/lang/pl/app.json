@@ -23,7 +23,8 @@
         "next": "Następna"
     },
     "actions": {
-        "clear": "Wyczyść"
+        "clear": "Wyczyść",
+        "info": "Informacje"
     },
     "messages": {
         "extension_created": "Rozszerzenie zostało utworzone pomyślnie.",

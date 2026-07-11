@@ -48,23 +48,21 @@ function toggleLock(id: number) {
         <div v-for="extension in extensions" :key="extension.id" class="rounded-lg border border-border bg-card">
             <Collapsible :open="expandedIds.has(extension.id)">
                 <div class="flex items-center justify-between p-4">
-                    <CollapsibleTrigger as-child>
-                        <button
-                            class="flex flex-1 items-center justify-between text-left font-semibold transition-colors hover:text-primary"
-                            @click="toggleExtension(extension.id)"
+                    <CollapsibleTrigger
+                        class="flex flex-1 items-center justify-between text-left font-semibold transition-colors hover:text-primary"
+                        @click="toggleExtension(extension.id)"
+                    >
+                        <span>{{ extension.title }}</span>
+                        <svg
+                            :class="{ 'rotate-180': expandedIds.has(extension.id) }"
+                            class="h-5 w-5 transition-transform duration-200"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
                         >
-                            <span>{{ extension.title }}</span>
-                            <svg
-                                :class="{ 'rotate-180': expandedIds.has(extension.id) }"
-                                class="h-5 w-5 transition-transform duration-200"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
-                            </svg>
-                        </button>
+                            <path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                        </svg>
                     </CollapsibleTrigger>
                     <div v-if="extensions.length > 1" class="ml-4 flex items-center gap-2">
                         <TooltipProvider>

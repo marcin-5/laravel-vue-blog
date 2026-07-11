@@ -23,7 +23,8 @@
         "next": "Next"
     },
     "actions": {
-        "clear": "Clear"
+        "clear": "Clear",
+        "info": "Info"
     },
     "messages": {
         "extension_created": "Extension created successfully.",
