@@ -79,7 +79,33 @@ readonly class UpdateVisitorOnLogin
             })
             ->delete();
 
-        // 2. Update remaining anonymous records to belong to the user.
+        // 2. Prune duplicates within the anonymous set itself.
+        // If there are multiple anonymous records for the same (viewable_type, viewable_id)
+        // that all match our current visitor/fingerprint, keeping more than one would
+        // cause a UniqueConstraintViolation when updated to the same user_id.
+        (clone $query)
+            ->whereExists(function ($query) use ($visitorId, $fingerprint) {
+                $query->select(DB::raw(1))
+                    ->from('page_views as pv2')
+                    ->whereColumn('pv2.viewable_type', 'page_views.viewable_type')
+                    ->whereColumn('pv2.viewable_id', 'page_views.viewable_id')
+                    ->whereNull('pv2.user_id')
+                    ->whereRaw('pv2.id > page_views.id')
+                    ->where(function ($query) use ($visitorId, $fingerprint) {
+                        $has = false;
+                        if ($visitorId !== '') {
+                            $query->where('pv2.visitor_id', $visitorId);
+                            $has = true;
+                        }
+                        if ($fingerprint !== null) {
+                            $has ? $query->orWhere('pv2.fingerprint', $fingerprint)
+                                : $query->where('pv2.fingerprint', $fingerprint);
+                        }
+                    });
+            })
+            ->delete();
+
+        // 3. Update remaining anonymous records to belong to the user.
         $query->update(['user_id' => $userId]);
 
         $request->session()->put('page_views_synced_for_user', true);

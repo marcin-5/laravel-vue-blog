@@ -41,6 +41,11 @@ function createAnonPageView(array $overrides = []): PageView
 }
 
 it('syncs anonymous page views by visitor_id only, without touching others', function () {
+    // Manually add the unique index for SQLite to ensure we handle conflicts
+    if (DB::getDriverName() === 'sqlite') {
+        DB::statement('CREATE UNIQUE INDEX test_page_views_unique_user_viewable ON page_views (user_id, viewable_type, viewable_id) WHERE user_id IS NOT NULL');
+    }
+
     $user = User::factory()->create();
 
     // Anonymous page views: two with matching visitor_id, one with different visitor_id.
@@ -54,14 +59,22 @@ it('syncs anonymous page views by visitor_id only, without touching others', fun
     session()->start();
     runUpdateVisitorOnLogin($request, $user);
 
-    // Refresh models
-    $matchA->refresh();
+    // Refresh models - matchA might have been deleted as a duplicate if it has same viewable_type/id as matchB
+    $matchAExists = PageView::find($matchA->id);
     $matchB->refresh();
     $other->refresh();
 
-    expect($matchA->user_id)->toBe($user->id)
-        ->and($matchB->user_id)->toBe($user->id)
+    if ($matchAExists) {
+        expect($matchAExists->user_id)->toBe($user->id);
+    }
+    expect($matchB->user_id)->toBe($user->id)
         ->and($other->user_id)->toBeNull();
+
+    // Total matching records for this resource should be 1 for this user
+    expect(PageView::where('user_id', $user->id)
+        ->where('viewable_type', $matchB->viewable_type)
+        ->where('viewable_id', $matchB->viewable_id)
+        ->count())->toBe(1);
 });
 
 it('syncs anonymous page views by fingerprint when visitor_id cookie is missing', function () {
