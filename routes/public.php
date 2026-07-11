@@ -49,6 +49,12 @@ Route::domain('{blog:slug}.{mainDomain}')
             ->name('blog.public.about')
             ->middleware(['track-page-views', TrackMarkdownRequests::class, ProvideMarkdownResponse::class]);
 
+        Route::get('/contact', [PublicBlogController::class, 'contact'])
+            ->name('blog.public.contact');
+        Route::post('/contact', [PublicBlogController::class, 'submitContact'])
+            ->name('blog.public.contact.submit')
+            ->middleware(['throttle:6,1']);
+
         Route::get('/tags/{tag:slug}', [PublicBlogController::class, 'tag'])
             ->name('blog.public.tag');
 

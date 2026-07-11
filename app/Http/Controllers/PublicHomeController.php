@@ -87,6 +87,7 @@ class PublicHomeController extends BasePublicController
         return $this->renderWithTranslations('public/Contact', 'contact', [
             'locale' => app()->getLocale(),
             'seo' => $this->seoBuilder->buildContactSeo($messages)->toArray(),
+            'recipientName' => (string) config('admin.name'),
         ]);
     }
 

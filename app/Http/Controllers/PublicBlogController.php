@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\SubmitContactFormAction;
 use App\Builders\PublicBlogSeoBuilder;
 use App\Http\Controllers\Concerns\FormatsDatesForLocale;
 use App\Http\Controllers\Concerns\FormatsPaginator;
 use App\Http\Controllers\Concerns\HandlesViewStats;
+use App\Http\Requests\ContactSubmitRequest;
 use App\Http\Resources\PublicBlogDetailResource;
 use App\Http\Resources\PublicBlogResource;
 use App\Http\Resources\PublicPostDetailResource;
@@ -21,6 +23,7 @@ use App\Services\SeoService;
 use App\Services\StatsService;
 use App\Services\TranslationService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -35,6 +38,7 @@ class PublicBlogController extends BasePublicController
         private readonly PublicBlogSeoBuilder $seoBuilder,
         private readonly BlogNavigationService $navigation,
         private readonly StatsService $stats,
+        private readonly SubmitContactFormAction $submitAction,
         protected TranslationService $translations,
     ) {
         parent::__construct($translations);
@@ -198,6 +202,49 @@ class PublicBlogController extends BasePublicController
             'navigation' => $this->navigation->getLandingNavigation($blog),
             'seo' => $this->seoBuilder->buildAboutSeo($blog)->toArray(),
             'allTags' => TagResource::collection($blog->tags->sortBy('name')->values()),
+        ]);
+    }
+
+    /**
+     * Show the contact page for a blog.
+     * Route: /contact
+     */
+    public function contact(Request $request, Blog $blog, string $mainDomain): Response
+    {
+        $this->ensureBlogIsPublic($blog);
+        $blog->load(['landingPage', 'user']);
+
+        return $this->renderWithTranslations('public/blog/Contact', 'contact', [
+            'locale' => app()->getLocale(),
+            'blog' => new PublicBlogDetailResource($blog),
+            'footerHtml' => $this->markdown->convertToHtml($blog->footer),
+            'sidebar' => (int) ($blog->sidebar ?? 0),
+            'sidebarPosition' => $blog->sidebar_position,
+            'navigation' => $this->navigation->getLandingNavigation($blog),
+            'seo' => $this->seoBuilder->buildContactSeo($blog)->toArray(),
+            'allTags' => TagResource::collection($blog->tags->sortBy('name')->values()),
+            'recipientName' => $blog->user->name,
+            'submitUrl' => route('blog.public.contact.submit', ['blog' => $blog->slug, 'mainDomain' => $mainDomain]),
+        ]);
+    }
+
+    /**
+     * Handle contact form submission for a blog.
+     * Route: POST /contact
+     */
+    public function submitContact(ContactSubmitRequest $request, Blog $blog, string $mainDomain): JsonResponse
+    {
+        $this->ensureBlogIsPublic($blog);
+        $blog->load(['user']);
+
+        $this->submitAction->execute(
+            $request->validated(),
+            $blog->user->email,
+            $blog->user->name,
+        );
+
+        return response()->json([
+            'message' => 'Thanks for your message. We will get back to you soon.',
         ]);
     }
 }

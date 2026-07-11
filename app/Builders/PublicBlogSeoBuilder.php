@@ -131,6 +131,36 @@ readonly class PublicBlogSeoBuilder
     }
 
     /**
+     * Build SEO data for the blog contact page.
+     */
+    public function buildContactSeo(Blog $blog): SeoData
+    {
+        $baseUrl = $this->getBlogBaseUrl($blog);
+        $appBaseUrl = $this->getAppBaseUrl($blog);
+        $locale = app()->getLocale();
+        $canonicalUrl = $baseUrl . '/contact';
+
+        $title = ($locale === self::POLISH_LOCALE ? 'Kontakt' : 'Contact') . ' - ' . $blog->name;
+        $description = $blog->seo_description ?: $blog->name;
+
+        return new SeoData(
+            title: $title,
+            description: $description,
+            canonicalUrl: $canonicalUrl,
+            ogImage: $this->getOgImage($appBaseUrl, $locale),
+            ogType: self::BLOG_OG_TYPE,
+            locale: $locale,
+            structuredData: [
+                '@context' => 'https://schema.org',
+                '@type' => 'ContactPage',
+                'name' => $title,
+                'url' => $canonicalUrl,
+                'description' => $description,
+            ],
+        );
+    }
+
+    /**
      * Build SEO data for the blog about page.
      */
     public function buildAboutSeo(Blog $blog): SeoData
