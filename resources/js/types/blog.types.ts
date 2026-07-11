@@ -296,9 +296,9 @@ export interface BlogFormData {
     sidebar: number;
     page_size: number;
     categories: number[];
-    landing_content?: string | null;
-    about?: string | null;
-    theme?: BlogTheme | null;
+    landing_content: string | null;
+    about: string | null;
+    theme: BlogTheme | null;
     [key: string]: any;
 }
 
@@ -310,7 +310,7 @@ export interface GroupFormData {
     locale: string;
     sidebar: number;
     page_size: number;
-    theme?: BlogTheme | null;
+    theme: BlogTheme | null;
     [key: string]: any;
 }
 

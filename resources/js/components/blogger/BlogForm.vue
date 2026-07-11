@@ -160,7 +160,7 @@ const seoDescriptionClass = computed(() => getThresholdClass(form.seo_descriptio
 
             <EntityMarkdownField
                 :id="`${fieldIdPrefix}-landing-content`"
-                v-model="form.landing_content as string"
+                v-model="form.landing_content"
                 :error="form.errors.landing_content"
                 :is-edit="props.isEdit"
                 :is-processing="form.processing"
