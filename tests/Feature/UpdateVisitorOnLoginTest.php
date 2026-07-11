@@ -43,6 +43,7 @@ function createAnonPageView(array $overrides = []): PageView
 it('syncs anonymous page views by visitor_id only, without touching others', function () {
     // Manually add the unique index for SQLite to ensure we handle conflicts
     if (DB::getDriverName() === 'sqlite') {
+        /** @noinspection SqlDialectInspection */
         DB::statement('CREATE UNIQUE INDEX test_page_views_unique_user_viewable ON page_views (user_id, viewable_type, viewable_id) WHERE user_id IS NOT NULL');
     }
 
