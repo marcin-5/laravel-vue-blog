@@ -23,7 +23,7 @@ test('blog landing page uses seo_description if provided', function () {
 
     $response->assertStatus(200);
     // In Inertia, SEO data is usually passed in the 'seo' prop
-    $response->assertInertia(fn ($page) => $page
+    $response->assertInertia(fn($page) => $page
         ->where('seo.description', 'This is a custom SEO description for the blog landing page.')
     );
 });
@@ -42,7 +42,7 @@ test('blog about page uses seo_description if provided', function () {
     $response = $this->get('http://seo-blog-about.osobliwy.pl/about');
 
     $response->assertStatus(200);
-    $response->assertInertia(fn ($page) => $page
+    $response->assertInertia(fn($page) => $page
         ->where('seo.description', 'Custom SEO description for about page.')
     );
 });
@@ -61,7 +61,7 @@ test('blog landing page falls back to regular description if seo_description is 
     $response = $this->get('http://fallback-blog.osobliwy.pl');
 
     $response->assertStatus(200);
-    $response->assertInertia(fn ($page) => $page
+    $response->assertInertia(fn($page) => $page
         ->where('seo.description', 'This is the regular blog description that should be used as fallback.')
     );
 });
