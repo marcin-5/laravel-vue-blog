@@ -19,6 +19,7 @@ class StoreBlogRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'seo_title' => ['nullable', 'string', 'max:255'],
+            'seo_description' => ['nullable', 'string', 'max:500'],
             'description' => ['nullable', 'string'],
             'footer' => ['nullable', 'string'],
             'motto' => ['nullable', 'string'],
@@ -54,6 +55,7 @@ class StoreBlogRequest extends FormRequest
             'user_id' => $this->user()->id,
             'name' => $this->getBlogName(),
             'seo_title' => $validated['seo_title'] ?? null,
+            'seo_description' => $validated['seo_description'] ?? null,
             'description' => $validated['description'] ?? null,
             'footer' => $validated['footer'] ?? null,
             'motto' => $validated['motto'] ?? null,

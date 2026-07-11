@@ -21,6 +21,7 @@ export interface Blog {
     motto?: string | null;
     about?: string | null;
     aboutHtml?: string | null;
+    seo_description?: string | null;
     theme?: BlogTheme;
     main_domain?: string | null;
 }
@@ -170,6 +171,7 @@ export interface AdminBlog {
     user_id: number;
     name: string;
     seo_title: string | null;
+    seo_description: string | null;
     slug: string;
     description: string | null;
     motto?: string | null;
@@ -285,6 +287,7 @@ export interface UsePostFormLogicOptions {
 export interface BlogFormData {
     name: string;
     seo_title: string | null;
+    seo_description: string | null;
     description: string | null;
     footer: string | null;
     motto: string | null;

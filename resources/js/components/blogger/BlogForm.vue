@@ -48,6 +48,8 @@ const baseTranslations = computed(() => ({
     namePlaceholder: props.isEdit ? '' : t('blogger.form.name_placeholder'),
     seoTitle: t('blogger.form.seo_title_label'),
     seoTitlePlaceholder: t('blogger.form.seo_title_placeholder'),
+    seoDescription: t('blogger.form.seo_description_label'),
+    seoDescriptionPlaceholder: t('blogger.form.seo_description_placeholder'),
     description: t('blogger.form.description_label'),
     descriptionPlaceholder: props.isEdit ? '' : t('blogger.form.description_placeholder'),
     landingContent: t('blogger.form.landing_content_label'),
@@ -59,6 +61,7 @@ const baseTranslations = computed(() => ({
     motto: t('blogger.form.motto_label'),
     mottoPlaceholder: props.isEdit ? '' : t('blogger.form.motto_placeholder'),
     mottoTooltip: t('blogger.form.motto_tooltip'),
+    characters: t('blogger.post_form.characters'),
 }));
 
 const descriptionTranslations = createMarkdownTranslations(useMarkdownPreviewSection());
@@ -81,10 +84,20 @@ function handleCancel() {
     emit('cancel');
 }
 
-const seoTitleClass = computed(() => {
-    const length = form.seo_title?.length || 0;
-    return length >= 50 && length <= 60 ? 'bg-secondary' : '';
-});
+const getRangeClass = (value: string | null, from: number, to: number): string => {
+    const length = value?.length || 0;
+    return length >= from && length <= to ? 'bg-secondary' : '';
+};
+
+const getThresholdClass = (value: string | null, threshold1: number, threshold2: number): string => {
+    const length = value?.length || 0;
+    if (length > threshold2) return 'bg-destructive text-destructive-foreground';
+    if (length > threshold1) return 'bg-constructive text-constructive-foreground';
+    return '';
+};
+
+const seoTitleClass = computed(() => getRangeClass(form.seo_title, 50, 60));
+const seoDescriptionClass = computed(() => getThresholdClass(form.seo_description, 120, 160));
 </script>
 
 <template>
@@ -104,10 +117,23 @@ const seoTitleClass = computed(() => {
                 :id="`${fieldIdPrefix}-seo-title`"
                 v-model="form.seo_title"
                 :error="form.errors.seo_title"
+                :hint="`${form.seo_title?.length || 0} ${baseTranslations.characters}`"
                 :input-class="seoTitleClass"
                 :label="baseTranslations.seoTitle"
                 :placeholder="baseTranslations.seoTitlePlaceholder"
                 type="input"
+            />
+
+            <PostFormField
+                :id="`${fieldIdPrefix}-seo-description`"
+                v-model="form.seo_description"
+                :error="form.errors.seo_description"
+                :hint="`${form.seo_description?.length || 0} ${baseTranslations.characters}`"
+                :input-class="seoDescriptionClass"
+                :label="baseTranslations.seoDescription"
+                :placeholder="baseTranslations.seoDescriptionPlaceholder"
+                :rows="2"
+                type="textarea"
             />
 
             <PostFormField

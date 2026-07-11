@@ -239,6 +239,8 @@
             "name_placeholder": "My Awesome Blog",
             "seo_title_label": "SEO Title",
             "seo_title_placeholder": "Optional title for search engines (50–60 characters recommended)...",
+            "seo_description_label": "SEO Description",
+            "seo_description_placeholder": "Optional description for search engines (120–160 characters recommended)...",
             "description_label": "Description",
             "description_placeholder": "What's this blog about?",
             "landing_content_label": "Landing page content",

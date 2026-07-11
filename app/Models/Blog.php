@@ -44,6 +44,7 @@ class Blog extends Model
         'user_id',
         'name',
         'seo_title',
+        'seo_description',
         'slug',
         'description',
         'motto',

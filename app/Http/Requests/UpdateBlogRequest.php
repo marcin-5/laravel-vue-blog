@@ -18,6 +18,7 @@ class UpdateBlogRequest extends FormRequest
         return [
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'seo_title' => ['nullable', 'string', 'max:255'],
+            'seo_description' => ['nullable', 'string', 'max:500'],
             'description' => ['nullable', 'string'],
             'footer' => ['nullable', 'string'],
             'motto' => ['nullable', 'string'],
@@ -55,6 +56,10 @@ class UpdateBlogRequest extends FormRequest
 
         if (array_key_exists('seo_title', $validated)) {
             $data['seo_title'] = $validated['seo_title'];
+        }
+
+        if (array_key_exists('seo_description', $validated)) {
+            $data['seo_description'] = $validated['seo_description'];
         }
 
         if (array_key_exists('description', $validated)) {

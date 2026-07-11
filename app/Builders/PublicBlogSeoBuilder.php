@@ -12,9 +12,13 @@ use Illuminate\Pagination\LengthAwarePaginator;
 readonly class PublicBlogSeoBuilder
 {
     private const string POLISH_LOCALE = 'pl';
+
     private const string DEFAULT_OG_LOCALE = 'en';
+
     private const string BLOG_OG_TYPE = 'blog';
+
     private const string ARTICLE_OG_TYPE = 'article';
+
     private const string OG_IMAGE_FILENAME = 'og-image.png';
 
     public function __construct(
@@ -137,7 +141,7 @@ readonly class PublicBlogSeoBuilder
         $canonicalUrl = $baseUrl . '/about';
 
         $title = ($locale === self::POLISH_LOCALE ? 'O nas' : 'About') . ' - ' . $blog->name;
-        $description = $this->seoService->generateMetaDescription($blog->about) ?: $blog->name;
+        $description = $blog->seo_description ?: ($this->seoService->generateMetaDescription($blog->about) ?: $blog->name);
 
         return new SeoData(
             title: $title,

@@ -52,7 +52,7 @@ class PublicBlogController extends BasePublicController
         $paginator = $query->handle($blog);
 
         $descriptionHtml = str_replace('-!-', '', $this->markdown->convertToHtml($blog->description));
-        $metaDescription = $this->seo->generateMetaDescription(
+        $metaDescription = $blog->seo_description ?: $this->seo->generateMetaDescription(
             $descriptionHtml ?: $blog->landingPage?->content_html ?: $blog->name,
         );
 
@@ -155,7 +155,7 @@ class PublicBlogController extends BasePublicController
         $paginator = $query->handle($blog, $tag);
 
         $descriptionHtml = str_replace('-!-', '', $this->markdown->convertToHtml($blog->description));
-        $metaDescription = $this->seo->generateMetaDescription(
+        $metaDescription = $blog->seo_description ?: $this->seo->generateMetaDescription(
             $descriptionHtml ?: $blog->landingPage?->content_html ?: $blog->name,
         );
 
