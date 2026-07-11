@@ -125,4 +125,34 @@ readonly class PublicBlogSeoBuilder
     {
         return $post->seo_title ?: ($post->title . ' - ' . $blog->name);
     }
+
+    /**
+     * Build SEO data for the blog about page.
+     */
+    public function buildAboutSeo(Blog $blog): SeoData
+    {
+        $baseUrl = $this->getBlogBaseUrl($blog);
+        $appBaseUrl = $this->getAppBaseUrl($blog);
+        $locale = app()->getLocale();
+        $canonicalUrl = $baseUrl . '/about';
+
+        $title = ($locale === self::POLISH_LOCALE ? 'O nas' : 'About') . ' - ' . $blog->name;
+        $description = $this->seoService->generateMetaDescription($blog->about) ?: $blog->name;
+
+        return new SeoData(
+            title: $title,
+            description: $description,
+            canonicalUrl: $canonicalUrl,
+            ogImage: $this->getOgImage($appBaseUrl, $locale),
+            ogType: self::BLOG_OG_TYPE,
+            locale: $locale,
+            structuredData: [
+                '@context' => 'https://schema.org',
+                '@type' => 'AboutPage',
+                'name' => $title,
+                'url' => $canonicalUrl,
+                'description' => $description,
+            ],
+        );
+    }
 }

@@ -28,6 +28,7 @@ class PublicBlogDetailResource extends JsonResource
             'motto' => $this->motto,
             'theme' => $this->theme,
             'descriptionHtml' => $descriptionHtml,
+            'aboutHtml' => $markdown->convertToHtml($this->about),
             'footerHtml' => $markdown->convertToHtml($this->footer),
             'authorName' => $this->user?->name,
             'authorEmail' => $this->user?->email,

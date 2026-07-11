@@ -18,7 +18,7 @@ use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Support\Facades\Route;
 use Spatie\MarkdownResponse\Middleware\ProvideMarkdownResponse;
 
-$reservedSlugs = 'about|contact|newsletter|enneagram-test|admin|api|dashboard|settings|_|robots|sitemap|sitemap\.xml|robots\.txt|login|register|logout|www|posts|blogs|groups|data|markdown';
+$reservedSlugs = 'about|contact|newsletter|enneagram-test|admin|api|dashboard|settings|_|_debugbar|_telescope|robots|sitemap|sitemap\.xml|robots\.txt|login|register|logout|www|posts|blogs|groups|data|markdown';
 $reservedRegex = '^(?!(' . $reservedSlugs . ')($|/)).+$';
 
 // Robots.txt and Sitemap routes (without Inertia and appearance middleware)
@@ -43,6 +43,10 @@ Route::domain('{blog:slug}.{mainDomain}')
     ->group(function () use ($reservedRegex) {
         Route::get('/', [PublicBlogController::class, 'landing'])
             ->name('blog.public.landing')
+            ->middleware(['track-page-views', TrackMarkdownRequests::class, ProvideMarkdownResponse::class]);
+
+        Route::get('/about', [PublicBlogController::class, 'about'])
+            ->name('blog.public.about')
             ->middleware(['track-page-views', TrackMarkdownRequests::class, ProvideMarkdownResponse::class]);
 
         Route::get('/tags/{tag:slug}', [PublicBlogController::class, 'tag'])

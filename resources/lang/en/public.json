@@ -1,5 +1,6 @@
 {
     "about": {
+        "empty": "This blog does not have an 'About' description yet.",
         "meta": {
             "title": "About Peculiar Matters",
             "description": "A space where the written word sparks reflection, discovery, and conversation."

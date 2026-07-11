@@ -30,6 +30,7 @@ export function createDefaultFormData(locale: string = 'en'): BlogFormData {
         page_size: 10,
         theme: ensureThemeStructure(null),
         landing_content: null,
+        about: null,
     };
 }
 
@@ -50,6 +51,7 @@ export function createFormDataFromBlog(blog: Blog | undefined, defaultLocale: st
         categories: (blog.categories ?? []).map((c) => c.id),
         theme: ensureThemeStructure(blog.theme),
         landing_content: blog.landing_page?.content ?? null,
+        about: blog.about ?? null,
     };
 }
 
@@ -67,6 +69,7 @@ export function populateFormFromBlog(form: InertiaForm<BlogFormData>, blog: Blog
     form.categories = data.categories;
     form.theme = data.theme;
     form.landing_content = data.landing_content;
+    form.about = data.about;
 }
 
 export function createDefaultGroupFormData(locale: string = 'en'): GroupFormData {

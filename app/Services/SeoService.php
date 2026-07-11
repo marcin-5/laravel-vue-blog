@@ -18,9 +18,15 @@ readonly class SeoService
         '/^\s{0,3}[#>\-]+\s*/m' => '',       // heading/blockquote/list markers
     ];
 
-    public function generateMetaDescription(string $html, int $limit = 160): string
+    public function generateMetaDescription(?string $html, int $limit = 160): string
     {
+        if ($html === null) {
+            return '';
+        }
         $text = $this->safeStripTags($html);
+        if ($text === null) {
+            return '';
+        }
         $text = preg_replace(array_keys(self::MARKDOWN_PATTERNS), array_values(self::MARKDOWN_PATTERNS), $text);
         $text = Str::squish(html_entity_decode($text, ENT_QUOTES | ENT_HTML5));
         return $this->truncateToLimit($text, $limit);

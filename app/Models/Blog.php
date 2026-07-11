@@ -53,6 +53,7 @@ class Blog extends Model
         'sidebar',
         'page_size',
         'theme',
+        'about',
     ];
 
     protected $casts = [

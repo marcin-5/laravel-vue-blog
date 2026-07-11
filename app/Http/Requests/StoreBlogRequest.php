@@ -41,6 +41,7 @@ class StoreBlogRequest extends FormRequest
             'theme.light' => ['nullable', 'array'],
             'theme.dark' => ['nullable', 'array'],
             'landing_content' => ['nullable', 'string'],
+            'about' => ['nullable', 'string'],
         ];
     }
 
@@ -62,6 +63,7 @@ class StoreBlogRequest extends FormRequest
             'page_size' => (int) ($validated['page_size'] ?? $config['page_size']),
             'theme' => $validated['theme'] ?? null,
             'landing_content' => $validated['landing_content'] ?? null,
+            'about' => $validated['about'] ?? null,
         ];
     }
 

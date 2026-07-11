@@ -54,6 +54,8 @@ const baseTranslations = computed(() => ({
     landingContentPlaceholder: props.isEdit ? '' : t('blogger.form.landing_content_placeholder'),
     footer: t('blogger.form.footer_label'),
     footerPlaceholder: props.isEdit ? '' : t('blogger.form.footer_placeholder'),
+    about: t('blogger.form.about_label'),
+    aboutPlaceholder: props.isEdit ? '' : t('blogger.form.about_placeholder'),
     motto: t('blogger.form.motto_label'),
     mottoPlaceholder: props.isEdit ? '' : t('blogger.form.motto_placeholder'),
     mottoTooltip: t('blogger.form.motto_tooltip'),
@@ -61,6 +63,7 @@ const baseTranslations = computed(() => ({
 
 const descriptionTranslations = createMarkdownTranslations(useMarkdownPreviewSection());
 const landingTranslations = createMarkdownTranslations(useMarkdownPreviewSection());
+const aboutTranslations = createMarkdownTranslations(useMarkdownPreviewSection());
 const footerTranslations = createMarkdownTranslations(useMarkdownPreviewSection());
 
 function handleSubmit() {
@@ -138,6 +141,18 @@ const seoTitleClass = computed(() => {
                 :label="baseTranslations.landingContent"
                 :placeholder="baseTranslations.landingContentPlaceholder"
                 :translations="landingTranslations"
+                @cancel="handleCancel"
+            />
+
+            <EntityMarkdownField
+                :id="`${fieldIdPrefix}-about`"
+                v-model="form.about"
+                :error="form.errors.about"
+                :is-edit="props.isEdit"
+                :is-processing="form.processing"
+                :label="baseTranslations.about"
+                :placeholder="baseTranslations.aboutPlaceholder"
+                :translations="aboutTranslations"
                 @cancel="handleCancel"
             />
 

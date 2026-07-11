@@ -179,4 +179,25 @@ class PublicBlogController extends BasePublicController
             'allTags' => TagResource::collection($blog->tags->sortBy('name')->values()),
         ]);
     }
+
+    /**
+     * Show the about page for a blog.
+     * Route: /about
+     */
+    public function about(Request $request, Blog $blog, string $mainDomain): Response
+    {
+        $this->ensureBlogIsPublic($blog);
+        $blog->load(['landingPage', 'user']);
+
+        return $this->renderWithTranslations('public/blog/About', 'about', [
+            'locale' => app()->getLocale(),
+            'blog' => new PublicBlogDetailResource($blog),
+            'footerHtml' => $this->markdown->convertToHtml($blog->footer),
+            'sidebar' => (int) ($blog->sidebar ?? 0),
+            'sidebarPosition' => $blog->sidebar_position,
+            'navigation' => $this->navigation->getLandingNavigation($blog),
+            'seo' => $this->seoBuilder->buildAboutSeo($blog)->toArray(),
+            'allTags' => TagResource::collection($blog->tags->sortBy('name')->values()),
+        ]);
+    }
 }

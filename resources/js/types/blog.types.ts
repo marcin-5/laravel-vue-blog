@@ -19,6 +19,8 @@ export interface Blog {
     description?: string | null;
     descriptionHtml?: string | null;
     motto?: string | null;
+    about?: string | null;
+    aboutHtml?: string | null;
     theme?: BlogTheme;
     main_domain?: string | null;
 }
@@ -172,6 +174,7 @@ export interface AdminBlog {
     description: string | null;
     motto?: string | null;
     footer?: string | null;
+    about?: string | null;
     is_published: boolean;
     locale: string;
     sidebar?: number; // -50..50
@@ -291,6 +294,7 @@ export interface BlogFormData {
     page_size: number;
     categories: number[];
     landing_content?: string | null;
+    about?: string | null;
     theme?: BlogTheme | null;
     [key: string]: any;
 }

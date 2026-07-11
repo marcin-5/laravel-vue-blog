@@ -248,6 +248,8 @@
             "motto_tooltip": "Możesz dodać wiele mott rozdzielonych podwójnym enterem (naciśnij Enter dwa razy). Jedno z nich będzie losowo wyświetlane na każdej stronie posta.",
             "footer_label": "Stopka",
             "footer_placeholder": "Stopka bloga",
+            "about_label": "O nas",
+            "about_placeholder": "Treść strony 'O nas' (Markdown)...",
             "published_label": "Opublikowany",
             "locale_label": "Język",
             "sidebar_label": "Pozycja\/szerokość paska bocznego",
