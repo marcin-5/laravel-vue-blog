@@ -26,6 +26,7 @@ readonly class BlogService
         'theme',
         'seo_title',
         'seo_description',
+        'about',
         'created_at',
     ];
 
