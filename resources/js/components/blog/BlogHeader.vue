@@ -25,7 +25,7 @@ defineProps<{
         <p
             v-if="displayedMotto"
             :style="{ fontStyle: 'var(--blog-motto-style)', fontFamily: 'var(--blog-motto-font)', fontSize: 'calc(1rem * var(--blog-motto-scale))' }"
-            class="mt-8 mb-8 text-foreground opacity-80"
+            class="mt-8 mb-8 max-w-11/12 text-right text-foreground opacity-80"
         >
             {{ displayedMotto }}
         </p>
@@ -39,7 +39,7 @@ defineProps<{
         />
     </section>
     <footer :style="{ fontFamily: 'var(--blog-footer-font)', fontSize: 'calc(1rem * var(--blog-body-scale))' }" class="origin-right">
-        <div v-if="blog.authorName && blog.authorEmail" class="author mr-12 mb-8 text-end text-muted-foreground">
+        <div v-if="blog.authorName && blog.authorEmail" class="author mb-8 max-w-11/12 text-end text-muted-foreground">
             <a :href="`mailto:${blog.authorEmail}`" class="hover:text-primary">{{ blog.authorName }}</a>
         </div>
     </footer>
