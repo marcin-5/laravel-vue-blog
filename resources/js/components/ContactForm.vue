@@ -1,6 +1,11 @@
 <script lang="ts" setup>
+import InputError from '@/components/InputError.vue';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/composables/useToast';
 import { useForm } from '@inertiajs/vue3';
+import { LoaderCircle } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
@@ -10,11 +15,6 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const { toast } = useToast();
-
-const INPUT_CLASSES =
-    'w-full rounded-md border border-border bg-background/70 p-2 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/30 focus:outline-none';
-const LABEL_CLASSES = 'mb-1 block text-sm font-medium';
-const BUTTON_CLASSES = 'rounded-md border border-border px-4 py-2 text-sm text-foreground hover:border-ring/40';
 
 const form = useForm({
     name: '',
@@ -51,79 +51,65 @@ function submit() {
             {{ t('contact.form.recipient', 'Your message will be sent to:') }}
             <strong class="text-foreground">{{ recipientName }}</strong>
         </p>
-        <form class="grid gap-4" @submit.prevent="submit">
-            <div>
-                <label :class="LABEL_CLASSES" for="contact-name">{{ t('contact.form.name', 'Name') }}</label>
-                <input
-                    id="contact-name"
-                    v-model="form.name"
-                    :class="INPUT_CLASSES"
-                    :placeholder="t('contact.form.placeholders.name', 'Your name')"
-                    autocomplete="name"
-                    data-gramm="false"
-                    data-lt-active="false"
-                    required
-                    spellcheck="false"
-                    type="text"
-                    @keydown.stop
-                />
-                <p v-if="form.errors.name" class="mt-1 text-xs text-destructive">{{ form.errors.name }}</p>
-            </div>
-            <div>
-                <label :class="LABEL_CLASSES" for="contact-email">{{ t('contact.form.email', 'Email') }}</label>
-                <input
-                    id="contact-email"
-                    v-model="form.email"
-                    :class="INPUT_CLASSES"
-                    :placeholder="t('contact.form.placeholders.email', 'Your email')"
-                    autocomplete="email"
-                    data-gramm="false"
-                    data-lt-active="false"
-                    required
-                    spellcheck="false"
-                    type="email"
-                    @keydown.stop
-                />
-                <p v-if="form.errors.email" class="mt-1 text-xs text-destructive">{{ form.errors.email }}</p>
-            </div>
-            <div>
-                <label :class="LABEL_CLASSES" for="contact-subject">{{ t('contact.form.subject', 'Subject') }}</label>
-                <input
-                    id="contact-subject"
-                    v-model="form.subject"
-                    :class="INPUT_CLASSES"
-                    :placeholder="t('contact.form.placeholders.subject', 'Subject')"
-                    autocomplete="off"
-                    data-gramm="false"
-                    data-lt-active="false"
-                    required
-                    spellcheck="false"
-                    type="text"
-                    @keydown.stop
-                />
-                <p v-if="form.errors.subject" class="mt-1 text-xs text-destructive">{{ form.errors.subject }}</p>
-            </div>
-            <div>
-                <label :class="LABEL_CLASSES" for="contact-message">{{ t('contact.form.message', 'Message') }}</label>
-                <textarea
-                    id="contact-message"
-                    v-model="form.message"
-                    :class="INPUT_CLASSES"
-                    :placeholder="t('contact.form.placeholders.message', 'Write your message...')"
-                    autocomplete="off"
-                    data-gramm="false"
-                    data-lt-active="false"
-                    required
-                    rows="6"
-                    spellcheck="false"
-                    @keydown.stop
-                />
-                <p v-if="form.errors.message" class="mt-1 text-xs text-destructive">{{ form.errors.message }}</p>
-            </div>
-            <div class="mt-2">
-                <button :class="BUTTON_CLASSES" :disabled="form.processing" type="submit">
+        <form class="flex flex-col gap-6" @submit.prevent="submit">
+            <div class="grid gap-6">
+                <div class="grid gap-2">
+                    <Label for="contact-name">{{ t('contact.form.name', 'Name') }}</Label>
+                    <Input
+                        id="contact-name"
+                        name="name"
+                        v-model="form.name"
+                        :placeholder="t('contact.form.placeholders.name', 'Your name')"
+                        autocomplete="name"
+                        required
+                        type="text"
+                    />
+                    <InputError :message="form.errors.name" />
+                </div>
+                <div class="grid gap-2">
+                    <Label for="contact-email">{{ t('contact.form.email', 'Email') }}</Label>
+                    <Input
+                        id="contact-email"
+                        name="email"
+                        v-model="form.email"
+                        :placeholder="t('contact.form.placeholders.email', 'Your email')"
+                        autocomplete="email"
+                        required
+                        type="email"
+                    />
+                    <InputError :message="form.errors.email" />
+                </div>
+                <div class="grid gap-2">
+                    <Label for="contact-subject">{{ t('contact.form.subject', 'Subject') }}</Label>
+                    <Input
+                        id="contact-subject"
+                        name="subject"
+                        v-model="form.subject"
+                        :placeholder="t('contact.form.placeholders.subject', 'Subject')"
+                        autocomplete="off"
+                        required
+                        type="text"
+                    />
+                    <InputError :message="form.errors.subject" />
+                </div>
+                <div class="grid gap-2">
+                    <Label for="contact-message">{{ t('contact.form.message', 'Message') }}</Label>
+                    <textarea
+                        id="contact-message"
+                        name="message"
+                        v-model="form.message"
+                        :placeholder="t('contact.form.placeholders.message', 'Write your message...')"
+                        autocomplete="off"
+                        class="flex min-h-30 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:ring-[3px] focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                        required
+                        rows="6"
+                    />
+                    <InputError :message="form.errors.message" />
+                </div>
+                <Button :disabled="form.processing" class="mt-2 w-full" type="submit">
+                    <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
                     {{ t('contact.form.submit', 'Send message') }}
-                </button>
+                </Button>
             </div>
         </form>
     </div>
