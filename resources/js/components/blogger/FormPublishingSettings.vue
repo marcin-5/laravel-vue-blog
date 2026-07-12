@@ -8,7 +8,7 @@ import { useI18n } from 'vue-i18n';
 interface Props {
     modelValue: {
         is_published: boolean;
-        is_multi_author: boolean;
+        is_multi_author?: boolean;
         locale: string;
         sidebar: number;
         page_size: number;
@@ -57,11 +57,11 @@ const model = computed({
                 :label="translations.published"
             />
             <FormCheckboxField
+                v-if="model.is_multi_author !== undefined"
                 :id="`${idPrefix}-multi-author`"
                 v-model="model.is_multi_author"
                 :error="errors.is_multi_author"
                 :label="translations.multiAuthor"
-                :tooltip="translations.multiAuthorTooltip"
             />
             <div class="ml-auto">
                 <FormSelectField
