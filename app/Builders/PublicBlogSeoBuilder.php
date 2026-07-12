@@ -79,10 +79,10 @@ readonly class PublicBlogSeoBuilder
     private function getLandingTitle(Blog $blog, ?Tag $tag): string
     {
         if ($tag !== null) {
-            return $tag->name . ' - ' . $blog->name;
+            return __('seo.title_format', ['page' => $tag->name, 'site' => $blog->name]);
         }
 
-        return $blog->seo_title ?: ($blog->name . ' - ' . config('app.name'));
+        return $blog->seo_title ?: __('seo.title_format', ['page' => $blog->name, 'site' => config('app.name')]);
     }
 
     private function getLandingCanonicalUrl(string $baseUrl, ?Tag $tag): string
@@ -127,7 +127,7 @@ readonly class PublicBlogSeoBuilder
 
     private function getPostTitle(Blog $blog, Post $post): string
     {
-        return $post->seo_title ?: ($post->title . ' - ' . $blog->name);
+        return $post->seo_title ?: __('seo.title_format', ['page' => $post->title, 'site' => $blog->name]);
     }
 
     /**
@@ -140,8 +140,11 @@ readonly class PublicBlogSeoBuilder
         $locale = app()->getLocale();
         $canonicalUrl = $baseUrl . '/contact';
 
-        $title = ($locale === self::POLISH_LOCALE ? 'Kontakt' : 'Contact') . ' - ' . $blog->name;
-        $description = $blog->seo_description ?: $blog->name;
+        $title = __('seo.title_format', [
+            'page' => __('seo.contact.title'),
+            'site' => $blog->name,
+        ]);
+        $description = $blog->contact_seo_description ?: __('seo.contact.description');
 
         return new SeoData(
             title: $title,
@@ -170,8 +173,15 @@ readonly class PublicBlogSeoBuilder
         $locale = app()->getLocale();
         $canonicalUrl = $baseUrl . '/about';
 
-        $title = ($locale === self::POLISH_LOCALE ? 'O nas' : 'About') . ' - ' . $blog->name;
-        $description = $blog->seo_description ?: ($this->seoService->generateMetaDescription($blog->about) ?: $blog->name);
+        $aboutLabel = $blog->is_multi_author
+            ? __('seo.about.title_us')
+            : __('seo.about.title_me');
+
+        $title = __('seo.title_format', [
+            'page' => $aboutLabel,
+            'site' => $blog->name,
+        ]);
+        $description = $blog->about_seo_description ?: __('seo.about.description');
 
         return new SeoData(
             title: $title,

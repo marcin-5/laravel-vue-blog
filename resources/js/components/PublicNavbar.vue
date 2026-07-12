@@ -23,6 +23,7 @@ const page = usePage();
 const isHomePage = computed(() => page.url === '/');
 
 const user = computed(() => (page.props as any).auth?.user);
+const blog = computed(() => (page.props as any).blog?.data || (page.props as any).blog);
 
 interface NavLink {
     route: string;
@@ -33,10 +34,15 @@ interface NavLink {
     prefetch?: boolean;
 }
 
-const commonLinks = computed<NavLink[]>(() => [
-    { route: 'about', label: t('common.nav.about', 'About') },
-    { route: 'contact', label: t('common.nav.contact', 'Contact') },
-]);
+const commonLinks = computed<NavLink[]>(() => {
+    const aboutLabel = blog.value
+        ? blog.value.is_multi_author
+            ? t('common.nav.about_us', 'About us')
+            : t('common.nav.about_me', 'About me')
+        : t('common.nav.about', 'About');
+
+    return [{ route: 'about', label: aboutLabel }, { route: 'contact', label: t('common.nav.contact', 'Contact') }];
+});
 
 const authLinks = computed<NavLink[]>(() => [
     { route: 'dashboard', label: t('common.nav.dashboard'), emphasized: true, prefetch: true },

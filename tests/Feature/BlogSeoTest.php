@@ -28,13 +28,13 @@ test('blog landing page uses seo_description if provided', function () {
     );
 });
 
-test('blog about page uses seo_description if provided', function () {
+test('blog about page uses about_seo_description if provided', function () {
     $user = User::factory()->create();
     $blog = Blog::factory()->create([
         'user_id' => $user->id,
         'slug' => 'seo-blog-about',
         'is_published' => true,
-        'seo_description' => 'Custom SEO description for about page.',
+        'about_seo_description' => 'Specific about SEO description.',
         'about' => 'Some about content',
         'locale' => 'pl',
     ]);
@@ -43,7 +43,7 @@ test('blog about page uses seo_description if provided', function () {
 
     $response->assertStatus(200);
     $response->assertInertia(fn($page) => $page
-        ->where('seo.description', 'Custom SEO description for about page.')
+        ->where('seo.description', 'Specific about SEO description.')
     );
 });
 

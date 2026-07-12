@@ -3,6 +3,8 @@
         "appName": "Peculiar Matters",
         "nav": {
             "about": "About",
+            "about_me": "About me",
+            "about_us": "About us",
             "contact": "Contact",
             "dashboard": "Dashboard",
             "logout": "Log out",

@@ -3,6 +3,8 @@
         "appName": "Osobliwy Blog",
         "nav": {
             "about": "O nas",
+            "about_me": "O mnie",
+            "about_us": "O nas",
             "contact": "Kontakt",
             "dashboard": "Panel",
             "logout": "Wyloguj",

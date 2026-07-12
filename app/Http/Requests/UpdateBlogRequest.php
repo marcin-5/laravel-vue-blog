@@ -19,9 +19,12 @@ class UpdateBlogRequest extends FormRequest
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'seo_title' => ['nullable', 'string', 'max:255'],
             'seo_description' => ['nullable', 'string', 'max:500'],
+            'about_seo_description' => ['nullable', 'string', 'max:500'],
+            'contact_seo_description' => ['nullable', 'string', 'max:500'],
             'description' => ['nullable', 'string'],
             'footer' => ['nullable', 'string'],
             'motto' => ['nullable', 'string'],
+            'is_multi_author' => ['sometimes', 'boolean'],
             'is_published' => ['sometimes', 'boolean'],
             'categories' => ['sometimes', 'array'],
             'categories.*' => ['integer', 'exists:categories,id'],
@@ -62,6 +65,14 @@ class UpdateBlogRequest extends FormRequest
             $data['seo_description'] = $validated['seo_description'];
         }
 
+        if (array_key_exists('about_seo_description', $validated)) {
+            $data['about_seo_description'] = $validated['about_seo_description'];
+        }
+
+        if (array_key_exists('contact_seo_description', $validated)) {
+            $data['contact_seo_description'] = $validated['contact_seo_description'];
+        }
+
         if (array_key_exists('description', $validated)) {
             $data['description'] = $validated['description'];
         }
@@ -72,6 +83,10 @@ class UpdateBlogRequest extends FormRequest
 
         if (array_key_exists('motto', $validated)) {
             $data['motto'] = $validated['motto'];
+        }
+
+        if (array_key_exists('is_multi_author', $validated)) {
+            $data['is_multi_author'] = (bool) $validated['is_multi_author'];
         }
 
         if (array_key_exists('is_published', $validated)) {

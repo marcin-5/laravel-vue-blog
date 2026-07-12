@@ -21,10 +21,13 @@ export function createDefaultFormData(locale: string = 'en'): BlogFormData {
         name: '',
         seo_title: null,
         seo_description: null,
+        about_seo_description: null,
+        contact_seo_description: null,
         description: null,
         footer: null,
         motto: null,
         is_published: false,
+        is_multi_author: false,
         locale,
         categories: [],
         sidebar: 0,
@@ -43,10 +46,13 @@ export function createFormDataFromBlog(blog: Blog | undefined, defaultLocale: st
         name: blog.name,
         seo_title: blog.seo_title ?? null,
         seo_description: blog.seo_description ?? null,
+        about_seo_description: blog.about_seo_description ?? null,
+        contact_seo_description: blog.contact_seo_description ?? null,
         description: blog.description ?? null,
         footer: blog.footer ?? null,
         motto: blog.motto ?? null,
         is_published: blog.is_published,
+        is_multi_author: blog.is_multi_author ?? false,
         locale: blog.locale || defaultLocale,
         sidebar: blog.sidebar ?? 0,
         page_size: blog.page_size ?? 10,
@@ -62,10 +68,13 @@ export function populateFormFromBlog(form: InertiaForm<BlogFormData>, blog: Blog
     form.name = data.name;
     form.seo_title = data.seo_title;
     form.seo_description = data.seo_description;
+    form.about_seo_description = data.about_seo_description;
+    form.contact_seo_description = data.contact_seo_description;
     form.description = data.description;
     form.footer = data.footer;
     form.motto = data.motto;
     form.is_published = data.is_published;
+    form.is_multi_author = data.is_multi_author;
     form.locale = data.locale;
     form.sidebar = data.sidebar;
     form.page_size = data.page_size;

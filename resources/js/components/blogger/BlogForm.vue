@@ -50,6 +50,10 @@ const baseTranslations = computed(() => ({
     seoTitlePlaceholder: t('blogger.form.seo_title_placeholder'),
     seoDescription: t('blogger.form.seo_description_label'),
     seoDescriptionPlaceholder: t('blogger.form.seo_description_placeholder'),
+    aboutSeoDescription: t('blogger.form.about_seo_description_label'),
+    aboutSeoDescriptionPlaceholder: t('blogger.form.about_seo_description_placeholder'),
+    contactSeoDescription: t('blogger.form.contact_seo_description_label'),
+    contactSeoDescriptionPlaceholder: t('blogger.form.contact_seo_description_placeholder'),
     description: t('blogger.form.description_label'),
     descriptionPlaceholder: props.isEdit ? '' : t('blogger.form.description_placeholder'),
     landingContent: t('blogger.form.landing_content_label'),
@@ -98,6 +102,8 @@ const getThresholdClass = (value: string | null, threshold1: number, threshold2:
 
 const seoTitleClass = computed(() => getRangeClass(form.seo_title, 50, 60));
 const seoDescriptionClass = computed(() => getThresholdClass(form.seo_description, 120, 160));
+const aboutSeoDescriptionClass = computed(() => getThresholdClass(form.about_seo_description, 120, 160));
+const contactSeoDescriptionClass = computed(() => getThresholdClass(form.contact_seo_description, 120, 160));
 </script>
 
 <template>
@@ -132,6 +138,30 @@ const seoDescriptionClass = computed(() => getThresholdClass(form.seo_descriptio
                 :input-class="seoDescriptionClass"
                 :label="baseTranslations.seoDescription"
                 :placeholder="baseTranslations.seoDescriptionPlaceholder"
+                :rows="2"
+                type="textarea"
+            />
+
+            <PostFormField
+                :id="`${fieldIdPrefix}-about-seo-description`"
+                v-model="form.about_seo_description"
+                :error="form.errors.about_seo_description"
+                :hint="`${form.about_seo_description?.length || 0} ${baseTranslations.characters}`"
+                :input-class="aboutSeoDescriptionClass"
+                :label="baseTranslations.aboutSeoDescription"
+                :placeholder="baseTranslations.aboutSeoDescriptionPlaceholder"
+                :rows="2"
+                type="textarea"
+            />
+
+            <PostFormField
+                :id="`${fieldIdPrefix}-contact-seo-description`"
+                v-model="form.contact_seo_description"
+                :error="form.errors.contact_seo_description"
+                :hint="`${form.contact_seo_description?.length || 0} ${baseTranslations.characters}`"
+                :input-class="contactSeoDescriptionClass"
+                :label="baseTranslations.contactSeoDescription"
+                :placeholder="baseTranslations.contactSeoDescriptionPlaceholder"
                 :rows="2"
                 type="textarea"
             />

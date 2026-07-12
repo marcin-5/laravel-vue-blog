@@ -21,7 +21,11 @@ export interface Blog {
     motto?: string | null;
     about?: string | null;
     aboutHtml?: string | null;
+    seo_title?: string | null;
     seo_description?: string | null;
+    about_seo_description?: string | null;
+    contact_seo_description?: string | null;
+    is_multi_author?: boolean;
     theme?: BlogTheme;
     main_domain?: string | null;
 }
@@ -172,12 +176,15 @@ export interface AdminBlog {
     name: string;
     seo_title: string | null;
     seo_description: string | null;
+    about_seo_description?: string | null;
+    contact_seo_description?: string | null;
     slug: string;
     description: string | null;
     motto?: string | null;
     footer?: string | null;
     about?: string | null;
     is_published: boolean;
+    is_multi_author?: boolean;
     locale: string;
     sidebar?: number; // -50..50
     page_size?: number; // default 10
@@ -288,10 +295,13 @@ export interface BlogFormData {
     name: string;
     seo_title: string | null;
     seo_description: string | null;
+    about_seo_description: string | null;
+    contact_seo_description: string | null;
     description: string | null;
     footer: string | null;
     motto: string | null;
     is_published: boolean;
+    is_multi_author: boolean;
     locale: string;
     sidebar: number;
     page_size: number;

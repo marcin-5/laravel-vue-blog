@@ -30,7 +30,11 @@ class BlogFactory extends Factory
             'name' => $name,
             'slug' => Str::slug($name),
             'description' => $this->faker->paragraph(random_int(1, 5)),
+            'seo_description' => $this->faker->boolean(50) ? $this->faker->text(160) : null,
+            'about_seo_description' => $this->faker->boolean(50) ? $this->faker->text(160) : null,
+            'contact_seo_description' => $this->faker->boolean(50) ? $this->faker->text(160) : null,
             'is_published' => $this->faker->boolean(70),
+            'is_multi_author' => $this->faker->boolean(30),
             'locale' => $this->faker->randomElement(['en', 'pl']),
             'sidebar' => $this->faker->randomElement([random_int(-40, -25), random_int(25, 40), 0]),
         ];
