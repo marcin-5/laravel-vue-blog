@@ -8,10 +8,11 @@ test('about page uses about_seo_description if provided', function () {
         'about_seo_description' => 'Custom about SEO description',
     ]);
 
-    $this->get(getBlogUrl($blog, '/about'))
+    $this
+        ->get(getBlogUrl($blog, '/about'))
         ->assertSuccessful()
         ->assertInertia(fn(Assert $page) => $page
-            ->where('seo.description', 'Custom about SEO description')
+            ->where('seo.description', 'Custom about SEO description'),
         );
 });
 
@@ -22,10 +23,11 @@ test('about page uses fallback translation if about_seo_description is missing',
         'locale' => 'pl',
     ]);
 
-    $this->get(getBlogUrl($blog, '/about'))
+    $this
+        ->get(getBlogUrl($blog, '/about'))
         ->assertSuccessful()
         ->assertInertia(fn(Assert $page) => $page
-            ->where('seo.description', 'Dowiedz się więcej o tym blogu, jego autorze i misji.')
+            ->where('seo.description', 'Poznaj historię, wartości i misję tego bloga.'),
         );
 });
 
@@ -35,10 +37,11 @@ test('contact page uses contact_seo_description if provided', function () {
         'contact_seo_description' => 'Custom contact SEO description',
     ]);
 
-    $this->get(getBlogUrl($blog, '/contact'))
+    $this
+        ->get(getBlogUrl($blog, '/contact'))
         ->assertSuccessful()
         ->assertInertia(fn(Assert $page) => $page
-            ->where('seo.description', 'Custom contact SEO description')
+            ->where('seo.description', 'Custom contact SEO description'),
         );
 });
 
@@ -49,10 +52,11 @@ test('contact page uses fallback translation if contact_seo_description is missi
         'locale' => 'pl',
     ]);
 
-    $this->get(getBlogUrl($blog, '/contact'))
+    $this
+        ->get(getBlogUrl($blog, '/contact'))
         ->assertSuccessful()
         ->assertInertia(fn(Assert $page) => $page
-            ->where('seo.description', 'Skontaktuj się z nami, aby zadać pytanie lub podzielić się opinią.')
+            ->where('seo.description', 'Tutaj można zadać pytanie lub podzielić się opinią.'),
         );
 });
 
@@ -64,10 +68,11 @@ test('about page title uses "O mnie" for single author blog in Polish', function
         'name' => 'BlogTestowy',
     ]);
 
-    $this->get(getBlogUrl($blog, '/about'))
+    $this
+        ->get(getBlogUrl($blog, '/about'))
         ->assertSuccessful()
         ->assertInertia(fn(Assert $page) => $page
-            ->where('seo.title', 'O mnie - BlogTestowy')
+            ->where('seo.title', 'O mnie - BlogTestowy'),
         );
 });
 
@@ -79,9 +84,10 @@ test('about page title uses "O nas" for multi author blog in Polish', function (
         'name' => 'BlogWielu',
     ]);
 
-    $this->get(getBlogUrl($blog, '/about'))
+    $this
+        ->get(getBlogUrl($blog, '/about'))
         ->assertSuccessful()
         ->assertInertia(fn(Assert $page) => $page
-            ->where('seo.title', 'O nas - BlogWielu')
+            ->where('seo.title', 'O nas - BlogWielu'),
         );
 });
