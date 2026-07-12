@@ -77,16 +77,21 @@ describe('blogFormUtils', () => {
             expect(data).toEqual({
                 name: 'Test Blog',
                 seo_title: 'SEO Title',
+                seo_description: null,
+                about_seo_description: null,
+                contact_seo_description: null,
                 description: 'Desc',
                 footer: 'Footer',
                 motto: 'Motto',
                 is_published: true,
+                is_multi_author: false,
                 locale: 'de',
                 sidebar: 1,
                 page_size: 20,
                 categories: [10],
                 theme: { light: { '--bg': '#eee' }, dark: {} },
                 landing_content: 'Landing Content',
+                about: null,
             });
         });
 
