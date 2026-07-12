@@ -56,12 +56,18 @@ it('generates sitemap with home page, published blogs, and public published post
         'published_at' => now()->subDay(),
     ]);
 
-    $xml = app(SitemapService::class)->getSitemap(config('app.locale'));
+    $sitemapService = app(SitemapService::class);
+    $xmlMain = $sitemapService->getSitemap(config('app.locale'));
 
-    expect($xml)->toContain('/')
-        ->and($xml)->toContain('published-blog')
-        ->and($xml)->toContain('published-public-post')
-        ->and($xml)->not->toContain('unpublished-blog')
-        ->and($xml)->not->toContain('unpublished-post')
-        ->and($xml)->not->toContain('published-private-post');
+    expect($xmlMain)->toContain('/')
+        ->and($xmlMain)->toContain('published-blog')
+        ->and($xmlMain)->not->toContain('published-public-post')
+        ->and($xmlMain)->not->toContain('unpublished-blog');
+
+    $xmlBlog = $sitemapService->getSitemap(config('app.locale'), $publishedBlog);
+
+    expect($xmlBlog)->toContain('published-blog')
+        ->and($xmlBlog)->toContain('published-public-post')
+        ->and($xmlBlog)->not->toContain('unpublished-post')
+        ->and($xmlBlog)->not->toContain('published-private-post');
 });

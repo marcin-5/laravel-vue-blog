@@ -38,8 +38,8 @@ class DomainSitemapTest extends TestCase
         // Host might or might not have trailing slash depending on Laravel version/config
         $content = $response->getContent();
         $this->assertTrue(
-            str_contains($content, 'Host: http://blog.pl') || str_contains($content, 'Host: http://blog.pl/'),
-            'robots.txt should contain Host: http://blog.pl. Content: ' . $content
+            str_contains($content, 'Host: blog.pl'),
+            'robots.txt should contain Host: blog.pl. Content: ' . $content
         );
 
         $this->get('http://blog.com/robots.txt')
