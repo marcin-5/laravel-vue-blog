@@ -25,7 +25,7 @@ defineProps<{
         <p
             v-if="displayedMotto"
             :style="{ fontStyle: 'var(--blog-motto-style)', fontFamily: 'var(--blog-motto-font)', fontSize: 'calc(1rem * var(--blog-motto-scale))' }"
-            class="mt-2 mb-12 text-foreground opacity-80"
+            class="mt-8 mb-8 text-foreground opacity-80"
         >
             {{ displayedMotto }}
         </p>
