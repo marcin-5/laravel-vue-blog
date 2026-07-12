@@ -2,12 +2,12 @@
 
 return [
     'about' => [
-        'description' => 'Dowiedz się więcej o tym blogu, jego autorze i misji.',
+        'description' => 'Poznaj historię, wartości i misję tego bloga.',
         'title_me' => 'O mnie',
         'title_us' => 'O nas',
     ],
     'contact' => [
-        'description' => 'Skontaktuj się z nami, aby zadać pytanie lub podzielić się opinią.',
+        'description' => 'Tutaj można zadać pytanie lub podzielić się opinią.',
         'title' => 'Kontakt',
     ],
     'title_format' => ':page - :site',
