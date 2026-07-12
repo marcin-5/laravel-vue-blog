@@ -44,8 +44,10 @@ const submit = () => {
                         <Label for="name">{{ t('auth.register.name') }}</Label>
                         <Input
                             id="name"
+                            name="name"
                             v-model="form.name"
                             :placeholder="t('auth.register.name_placeholder')"
+                            autocomplete="name"
                             :tabindex="1"
                             autofocus
                             required
@@ -58,8 +60,10 @@ const submit = () => {
                         <Label for="email">{{ t('auth.register.email') }}</Label>
                         <Input
                             id="email"
+                            name="email"
                             v-model="form.email"
                             :placeholder="t('auth.register.email_placeholder')"
+                            autocomplete="email"
                             :tabindex="2"
                             required
                             type="email"
@@ -71,8 +75,10 @@ const submit = () => {
                         <Label for="password">{{ t('auth.register.password') }}</Label>
                         <Input
                             id="password"
+                            name="password"
                             v-model="form.password"
                             :placeholder="t('auth.register.password_placeholder')"
+                            autocomplete="new-password"
                             :tabindex="3"
                             required
                             type="password"
@@ -84,8 +90,10 @@ const submit = () => {
                         <Label for="password_confirmation">{{ t('auth.register.password_confirmation') }}</Label>
                         <Input
                             id="password_confirmation"
+                            name="password_confirmation"
                             v-model="form.password_confirmation"
                             :placeholder="t('auth.register.password_confirmation_placeholder')"
+                            autocomplete="new-password"
                             :tabindex="4"
                             required
                             type="password"

@@ -44,6 +44,7 @@ const submit = () => {
                     <Label for="email">{{ t('auth.login.email') }}</Label>
                     <Input
                         id="email"
+                        name="email"
                         v-model="form.email"
                         :tabindex="1"
                         autocomplete="email"
@@ -64,6 +65,7 @@ const submit = () => {
                     </div>
                     <Input
                         id="password"
+                        name="password"
                         v-model="form.password"
                         :placeholder="t('auth.login.password')"
                         :tabindex="2"

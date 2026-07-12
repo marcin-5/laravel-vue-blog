@@ -36,7 +36,7 @@ const submit = () => {
             <form @submit.prevent="submit">
                 <div class="grid gap-2">
                     <Label for="email">{{ t('auth.forgot_password.email') }}</Label>
-                    <Input id="email" v-model="form.email" autocomplete="off" autofocus name="email" placeholder="email@example.com" type="email" />
+                    <Input id="email" v-model="form.email" autocomplete="email" autofocus name="email" placeholder="email@example.com" type="email" />
                     <InputError :message="form.errors.email" />
                 </div>
 

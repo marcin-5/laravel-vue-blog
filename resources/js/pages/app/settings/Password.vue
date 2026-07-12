@@ -66,6 +66,7 @@ const updatePassword = () => {
                         <Label for="current_password">{{ t('settings.password.current_password') }}</Label>
                         <Input
                             id="current_password"
+                            name="current_password"
                             ref="currentPasswordInput"
                             v-model="form.current_password"
                             :placeholder="t('settings.password.current_password')"
@@ -80,6 +81,7 @@ const updatePassword = () => {
                         <Label for="password">{{ t('settings.password.new_password') }}</Label>
                         <Input
                             id="password"
+                            name="password"
                             ref="passwordInput"
                             v-model="form.password"
                             :placeholder="t('settings.password.new_password')"
@@ -94,6 +96,7 @@ const updatePassword = () => {
                         <Label for="password_confirmation">{{ t('settings.password.confirm_password') }}</Label>
                         <Input
                             id="password_confirmation"
+                            name="password_confirmation"
                             v-model="form.password_confirmation"
                             :placeholder="t('settings.password.confirm_password')"
                             autocomplete="new-password"

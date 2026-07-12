@@ -56,6 +56,7 @@ const submit = () => {
                         <Label for="name">{{ t('settings.profile.name') }}</Label>
                         <Input
                             id="name"
+                            name="name"
                             v-model="form.name"
                             :placeholder="t('settings.profile.name_placeholder')"
                             autocomplete="name"
@@ -69,6 +70,7 @@ const submit = () => {
                         <Label for="email">{{ t('settings.profile.email') }}</Label>
                         <Input
                             id="email"
+                            name="email"
                             v-model="form.email"
                             :placeholder="t('settings.profile.email_placeholder')"
                             autocomplete="username"

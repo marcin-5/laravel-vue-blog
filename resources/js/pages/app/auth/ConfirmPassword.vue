@@ -31,9 +31,10 @@ const submit = () => {
         <form @submit.prevent="submit">
             <div class="space-y-6">
                 <div class="grid gap-2">
-                    <Label htmlFor="password">{{ t('auth.confirm_password.password') }}</Label>
+                    <Label for="password">{{ t('auth.confirm_password.password') }}</Label>
                     <Input
                         id="password"
+                        name="password"
                         v-model="form.password"
                         autocomplete="current-password"
                         autofocus
