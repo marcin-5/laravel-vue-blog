@@ -102,8 +102,8 @@ const getThresholdClass = (value: string | null, threshold1: number, threshold2:
 
 const seoTitleClass = computed(() => getRangeClass(form.seo_title, 50, 60));
 const seoDescriptionClass = computed(() => getThresholdClass(form.seo_description, 120, 160));
-const aboutSeoDescriptionClass = computed(() => getThresholdClass(form.about_seo_description, 120, 160));
-const contactSeoDescriptionClass = computed(() => getThresholdClass(form.contact_seo_description, 120, 160));
+const aboutSeoDescriptionClass = computed(() => getThresholdClass(form.about_seo_description, 60, 160));
+const contactSeoDescriptionClass = computed(() => getThresholdClass(form.contact_seo_description, 60, 160));
 </script>
 
 <template>
