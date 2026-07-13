@@ -64,8 +64,14 @@ it('does not send extension if it was attached long ago', function () {
         'send_time' => now()->format('H:i'),
     ]);
 
-    $mainPost = createPost($blog, ['visibility' => Post::VIS_PUBLIC]);
-    $extension = createPost($blog, ['visibility' => Post::VIS_EXTENSION]);
+    $mainPost = createPost($blog, [
+        'visibility' => Post::VIS_PUBLIC,
+        'published_at' => now()->subDays(2),
+    ]);
+    $extension = createPost($blog, [
+        'visibility' => Post::VIS_EXTENSION,
+        'published_at' => now()->subDays(2),
+    ]);
 
     DB::table('post_extensions')->insert([
         'post_id' => $mainPost->id,
@@ -91,9 +97,13 @@ it('does not send extension if attached to non-public post', function () {
     // Restricted post (not for public view in newsletter context)
     $mainPost = createPost($blog, [
         'visibility' => Post::VIS_RESTRICTED,
+        'published_at' => now()->subDays(2),
     ]);
 
-    $extension = createPost($blog, ['visibility' => Post::VIS_EXTENSION]);
+    $extension = createPost($blog, [
+        'visibility' => Post::VIS_EXTENSION,
+        'published_at' => now()->subDays(2),
+    ]);
 
     DB::table('post_extensions')->insert([
         'post_id' => $mainPost->id,
