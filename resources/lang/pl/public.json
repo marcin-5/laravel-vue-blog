@@ -41,7 +41,8 @@
         "Świat jest pełen osobliwości. Wejdziesz, by je odkryć?"
     ],
     "actions": {
-        "clear": "Wyczyść filtr"
+        "clear": "Wyczyść filtr",
+        "info": "Informacje"
     },
     "blog": {
         "author": "Autor:",

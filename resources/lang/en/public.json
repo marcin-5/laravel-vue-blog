@@ -41,7 +41,8 @@
         "The world is full of curiosities. Dare to explore them?"
     ],
     "actions": {
-        "clear": "Clear filter"
+        "clear": "Clear filter",
+        "info": "Info"
     },
     "blog": {
         "author": "Author:",
