@@ -67,8 +67,6 @@ const createPostNavItem = (direction: PostNavDirection): PostNavItem => ({
 const postNavItems = computed(() => [createPostNavItem('previous'), createPostNavItem('next')]);
 
 const getPostNavComponent = (post?: NavPost | null) => (post ? Link : 'span');
-
-const backLinkLabel = computed(() => t(props.navigation?.isGroup ? 'blog.post_nav.back_to_group' : 'blog.post_nav.back_to_blog'));
 </script>
 
 <template>
@@ -99,7 +97,7 @@ const backLinkLabel = computed(() => t(props.navigation?.isGroup ? 'blog.post_na
                 :class="getBackLinkClasses(!navigation.isLandingPage)"
                 :href="navigation.isLandingPage ? undefined : navigation.landingUrl"
             >
-                {{ backLinkLabel }}
+                {{ t('blog.post_nav.home_page') }}
             </component>
 
             <component
@@ -139,7 +137,7 @@ const backLinkLabel = computed(() => t(props.navigation?.isGroup ? 'blog.post_na
                         class="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wider uppercase opacity-60 transition-opacity hover:opacity-100"
                     >
                         <HomeIcon class="h-4 w-4 shrink-0" />
-                        <span>{{ backLinkLabel }}</span>
+                        <span>{{ t('blog.post_nav.home_page') }}</span>
                     </Link>
                 </div>
             </div>

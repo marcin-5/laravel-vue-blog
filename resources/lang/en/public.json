@@ -63,8 +63,7 @@
             "previous": "Previous",
             "next": "Next",
             "back": "Back",
-            "back_to_blog": "Back to blog",
-            "back_to_group": "Back to group"
+            "home_page": "Home page"
         },
         "pagination": {
             "aria": "Pagination",
