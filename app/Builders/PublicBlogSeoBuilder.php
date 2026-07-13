@@ -173,12 +173,8 @@ readonly class PublicBlogSeoBuilder
         $locale = app()->getLocale();
         $canonicalUrl = $baseUrl . '/about';
 
-        $aboutLabel = $blog->is_multi_author
-            ? __('seo.about.title_us')
-            : __('seo.about.title_me');
-
         $title = __('seo.title_format', [
-            'page' => $aboutLabel,
+            'page' => __('seo.about.title'),
             'site' => $blog->name,
         ]);
         $description = $blog->about_seo_description ?: __('seo.about.description');

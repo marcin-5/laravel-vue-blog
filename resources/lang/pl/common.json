@@ -2,9 +2,8 @@
     "common": {
         "appName": "Osobliwy Blog",
         "nav": {
-            "about": "O nas",
-            "about_me": "O mnie",
-            "about_us": "O nas",
+            "about": "O blogu",
+            "about_home": "O nas",
             "contact": "Kontakt",
             "dashboard": "Panel",
             "logout": "Wyloguj",

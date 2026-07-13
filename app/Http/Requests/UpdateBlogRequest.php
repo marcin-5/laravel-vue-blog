@@ -24,7 +24,6 @@ class UpdateBlogRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'footer' => ['nullable', 'string'],
             'motto' => ['nullable', 'string'],
-            'is_multi_author' => ['sometimes', 'boolean'],
             'is_published' => ['sometimes', 'boolean'],
             'categories' => ['sometimes', 'array'],
             'categories.*' => ['integer', 'exists:categories,id'],
@@ -83,10 +82,6 @@ class UpdateBlogRequest extends FormRequest
 
         if (array_key_exists('motto', $validated)) {
             $data['motto'] = $validated['motto'];
-        }
-
-        if (array_key_exists('is_multi_author', $validated)) {
-            $data['is_multi_author'] = (bool) $validated['is_multi_author'];
         }
 
         if (array_key_exists('is_published', $validated)) {

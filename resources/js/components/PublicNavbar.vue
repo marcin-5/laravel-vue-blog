@@ -35,13 +35,9 @@ interface NavLink {
 }
 
 const commonLinks = computed<NavLink[]>(() => {
-    const aboutLabel = blog.value
-        ? blog.value.is_multi_author
-            ? t('common.nav.about_us', 'About us')
-            : t('common.nav.about_me', 'About me')
-        : t('common.nav.about', 'About');
+    const aboutLabel = blog.value ? t('common.nav.about') : t('common.nav.about_home');
 
-    return [{ route: 'about', label: aboutLabel }, { route: 'contact', label: t('common.nav.contact', 'Contact') }];
+    return [{ route: 'about', label: aboutLabel }, { route: 'contact', label: t('common.nav.contact') }];
 });
 
 const authLinks = computed<NavLink[]>(() => [

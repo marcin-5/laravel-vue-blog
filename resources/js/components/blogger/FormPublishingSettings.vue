@@ -8,7 +8,6 @@ import { useI18n } from 'vue-i18n';
 interface Props {
     modelValue: {
         is_published: boolean;
-        is_multi_author?: boolean;
         locale: string;
         sidebar: number;
         page_size: number;
@@ -27,8 +26,6 @@ const { t } = useI18n();
 
 const translations = computed(() => ({
     published: t('blogger.form.published_label'),
-    multiAuthor: t('blogger.form.is_multi_author_label'),
-    multiAuthorTooltip: t('blogger.form.is_multi_author_tooltip'),
     locale: t('blogger.form.locale_label'),
     sidebar: t('blogger.form.sidebar_label'),
     sidebarHint: t('blogger.form.sidebar_hint'),
@@ -55,13 +52,6 @@ const model = computed({
                 :additional-info="additionalInfo"
                 :error="errors.is_published"
                 :label="translations.published"
-            />
-            <FormCheckboxField
-                v-if="model.is_multi_author !== undefined"
-                :id="`${idPrefix}-multi-author`"
-                v-model="model.is_multi_author"
-                :error="errors.is_multi_author"
-                :label="translations.multiAuthor"
             />
             <div class="ml-auto">
                 <FormSelectField

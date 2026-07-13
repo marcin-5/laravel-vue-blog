@@ -25,7 +25,6 @@ export interface Blog {
     seo_description?: string | null;
     about_seo_description?: string | null;
     contact_seo_description?: string | null;
-    is_multi_author?: boolean;
     theme?: BlogTheme;
     main_domain?: string | null;
 }
@@ -184,7 +183,6 @@ export interface AdminBlog {
     footer?: string | null;
     about?: string | null;
     is_published: boolean;
-    is_multi_author?: boolean;
     locale: string;
     sidebar?: number; // -50..50
     page_size?: number; // default 10
@@ -301,7 +299,6 @@ export interface BlogFormData {
     footer: string | null;
     motto: string | null;
     is_published: boolean;
-    is_multi_author: boolean;
     locale: string;
     sidebar: number;
     page_size: number;

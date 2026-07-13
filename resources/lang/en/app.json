@@ -257,8 +257,6 @@
             "footer_placeholder": "Footer content",
             "about_label": "About",
             "about_placeholder": "Content for the 'About' page (Markdown)...",
-            "is_multi_author_label": "Multi-author Blog",
-            "is_multi_author_tooltip": "Changes 'About me' to 'About us' in navigation and page titles.",
             "published_label": "Published",
             "locale_label": "Locale",
             "sidebar_label": "Sidebar position\/width",

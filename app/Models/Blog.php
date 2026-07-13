@@ -27,7 +27,6 @@ use Illuminate\Support\Carbon;
  * @property string|null $contact_seo_description
  * @property string|null $motto
  * @property string|null $footer
- * @property bool $is_multi_author
  * @property bool $is_published
  * @property string $locale
  * @property Carbon $created_at
@@ -61,12 +60,10 @@ class Blog extends Model
         'page_size',
         'theme',
         'about',
-        'is_multi_author',
     ];
 
     protected $casts = [
         'is_published' => 'boolean',
-        'is_multi_author' => 'boolean',
         'sidebar' => 'integer',
         'page_size' => 'integer',
         'theme' => 'array',

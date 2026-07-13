@@ -60,10 +60,9 @@ test('contact page uses fallback translation if contact_seo_description is missi
         );
 });
 
-test('about page title uses "O mnie" for single author blog in Polish', function () {
+test('about page title uses "O blogu" in Polish', function () {
     $blog = createBlog([
         'is_published' => true,
-        'is_multi_author' => false,
         'locale' => 'pl',
         'name' => 'BlogTestowy',
     ]);
@@ -72,22 +71,6 @@ test('about page title uses "O mnie" for single author blog in Polish', function
         ->get(getBlogUrl($blog, '/about'))
         ->assertSuccessful()
         ->assertInertia(fn(Assert $page) => $page
-            ->where('seo.title', 'O mnie - BlogTestowy'),
-        );
-});
-
-test('about page title uses "O nas" for multi author blog in Polish', function () {
-    $blog = createBlog([
-        'is_published' => true,
-        'is_multi_author' => true,
-        'locale' => 'pl',
-        'name' => 'BlogWielu',
-    ]);
-
-    $this
-        ->get(getBlogUrl($blog, '/about'))
-        ->assertSuccessful()
-        ->assertInertia(fn(Assert $page) => $page
-            ->where('seo.title', 'O nas - BlogWielu'),
+            ->where('seo.title', 'O blogu - BlogTestowy'),
         );
 });

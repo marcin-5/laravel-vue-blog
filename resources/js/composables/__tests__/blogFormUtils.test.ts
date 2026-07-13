@@ -84,7 +84,6 @@ describe('blogFormUtils', () => {
                 footer: 'Footer',
                 motto: 'Motto',
                 is_published: true,
-                is_multi_author: false,
                 locale: 'de',
                 sidebar: 1,
                 page_size: 20,

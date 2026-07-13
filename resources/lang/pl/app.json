@@ -257,8 +257,6 @@
             "footer_placeholder": "Stopka bloga",
             "about_label": "O nas",
             "about_placeholder": "Treść strony 'O nas' (Markdown)...",
-            "is_multi_author_label": "Blog wieloautorski",
-            "is_multi_author_tooltip": "Zmienia teksty 'O mnie' na 'O nas' w nawigacji i tytułach stron.",
             "published_label": "Opublikowany",
             "locale_label": "Język",
             "sidebar_label": "Pozycja\/szerokość paska bocznego",

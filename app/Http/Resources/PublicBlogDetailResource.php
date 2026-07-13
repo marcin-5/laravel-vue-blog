@@ -32,7 +32,6 @@ class PublicBlogDetailResource extends JsonResource
             'footerHtml' => $markdown->convertToHtml($this->footer),
             'authorName' => $this->user?->name,
             'authorEmail' => $this->user?->email,
-            'is_multi_author' => (bool) $this->is_multi_author,
             'sidebar' => (int) ($this->sidebar ?? 0),
         ];
     }
