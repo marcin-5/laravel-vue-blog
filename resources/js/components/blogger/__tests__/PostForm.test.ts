@@ -146,7 +146,7 @@ describe('PostForm.vue', () => {
         await section.vm.$emit('add-item', { blog_id: 1, related_post_id: 2, reason: 'test' });
 
         // Check internal form state
-        expect(wrapper.vm.form.related_posts).toHaveLength(1);
+        expect(wrapper.vm.form!.related_posts).toHaveLength(1);
     });
 
     it('adds an external link when @add-item event is emitted', async () => {
@@ -155,7 +155,7 @@ describe('PostForm.vue', () => {
 
         await section.vm.$emit('add-item', { title: 't', url: 'https://example.com', description: 'd', reason: 'r' });
 
-        expect(wrapper.vm.form.external_links).toHaveLength(1);
+        expect(wrapper.vm.form!.external_links).toHaveLength(1);
     });
 
     it('uses the provided external form as-is without overriding its fields', async () => {
@@ -174,9 +174,9 @@ describe('PostForm.vue', () => {
             },
         });
 
-        expect(wrapper.vm.form.related_posts).toHaveLength(1);
-        expect(Array.isArray(wrapper.vm.form.external_links)).toBe(true);
-        expect(wrapper.vm.form.tags).toEqual(['foo']);
+        expect(wrapper.vm.form!.related_posts).toHaveLength(1);
+        expect(Array.isArray(wrapper.vm.form!.external_links)).toBe(true);
+        expect(wrapper.vm.form!.tags).toEqual(['foo']);
     });
 
     it('emits submit when form is submitted', async () => {

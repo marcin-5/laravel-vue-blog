@@ -7,6 +7,7 @@ import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
 import PostFormField from '@/components/blogger/PostFormField.vue';
 import BlogTagsSection from '@/components/blogger/BlogTagsSection.vue';
 import { useBlogFormLogic } from '@/composables/useBlogFormLogic';
+import { createApplyHandler } from '@/composables/useFormApply';
 import { useBloggerFormTranslations } from '@/composables/useBloggerFormTranslations';
 import { useMarkdownPreviewSection } from '@/composables/useMarkdownPreviewSection';
 import { useSeoLengthClasses } from '@/composables/useSeoLengthClasses';
@@ -78,12 +79,7 @@ function handleSubmit() {
     emit('submit', form);
 }
 
-function handleApply() {
-    form.patch(route('blogs.update', props.blog!.id), {
-        preserveScroll: true,
-        preserveState: true,
-    });
-}
+const handleApply = createApplyHandler(form, 'blogs.update', props.blog?.id ?? 0);
 
 function handleCancel() {
     emit('cancel');

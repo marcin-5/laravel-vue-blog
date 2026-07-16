@@ -9,11 +9,15 @@ import PostTagsSelector from '@/components/blogger/PostTagsSelector.vue';
 import { useMarkdownPreviewSection } from '@/composables/useMarkdownPreviewSection';
 import { usePostFormLogic } from '@/composables/usePostFormLogic';
 import { useSeoLengthClasses } from '@/composables/useSeoLengthClasses';
-import type { AdminPostItem as PostItem } from '@/types/blog.types';
+import { useBloggerFormTranslations } from '@/composables/useBloggerFormTranslations';
+import { createApplyHandler } from '@/composables/useFormApply';
+import type { AdminPostItem as PostItem, PostFormData } from '@/types/blog.types';
+import type { InertiaForm } from '@inertiajs/vue3';
 import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
+const { actionTranslations, createMarkdownTranslations } = useBloggerFormTranslations();
 
 interface Props {
     post?: PostItem;
@@ -21,11 +25,11 @@ interface Props {
     groupId?: number;
     isEdit?: boolean;
     idPrefix?: string;
-    form?: any;
+    form?: InertiaForm<PostFormData>;
 }
 
 interface Emits {
-    (e: 'submit', form: any): void;
+    (e: 'submit', form: InertiaForm<PostFormData>): void;
     (e: 'cancel'): void;
 }
 
@@ -65,7 +69,7 @@ const isExtension = createVisibilityComputed('extension');
 // Field ID prefix for consistent ID generation in template
 const fieldIdPrefix = computed(() => props.idPrefix);
 
-// Translation keys - organized by category
+// Translation keys - form-specific labels
 const translationKeys = computed(() => ({
     // Form labels
     title: props.isEdit ? t('blogger.post_form.title_label') : t('blogger.post_form.post_title_label'),
@@ -78,33 +82,18 @@ const translationKeys = computed(() => ({
     summaryPlaceholder: props.isEdit ? '' : t('blogger.post_form.summary_placeholder'),
     content: t('blogger.post_form.content_label'),
     contentPlaceholder: props.isEdit ? '' : t('blogger.post_form.content_placeholder'),
-    previewToggleLayout: (layout: string) =>
-        layout === 'vertical' ? t('blogger.post_form.horizontal_button') : t('blogger.post_form.vertical_button'),
     published: props.isEdit ? t('blogger.post_form.published_label') : t('blogger.post_form.publish_now_label'),
-
-    // Buttons
-    cancel: t('blogger.post_form.cancel_button'),
-    create: t('blogger.post_form.create_post_button'),
-    creating: t('blogger.post_form.creating_button'),
-    save: t('blogger.post_form.save_post_button'),
-    apply: t('blogger.post_form.apply_button'),
-    saving: t('blogger.post_form.saving_button'),
 
     // Visibility
     unlisted: t('blogger.post_form.unlisted_label'),
     extension: t('blogger.post_form.extension_label'),
 
-    // Preview
-    preview: t('blogger.post_form.preview_button'),
-    closePreview: t('blogger.post_form.close_button'),
-    fullPreview: t('blogger.post_form.full_preview_button'),
-    splitView: t('blogger.post_form.split_view_button'),
-    exitPreview: t('blogger.post_form.exit_preview_button'),
-    markdownLabel: t('blogger.post_form.markdown_label'),
-    previewLabel: t('blogger.post_form.preview_label'),
-    previewModeTitle: t('blogger.post_form.preview_mode_title'),
+    // Characters hint
     characters: t('blogger.post_form.characters'),
 }));
+
+const contentTranslations = createMarkdownTranslations(contentPreview);
+const summaryTranslations = createMarkdownTranslations(summaryPreview);
 
 const relatedPostsTranslations = computed(() => ({
     label: t('blogger.post_form.related_posts_label'),
@@ -184,13 +173,7 @@ watch(isExtension, (newValue) => {
 
 // Event handlers
 const handleSubmit = () => emit('submit', form);
-
-const handleApply = () =>
-    form.patch(route('posts.update', props.post!.id), {
-        preserveScroll: true,
-        preserveState: true,
-    });
-
+const handleApply = createApplyHandler(form, 'posts.update', props.post?.id ?? 0);
 const handleCancel = () => emit('cancel');
 
 const handleToggleContentPreview = () => contentPreview.togglePreview(form.content);
@@ -272,20 +255,7 @@ const { getRangeClass, getThresholdClass } = useSeoLengthClasses();
                 :preview-html="contentPreview.previewHtml.value"
                 :preview-layout="contentPreview.previewLayout.value"
                 :rows="props.isEdit ? 10 : 15"
-                :translations="{
-                    cancel: translationKeys.cancel,
-                    create: translationKeys.create,
-                    save: translationKeys.save,
-                    exitPreview: translationKeys.exitPreview,
-                    markdownLabel: translationKeys.markdownLabel,
-                    previewLabel: translationKeys.previewLabel,
-                    previewModeTitle: translationKeys.previewModeTitle,
-                    toggleLayout: translationKeys.previewToggleLayout(contentPreview.previewLayout.value),
-                    closePreview: translationKeys.closePreview,
-                    preview: translationKeys.preview,
-                    fullPreview: translationKeys.fullPreview,
-                    splitView: translationKeys.splitView,
-                }"
+                :translations="contentTranslations"
                 @cancel="handleCancel"
                 @input="handleContentInput"
                 @submit="handleSubmit"
@@ -308,20 +278,7 @@ const { getRangeClass, getThresholdClass } = useSeoLengthClasses();
                 :preview-html="summaryPreview.previewHtml.value"
                 :preview-layout="summaryPreview.previewLayout.value"
                 :rows="props.isEdit ? 4 : 6"
-                :translations="{
-                    cancel: translationKeys.cancel,
-                    create: translationKeys.create,
-                    save: translationKeys.save,
-                    exitPreview: translationKeys.exitPreview,
-                    markdownLabel: translationKeys.markdownLabel,
-                    previewLabel: translationKeys.previewLabel,
-                    previewModeTitle: translationKeys.previewModeTitle,
-                    toggleLayout: translationKeys.previewToggleLayout(summaryPreview.previewLayout.value),
-                    closePreview: translationKeys.closePreview,
-                    preview: translationKeys.preview,
-                    fullPreview: translationKeys.fullPreview,
-                    splitView: translationKeys.splitView,
-                }"
+                :translations="summaryTranslations"
                 @cancel="handleCancel"
                 @input="handleSummaryInput"
                 @submit="handleSubmit"
@@ -356,14 +313,7 @@ const { getRangeClass, getThresholdClass } = useSeoLengthClasses();
             <FormSubmitActions
                 :is-edit="props.isEdit"
                 :is-processing="form.processing"
-                :translations="{
-                    cancel: translationKeys.cancel,
-                    create: translationKeys.create,
-                    save: translationKeys.save,
-                    apply: translationKeys.apply,
-                    creating: translationKeys.creating,
-                    saving: translationKeys.saving,
-                }"
+                :translations="actionTranslations"
                 @apply="handleApply"
                 @cancel="handleCancel"
                 @submit="handleSubmit"
