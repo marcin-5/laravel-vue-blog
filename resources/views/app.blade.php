@@ -38,9 +38,21 @@
     <link rel="apple-touch-icon" href="/{{ $iconsLocale }}/apple-touch-icon.png">
 
     {{-- SEO Meta Tags are handled by Inertia Head component in Vue pages via @inertiaHead --}}
+    @if(isset($page['props']['seo']))
+        <title>{{ $page['props']['seo']['title'] ?? config('app.name') }}</title>
+        <meta name="description" content="{{ $page['props']['seo']['description'] ?? '' }}">
+        <meta name="robots" content="{{ $page['props']['seo']['robots'] ?? 'index, follow' }}">
+        @if(isset($page['props']['seo']['canonicalUrl']))
+            <link rel="canonical" href="{{ $page['props']['seo']['canonicalUrl'] }}">
+        @endif
+    @endif
 
     @routes
-    @vite(['resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
+    @if(app()->environment('testing'))
+        @vite(['resources/js/app.ts'])
+    @else
+        @vite(['resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
+    @endif
     @inertiaHead
 </head>
 <body class="antialiased">
