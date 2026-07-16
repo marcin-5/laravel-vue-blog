@@ -158,24 +158,25 @@ describe('PostForm.vue', () => {
         expect(wrapper.vm.form.external_links).toHaveLength(1);
     });
 
-    it('initializes missing form fields when props.form is incomplete', async () => {
-        const incompleteForm = {
+    it('uses the provided external form as-is without overriding its fields', async () => {
+        const externalForm = {
             title: 'Test',
+            related_posts: [{ blog_id: 1, related_post_id: 2, reason: 'r', display_order: 0 }],
+            external_links: [],
+            tags: ['foo'],
             errors: {},
             processing: false,
-            // related_posts and external_links are missing
         };
 
         const wrapper = mount(PostForm, {
             props: {
-                form: incompleteForm as any,
+                form: externalForm as any,
             },
         });
 
-        expect(wrapper.vm.form.related_posts).toBeDefined();
-        expect(Array.isArray(wrapper.vm.form.related_posts)).toBe(true);
-        expect(wrapper.vm.form.external_links).toBeDefined();
+        expect(wrapper.vm.form.related_posts).toHaveLength(1);
         expect(Array.isArray(wrapper.vm.form.external_links)).toBe(true);
+        expect(wrapper.vm.form.tags).toEqual(['foo']);
     });
 
     it('emits submit when form is submitted', async () => {

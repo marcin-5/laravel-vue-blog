@@ -125,12 +125,17 @@ export function populateFormFromGroup(form: InertiaForm<GroupFormData>, group: G
 export function createDefaultPostFormData(blogId?: number): PostFormData {
     return {
         blog_id: blogId ?? 0,
+        group_id: 0,
         title: '',
+        seo_title: '',
         excerpt: '',
         summary: '',
         content: '',
         is_published: false,
         visibility: 'public',
+        related_posts: [],
+        external_links: [],
+        tags: [],
     };
 }
 
@@ -140,22 +145,32 @@ export function createFormDataFromPost(post: Post | undefined, blogId?: number):
     }
     return {
         blog_id: post.blog_id ?? blogId ?? 0,
+        group_id: post.group_id ?? 0,
         title: post.title,
+        seo_title: post.seo_title ?? '',
         excerpt: post.excerpt ?? '',
         summary: post.summary ?? '',
         content: post.content ?? '',
         is_published: post.is_published,
         visibility: post.visibility ?? 'public',
+        related_posts: post.related_posts ?? [],
+        external_links: post.external_links ?? [],
+        tags: (post.tags ?? []).map((tag) => tag.slug),
     };
 }
 
 export function populateFormFromPost(form: InertiaForm<PostFormData>, post: Post): void {
     const data = createFormDataFromPost(post);
     form.blog_id = data.blog_id;
+    form.group_id = data.group_id;
     form.title = data.title;
+    form.seo_title = data.seo_title;
     form.excerpt = data.excerpt;
     form.summary = data.summary;
     form.content = data.content;
     form.is_published = data.is_published;
     form.visibility = data.visibility;
+    form.related_posts = data.related_posts;
+    form.external_links = data.external_links;
+    form.tags = data.tags;
 }

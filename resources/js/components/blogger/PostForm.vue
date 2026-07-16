@@ -7,8 +7,9 @@ import PostFormField from '@/components/blogger/PostFormField.vue';
 import PostRelatedPostsSection from '@/components/blogger/PostRelatedPostsSection.vue';
 import PostTagsSelector from '@/components/blogger/PostTagsSelector.vue';
 import { useMarkdownPreviewSection } from '@/composables/useMarkdownPreviewSection';
-import type { AdminPostItem as PostItem, ExternalLinkItem, RelatedPostItem } from '@/types/blog.types';
-import { useForm } from '@inertiajs/vue3';
+import { usePostFormLogic } from '@/composables/usePostFormLogic';
+import { useSeoLengthClasses } from '@/composables/useSeoLengthClasses';
+import type { AdminPostItem as PostItem } from '@/types/blog.types';
 import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -41,37 +42,13 @@ const contentPreview = useMarkdownPreviewSection('markdown.preview');
 // Preview functionality for summary
 const summaryPreview = useMarkdownPreviewSection('markdown.preview');
 
-// Form initialization
-const form =
-    props.form ||
-    useForm({
-        blog_id: props.blogId || props.post?.blog_id || 0,
-        group_id: props.post?.group_id || 0,
-        title: props.post?.title || '',
-        seo_title: props.post?.seo_title || '',
-        excerpt: props.post?.excerpt || '',
-        summary: props.post?.summary || '',
-        content: props.post?.content || '',
-        is_published: !!props.post?.is_published,
-        visibility: props.post?.visibility || 'public',
-        related_posts: (props.post?.related_posts || []) as RelatedPostItem[],
-        external_links: (props.post?.external_links || []) as ExternalLinkItem[],
-        tags: props.post?.tags?.map((t) => t.slug) || [],
-    });
-
-// Ensure summary, related_posts and external_links are initialized if props.form was provided without them
-if (form.summary === undefined) {
-    form.summary = props.post?.summary || '';
-}
-if (form.related_posts === undefined) {
-    form.related_posts = (props.post?.related_posts || []) as RelatedPostItem[];
-}
-if (form.external_links === undefined) {
-    form.external_links = (props.post?.external_links || []) as ExternalLinkItem[];
-}
-if (form.tags === undefined) {
-    form.tags = (props.post?.tags || []).map((t) => t.slug);
-}
+// Form initialization and post/blogId population logic
+const { form } = usePostFormLogic({
+    post: props.post,
+    blogId: props.blogId,
+    isEdit: props.isEdit,
+    externalForm: props.form,
+});
 
 // Visibility computed properties
 const createVisibilityComputed = (value: string) =>
@@ -159,22 +136,6 @@ const externalLinksErrors = computed(() => {
     return errors;
 });
 
-// Update form from post data
-const updateFormFromPost = (post: PostItem) => {
-    form.blog_id = post.blog_id;
-    form.group_id = post.group_id || 0;
-    form.title = post.title;
-    form.seo_title = post.seo_title ?? '';
-    form.excerpt = post.excerpt ?? '';
-    form.summary = post.summary ?? '';
-    form.content = post.content ?? '';
-    form.is_published = post.is_published;
-    form.visibility = post.visibility ?? 'public';
-    form.related_posts = (post.related_posts || []) as RelatedPostItem[];
-    form.external_links = (post.external_links || []) as ExternalLinkItem[];
-    form.tags = (post.tags || []).map((t) => t.slug);
-};
-
 const addRelatedPost = (item: { blog_id: number; related_post_id: number; reason: string }) => {
     form.related_posts.push({
         blog_id: item.blog_id,
@@ -208,27 +169,6 @@ const updateExternalLink = (index: number, item: { title: string; url: string; d
         ...item,
     };
 };
-
-// Watchers for post and blogId props
-if (!props.form) {
-    watch(
-        () => props.post,
-        (newPost) => {
-            if (newPost) updateFormFromPost(newPost);
-        },
-        { immediate: true },
-    );
-
-    watch(
-        () => props.blogId,
-        (newBlogId) => {
-            if (newBlogId && !props.isEdit) {
-                form.blog_id = newBlogId;
-            }
-        },
-        { immediate: true },
-    );
-}
 
 // Watcher for isExtension to clear fields when true
 watch(isExtension, (newValue) => {
@@ -266,17 +206,7 @@ const handleToggleSummaryFullPreview = () => summaryPreview.toggleFullPreview(fo
 const handleSummaryInput = () => summaryPreview.handleInput(form.summary);
 
 // helpers for SEO data length validation
-const getRangeClass = computed(() => (value: string | null, from: number, to: number): string => {
-    const length = value?.length || 0;
-    return length >= from && length <= to ? 'bg-secondary' : '';
-});
-
-const getThresholdClass = computed(() => (value: string | null, threshold1: number, threshold2: number): string => {
-    const length = value?.length || 0;
-    if (length > threshold2) return 'bg-destructive text-destructive-foreground';
-    if (length > threshold1) return 'bg-constructive text-constructive-foreground';
-    return '';
-});
+const { getRangeClass, getThresholdClass } = useSeoLengthClasses();
 </script>
 
 <template>

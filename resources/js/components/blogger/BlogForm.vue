@@ -9,6 +9,7 @@ import BlogTagsSection from '@/components/blogger/BlogTagsSection.vue';
 import { useBlogFormLogic } from '@/composables/useBlogFormLogic';
 import { useBloggerFormTranslations } from '@/composables/useBloggerFormTranslations';
 import { useMarkdownPreviewSection } from '@/composables/useMarkdownPreviewSection';
+import { useSeoLengthClasses } from '@/composables/useSeoLengthClasses';
 import type { AdminBlog as Blog, BlogFormData, Category } from '@/types/blog.types';
 import { InertiaForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -88,17 +89,7 @@ function handleCancel() {
     emit('cancel');
 }
 
-const getRangeClass = (value: string | null, from: number, to: number): string => {
-    const length = value?.length || 0;
-    return length >= from && length <= to ? 'bg-secondary' : '';
-};
-
-const getThresholdClass = (value: string | null, threshold1: number, threshold2: number): string => {
-    const length = value?.length || 0;
-    if (length > threshold2) return 'bg-destructive text-destructive-foreground';
-    if (length > threshold1) return 'bg-constructive text-constructive-foreground';
-    return '';
-};
+const { getRangeClass, getThresholdClass } = useSeoLengthClasses();
 
 const seoTitleClass = computed(() => getRangeClass(form.seo_title, 50, 60));
 const seoDescriptionClass = computed(() => getThresholdClass(form.seo_description, 120, 160));

@@ -273,12 +273,17 @@ export interface MarkdownPreviewSection {
 
 export interface PostFormData {
     blog_id: number;
+    group_id: number;
     title: string;
+    seo_title: string;
     excerpt: string;
     summary: string;
     content: string;
     is_published: boolean;
     visibility: string;
+    related_posts: RelatedPostItem[];
+    external_links: ExternalLinkItem[];
+    tags: string[];
     [key: string]: any; // Index signature for Inertia form compatibility
 }
 
