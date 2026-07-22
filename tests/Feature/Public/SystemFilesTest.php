@@ -62,7 +62,10 @@ test('sitemap.xml returns 200 and removes physical files', function () {
     $response->assertHeader('Content-Type', 'application/xml; charset=utf-8');
 
     expect(File::exists(public_path('sitemap.xml')))->toBeFalse();
-    expect(File::exists(public_path('robots.txt')))->toBeFalse();
+    expect(File::exists('sitemap-' . app()->getLocale() . '.xml'))->toBeFalse();
+
+    // robots.txt should still exist since it's handled by RobotsController
+    expect(File::exists(public_path('robots.txt')))->toBeTrue();
 });
 
 test('FileManagementService prevents path traversal and unauthorized files', function () {
