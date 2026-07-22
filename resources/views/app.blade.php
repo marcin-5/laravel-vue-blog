@@ -37,18 +37,7 @@
     <link rel="icon" href="/{{ $iconsLocale }}/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/{{ $iconsLocale }}/apple-touch-icon.png">
 
-    {{-- SEO Meta Tags are handled by Inertia Head component in Vue pages via @inertiaHead --}}
-    {{-- We keep a fallback here for non-SSR environments and testing --}}
-    @if(isset($page['props']['seo']))
-        <title>{{ $page['props']['seo']['title'] ?? config('app.name') }}</title>
-        <meta name="description" content="{{ $page['props']['seo']['description'] ?? '' }}">
-        <meta name="robots" content="{{ $page['props']['seo']['robots'] ?? 'index, follow' }}">
-        @if(isset($page['props']['seo']['canonicalUrl']))
-            <link rel="canonical" href="{{ $page['props']['seo']['canonicalUrl'] }}">
-        @endif
-    @else
-        <title>{{ config('app.name', 'Laravel') }}</title>
-    @endif
+    <title>{{ config('app.name', 'Laravel') }}</title>
 
     @routes
     @vite(['resources/js/app.ts'])
