@@ -96,6 +96,36 @@ test('artisan command submits urls', function () {
         ->expectsOutput('Submitting 1 URLs to IndexNow...');
 });
 
+test('artisan command submits a post URL on the blog subdomain', function () {
+    $user = User::factory()->create();
+    $blog = Blog::factory()->create(['user_id' => $user->id, 'is_published' => true]);
+    $post = Post::factory()->create([
+        'user_id' => $user->id,
+        'blog_id' => $blog->id,
+        'is_published' => true,
+        'visibility' => 'public',
+    ]);
+
+    $canonicalUrl = route('blog.public.post', [
+        'blog' => $blog->slug,
+        'postSlug' => $post->slug,
+        'mainDomain' => $blog->main_domain,
+    ]);
+    $legacyUrl = url("/{$blog->slug}/{$post->slug}");
+
+    $this
+        ->artisan('blog:indexnow', ['path' => "{$blog->slug}/{$post->slug}"])
+        ->assertExitCode(0)
+        ->expectsOutput("Submitting post: {$blog->slug}/{$post->slug}...")
+        ->expectsOutput('Submitting 1 URLs to IndexNow...');
+
+    Http::assertSent(function ($request) use ($canonicalUrl, $legacyUrl): bool {
+        return $request->url() === 'https://api.indexnow.org/indexnow'
+            && $request['urlList'] === [$canonicalUrl]
+            && !in_array($legacyUrl, $request['urlList'], true);
+    });
+});
+
 test('artisan command shows pending queue status', function () {
     IndexNowQueuedUrl::create(['url' => 'https://example.org/pending-1']);
     IndexNowQueuedUrl::create(['url' => 'https://example.org/pending-2']);
