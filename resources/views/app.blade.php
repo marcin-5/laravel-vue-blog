@@ -41,7 +41,11 @@
 
     @routes
     @vite(['resources/js/app.ts'])
-    @inertiaHead
+    <x-inertia::head>
+        @if ($description = data_get($page ?? [], 'props.seo.description'))
+            <meta name="description" content="{{ $description }}">
+        @endif
+    </x-inertia::head>
 </head>
 <body class="antialiased">
 @inertia

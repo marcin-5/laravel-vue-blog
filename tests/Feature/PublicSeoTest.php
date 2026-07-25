@@ -6,11 +6,12 @@ use function Pest\Laravel\get;
 
 function assertSingleMetaDescription(string $html): void
 {
-    expect(substr_count($html, '<meta name="description"'))->toBe(1)
-        ->and(str_contains($html, 'meta name="description" inertia'))->toBeFalse();
+    preg_match_all('/<meta\b(?=[^>]*\bname=["\']description["\'])[^>]*>/i', $html, $matches);
+
+    expect($matches[0])->toHaveCount(1);
 }
 
-test('home page has single meta description without inertia', function () {
+test('home page has a single meta description', function () {
     $response = get(route('home'));
 
     $response->assertSuccessful();
@@ -20,7 +21,7 @@ test('home page has single meta description without inertia', function () {
     assertSingleMetaDescription($html);
 });
 
-test('about page has single meta description without inertia', function () {
+test('about page has a single meta description', function () {
     $response = get(route('about'));
 
     $response->assertSuccessful();
@@ -32,7 +33,7 @@ test('about page has single meta description without inertia', function () {
     assertSingleMetaDescription($html);
 });
 
-test('contact page has single meta description without inertia', function () {
+test('contact page has a single meta description', function () {
     $response = get(route('contact'));
 
     $response->assertSuccessful();
@@ -44,7 +45,7 @@ test('contact page has single meta description without inertia', function () {
     assertSingleMetaDescription($html);
 });
 
-test('public blog landing page has single meta description without inertia', function () {
+test('public blog landing page has a single meta description', function () {
     $blog = createBlog([
         'is_published' => true,
     ]);
@@ -60,7 +61,7 @@ test('public blog landing page has single meta description without inertia', fun
     assertSingleMetaDescription($html);
 });
 
-test('public blog post page has single meta description without inertia', function () {
+test('public blog post page has a single meta description', function () {
     $blog = createBlog([
         'is_published' => true,
     ]);
