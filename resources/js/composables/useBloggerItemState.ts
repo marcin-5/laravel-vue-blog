@@ -26,14 +26,31 @@ export function useBloggerItemState<TEntity extends ManageableItem>({ item, enti
     const isCreatingPost = computed(() => postState.creatingPostForId.value === item.id);
     const isPostsExpanded = computed(() => uiState.expandedPostsForId.value === item.id);
 
-    function resetPostInteraction() {
+    function resetEntityEdit() {
+        entityState.editingId.value = null;
+        entityState.editForm.reset();
+    }
+
+    function resetPostCreation() {
         postState.creatingPostForId.value = null;
+        postState.postForm.reset();
+    }
+
+    function resetPostEdit() {
         postState.editingPostId.value = null;
+        postState.postEditForm.reset();
+    }
+
+    function resetExtensionInteraction() {
         postState.creatingExtensionForId.value = null;
         postState.editingExtensionId.value = null;
         uiState.expandedExtensionsForId.value = null;
-        postState.postForm.reset();
-        postState.postEditForm.reset();
+    }
+
+    function resetPostInteraction() {
+        resetPostCreation();
+        resetPostEdit();
+        resetExtensionInteraction();
     }
 
     function edit() {
@@ -43,50 +60,33 @@ export function useBloggerItemState<TEntity extends ManageableItem>({ item, enti
     }
 
     function createPost() {
-        entityState.editingId.value = null;
-        entityState.editForm.reset();
-        postState.editingPostId.value = null;
-        postState.postEditForm.reset();
+        resetEntityEdit();
+        resetPostEdit();
         uiState.expandedPostsForId.value = null;
-        uiState.expandedExtensionsForId.value = null;
-        postState.creatingExtensionForId.value = null;
-        postState.editingExtensionId.value = null;
+        resetExtensionInteraction();
         startCreatePost(postState);
     }
 
     function togglePosts() {
-        entityState.editingId.value = null;
-        entityState.editForm.reset();
-        postState.creatingPostForId.value = null;
-        postState.editingPostId.value = null;
-        postState.creatingExtensionForId.value = null;
-        postState.editingExtensionId.value = null;
-        uiState.expandedExtensionsForId.value = null;
-        postState.postForm.reset();
-        postState.postEditForm.reset();
+        resetEntityEdit();
+        resetPostCreation();
+        resetPostEdit();
+        resetExtensionInteraction();
         uiState.togglePosts(item);
     }
 
     function editPost(post: PostItem) {
-        entityState.editingId.value = null;
-        entityState.editForm.reset();
-        postState.creatingPostForId.value = null;
-        postState.postForm.reset();
-        uiState.expandedExtensionsForId.value = null;
-        postState.creatingExtensionForId.value = null;
-        postState.editingExtensionId.value = null;
+        resetEntityEdit();
+        resetPostCreation();
+        resetExtensionInteraction();
         postState.startEditPost(post);
     }
 
     function toggleExtensions(post: PostItem) {
-        entityState.editingId.value = null;
-        entityState.editForm.reset();
-        postState.creatingPostForId.value = null;
-        postState.editingPostId.value = null;
-        postState.creatingExtensionForId.value = null;
-        postState.editingExtensionId.value = null;
-        postState.postForm.reset();
-        postState.postEditForm.reset();
+        resetEntityEdit();
+        resetPostCreation();
+        resetPostEdit();
+        resetExtensionInteraction();
         uiState.toggleExtensions(post);
     }
 
