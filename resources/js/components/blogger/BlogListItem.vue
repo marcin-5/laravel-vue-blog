@@ -19,17 +19,12 @@ const props = defineProps<Props>();
 const { t } = useI18n();
 const state = useBlogItemState(props.item);
 const {
-    creatingExtensionForId,
     editForm,
-    editingExtensionId,
     editingPostId,
     expandedExtensionsForId,
-    extensionEditForm,
-    extensionForm,
     isCreatingPost,
     isEditing,
     isPostsExpanded,
-    postEditForm,
     postForm: rawPostForm,
     cancelCreateExtension,
     cancelCreatePost,
@@ -123,7 +118,7 @@ function handleReload() {
             />
         </template>
 
-        <template #create-post-form="{ handleCancelCreatePost }">
+        <template #create-post-form="">
             <PostForm
                 :blog-id="item.id"
                 :form="postForm"

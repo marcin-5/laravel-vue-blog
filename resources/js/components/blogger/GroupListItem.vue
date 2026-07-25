@@ -23,12 +23,9 @@ const {
     editForm,
     editingPostId,
     expandedExtensionsForId,
-    extensionEditForm,
-    extensionForm,
     isCreatingPost,
     isEditing,
     isPostsExpanded,
-    postEditForm,
     postForm: rawPostForm,
     cancelCreateExtension,
     cancelCreatePost,
@@ -117,7 +114,7 @@ function handleReload() {
             </div>
         </template>
 
-        <template #create-post-form="{ handleCancelCreatePost }">
+        <template #create-post-form="">
             <div class="mt-4 border-t pt-4">
                 <div class="mb-4 flex items-center justify-between">
                     <h3 class="text-sm font-medium">{{ t('blogger.actions.add_post_to') }} {{ item.name }}</h3>
