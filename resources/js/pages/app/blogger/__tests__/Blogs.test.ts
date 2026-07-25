@@ -36,10 +36,7 @@ vi.mock('@/components/blogger/BlogListItem.vue', () => ({
     default: { name: 'BlogListItem', template: '<div>BlogListItem</div>' },
 }));
 vi.mock('@/components/blogger/CreateEntitySection.vue', () => ({
-    default: {
-        name: 'CreateEntitySection',
-        template: '<div><slot name="form" :form="{}" :onCancel="() => {}" :onSubmit="() => {}" /></div>',
-    },
+    default: { template: '<div />' },
 }));
 vi.mock('@/components/ui/button', () => ({
     Button: { name: 'Button', inheritAttrs: false, template: '<button v-bind="$attrs"><slot /></button>' },

@@ -30,10 +30,7 @@ vi.mock('@/layouts/AppLayout.vue', () => ({
     default: { name: 'AppLayout', template: '<div><slot /></div>' },
 }));
 vi.mock('@/components/blogger/CreateEntitySection.vue', () => ({
-    default: {
-        name: 'CreateEntitySection',
-        template: '<div><slot name="form" :form="{}" :onCancel="() => {}" :onSubmit="() => {}" /></div>',
-    },
+    default: { template: '<div />' },
 }));
 vi.mock('@/components/blogger/GroupForm.vue', () => ({
     default: { name: 'GroupForm', template: '<div>GroupForm</div>' },
