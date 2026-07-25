@@ -3,61 +3,90 @@ import BlogForm from '@/components/blogger/BlogForm.vue';
 import BloggerListItem from '@/components/blogger/BloggerListItem.vue';
 import ItemActionGroup from '@/components/blogger/ItemActionGroup.vue';
 import PostForm from '@/components/blogger/PostForm.vue';
-import type { AdminBlog as Blog, AdminPostItem as PostItem, Category, ListItemEmits, ListItemProps } from '@/types/blog.types';
+import { useBlogItemState } from '@/composables/useBlogItemState';
+import type { AdminBlog as Blog, AdminPostItem as PostItem, BloggerItemContext, Category } from '@/types/blog.types';
 import { localizedName } from '@/utils/localization';
 import { router } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
-
-function handleReload() {
-    router.reload({ only: ['blogs'] });
-}
-
-interface Props extends ListItemProps<Blog> {
+interface Props {
+    item: Blog;
     categories: Category[];
 }
 
 const props = defineProps<Props>();
-const emit = defineEmits<ListItemEmits<Blog, PostItem>>();
+const { t } = useI18n();
+const state = useBlogItemState(props.item);
+const {
+    creatingExtensionForId,
+    editForm,
+    editingExtensionId,
+    editingPostId,
+    expandedExtensionsForId,
+    extensionEditForm,
+    extensionForm,
+    isCreatingPost,
+    isEditing,
+    isPostsExpanded,
+    postEditForm,
+    postForm: rawPostForm,
+    cancelCreateExtension,
+    cancelCreatePost,
+    cancelEdit,
+    cancelEditExtension,
+    cancelEditPost,
+    createPost,
+    edit,
+    editPost,
+    startCreateExtension,
+    startEditExtension,
+    submitCreateExtension,
+    submitCreatePost,
+    submitEdit,
+    submitEditExtension,
+    submitEditPost,
+    toggleExtensions,
+    togglePosts,
+} = state;
+const postForm = rawPostForm as any;
+const context = computed<BloggerItemContext<Blog, PostItem>>(() => ({
+    item: props.item,
+    subtitle: `/${props.item.slug} · ${props.item.creation_date ?? ''}`,
+    isEditing: isEditing.value,
+    isCreatingPost: isCreatingPost.value,
+    isPostsExpanded: isPostsExpanded.value,
+    editingPostId: editingPostId.value,
+    expandedExtensionsForId: expandedExtensionsForId.value,
+    editForm,
+    actions: {
+        edit,
+        createPost,
+        togglePosts,
+        editPost,
+        toggleExtensions,
+        cancelEdit,
+        cancelCreatePost,
+        submitEdit,
+        submitCreatePost,
+        cancelEditPost,
+        submitEditPost,
+        createExtension: startCreateExtension,
+        submitCreateExtension,
+        cancelCreateExtension,
+        editExtension: startEditExtension,
+        submitEditExtension,
+        cancelEditExtension,
+    },
+}));
 
-function handleSubmitEdit(form: any) {
-    emit('submitEdit', form, props.item);
-}
-
-function handleSubmitCreatePost(form: any) {
-    emit('submitCreatePost', form);
-}
-
-function handleSubmitEditPost(form: any, post: PostItem) {
-    emit('submitEditPost', form, post);
+function handleReload() {
+    router.reload({ only: ['blogs'] });
 }
 </script>
 
 <template>
-    <BloggerListItem
-        :subtitle="`/${item.slug} · ${item.creation_date ?? ''}`"
-        v-bind="props"
-        @edit="(i) => emit('edit', i)"
-        @apply-edit-extension="(form, ext) => emit('applyEditExtension', form, ext)"
-        @cancel-create-extension="emit('cancelCreateExtension')"
-        @cancel-edit="emit('cancelEdit')"
-        @cancel-edit-extension="emit('cancelEditExtension')"
-        @cancel-edit-post="emit('cancelEditPost')"
-        @cancel-create-post="emit('cancelCreatePost')"
-        @create-extension="(p) => emit('createExtension', p)"
-        @create-post="(i) => emit('createPost', i)"
-        @edit-extension="(ext) => emit('editExtension', ext)"
-        @edit-post="(p) => emit('editPost', p)"
-        @post-updated="handleReload"
-        @submit-create-extension="(form, p) => emit('submitCreateExtension', form, p)"
-        @submit-create-post="handleSubmitCreatePost"
-        @submit-edit="handleSubmitEdit"
-        @submit-edit-extension="(form, ext) => emit('submitEditExtension', form, ext)"
-        @submit-edit-post="handleSubmitEditPost"
-        @toggle-extensions="(p) => emit('toggleExtensions', p)"
-        @toggle-posts="(i) => emit('togglePosts', i)"
-    >
+    <BloggerListItem :context="context" @post-updated="handleReload">
         <template #badges>
             <div v-if="item.categories && item.categories.length" class="mt-1 flex flex-wrap gap-2">
                 <span
@@ -75,9 +104,9 @@ function handleSubmitEditPost(form: any, post: PostItem) {
                 :is-creating-post="isCreatingPost"
                 :is-editing="isEditing"
                 :is-posts-expanded="isPostsExpanded"
-                @edit="handleEdit(item)"
-                @create-post="handleCreatePost(item)"
-                @toggle-posts="handleTogglePosts(item)"
+                @edit="handleEdit"
+                @create-post="handleCreatePost"
+                @toggle-posts="handleTogglePosts"
             />
         </template>
 
@@ -85,12 +114,12 @@ function handleSubmitEditPost(form: any, post: PostItem) {
             <BlogForm
                 :blog="item"
                 :categories="categories"
-                :form="props.editForm"
+                :form="editForm"
                 :id-prefix="`edit-${item.id}`"
                 :is-edit="true"
                 class="mt-4"
                 @cancel="handleCancelEdit"
-                @submit="handleSubmitEdit"
+                @submit="submitEdit"
             />
         </template>
 
@@ -101,8 +130,8 @@ function handleSubmitEditPost(form: any, post: PostItem) {
                 :id-prefix="`post-${item.id}`"
                 :is-edit="false"
                 class="mt-4"
-                @cancel="handleCancelCreatePost"
-                @submit="handleSubmitCreatePost"
+                @cancel="cancelCreatePost"
+                @submit="submitCreatePost"
             />
         </template>
 

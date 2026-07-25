@@ -254,6 +254,39 @@ export interface ManageableItem {
     name: string;
     slug: string;
     is_published: boolean;
+    posts?: AdminPostItem[];
+}
+
+export interface BloggerItemActions<P extends AdminPostItem = AdminPostItem> {
+    edit(): void;
+    createPost(): void;
+    togglePosts(): void;
+    editPost(post: P): void;
+    toggleExtensions(post: P): void;
+    cancelEdit(): void;
+    cancelCreatePost(): void;
+    submitEdit(): void;
+    submitCreatePost(): void;
+    cancelEditPost(): void;
+    submitEditPost(): void;
+    createExtension(post: P): void;
+    submitCreateExtension(post: P): void;
+    cancelCreateExtension(): void;
+    editExtension(extension: PostExtension): void;
+    submitEditExtension(extension: PostExtension, closeOnSuccess?: boolean): void;
+    cancelEditExtension(): void;
+}
+
+export interface BloggerItemContext<T extends ManageableItem, P extends AdminPostItem = AdminPostItem> {
+    item: T;
+    subtitle?: string;
+    isEditing: boolean;
+    isCreatingPost: boolean;
+    isPostsExpanded: boolean;
+    editingPostId: number | null;
+    expandedExtensionsForId: number | null;
+    editForm?: any;
+    actions: BloggerItemActions<P>;
 }
 
 // ===== Blog form/composable shared types =====

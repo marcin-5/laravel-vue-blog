@@ -1,5 +1,7 @@
 import CreateEntitySection from '@/components/blogger/CreateEntitySection.vue';
 import GroupListItem from '@/components/blogger/GroupListItem.vue';
+import GroupCreateSection from '@/pages/app/blogger/components/GroupCreateSection.vue';
+import GroupList from '@/pages/app/blogger/components/GroupList.vue';
 import type { AdminGroup } from '@/types/blog.types';
 import { mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
@@ -40,7 +42,7 @@ vi.mock('@/components/blogger/GroupListItem.vue', () => ({
     default: { name: 'GroupListItem', template: '<div>GroupListItem</div>' },
 }));
 vi.mock('@/components/ui/button', () => ({
-    Button: { name: 'Button', template: '<button><slot /></button>' },
+    Button: { name: 'Button', inheritAttrs: false, template: '<button v-bind="$attrs"><slot /></button>' },
 }));
 
 // Mock composables
@@ -109,6 +111,8 @@ describe('Groups.vue', () => {
 
         const groupItems = wrapper.findAllComponents(GroupListItem);
         expect(groupItems.length).toBe(mockGroups.length);
+        expect(wrapper.findComponent(GroupCreateSection).exists()).toBe(true);
+        expect(wrapper.findComponent(GroupList).props('groups')).toEqual(mockGroups);
     });
 
     it('renders empty state when no groups are provided', () => {

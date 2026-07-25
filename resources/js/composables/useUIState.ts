@@ -1,11 +1,11 @@
-import type { AdminBlog as Blog } from '@/types/blog.types';
+import type { ManageableItem } from '@/types/blog.types';
 import { ref } from 'vue';
 
 export function useUIState() {
     const expandedPostsForId = ref<number | null>(null);
     const expandedExtensionsForId = ref<number | null>(null);
 
-    function togglePosts(blog: Blog) {
+    function togglePosts(blog: Pick<ManageableItem, 'id'>) {
         if (expandedPostsForId.value === blog.id) {
             expandedPostsForId.value = null;
             return;
