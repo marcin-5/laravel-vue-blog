@@ -1,6 +1,9 @@
 <script generic="T extends Record<string, any>" lang="ts" setup>
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Info } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 interface Column {
     key: string;
@@ -55,7 +58,7 @@ function getVisibleColumns(columns: Column[]): Column[] {
                         </td>
                     </tr>
                     <tr v-if="!data.length">
-                        <td :colspan="getVisibleColumns(columns).length" class="py-4 text-center text-muted-foreground">No data</td>
+                        <td :colspan="getVisibleColumns(columns).length" class="py-4 text-center text-muted-foreground">{{ t('stats.no_data') }}</td>
                     </tr>
                 </tbody>
             </table>

@@ -1,4 +1,4 @@
-export type StatsRange = 'today' | 'week' | 'month' | 'half_year' | 'year';
+export type StatsRange = 'today' | 'week' | 'month' | 'half_year' | 'year' | 'lifetime';
 
 export type BlogRow = {
     blog_id: number;

@@ -455,5 +455,71 @@
             "user": "Panel użytkownika",
             "select": "Wybierz widok"
         }
+    },
+    "stats": {
+        "sections": {
+            "blog_views": "Wyświetlenia blogów",
+            "post_views": "Wyświetlenia wpisów",
+            "consent_views": "Wyświetlenia za zgodą",
+            "special_views": "Wyświetlenia anonimowe, botów i markdown"
+        },
+        "columns": {
+            "blog": "Blog",
+            "blogger": "Bloger",
+            "blog_views": "Wyświetlenia bloga",
+            "post_views": "Wyświetlenia wpisów",
+            "markdown_views": "Wyświetlenia markdown",
+            "title": "Tytuł",
+            "consent_views": "Wyświetlenia za zgodą",
+            "bot_views": "Wyświetlenia botów",
+            "anonymous_views": "Wyświetlenia anonimowe",
+            "visitor": "Odwiedzający",
+            "fingerprint": "Odcisk palca",
+            "lifetime_visits": "Wizyty ogółem",
+            "user_agent": "User agent",
+            "last_seen": "Ostatnio widziany"
+        },
+        "filters": {
+            "range": "Zakres czasu",
+            "sort": "Sortowanie",
+            "size": "Elementy",
+            "blogger": "Bloger",
+            "blog": "Blog",
+            "visitor_type": "Typ odwiedzającego",
+            "identify_by": "Identyfikuj przez",
+            "all": "Wszystkie",
+            "all_blogs": "Wszystkie blogi",
+            "all_my_blogs": "Wszystkie moje blogi"
+        },
+        "filter_options": {
+            "today": "Dzisiaj",
+            "week": "Ostatni tydzień",
+            "month": "Ostatni miesiąc",
+            "half_year": "Ostatnie 6 miesięcy",
+            "year": "Ostatni rok",
+            "lifetime": "Cały czas",
+            "visitor_id": "ID odwiedzającego",
+            "fingerprint": "Odcisk palca",
+            "size_all": "Wszystkie"
+        },
+        "visitor_types": {
+            "all": "Wszyscy",
+            "bots": "Boty",
+            "anonymous": "Anonimowi",
+            "markdown": "Markdown"
+        },
+        "sort_options": {
+            "views_desc": "Wyświetlenia ↓",
+            "views_asc": "Wyświetlenia ↑",
+            "name_asc": "Nazwa A→Z",
+            "name_desc": "Nazwa Z→A",
+            "title_asc": "Tytuł A→Z",
+            "title_desc": "Tytuł Z→A",
+            "post_views_desc": "Wyświetlenia wpisów ↓",
+            "post_views_asc": "Wyświetlenia wpisów ↑",
+            "last_seen_desc": "Ostatnio widziany ↓",
+            "last_seen_asc": "Ostatnio widziany ↑"
+        },
+        "no_data": "Brak danych"
     }
 }

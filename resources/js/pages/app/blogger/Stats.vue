@@ -33,19 +33,27 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: t('blogger.stats_title'), href: 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
         <StatsPage
-            :blog-filters="blogFilters"
-            :blog-options="blogOptions"
-            :bloggers="bloggers"
-            :blogs="blogs"
-            :post-filters="postFilters"
-            :posts="posts"
-            :show-blogger-filter="isAdmin"
-            :special-visitor-filters="specialVisitorFilters"
-            :visitor-blog-options="visitorBlogOptions"
-            :visitor-filters="visitorFilters"
-            :visitors-from-page="visitorsFromPage"
-            :visitors-from-special="visitorsFromSpecial"
-            route-name="blogger.stats.index"
+            :config="{
+                routeName: 'blogger.stats.index',
+                showBloggerFilter: isAdmin,
+            }"
+            :data="{
+                blogs: blogs,
+                posts: posts,
+                visitorsFromPage: visitorsFromPage,
+                visitorsFromSpecial: visitorsFromSpecial,
+            }"
+            :filters="{
+                blog: blogFilters,
+                post: postFilters,
+                visitor: visitorFilters,
+                specialVisitor: specialVisitorFilters,
+            }"
+            :options="{
+                bloggers: bloggers,
+                blogOptions: blogOptions,
+                visitorBlogOptions: visitorBlogOptions,
+            }"
         />
     </AppLayout>
 </template>

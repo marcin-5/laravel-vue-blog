@@ -455,5 +455,71 @@
             "user": "User Dashboard",
             "select": "Select View"
         }
+    },
+    "stats": {
+        "sections": {
+            "blog_views": "Blog Views",
+            "post_views": "Post Views",
+            "consent_views": "Consent Views",
+            "special_views": "Anonymous, Bot and Markdown Views"
+        },
+        "columns": {
+            "blog": "Blog",
+            "blogger": "Blogger",
+            "blog_views": "Blog views",
+            "post_views": "Post views",
+            "markdown_views": "Markdown views",
+            "title": "Title",
+            "consent_views": "Consent views",
+            "bot_views": "Bot views",
+            "anonymous_views": "Anonymous views",
+            "visitor": "Visitor",
+            "fingerprint": "Fingerprint",
+            "lifetime_visits": "Lifetime visits",
+            "user_agent": "User agent",
+            "last_seen": "Last seen"
+        },
+        "filters": {
+            "range": "Time range",
+            "sort": "Sort",
+            "size": "Items",
+            "blogger": "Blogger",
+            "blog": "Blog",
+            "visitor_type": "Visitor type",
+            "identify_by": "Identify by",
+            "all": "All",
+            "all_blogs": "All blogs",
+            "all_my_blogs": "All my blogs"
+        },
+        "filter_options": {
+            "today": "Today",
+            "week": "Last week",
+            "month": "Last month",
+            "half_year": "Last 6 months",
+            "year": "Last year",
+            "lifetime": "Lifetime",
+            "visitor_id": "Visitor ID",
+            "fingerprint": "Fingerprint",
+            "size_all": "All"
+        },
+        "visitor_types": {
+            "all": "All",
+            "bots": "Bots",
+            "anonymous": "Anonymous",
+            "markdown": "Markdown"
+        },
+        "sort_options": {
+            "views_desc": "Views ↓",
+            "views_asc": "Views ↑",
+            "name_asc": "Name A→Z",
+            "name_desc": "Name Z→A",
+            "title_asc": "Title A→Z",
+            "title_desc": "Title Z→A",
+            "post_views_desc": "Post views ↓",
+            "post_views_asc": "Post views ↑",
+            "last_seen_desc": "Last seen ↓",
+            "last_seen_asc": "Last seen ↑"
+        },
+        "no_data": "No data"
     }
 }

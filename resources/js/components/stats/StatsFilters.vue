@@ -1,19 +1,10 @@
 <script lang="ts" setup>
+import type { BlogOption, FilterState, StatsRange, UserOption } from '@/types/stats';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import FilterSelect from './FilterSelect.vue';
 
-type Range = 'today' | 'week' | 'month' | 'half_year' | 'year' | 'lifetime';
-type UserOption = { id: number; name: string };
-type BlogOption = { id: number; name: string };
-
 interface Props {
-    selectedRange: Range;
-    selectedSort: string;
-    selectedSize: number;
-    selectedBlogger?: number | null;
-    selectedBlog?: number | null;
-    selectedGroupBy?: 'visitor_id' | 'fingerprint';
-    selectedVisitorType?: 'all' | 'bots' | 'anonymous' | 'markdown';
     bloggers?: UserOption[];
     blogOptions: BlogOption[];
     showBloggerFilter?: boolean;
@@ -25,7 +16,7 @@ interface Props {
     sortOptions: { value: string; label: string }[];
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
     showBlogFilter: true,
     showGroupByFilter: false,
     showVisitorTypeFilter: false,
@@ -38,105 +29,94 @@ withDefaults(defineProps<Props>(), {
     ],
 });
 
-const emit = defineEmits<{
-    'update:selectedRange': [value: Range];
-    'update:selectedSort': [value: string];
-    'update:selectedSize': [value: number];
-    'update:selectedBlogger': [value: number | null | undefined];
-    'update:selectedBlog': [value: number | null | undefined];
-    'update:selectedGroupBy': [value: 'visitor_id' | 'fingerprint'];
-    'update:selectedVisitorType': [value: 'all' | 'bots' | 'anonymous' | 'markdown'];
-}>();
+const model = defineModel<FilterState>({ required: true });
 
 const { t } = useI18n();
 
-const ranges: { value: Range; label: string }[] = [
-    { value: 'today', label: 'Today' },
-    { value: 'week', label: 'Last week' },
-    { value: 'month', label: 'Last month' },
-    { value: 'half_year', label: 'Last 6 months' },
-    { value: 'year', label: 'Last year' },
-    { value: 'lifetime', label: 'Lifetime' },
-];
+const ranges = computed(
+    () =>
+        [
+            { value: 'today', label: t('stats.filter_options.today') },
+            { value: 'week', label: t('stats.filter_options.week') },
+            { value: 'month', label: t('stats.filter_options.month') },
+            { value: 'half_year', label: t('stats.filter_options.half_year') },
+            { value: 'year', label: t('stats.filter_options.year') },
+            { value: 'lifetime', label: t('stats.filter_options.lifetime') },
+        ] as { value: StatsRange; label: string }[],
+);
 
-const sizes = [
+const sizes = computed(() => [
     { value: 5, label: '5' },
     { value: 10, label: '10' },
     { value: 20, label: '20' },
-    { value: 0, label: 'All' },
-];
+    { value: 0, label: t('stats.filter_options.size_all') },
+]);
 
-const groupOptions = [
-    { value: 'visitor_id', label: 'Visitor ID' },
-    { value: 'fingerprint', label: 'Fingerprint' },
-];
+const groupOptions = computed(() => [
+    { value: 'visitor_id', label: t('stats.filter_options.visitor_id') },
+    { value: 'fingerprint', label: t('stats.filter_options.fingerprint') },
+]);
 
-const visitorTypeOptions = [
-    { value: 'all', label: t('admin.stats.visitor_types.all') },
-    { value: 'bots', label: t('admin.stats.visitor_types.bots') },
-    { value: 'anonymous', label: t('admin.stats.visitor_types.anonymous') },
-    { value: 'markdown', label: t('admin.stats.visitor_types.markdown') },
-];
+const visitorTypeOptions = computed(() => [
+    { value: 'all', label: t('stats.visitor_types.all') },
+    { value: 'bots', label: t('stats.visitor_types.bots') },
+    { value: 'anonymous', label: t('stats.visitor_types.anonymous') },
+    { value: 'markdown', label: t('stats.visitor_types.markdown') },
+]);
+
+const translatedSortOptions = computed(() =>
+    props.sortOptions.map((opt) => ({
+        ...opt,
+        label: t(`stats.sort_options.${opt.value}`, opt.label),
+    })),
+);
+
+const translatedBloggers = computed(() => props.bloggers?.map((b) => ({ value: b.id, label: b.name })) || []);
+
+const translatedBlogOptions = computed(() => [
+    { value: 'all', label: props.blogFilterLabel || t('stats.filters.all') },
+    ...props.blogOptions.map((b) => ({ value: b.id, label: b.name })),
+]);
 </script>
 
 <template>
     <div class="flex flex-wrap items-end gap-3 rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border">
-        <FilterSelect
-            v-if="showRangeFilter"
-            :model-value="selectedRange"
-            :options="ranges"
-            label="Time range"
-            @update:model-value="emit('update:selectedRange', $event as Range)"
-        />
+        <FilterSelect v-if="showRangeFilter" v-model="model.range" :options="ranges" :label="t('stats.filters.range')" />
 
-        <FilterSelect
-            :model-value="selectedSort"
-            :options="sortOptions"
-            label="Sort"
-            @update:model-value="emit('update:selectedSort', $event as string)"
-        />
+        <FilterSelect v-model="model.sort" :options="translatedSortOptions" :label="t('stats.filters.sort')" />
 
-        <FilterSelect
-            :model-value="selectedSize"
-            :options="sizes"
-            label="Items"
-            @update:model-value="emit('update:selectedSize', $event as number)"
-        />
+        <FilterSelect v-model="model.size" :options="sizes" :label="t('stats.filters.size')" />
 
         <FilterSelect
             v-if="showBloggerFilter"
-            :model-value="selectedBlogger"
-            :options="bloggers?.map((b) => ({ value: b.id, label: b.name })) || []"
-            label="Blogger"
+            v-model="model.blogger_id"
+            :options="translatedBloggers"
+            :label="t('stats.filters.blogger')"
             min-width="min-w-48"
-            placeholder="All"
-            @update:model-value="emit('update:selectedBlogger', $event as number | null | undefined)"
+            :placeholder="t('stats.filters.all')"
         />
 
         <FilterSelect
             v-if="showBlogFilter"
-            :model-value="selectedBlog"
-            :options="[{ value: 'all', label: blogFilterLabel || 'All' }, ...blogOptions.map((b) => ({ value: b.id, label: b.name }))]"
+            v-model="model.blog_id"
+            :options="translatedBlogOptions"
             :placeholder="blogFilterLabel"
-            label="Blog"
+            :label="t('stats.filters.blog')"
             min-width="min-w-48"
-            @update:model-value="emit('update:selectedBlog', ($event === 'all' ? null : $event) as number | null | undefined)"
         />
 
         <FilterSelect
             v-if="showVisitorTypeFilter"
-            :model-value="selectedVisitorType"
+            v-model="model.visitor_type"
             :options="visitorTypeOptions"
-            label="Visitor type"
-            @update:model-value="emit('update:selectedVisitorType', $event as 'all' | 'bots' | 'anonymous' | 'markdown')"
+            :label="t('stats.filters.visitor_type')"
         />
 
         <FilterSelect
             v-if="showGroupByFilter"
-            :model-value="selectedGroupBy"
+            v-model="model.group_by"
             :options="groupOptions"
-            label="Identify by"
-            @update:model-value="emit('update:selectedGroupBy', $event as 'visitor_id' | 'fingerprint')"
+            :label="t('stats.filters.identify_by')"
         />
     </div>
 </template>
