@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { Button } from '@/components/ui/button';
+import { router } from '@inertiajs/vue3';
 import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -36,6 +37,7 @@ onMounted(() => {
 const accept = () => {
     setCookie(COOKIE_NAME, 'accepted', COOKIE_MAX_AGE);
     show.value = false;
+    router.reload();
 };
 
 const reject = () => {
