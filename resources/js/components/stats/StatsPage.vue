@@ -4,8 +4,8 @@ import type { BlogOption, BlogRow, FilterState, PostRow, UserOption, VisitorRow 
 import { useI18n } from 'vue-i18n';
 import BlogStats from './BlogStats.vue';
 import PostStats from './PostStats.vue';
-import SpecialVisitorStats from './SpecialVisitorStats.vue';
-import VisitorStats from './VisitorStats.vue';
+import SpecialAudienceStats from './SpecialAudienceStats.vue';
+import AudienceStats from './AudienceStats.vue';
 
 const { t } = useI18n();
 
@@ -87,14 +87,14 @@ const { blogState, postState, visitorState, specialVisitorState } = useStatsFilt
             :show-blogger-filter="props.config.showBloggerFilter"
         />
 
-        <VisitorStats
+        <AudienceStats
             v-model="visitorState"
             :blog-filter-label="getEffectiveBlogFilterLabel(visitorState.blogger_id)"
             :blog-options="props.options.visitorBlogOptions ?? props.options.blogOptions"
             :data="props.data.visitorsFromPage ?? []"
         />
 
-        <SpecialVisitorStats
+        <SpecialAudienceStats
             v-model="specialVisitorState"
             :blog-filter-label="getEffectiveBlogFilterLabel(specialVisitorState.blogger_id)"
             :blog-options="props.options.visitorBlogOptions ?? props.options.blogOptions"

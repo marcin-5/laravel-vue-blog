@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { SPECIAL_VISITOR_SORT_OPTIONS } from '@/constants/stats';
+import { VISITOR_SORT_OPTIONS } from '@/constants/stats';
 import type { BlogOption, FilterState, VisitorRow } from '@/types/stats';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -13,7 +13,7 @@ interface Props {
     blogFilterLabel?: string;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
     blogFilterLabel: undefined,
 });
 
@@ -21,16 +21,21 @@ const model = defineModel<FilterState>({ required: true });
 const { t } = useI18n();
 
 const columns = computed(() => [
-    { key: 'visitor_label', label: t('stats.columns.user_agent') },
+    {
+        key: 'visitor_label',
+        label: model.value.group_by === 'fingerprint' ? t('stats.columns.fingerprint') : t('stats.columns.visitor'),
+        hasInfo: true,
+    },
     { key: 'blog_views', label: t('stats.columns.blog_views') },
     { key: 'post_views', label: t('stats.columns.post_views') },
     { key: 'lifetime_views', label: t('stats.columns.lifetime_visits') },
-    { key: 'last_seen_at', label: t('stats.columns.last_seen'), isDate: true },
 ]);
+
+const visitorInfoKey = computed(() => 'user_agent');
 </script>
 
 <template>
-    <StatsSection :title="t('stats.sections.special_views')" :show-separator="false">
+    <StatsSection :title="t('stats.sections.consent_views')">
         <template #filters>
             <StatsFilters
                 v-model="model"
@@ -38,11 +43,10 @@ const columns = computed(() => [
                 :blog-options="blogOptions"
                 :show-blog-filter="true"
                 :show-blogger-filter="false"
-                :show-range-filter="false"
-                :show-visitor-type-filter="true"
-                :sort-options="[...SPECIAL_VISITOR_SORT_OPTIONS]"
+                :show-group-by-filter="true"
+                :sort-options="[...VISITOR_SORT_OPTIONS]"
             />
         </template>
-        <StatsTable :columns="columns" :data="data" row-key="row_id" />
+        <StatsTable :columns="columns" :data="data" :info-key="visitorInfoKey" row-key="row_id" />
     </StatsSection>
 </template>
