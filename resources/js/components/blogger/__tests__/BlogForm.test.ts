@@ -63,6 +63,15 @@ describe('BlogForm.vue', () => {
         expect(wrapper.find('form').exists()).toBe(true);
     });
 
+    it('renders the dedicated SEO and content field sections', () => {
+        const wrapper = mount(BlogForm, {
+            props: defaultProps,
+        });
+
+        expect(wrapper.findComponent({ name: 'BlogSeoFields' }).exists()).toBe(true);
+        expect(wrapper.findComponent({ name: 'BlogContentFields' }).exists()).toBe(true);
+    });
+
     it('emits submit when handleSubmit is called', async () => {
         const wrapper = mount(BlogForm, {
             props: defaultProps,

@@ -1,4 +1,3 @@
-import CreateEntitySection from '@/components/blogger/CreateEntitySection.vue';
 import GroupListItem from '@/components/blogger/GroupListItem.vue';
 import GroupCreateSection from '@/pages/app/blogger/components/GroupCreateSection.vue';
 import GroupList from '@/pages/app/blogger/components/GroupList.vue';
@@ -132,7 +131,7 @@ describe('Groups.vue', () => {
         expect(wrapper.find('button').exists()).toBe(true);
     });
 
-    it('renders CreateEntitySection', () => {
+    it('composes the management panel with group props', () => {
         const wrapper = mount(Groups, {
             props: defaultProps,
             global: {
@@ -145,7 +144,9 @@ describe('Groups.vue', () => {
             },
         });
 
-        const createSection = wrapper.findComponent(CreateEntitySection as any);
-        expect(createSection.exists()).toBe(true);
+        const panel = wrapper.findComponent({ name: 'BloggerManagementPanel' });
+
+        expect(panel.exists()).toBe(true);
+        expect(panel.props()).toMatchObject({ items: mockGroups, canCreate: true });
     });
 });

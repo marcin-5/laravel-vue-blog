@@ -122,6 +122,10 @@ describe('Blogs.vue', () => {
             global: { stubs: { Head: true } },
         });
 
+        const panel = wrapper.findComponent({ name: 'BloggerManagementPanel' });
+
+        expect(panel.exists()).toBe(true);
+        expect(panel.props()).toMatchObject({ items: mockBlogs, canCreate: true });
         expect(wrapper.findComponent(BlogCreateSection).exists()).toBe(true);
         expect(wrapper.findComponent(BlogList).props()).toMatchObject({ blogs: mockBlogs, canCreate: true, categories });
         expect(wrapper.findAllComponents(BlogListItem)).toHaveLength(mockBlogs.length);
@@ -148,5 +152,6 @@ describe('Blogs.vue', () => {
 
         expect(wrapper.find('button').attributes('disabled')).toBeDefined();
         expect(wrapper.findComponent(BlogList).props('canCreate')).toBe(false);
+        expect(wrapper.findComponent({ name: 'BloggerManagementPanel' }).props('canCreate')).toBe(false);
     });
 });

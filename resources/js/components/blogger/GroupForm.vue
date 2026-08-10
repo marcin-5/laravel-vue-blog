@@ -23,8 +23,8 @@ interface Props {
 }
 
 interface Emits {
-    (e: 'submit', form: any): void;
-    (e: 'cancel'): void;
+    submit: [form: InertiaForm<GroupFormData>];
+    cancel: [];
 }
 
 const props = withDefaults(defineProps<Props>(), {

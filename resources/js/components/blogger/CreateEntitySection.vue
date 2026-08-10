@@ -1,5 +1,6 @@
-<script generic="T extends Record<string, any>" lang="ts" setup>
+<script generic="TFormData extends Record<string, any>" lang="ts" setup>
 import CreateSection from '@/components/blogger/CreateSection.vue';
+import type { InertiaForm } from '@inertiajs/vue3';
 
 interface Props {
     canCreate: boolean;
@@ -7,18 +8,18 @@ interface Props {
     tooltipCreate: string;
     tooltipClose?: string;
     tooltipLimit: string;
-    form?: T;
+    form?: InertiaForm<TFormData>;
 }
 
 const props = defineProps<Props>();
 const showCreate = defineModel<boolean>('showCreate', { required: true });
 
 defineSlots<{
-    form: (props: { form?: T; onCancel: () => void; onSubmit: (form: T) => void }) => unknown;
+    form: (props: { form?: InertiaForm<TFormData>; onCancel: () => void; onSubmit: (form: InertiaForm<TFormData>) => void }) => unknown;
 }>();
 
 const emit = defineEmits<{
-    submit: [form: T];
+    submit: [form: InertiaForm<TFormData>];
     cancel: [];
 }>();
 
@@ -26,7 +27,7 @@ function handleCancel(): void {
     emit('cancel');
 }
 
-function handleSubmit(form: T): void {
+function handleSubmit(form: InertiaForm<TFormData>): void {
     emit('submit', form);
 }
 </script>
