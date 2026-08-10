@@ -38,15 +38,17 @@ function submitCreate() {
         payload.blog_quota = createForm.blog_quota ?? (createForm.role === 'blogger' ? 1 : 0);
     }
 
-    createForm.post(route('admin.users.store'), {
-        preserveScroll: true,
-        preserveState: true,
-        onSuccess: () => {
-            createForm.reset();
-            createForm.role = 'user';
-            createForm.blog_quota = 0;
-        },
-    });
+    createForm
+        .transform(() => payload)
+        .post(route('admin.users.store'), {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => {
+                createForm.reset();
+                createForm.role = 'user';
+                createForm.blog_quota = 0;
+            },
+        });
 }
 </script>
 
