@@ -1,6 +1,6 @@
 import type { InertiaForm } from '@/types/blog.types';
 import { useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, shallowRef, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 export interface UseEntityFormOptions<TEntity extends { id: number }, TFormData extends Record<string, any>> {
@@ -8,12 +8,13 @@ export interface UseEntityFormOptions<TEntity extends { id: number }, TFormData 
     populateFromEntity: (form: InertiaForm<TFormData>, entity: TEntity) => void;
     storeRoute: string;
     updateRoute: (id: number) => string;
+    showCreate?: Ref<boolean>;
 }
 
 export function useEntityForm<TEntity extends { id: number }, TFormData extends Record<string, any>>(
     options: UseEntityFormOptions<TEntity, TFormData>,
 ) {
-    const showCreate = ref(false);
+    const showCreate = options.showCreate ?? shallowRef(false);
     const editingId = ref<number | null>(null);
     const { locale } = useI18n();
 

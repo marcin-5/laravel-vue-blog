@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { shallowRef } from 'vue';
 import { useEntityForm } from '../useEntityForm';
 
 // Mock useI18n
@@ -53,6 +54,17 @@ describe('useEntityForm', () => {
         closeCreateForm();
         expect(showCreate.value).toBe(false);
         expect(resetMock).toHaveBeenCalled();
+    });
+
+    it('uses external visibility state for create form actions', () => {
+        const showCreate = shallowRef(false);
+        const { openCreateForm, closeCreateForm } = useEntityForm({ ...options, showCreate });
+
+        openCreateForm();
+        expect(showCreate.value).toBe(true);
+
+        closeCreateForm();
+        expect(showCreate.value).toBe(false);
     });
 
     it('handles start and cancel edit', () => {

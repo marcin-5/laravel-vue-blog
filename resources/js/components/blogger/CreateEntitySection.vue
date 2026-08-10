@@ -1,35 +1,47 @@
 <script generic="T extends Record<string, any>" lang="ts" setup>
 import CreateSection from '@/components/blogger/CreateSection.vue';
 
-defineProps<{
+interface Props {
     canCreate: boolean;
-    showCreate: boolean;
     title: string;
     tooltipCreate: string;
     tooltipClose?: string;
     tooltipLimit: string;
-    form?: any;
+    form?: T;
+}
+
+const props = defineProps<Props>();
+const showCreate = defineModel<boolean>('showCreate', { required: true });
+
+defineSlots<{
+    form: (props: { form?: T; onCancel: () => void; onSubmit: (form: T) => void }) => unknown;
 }>();
 
 const emit = defineEmits<{
-    (e: 'toggle'): void;
-    (e: 'submit', form: any): void;
-    (e: 'cancel'): void;
+    submit: [form: T];
+    cancel: [];
 }>();
+
+function handleCancel(): void {
+    emit('cancel');
+}
+
+function handleSubmit(form: T): void {
+    emit('submit', form);
+}
 </script>
 
 <template>
     <CreateSection
-        :can-create="canCreate"
-        :show-create="showCreate"
-        :title="title"
-        :tooltip-close="tooltipClose"
-        :tooltip-create="tooltipCreate"
-        :tooltip-limit="tooltipLimit"
-        @toggle="emit('toggle')"
+        v-model:show-create="showCreate"
+        :can-create="props.canCreate"
+        :title="props.title"
+        :tooltip-close="props.tooltipClose"
+        :tooltip-create="props.tooltipCreate"
+        :tooltip-limit="props.tooltipLimit"
     >
         <template #form>
-            <slot :form="form" :on-cancel="() => emit('cancel')" :on-submit="(f: any) => emit('submit', f)" name="form" />
+            <slot :form="props.form" :on-cancel="handleCancel" :on-submit="handleSubmit" name="form" />
         </template>
     </CreateSection>
 </template>

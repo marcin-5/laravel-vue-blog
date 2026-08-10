@@ -1,4 +1,4 @@
-<script generic="TForm" lang="ts" setup>
+<script lang="ts" setup>
 import { TooltipButton } from '@/components/ui/tooltip';
 import { Plus, X } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
@@ -8,18 +8,13 @@ const { t } = useI18n();
 interface Props {
     title: string;
     canCreate: boolean;
-    showCreate: boolean;
     tooltipCreate: string;
     tooltipLimit: string;
     tooltipClose?: string;
 }
 
-const props = defineProps<Props>();
-
-const emit = defineEmits<{
-    (e: 'toggle'): void;
-    (e: 'cancel'): void;
-}>();
+defineProps<Props>();
+const showCreate = defineModel<boolean>('showCreate', { required: true });
 </script>
 
 <template>
@@ -31,7 +26,7 @@ const emit = defineEmits<{
                 :variant="!canCreate ? 'muted' : showCreate ? 'exit' : 'constructive'"
                 size="icon"
                 tooltip-content=""
-                @click="emit('toggle')"
+                @click="showCreate = !showCreate"
             >
                 <X v-if="showCreate" />
                 <Plus v-else />

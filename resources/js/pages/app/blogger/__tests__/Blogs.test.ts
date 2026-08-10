@@ -6,8 +6,6 @@ import { mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
 import Blogs from '../Blogs.vue';
 
-const openCreateForm = vi.fn();
-
 vi.mock('vue-i18n', () => ({
     useI18n: () => ({
         t: (key: string) => key,
@@ -48,7 +46,7 @@ vi.mock('@/composables/useBlogForm', () => ({
         editingId: { value: null },
         createForm: {},
         editForm: {},
-        openCreateForm,
+        openCreateForm: vi.fn(),
         closeCreateForm: vi.fn(),
         submitCreate: vi.fn(),
         startEdit: vi.fn(),
@@ -139,7 +137,7 @@ describe('Blogs.vue', () => {
 
         await wrapper.find('button').trigger('click');
 
-        expect(openCreateForm).toHaveBeenCalledOnce();
+        expect(wrapper.findComponent(BlogCreateSection).props('showCreate')).toBe(true);
     });
 
     it('keeps the empty-state CTA disabled when creation is unavailable', () => {
