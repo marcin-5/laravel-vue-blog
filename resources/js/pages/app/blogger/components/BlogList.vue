@@ -1,7 +1,9 @@
 <script lang="ts" setup>
+import BloggerEntityList from '@/components/blogger/BloggerEntityList.vue';
 import BlogListItem from '@/components/blogger/BlogListItem.vue';
-import BlogEmptyState from './BlogEmptyState.vue';
 import type { AdminBlog as Blog, Category } from '@/types/blog.types';
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
     blogs: Blog[];
@@ -12,12 +14,24 @@ const props = defineProps<{
 const emit = defineEmits<{
     create: [];
 }>();
+
+const { t } = useI18n();
+
+const emptyState = computed(() => ({
+    emptyText: t('blogger.empty'),
+    emptyCta: t('blogger.empty_cta'),
+    limitReachedHint: t('blogger.limit_reached_hint'),
+}));
+
+function handleCreate(): void {
+    emit('create');
+}
 </script>
 
 <template>
-    <div class="space-y-3">
-        <BlogListItem v-for="blog in props.blogs" :key="blog.id" :categories="props.categories" :item="blog" />
-
-        <BlogEmptyState v-if="props.blogs.length === 0" :can-create="props.canCreate" @create="emit('create')" />
-    </div>
+    <BloggerEntityList :can-create="props.canCreate" :empty-state="emptyState" :items="props.blogs" @create="handleCreate">
+        <template #default="{ item }">
+            <BlogListItem :categories="props.categories" :item="item" />
+        </template>
+    </BloggerEntityList>
 </template>

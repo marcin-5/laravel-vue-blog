@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { Button } from '@/components/ui/button';
+import BloggerEmptyState from '@/components/blogger/BloggerEmptyState.vue';
 import { useI18n } from 'vue-i18n';
 
-defineProps<{
+const props = defineProps<{
     canCreate: boolean;
 }>();
 
@@ -14,12 +14,11 @@ const { t } = useI18n();
 </script>
 
 <template>
-    <div class="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
-        {{ t('blogger.groups.empty') }}
-        <span :title="!canCreate ? t('blogger.groups.limit_reached_hint') : ''">
-            <Button :disabled="!canCreate" :variant="!canCreate ? 'muted' : 'link'" class="ml-2" type="button" @click="emit('create')">
-                {{ t('blogger.groups.empty_cta') }}
-            </Button>
-        </span>
-    </div>
+    <BloggerEmptyState
+        :can-create="props.canCreate"
+        :empty-cta="t('blogger.groups.empty_cta')"
+        :empty-text="t('blogger.groups.empty')"
+        :limit-reached-hint="t('blogger.groups.limit_reached_hint')"
+        @create="emit('create')"
+    />
 </template>
