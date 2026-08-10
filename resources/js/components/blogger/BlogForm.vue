@@ -94,7 +94,7 @@ const contactSeoDescriptionClass = computed(() => getThresholdClass(form.contact
 </script>
 
 <template>
-    <div class="rounded-md border border-sidebar-border/70 p-4 dark:border-sidebar-border">
+    <div class="rounded-md border border-sidebar-border/70 p-4">
         <form class="space-y-4" @submit.prevent="handleSubmit">
             <PostFormField
                 :id="`${fieldIdPrefix}-name`"

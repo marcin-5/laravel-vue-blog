@@ -31,7 +31,7 @@ function submitCreate() {
 </script>
 
 <template>
-    <div class="rounded-md border border-sidebar-border/70 p-4 dark:border-sidebar-border">
+    <div class="rounded-md border border-sidebar-border/70 p-4">
         <h2 class="mb-3 text-lg font-semibold">{{ t('admin.categories.create_heading') }}</h2>
         <form class="flex flex-wrap items-end gap-3" @submit.prevent="submitCreate">
             <div>

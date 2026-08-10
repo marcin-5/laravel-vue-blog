@@ -18,7 +18,7 @@ defineProps<Props>();
 </script>
 
 <template>
-    <div class="rounded-md border border-sidebar-border/70 p-4 dark:border-sidebar-border">
+    <div class="rounded-md border border-sidebar-border/70 p-4">
         <div class="flex items-start justify-between gap-4">
             <div class="flex-1">
                 <slot name="header">

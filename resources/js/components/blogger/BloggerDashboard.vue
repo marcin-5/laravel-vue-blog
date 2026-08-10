@@ -25,7 +25,7 @@ defineProps<{
         </div>
         <BloggerStats v-if="blogStats" :stats="blogStats" />
         <StatsSkeleton v-else class="h-48" />
-        <div class="relative min-h-screen flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
+        <div class="relative min-h-screen flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min">
             <PlaceholderPattern />
         </div>
     </div>

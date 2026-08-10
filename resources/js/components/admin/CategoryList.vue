@@ -16,11 +16,11 @@ const sortedCategories = computed(() => [...props.categories].sort((a, b) => loc
 </script>
 
 <template>
-    <div class="rounded-md border border-sidebar-border/70 p-4 dark:border-sidebar-border">
+    <div class="rounded-md border border-sidebar-border/70 p-4">
         <h2 class="mb-3 text-lg font-semibold">{{ t('admin.categories.title') }}</h2>
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
-                <thead class="border-b border-sidebar-border/70 text-xs text-muted-foreground uppercase dark:border-sidebar-border">
+                <thead class="border-b border-sidebar-border/70 text-xs text-muted-foreground uppercase">
                     <tr>
                         <th>{{ t('admin.categories.table.name') }}</th>
                         <th>{{ t('admin.categories.table.slug') }}</th>

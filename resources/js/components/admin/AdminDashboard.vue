@@ -32,7 +32,7 @@ defineProps<{
             </div>
             <StatsSkeleton v-else class="aspect-video" />
         </div>
-        <div class="relative min-h-screen flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
+        <div class="relative min-h-screen flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min">
             <PlaceholderPattern />
         </div>
     </div>

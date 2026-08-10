@@ -28,11 +28,11 @@ function getVisibleColumns(columns: Column[]): Column[] {
 </script>
 
 <template>
-    <div class="rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border">
+    <div class="rounded-xl border border-sidebar-border/70 p-4">
         <h2 v-if="title" class="mb-3 text-lg font-semibold">{{ title }}</h2>
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
-                <thead class="border-b border-sidebar-border/70 text-xs text-muted-foreground uppercase dark:border-sidebar-border">
+                <thead class="border-b border-sidebar-border/70 text-xs text-muted-foreground uppercase">
                     <tr>
                         <th v-for="col in getVisibleColumns(columns)" :key="col.key" class="py-2 pr-4">
                             {{ col.label }}
@@ -40,7 +40,7 @@ function getVisibleColumns(columns: Column[]): Column[] {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="row in data" :key="row[rowKey]" class="border-b border-sidebar-border/70 last:border-b-0 dark:border-sidebar-border">
+                    <tr v-for="row in data" :key="row[rowKey]" class="border-b border-sidebar-border/70 last:border-b-0">
                         <td v-for="col in getVisibleColumns(columns)" :key="col.key" class="py-2 pr-4">
                             <div class="flex items-center gap-2">
                                 <span>{{ row[col.key] }}</span>

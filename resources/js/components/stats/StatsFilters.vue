@@ -80,7 +80,7 @@ const translatedBlogOptions = computed(() => [
 </script>
 
 <template>
-    <div class="flex flex-wrap items-end gap-3 rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border">
+    <div class="flex flex-wrap items-end gap-3 rounded-xl border border-sidebar-border/70 p-4">
         <FilterSelect v-if="showRangeFilter" v-model="model.range" :options="ranges" :label="t('stats.filters.range')" />
 
         <FilterSelect v-model="model.sort" :options="translatedSortOptions" :label="t('stats.filters.sort')" />

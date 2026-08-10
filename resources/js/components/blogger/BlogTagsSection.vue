@@ -85,7 +85,7 @@ onMounted(loadTags);
 </script>
 
 <template>
-    <div class="rounded-md border border-sidebar-border/70 p-4 dark:border-sidebar-border">
+    <div class="rounded-md border border-sidebar-border/70 p-4">
         <h3 class="mb-2 text-sm font-semibold">{{ $t('blogger.tags.section_title') }}</h3>
         <div class="mt-3 flex flex-wrap gap-2">
             <div v-for="tag in tags" :key="tag.id" class="flex items-center gap-1 rounded bg-muted px-2 py-1">

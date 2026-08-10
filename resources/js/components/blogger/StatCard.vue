@@ -9,7 +9,7 @@ defineProps<{
 </script>
 
 <template>
-    <div class="rounded-xl border border-sidebar-border/70 bg-sidebar p-4 shadow-sm dark:border-sidebar-border">
+    <div class="rounded-xl border border-sidebar-border/70 bg-sidebar p-4 shadow-sm">
         <div class="flex gap-2">
             <component :is="icon" class="h-4 w-4 text-muted-foreground" />
             <span class="align-top text-xs font-medium tracking-wider text-muted-foreground uppercase">{{ title }}</span>

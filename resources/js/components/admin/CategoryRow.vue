@@ -102,7 +102,7 @@ watch(
 </script>
 
 <template>
-    <tr class="border-b border-sidebar-border/70 last:border-b-0 dark:border-sidebar-border">
+    <tr class="border-b border-sidebar-border/70 last:border-b-0">
         <td class="py-2 pr-4">
             <div v-if="!isEditing">{{ localizedName(category.name) }}</div>
             <div v-else class="flex items-end gap-2">
