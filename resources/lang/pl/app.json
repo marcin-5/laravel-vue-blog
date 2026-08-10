@@ -12,6 +12,12 @@
         "direction": "Kierunek",
         "asc": "Rosnąco",
         "desc": "Malejąco",
+        "roles": {
+            "member": "Członek",
+            "contributor": "Współtwórca",
+            "moderator": "Moderator",
+            "maintainer": "Opiekun"
+        },
         "owner": "Właściciel",
         "email": "E-mail",
         "add": "Dodaj",

@@ -12,6 +12,12 @@
         "direction": "Direction",
         "asc": "Ascending",
         "desc": "Descending",
+        "roles": {
+            "member": "Member",
+            "contributor": "Contributor",
+            "moderator": "Moderator",
+            "maintainer": "Maintainer"
+        },
         "owner": "Owner",
         "email": "Email",
         "add": "Add",
