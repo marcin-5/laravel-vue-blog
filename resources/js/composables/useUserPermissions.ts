@@ -1,12 +1,7 @@
 import type { Ref } from 'vue';
+import type { Role, UserWithQuota } from '@/types/admin.types';
 
-export type Role = 'admin' | 'blogger' | 'user';
-
-export interface UserWithQuota {
-    id: number;
-    role: Role;
-    blog_quota: number | null;
-}
+export type { Role, UserWithQuota } from '@/types/admin.types';
 
 export interface UseUserPermissionsOptions {
     currentUserIsAdmin?: boolean;

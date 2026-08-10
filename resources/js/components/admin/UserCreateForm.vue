@@ -2,8 +2,9 @@
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { type Role, useUserPermissions } from '@/composables/useUserPermissions';
+import { useUserPermissions } from '@/composables/useUserPermissions';
 import { useForm } from '@inertiajs/vue3';
+import type { Role } from '@/types/admin.types';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -88,7 +89,7 @@ function submitCreate() {
             </div>
             <div>
                 <Select v-model="createForm.role">
-                    <SelectTrigger class="h-[34px] w-full">
+                    <SelectTrigger class="h-8.5 w-full">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
