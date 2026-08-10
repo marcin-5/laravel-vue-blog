@@ -78,6 +78,68 @@ class GroupMembersStoreTest extends TestCase
         ]);
     }
 
+    public function test_store_requires_an_email(): void
+    {
+        $owner = User::factory()->create(['role' => 'blogger']);
+        $group = Group::factory()->create(['user_id' => $owner->id]);
+
+        $response = $this->actingAs($owner)->post(route('blogger.groups.members.store', $group), [
+            'role' => GroupMember::ROLE_MEMBER,
+        ]);
+
+        $response->assertSessionHasErrors(['email']);
+    }
+
+    public function test_store_rejects_an_unknown_email(): void
+    {
+        $owner = User::factory()->create(['role' => 'blogger']);
+        $group = Group::factory()->create(['user_id' => $owner->id]);
+
+        $response = $this->actingAs($owner)->post(route('blogger.groups.members.store', $group), [
+            'email' => 'missing@example.com',
+            'role' => GroupMember::ROLE_MEMBER,
+        ]);
+
+        $response->assertSessionHasErrors(['email']);
+    }
+
+    public function test_store_rejects_an_invalid_role(): void
+    {
+        $owner = User::factory()->create(['role' => 'blogger']);
+        $group = Group::factory()->create(['user_id' => $owner->id]);
+        $userToAdd = User::factory()->create();
+
+        $response = $this->actingAs($owner)->post(route('blogger.groups.members.store', $group), [
+            'email' => $userToAdd->email,
+            'role' => 'invalid-role',
+        ]);
+
+        $response->assertSessionHasErrors(['role']);
+        $this->assertDatabaseMissing('group_user', [
+            'group_id' => $group->id,
+            'user_id' => $userToAdd->id,
+        ]);
+    }
+
+    public function test_update_rejects_an_invalid_role(): void
+    {
+        $owner = User::factory()->create(['role' => 'blogger']);
+        $group = Group::factory()->create(['user_id' => $owner->id]);
+        $member = User::factory()->create();
+        $group->members()->attach($member->id, ['role' => GroupMember::ROLE_MEMBER]);
+
+        $response = $this->actingAs($owner)->patch(route('blogger.groups.members.update', [$group, $member]), [
+            'role' => 'invalid-role',
+        ]);
+
+        $response->assertSessionHasErrors(['role']);
+        $this->assertDatabaseHas('group_user', [
+            'group_id' => $group->id,
+            'user_id' => $member->id,
+            'role' => GroupMember::ROLE_MEMBER,
+        ]);
+    }
+
     public function test_owner_can_update_member_role(): void
     {
         $owner = User::factory()->create(['role' => 'blogger']);
@@ -127,7 +189,8 @@ class GroupMembersStoreTest extends TestCase
             ]);
         $responseUpdate->assertForbidden();
 
-        $responseDelete = $this->actingAs($otherUser)->delete(route('blogger.groups.members.destroy', [$group, $member]),
+        $responseDelete = $this->actingAs($otherUser)->delete(
+            route('blogger.groups.members.destroy', [$group, $member]),
         );
         $responseDelete->assertForbidden();
     }
