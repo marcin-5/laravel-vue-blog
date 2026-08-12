@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useStatsFilters } from '@/composables/useStatsFilters';
-import type { BlogOption, BlogRow, FilterState, PostRow, UserOption, VisitorRow } from '@/types/stats';
+import type { StatsPageProps } from '@/types/stats';
 import { useI18n } from 'vue-i18n';
 import BlogStats from './BlogStats.vue';
 import PostStats from './PostStats.vue';
@@ -8,33 +8,6 @@ import SpecialAudienceStats from './SpecialAudienceStats.vue';
 import AudienceStats from './AudienceStats.vue';
 
 const { t } = useI18n();
-
-export type StatsPageProps = {
-    filters: {
-        blog: FilterState;
-        post: FilterState;
-        visitor?: FilterState;
-        specialVisitor?: FilterState;
-    };
-    data: {
-        blogs: BlogRow[];
-        posts: PostRow[];
-        visitorsFromPage?: VisitorRow[];
-        visitorsFromSpecial?: VisitorRow[];
-    };
-    options: {
-        bloggers?: UserOption[];
-        blogOptions: BlogOption[];
-        postBlogOptions?: BlogOption[];
-        visitorBlogOptions?: BlogOption[];
-    };
-    config: {
-        routeName: string;
-        showBloggerFilter?: boolean;
-        showBloggerColumn?: boolean;
-        blogFilterLabel?: string;
-    };
-};
 
 const props = defineProps<StatsPageProps>();
 

@@ -1,5 +1,21 @@
 export type StatsRange = 'today' | 'week' | 'month' | 'half_year' | 'year' | 'lifetime';
 
+export type StatsGroupBy = 'visitor_id' | 'fingerprint';
+export type StatsVisitorType = 'all' | 'bots' | 'anonymous' | 'markdown';
+
+export interface StatsSortOption {
+    readonly value: string;
+    readonly label: string;
+}
+
+export interface StatsTableColumn {
+    key: string;
+    label: string;
+    visible?: boolean;
+    hasInfo?: boolean;
+    isDate?: boolean;
+}
+
 export type BlogRow = {
     blog_id: number;
     name: string;
@@ -40,8 +56,119 @@ export interface FilterState {
     size: number;
     blogger_id?: number | null;
     blog_id?: number | null;
-    group_by?: 'visitor_id' | 'fingerprint';
-    visitor_type?: 'all' | 'bots' | 'anonymous' | 'markdown';
+    group_by?: StatsGroupBy;
+    visitor_type?: StatsVisitorType;
+}
+
+export interface StatsQuery {
+    range: StatsRange;
+    sort: string;
+    size: number;
+    blogger_id?: number;
+    blog_id?: number;
+    posts_range: StatsRange;
+    posts_sort: string;
+    posts_size: number;
+    posts_blogger_id?: number;
+    posts_blog_id?: number;
+    visitors_range: StatsRange;
+    visitors_sort: string;
+    visitors_size: number;
+    visitors_group_by?: StatsGroupBy;
+    visitors_type?: StatsVisitorType;
+    visitors_blog_id?: number;
+    special_visitors_range: StatsRange;
+    special_visitors_sort: string;
+    special_visitors_size: number;
+    special_visitors_group_by?: StatsGroupBy;
+    special_visitors_type?: StatsVisitorType;
+    special_visitors_blog_id?: number;
+}
+
+export interface StatsFilterConfig {
+    bloggers?: readonly UserOption[];
+    blogOptions: readonly BlogOption[];
+    showBloggerFilter?: boolean;
+    showBlogFilter?: boolean;
+    showGroupByFilter?: boolean;
+    showVisitorTypeFilter?: boolean;
+    showRangeFilter?: boolean;
+    blogFilterLabel?: string;
+    sortOptions: readonly StatsSortOption[];
+}
+
+export interface StatsPageFilters {
+    blog: FilterState;
+    post: FilterState;
+    visitor?: FilterState;
+    specialVisitor?: FilterState;
+}
+
+export interface StatsPageData {
+    blogs: BlogRow[];
+    posts: PostRow[];
+    visitorsFromPage?: VisitorRow[];
+    visitorsFromSpecial?: VisitorRow[];
+}
+
+export interface StatsPageOptions {
+    bloggers?: UserOption[];
+    blogOptions: BlogOption[];
+    postBlogOptions?: BlogOption[];
+    visitorBlogOptions?: BlogOption[];
+}
+
+export interface StatsPageConfig {
+    routeName: string;
+    showBloggerFilter?: boolean;
+    showBloggerColumn?: boolean;
+    blogFilterLabel?: string;
+}
+
+export interface StatsPageProps {
+    filters: StatsPageFilters;
+    data: StatsPageData;
+    options: StatsPageOptions;
+    config: StatsPageConfig;
+}
+
+export interface StatsPageInertiaProps {
+    blogFilters: FilterState;
+    postFilters: FilterState;
+    visitorFilters: FilterState;
+    specialVisitorFilters: FilterState;
+    blogs: BlogRow[];
+    posts: PostRow[];
+    visitorsFromPage: VisitorRow[];
+    visitorsFromSpecial: VisitorRow[];
+    bloggers?: UserOption[] | null;
+    blogOptions: BlogOption[];
+    postBlogOptions?: BlogOption[];
+    visitorBlogOptions?: BlogOption[];
+}
+
+export function mapStatsPageProps(props: StatsPageInertiaProps, config: StatsPageConfig): StatsPageProps {
+    return {
+        config,
+        data: {
+            blogs: props.blogs,
+            posts: props.posts,
+            visitorsFromPage: props.visitorsFromPage,
+            visitorsFromSpecial: props.visitorsFromSpecial,
+        },
+        filters: {
+            blog: props.blogFilters,
+            post: props.postFilters,
+            visitor: props.visitorFilters,
+            specialVisitor: props.specialVisitorFilters,
+        },
+        options: {
+            bloggers: props.bloggers ?? undefined,
+            blogOptions: props.blogOptions,
+            postBlogOptions: props.postBlogOptions,
+            visitorBlogOptions: props.visitorBlogOptions,
+        },
+    };
 }
 
 export interface BlogStats {
