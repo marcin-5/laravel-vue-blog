@@ -60,7 +60,7 @@ export interface FilterState {
     visitor_type?: StatsVisitorType;
 }
 
-export interface StatsQuery {
+export interface StatsQuery extends Record<string, string | number | undefined> {
     range: StatsRange;
     sort: string;
     size: number;
