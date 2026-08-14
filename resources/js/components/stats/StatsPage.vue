@@ -12,13 +12,10 @@ const {
     postState,
     visitorState,
     specialVisitorState,
-    blogOptions,
-    postBlogOptions,
-    visitorBlogOptions,
-    blogFilterLabel,
-    postBlogFilterLabel,
-    visitorBlogFilterLabel,
-    specialVisitorBlogFilterLabel,
+    blogFilterConfig,
+    postFilterConfig,
+    visitorFilterConfig,
+    specialVisitorFilterConfig,
 } = useStatsPage(props);
 </script>
 
@@ -26,34 +23,18 @@ const {
     <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
         <BlogStats
             v-model="blogState"
-            :blog-filter-label="blogFilterLabel"
-            :blog-options="blogOptions"
-            :bloggers="props.options.bloggers"
+            :filter-config="blogFilterConfig"
             :data="props.data.blogs"
             :show-blogger-column="props.config.showBloggerColumn"
-            :show-blogger-filter="props.config.showBloggerFilter"
         />
 
-        <PostStats
-            v-model="postState"
-            :blog-filter-label="postBlogFilterLabel"
-            :blog-options="postBlogOptions"
-            :bloggers="props.options.bloggers"
-            :data="props.data.posts"
-            :show-blogger-filter="props.config.showBloggerFilter"
-        />
+        <PostStats v-model="postState" :filter-config="postFilterConfig" :data="props.data.posts" />
 
-        <AudienceStats
-            v-model="visitorState"
-            :blog-filter-label="visitorBlogFilterLabel"
-            :blog-options="visitorBlogOptions"
-            :data="props.data.visitorsFromPage ?? []"
-        />
+        <AudienceStats v-model="visitorState" :filter-config="visitorFilterConfig" :data="props.data.visitorsFromPage ?? []" />
 
         <SpecialAudienceStats
             v-model="specialVisitorState"
-            :blog-filter-label="specialVisitorBlogFilterLabel"
-            :blog-options="visitorBlogOptions"
+            :filter-config="specialVisitorFilterConfig"
             :data="props.data.visitorsFromSpecial ?? []"
         />
     </div>

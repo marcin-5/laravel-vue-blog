@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import { POST_SORT_OPTIONS } from '@/constants/stats';
-import type { BlogOption, FilterState, PostRow, UserOption } from '@/types/stats';
+import type { FilterState, PostRow, StatsFilterConfig } from '@/types/stats';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import StatsFilters from './StatsFilters.vue';
@@ -9,17 +8,10 @@ import StatsTable from './StatsTable.vue';
 
 interface Props {
     data: PostRow[];
-    blogOptions: BlogOption[];
-    bloggers?: UserOption[];
-    showBloggerFilter?: boolean;
-    blogFilterLabel?: string;
+    filterConfig: StatsFilterConfig;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-    showBloggerFilter: false,
-    blogFilterLabel: undefined,
-    bloggers: () => [],
-});
+defineProps<Props>();
 
 const model = defineModel<FilterState>({ required: true });
 const { t } = useI18n();
@@ -36,14 +28,7 @@ const columns = computed(() => [
 <template>
     <StatsSection :title="t('stats.sections.post_views')">
         <template #filters>
-            <StatsFilters
-                v-model="model"
-                :blog-filter-label="blogFilterLabel"
-                :blog-options="blogOptions"
-                :bloggers="bloggers"
-                :show-blogger-filter="showBloggerFilter"
-                :sort-options="[...POST_SORT_OPTIONS]"
-            />
+            <StatsFilters v-model="model" :config="filterConfig" />
         </template>
         <StatsTable :columns="columns" :data="data" row-key="post_id" />
     </StatsSection>
