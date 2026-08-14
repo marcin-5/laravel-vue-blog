@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { Button } from '@/components/ui/button';
 import type { HTMLAttributes } from 'vue';
 
 interface Emits {
@@ -7,7 +8,7 @@ interface Emits {
 
 const props = defineProps<{
     label: string;
-    selected?: boolean;
+    selected: boolean;
     class?: HTMLAttributes['class'];
 }>();
 
@@ -15,7 +16,7 @@ const emit = defineEmits<Emits>();
 </script>
 
 <template>
-    <button
+    <Button
         :class="[
             'rounded-full border px-3 py-1 text-sm transition-colors',
             selected
@@ -23,9 +24,12 @@ const emit = defineEmits<Emits>();
                 : 'border-gray-300 bg-mist-50 text-gray-700 dark:border-gray-600 dark:bg-slate-800 dark:text-slate-200',
             props.class,
         ]"
+        :aria-pressed="selected"
+        variant="ghost"
+        class="h-auto"
         type="button"
         @click="emit('click')"
     >
         {{ label }}
-    </button>
+    </Button>
 </template>

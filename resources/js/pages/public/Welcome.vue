@@ -4,9 +4,10 @@ import BlogsGrid from '@/components/blog/BlogsGrid.vue';
 import CategoriesFilter from '@/components/blog/CategoriesFilter.vue';
 import NoBlogs from '@/components/blog/NoBlogs.vue';
 import UserGroupsList from '@/components/blog/UserGroupsList.vue';
+import { useWelcomeCategoryFilter } from '@/composables/useWelcomeCategoryFilter';
+import { useWelcomeSlogan } from '@/composables/useWelcomeSlogan';
 import PublicHomeLayout from '@/layouts/PublicHomeLayout.vue';
 import type { BlogItem, CategoryItem } from '@/types/blog.types';
-import { router, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -17,43 +18,13 @@ const props = defineProps<{
     locale?: string;
 }>();
 
-const { t, tm } = useI18n();
-const page = usePage();
-
 const selected = computed<number[]>(() => props.selectedCategoryIds ?? []);
+const { t } = useI18n();
+const { slogan } = useWelcomeSlogan();
+const { toggleCategory: navigateCategory, clearFilter } = useWelcomeCategoryFilter();
 
-// Make motto selection reactive to page URL to ensure it recalculates on navigation
-const randomSlogan = computed(() => {
-    // Use current URL as dependency to trigger re-computation on navigation
-    const currentUrl = page.url;
-    const slogans = tm('slogans') as string[];
-
-    // Create a seed from the URL to ensure deterministic yet varied selection per page visit
-    // Using URL length and random to pick different motto on each navigation
-    const urlSeed = currentUrl.length + Math.random();
-    return slogans[Math.floor(urlSeed * slogans.length) % slogans.length] || '';
-});
-
-function toggleCategory(id: number) {
-    const set = new Set(selected.value);
-    if (set.has(id)) set.delete(id);
-    else set.add(id);
-    const ids = Array.from(set.values());
-
-    const query: Record<string, any> = {};
-    if (ids.length > 0) {
-        query.categories = ids.join(',');
-    }
-
-    router.get('/', query, {
-        preserveScroll: true,
-        preserveState: true,
-        replace: true,
-    });
-}
-
-function clearFilter() {
-    router.get('/', {}, { preserveScroll: true, preserveState: true, replace: true });
+function toggleCategory(categoryId: number): void {
+    navigateCategory(selected.value, categoryId);
 }
 </script>
 
@@ -61,7 +32,7 @@ function clearFilter() {
     <PublicHomeLayout>
         <div class="mb-12 text-center">
             <AppLogo />
-            <p class="mt-4 font-slogan text-lg opacity-80 sm:text-xl md:text-2xl dark:text-white">— {{ randomSlogan }} —</p>
+            <p class="mt-4 font-slogan text-lg opacity-80 sm:text-xl md:text-2xl dark:text-white">— {{ slogan }} —</p>
         </div>
 
         <!-- Groups list -->
