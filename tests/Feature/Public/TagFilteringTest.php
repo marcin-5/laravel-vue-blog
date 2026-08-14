@@ -28,12 +28,12 @@ it('lists only posts assigned to the given tag within the blog', function () {
     $response->assertOk();
     $response->assertInertia(fn(Assert $page) => $page
         ->component('public/blog/Landing')
-        ->has('activeTag', fn(Assert $a) => $a
+        ->has('listing.activeTag', fn(Assert $a) => $a
             ->where('name', 'Laravel')
             ->etc(),
         )
-        ->has('posts', 2)
-        ->has('pagination')
+        ->has('listing.posts', 2)
+        ->has('listing.pagination')
         ->where('seo.canonicalUrl', getBlogUrl($blog, "/tags/$tag->slug")),
     );
 });

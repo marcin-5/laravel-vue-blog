@@ -17,10 +17,10 @@ it('renders the contact page for a published blog', function () {
         ->component('public/blog/Contact')
         ->has('blog')
         ->has('seo')
-        ->has('navigation')
-        ->has('footerHtml')
+        ->has('chrome.navigation')
+        ->has('chrome.footerHtml')
         ->has('submitUrl')
-        ->where('recipientName', 'Blog Owner')
+        ->where('recipientName', 'Blog Owner'),
     );
 });
 
@@ -53,8 +53,8 @@ it('submits the contact form and sends email to blog owner', function () {
 
     Mail::assertSent(ContactMessageMail::class, function ($mail) use ($owner, $data) {
         return $mail->hasTo($owner->email) &&
-               $mail->data['email'] === $data['email'] &&
-               $mail->data['message'] === $data['message'];
+            $mail->data['email'] === $data['email'] &&
+            $mail->data['message'] === $data['message'];
     });
 });
 
@@ -62,7 +62,7 @@ it('validates contact form submission on blog subdomain', function () {
     $owner = User::factory()->create();
     $blog = Blog::factory()->for($owner)->create(['is_published' => true]);
 
-    $response = $this->post(getBlogUrl($blog, '/contact'), []);
+    $response = $this->post(getBlogUrl($blog, '/contact'));
 
     $response->assertSessionHasErrors(['name', 'email', 'subject', 'message']);
 });

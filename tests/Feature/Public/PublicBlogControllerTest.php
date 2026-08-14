@@ -30,13 +30,13 @@ it('returns 200 for published blog on landing page and sets locale', function ()
     $response->assertInertia(fn(Assert $page) => $page
         ->component('public/blog/Landing')
         ->has('blog')
-        ->has('posts')
+        ->has('listing.posts')
         ->has('seo')
-        ->has('pagination')
-        ->has('navigation')
+        ->has('listing.pagination')
+        ->has('chrome.navigation')
         ->has('landingHtml')
-        ->has('footerHtml')
-        ->where('locale', 'pl')
+        ->has('chrome.footerHtml')
+        ->where('chrome.locale', 'pl')
         ->loadDeferredProps(fn(Assert $reload) => $reload
             ->has('viewStats'),
         ),
@@ -78,7 +78,7 @@ it('returns 404 for unpublished blog on post page', function () {
         'visibility' => Post::VIS_PUBLIC,
     ]);
 
-    $response = $this->get(getBlogUrl($blog, "/{$post->slug}"));
+    $response = $this->get(getBlogUrl($blog, "/$post->slug"));
 
     $response->assertNotFound();
 });
@@ -91,7 +91,7 @@ it('returns 404 for unpublished post on public blog', function () {
         'published_at' => null,
     ]);
 
-    $response = $this->get(getBlogUrl($blog, "/{$post->slug}"));
+    $response = $this->get(getBlogUrl($blog, "/$post->slug"));
 
     $response->assertNotFound();
 });
@@ -110,7 +110,7 @@ it('returns 200 for published post on published blog and checks sidebar position
         'visibility' => Post::VIS_PUBLIC,
     ]);
 
-    $response = $this->get(getBlogUrl($blog, "/{$post->slug}"));
+    $response = $this->get(getBlogUrl($blog, "/$post->slug"));
 
     $response->assertSuccessful();
     expect(App::getLocale())->toBe('en');
@@ -119,12 +119,12 @@ it('returns 200 for published post on published blog and checks sidebar position
         ->component('public/blog/Post')
         ->has('blog')
         ->has('post')
-        ->has('posts')
-        ->has('pagination')
+        ->has('listing.posts')
+        ->has('listing.pagination')
         ->has('seo')
-        ->has('navigation')
-        ->has('sidebarPosition')
-        ->where('sidebarPosition', 'left')
+        ->has('chrome.navigation')
+        ->has('chrome.sidebarPosition')
+        ->where('chrome.sidebarPosition', 'left')
         ->loadDeferredProps(fn(Assert $reload) => $reload
             ->has('viewStats'),
         ),
@@ -149,7 +149,7 @@ it('uses seo_title for post when available and falls back to title', function ()
 
     // With seo_title set
     $this
-        ->get(getBlogUrl($blog, "/{$post->slug}"))
+        ->get(getBlogUrl($blog, "/$post->slug"))
         ->assertInertia(fn(Assert $page) => $page
             ->where('seo.title', 'SEO Optimized Title'),
         );
@@ -158,7 +158,7 @@ it('uses seo_title for post when available and falls back to title', function ()
     $post->update(['seo_title' => null]);
 
     $this
-        ->get(getBlogUrl($blog, "/{$post->slug}"))
+        ->get(getBlogUrl($blog, "/$post->slug"))
         ->assertInertia(fn(Assert $page) => $page
             ->where('seo.title', 'Original Title - ' . $blog->name),
         );
@@ -181,12 +181,12 @@ it('ensures pagination on post page points to blog landing page', function () {
 
     $post = $blog->posts()->first();
 
-    $response = $this->get(getBlogUrl($blog, "/{$post->slug}"));
+    $response = $this->get(getBlogUrl($blog, "/$post->slug"));
 
     $response->assertSuccessful();
 
     $response->assertInertia(fn(Assert $page) => $page
-        ->where('pagination.nextUrl', function ($url) use ($blog) {
+        ->where('listing.pagination.nextUrl', function ($url) use ($blog) {
             $expected = getBlogUrl($blog) . '?page=2';
             return $url === $expected;
         }),

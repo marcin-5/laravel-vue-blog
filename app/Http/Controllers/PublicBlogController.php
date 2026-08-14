@@ -3,16 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Actions\SubmitContactFormAction;
+use App\Builders\PublicBlogPagePayloadBuilder;
 use App\Builders\PublicBlogSeoBuilder;
 use App\Http\Controllers\Concerns\FormatsDatesForLocale;
-use App\Http\Controllers\Concerns\FormatsPaginator;
 use App\Http\Controllers\Concerns\HandlesViewStats;
+use App\Http\Middleware\SetLocale;
 use App\Http\Requests\ContactSubmitRequest;
 use App\Http\Resources\PublicBlogDetailResource;
 use App\Http\Resources\PublicBlogResource;
 use App\Http\Resources\PublicPostDetailResource;
-use App\Http\Resources\PublicPostResource;
-use App\Http\Resources\TagResource;
 use App\Models\Blog;
 use App\Models\Post;
 use App\Models\Tag;
@@ -22,6 +21,7 @@ use App\Services\MarkdownService;
 use App\Services\SeoService;
 use App\Services\StatsService;
 use App\Services\TranslationService;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -30,12 +30,13 @@ use Inertia\Response;
 
 class PublicBlogController extends BasePublicController
 {
-    use FormatsDatesForLocale, FormatsPaginator, HandlesViewStats;
+    use FormatsDatesForLocale, HandlesViewStats;
 
     public function __construct(
         private readonly MarkdownService $markdown,
         private readonly SeoService $seo,
         private readonly PublicBlogSeoBuilder $seoBuilder,
+        private readonly PublicBlogPagePayloadBuilder $payloadBuilder,
         private readonly BlogNavigationService $navigation,
         private readonly StatsService $stats,
         private readonly SubmitContactFormAction $submitAction,
@@ -61,18 +62,15 @@ class PublicBlogController extends BasePublicController
         );
 
         return $this->renderWithTranslations('public/blog/Landing', 'blog', [
-            'locale' => app()->getLocale(),
             'blog' => new PublicBlogDetailResource($blog),
             'landingHtml' => $blog->landingPage?->content_html ?? '',
-            'footerHtml' => $this->markdown->convertToHtml($blog->footer),
-            'posts' => PublicPostResource::collection($paginator->items()),
-            'pagination' => $this->formatPagination($paginator),
-            'sidebar' => (int) ($blog->sidebar ?? 0),
-            'sidebarPosition' => $blog->sidebar_position,
-            'navigation' => $this->navigation->getLandingNavigation($blog),
+            'chrome' => $this->payloadBuilder->buildChrome(
+                $blog,
+                $this->navigation->getLandingNavigation($blog),
+            )->toArray(),
+            'listing' => $this->payloadBuilder->buildListing($blog, $paginator)->toArray(),
             'seo' => $this->seoBuilder->buildLandingSeo($blog, $paginator, $metaDescription)->toArray(),
             'viewStats' => Inertia::defer(fn() => $this->getViewStats(Blog::class, $blog->id, $blog->user_id)),
-            'allTags' => TagResource::collection($blog->tags->sortBy('name')->values()),
         ]);
     }
 
@@ -87,7 +85,7 @@ class PublicBlogController extends BasePublicController
         app()->setLocale($locale);
 
         config([
-            'app.name' => \App\Http\Middleware\SetLocale::getAppNameForLocale($locale),
+            'app.name' => SetLocale::getAppNameForLocale($locale),
         ]);
     }
 
@@ -96,9 +94,15 @@ class PublicBlogController extends BasePublicController
      * Route: /{blog:slug}/{post:slug}
      *
      * @throws ModelNotFoundException
+     * @throws FileNotFoundException
      */
-    public function post(Request $request, Blog $blog, string $mainDomain, string $postSlug, PublicBlogPostsQuery $query): Response
-    {
+    public function post(
+        Request $request,
+        Blog $blog,
+        string $mainDomain,
+        string $postSlug,
+        PublicBlogPostsQuery $query,
+    ): Response {
         $this->ensureBlogIsPublic($blog);
 
         $tag = null;
@@ -124,31 +128,31 @@ class PublicBlogController extends BasePublicController
         $metaDescription = $post->excerpt ?: $this->seo->generateMetaDescription($post->content_html);
 
         return $this->renderWithTranslations('public/blog/Post', 'post', [
-            'locale' => app()->getLocale(),
             'blog' => new PublicBlogResource($blog),
             'post' => new PublicPostDetailResource($post),
-            'posts' => PublicPostResource::collection($paginator->items()),
-            'pagination' => $this->formatPagination($paginator),
-            'sidebar' => (int) ($blog->sidebar ?? 0),
-            'sidebarPosition' => $blog->sidebar_position,
-            'navigation' => $this->navigation->getPostNavigation($blog, $post, $tag),
+            'chrome' => $this->payloadBuilder->buildChrome(
+                $blog,
+                $this->navigation->getPostNavigation($blog, $post, $tag),
+                withFooter: false,
+            )->toArray(),
+            'listing' => $this->payloadBuilder->buildListing($blog, $paginator, $tag)->toArray(),
             'seo' => $this->seoBuilder->buildPostSeo($blog, $post, $metaDescription)->toArray(),
-            'activeTag' => $tag ? [
-                'id' => $tag->id,
-                'name' => $tag->name,
-                'slug' => $tag->slug,
-            ] : null,
             'viewStats' => Inertia::defer(fn() => $this->getViewStats(Post::class, $post->id, $blog->user_id)),
-            'allTags' => TagResource::collection($blog->tags->sortBy('name')->values()),
         ]);
     }
 
     /**
      * Show posts filtered by tag within a blog.
      * Route: /{blog:slug}/tags/{tag:slug}
+     * @throws FileNotFoundException
      */
-    public function tag(Request $request, Blog $blog, string $mainDomain, Tag $tag, PublicBlogPostsQuery $query): Response
-    {
+    public function tag(
+        Request $request,
+        Blog $blog,
+        string $mainDomain,
+        Tag $tag,
+        PublicBlogPostsQuery $query,
+    ): Response {
         $this->ensureBlogIsPublic($blog);
 
         // Ensure tag belongs to the same blog
@@ -164,29 +168,22 @@ class PublicBlogController extends BasePublicController
         );
 
         return $this->renderWithTranslations('public/blog/Landing', 'blog', [
-            'locale' => app()->getLocale(),
             'blog' => new PublicBlogDetailResource($blog),
             'landingHtml' => $blog->landingPage?->content_html ?? '',
-            'footerHtml' => $this->markdown->convertToHtml($blog->footer),
-            'posts' => PublicPostResource::collection($paginator->items()),
-            'pagination' => $this->formatPagination($paginator),
-            'sidebar' => (int) ($blog->sidebar ?? 0),
-            'sidebarPosition' => $blog->sidebar_position,
-            'navigation' => $this->navigation->getLandingNavigation($blog, $tag),
+            'chrome' => $this->payloadBuilder->buildChrome(
+                $blog,
+                $this->navigation->getLandingNavigation($blog, $tag),
+            )->toArray(),
+            'listing' => $this->payloadBuilder->buildListing($blog, $paginator, $tag)->toArray(),
             'seo' => $this->seoBuilder->buildLandingSeo($blog, $paginator, $metaDescription, $tag)->toArray(),
-            'activeTag' => [
-                'id' => $tag->id,
-                'name' => $tag->name,
-                'slug' => $tag->slug,
-            ],
             'viewStats' => Inertia::defer(fn() => $this->getViewStats(Blog::class, $blog->id, $blog->user_id)),
-            'allTags' => TagResource::collection($blog->tags->sortBy('name')->values()),
         ]);
     }
 
     /**
      * Show the about page for a blog.
      * Route: /about
+     * @throws FileNotFoundException
      */
     public function about(Request $request, Blog $blog, string $mainDomain): Response
     {
@@ -194,20 +191,19 @@ class PublicBlogController extends BasePublicController
         $blog->load(['landingPage', 'user']);
 
         return $this->renderWithTranslations('public/blog/About', 'about', [
-            'locale' => app()->getLocale(),
             'blog' => new PublicBlogDetailResource($blog),
-            'footerHtml' => $this->markdown->convertToHtml($blog->footer),
-            'sidebar' => (int) ($blog->sidebar ?? 0),
-            'sidebarPosition' => $blog->sidebar_position,
-            'navigation' => $this->navigation->getLandingNavigation($blog),
+            'chrome' => $this->payloadBuilder->buildChrome(
+                $blog,
+                $this->navigation->getLandingNavigation($blog),
+            )->toArray(),
             'seo' => $this->seoBuilder->buildAboutSeo($blog)->toArray(),
-            'allTags' => TagResource::collection($blog->tags->sortBy('name')->values()),
         ]);
     }
 
     /**
      * Show the contact page for a blog.
      * Route: /contact
+     * @throws FileNotFoundException
      */
     public function contact(Request $request, Blog $blog, string $mainDomain): Response
     {
@@ -215,14 +211,12 @@ class PublicBlogController extends BasePublicController
         $blog->load(['landingPage', 'user']);
 
         return $this->renderWithTranslations('public/blog/Contact', 'contact', [
-            'locale' => app()->getLocale(),
             'blog' => new PublicBlogDetailResource($blog),
-            'footerHtml' => $this->markdown->convertToHtml($blog->footer),
-            'sidebar' => (int) ($blog->sidebar ?? 0),
-            'sidebarPosition' => $blog->sidebar_position,
-            'navigation' => $this->navigation->getLandingNavigation($blog),
+            'chrome' => $this->payloadBuilder->buildChrome(
+                $blog,
+                $this->navigation->getLandingNavigation($blog),
+            )->toArray(),
             'seo' => $this->seoBuilder->buildContactSeo($blog)->toArray(),
-            'allTags' => TagResource::collection($blog->tags->sortBy('name')->values()),
             'recipientName' => $blog->user->name,
             'submitUrl' => route('blog.public.contact.submit', ['blog' => $blog->slug, 'mainDomain' => $mainDomain]),
         ]);

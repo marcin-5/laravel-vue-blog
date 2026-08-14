@@ -88,8 +88,8 @@ class DomainLinkTest extends TestCase
             ->get('http://polski-blog.' . $this->domain)
             ->assertStatus(200)
             ->assertInertia(fn($page) => $page
-                ->has('posts', 1)
-                ->where('posts.0.slug', 'polski-post'),
+                ->has('listing.posts', 1)
+                ->where('listing.posts.0.slug', 'polski-post'),
             );
 
         // Verify that route() helper generates the correct absolute URL for the Polish domain
@@ -129,8 +129,8 @@ class DomainLinkTest extends TestCase
             ->get('http://english-blog.' . $this->domainSecondary)
             ->assertStatus(200)
             ->assertInertia(fn($page) => $page
-                ->has('posts', 1)
-                ->where('posts.0.slug', 'english-post'),
+                ->has('listing.posts', 1)
+                ->where('listing.posts.0.slug', 'english-post'),
             );
 
         // Test context for English domain - route() should point to the English domain
@@ -144,7 +144,7 @@ class DomainLinkTest extends TestCase
         );
     }
 
-    private function prepareForDomain(string $domain)
+    private function prepareForDomain(string $domain): void
     {
         // This simulates a request to the domain to set the host in the current request context
         $this->get('http://' . $domain . '/_test/locale');

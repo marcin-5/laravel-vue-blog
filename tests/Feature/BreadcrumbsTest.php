@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Blog;
+use App\Models\Group;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -22,23 +23,25 @@ it('displays correct breadcrumb label and external flag based on domain', functi
     ]);
 
     // Test Polish blog
-    $this->get(getBlogUrl($plBlog))
+    $this
+        ->get(getBlogUrl($plBlog))
         ->assertInertia(fn(Assert $page) => $page
-            ->where('navigation.breadcrumbs.0.label', 'Osobliwy Blog')
-            ->where('navigation.breadcrumbs.0.is_external', true)
+            ->where('chrome.navigation.breadcrumbs.0.label', 'Osobliwy Blog')
+            ->where('chrome.navigation.breadcrumbs.0.is_external', true),
         );
 
     // Test English blog
-    $this->get(getBlogUrl($enBlog))
+    $this
+        ->get(getBlogUrl($enBlog))
         ->assertInertia(fn(Assert $page) => $page
-            ->where('navigation.breadcrumbs.0.label', 'Peculiar Matters')
-            ->where('navigation.breadcrumbs.0.is_external', true)
+            ->where('chrome.navigation.breadcrumbs.0.label', 'Peculiar Matters')
+            ->where('chrome.navigation.breadcrumbs.0.is_external', true),
         );
 });
 
 it('sets is_external to false when on main domain', function () {
     $user = User::factory()->create();
-    $group = \App\Models\Group::factory()->create([
+    $group = Group::factory()->create([
         'user_id' => $user->id,
         'is_published' => true,
         'slug' => 'test-group',
@@ -46,13 +49,14 @@ it('sets is_external to false when on main domain', function () {
 
     // Explicitly set the host to main domain to test non-external breadcrumb
     $domain = config('app.domain');
-    $url = "http://{$domain}/_/{$group->slug}";
+    $url = "http://$domain/_/$group->slug";
 
-    $this->actingAs($user)
+    $this
+        ->actingAs($user)
         ->get($url)
         ->assertOk()
         ->assertInertia(fn(Assert $page) => $page
-            ->where('navigation.breadcrumbs.0.is_external', false)
+            ->where('navigation.breadcrumbs.0.is_external', false),
         );
 });
 
@@ -66,10 +70,11 @@ it('separates navigation cache based on domain status (internal vs external)', f
 
     // 1. Visit blog on subdomain - should cache with is_external = true
     $urlSubdomain = 'http://' . $blog->slug . '.' . config('app.domain');
-    $this->get($urlSubdomain)
+    $this
+        ->get($urlSubdomain)
         ->assertInertia(fn(Assert $page) => $page
-            ->where('navigation.breadcrumbs.0.label', 'Osobliwy Blog')
-            ->where('navigation.breadcrumbs.0.is_external', true)
+            ->where('chrome.navigation.breadcrumbs.0.label', 'Osobliwy Blog')
+            ->where('chrome.navigation.breadcrumbs.0.is_external', true),
         );
 
     // 2. Visit the same blog on main domain - should cache with is_external = false
@@ -77,23 +82,25 @@ it('separates navigation cache based on domain status (internal vs external)', f
     $urlMain = 'http://' . config('app.domain') . '/' . $blog->slug;
 
     // Using a group instead of blog to test main domain without redirects
-    $group = \App\Models\Group::factory()->create([
+    $group = Group::factory()->create([
         'user_id' => $owner->id,
         'is_published' => true,
         'slug' => 'cache-test-group',
     ]);
 
     $urlGroup = 'http://' . config('app.domain') . '/_/' . $group->slug;
-    $this->actingAs($owner)->get($urlGroup)
+    $this
+        ->actingAs($owner)->get($urlGroup)
         ->assertInertia(fn(Assert $page) => $page
-            ->where('navigation.breadcrumbs.0.is_external', false)
+            ->where('navigation.breadcrumbs.0.is_external', false),
         );
 
     // 3. Visit English version of the main domain for the same group
     $urlGroupEn = 'http://' . config('app.domain_secondary') . '/_/' . $group->slug;
-    $this->actingAs($owner)->get($urlGroupEn)
+    $this
+        ->actingAs($owner)->get($urlGroupEn)
         ->assertInertia(fn(Assert $page) => $page
             ->where('navigation.breadcrumbs.0.label', 'Peculiar Matters')
-            ->where('navigation.breadcrumbs.0.is_external', false)
+            ->where('navigation.breadcrumbs.0.is_external', false),
         );
 });
