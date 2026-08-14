@@ -19,6 +19,7 @@ export interface Blog {
     description?: string | null;
     descriptionHtml?: string | null;
     motto?: string | null;
+    displayedMotto?: string | null;
     about?: string | null;
     aboutHtml?: string | null;
     seo_title?: string | null;

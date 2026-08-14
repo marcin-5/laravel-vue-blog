@@ -6,7 +6,6 @@ import BlogLayout from '@/components/blog/BlogLayout.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import ContactForm from '@/components/ContactForm.vue';
 import type { Blog, Navigation, Tag } from '@/types/blog.types';
-import { selectRandomMotto } from '@/utils/stringUtils';
 import { hasContent } from '@/utils/stringUtils';
 import { computed } from 'vue';
 import { SEO } from '@/types';
@@ -27,7 +26,6 @@ const props = defineProps<{
 const { t } = useI18n();
 
 const hasFooterContent = computed(() => hasContent(props.footerHtml));
-const displayedMotto = selectRandomMotto(props.blog.motto);
 </script>
 
 <template>
@@ -37,7 +35,7 @@ const displayedMotto = selectRandomMotto(props.blog.motto);
         </template>
 
         <template #header>
-            <BlogHeader :blog="blog" :displayedMotto="displayedMotto" />
+            <BlogHeader :blog="blog" />
         </template>
 
         <template #content>

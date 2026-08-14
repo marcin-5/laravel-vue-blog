@@ -6,7 +6,7 @@ import BlogLayout from '@/components/blog/BlogLayout.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import type { Blog, Navigation, Tag } from '@/types/blog.types';
 import { handleContentClick } from '@/utils/domUtils';
-import { hasContent, selectRandomMotto } from '@/utils/stringUtils';
+import { hasContent } from '@/utils/stringUtils';
 import { computed } from 'vue';
 import { SEO } from '@/types';
 import { useI18n } from 'vue-i18n';
@@ -25,8 +25,6 @@ const { t } = useI18n();
 
 const hasAboutContent = computed(() => hasContent(props.blog.aboutHtml));
 const hasFooterContent = computed(() => hasContent(props.footerHtml));
-const displayedMotto = selectRandomMotto(props.blog.motto);
-
 </script>
 
 <template>
@@ -36,12 +34,12 @@ const displayedMotto = selectRandomMotto(props.blog.motto);
         </template>
 
         <template #header>
-            <BlogHeader :blog="blog" :displayedMotto="displayedMotto" />
+            <BlogHeader :blog="blog" />
         </template>
 
         <template #content>
             <div v-if="hasAboutContent" class="prose max-w-none text-primary" @click="handleContentClick" v-html="blog.aboutHtml" />
-            <div v-else class="text-center py-12 text-muted-foreground italic">
+            <div v-else class="py-12 text-center text-muted-foreground italic">
                 {{ t('about.empty') }}
             </div>
         </template>

@@ -9,7 +9,7 @@ import BorderDivider from '@/components/blog/BorderDivider.vue';
 import ScrollToPostsLink from '@/components/blog/ScrollToPostsLink.vue';
 import type { Blog, Navigation, PostItem, Tag, ViewStats } from '@/types/blog.types';
 import { handleContentClick } from '@/utils/domUtils';
-import { hasContent, selectRandomMotto } from '@/utils/stringUtils';
+import { hasContent } from '@/utils/stringUtils';
 import { computed } from 'vue';
 import { Pagination, SEO } from '@/types';
 
@@ -37,9 +37,6 @@ const props = defineProps<{
 const hasLandingContent = computed(() => hasContent(props.landingHtml));
 const hasFooterContent = computed(() => hasContent(props.footerHtml));
 
-// Motto selection
-const displayedMotto = selectRandomMotto(props.blog.motto);
-
 const postsListSpacingClass = computed(() => (hasLandingContent.value ? 'mt-6' : ''));
 </script>
 
@@ -50,7 +47,7 @@ const postsListSpacingClass = computed(() => (hasLandingContent.value ? 'mt-6' :
         </template>
 
         <template #header>
-            <BlogHeader :blog="blog" :displayedMotto="displayedMotto" :viewStats="viewStats" />
+            <BlogHeader :blog="blog" :viewStats="viewStats" />
             <ScrollToPostsLink :class="{ 'xl:hidden': sidebar }" />
         </template>
 

@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Services\MarkdownService;
+use App\Services\MottoSelector;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -26,6 +27,7 @@ class PublicBlogDetailResource extends JsonResource
             'main_domain' => $this->main_domain,
             'url' => $this->public_url,
             'motto' => $this->motto,
+            'displayedMotto' => app(MottoSelector::class)->select($this->motto),
             'theme' => $this->theme,
             'descriptionHtml' => $descriptionHtml,
             'aboutHtml' => $markdown->convertToHtml($this->about),

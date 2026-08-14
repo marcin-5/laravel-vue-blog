@@ -7,7 +7,6 @@ defineProps<{
         authorName?: string;
         authorEmail?: string;
     };
-    displayedMotto: string | null;
     viewStats?: ViewStats | null;
 }>();
 </script>
@@ -23,11 +22,11 @@ defineProps<{
             :markdown="viewStats?.markdown"
         />
         <p
-            v-if="displayedMotto"
+            v-if="blog.displayedMotto"
             :style="{ fontStyle: 'var(--blog-motto-style)', fontFamily: 'var(--blog-motto-font)', fontSize: 'calc(1rem * var(--blog-motto-scale))' }"
             class="mt-8 mb-8 max-w-11/12 text-right text-foreground opacity-80"
         >
-            {{ displayedMotto }}
+            {{ blog.displayedMotto }}
         </p>
     </header>
     <section>
