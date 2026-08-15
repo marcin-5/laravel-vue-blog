@@ -17,8 +17,20 @@ it('renders the welcome page', function () {
         ->has('categories')
         ->has('selectedCategoryIds')
         ->has('locale')
+        ->has('displayedSlogan')
         ->has('userGroups')
         ->has('seo')
+    );
+});
+
+it('exposes a displayed slogan from the current locale', function () {
+    $response = $this->get(route('home'));
+    $slogans = $response->inertiaProps('translations.messages.slogans');
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn(Assert $page) => $page
+        ->where('displayedSlogan', fn(?string $slogan) => in_array($slogan, $slogans, true))
+        ->etc(),
     );
 });
 

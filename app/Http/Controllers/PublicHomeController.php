@@ -7,6 +7,7 @@ use App\Builders\PublicHomeSeoBuilder;
 use App\Http\Requests\ContactSubmitRequest;
 use App\Queries\Public\WelcomeQuery;
 use App\Services\MarkdownService;
+use App\Services\SloganSelector;
 use App\Services\TranslationService;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\Request;
@@ -18,6 +19,7 @@ class PublicHomeController extends BasePublicController
         private readonly MarkdownService $markdown,
         private readonly PublicHomeSeoBuilder $seoBuilder,
         private readonly SubmitContactFormAction $submitAction,
+        private readonly SloganSelector $slogans,
         protected TranslationService $translations,
     ) {
         parent::__construct($translations);
@@ -48,6 +50,8 @@ class PublicHomeController extends BasePublicController
                 $messages,
                 $data['selectedCategoryIds'],
             )->toArray(),
+            'displayedSlogan' => $this->slogans->select(data_get($messages, 'slogans')),
+            'translations' => ['messages' => $messages],
         ]));
     }
 
