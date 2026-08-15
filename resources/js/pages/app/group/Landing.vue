@@ -62,7 +62,11 @@ const postsListTitle = computed(() => t('blog.posts_list.title'));
         </template>
 
         <template #header>
-            <PostHeader :locale="translations.locale" :modifiedTime="group.updated_at" :post="groupAsPost" :publishedTime="group.created_at" />
+            <PostHeader
+                :locale="translations.locale"
+                :post="groupAsPost"
+                :seo="{ publishedTime: group.created_at, modifiedTime: group.updated_at }"
+            />
             <BorderDivider v-if="!sidebar" class="mb-8" />
         </template>
 

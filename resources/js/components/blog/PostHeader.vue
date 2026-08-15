@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import ViewStatsComponent from '@/components/blog/ViewStats.vue';
+import type { SEO } from '@/types';
 import type { PostDetails, ViewStats } from '@/types/blog.types';
 import { formatDate, shouldShowUpdatedDate } from '@/utils/dateUtils';
 import { computed } from 'vue';
@@ -9,8 +10,7 @@ const props = defineProps<{
     post: PostDetails;
     viewStats?: ViewStats | null;
     locale?: string;
-    publishedTime?: string | null;
-    modifiedTime?: string | null;
+    seo?: Pick<SEO, 'publishedTime' | 'modifiedTime'> | null;
 }>();
 
 const { t } = useI18n();
@@ -19,8 +19,11 @@ const authorLabel = computed(() => t('blog.post.author', ''));
 const publishedLabel = computed(() => t('blog.post.published', 'Published:'));
 const updatedLabel = computed(() => t('blog.post.updated', 'Updated:'));
 
-const showUpdated = computed(() => shouldShowUpdatedDate(props.publishedTime, props.modifiedTime));
-const formattedUpdatedDate = computed(() => formatDate(props.modifiedTime, props.locale));
+const publishedTime = computed(() => props.seo?.publishedTime ?? null);
+const modifiedTime = computed(() => props.seo?.modifiedTime ?? null);
+
+const showUpdated = computed(() => shouldShowUpdatedDate(publishedTime.value, modifiedTime.value));
+const formattedUpdatedDate = computed(() => formatDate(modifiedTime.value, props.locale));
 </script>
 
 <template>
