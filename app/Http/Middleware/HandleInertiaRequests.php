@@ -56,6 +56,15 @@ class HandleInertiaRequests extends Middleware
                     ],
                 ]) : null,
             ],
+            'userGroups' => fn(): array => $request->user()?->groups()
+                ->select('groups.id', 'groups.name', 'groups.slug')
+                ->get()
+                ->map(fn($group): array => [
+                    'id' => $group->id,
+                    'name' => $group->name,
+                    'slug' => $group->slug,
+                ])
+                ->all() ?? [],
             'locale' => app()->getLocale(),
             'mainDomain' => $mainDomain = (string) collect([config('app.domain'), config('app.domain_secondary')])
                 ->first(fn($d) => $d && str_ends_with((string) $request->getHost(), (string) $d)),

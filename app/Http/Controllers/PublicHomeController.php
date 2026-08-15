@@ -33,15 +33,6 @@ class PublicHomeController extends BasePublicController
     {
         $data = $query->handle($request);
 
-        $data['userGroups'] = auth()->check()
-            ? auth()->user()->groups()->select('groups.id', 'groups.name', 'groups.slug')->get()
-                ->map(fn($group) => [
-                    'id' => $group->id,
-                    'name' => $group->name,
-                    'slug' => $group->slug,
-                ])
-            : [];
-
         $messages = $this->translations->getPageTranslations('home');
 
         return $this->renderWithTranslations('public/Welcome', 'home', array_merge($data, [

@@ -41,7 +41,7 @@ test('welcome page passes empty user groups array to logged-in users without gro
     );
 });
 
-test('welcome page does not pass user groups to guests', function () {
+test('welcome page passes an empty user groups array to guests', function () {
     $response = $this->get('/');
 
     $response->assertInertia(
