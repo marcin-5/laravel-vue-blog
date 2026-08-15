@@ -5,7 +5,6 @@ import CategoriesFilter from '@/components/blog/CategoriesFilter.vue';
 import NoBlogs from '@/components/blog/NoBlogs.vue';
 import UserGroupsList from '@/components/blog/UserGroupsList.vue';
 import { useWelcomeCategoryFilter } from '@/composables/useWelcomeCategoryFilter';
-import { useWelcomeSlogan } from '@/composables/useWelcomeSlogan';
 import PublicHomeLayout from '@/layouts/PublicHomeLayout.vue';
 import type { BlogItem, CategoryItem } from '@/types/blog.types';
 import { computed } from 'vue';
@@ -16,11 +15,11 @@ const props = defineProps<{
     categories: CategoryItem[];
     selectedCategoryIds?: number[];
     locale?: string;
+    displayedSlogan?: string | null;
 }>();
 
 const selected = computed<number[]>(() => props.selectedCategoryIds ?? []);
 const { t } = useI18n();
-const { slogan } = useWelcomeSlogan();
 const { toggleCategory: navigateCategory, clearFilter } = useWelcomeCategoryFilter();
 
 function toggleCategory(categoryId: number): void {
@@ -32,7 +31,7 @@ function toggleCategory(categoryId: number): void {
     <PublicHomeLayout>
         <div class="mb-12 text-center">
             <AppLogo />
-            <p class="mt-4 font-slogan text-lg opacity-80 sm:text-xl md:text-2xl dark:text-white">— {{ slogan }} —</p>
+            <p v-if="displayedSlogan" class="mt-4 font-slogan text-lg opacity-80 sm:text-xl md:text-2xl dark:text-white">— {{ displayedSlogan }} —</p>
         </div>
 
         <!-- Groups list -->

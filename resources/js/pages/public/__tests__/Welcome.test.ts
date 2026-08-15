@@ -1,7 +1,6 @@
 import type { BlogItem, CategoryItem } from '@/types/blog.types';
 import { mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { computed } from 'vue';
 import Welcome from '../Welcome.vue';
 
 const { clearFilter, navigateCategory } = vi.hoisted(() => ({
@@ -49,12 +48,6 @@ vi.mock('@/composables/useWelcomeCategoryFilter', () => ({
     }),
 }));
 
-vi.mock('@/composables/useWelcomeSlogan', () => ({
-    useWelcomeSlogan: () => ({
-        slogan: computed(() => 'A stable slogan'),
-    }),
-}));
-
 vi.mock('vue-i18n', () => ({
     useI18n: () => ({
         t: (key: string, fallback?: string) => fallback ?? key,
@@ -84,7 +77,7 @@ describe('Welcome.vue', () => {
 
     it('forwards page data and renders the non-empty blog state', () => {
         const wrapper = mount(Welcome, {
-            props: { blogs, categories, selectedCategoryIds: [2] },
+            props: { blogs, categories, selectedCategoryIds: [2], displayedSlogan: 'A stable slogan' },
         });
         const filter = wrapper.findComponent({ name: 'CategoriesFilter' });
 
@@ -96,6 +89,14 @@ describe('Welcome.vue', () => {
         });
         expect(wrapper.findComponent({ name: 'BlogsGrid' }).props('blogs')).toEqual(blogs);
         expect(wrapper.findComponent({ name: 'NoBlogs' }).exists()).toBe(false);
+    });
+
+    it('does not render a slogan when it is not provided', () => {
+        const wrapper = mount(Welcome, {
+            props: { blogs, categories },
+        });
+
+        expect(wrapper.text()).not.toContain('—');
     });
 
     it('uses the empty state when no blogs are provided', () => {
