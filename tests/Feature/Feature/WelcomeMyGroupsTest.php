@@ -20,12 +20,16 @@ test('welcome page passes user groups to logged-in users with groups', function 
         fn(Assert $page) => $page
             ->component('public/Welcome')
             ->has('userGroups', 2)
-            ->where('userGroups.0.id', $group1->id)
-            ->where('userGroups.0.name', $group1->name)
-            ->where('userGroups.0.slug', $group1->slug)
-            ->where('userGroups.1.name', $group2->name)
-            ->where('userGroups.1.slug', $group2->slug)
-            ->where('userGroups.1.id', $group2->id),
+            ->where('userGroups.0', [
+                'id' => $group1->id,
+                'name' => $group1->name,
+                'slug' => $group1->slug,
+            ])
+            ->where('userGroups.1', [
+                'id' => $group2->id,
+                'name' => $group2->name,
+                'slug' => $group2->slug,
+            ]),
     );
 });
 

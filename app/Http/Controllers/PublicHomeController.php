@@ -10,6 +10,7 @@ use App\Services\MarkdownService;
 use App\Services\SloganSelector;
 use App\Services\TranslationService;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Response;
 
@@ -32,10 +33,22 @@ class PublicHomeController extends BasePublicController
     public function welcome(Request $request, WelcomeQuery $query): Response
     {
         $data = $query->handle($request);
-
         $messages = $this->translations->getPageTranslations('home');
 
-        return $this->renderWithTranslations('public/Welcome', 'home', array_merge($data, [
+        return $this->renderWithTranslations('public/Welcome', 'home', array_merge($data, $this->buildWelcomeProps(
+            $data,
+            $messages,
+        )));
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @param array<string, mixed> $messages
+     * @return array<string, mixed>
+     */
+    private function buildWelcomeProps(array $data, array $messages): array
+    {
+        return [
             'seo' => $this->seoBuilder->buildWelcomeSeo(
                 $data['blogs'],
                 $messages,
@@ -43,7 +56,7 @@ class PublicHomeController extends BasePublicController
             )->toArray(),
             'displayedSlogan' => $this->slogans->select(data_get($messages, 'slogans')),
             'translations' => ['messages' => $messages],
-        ]));
+        ];
     }
 
     /**
@@ -86,7 +99,7 @@ class PublicHomeController extends BasePublicController
         ]);
     }
 
-    public function submit(ContactSubmitRequest $request)
+    public function submit(ContactSubmitRequest $request): JsonResponse
     {
         $this->submitAction->execute($request->validated());
 
