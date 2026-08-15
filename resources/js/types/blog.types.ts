@@ -3,6 +3,7 @@
 // Public blog types (from resources/js/types/blog.ts)
 import { useForm } from '@inertiajs/vue3';
 import type { Ref } from 'vue';
+import type { Pagination, SEO } from './index';
 
 export type BlogTheme = {
     light?: Record<string, string>;
@@ -84,6 +85,32 @@ export interface Navigation {
     isLandingPage?: boolean;
     isGroup?: boolean;
     breadcrumbs?: BreadcrumbItem[];
+}
+
+/** Layout-level data shared by every public blog page. */
+export interface BlogChrome {
+    locale: string;
+    sidebar: number;
+    sidebarPosition?: string | null;
+    navigation?: Navigation;
+    footerHtml?: string | null;
+}
+
+/** Posts listing shown in the sidebar/stacked area of public blog pages. */
+export interface PostListing {
+    posts: PostItem[];
+    pagination?: Pagination | null;
+    activeTag?: Pick<Tag, 'id' | 'name' | 'slug'> | null;
+    allTags?: Tag[];
+}
+
+/** Common Inertia props shared by public blog pages. */
+export interface PublicBlogPageProps {
+    blog: Blog;
+    chrome: BlogChrome;
+    listing?: PostListing | null;
+    seo?: SEO;
+    viewStats?: ViewStats | null;
 }
 
 export interface CategoryItem {
