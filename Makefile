@@ -135,12 +135,14 @@ COMPOSE_FILES_PROD = -f docker/docker-compose.yml -f docker/docker-compose.prod.
 DOCKER_PROJECT_NAME_PROD ?= docker
 # DOCKER_COMPOSE_PROD = docker compose --env-file .env -p $(PROJECT_NAME) $(COMPOSE_FILES_PROD)
 DOCKER_COMPOSE_PROD = docker compose --env-file .env -p $(DOCKER_PROJECT_NAME_PROD) $(COMPOSE_FILES_PROD)
+QUEUE_PAUSE_STATE_FILE ?= /tmp/laravel-blog-$(DOCKER_PROJECT_NAME_PROD)-queues-paused
 
 .PHONY: prod-up prod-down prod-restart prod-build prod-logs \
         prod-migrate prod-optimize prod-deploy prod-update prod-wait \
         prod-maintenance-on prod-maintenance-off prod-rebuild-pg-redis \
         prod-prune prod-versions prod-check-assets prod-logs-queue prod-logs-app \
-        prod-health-queue prod-queue-diag prod-indexnow
+        prod-health-queue prod-queue-diag prod-queue-pause-all \
+        prod-queue-continue-all prod-indexnow
 
 prod-up: ## Start production services
 	$(DOCKER_COMPOSE_PROD) up -d
@@ -172,6 +174,41 @@ prod-indexnow-logs: ## 📜 Show recent IndexNow API response logs from producti
 prod-queue-clear-logs: ## 🧹 Clear the queue worker log file
 	$(DOCKER_COMPOSE_PROD) exec -T queue sh -c '> /var/www/html/storage/logs/supervisor_queue.log'
 	@echo "✅ Queue log cleared."
+
+# `queue:pause --all` and `queue:continue --all` are not available in older
+# Laravel releases. Check the command and option before executing them so
+# production deployments remain compatible with older application images.
+prod-queue-pause-all: ## ⏸️ Pause processing on all production queues when supported
+	@if $(DOCKER_COMPOSE_PROD) exec -T queue php artisan queue:pause --all --help >/dev/null 2>&1; then
+		if $(DOCKER_COMPOSE_PROD) exec -T queue php artisan queue:pause --all; then
+			if touch "$(QUEUE_PAUSE_STATE_FILE)"; then
+				echo "✅ All production queues paused."
+			else
+				echo "❌ Could not record the queue pause state."; exit 1
+			fi
+		else
+			echo "❌ Failed to pause production queues."; exit 1
+		fi
+	else
+		echo "⚠️  queue:pause --all is not available in this Laravel version; skipping queue pause."
+	fi
+
+prod-queue-continue-all: ## ▶️ Resume processing on all production queues when supported
+	@if [ ! -f "$(QUEUE_PAUSE_STATE_FILE)" ]; then
+		echo "ℹ️  No queue pause recorded; skipping queue resume."
+	elif $(DOCKER_COMPOSE_PROD) exec -T queue php artisan queue:continue --all --help >/dev/null 2>&1; then
+		if $(DOCKER_COMPOSE_PROD) exec -T queue php artisan queue:continue --all; then
+			if rm -f "$(QUEUE_PAUSE_STATE_FILE)"; then
+				echo "✅ All production queues resumed."
+			else
+				echo "❌ Queues resumed, but the pause state could not be cleared."; exit 1
+			fi
+		else
+			echo "❌ Failed to resume production queues; pause state was preserved."; exit 1
+		fi
+	else
+		echo "⚠️  queue:continue --all is not available in this Laravel version; skipping queue resume."
+	fi
 
 prod-queue-diag: ## 🔍 Generate diagnostic data for queue worker debugging
 	@echo "=== Queue Worker Diagnostics ==="
@@ -327,6 +364,7 @@ prod-ready: ## Check if the app is ready to handle requests (PHP-FPM/DB)
 # Shorthand target to update code and restart selected services
 prod-update: ## Update code from Git and restart selected services with zero-502 maintenance
 	$(MAKE) prod-maintenance-on
+	$(MAKE) prod-queue-pause-all
 	git fetch --all
 	git pull --ff-only
 	@echo "🧹 Clearing old bootstrap cache to prevent worker stuck..."
@@ -368,11 +406,13 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 	@echo "✅ Production update complete."
 	@echo ""
 	@echo "If SSR still doesn't work, check your Dockerfile to ensure 'npm run build' creates bootstrap/ssr/"
+	$(MAKE) prod-queue-continue-all
 	$(MAKE) prod-maintenance-off
 
 # Shorthand target to update application data only
 prod-update-data: ## Pull code and rebuild only the app container for data/code updates
 	$(MAKE) prod-maintenance-on
+	$(MAKE) prod-queue-pause-all
 	git fetch --all
 	git pull --ff-only
 	@echo "🔨 Building fresh image for app service..."
@@ -383,6 +423,7 @@ prod-update-data: ## Pull code and rebuild only the app container for data/code 
 	$(MAKE) prod-ready
 	@echo "🧹 Clearing Laravel caches..."
 	-$(DOCKER_COMPOSE_PROD) exec -T app php artisan optimize:clear
+	$(MAKE) prod-queue-continue-all
 	$(MAKE) prod-maintenance-off
 	@echo "✅ Data update complete."
 
@@ -392,6 +433,7 @@ prod-update-data: ## Pull code and rebuild only the app container for data/code 
 prod-rebuild-pg-redis: ## Recreate postgres and redis services with zero-502 maintenance window
 	@echo "🛠️  Enabling maintenance mode..."
 	$(MAKE) prod-maintenance-on
+	$(MAKE) prod-queue-pause-all
 	@echo "⬇️  Pulling latest images for postgres and redis (if available)..."
 	$(DOCKER_COMPOSE_PROD) pull postgres redis || true
 	@echo "♻️  Recreating postgres and redis containers without touching other services..."
@@ -399,6 +441,7 @@ prod-rebuild-pg-redis: ## Recreate postgres and redis services with zero-502 mai
 	@echo "⏳ Giving services a moment to start..."
 	sleep 5
 	@echo "✅ Postgres and Redis have been recreated. Disabling maintenance mode..."
+	$(MAKE) prod-queue-continue-all
 	$(MAKE) prod-maintenance-off
 
 prod-prune: ## 🧹 Safe Docker cleanup (removes unused images/cache but keeps stopped containers)
