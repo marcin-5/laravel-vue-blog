@@ -2,17 +2,10 @@
 import BlogHeader from '@/components/blog/BlogHeader.vue';
 import PublicBlogShell from '@/components/blog/PublicBlogShell.vue';
 import ContactForm from '@/components/ContactForm.vue';
-import type { Blog, BlogChrome } from '@/types/blog.types';
-import { SEO } from '@/types';
+import type { PublicBlogContactPageProps } from '@/types/blog.types';
 import { useI18n } from 'vue-i18n';
 
-defineProps<{
-    blog: Blog;
-    chrome: BlogChrome;
-    seo?: SEO;
-    recipientName?: string;
-    submitUrl: string;
-}>();
+defineProps<PublicBlogContactPageProps>();
 
 const { t } = useI18n();
 </script>

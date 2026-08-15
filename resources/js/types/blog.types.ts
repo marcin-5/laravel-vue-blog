@@ -113,6 +113,23 @@ export interface PublicBlogPageProps {
     viewStats?: ViewStats | null;
 }
 
+export interface PublicBlogLandingPageProps extends PublicBlogPageProps {
+    landingHtml: string;
+    listing: PostListing;
+}
+
+export interface PublicBlogPostPageProps extends PublicBlogPageProps {
+    post: PostDetails;
+    listing: PostListing;
+}
+
+export type PublicBlogStaticPageProps = PublicBlogPageProps;
+
+export interface PublicBlogContactPageProps extends PublicBlogStaticPageProps {
+    recipientName?: string;
+    submitUrl: string;
+}
+
 export interface CategoryItem {
     id: number;
     name: string | Record<string, string>;

@@ -22,6 +22,7 @@ use App\Services\SeoService;
 use App\Services\StatsService;
 use App\Services\TranslationService;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -56,22 +57,7 @@ class PublicBlogController extends BasePublicController
 
         $paginator = $query->handle($blog);
 
-        $descriptionHtml = str_replace('-!-', '', $this->markdown->convertToHtml($blog->description));
-        $metaDescription = $blog->seo_description ?: $this->seo->generateMetaDescription(
-            $descriptionHtml ?: $blog->landingPage?->content_html ?: $blog->name,
-        );
-
-        return $this->renderWithTranslations('public/blog/Landing', 'blog', [
-            'blog' => new PublicBlogDetailResource($blog),
-            'landingHtml' => $blog->landingPage?->content_html ?? '',
-            'chrome' => $this->payloadBuilder->buildChrome(
-                $blog,
-                $this->navigation->getLandingNavigation($blog),
-            )->toArray(),
-            'listing' => $this->payloadBuilder->buildListing($blog, $paginator)->toArray(),
-            'seo' => $this->seoBuilder->buildLandingSeo($blog, $paginator, $metaDescription)->toArray(),
-            'viewStats' => Inertia::defer(fn() => $this->getViewStats(Blog::class, $blog->id, $blog->user_id)),
-        ]);
+        return $this->renderLandingPage($blog, $paginator);
     }
 
     /**
@@ -162,11 +148,11 @@ class PublicBlogController extends BasePublicController
 
         $paginator = $query->handle($blog, $tag);
 
-        $descriptionHtml = str_replace('-!-', '', $this->markdown->convertToHtml($blog->description));
-        $metaDescription = $blog->seo_description ?: $this->seo->generateMetaDescription(
-            $descriptionHtml ?: $blog->landingPage?->content_html ?: $blog->name,
-        );
+        return $this->renderLandingPage($blog, $paginator, $tag);
+    }
 
+    private function renderLandingPage(Blog $blog, LengthAwarePaginator $paginator, ?Tag $tag = null): Response
+    {
         return $this->renderWithTranslations('public/blog/Landing', 'blog', [
             'blog' => new PublicBlogDetailResource($blog),
             'landingHtml' => $blog->landingPage?->content_html ?? '',
@@ -175,9 +161,23 @@ class PublicBlogController extends BasePublicController
                 $this->navigation->getLandingNavigation($blog, $tag),
             )->toArray(),
             'listing' => $this->payloadBuilder->buildListing($blog, $paginator, $tag)->toArray(),
-            'seo' => $this->seoBuilder->buildLandingSeo($blog, $paginator, $metaDescription, $tag)->toArray(),
+            'seo' => $this->seoBuilder->buildLandingSeo(
+                $blog,
+                $paginator,
+                $this->buildLandingMetaDescription($blog),
+                $tag,
+            )->toArray(),
             'viewStats' => Inertia::defer(fn() => $this->getViewStats(Blog::class, $blog->id, $blog->user_id)),
         ]);
+    }
+
+    private function buildLandingMetaDescription(Blog $blog): string
+    {
+        $descriptionHtml = str_replace('-!-', '', $this->markdown->convertToHtml($blog->description));
+
+        return $blog->seo_description ?: $this->seo->generateMetaDescription(
+            $descriptionHtml ?: $blog->landingPage?->content_html ?: $blog->name,
+        );
     }
 
     /**

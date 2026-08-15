@@ -8,18 +8,10 @@ import PostExternalLinks from '@/components/blog/PostExternalLinks.vue';
 import PostHeader from '@/components/blog/PostHeader.vue';
 import PostRelatedPosts from '@/components/blog/PostRelatedPosts.vue';
 import PublicBlogShell from '@/components/blog/PublicBlogShell.vue';
-import type { SEO } from '@/types';
-import type { Blog, BlogChrome, PostDetails, PostListing, ViewStats } from '@/types/blog.types';
+import type { PublicBlogPostPageProps } from '@/types/blog.types';
 import { computed } from 'vue';
 
-const props = defineProps<{
-    blog: Blog;
-    post: PostDetails;
-    chrome: BlogChrome;
-    listing: PostListing;
-    seo?: SEO;
-    viewStats?: ViewStats | null;
-}>();
+const props = defineProps<PublicBlogPostPageProps>();
 
 const isListed = computed(() => props.post.visibility !== 'unlisted');
 const visibleListing = computed(() => (isListed.value ? props.listing : null));

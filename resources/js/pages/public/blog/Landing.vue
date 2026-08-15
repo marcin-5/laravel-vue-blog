@@ -2,20 +2,12 @@
 import BlogHeader from '@/components/blog/BlogHeader.vue';
 import PublicBlogShell from '@/components/blog/PublicBlogShell.vue';
 import ScrollToPostsLink from '@/components/blog/ScrollToPostsLink.vue';
-import type { Blog, BlogChrome, PostListing, ViewStats } from '@/types/blog.types';
+import type { PublicBlogLandingPageProps } from '@/types/blog.types';
 import { handleContentClick } from '@/utils/domUtils';
 import { hasContent } from '@/utils/stringUtils';
 import { computed } from 'vue';
-import { SEO } from '@/types';
 
-const props = defineProps<{
-    blog: Blog;
-    landingHtml: string;
-    chrome: BlogChrome;
-    listing: PostListing;
-    seo?: SEO;
-    viewStats?: ViewStats | null;
-}>();
+const props = defineProps<PublicBlogLandingPageProps>();
 
 const hasLandingContent = computed(() => hasContent(props.landingHtml));
 
