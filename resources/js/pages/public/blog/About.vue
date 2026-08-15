@@ -1,10 +1,7 @@
 <script lang="ts" setup>
-import BlogBreadcrumbs from '@/components/blog/BlogBreadcrumbs.vue';
-import BlogFooter from '@/components/blog/BlogFooter.vue';
 import BlogHeader from '@/components/blog/BlogHeader.vue';
-import BlogLayout from '@/components/blog/BlogLayout.vue';
-import BorderDivider from '@/components/blog/BorderDivider.vue';
-import type { Blog, Navigation, Tag } from '@/types/blog.types';
+import PublicBlogShell from '@/components/blog/PublicBlogShell.vue';
+import type { Blog, BlogChrome } from '@/types/blog.types';
 import { handleContentClick } from '@/utils/domUtils';
 import { hasContent } from '@/utils/stringUtils';
 import { computed } from 'vue';
@@ -13,26 +10,17 @@ import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
     blog: Blog;
-    footerHtml?: string;
-    sidebar?: number;
-    navigation?: Navigation;
-    locale?: string;
+    chrome: BlogChrome;
     seo?: SEO;
-    allTags?: Tag[];
 }>();
 
 const { t } = useI18n();
 
 const hasAboutContent = computed(() => hasContent(props.blog.aboutHtml));
-const hasFooterContent = computed(() => hasContent(props.footerHtml));
 </script>
 
 <template>
-    <BlogLayout v-if="blog" :isPublic="true" :sidebar="sidebar" :theme="blog.theme">
-        <template #top-divider>
-            <BorderDivider class="mb-4" />
-        </template>
-
+    <PublicBlogShell :blog="blog" :chrome="chrome">
         <template #header>
             <BlogHeader :blog="blog" />
         </template>
@@ -43,20 +31,5 @@ const hasFooterContent = computed(() => hasContent(props.footerHtml));
                 {{ t('about.empty') }}
             </div>
         </template>
-
-        <template #middle-divider>
-            <BorderDivider class="my-4" />
-        </template>
-
-        <template #breadcrumbs>
-            <BlogBreadcrumbs :breadcrumbs="navigation?.breadcrumbs ?? []" />
-        </template>
-
-        <template #footer>
-            <template v-if="hasFooterContent">
-                <BorderDivider class="my-4" />
-                <BlogFooter :html="footerHtml || ''" />
-            </template>
-        </template>
-    </BlogLayout>
+    </PublicBlogShell>
 </template>

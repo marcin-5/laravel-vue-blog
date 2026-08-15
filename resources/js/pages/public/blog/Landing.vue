@@ -1,91 +1,36 @@
 <script lang="ts" setup>
-import BlogBreadcrumbs from '@/components/blog/BlogBreadcrumbs.vue';
-import BlogFooter from '@/components/blog/BlogFooter.vue';
 import BlogHeader from '@/components/blog/BlogHeader.vue';
-import BlogLayout from '@/components/blog/BlogLayout.vue';
-import BlogPostNav from '@/components/blog/BlogPostNav.vue';
-import BlogPostsList from '@/components/blog/BlogPostsList.vue';
-import BorderDivider from '@/components/blog/BorderDivider.vue';
+import PublicBlogShell from '@/components/blog/PublicBlogShell.vue';
 import ScrollToPostsLink from '@/components/blog/ScrollToPostsLink.vue';
-import type { Blog, Navigation, PostItem, Tag, ViewStats } from '@/types/blog.types';
+import type { Blog, BlogChrome, PostListing, ViewStats } from '@/types/blog.types';
 import { handleContentClick } from '@/utils/domUtils';
 import { hasContent } from '@/utils/stringUtils';
 import { computed } from 'vue';
-import { Pagination, SEO } from '@/types';
+import { SEO } from '@/types';
 
 const props = defineProps<{
     blog: Blog;
     landingHtml: string;
-    footerHtml?: string;
-    posts: PostItem[];
-    pagination?: Pagination | null;
-    /** Numeric sidebar value (-50..50). */
-    sidebar?: number;
-    navigation?: Navigation;
-    locale?: string;
-    viewStats?: ViewStats | null;
+    chrome: BlogChrome;
+    listing: PostListing;
     seo?: SEO;
-    activeTag?: {
-        id: number;
-        name: string;
-        slug: string;
-    } | null;
-    allTags?: Tag[];
+    viewStats?: ViewStats | null;
 }>();
 
-// Content availability checks
 const hasLandingContent = computed(() => hasContent(props.landingHtml));
-const hasFooterContent = computed(() => hasContent(props.footerHtml));
 
 const postsListSpacingClass = computed(() => (hasLandingContent.value ? 'mt-6' : ''));
 </script>
 
 <template>
-    <BlogLayout v-if="blog" :isPublic="true" :sidebar="sidebar" :theme="blog.theme">
-        <template #top-divider>
-            <BorderDivider class="mb-4" />
-        </template>
-
+    <PublicBlogShell :blog="blog" :chrome="chrome" :contentSpacingClass="postsListSpacingClass" :listing="listing">
         <template #header>
             <BlogHeader :blog="blog" :viewStats="viewStats" />
-            <ScrollToPostsLink :class="{ 'xl:hidden': sidebar }" />
+            <ScrollToPostsLink :class="{ 'xl:hidden': chrome.sidebar }" />
         </template>
 
         <template #content>
             <div v-if="hasLandingContent" class="prose max-w-none text-primary" @click="handleContentClick" v-html="landingHtml" />
         </template>
-
-        <template #middle-divider>
-            <BorderDivider class="my-4" />
-        </template>
-
-        <template #breadcrumbs>
-            <BlogBreadcrumbs :breadcrumbs="navigation?.breadcrumbs ?? []" />
-        </template>
-
-        <template #sidebar-content>
-            <BlogPostsList
-                id="posts-list"
-                :activeTag="activeTag"
-                :allTags="allTags"
-                :blogId="blog.id"
-                :blogSlug="blog.slug"
-                :class="postsListSpacingClass"
-                :mainDomain="blog.main_domain ?? undefined"
-                :pagination="pagination"
-                :posts="posts"
-            />
-        </template>
-
-        <template #navigation>
-            <BlogPostNav :activeTag="activeTag" :navigation="navigation" />
-        </template>
-
-        <template #footer>
-            <template v-if="hasFooterContent">
-                <BorderDivider class="my-4" />
-                <BlogFooter :html="footerHtml || ''" />
-            </template>
-        </template>
-    </BlogLayout>
+    </PublicBlogShell>
 </template>
