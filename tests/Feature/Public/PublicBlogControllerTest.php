@@ -30,13 +30,16 @@ it('returns 200 for published blog on landing page and sets locale', function ()
     $response->assertInertia(fn(Assert $page) => $page
         ->component('public/blog/Landing')
         ->has('blog')
+        ->has('landingHtml')
         ->has('listing.posts')
         ->has('seo')
         ->has('listing.pagination')
         ->has('chrome.navigation')
-        ->has('landingHtml')
         ->has('chrome.footerHtml')
+        ->has('translations.messages')
+        ->missing('viewStats')
         ->where('chrome.locale', 'pl')
+        ->where('translations.locale', 'pl')
         ->loadDeferredProps(fn(Assert $reload) => $reload
             ->has('viewStats'),
         ),
@@ -124,7 +127,10 @@ it('returns 200 for published post on published blog and checks sidebar position
         ->has('seo')
         ->has('chrome.navigation')
         ->has('chrome.sidebarPosition')
+        ->has('translations.messages')
+        ->missing('viewStats')
         ->where('chrome.sidebarPosition', 'left')
+        ->where('translations.locale', 'en')
         ->loadDeferredProps(fn(Assert $reload) => $reload
             ->has('viewStats'),
         ),
