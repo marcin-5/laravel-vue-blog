@@ -183,9 +183,9 @@ final class EnneagramTestEngine
 
         foreach (self::INSTINCTS as $instinct) {
             $stage2[$instinct] = array_filter(
-                    $questions,
-                    fn(array $question): bool => str_starts_with($question['id'], "$instinct-"),
-                )
+                $questions,
+                fn(array $question): bool => str_starts_with($question['id'], "$instinct-"),
+            )
                     |> array_values(...)
                     |> (fn($x) => $this->shuffleByPriority($x, $seed));
         }
@@ -308,8 +308,8 @@ final class EnneagramTestEngine
         $state['allowed_actions'] = [
             'answer' => $state['status'] === 'in_progress',
             'skip' => $state['status'] === 'in_progress' && (int) $state['skips'] < $this->currentConfig(
-                    $state,
-                )['maxSkips'],
+                $state,
+            )['maxSkips'],
             'back' => $state['history'] !== [],
         ];
 
@@ -403,9 +403,9 @@ final class EnneagramTestEngine
 
         return [
             'current' => $question === null ? $total : ((int) $state['stage'] === 1 ? $state['question_index'] + 1 : $state['stage2_pool_indices'][$this->stage2Instinct(
-                    $state,
-                    (int) $state['part'],
-                )] + 1),
+                $state,
+                (int) $state['part'],
+            )] + 1),
             'total' => $total,
             'answered' => (int) $state['stage'] === 1
                 ? $state['stage1_answered']["part{$state['part']}"]
@@ -728,16 +728,16 @@ final class EnneagramTestEngine
         $alternativeLead = $alternativeApplies && $this->hasLead($scores, (int) ($config['minLeadAlternative'] ?? 0));
 
         if ($reachedMax && !$standardLead && !$alternativeLead && !$this->isLastQuestion(
-                (int) $state['question_index'],
-                $pool,
-            )) {
+            (int) $state['question_index'],
+            $pool,
+        )) {
             return false;
         }
 
         return $standardLead || $alternativeLead || $reachedMax || $this->isLastQuestion(
-                (int) $state['question_index'],
-                $pool,
-            );
+            (int) $state['question_index'],
+            $pool,
+        );
     }
 
     /**
@@ -847,9 +847,9 @@ final class EnneagramTestEngine
         $reachedMax = (int) $state['question_index'] >= $config['maxQuestions'];
         $noMoreQuestions = $state['stage2_pool_indices'][$instinct] >= count($pool);
         $canEndEarly = !$this->isStage2TieBreaker($part) && $this->hasLead(
-                $state['scores']['stage2']['per_part'][$part],
-                (int) ($config['minLead'] ?? 0),
-            );
+            $state['scores']['stage2']['per_part'][$part],
+            (int) ($config['minLead'] ?? 0),
+        );
 
         if (!$reachedMax && !$noMoreQuestions && !$canEndEarly) {
             return;
@@ -994,9 +994,15 @@ final class EnneagramTestEngine
             'part' => $state['part'],
             'question' => $state['question'],
             'options' => $state['options'],
+            'selected_answers' => $state['selected_answers'],
+            'answer_limit' => $state['status'] === 'in_progress' ? $this->maximumAnswers($state) : 0,
+            'skip_count' => $state['skips'],
+            'skip_limit' => $state['status'] === 'in_progress'
+                ? $this->currentConfig($state)['maxSkips']
+                : 0,
             'progress' => $state['progress'],
             'allowed_actions' => $state['allowed_actions'],
-            'result' => $state['result'],
+            'result' => $state['status'] === 'completed' ? $state['result'] : null,
         ];
     }
 }

@@ -1,14 +1,18 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { CompleteStage1Results, Stage2Results } from '../composables/shared/types';
+import type { StageOneResult, StageTwoResult } from '../types';
 
 import { Button } from '@/components/ui/button';
 
 const props = defineProps<{
-    stage1Results: CompleteStage1Results | null;
-    stage2Results: Stage2Results | null;
+    stage1Results: StageOneResult | null;
+    stage2Results: StageTwoResult | null;
     debug?: boolean;
+}>();
+
+const emit = defineEmits<{
+    reset: [];
 }>();
 
 const { t } = useI18n();
@@ -27,9 +31,6 @@ const maxScore = computed(() => {
     return sortedTypes.value[0].score;
 });
 
-function restart() {
-    window.location.reload();
-}
 </script>
 
 <template>
@@ -122,7 +123,7 @@ function restart() {
             </div>
 
             <div class="mt-8">
-                <Button class="px-6 py-2 transition hover:opacity-90" variant="secondary" @click="restart">
+                <Button class="px-6 py-2 transition hover:opacity-90" variant="secondary" @click="emit('reset')">
                     {{ t('restart') }}
                 </Button>
             </div>

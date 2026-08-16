@@ -4,22 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Services\Enneagram\EnneagramTestDataLoader;
 use Inertia\Inertia;
 use Inertia\Response;
 
 final class EnneagramTestController extends Controller
 {
-    public function index(EnneagramTestDataLoader $dataLoader): Response
+    public function index(): Response
     {
-        $data = $dataLoader->load();
-        $locale = $data['locale'];
+        $locale = app()->getLocale();
 
-        return Inertia::render('EnneagramTest/Index', [
-            'testData' => [
-                'questions' => $data['questions'],
-                'testConfig' => $data['config'],
-            ],
+        return Inertia::render('public/EnneagramTest/Index', [
             'initialLocale' => $locale,
             'appDebug' => (bool) config('enneagram.debug'),
             'autoConfirmSingleDefault' => (bool) config('enneagram.auto_confirm_single'),

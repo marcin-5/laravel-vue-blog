@@ -20,18 +20,12 @@ it('loads the enneagram test page with valid data', function () {
 
     $response->assertStatus(200);
     $response->assertInertia(fn(Assert $page) => $page
-        ->component('EnneagramTest/Index')
+        ->component('public/EnneagramTest/Index')
         ->where('appDebug', true)
         ->where('initialLocale', 'pl')
-        ->has('testData')
-        ->has('testData.questions')
-        ->has('testData.testConfig.stages.stage2.part3')
-        ->has('testData.testConfig.stages.stage2.part4')
-        ->where('testData.questions', function ($questions) {
-            return collect($questions)->every(function ($question) {
-                return isset($question['id']);
-            });
-        }),
+        ->has('autoConfirmSingleDefault')
+        ->has('seo')
+        ->missing('testData'),
     );
 });
 
@@ -73,7 +67,7 @@ it('loads the enneagram test page with English locale for secondary domain', fun
 
     $response->assertStatus(200);
     $response->assertInertia(fn(Assert $page) => $page
-        ->component('EnneagramTest/Index')
+        ->component('public/EnneagramTest/Index')
         ->where('initialLocale', 'en'),
     );
 });

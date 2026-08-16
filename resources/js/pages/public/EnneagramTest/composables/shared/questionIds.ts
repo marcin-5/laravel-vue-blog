@@ -1,4 +1,4 @@
-import type { Instinct } from './types';
+type Instinct = 'sp' | 'so' | 'sx';
 
 const STAGE_1_PART_1_PREFIX = 'di-';
 const STAGE_1_PART_2_PREFIX = 'ri-';

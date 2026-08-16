@@ -17,7 +17,7 @@ it('passes autoConfirmSingleDefault from config when enabled', function () {
     get('http://' . $domain)
         ->assertOk()
         ->assertInertia(fn(Assert $page) => $page
-            ->component('EnneagramTest/Index')
+            ->component('public/EnneagramTest/Index')
             ->has('autoConfirmSingleDefault')
             ->where('autoConfirmSingleDefault', true),
         );
@@ -36,7 +36,7 @@ it('passes autoConfirmSingleDefault from config when disabled', function () {
     get('http://' . $domain)
         ->assertOk()
         ->assertInertia(fn(Assert $page) => $page
-            ->component('EnneagramTest/Index')
+            ->component('public/EnneagramTest/Index')
             ->has('autoConfirmSingleDefault')
             ->where('autoConfirmSingleDefault', false),
         );
