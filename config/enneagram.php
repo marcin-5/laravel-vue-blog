@@ -26,6 +26,35 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Enneagram Data Cache
+    |--------------------------------------------------------------------------
+    |
+    | Validated question and test configuration data is static and may be
+    | cached between requests without exposing participant state.
+    |
+    */
+    'data_cache' => [
+        'enabled' => env('ENNEAGRAM_DATA_CACHE', true),
+        'ttl' => env('ENNEAGRAM_DATA_CACHE_TTL', 3600),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Enneagram Test Session
+    |--------------------------------------------------------------------------
+    |
+    | Test state remains in the current Laravel session and is never persisted
+    | in the application database.
+    |
+    */
+    'session' => [
+        'key' => 'enneagram.test_sessions',
+    ],
+
+    'contract_version' => '1',
+
+    /*
+    |--------------------------------------------------------------------------
     | Enneagram Test Domains
     |--------------------------------------------------------------------------
     |
