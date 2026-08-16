@@ -29,7 +29,7 @@ readonly class NewsletterService
                 ->whereNotIn('blog_id', $blogIds)
                 ->delete();
 
-            $this->subscribe($email, $subscriptions, $visitorId);
+            $this->persistSubscriptions($email, $subscriptions, $visitorId);
         });
     }
 
@@ -45,22 +45,30 @@ readonly class NewsletterService
     public function subscribe(string $email, array $subscriptions, ?string $visitorId = null): void
     {
         DB::transaction(function () use ($email, $subscriptions, $visitorId) {
-            foreach ($subscriptions as $sub) {
-                NewsletterSubscription::query()->updateOrCreate(
-                    [
-                        'email' => $email,
-                        'blog_id' => $sub['blog_id'],
-                    ],
-                    [
-                        'frequency' => $sub['frequency'],
-                        'send_time' => $sub['send_time'] ?? null,
-                        'send_time_weekend' => $sub['send_time_weekend'] ?? null,
-                        'send_day' => $sub['send_day'] ?? null,
-                        'visitor_id' => $visitorId,
-                    ],
-                );
-            }
+            $this->persistSubscriptions($email, $subscriptions, $visitorId);
         });
+    }
+
+    /**
+     * @param array<int, array{blog_id: int, frequency: string, send_time?: string|null, send_time_weekend?: string|null, send_day?: int|null}> $subscriptions
+     */
+    private function persistSubscriptions(string $email, array $subscriptions, ?string $visitorId): void
+    {
+        foreach ($subscriptions as $subscription) {
+            NewsletterSubscription::query()->updateOrCreate(
+                [
+                    'email' => $email,
+                    'blog_id' => $subscription['blog_id'],
+                ],
+                [
+                    'frequency' => $subscription['frequency'],
+                    'send_time' => $subscription['send_time'] ?? null,
+                    'send_time_weekend' => $subscription['send_time_weekend'] ?? null,
+                    'send_day' => $subscription['send_day'] ?? null,
+                    'visitor_id' => $visitorId,
+                ],
+            );
+        }
     }
 
     /**

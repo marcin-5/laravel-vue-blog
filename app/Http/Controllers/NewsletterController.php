@@ -96,8 +96,11 @@ class NewsletterController extends BasePublicController
             abort(403, __('newsletter.messages.invalid_signature'));
         }
 
+        $email = $request->validated('email');
+        $this->ensureSignedEmailMatches($request, $email);
+
         $this->newsletterService->updateSubscriptions(
-            $request->validated('email'),
+            $email,
             $request->validated('subscriptions'),
             $this->identityResolver->resolvedVisitorId($request),
         );
@@ -111,8 +114,18 @@ class NewsletterController extends BasePublicController
             abort(403, __('newsletter.messages.invalid_signature'));
         }
 
-        $this->newsletterService->unsubscribe($request->validated('email'));
+        $email = $request->validated('email');
+        $this->ensureSignedEmailMatches($request, $email);
+
+        $this->newsletterService->unsubscribe($email);
 
         return redirect()->route('home')->with('message', __('newsletter.messages.unsubscribed'));
+    }
+
+    private function ensureSignedEmailMatches(Request $request, string $email): void
+    {
+        if ($request->query('email') !== $email) {
+            abort(403, __('newsletter.messages.invalid_signature'));
+        }
     }
 }
