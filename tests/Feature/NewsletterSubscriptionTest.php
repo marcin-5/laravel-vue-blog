@@ -62,6 +62,20 @@ test('validates newsletter subscription request', function () {
     $response->assertSessionHasErrors(['email', 'subscriptions']);
 });
 
+test('rejects subscriptions for unpublished blogs', function () {
+    $blog = createBlog(['is_published' => false]);
+
+    $response = $this->post(route('newsletter.store'), [
+        'email' => 'test@example.com',
+        'subscriptions' => [
+            ['blog_id' => $blog->id, 'frequency' => 'daily'],
+        ],
+    ]);
+
+    $response->assertSessionHasErrors('subscriptions.0.blog_id');
+    expect(NewsletterSubscription::count())->toBe(0);
+});
+
 test('newsletter management page requires valid signature', function () {
     $response = $this->get(route('newsletter.manage', ['email' => 'test@example.com']));
 

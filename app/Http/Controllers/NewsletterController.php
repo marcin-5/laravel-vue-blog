@@ -5,18 +5,15 @@ namespace App\Http\Controllers;
 use App\Builders\PublicHomeSeoBuilder;
 use App\Http\Requests\StoreNewsletterSubscriptionRequest;
 use App\Http\Requests\UnsubscribeNewsletterRequest;
-use App\Models\Blog;
-use App\Models\NewsletterSubscription;
+use App\Queries\Public\NewsletterQuery;
 use App\Services\IdentityResolver;
 use App\Services\NewsletterService;
 use App\Services\TranslationService;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\URL;
 use Inertia\Response;
-use LaravelIdea\Helper\App\Models\_IH_Blog_C;
 use Throwable;
 
 class NewsletterController extends BasePublicController
@@ -26,6 +23,7 @@ class NewsletterController extends BasePublicController
         private readonly IdentityResolver $identityResolver,
         private readonly NewsletterService $newsletterService,
         private readonly PublicHomeSeoBuilder $seoBuilder,
+        private readonly NewsletterQuery $newsletterQuery,
     ) {
         parent::__construct($translations);
     }
@@ -35,41 +33,18 @@ class NewsletterController extends BasePublicController
      */
     public function index(Request $request): Response
     {
-        $selectedBlogId = $request->integer('blog_id');
-        $blogs = $this->getPublishedBlogs();
-
-        $this->setLocaleFromBlog($blogs, $selectedBlogId);
+        $pageData = $this->newsletterQuery->handleSubscribe($request);
 
         $messages = $this->translations->getPageTranslations('newsletter');
 
         return $this->renderWithTranslations('public/Newsletter', 'newsletter', [
-            'blogs' => $blogs,
-            'selectedBlogId' => $selectedBlogId,
+            'blogs' => $pageData['blogs'],
+            'selectedBlogId' => $pageData['selectedBlogId'],
             'userEmail' => $request->user()?->email,
             'mode' => 'subscribe',
             'config' => config('newsletter'),
             'seo' => $this->seoBuilder->buildNewsletterSeo($messages)->toArray(),
         ]);
-    }
-
-    private function getPublishedBlogs(): array|Collection|_IH_Blog_C
-    {
-        return Blog::query()
-            ->where('is_published', true)
-            ->orderBy('name')
-            ->get(['id', 'name', 'slug', 'locale']);
-    }
-
-    private function setLocaleFromBlog(Collection $blogs, ?int $blogId): void
-    {
-        if (!$blogId) {
-            return;
-        }
-
-        $currentBlog = $blogs->firstWhere('id', $blogId);
-        if ($currentBlog && $currentBlog->locale) {
-            app()->setLocale($currentBlog->locale);
-        }
     }
 
     /**
@@ -96,49 +71,19 @@ class NewsletterController extends BasePublicController
         }
 
         $email = $request->query('email');
-        $subscriptions = NewsletterSubscription::query()
-            ->where('email', $email)
-            ->with('blog:id,locale')
-            ->get();
-
-        $this->setLocaleFromSubscriptions($subscriptions);
-
-        $blogs = $this->getPublishedBlogs();
+        $pageData = $this->newsletterQuery->handleManage($email);
 
         $messages = $this->translations->getPageTranslations('newsletter');
 
         return $this->renderWithTranslations('public/Newsletter', 'newsletter', [
-            'blogs' => $blogs,
+            'blogs' => $pageData['blogs'],
             'email' => $email,
-            'currentSubscriptions' => $this->mapSubscriptionsToArray($subscriptions),
+            'currentSubscriptions' => $pageData['currentSubscriptions'],
             'updateUrl' => URL::signedRoute('newsletter.update', ['email' => $email]),
             'unsubscribeUrl' => URL::signedRoute('newsletter.unsubscribe', ['email' => $email]),
             'mode' => 'manage',
             'config' => config('newsletter'),
             'seo' => $this->seoBuilder->buildNewsletterSeo($messages)->toArray(),
-        ]);
-    }
-
-    private function setLocaleFromSubscriptions(Collection $subscriptions): void
-    {
-        if ($subscriptions->isEmpty()) {
-            return;
-        }
-
-        $firstSubBlog = $subscriptions->first()?->blog;
-        if ($firstSubBlog && $firstSubBlog->locale) {
-            app()->setLocale($firstSubBlog->locale);
-        }
-    }
-
-    private function mapSubscriptionsToArray(Collection $subscriptions): Collection
-    {
-        return $subscriptions->map(fn($s) => [
-            'blog_id' => $s->blog_id,
-            'frequency' => $s->frequency,
-            'send_time' => $s->send_time,
-            'send_time_weekend' => $s->send_time_weekend,
-            'send_day' => $s->send_day,
         ]);
     }
 
