@@ -2,7 +2,7 @@
 import { useI18n } from 'vue-i18n';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { enneagramThemes, type EnneagramTheme } from '../composables/useEnneagramPreferences';
+import { type EnneagramTheme, enneagramThemes } from '../composables/useEnneagramPreferences';
 
 const props = defineProps<{
     theme: EnneagramTheme;
@@ -30,7 +30,7 @@ function selectTheme(value: unknown): void {
         <label class="flex items-center gap-3 text-sm font-medium text-foreground">
             <span>{{ t('theme_selection') }}</span>
             <Select :model-value="props.theme" @update:model-value="selectTheme">
-                <SelectTrigger class="w-44">
+                <SelectTrigger class="w-44 bg-secondary">
                     <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -41,7 +41,7 @@ function selectTheme(value: unknown): void {
             </Select>
         </label>
         <div class="flex items-center gap-3">
-            <span class="rounded-full border px-3 py-1 text-xs font-semibold" aria-label="Current language">
+            <span aria-label="Current language" class="rounded-full border px-3 py-1 text-xs font-semibold">
                 {{ props.localeLabel }}
             </span>
             <Button v-if="props.hasSession" :disabled="props.processing" variant="ghost" @click="emit('reset')">
