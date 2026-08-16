@@ -171,12 +171,42 @@ test('newsletter update requires valid signature', function () {
     $response->assertStatus(403);
 });
 
+test('newsletter update rejects an email different from the signed email', function () {
+    $blog = createBlog(['is_published' => true]);
+    createSubscription($blog, ['email' => 'signed@example.com']);
+
+    $url = URL::signedRoute('newsletter.update', ['email' => 'signed@example.com']);
+
+    $response = $this->post($url, [
+        'email' => 'other@example.com',
+        'subscriptions' => [
+            ['blog_id' => $blog->id, 'frequency' => 'weekly'],
+        ],
+    ]);
+
+    $response->assertStatus(403);
+    expect(NewsletterSubscription::where('email', 'signed@example.com')->count())->toBe(1)
+        ->and(NewsletterSubscription::where('email', 'other@example.com')->count())->toBe(0);
+});
+
 test('newsletter unsubscribe requires valid signature', function () {
     $response = $this->post(route('newsletter.unsubscribe', ['email' => 'test@example.com']), [
         'email' => 'test@example.com',
     ]);
 
     $response->assertStatus(403);
+});
+
+test('newsletter unsubscribe rejects an email different from the signed email', function () {
+    $blog = createBlog(['is_published' => true]);
+    createSubscription($blog, ['email' => 'signed@example.com']);
+
+    $url = URL::signedRoute('newsletter.unsubscribe', ['email' => 'signed@example.com']);
+
+    $response = $this->post($url, ['email' => 'other@example.com']);
+
+    $response->assertStatus(403);
+    expect(NewsletterSubscription::where('email', 'signed@example.com')->count())->toBe(1);
 });
 
 test('newsletter management page fails with expired signature', function () {

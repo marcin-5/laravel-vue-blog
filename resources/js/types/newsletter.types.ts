@@ -19,6 +19,10 @@ export interface NewsletterSubscription {
     send_day: number | null;
 }
 
+export type NewsletterSubscriptionPayload = Omit<NewsletterSubscription, 'selected'>;
+
+export type NewsletterTranslate = (key: string) => string;
+
 export interface NewsletterConfig {
     daily_weekday_time: string;
     daily_weekend_time: string;

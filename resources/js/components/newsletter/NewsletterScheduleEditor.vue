@@ -1,11 +1,10 @@
 <script lang="ts" setup>
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { NewsletterSubscription } from '@/types/newsletter.types';
+import type { NewsletterSubscription, NewsletterTranslate } from '@/types/newsletter.types';
 
 const props = defineProps<{
     modelValue: NewsletterSubscription;
-    // Using any for translations to avoid over-constraining the expected shape
-    t: any;
+    t: NewsletterTranslate;
 }>();
 
 const emit = defineEmits<{
@@ -20,8 +19,11 @@ const onChangeSendTimeWeekend = (value: string) => {
     emit('update:modelValue', { ...props.modelValue, send_time_weekend: value });
 };
 
-const onChangeSendDay = (value: any) => {
-    emit('update:modelValue', { ...props.modelValue, send_day: value ? Number(value) : null });
+const onChangeSendDay = (value: unknown) => {
+    emit('update:modelValue', {
+        ...props.modelValue,
+        send_day: typeof value === 'string' && value ? Number(value) : null,
+    });
 };
 </script>
 
@@ -30,7 +32,7 @@ const onChangeSendDay = (value: any) => {
         <!-- Daily schedule -->
         <template v-if="props.modelValue.frequency === 'daily'">
             <div class="flex items-center gap-2">
-                <span class="w-24 text-xs text-secondary-foreground">{{ props.t.form.weekday }}:</span>
+                <span class="w-24 text-xs text-secondary-foreground">{{ props.t('form.weekday') }}:</span>
                 <input
                     :value="props.modelValue.send_time ?? ''"
                     class="w-20 rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
@@ -39,7 +41,7 @@ const onChangeSendDay = (value: any) => {
                 />
             </div>
             <div class="flex items-center gap-2">
-                <span class="w-24 text-xs text-secondary-foreground">{{ props.t.form.weekend }}:</span>
+                <span class="w-24 text-xs text-secondary-foreground">{{ props.t('form.weekend') }}:</span>
                 <input
                     :value="props.modelValue.send_time_weekend ?? ''"
                     class="w-20 rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
@@ -62,13 +64,13 @@ const onChangeSendDay = (value: any) => {
                     <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="1">{{ props.t.form.monday }}</SelectItem>
-                    <SelectItem value="2">{{ props.t.form.tuesday }}</SelectItem>
-                    <SelectItem value="3">{{ props.t.form.wednesday }}</SelectItem>
-                    <SelectItem value="4">{{ props.t.form.thursday }}</SelectItem>
-                    <SelectItem value="5">{{ props.t.form.friday }}</SelectItem>
-                    <SelectItem value="6">{{ props.t.form.saturday }}</SelectItem>
-                    <SelectItem value="7">{{ props.t.form.sunday }}</SelectItem>
+                    <SelectItem value="1">{{ props.t('form.monday') }}</SelectItem>
+                    <SelectItem value="2">{{ props.t('form.tuesday') }}</SelectItem>
+                    <SelectItem value="3">{{ props.t('form.wednesday') }}</SelectItem>
+                    <SelectItem value="4">{{ props.t('form.thursday') }}</SelectItem>
+                    <SelectItem value="5">{{ props.t('form.friday') }}</SelectItem>
+                    <SelectItem value="6">{{ props.t('form.saturday') }}</SelectItem>
+                    <SelectItem value="7">{{ props.t('form.sunday') }}</SelectItem>
                 </SelectContent>
             </Select>
         </div>

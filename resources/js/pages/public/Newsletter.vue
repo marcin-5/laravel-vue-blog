@@ -6,17 +6,15 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/composables/useToast';
-import type { Blog, InertiaForm } from '@/types/blog.types';
-import type { ExistingSubscription, NewsletterConfig, NewsletterFormData, NewsletterSubscription } from '@/types/newsletter.types';
-import { useForm } from '@inertiajs/vue3';
+import { useNewsletterForm } from '@/composables/useNewsletterForm';
+import type { Blog } from '@/types/blog.types';
+import type { ExistingSubscription, NewsletterConfig, NewsletterTranslate } from '@/types/newsletter.types';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
     mode: 'subscribe' | 'manage';
     blogs: Blog[];
-    translations: any;
     // subscribe
     selectedBlogId?: number | string;
     userEmail?: string;
@@ -30,44 +28,12 @@ const props = defineProps<{
 
 const { t } = useI18n();
 
-const isManageMode = computed(() => props.mode === 'manage');
 const displayEmail = computed(() => (props.mode === 'subscribe' ? props.userEmail || '' : props.email || ''));
-
-const getInitialSub = (blogId: number): NewsletterSubscription => {
-    const existing = props.currentSubscriptions?.find((s) => s.blog_id === blogId);
-    if (existing) {
-        return {
-            blog_id: blogId,
-            selected: true,
-            frequency: existing.frequency as 'daily' | 'weekly',
-            send_time: existing.send_time || (existing.frequency === 'daily' ? props.config.daily_weekday_time : props.config.weekly_time),
-            send_time_weekend: existing.send_time_weekend || (existing.frequency === 'daily' ? props.config.daily_weekend_time : null),
-            send_day: existing.send_day || props.config.weekly_day,
-        };
-    }
-    const isInitiallySelected = props.selectedBlogId && Number(props.selectedBlogId) === blogId;
-    return {
-        blog_id: blogId,
-        selected: !!isInitiallySelected,
-        frequency: 'weekly',
-        send_time: props.config.weekly_time,
-        send_time_weekend: null,
-        send_day: props.config.weekly_day,
-    };
-};
-
-const newsletterForm: InertiaForm<NewsletterFormData> = useForm<NewsletterFormData>({
-    email: displayEmail.value,
-    subscriptions: props.blogs.map((blog) => getInitialSub(blog.id)),
+const { newsletterForm, isManageMode, hasSelectedBlogs, submit, unsubscribe } = useNewsletterForm({
+    ...props,
+    t: t as NewsletterTranslate,
 });
 
-const unsubscribeForm: InertiaForm<{ email: string }> = useForm<{ email: string }>({ email: displayEmail.value });
-
-const hasSelectedBlogs = computed(() => newsletterForm.subscriptions.some((s) => s.selected));
-
-const { toast } = useToast();
-
-const submitUrl = computed(() => (isManageMode.value ? props.updateUrl! : route('newsletter.store')));
 const submitText = computed(() =>
     isManageMode.value
         ? newsletterForm.processing
@@ -80,53 +46,6 @@ const submitText = computed(() =>
 const title = computed(() => (isManageMode.value ? t('title.manage') : t('title.subscribe')));
 const desc = computed(() => (isManageMode.value ? t('description.manage').replace('{email}', displayEmail.value) : t('description.subscribe')));
 const blogLabel = computed(() => t('form.blog_label'));
-const successDesc = computed(() => (isManageMode.value ? t('messages.success_manage') : t('messages.success_subscribe')));
-
-const submit = () => {
-    if (hasSelectedBlogs.value || isManageMode.value) {
-        // We use post but with the filtered payload. Inertia's useForm doesn't easily allow filtering data on submit without manually setting it.
-        // But we can just pass the whole thing and the backend will handle it, or we can adjust how we store data in form.
-        // Let's keep it simple: the backend expects 'subscriptions' array.
-        const originalSubscriptions = newsletterForm.subscriptions;
-        newsletterForm.subscriptions = newsletterForm.subscriptions.filter((s) => s.selected);
-
-        newsletterForm.post(submitUrl.value, {
-            onSuccess: () => {
-                newsletterForm.subscriptions = originalSubscriptions;
-                toast({
-                    title: t('messages.success_title'),
-                    description: successDesc.value,
-                    variant: 'success',
-                    size: 'sm',
-                });
-            },
-            onError: () => {
-                newsletterForm.subscriptions = originalSubscriptions;
-                toast({
-                    title: t('messages.error_title'),
-                    description: isManageMode.value ? t('messages.error_manage') : t('messages.error_subscribe'),
-                    variant: 'destructive',
-                    size: 'sm',
-                });
-            },
-        });
-    }
-};
-
-const unsubscribe = () => {
-    if (confirm(t('form.unsubscribe_confirm'))) {
-        unsubscribeForm.post(props.unsubscribeUrl!, {
-            onSuccess: () => {
-                toast({
-                    title: t('messages.unsubscribed_title'),
-                    description: t('messages.unsubscribed'),
-                    variant: 'success',
-                    size: 'sm',
-                });
-            },
-        });
-    }
-};
 </script>
 
 <template>
