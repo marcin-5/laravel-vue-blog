@@ -158,7 +158,7 @@ services:
             - laravel-network
 
     postgres:
-        image: postgres:15-alpine
+        image: ${POSTGRES_IMAGE:-postgres:15.15-alpine}
         container_name: ${APP_NAME:-laravel-app}-postgres
         restart: unless-stopped
         environment:
@@ -171,9 +171,15 @@ services:
             - postgres_data:/var/lib/postgresql/data
         networks:
             - laravel-network
+        healthcheck:
+            test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+            interval: 10s
+            timeout: 5s
+            retries: 6
+            start_period: 20s
 
     redis:
-        image: redis:7-alpine
+        image: ${REDIS_IMAGE:-redis:7.4.7-alpine}
         container_name: ${APP_NAME:-laravel-app}-redis
         restart: unless-stopped
         expose:
@@ -182,6 +188,12 @@ services:
             - redis_data:/data
         networks:
             - laravel-network
+        healthcheck:
+            test: [ "CMD", "redis-cli", "ping" ]
+            interval: 10s
+            timeout: 5s
+            retries: 6
+            start_period: 10s
 
 volumes:
     postgres_data:

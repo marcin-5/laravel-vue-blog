@@ -133,13 +133,22 @@ COMPOSE_FILES_PROD = -f docker/docker-compose.yml -f docker/docker-compose.prod.
 # directory name changes. If you intentionally plan to migrate names, override
 # DOCKER_PROJECT_NAME_PROD at invocation time: `make DOCKER_PROJECT_NAME_PROD=laravel-vue-blog prod-update`.
 DOCKER_PROJECT_NAME_PROD ?= docker
+POSTGRES_IMAGE ?= postgres:15.15-alpine
+REDIS_IMAGE ?= redis:7.4.7-alpine
+PROD_BACKUP_DIR ?= /srv/laravel-blog/backups/pg-redis
+PROD_REBUILD_TIMEOUT ?= 120
+PROD_REBUILD_STOP_TIMEOUT ?= 30
+PROD_REBUILD_CONFIRM ?= 0
+ALLOW_POSTGRES_MAJOR_UPGRADE ?= 0
+ALLOW_REDIS_MAJOR_UPGRADE ?= 0
 # DOCKER_COMPOSE_PROD = docker compose --env-file .env -p $(PROJECT_NAME) $(COMPOSE_FILES_PROD)
-DOCKER_COMPOSE_PROD = docker compose --env-file .env -p $(DOCKER_PROJECT_NAME_PROD) $(COMPOSE_FILES_PROD)
+DOCKER_COMPOSE_PROD = POSTGRES_IMAGE="$(POSTGRES_IMAGE)" REDIS_IMAGE="$(REDIS_IMAGE)" docker compose --env-file .env -p $(DOCKER_PROJECT_NAME_PROD) $(COMPOSE_FILES_PROD)
 QUEUE_PAUSE_STATE_FILE ?= /tmp/laravel-blog-$(DOCKER_PROJECT_NAME_PROD)-queues-paused
 
 .PHONY: prod-up prod-down prod-restart prod-build prod-logs \
         prod-migrate prod-optimize prod-deploy prod-update prod-wait \
         prod-maintenance-on prod-maintenance-off prod-rebuild-pg-redis \
+        prod-rebuild-pg-redis-preflight prod-backup-pg-redis \
         prod-prune prod-versions prod-check-assets prod-logs-queue prod-logs-app \
         prod-health-queue prod-queue-diag prod-queue-pause-all \
         prod-queue-continue-all prod-indexnow
@@ -432,19 +441,206 @@ prod-update-data: ## Pull code and rebuild only the app container for data/code 
 # =============================
 # Rebuild Postgres & Redis (production)
 # =============================
-prod-rebuild-pg-redis: ## Recreate postgres and redis services with zero-502 maintenance window
-	@echo "🛠️  Enabling maintenance mode..."
-	$(MAKE) prod-maintenance-on
-	$(MAKE) prod-queue-pause-all
-	@echo "⬇️  Pulling latest images for postgres and redis (if available)..."
-	$(DOCKER_COMPOSE_PROD) pull postgres redis || true
-	@echo "♻️  Recreating postgres and redis containers without touching other services..."
-	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps postgres redis
-	@echo "⏳ Giving services a moment to start..."
-	sleep 5
-	@echo "✅ Postgres and Redis have been recreated. Disabling maintenance mode..."
-	$(MAKE) prod-queue-continue-all
-	$(MAKE) prod-maintenance-off
+prod-rebuild-pg-redis: prod-rebuild-pg-redis-preflight ## Recreate postgres and redis services with zero-502 maintenance window
+	@set -eu; \
+	maintenance_enabled=0; \
+	dependencies_stopped=0; \
+	maintenance_on() { \
+		printf '%s\n' '[prod-rebuild-pg-redis] Ensuring maintenance.html exists...'; \
+		$(DOCKER_COMPOSE_PROD) exec -T app sh -lc 'test -f /var/www/html/public/maintenance.html || printf %s "<!doctype html><title>Maintenance</title><h1>Trwa aktualizacja…</h1>" > /var/www/html/public/maintenance.html'; \
+		cid=$$($(DOCKER_COMPOSE_PROD) ps -q caddy); \
+		[ -n "$$cid" ] || { printf '%s\n' '[prod-rebuild-pg-redis] Caddy container not found.' >&2; return 1; }; \
+		[ "$$(docker inspect -f '{{.State.Running}}' "$$cid" 2>/dev/null)" = 'true' ] || { printf '%s\n' '[prod-rebuild-pg-redis] Caddy container is not running.' >&2; return 1; }; \
+		docker cp docker/Caddyfile.maintenance "$$cid:/etc/caddy/Caddyfile.maintenance"; \
+		$(DOCKER_COMPOSE_PROD) exec -T caddy caddy validate --config /etc/caddy/Caddyfile.maintenance; \
+		$(DOCKER_COMPOSE_PROD) exec -T caddy caddy reload --config /etc/caddy/Caddyfile.maintenance; \
+	}; \
+	create_backup() { \
+		timestamp=$$(date -u +%Y%m%dT%H%M%SZ); \
+		postgres_container=$$($(DOCKER_COMPOSE_PROD) ps -q postgres); redis_container=$$($(DOCKER_COMPOSE_PROD) ps -q redis); \
+		[ -n "$$postgres_container" ] && [ -n "$$redis_container" ] || { printf '%s\n' '❌ Both PostgreSQL and Redis containers must be running for backup.' >&2; return 1; }; \
+		umask 077; \
+		postgres_backup="$(PROD_BACKUP_DIR)/postgres-$$timestamp.dump"; postgres_tmp="$$postgres_backup.tmp"; \
+		if ! $(DOCKER_COMPOSE_PROD) exec -T postgres sh -lc 'PGPASSWORD="$${POSTGRES_PASSWORD}" pg_dump --format=custom --no-owner --no-privileges --username="$${POSTGRES_USER}" "$${POSTGRES_DB}"' > "$$postgres_tmp"; then rm -f "$$postgres_tmp"; printf '%s\n' '❌ PostgreSQL logical dump failed.' >&2; return 1; fi; \
+		if [ ! -s "$$postgres_tmp" ]; then rm -f "$$postgres_tmp"; printf '%s\n' '❌ PostgreSQL logical dump is empty.' >&2; return 1; fi; \
+		mv "$$postgres_tmp" "$$postgres_backup"; \
+		redis_result=$$($(DOCKER_COMPOSE_PROD) exec -T redis redis-cli --raw BGSAVE) || { printf '%s\n' '❌ Redis BGSAVE failed.' >&2; return 1; }; \
+		case "$$redis_result" in *'Background saving started'*|*'Background saving terminated'*) ;; *) printf '%s\n' "❌ Redis returned an unexpected BGSAVE response: $$redis_result" >&2; return 1 ;; esac; \
+		deadline=$$(( $$(date +%s) + $(PROD_REBUILD_TIMEOUT) )); \
+		while :; do \
+			redis_persistence=$$($(DOCKER_COMPOSE_PROD) exec -T redis redis-cli --raw INFO persistence) || { printf '%s\n' '❌ Could not read Redis snapshot status.' >&2; return 1; }; \
+		redis_in_progress=$$(printf '%s\n' "$$redis_persistence" | tr -d '\r' | sed -n 's/^rdb_bgsave_in_progress://p'); redis_last_status=$$(printf '%s\n' "$$redis_persistence" | tr -d '\r' | sed -n 's/^rdb_last_bgsave_status://p'); \
+			if [ "$$redis_in_progress" = '0' ] && [ "$$redis_last_status" = 'ok' ]; then break; fi; \
+			[ "$$(date +%s)" -lt "$$deadline" ] || { printf '%s\n' '❌ Redis BGSAVE did not complete successfully before the timeout.' >&2; return 1; }; sleep 1; \
+		done; \
+		redis_backup="$(PROD_BACKUP_DIR)/redis-$$timestamp.rdb"; redis_tmp="$$redis_backup.tmp"; \
+		if ! docker cp "$${redis_container}:/data/dump.rdb" "$$redis_tmp"; then rm -f "$$redis_tmp"; printf '%s\n' '❌ Could not copy the Redis RDB snapshot from the container.' >&2; return 1; fi; \
+		if [ ! -s "$$redis_tmp" ]; then rm -f "$$redis_tmp"; printf '%s\n' '❌ Redis RDB snapshot is empty.' >&2; return 1; fi; \
+		mv "$$redis_tmp" "$$redis_backup"; \
+		printf '%s\n' "✅ PostgreSQL backup: $$postgres_backup"; printf '%s\n' "✅ Redis snapshot: $$redis_backup"; \
+	}; \
+	maintenance_off() { \
+		cid=$$($(DOCKER_COMPOSE_PROD) ps -q caddy); \
+		[ -n "$$cid" ] || { printf '%s\n' '[prod-rebuild-pg-redis] Caddy container not found while disabling maintenance.' >&2; return 1; }; \
+		[ "$$(docker inspect -f '{{.State.Running}}' "$$cid" 2>/dev/null)" = 'true' ] || { printf '%s\n' '[prod-rebuild-pg-redis] Caddy container is not running while disabling maintenance.' >&2; return 1; }; \
+		$(DOCKER_COMPOSE_PROD) exec -T caddy caddy validate --config /etc/caddy/Caddyfile; \
+		$(DOCKER_COMPOSE_PROD) exec -T caddy caddy reload --config /etc/caddy/Caddyfile; \
+	}; \
+	on_exit() { \
+		status=$$?; \
+		if [ "$$status" -ne 0 ]; then \
+			if [ "$$maintenance_enabled" -eq 1 ]; then \
+				printf '%s\n' '❌ Production database rebuild failed; maintenance remains enabled.' >&2; \
+			else \
+				printf '%s\n' '❌ Production database rebuild failed before maintenance was confirmed active.' >&2; \
+			fi; \
+			if [ "$$dependencies_stopped" -eq 1 ]; then \
+				printf '%s\n' "⚠️  queue and scheduler were not restarted automatically." >&2; \
+			fi; \
+			printf '%s\n' "ℹ️  Backups are stored in $(PROD_BACKUP_DIR)." >&2; \
+		fi; \
+		return "$$status"; \
+	}; \
+	trap on_exit EXIT; \
+	printf '%s\n' '🛠️  Enabling and verifying maintenance mode...'; \
+	maintenance_on; \
+	maintenance_enabled=1; \
+	printf '%s\n' '⏹️  Gracefully stopping scheduler and queue workers...'; \
+	$(DOCKER_COMPOSE_PROD) stop --timeout=$(PROD_REBUILD_STOP_TIMEOUT) scheduler queue; \
+	dependencies_stopped=1; \
+	for service in scheduler queue; do \
+		container_id=$$($(DOCKER_COMPOSE_PROD) ps -aq "$$service"); \
+		if [ -z "$$container_id" ] || [ "$$(docker inspect -f '{{.State.Running}}' "$$container_id" 2>/dev/null)" = 'true' ]; then \
+			printf '%s\n' "❌ Service '$$service' did not stop cleanly." >&2; \
+			exit 1; \
+		fi; \
+	done; \
+	printf '%s\n' '💾 Creating PostgreSQL and Redis backups...'; \
+	create_backup; \
+	printf '%s\n' '⬇️  Pulling target PostgreSQL and Redis images...'; \
+	$(DOCKER_COMPOSE_PROD) pull postgres redis; \
+	printf '%s\n' '♻️  Recreating PostgreSQL and Redis without touching other services or volumes...'; \
+	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps postgres redis; \
+	deadline=$$(( $$(date +%s) + $(PROD_REBUILD_TIMEOUT) )); \
+	while :; do \
+		all_healthy=1; \
+		for service in postgres redis; do \
+			container_id=$$($(DOCKER_COMPOSE_PROD) ps -q "$$service"); \
+			status=$$(docker inspect -f '{{.State.Health.Status}}' "$$container_id" 2>/dev/null || printf '%s' unknown); \
+			printf '%s\n' "$$service health: $$status"; \
+			if [ "$$status" != 'healthy' ]; then all_healthy=0; fi; \
+		done; \
+		if [ "$$all_healthy" -eq 1 ]; then break; fi; \
+		if [ "$$(date +%s)" -ge "$$deadline" ]; then \
+			printf '%s\n' '❌ PostgreSQL or Redis did not become healthy before the timeout.' >&2; \
+			exit 1; \
+		fi; \
+		sleep 2; \
+	done; \
+	printf '%s\n' '🔌 Verifying database and Redis connectivity from the app container...'; \
+	$(DOCKER_COMPOSE_PROD) exec -T app php artisan migrate:status >/dev/null; \
+	$(DOCKER_COMPOSE_PROD) exec -T app php artisan tinker --execute='Illuminate\\Support\\Facades\\Redis::connection()->ping();' >/dev/null; \
+	printf '%s\n' '🚀 Starting scheduler and queue workers after readiness checks...'; \
+	$(DOCKER_COMPOSE_PROD) up -d --no-deps scheduler queue; \
+	for service in scheduler queue; do \
+		container_id=$$($(DOCKER_COMPOSE_PROD) ps -q "$$service"); \
+		if [ -z "$$container_id" ] || [ "$$(docker inspect -f '{{.State.Running}}' "$$container_id" 2>/dev/null)" != 'true' ]; then \
+			printf '%s\n' "❌ Service '$$service' failed to start; maintenance remains enabled." >&2; \
+			exit 1; \
+		fi; \
+	done; \
+	printf '%s\n' '✅ PostgreSQL, Redis and application connectivity checks passed.'; \
+	maintenance_off; \
+	maintenance_enabled=0; \
+	printf '%s\n' '✅ Production PostgreSQL and Redis rebuild completed.'
+
+prod-rebuild-pg-redis-preflight: ## Validate production rebuild confirmation, versions, services, volumes and images
+	@set -eu; \
+	fail() { \
+		printf '%s\n' "❌ [prod-rebuild-pg-redis-preflight] $$1" >&2; \
+		exit 1; \
+	}; \
+	if [ "$(PROD_REBUILD_CONFIRM)" != "1" ]; then fail 'Production rebuild is blocked. Re-run with PROD_REBUILD_CONFIRM=1.'; fi; \
+	if ! $(DOCKER_COMPOSE_PROD) config --quiet; then fail 'Production Compose configuration is invalid.'; fi; \
+	for image in "$(POSTGRES_IMAGE)" "$(REDIS_IMAGE)"; do \
+		case "$$image" in \
+			latest|*:latest|'') fail "Image '$$image' must use an explicit tag or digest; latest is not allowed." ;; \
+			*@sha256:*) ;; \
+			*@*) fail "Image '$$image' must use a sha256 digest when using a digest reference." ;; \
+			*/*) image_name=$${image##*/}; case "$$image_name" in *:*) ;; *) fail "Image '$$image' must use an explicit tag or digest." ;; esac ;; \
+			*:*) ;; \
+			*) fail "Image '$$image' must use an explicit tag or digest." ;; \
+		esac; \
+	done; \
+	for service in postgres redis app caddy queue scheduler; do \
+		container_id=$$($(DOCKER_COMPOSE_PROD) ps -aq "$$service") || fail "Could not inspect the required '$$service' service."; \
+		[ -n "$$container_id" ] || fail "Required '$$service' container does not exist."; \
+		[ "$$(docker inspect -f '{{.State.Running}}' "$$container_id" 2>/dev/null)" = 'true' ] || fail "Required '$$service' service is not running."; \
+	done; \
+	for volume in docker_postgres_data docker_redis_data; do \
+		docker volume inspect "$$volume" >/dev/null 2>&1 || fail "Required external volume '$$volume' does not exist."; \
+	done; \
+	if ! mkdir -p "$(PROD_BACKUP_DIR)" || [ ! -w "$(PROD_BACKUP_DIR)" ]; then fail "Backup directory '$(PROD_BACKUP_DIR)' is not writable."; fi; \
+	printf '%s\n' '⬇️  Pulling target PostgreSQL and Redis images...'; \
+	$(DOCKER_COMPOSE_PROD) pull postgres redis || fail 'Could not pull the target PostgreSQL and Redis images.'; \
+	postgres_running_version=$$($(DOCKER_COMPOSE_PROD) exec -T postgres sh -lc 'PGPASSWORD="$${POSTGRES_PASSWORD}" psql -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}" -Atqc "SHOW server_version"') || fail 'Could not read the running PostgreSQL version.'; \
+	redis_running_version=$$($(DOCKER_COMPOSE_PROD) exec -T redis sh -lc "redis-cli --raw INFO server | sed -n 's/^redis_version://p' | head -n 1") || fail 'Could not read the running Redis version.'; \
+	postgres_target_version=$$(docker run --rm --entrypoint postgres "$(POSTGRES_IMAGE)" --version) || fail 'Could not read the PostgreSQL version from the target image.'; \
+	redis_target_version=$$(docker run --rm --entrypoint redis-server "$(REDIS_IMAGE)" --version) || fail 'Could not read the Redis version from the target image.'; \
+	version_parts() { printf '%s\n' "$$1" | sed -nE 's/^[^0-9]*([0-9]+)\.([0-9]+)(\.([0-9]+))?.*/\1 \2 \4/p' | awk '{ printf "%s %s %s\n", $$1, $$2, ($$3 == "" ? 0 : $$3) }'; }; \
+	postgres_running_parts=$$(version_parts "$$postgres_running_version") || fail "The running PostgreSQL version '$$postgres_running_version' is not parseable."; \
+	postgres_target_parts=$$(version_parts "$$postgres_target_version") || fail "The target PostgreSQL version '$$postgres_target_version' is not parseable."; \
+	redis_running_parts=$$(version_parts "$$redis_running_version") || fail "The running Redis version '$$redis_running_version' is not parseable."; \
+	redis_target_parts=$$(version_parts "$$redis_target_version") || fail "The target Redis version '$$redis_target_version' is not parseable."; \
+	[ -n "$$postgres_running_parts" ] || fail "The running PostgreSQL version '$$postgres_running_version' is not parseable."; \
+	[ -n "$$postgres_target_parts" ] || fail "The target PostgreSQL version '$$postgres_target_version' is not parseable."; \
+	[ -n "$$redis_running_parts" ] || fail "The running Redis version '$$redis_running_version' is not parseable."; \
+	[ -n "$$redis_target_parts" ] || fail "The target Redis version '$$redis_target_version' is not parseable."; \
+	postgres_running_major=$$(printf '%s\n' "$$postgres_running_parts" | awk '{ print $$1 }'); postgres_running_minor=$$(printf '%s\n' "$$postgres_running_parts" | awk '{ print $$2 }'); postgres_running_patch=$$(printf '%s\n' "$$postgres_running_parts" | awk '{ print $$3 }'); \
+	postgres_target_major=$$(printf '%s\n' "$$postgres_target_parts" | awk '{ print $$1 }'); postgres_target_minor=$$(printf '%s\n' "$$postgres_target_parts" | awk '{ print $$2 }'); postgres_target_patch=$$(printf '%s\n' "$$postgres_target_parts" | awk '{ print $$3 }'); \
+	redis_running_major=$$(printf '%s\n' "$$redis_running_parts" | awk '{ print $$1 }'); redis_running_minor=$$(printf '%s\n' "$$redis_running_parts" | awk '{ print $$2 }'); redis_running_patch=$$(printf '%s\n' "$$redis_running_parts" | awk '{ print $$3 }'); \
+	redis_target_major=$$(printf '%s\n' "$$redis_target_parts" | awk '{ print $$1 }'); redis_target_minor=$$(printf '%s\n' "$$redis_target_parts" | awk '{ print $$2 }'); redis_target_patch=$$(printf '%s\n' "$$redis_target_parts" | awk '{ print $$3 }'); \
+	printf '%s\n' "PostgreSQL running: $$postgres_running_version (major=$$postgres_running_major minor=$$postgres_running_minor patch=$$postgres_running_patch)"; \
+	printf '%s\n' "PostgreSQL target:  $$postgres_target_version (major=$$postgres_target_major minor=$$postgres_target_minor patch=$$postgres_target_patch)"; \
+	printf '%s\n' "Redis running:      $$redis_running_version (major=$$redis_running_major minor=$$redis_running_minor patch=$$redis_running_patch)"; \
+	printf '%s\n' "Redis target:       $$redis_target_version (major=$$redis_target_major minor=$$redis_target_minor patch=$$redis_target_patch)"; \
+	major_upgrade_blocked=0; \
+	if [ "$$postgres_running_major" != "$$postgres_target_major" ]; then \
+		if [ "$(ALLOW_POSTGRES_MAJOR_UPGRADE)" != '1' ]; then printf '%s\n' "❌ PostgreSQL major upgrade $$postgres_running_major.x -> $$postgres_target_major.x is blocked. Set ALLOW_POSTGRES_MAJOR_UPGRADE=1 only after checking compatibility and migration requirements." >&2; major_upgrade_blocked=1; else printf '%s\n' '⚠️  PostgreSQL major upgrade explicitly allowed; compatibility and data migration remain the operator’s responsibility.' >&2; fi; \
+	fi; \
+	if [ "$$redis_running_major" != "$$redis_target_major" ]; then \
+		if [ "$(ALLOW_REDIS_MAJOR_UPGRADE)" != '1' ]; then printf '%s\n' "❌ Redis major upgrade $$redis_running_major.x -> $$redis_target_major.x is blocked. Set ALLOW_REDIS_MAJOR_UPGRADE=1 only after checking compatibility and migration requirements." >&2; major_upgrade_blocked=1; else printf '%s\n' '⚠️  Redis major upgrade explicitly allowed; compatibility and data migration remain the operator’s responsibility.' >&2; fi; \
+	fi; \
+	[ "$$major_upgrade_blocked" -eq 0 ] || fail 'Version gate failed; no maintenance or service stop was performed.'; \
+	printf '%s\n' '✅ Preflight passed; same-major updates are allowed and explicit major opt-ins were honored.'
+
+prod-backup-pg-redis: ## Create a PostgreSQL logical dump and Redis RDB snapshot
+	@set -eu; \
+	fail() { printf '%s\n' "❌ [prod-backup-pg-redis] $$1" >&2; exit 1; }; \
+	[ "$(PROD_REBUILD_CONFIRM)" = '1' ] || fail 'Production backup is blocked. Re-run with PROD_REBUILD_CONFIRM=1.'; \
+	if ! mkdir -p "$(PROD_BACKUP_DIR)" || [ ! -w "$(PROD_BACKUP_DIR)" ]; then fail "Backup directory '$(PROD_BACKUP_DIR)' is not writable."; fi; \
+	timestamp=$$(date -u +%Y%m%dT%H%M%SZ); \
+	postgres_container=$$($(DOCKER_COMPOSE_PROD) ps -q postgres); redis_container=$$($(DOCKER_COMPOSE_PROD) ps -q redis); \
+	[ -n "$$postgres_container" ] && [ -n "$$redis_container" ] || fail 'Both PostgreSQL and Redis containers must be running for backup.'; \
+	umask 077; \
+	postgres_backup="$(PROD_BACKUP_DIR)/postgres-$$timestamp.dump"; postgres_tmp="$$postgres_backup.tmp"; \
+	if ! $(DOCKER_COMPOSE_PROD) exec -T postgres sh -lc 'PGPASSWORD="$${POSTGRES_PASSWORD}" pg_dump --format=custom --no-owner --no-privileges --username="$${POSTGRES_USER}" "$${POSTGRES_DB}"' > "$$postgres_tmp"; then rm -f "$$postgres_tmp"; fail 'PostgreSQL logical dump failed.'; fi; \
+	if [ ! -s "$$postgres_tmp" ]; then rm -f "$$postgres_tmp"; fail 'PostgreSQL logical dump is empty.'; fi; \
+	mv "$$postgres_tmp" "$$postgres_backup"; \
+	redis_result=$$($(DOCKER_COMPOSE_PROD) exec -T redis redis-cli --raw BGSAVE) || fail 'Redis BGSAVE failed.'; \
+	case "$$redis_result" in *'Background saving started'*|*'Background saving terminated'*) ;; *) fail "Redis returned an unexpected BGSAVE response: $$redis_result" ;; esac; \
+	deadline=$$(( $$(date +%s) + $(PROD_REBUILD_TIMEOUT) )); \
+	while :; do \
+		redis_persistence=$$($(DOCKER_COMPOSE_PROD) exec -T redis redis-cli --raw INFO persistence) || fail 'Could not read Redis snapshot status.'; \
+		redis_in_progress=$$(printf '%s\n' "$$redis_persistence" | tr -d '\r' | sed -n 's/^rdb_bgsave_in_progress://p'); redis_last_status=$$(printf '%s\n' "$$redis_persistence" | tr -d '\r' | sed -n 's/^rdb_last_bgsave_status://p'); \
+		if [ "$$redis_in_progress" = '0' ] && [ "$$redis_last_status" = 'ok' ]; then break; fi; \
+		[ "$$(date +%s)" -lt "$$deadline" ] || fail 'Redis BGSAVE did not complete successfully before the timeout.'; sleep 1; \
+	done; \
+	redis_backup="$(PROD_BACKUP_DIR)/redis-$$timestamp.rdb"; redis_tmp="$$redis_backup.tmp"; \
+	if ! docker cp "$${redis_container}:/data/dump.rdb" "$$redis_tmp"; then rm -f "$$redis_tmp"; fail 'Could not copy the Redis RDB snapshot from the container.'; fi; \
+	if [ ! -s "$$redis_tmp" ]; then rm -f "$$redis_tmp"; fail 'Redis RDB snapshot is empty.'; fi; \
+	mv "$$redis_tmp" "$$redis_backup"; \
+	printf '%s\n' "✅ PostgreSQL backup: $$postgres_backup"; printf '%s\n' "✅ Redis snapshot: $$redis_backup"
 
 prod-prune: ## 🧹 Safe Docker cleanup (removes unused images/cache but keeps stopped containers)
 	@echo "Cleaning up unused Docker resources (images, networks, and build cache)..."
@@ -457,57 +653,27 @@ prod-prune: ## 🧹 Safe Docker cleanup (removes unused images/cache but keeps s
 # =============================
 
 prod-maintenance-on: ## Enable Caddy maintenance mode (serve static maintenance.html)
-	@printf '%s\n' '[prod-maintenance-on] Ensuring maintenance.html exists...'
-	@$(DOCKER_COMPOSE_PROD) exec -T app sh -lc 'test -f /var/www/html/public/maintenance.html || printf %s "<!doctype html><title>Maintenance</title><h1>Trwa aktualizacja…</h1>" > /var/www/html/public/maintenance.html'
-
-	@printf '%s\n' '[prod-maintenance-on] Copying maintenance Caddyfile into container...'
-	@docker cp docker/Caddyfile.maintenance $$($(DOCKER_COMPOSE_PROD) ps -q caddy):/etc/caddy/Caddyfile.maintenance
-
-	@printf '%s\n' '[prod-maintenance-on] Validating maintenance Caddyfile...'
-	@cid=$$($(DOCKER_COMPOSE_PROD) ps -q caddy); \
-	if [ -n "$$cid" ]; then \
-	  if $(DOCKER_COMPOSE_PROD) exec -T caddy caddy validate --config /etc/caddy/Caddyfile.maintenance; then \
-	    printf '%s\n' '[prod-maintenance-on] Caddyfile.maintenance is valid.'; \
-	  else \
-	    printf '%s\n' '[prod-maintenance-on] Warning: Caddyfile.maintenance validation failed! Attempting reload anyway...'; \
-	  fi; \
-	fi
-
-	@cid=$$($(DOCKER_COMPOSE_PROD) ps -q caddy); \
-	if [ -z "$$cid" ]; then \
-	  printf '%s\n' '[prod-maintenance-on] Caddy container not found; skipping reload.'; \
-	else \
-	  printf '%s\n' "[prod-maintenance-on] Waiting for Caddy container ($$cid) to be running..."; \
-	  for i in $$(seq 1 10); do \
-	    if docker inspect -f '{{.State.Running}}' $$cid 2>/dev/null | grep -q true; then \
-	      printf '%s\n' '[prod-maintenance-on] Caddy is running; reloading maintenance config...'; \
-	      if ! $(DOCKER_COMPOSE_PROD) exec -T caddy caddy reload --config /etc/caddy/Caddyfile.maintenance; then \
-	        printf '%s\n' '[prod-maintenance-on] Warning: failed to reload Caddy into maintenance mode.'; \
-	      fi; \
-	      exit 0; \
-	    fi; \
-	    printf '%s\n' "[prod-maintenance-on] Caddy not running yet ($$i/10); waiting..."; \
-	    sleep 2; \
-	  done; \
-	  printf '%s\n' '[prod-maintenance-on] Caddy failed to become running; continuing without reload.'; \
-	fi
+	@set -eu; \
+	printf '%s\n' '[prod-maintenance-on] Ensuring maintenance.html exists...'; \
+	$(DOCKER_COMPOSE_PROD) exec -T app sh -lc 'test -f /var/www/html/public/maintenance.html || printf %s "<!doctype html><title>Maintenance</title><h1>Trwa aktualizacja…</h1>" > /var/www/html/public/maintenance.html'; \
+	cid=$$($(DOCKER_COMPOSE_PROD) ps -q caddy); \
+	[ -n "$$cid" ] || { printf '%s\n' '[prod-maintenance-on] Caddy container not found.' >&2; exit 1; }; \
+	[ "$$(docker inspect -f '{{.State.Running}}' "$$cid" 2>/dev/null)" = 'true' ] || { printf '%s\n' '[prod-maintenance-on] Caddy container is not running.' >&2; exit 1; }; \
+	printf '%s\n' '[prod-maintenance-on] Copying maintenance Caddyfile into container...'; \
+	docker cp docker/Caddyfile.maintenance "$$cid:/etc/caddy/Caddyfile.maintenance"; \
+	printf '%s\n' '[prod-maintenance-on] Validating maintenance Caddyfile...'; \
+	$(DOCKER_COMPOSE_PROD) exec -T caddy caddy validate --config /etc/caddy/Caddyfile.maintenance; \
+	printf '%s\n' '[prod-maintenance-on] Reloading maintenance Caddyfile...'; \
+	$(DOCKER_COMPOSE_PROD) exec -T caddy caddy reload --config /etc/caddy/Caddyfile.maintenance; \
+	printf '%s\n' '[prod-maintenance-on] Maintenance mode is active.'
 
 prod-maintenance-off: ## Disable Caddy maintenance mode (restore normal config)
-	@cid=$$($(DOCKER_COMPOSE_PROD) ps -q caddy); \
-	if [ -z "$$cid" ]; then \
-	  printf '%s\n' '[prod-maintenance-off] Caddy container not found; skipping reload.'; \
-	else \
-	  printf '%s\n' "[prod-maintenance-off] Waiting for Caddy container ($$cid) to be running..."; \
-	  for i in $$(seq 1 10); do \
-	    if docker inspect -f '{{.State.Running}}' $$cid 2>/dev/null | grep -q true; then \
-	      printf '%s\n' '[prod-maintenance-off] Caddy is running; reloading default config...'; \
-	      if ! $(DOCKER_COMPOSE_PROD) exec -T caddy caddy reload --config /etc/caddy/Caddyfile; then \
-	        printf '%s\n' '[prod-maintenance-off] Warning: failed to reload Caddy back to default config.'; \
-	      fi; \
-	      exit 0; \
-	    fi; \
-	    printf '%s\n' "[prod-maintenance-off] Caddy not running yet ($$i/10); waiting..."; \
-	    sleep 2; \
-	  done; \
-	  printf '%s\n' '[prod-maintenance-off] Caddy failed to become running; continuing without reload.'; \
-	fi
+	@set -eu; \
+	cid=$$($(DOCKER_COMPOSE_PROD) ps -q caddy); \
+	[ -n "$$cid" ] || { printf '%s\n' '[prod-maintenance-off] Caddy container not found.' >&2; exit 1; }; \
+	[ "$$(docker inspect -f '{{.State.Running}}' "$$cid" 2>/dev/null)" = 'true' ] || { printf '%s\n' '[prod-maintenance-off] Caddy container is not running.' >&2; exit 1; }; \
+	printf '%s\n' '[prod-maintenance-off] Validating normal Caddyfile...'; \
+	$(DOCKER_COMPOSE_PROD) exec -T caddy caddy validate --config /etc/caddy/Caddyfile; \
+	printf '%s\n' '[prod-maintenance-off] Reloading normal Caddyfile...'; \
+	$(DOCKER_COMPOSE_PROD) exec -T caddy caddy reload --config /etc/caddy/Caddyfile; \
+	printf '%s\n' '[prod-maintenance-off] Maintenance mode is disabled.'
