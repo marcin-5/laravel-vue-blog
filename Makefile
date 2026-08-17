@@ -369,8 +369,8 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 	git pull --ff-only
 	@echo "🧹 Clearing old bootstrap cache to prevent worker stuck..."
 	rm -rf /srv/laravel-blog/bootstrap_cache/* 2>/dev/null || true
-	@echo "🔨 Building fresh images for core services (app, ssr, queue, scheduler)..."
-	$(DOCKER_COMPOSE_PROD) build --no-cache --pull app ssr queue scheduler
+	@echo "🔨 Building fresh images for core services and Caddy..."
+	$(DOCKER_COMPOSE_PROD) build --no-cache --pull app ssr queue scheduler caddy
 	@echo "🔧 Clearing Laravel caches before recreate..."
 	-$(DOCKER_COMPOSE_PROD) exec -T app php artisan optimize:clear || true
 	-$(DOCKER_COMPOSE_PROD) exec -T app php artisan package:discover --ansi || true
@@ -403,11 +403,13 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 	@echo "🔎 Queue status:"
 	$(DOCKER_COMPOSE_PROD) exec app php artisan queue:monitor redis
 	@echo ""
-	@echo "✅ Production update complete."
-	@echo ""
 	@echo "If SSR still doesn't work, check your Dockerfile to ensure 'npm run build' creates bootstrap/ssr/"
+	@echo "🔐 Recreating Caddy with the Hostinger DNS-01 provider..."
+	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps caddy
 	$(MAKE) prod-queue-continue-all
 	$(MAKE) prod-maintenance-off
+	@echo ""
+	@echo "✅ Production update complete."
 
 # Shorthand target to update application data only
 prod-update-data: ## Pull code and rebuild only the app container for data/code updates
