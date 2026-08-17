@@ -440,6 +440,7 @@ prod-update-data: ## Pull code and rebuild only the app container for data/code 
 
 # =============================
 # Rebuild Postgres & Redis (production)
+# make POSTGRES_IMAGE=postgres:15.16-alpine REDIS_IMAGE=redis:7.4.7-alpine PROD_REBUILD_CONFIRM=1 prod-rebuild-pg-redis
 # =============================
 prod-rebuild-pg-redis: prod-rebuild-pg-redis-preflight ## Recreate postgres and redis services with zero-502 maintenance window
 	@set -eu; \
@@ -567,7 +568,13 @@ prod-rebuild-pg-redis-preflight: ## Validate production rebuild confirmation, ve
 			latest|*:latest|'') fail "Image '$$image' must use an explicit tag or digest; latest is not allowed." ;; \
 			*@sha256:*) ;; \
 			*@*) fail "Image '$$image' must use a sha256 digest when using a digest reference." ;; \
-			*/*) image_name=$${image##*/}; case "$$image_name" in *:*) ;; *) fail "Image '$$image' must use an explicit tag or digest." ;; esac ;; \
+			*/*) \
+				image_name=$${image##*/}; \
+				case "$$image_name" in \
+					*:*) ;; \
+					*) fail "Image '$$image' must use an explicit tag or digest." ;; \
+				esac; \
+				;; \
 			*:*) ;; \
 			*) fail "Image '$$image' must use an explicit tag or digest." ;; \
 		esac; \
