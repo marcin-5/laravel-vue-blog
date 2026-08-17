@@ -1,6 +1,7 @@
 {$APP_DOMAIN}, *.{$APP_DOMAIN}, {$APP_DOMAIN_WWW}, {$APP_DOMAIN_SECONDARY}, *.{$APP_DOMAIN_SECONDARY} {
     tls {
         dns hostinger {env.HOSTINGER_API_TOKEN}
+        dns_ttl 60s
     }
 
     @www host {$APP_DOMAIN_WWW}
@@ -16,6 +17,7 @@
 {$ENNEAGRAM_DOMAIN_PL}, {$ENNEAGRAM_DOMAIN_EN} {
     tls {
         dns hostinger {env.HOSTINGER_API_TOKEN}
+        dns_ttl 60s
     }
 
     root * /var/www/html/public
