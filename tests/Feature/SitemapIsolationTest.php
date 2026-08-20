@@ -155,6 +155,26 @@ class SitemapIsolationTest extends TestCase
         $this->assertStringNotContainsString('mixed-post', $content); // Posty z group_id powinny być wykluczone
     }
 
+    public function test_subdomain_sitemap_contains_blog_about_page()
+    {
+        $user = User::factory()->create();
+
+        Blog::factory()->create([
+            'user_id' => $user->id,
+            'slug' => 'about-blog',
+            'locale' => 'pl',
+            'is_published' => true,
+        ]);
+
+        $response = $this->get('http://about-blog.osobliwy.pl/sitemap.xml');
+        $response->assertStatus(200);
+
+        $this->assertStringContainsString(
+            '<loc>http://about-blog.osobliwy.pl/about</loc>',
+            $response->getContent(),
+        );
+    }
+
     public function test_sitemap_cache_is_cleared_when_tag_is_added()
     {
         $user = User::factory()->create();

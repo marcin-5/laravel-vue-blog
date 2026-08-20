@@ -32,6 +32,7 @@ readonly class SitemapService
             $this->addPublishedBlogs($sitemap, $locale);
         } else {
             $this->addBlogLanding($sitemap, $blog);
+            $this->addBlogAbout($sitemap, $blog);
             $this->addBlogPosts($sitemap, $blog);
             $this->addBlogTags($sitemap, $blog);
         }
@@ -100,6 +101,19 @@ readonly class SitemapService
                 ->setLastModificationDate($blog->updated_at)
                 ->setChangeFrequency('daily')
                 ->setPriority(1.0),
+        );
+    }
+
+    private function addBlogAbout(Sitemap $sitemap, Blog $blog): void
+    {
+        $sitemap->add(
+            SitemapUrl::create(route('blog.public.about', [
+                'blog' => $blog->slug,
+                'mainDomain' => $blog->main_domain,
+            ]))
+                ->setLastModificationDate($blog->updated_at)
+                ->setChangeFrequency('monthly')
+                ->setPriority(0.7),
         );
     }
 
