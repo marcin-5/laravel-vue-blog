@@ -71,20 +71,18 @@ function submitAnswer(): void {
             <CardTitle class="text-base text-pretty wrap-break-word text-foreground md:text-lg">
                 {{ question.question }}
             </CardTitle>
-            <p class="text-sm text-muted-foreground" aria-live="polite">
-                {{ selectedAnswerState.length }}/{{ answerLimit }}
-            </p>
+            <p aria-live="polite" class="text-sm text-muted-foreground">{{ selectedAnswerState.length }}/{{ answerLimit }}</p>
         </CardHeader>
 
         <CardContent class="px-2 md:px-3 lg:px-4">
-            <div class="space-y-4 font-nunito md:space-y-3 lg:font-inter" role="group" :aria-label="question.question">
+            <div :aria-label="question.question" class="space-y-4 font-nunito md:space-y-3 lg:font-inter" role="group">
                 <Button
                     v-for="option in options"
                     :key="option.key"
                     :aria-pressed="isSelected(option.key)"
                     :disabled="processing"
                     :variant="isSelected(option.key) ? 'secondary' : 'outline'"
-                    class="w-full justify-start rounded-lg border px-1 py-4 text-left text-sm leading-snug text-pretty wrap-break-word whitespace-normal md:px-4 md:py-6 md:text-base"
+                    class="h-auto min-h-10 w-full items-start justify-start rounded-lg border px-1 py-1 text-left text-sm leading-snug text-pretty wrap-break-word whitespace-normal md:px-2 md:py-2 md:text-base"
                     size="lg"
                     @click="toggle(option)"
                 >
@@ -98,21 +96,12 @@ function submitAnswer(): void {
                         {{ t('back') }}
                     </Button>
 
-                    <Button
-                        :disabled="!canSkip || processing"
-                        variant="muted"
-                        @click="emit('skip')"
-                    >
+                    <Button :disabled="!canSkip || processing" variant="muted" @click="emit('skip')">
                         {{ t('skip') }} ({{ skipCount }}/{{ skipLimit }})
                     </Button>
                 </div>
 
-                <Button
-                    :disabled="selectedAnswerState.length === 0 || processing"
-                    class="px-6"
-                    variant="secondary"
-                    @click="submitAnswer"
-                >
+                <Button :disabled="selectedAnswerState.length === 0 || processing" class="px-6" variant="secondary" @click="submitAnswer">
                     {{ processing ? t('loading') : t('next') }}
                 </Button>
             </div>
