@@ -38,4 +38,27 @@ describe('QuestionCard.vue', () => {
 
         expect(answerButton.classes()).toEqual(expect.arrayContaining(['h-auto', 'min-h-10', 'items-start', 'whitespace-normal']));
     });
+
+    it('emits only the fields accepted by the answer API', async () => {
+        const option = { key: 'option-1', value: 'Answer', category: '1', score: 999 };
+        const wrapper = mount(QuestionCard, {
+            props: {
+                question: { id: 'question-1', question: 'Question' },
+                options: [option],
+                selectedAnswers: [],
+                answerLimit: 1,
+                skipCount: 0,
+                skipLimit: 1,
+                canSkip: true,
+                canBack: false,
+                autoConfirmSingle: false,
+                processing: false,
+            },
+        });
+
+        await wrapper.find('[aria-pressed]').trigger('click');
+        await wrapper.findAll('button').at(-1)?.trigger('click');
+
+        expect(wrapper.emitted('answer')).toEqual([[[{ key: 'option-1', value: 'Answer', category: '1' }]]]);
+    });
 });

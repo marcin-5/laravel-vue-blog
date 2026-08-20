@@ -53,14 +53,18 @@ function toggle(option: EnneagramOption): void {
         selectedAnswerState.value = [...selectedAnswerState.value, option];
 
         if (props.autoConfirmSingle && props.answerLimit === 1) {
-            emit('answer', selectedAnswerState.value);
+            emit('answer', answerPayload());
         }
     }
 }
 
+function answerPayload(): SelectedAnswer[] {
+    return selectedAnswerState.value.map(({ key, value, category }) => ({ key, value, category }));
+}
+
 function submitAnswer(): void {
     if (selectedAnswerState.value.length > 0 && !props.processing) {
-        emit('answer', selectedAnswerState.value);
+        emit('answer', answerPayload());
     }
 }
 </script>
