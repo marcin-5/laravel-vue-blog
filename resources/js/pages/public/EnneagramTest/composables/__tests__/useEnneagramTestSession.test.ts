@@ -1,8 +1,8 @@
-import { nextTick, reactive } from 'vue';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useHttp } from '@inertiajs/vue3';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { nextTick, reactive } from 'vue';
+import type { EnneagramTestState, SelectedAnswer, TestApiResponse } from '../../types';
 import { useEnneagramTestSession } from '../useEnneagramTestSession';
-import type { EnneagramTestState, TestApiResponse } from '../../types';
 
 vi.mock('@inertiajs/vue3', () => ({
     useHttp: vi.fn(),
@@ -104,6 +104,28 @@ describe('useEnneagramTestSession', () => {
         await Promise.all([first, second]);
 
         expect(actionHttp.post).toHaveBeenCalledTimes(1);
+    });
+
+    it('sends only the fields accepted by the answer API', async () => {
+        const startHttp = createHttp({ extended: false });
+        const actionHttp = createHttp({ testId: '', action: 'answer', answers: [] });
+        const resetHttp = createHttp({ testId: '' });
+        vi.mocked(useHttp)
+            .mockReturnValueOnce(startHttp as never)
+            .mockReturnValueOnce(actionHttp as never)
+            .mockReturnValueOnce(resetHttp as never);
+        startHttp.post.mockImplementation(async (_url, options) => {
+            options.onSuccess?.(response());
+            return response();
+        });
+
+        const session = useEnneagramTestSession();
+        await session.start();
+
+        const answer = { key: 'sp', value: 'Option', category: 'sp', score: 999 } as SelectedAnswer;
+        await session.apply('answer', [answer]);
+
+        expect((actionHttp as typeof actionHttp & { answers: SelectedAnswer[] }).answers).toEqual([{ key: 'sp', value: 'Option', category: 'sp' }]);
     });
 
     it('exposes validation failures and retries the last operation', async () => {

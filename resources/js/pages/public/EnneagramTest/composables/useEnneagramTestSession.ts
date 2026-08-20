@@ -1,5 +1,5 @@
-import { computed, shallowReadonly, shallowRef } from 'vue';
 import { useHttp } from '@inertiajs/vue3';
+import { computed, shallowReadonly, shallowRef } from 'vue';
 import type {
     ActionTestPayload,
     EnneagramTestState,
@@ -23,6 +23,10 @@ const defaultActionPayload = (): ActionTestPayload => ({
     answers: [],
 });
 
+function normalizeAnswers(answers: SelectedAnswer[]): SelectedAnswer[] {
+    return answers.map(({ key, value, category }) => ({ key, value, category }));
+}
+
 export function useEnneagramTestSession() {
     const state = shallowRef<EnneagramTestState | null>(null);
     const testId = shallowRef<string | null>(null);
@@ -33,9 +37,7 @@ export function useEnneagramTestSession() {
     const actionHttp = useHttp<ActionTestPayload, TestApiResponse>(defaultActionPayload());
     const resetHttp = useHttp<{ testId: string }, ResetTestResponse>({ testId: '' });
 
-    const processing = computed(() =>
-        startHttp.processing || actionHttp.processing || resetHttp.processing,
-    );
+    const processing = computed(() => startHttp.processing || actionHttp.processing || resetHttp.processing);
 
     const hasSession = computed(() => state.value !== null && testId.value !== null);
 
@@ -57,9 +59,7 @@ export function useEnneagramTestSession() {
 
     function handleHttpException(status: number): void {
         setError(
-            status === 409
-                ? 'This test session is no longer available. Please start again.'
-                : 'The test service returned an unexpected response.',
+            status === 409 ? 'This test session is no longer available. Please start again.' : 'The test service returned an unexpected response.',
             status,
         );
     }
@@ -98,7 +98,7 @@ export function useEnneagramTestSession() {
         clearError();
         actionHttp.testId = testId.value;
         actionHttp.action = action;
-        actionHttp.answers = answers;
+        actionHttp.answers = normalizeAnswers(answers);
         lastOperation.value = 'action';
 
         await actionHttp.post('/action', {
