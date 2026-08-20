@@ -1,6 +1,10 @@
 enneagram-test.osobliwy.localhost:80, enneagram-test.peculiarmatters.localhost:80 {
     root * /var/www/html/public
     header /build/assets/* Cache-Control "public, max-age=31536000, immutable"
+    @dynamicSystemFiles path /sitemap.xml /robots.txt
+    php_fastcgi @dynamicSystemFiles app:9000 {
+        try_files /index.php
+    }
     php_fastcgi app:9000
     file_server
 }
@@ -9,6 +13,10 @@ enneagram-test.osobliwy.localhost:80, enneagram-test.peculiarmatters.localhost:8
   root * /var/www/html/public
   encode zstd gzip
   header /build/assets/* Cache-Control "public, max-age=31536000, immutable"
+  @dynamicSystemFiles path /sitemap.xml /robots.txt
+  php_fastcgi @dynamicSystemFiles app:9000 {
+    try_files /index.php
+  }
   php_fastcgi app:9000
   file_server
 }
