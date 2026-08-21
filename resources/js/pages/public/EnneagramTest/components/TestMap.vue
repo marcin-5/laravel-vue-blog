@@ -46,8 +46,10 @@ function statusClasses(status: TestMapPartStatus): string {
                                 :title="statusLabel(part.status)"
                                 class="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold"
                             >
-                                <span aria-hidden="true">{{ statusIcon(part.status) }}</span>
-                                {{ t('part') }} {{ part.part }}
+                                <span aria-hidden="true" class="-mt-0.5 inline-flex h-3 w-3 items-center justify-center leading-none">
+                                    {{ statusIcon(part.status) }}
+                                </span>
+                                <span class="leading-none">{{ t('part') }} {{ part.part }}</span>
                                 <span class="sr-only">{{ statusLabel(part.status) }}</span>
                             </span>
                         </li>
