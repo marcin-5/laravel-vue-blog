@@ -183,9 +183,9 @@ final class EnneagramTestEngine
 
         foreach (self::INSTINCTS as $instinct) {
             $stage2[$instinct] = array_filter(
-                $questions,
-                fn(array $question): bool => str_starts_with($question['id'], "$instinct-"),
-            )
+                    $questions,
+                    fn(array $question): bool => str_starts_with($question['id'], "$instinct-"),
+                )
                     |> array_values(...)
                     |> (fn($x) => $this->shuffleByPriority($x, $seed));
         }
@@ -309,8 +309,8 @@ final class EnneagramTestEngine
         $state['allowed_actions'] = [
             'answer' => $state['status'] === 'in_progress',
             'skip' => $state['status'] === 'in_progress' && (int) $state['skips'] < $this->currentConfig(
-                $state,
-            )['maxSkips'],
+                    $state,
+                )['maxSkips'],
             'back' => $state['history'] !== [],
         ];
 
@@ -445,6 +445,21 @@ final class EnneagramTestEngine
 
     /**
      * @param  array<string, mixed>  $state
+     * @return array<string, int|string>
+     */
+    private function currentConfig(array $state): array
+    {
+        $config = $state['config']['stages']["stage{$state['stage']}"]["part{$state['part']}"] ?? null;
+
+        if (!is_array($config)) {
+            throw new RuntimeException('The enneagram state contains an invalid current part.');
+        }
+
+        return $config;
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
      * @return array<string, int>
      */
     private function progressScores(array $state): array
@@ -462,7 +477,10 @@ final class EnneagramTestEngine
      */
     private function stage1Part2AlternativeLeadTarget(array $state, array $config): ?int
     {
-        if ((int) $state['stage'] !== 1 || (int) $state['part'] !== 2 || !array_key_exists('minLeadAlternative', $config)) {
+        if ((int) $state['stage'] !== 1 || (int) $state['part'] !== 2 || !array_key_exists(
+                'minLeadAlternative',
+                $config,
+            )) {
             return null;
         }
 
@@ -485,8 +503,8 @@ final class EnneagramTestEngine
     {
         if ((int) $state['stage'] === 1 && (int) $state['part'] === 1) {
             return $answered >= $target
-                && $this->isTopTwoTie($scores)
-                && !$this->hasLead($scores, $leadTarget)
+            && $this->isTopTwoTie($scores)
+            && !$this->hasLead($scores, $leadTarget)
                 ? 'tie_breaker'
                 : 'standard';
         }
@@ -502,6 +520,32 @@ final class EnneagramTestEngine
         }
 
         return 'standard';
+    }
+
+    /**
+     * @param  array<string, int>  $scores
+     */
+    private function isTopTwoTie(array $scores): bool
+    {
+        $values = array_values($scores);
+        rsort($values);
+
+        return count($values) >= 2 && $values[0] === $values[1];
+    }
+
+    /**
+     * @param  array<string, int>  $scores
+     */
+    private function hasLead(array $scores, int $threshold): bool
+    {
+        if ($threshold <= 0) {
+            return false;
+        }
+
+        $values = array_values($scores);
+        rsort($values);
+
+        return ($values[0] ?? 0) - ($values[1] ?? 0) >= $threshold;
     }
 
     /**
@@ -581,21 +625,6 @@ final class EnneagramTestEngine
 
         return ($part === 2 && count($state['stage2_selected']['part1']) <= 1)
             || ($part === 4 && count($state['stage2_selected']['part3']) <= 1);
-    }
-
-    /**
-     * @param  array<string, mixed>  $state
-     * @return array<string, int|string>
-     */
-    private function currentConfig(array $state): array
-    {
-        $config = $state['config']['stages']["stage{$state['stage']}"]["part{$state['part']}"] ?? null;
-
-        if (!is_array($config)) {
-            throw new RuntimeException('The enneagram state contains an invalid current part.');
-        }
-
-        return $config;
     }
 
     /**
@@ -823,32 +852,6 @@ final class EnneagramTestEngine
     }
 
     /**
-     * @param  array<string, int>  $scores
-     */
-    private function hasLead(array $scores, int $threshold): bool
-    {
-        if ($threshold <= 0) {
-            return false;
-        }
-
-        $values = array_values($scores);
-        rsort($values);
-
-        return ($values[0] ?? 0) - ($values[1] ?? 0) >= $threshold;
-    }
-
-    /**
-     * @param  array<string, int>  $scores
-     */
-    private function isTopTwoTie(array $scores): bool
-    {
-        $values = array_values($scores);
-        rsort($values);
-
-        return count($values) >= 2 && $values[0] === $values[1];
-    }
-
-    /**
      * @param  list<array<string, mixed>>  $pool
      */
     private function isLastQuestion(int $index, array $pool): bool
@@ -897,16 +900,16 @@ final class EnneagramTestEngine
         $alternativeLead = $alternativeApplies && $this->hasLead($scores, (int) ($config['minLeadAlternative'] ?? 0));
 
         if ($reachedMax && !$standardLead && !$alternativeLead && !$this->isLastQuestion(
-            (int) $state['question_index'],
-            $pool,
-        )) {
+                (int) $state['question_index'],
+                $pool,
+            )) {
             return false;
         }
 
         return $standardLead || $alternativeLead || $reachedMax || $this->isLastQuestion(
-            (int) $state['question_index'],
-            $pool,
-        );
+                (int) $state['question_index'],
+                $pool,
+            );
     }
 
     /**
@@ -1016,9 +1019,9 @@ final class EnneagramTestEngine
         $reachedMax = (int) $state['question_index'] >= $config['maxQuestions'];
         $noMoreQuestions = $state['stage2_pool_indices'][$instinct] >= count($pool);
         $canEndEarly = !$this->isStage2TieBreaker($part) && $this->hasLead(
-            $state['scores']['stage2']['per_part'][$part],
-            (int) ($config['minLead'] ?? 0),
-        );
+                $state['scores']['stage2']['per_part'][$part],
+                (int) ($config['minLead'] ?? 0),
+            );
 
         if (!$reachedMax && !$noMoreQuestions && !$canEndEarly) {
             return;

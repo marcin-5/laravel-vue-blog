@@ -106,6 +106,29 @@ test('exposes the earlier stage one part two lead target when the part one winne
         ->and($state['progress']['lead']['secondThird']['alternativeTarget'])->toBeNull();
 });
 
+test('presents stage two options with string keys and categories', function () {
+    $data = enneagramEngineData();
+
+    foreach ($data['questions'] as &$question) {
+        if (str_starts_with($question['id'], 'sp-')) {
+            $question['answerLists'] = ['1' => 'Type one answer'];
+        }
+    }
+    unset($question);
+
+    $engine = new EnneagramTestEngine;
+    $state = $engine->start($data, false, 12345, 'en');
+
+    while ($state['stage'] === 1) {
+        $view = $engine->present($state);
+        $state = $engine->apply($state, 'answer', array_slice($view['options'], 0, $view['answer_limit']));
+    }
+
+    expect($state['stage'])->toBe(2)
+        ->and($state['options'][0]['key'])->toBeString()
+        ->and($state['options'][0]['category'])->toBeString();
+});
+
 test('rejects an answer that is not available for the current question', function () {
     $engine = new EnneagramTestEngine;
     $state = $engine->start(enneagramEngineData(), false, 12345, 'en');

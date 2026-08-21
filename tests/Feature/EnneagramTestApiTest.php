@@ -107,6 +107,34 @@ it('applies answers and can restore the previous question', function () {
         ->assertJsonPath('state.allowed_actions.back', false);
 });
 
+it('accepts answers with numeric stage two categories through the action endpoint', function () {
+    $engine = app(\App\Services\Enneagram\EnneagramTestEngine::class);
+    $data = app(\App\Services\Enneagram\EnneagramTestDataLoader::class)->load('pl');
+    $state = $engine->start($data, false, 12345, 'pl');
+
+    while ($state['stage'] === 1) {
+        $view = $engine->present($state);
+        $state = $engine->apply($state, 'answer', array_slice($view['options'], 0, $view['answer_limit']));
+    }
+
+    expect($state['stage'])->toBe(2)
+        ->and($state['part'])->toBe(1);
+
+    $testId = str_repeat('s', 40);
+    session([config('enneagram.session.key') => [$testId => $state]]);
+
+    $view = $engine->present($state);
+
+    $this
+        ->postJson(enneagramApiUrl('enneagram-test.osobliwy.localhost', '/action'), [
+            'testId' => $testId,
+            'action' => 'answer',
+            'answers' => [$view['options'][0]],
+        ])
+        ->assertSuccessful()
+        ->assertJsonPath('testId', $testId);
+});
+
 it('applies skip and reset actions', function () {
     $start = $this
         ->postJson(enneagramApiUrl('enneagram-test.osobliwy.localhost', '/start'))
