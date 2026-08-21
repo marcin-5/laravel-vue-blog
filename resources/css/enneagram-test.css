@@ -73,11 +73,11 @@
     --et-card-foreground: hsl(155 40% 60%);
     --et-primary: hsl(205 50% 65%);
     --et-primary-foreground: hsl(270 25% 25%);
-    --et-secondary: hsl(210 15% 75%);
-    --et-secondary-foreground: hsl(160 50% 35%);
+    --et-secondary: hsl(20 50% 80%);
+    --et-secondary-foreground: hsl(20 50% 35%);
     --et-muted: hsl(280 15% 85%);
     --et-muted-foreground: hsl(280 25% 50%);
-    --et-border: hsl(280 20% 88%);
+    --et-border: hsl(280 20% 78%);
 }
 
 /* DARK SCHEMES */
