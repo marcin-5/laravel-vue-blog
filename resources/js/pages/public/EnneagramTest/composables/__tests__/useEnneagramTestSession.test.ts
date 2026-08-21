@@ -44,8 +44,8 @@ const state: EnneagramTestState = {
         phase: 'standard',
         tieBreakerStartedAt: null,
         lead: {
-            firstSecond: { value: 0, target: 2 },
-            secondThird: { value: 0, target: 2 },
+            firstSecond: { value: 0, target: 2, alternativeTarget: null },
+            secondThird: { value: 0, target: 2, alternativeTarget: null },
         },
     },
     test_map: [

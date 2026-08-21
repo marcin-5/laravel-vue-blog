@@ -20,6 +20,7 @@ export type TestProgressPhase = 'standard' | 'tie_breaker';
 export interface LeadProgress {
     value: number;
     target: number;
+    alternativeTarget: number | null;
 }
 
 export interface TestProgress {

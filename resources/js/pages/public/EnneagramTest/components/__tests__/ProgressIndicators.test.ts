@@ -42,8 +42,8 @@ const state: EnneagramTestState = {
         phase: 'standard',
         tieBreakerStartedAt: null,
         lead: {
-            firstSecond: { value: 3, target: 4 },
-            secondThird: { value: 1, target: 4 },
+            firstSecond: { value: 3, target: 4, alternativeTarget: null },
+            secondThird: { value: 1, target: 4, alternativeTarget: null },
         },
     },
     test_map: [
@@ -100,5 +100,29 @@ describe('ProgressIndicators.vue', () => {
         expect(wrapper.text()).toContain('tie_breaker_active');
         expect(wrapper.text()).toContain('Tie-breaker from answer 6');
         expect(wrapper.find('[aria-valuenow="6"]').exists()).toBe(true);
+    });
+
+    it('shows an earlier lead target marker when it is available', () => {
+        const wrapper = mount(ProgressIndicators, {
+            props: {
+                state: {
+                    ...state,
+                    stage: 1,
+                    part: 2,
+                    progress: {
+                        ...state.progress,
+                        lead: {
+                            firstSecond: { value: 1, target: 3, alternativeTarget: 2 },
+                            secondThird: { value: 0, target: 3, alternativeTarget: null },
+                        },
+                    },
+                },
+            },
+        });
+
+        expect(wrapper.text()).toContain('lead_alternative_target');
+        expect(wrapper.text()).toContain('2');
+        expect(wrapper.find('.lead-alternative-marker').exists()).toBe(true);
+        expect(wrapper.find('.lead-alternative-marker').attributes('style')).toContain('left: 66.66666666666666%');
     });
 });

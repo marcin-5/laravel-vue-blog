@@ -405,8 +405,8 @@ final class EnneagramTestEngine
                 'phase' => 'standard',
                 'tieBreakerStartedAt' => null,
                 'lead' => [
-                    'firstSecond' => ['value' => 0, 'target' => 0],
-                    'secondThird' => ['value' => 0, 'target' => 0],
+                    'firstSecond' => ['value' => 0, 'target' => 0, 'alternativeTarget' => null],
+                    'secondThird' => ['value' => 0, 'target' => 0, 'alternativeTarget' => null],
                 ],
             ];
         }
@@ -425,8 +425,9 @@ final class EnneagramTestEngine
             : (int) $state['stage2_pool_indices'][$this->stage2Instinct($state, (int) $state['part'])] + 1);
         $scores = $this->progressScores($state);
         $leadTarget = (int) ($config['minLead'] ?? 0);
+        $alternativeLeadTarget = $this->stage1Part2AlternativeLeadTarget($state, $config);
         $phase = $this->progressPhase($state, $scores, $target, $leadTarget, $answered);
-        $lead = $this->leadProgress($scores, $leadTarget);
+        $lead = $this->leadProgress($scores, $leadTarget, $alternativeLeadTarget);
 
         return [
             'current' => $position,
@@ -453,6 +454,27 @@ final class EnneagramTestEngine
         }
 
         return $state['scores']['stage2']['per_part'][(int) $state['part']];
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     * @param  array<string, int|string>  $config
+     */
+    private function stage1Part2AlternativeLeadTarget(array $state, array $config): ?int
+    {
+        if ((int) $state['stage'] !== 1 || (int) $state['part'] !== 2 || !array_key_exists('minLeadAlternative', $config)) {
+            return null;
+        }
+
+        $winner = $state['stage1_part1_winner'] ?? null;
+
+        if (!is_string($winner)) {
+            return null;
+        }
+
+        return (int) ($state['scores']['stage1']['part2'][$winner] ?? 0) === 0
+            ? (int) $config['minLeadAlternative']
+            : null;
     }
 
     /**
@@ -485,11 +507,11 @@ final class EnneagramTestEngine
     /**
      * @param  array<string, int>  $scores
      * @return array{
-     *     firstSecond: array{value: int, target: int},
-     *     secondThird: array{value: int, target: int}
+     *     firstSecond: array{value: int, target: int, alternativeTarget: int|null},
+     *     secondThird: array{value: int, target: int, alternativeTarget: int|null}
      * }
      */
-    private function leadProgress(array $scores, int $target): array
+    private function leadProgress(array $scores, int $target, ?int $alternativeTarget = null): array
     {
         $values = array_values($scores);
         rsort($values);
@@ -498,8 +520,16 @@ final class EnneagramTestEngine
         $third = (int) ($values[2] ?? 0);
 
         return [
-            'firstSecond' => ['value' => $first - $second, 'target' => $target],
-            'secondThird' => ['value' => $second - $third, 'target' => $target],
+            'firstSecond' => [
+                'value' => $first - $second,
+                'target' => $target,
+                'alternativeTarget' => $alternativeTarget,
+            ],
+            'secondThird' => [
+                'value' => $second - $third,
+                'target' => $target,
+                'alternativeTarget' => null,
+            ],
         ];
     }
 

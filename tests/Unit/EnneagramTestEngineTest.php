@@ -4,9 +4,9 @@ use App\Services\Enneagram\EnneagramTestEngine;
 use Random\RandomException;
 
 test(
-/**
- * @throws RandomException
- */ 'creates a reproducible state from a seed',
+    /**
+     * @throws RandomException
+     */ 'creates a reproducible state from a seed',
     function () {
         $engine = new EnneagramTestEngine;
         $data = enneagramEngineData();
@@ -52,7 +52,7 @@ test('exposes progress target separately from the question pool position', funct
         ->and($state['progress']['poolSize'])->toBe(2)
         ->and($state['progress']['phase'])->toBe('standard')
         ->and($state['progress']['tieBreakerStartedAt'])->toBeNull()
-        ->and($state['progress']['lead']['firstSecond'])->toBe(['value' => 0, 'target' => 1])
+        ->and($state['progress']['lead']['firstSecond'])->toBe(['value' => 0, 'target' => 1, 'alternativeTarget' => null])
         ->and($state['test_map'][0]['parts'])->toBe([
             ['part' => 1, 'status' => 'active'],
             ['part' => 2, 'status' => 'pending'],
@@ -83,7 +83,27 @@ test('marks the progress as tie-breaker after the standard target is reached', f
         ->and($state['progress']['target'])->toBe(1)
         ->and($state['progress']['phase'])->toBe('tie_breaker')
         ->and($state['progress']['tieBreakerStartedAt'])->toBe(1)
-        ->and($state['progress']['lead']['firstSecond'])->toBe(['value' => 0, 'target' => 2]);
+        ->and($state['progress']['lead']['firstSecond'])->toBe(['value' => 0, 'target' => 2, 'alternativeTarget' => null]);
+});
+
+test('exposes the earlier stage one part two lead target when the part one winner is absent', function () {
+    $data = enneagramEngineData();
+    $data['config']['stages']['stage1']['part2']['minLead'] = 3;
+    $data['config']['stages']['stage1']['part2']['minLeadAlternative'] = 2;
+
+    $engine = new EnneagramTestEngine;
+    $state = $engine->start($data, false, 12345, 'en');
+    $state = $engine->apply($state, 'answer', [$state['options'][0]]);
+
+    expect($state['stage1_part1_winner'])->toBe('sp')
+        ->and($state['stage'])->toBe(1)
+        ->and($state['part'])->toBe(2)
+        ->and($state['progress']['lead']['firstSecond'])->toBe([
+            'value' => 0,
+            'target' => 3,
+            'alternativeTarget' => 2,
+        ])
+        ->and($state['progress']['lead']['secondThird']['alternativeTarget'])->toBeNull();
 });
 
 test('rejects an answer that is not available for the current question', function () {
@@ -100,9 +120,9 @@ test('rejects an answer that is not available for the current question', functio
 });
 
 test(
-/**
- * @throws RandomException
- */ 'finishes stage two and returns the server-computed result',
+    /**
+     * @throws RandomException
+     */ 'finishes stage two and returns the server-computed result',
     function () {
         $engine = new EnneagramTestEngine;
         $state = $engine->start(enneagramEngineData(), false, 12345, 'en');

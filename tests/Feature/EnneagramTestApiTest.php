@@ -37,8 +37,8 @@ it('starts a standard test with a public server state', function () {
                     'phase',
                     'tieBreakerStartedAt',
                     'lead' => [
-                        'firstSecond' => ['value', 'target'],
-                        'secondThird' => ['value', 'target'],
+                        'firstSecond' => ['value', 'target', 'alternativeTarget'],
+                        'secondThird' => ['value', 'target', 'alternativeTarget'],
                     ],
                 ],
                 'test_map' => [

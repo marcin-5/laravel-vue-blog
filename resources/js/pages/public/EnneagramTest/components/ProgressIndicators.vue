@@ -27,6 +27,14 @@ function leadPercentage(lead: LeadProgress): number {
     return Math.min(100, (lead.value / lead.target) * 100);
 }
 
+function alternativeTargetPosition(lead: LeadProgress): number | null {
+    if (lead.alternativeTarget === null || lead.target <= 0 || lead.alternativeTarget >= lead.target) {
+        return null;
+    }
+
+    return Math.max(0, (lead.alternativeTarget / lead.target) * 100);
+}
+
 function statusIcon(status: TestMapPartStatus): string {
     return {
         completed: '✓',
@@ -51,7 +59,7 @@ function statusClasses(status: TestMapPartStatus): string {
 </script>
 
 <template>
-    <section class="mb-6 space-y-4" aria-labelledby="enneagram-progress-title">
+    <section aria-labelledby="enneagram-progress-title" class="mb-6 space-y-4">
         <h3 id="enneagram-progress-title" class="sr-only">{{ t('progress') }}</h3>
 
         <div class="rounded-lg border border-muted bg-card p-4 text-card-foreground shadow-sm">
@@ -68,15 +76,15 @@ function statusClasses(status: TestMapPartStatus): string {
             </div>
 
             <div
-                class="h-2 overflow-hidden rounded-full bg-secondary/30"
-                role="progressbar"
                 :aria-valuemax="props.state.progress.target"
                 :aria-valuenow="Math.min(props.state.progress.answered, props.state.progress.target)"
                 :aria-valuetext="`${props.state.progress.answered}/${props.state.progress.target}`"
+                class="h-2 overflow-hidden rounded-full bg-secondary/30"
+                role="progressbar"
             >
                 <div
-                    class="h-full rounded-full bg-primary transition-[width] duration-300 motion-reduce:transition-none"
                     :style="{ width: `${progressPercentage}%` }"
+                    class="h-full rounded-full bg-primary transition-[width] duration-300 motion-reduce:transition-none"
                 />
             </div>
 
@@ -110,10 +118,10 @@ function statusClasses(status: TestMapPartStatus): string {
                     <ol class="flex flex-wrap gap-2">
                         <li v-for="part in stage.parts" :key="part.part">
                             <span
-                                :class="statusClasses(part.status)"
-                                class="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold"
                                 :aria-current="part.status === 'active' ? 'step' : undefined"
+                                :class="statusClasses(part.status)"
                                 :title="statusLabel(part.status)"
+                                class="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold"
                             >
                                 <span aria-hidden="true">{{ statusIcon(part.status) }}</span>
                                 {{ t('part') }} {{ part.part }}
@@ -140,18 +148,33 @@ function statusClasses(status: TestMapPartStatus): string {
                         {{ props.state.progress.lead[lead.key].value }} / {{ props.state.progress.lead[lead.key].target }}
                     </span>
                 </div>
-                <div
-                    class="h-2 overflow-hidden rounded-full bg-secondary/30"
-                    role="progressbar"
-                    :aria-valuemax="props.state.progress.lead[lead.key].target"
-                    :aria-valuenow="Math.min(props.state.progress.lead[lead.key].value, props.state.progress.lead[lead.key].target)"
-                    :aria-valuetext="`${props.state.progress.lead[lead.key].value}/${props.state.progress.lead[lead.key].target}`"
-                >
+                <div class="relative">
                     <div
-                        class="h-full rounded-full bg-secondary transition-[width] duration-300 motion-reduce:transition-none"
-                        :style="{ width: `${leadPercentage(props.state.progress.lead[lead.key])}%` }"
+                        :aria-valuemax="props.state.progress.lead[lead.key].target"
+                        :aria-valuenow="Math.min(props.state.progress.lead[lead.key].value, props.state.progress.lead[lead.key].target)"
+                        :aria-valuetext="`${props.state.progress.lead[lead.key].value}/${props.state.progress.lead[lead.key].target}`"
+                        class="h-2 overflow-hidden rounded-full bg-secondary/30"
+                        role="progressbar"
+                    >
+                        <div
+                            :style="{ width: `${leadPercentage(props.state.progress.lead[lead.key])}%` }"
+                            class="h-full rounded-full bg-secondary transition-[width] duration-300 motion-reduce:transition-none"
+                        />
+                    </div>
+                    <span
+                        v-if="alternativeTargetPosition(props.state.progress.lead[lead.key]) !== null"
+                        :style="{ left: `${alternativeTargetPosition(props.state.progress.lead[lead.key])}%` }"
+                        aria-hidden="true"
+                        class="lead-alternative-marker pointer-events-none absolute top-0 h-2 w-0.5 -translate-x-1/2 rounded-full bg-primary-foreground"
                     />
                 </div>
+                <p
+                    v-if="alternativeTargetPosition(props.state.progress.lead[lead.key]) !== null"
+                    class="mt-2 flex items-center gap-2 text-xs text-muted-foreground"
+                >
+                    <span aria-hidden="true" class="h-2.5 w-0.5 shrink-0 rounded-full bg-primary-foreground" />
+                    {{ t('lead_alternative_target', { target: props.state.progress.lead[lead.key].alternativeTarget ?? 0 }) }}
+                </p>
             </div>
         </div>
 
