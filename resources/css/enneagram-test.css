@@ -31,7 +31,7 @@
     --et-secondary: hsl(102 21% 68%);
     --et-secondary-foreground: hsl(102 75% 5%);
     --et-muted: hsl(0 0% 96.1%);
-    --et-muted-foreground: hsl(0 0% 45.1%);
+    --et-muted-foreground: hsl(100 15% 35%);
     --et-border: hsl(100 10% 80%);
 }
 
@@ -46,7 +46,7 @@
     --et-secondary: hsl(190 70% 85%);
     --et-secondary-foreground: hsl(190 80% 20%);
     --et-muted: hsl(210 10% 90%);
-    --et-muted-foreground: hsl(210 10% 40%);
+    --et-muted-foreground: hsl(210 25% 35%);
     --et-border: hsl(210 20% 85%);
 }
 
@@ -61,7 +61,7 @@
     --et-secondary: hsl(35 80% 85%);
     --et-secondary-foreground: hsl(35 80% 20%);
     --et-muted: hsl(30 10% 92%);
-    --et-muted-foreground: hsl(30 10% 45%);
+    --et-muted-foreground: hsl(30 20% 35%);
     --et-border: hsl(30 20% 88%);
 }
 
@@ -76,7 +76,7 @@
     --et-secondary: hsl(10 40% 92%);
     --et-secondary-foreground: hsl(160 50% 35%);
     --et-muted: hsl(280 15% 93%);
-    --et-muted-foreground: hsl(280 15% 50%);
+    --et-muted-foreground: hsl(280 25% 50%);
     --et-border: hsl(280 20% 88%);
 }
 
@@ -93,7 +93,7 @@
     --et-secondary: hsl(220 20% 25%);
     --et-secondary-foreground: hsl(220 10% 90%);
     --et-muted: hsl(220 20% 18%);
-    --et-muted-foreground: hsl(220 10% 60%);
+    --et-muted-foreground: hsl(220 15% 60%);
     --et-border: hsl(220 20% 25%);
 }
 
@@ -108,7 +108,7 @@
     --et-secondary: hsl(150 20% 20%);
     --et-secondary-foreground: hsl(150 10% 85%);
     --et-muted: hsl(150 20% 15%);
-    --et-muted-foreground: hsl(150 10% 55%);
+    --et-muted-foreground: hsl(150 15% 55%);
     --et-border: hsl(150 20% 22%);
 }
 
@@ -123,7 +123,7 @@
     --et-secondary: hsl(270 20% 22%);
     --et-secondary-foreground: hsl(270 10% 90%);
     --et-muted: hsl(270 20% 16%);
-    --et-muted-foreground: hsl(270 10% 60%);
+    --et-muted-foreground: hsl(270 15% 65%);
     --et-border: hsl(270 20% 20%);
 }
 
@@ -138,7 +138,7 @@
     --et-secondary: hsl(30 60% 25%);
     --et-secondary-foreground: hsl(40 80% 90%);
     --et-muted: hsl(21 22% 15%);
-    --et-muted-foreground: hsl(40 10% 60%);
+    --et-muted-foreground: hsl(40 15% 65%);
     --et-border: hsl(30 50% 20%);
 }
 
@@ -159,6 +159,10 @@
 
 .enneagram-test-container .text-primary-foreground {
     color: var(--et-primary-foreground) !important;
+}
+
+.enneagram-test-container .bg-primary-foreground {
+    background-color: var(--et-primary-foreground) !important;
 }
 
 .enneagram-test-container .text-card-foreground {

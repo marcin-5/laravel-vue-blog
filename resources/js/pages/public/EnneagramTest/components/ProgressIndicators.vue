@@ -165,14 +165,14 @@ function statusClasses(status: TestMapPartStatus): string {
                         v-if="alternativeTargetPosition(props.state.progress.lead[lead.key]) !== null"
                         :style="{ left: `${alternativeTargetPosition(props.state.progress.lead[lead.key])}%` }"
                         aria-hidden="true"
-                        class="lead-alternative-marker pointer-events-none absolute top-0 h-2 w-0.5 -translate-x-1/2 rounded-full bg-primary-foreground"
+                        class="lead-alternative-marker pointer-events-none absolute top-0 h-2 w-1 -translate-x-1/2 rounded-full bg-primary"
                     />
                 </div>
                 <p
                     v-if="alternativeTargetPosition(props.state.progress.lead[lead.key]) !== null"
                     class="mt-2 flex items-center gap-2 text-xs text-muted-foreground"
                 >
-                    <span aria-hidden="true" class="h-2.5 w-0.5 shrink-0 rounded-full bg-primary-foreground" />
+                    <span aria-hidden="true" class="h-2.5 w-1 shrink-0 rounded-full bg-primary" />
                     {{ t('lead_alternative_target', { target: props.state.progress.lead[lead.key].alternativeTarget ?? 0 }) }}
                 </p>
             </div>
