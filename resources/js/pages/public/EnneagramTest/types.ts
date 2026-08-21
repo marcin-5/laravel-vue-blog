@@ -15,11 +15,39 @@ export interface EnneagramQuestion {
 
 export type SelectedAnswer = EnneagramOption;
 
+export type TestProgressPhase = 'standard' | 'tie_breaker';
+
+export interface LeadProgress {
+    value: number;
+    target: number;
+}
+
 export interface TestProgress {
     current: number;
     total: number;
     answered: number;
     maximum: number;
+    position: number;
+    poolSize: number;
+    target: number;
+    phase: TestProgressPhase;
+    tieBreakerStartedAt: number | null;
+    lead: {
+        firstSecond: LeadProgress;
+        secondThird: LeadProgress;
+    };
+}
+
+export type TestMapPartStatus = 'pending' | 'active' | 'completed' | 'skipped';
+
+export interface TestMapPart {
+    part: number;
+    status: TestMapPartStatus;
+}
+
+export interface TestMapStage {
+    stage: number;
+    parts: TestMapPart[];
 }
 
 export interface AllowedActions {
@@ -62,6 +90,7 @@ export interface EnneagramTestState {
     skip_count: number;
     skip_limit: number;
     progress: TestProgress;
+    test_map: TestMapStage[];
     allowed_actions: AllowedActions;
     result: TestResult | null;
 }

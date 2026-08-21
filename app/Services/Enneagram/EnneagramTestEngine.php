@@ -305,6 +305,7 @@ final class EnneagramTestEngine
         $state['question'] = $this->currentQuestion($state);
         $state['options'] = $this->currentOptions($state);
         $state['progress'] = $this->progress($state);
+        $state['test_map'] = $this->testMap($state);
         $state['allowed_actions'] = [
             'answer' => $state['status'] === 'in_progress',
             'skip' => $state['status'] === 'in_progress' && (int) $state['skips'] < $this->currentConfig(
@@ -388,30 +389,168 @@ final class EnneagramTestEngine
 
     /**
      * @param  array<string, mixed>  $state
-     * @return array{current: int, total: int, answered: int, maximum: int}
+     * @return array<string, mixed>
      */
     private function progress(array $state): array
     {
         if ($state['status'] !== 'in_progress') {
-            return ['current' => 0, 'total' => 0, 'answered' => 0, 'maximum' => 0];
+            return [
+                'current' => 0,
+                'total' => 0,
+                'answered' => 0,
+                'maximum' => 0,
+                'position' => 0,
+                'poolSize' => 0,
+                'target' => 0,
+                'phase' => 'standard',
+                'tieBreakerStartedAt' => null,
+                'lead' => [
+                    'firstSecond' => ['value' => 0, 'target' => 0],
+                    'secondThird' => ['value' => 0, 'target' => 0],
+                ],
+            ];
         }
 
         $question = $this->currentQuestion($state);
-        $total = (int) $state['stage'] === 1
+        $poolSize = (int) $state['stage'] === 1
             ? count($state['pools']['stage1']["part{$state['part']}"])
             : count($state['pools']['stage2'][$this->stage2Instinct($state, (int) $state['part'])]);
+        $config = $this->currentConfig($state);
+        $target = (int) $config['maxQuestions'];
+        $answered = (int) $state['stage'] === 1
+            ? (int) $state['stage1_answered']["part{$state['part']}"]
+            : (int) $state['question_index'];
+        $position = $question === null ? $poolSize : ((int) $state['stage'] === 1
+            ? (int) $state['question_index'] + 1
+            : (int) $state['stage2_pool_indices'][$this->stage2Instinct($state, (int) $state['part'])] + 1);
+        $scores = $this->progressScores($state);
+        $leadTarget = (int) ($config['minLead'] ?? 0);
+        $phase = $this->progressPhase($state, $scores, $target, $leadTarget, $answered);
+        $lead = $this->leadProgress($scores, $leadTarget);
 
         return [
-            'current' => $question === null ? $total : ((int) $state['stage'] === 1 ? $state['question_index'] + 1 : $state['stage2_pool_indices'][$this->stage2Instinct(
-                $state,
-                (int) $state['part'],
-            )] + 1),
-            'total' => $total,
-            'answered' => (int) $state['stage'] === 1
-                ? $state['stage1_answered']["part{$state['part']}"]
-                : $state['question_index'],
-            'maximum' => $this->currentConfig($state)['maxQuestions'],
+            'current' => $position,
+            'total' => $poolSize,
+            'answered' => $answered,
+            'maximum' => $target,
+            'position' => $position,
+            'poolSize' => $poolSize,
+            'target' => $target,
+            'phase' => $phase,
+            'tieBreakerStartedAt' => $phase === 'tie_breaker' ? $target : null,
+            'lead' => $lead,
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     * @return array<string, int>
+     */
+    private function progressScores(array $state): array
+    {
+        if ((int) $state['stage'] === 1) {
+            return $state['scores']['stage1']["part{$state['part']}"];
+        }
+
+        return $state['scores']['stage2']['per_part'][(int) $state['part']];
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     * @param  array<string, int>  $scores
+     */
+    private function progressPhase(array $state, array $scores, int $target, int $leadTarget, int $answered): string
+    {
+        if ((int) $state['stage'] === 1 && (int) $state['part'] === 1) {
+            return $answered >= $target
+                && $this->isTopTwoTie($scores)
+                && !$this->hasLead($scores, $leadTarget)
+                ? 'tie_breaker'
+                : 'standard';
+        }
+
+        if ((int) $state['stage'] === 1 && (int) $state['part'] === 2) {
+            return (bool) ($state['stage1_extra_asked'] ?? false) ? 'tie_breaker' : 'standard';
+        }
+
+        if ((int) $state['stage'] === 2 && in_array((int) $state['part'], [2, 4], true)) {
+            return $answered >= $target && !$this->hasLead($scores, $leadTarget)
+                ? 'tie_breaker'
+                : 'standard';
+        }
+
+        return 'standard';
+    }
+
+    /**
+     * @param  array<string, int>  $scores
+     * @return array{
+     *     firstSecond: array{value: int, target: int},
+     *     secondThird: array{value: int, target: int}
+     * }
+     */
+    private function leadProgress(array $scores, int $target): array
+    {
+        $values = array_values($scores);
+        rsort($values);
+        $first = (int) ($values[0] ?? 0);
+        $second = (int) ($values[1] ?? 0);
+        $third = (int) ($values[2] ?? 0);
+
+        return [
+            'firstSecond' => ['value' => $first - $second, 'target' => $target],
+            'secondThird' => ['value' => $second - $third, 'target' => $target],
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     * @return list<array{stage: int, parts: list<array{part: int, status: string}>}>
+     */
+    private function testMap(array $state): array
+    {
+        return [
+            ['stage' => 1, 'parts' => $this->testMapParts($state, 1, 2)],
+            ['stage' => 2, 'parts' => $this->testMapParts($state, 2, 4)],
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     * @return list<array{part: int, status: string}>
+     */
+    private function testMapParts(array $state, int $stage, int $partCount): array
+    {
+        $currentStage = (int) $state['stage'];
+        $currentPart = (int) $state['part'];
+        $parts = [];
+
+        for ($part = 1; $part <= $partCount; $part++) {
+            if ($stage < $currentStage || ($stage === $currentStage && ($state['status'] === 'completed' || $part < $currentPart))) {
+                $status = $this->isSkippedPart($state, $stage, $part) ? 'skipped' : 'completed';
+            } elseif ($stage > $currentStage || ($stage === $currentStage && $part > $currentPart)) {
+                $status = 'pending';
+            } else {
+                $status = 'active';
+            }
+
+            $parts[] = ['part' => $part, 'status' => $status];
+        }
+
+        return $parts;
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     */
+    private function isSkippedPart(array $state, int $stage, int $part): bool
+    {
+        if ($stage !== 2) {
+            return false;
+        }
+
+        return ($part === 2 && count($state['stage2_selected']['part1']) <= 1)
+            || ($part === 4 && count($state['stage2_selected']['part3']) <= 1);
     }
 
     /**
@@ -553,7 +692,7 @@ final class EnneagramTestEngine
      */
     private function historySnapshot(array $state): array
     {
-        unset($state['history'], $state['question'], $state['options'], $state['progress'], $state['allowed_actions']);
+        unset($state['history'], $state['question'], $state['options'], $state['progress'], $state['test_map'], $state['allowed_actions']);
 
         return $state;
     }
@@ -1001,6 +1140,7 @@ final class EnneagramTestEngine
                 ? $this->currentConfig($state)['maxSkips']
                 : 0,
             'progress' => $state['progress'],
+            'test_map' => $state['test_map'],
             'allowed_actions' => $state['allowed_actions'],
             'result' => $state['status'] === 'completed' ? $state['result'] : null,
         ];

@@ -26,7 +26,31 @@ it('starts a standard test with a public server state', function () {
         ->assertJsonPath('state.status', 'in_progress')
         ->assertJsonPath('state.stage', 1)
         ->assertJsonPath('state.part', 1)
-        ->assertJsonPath('state.allowed_actions.answer', true);
+        ->assertJsonPath('state.allowed_actions.answer', true)
+        ->assertJsonStructure([
+            'state' => [
+                'progress' => [
+                    'answered',
+                    'target',
+                    'position',
+                    'poolSize',
+                    'phase',
+                    'tieBreakerStartedAt',
+                    'lead' => [
+                        'firstSecond' => ['value', 'target'],
+                        'secondThird' => ['value', 'target'],
+                    ],
+                ],
+                'test_map' => [
+                    '*' => [
+                        'stage',
+                        'parts' => [
+                            '*' => ['part', 'status'],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
 
     expect($response->json('testId'))
         ->toHaveLength(40)

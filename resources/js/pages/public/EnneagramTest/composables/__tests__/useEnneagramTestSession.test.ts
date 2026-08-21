@@ -33,7 +33,39 @@ const state: EnneagramTestState = {
     answer_limit: 1,
     skip_count: 0,
     skip_limit: 1,
-    progress: { current: 1, total: 10, answered: 0, maximum: 10 },
+    progress: {
+        current: 1,
+        total: 10,
+        answered: 0,
+        maximum: 10,
+        position: 1,
+        poolSize: 10,
+        target: 10,
+        phase: 'standard',
+        tieBreakerStartedAt: null,
+        lead: {
+            firstSecond: { value: 0, target: 2 },
+            secondThird: { value: 0, target: 2 },
+        },
+    },
+    test_map: [
+        {
+            stage: 1,
+            parts: [
+                { part: 1, status: 'active' },
+                { part: 2, status: 'pending' },
+            ],
+        },
+        {
+            stage: 2,
+            parts: [
+                { part: 1, status: 'pending' },
+                { part: 2, status: 'pending' },
+                { part: 3, status: 'pending' },
+                { part: 4, status: 'pending' },
+            ],
+        },
+    ],
     allowed_actions: { answer: true, skip: true, back: false },
     result: null,
 };
