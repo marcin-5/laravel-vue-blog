@@ -16,7 +16,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-    <div class="mx-auto max-w-4xl p-2 md:p-3 lg:p-6">
+    <div class="w-full">
         <QuestionCard
             v-if="props.state.question"
             :answer-limit="props.state.answer_limit"

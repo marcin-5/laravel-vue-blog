@@ -33,7 +33,7 @@ watch(
 </script>
 
 <template>
-    <section class="mx-auto max-w-4xl" aria-labelledby="enneagram-session-title">
+    <section class="mx-auto flex max-w-4xl flex-col gap-6" aria-labelledby="enneagram-session-title">
         <h2 id="enneagram-session-title" class="sr-only">{{ $t('question_progress') }}</h2>
         <p class="sr-only" aria-live="polite">{{ transitionMessage }}</p>
 

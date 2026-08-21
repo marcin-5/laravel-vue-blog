@@ -37,7 +37,7 @@ function alternativeTargetPosition(lead: LeadProgress): number | null {
 </script>
 
 <template>
-    <section aria-labelledby="enneagram-progress-title" class="mb-6 space-y-4">
+    <section aria-labelledby="enneagram-progress-title" class="space-y-4">
         <h3 id="enneagram-progress-title" class="sr-only">{{ t('progress') }}</h3>
 
         <div class="rounded-lg border border-muted bg-card p-4 text-card-foreground shadow-sm">

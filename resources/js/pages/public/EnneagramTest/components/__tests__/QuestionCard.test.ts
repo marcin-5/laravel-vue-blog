@@ -7,7 +7,7 @@ vi.mock('@/components/ui/button', () => ({
 }));
 
 vi.mock('@/components/ui/card', () => ({
-    Card: { template: '<div><slot /></div>' },
+    Card: { inheritAttrs: false, template: '<div v-bind="$attrs"><slot /></div>' },
     CardContent: { template: '<div><slot /></div>' },
     CardHeader: { template: '<div><slot /></div>' },
     CardTitle: { template: '<div><slot /></div>' },
@@ -18,6 +18,28 @@ vi.mock('vue-i18n', () => ({
 }));
 
 describe('QuestionCard.vue', () => {
+    it('uses the full width of the shared session column', () => {
+        const wrapper = mount(QuestionCard, {
+            props: {
+                question: { id: 'question-1', question: 'Question' },
+                options: [{ key: 'option-1', value: 'Answer', category: 'sp' }],
+                selectedAnswers: [],
+                answerLimit: 1,
+                skipCount: 0,
+                skipLimit: 1,
+                canSkip: true,
+                canBack: false,
+                autoConfirmSingle: false,
+                processing: false,
+            },
+        });
+
+        const card = wrapper.find('div');
+
+        expect(card.classes()).toContain('w-full');
+        expect(card.classes()).not.toContain('mx-1');
+    });
+
     it('labels selected answers and shows the skip counter beside them', () => {
         const wrapper = mount(QuestionCard, {
             props: {

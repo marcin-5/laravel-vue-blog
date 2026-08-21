@@ -32,7 +32,7 @@ function statusClasses(status: TestMapPartStatus): string {
 </script>
 
 <template>
-    <section aria-labelledby="enneagram-test-map-title" class="mb-6">
+    <section aria-labelledby="enneagram-test-map-title">
         <div class="rounded-lg border border-muted bg-card p-4 text-card-foreground shadow-sm">
             <h3 id="enneagram-test-map-title" class="mb-3 text-sm font-semibold text-foreground">{{ t('test_map') }}</h3>
             <div class="grid gap-3 sm:grid-cols-2">
