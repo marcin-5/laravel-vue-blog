@@ -75,7 +75,12 @@ function submitAnswer(): void {
             <CardTitle class="text-base text-pretty wrap-break-word text-foreground md:text-lg">
                 {{ question.question }}
             </CardTitle>
-            <p aria-live="polite" class="text-sm text-muted-foreground">{{ selectedAnswerState.length }}/{{ answerLimit }}</p>
+            <div class="answer-progress flex items-center justify-between gap-4">
+                <p aria-live="polite" class="text-sm text-muted-foreground">
+                    {{ t('answered_questions') }}: {{ selectedAnswerState.length }}/{{ answerLimit }}
+                </p>
+                <p aria-live="polite" class="shrink-0 text-right text-sm text-muted-foreground">{{ t('skips') }}: {{ skipCount }}/{{ skipLimit }}</p>
+            </div>
         </CardHeader>
 
         <CardContent class="px-2 md:px-3 lg:px-4">

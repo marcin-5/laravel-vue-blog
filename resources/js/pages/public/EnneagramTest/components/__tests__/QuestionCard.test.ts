@@ -18,6 +18,28 @@ vi.mock('vue-i18n', () => ({
 }));
 
 describe('QuestionCard.vue', () => {
+    it('labels selected answers and shows the skip counter beside them', () => {
+        const wrapper = mount(QuestionCard, {
+            props: {
+                question: { id: 'question-1', question: 'Question' },
+                options: [{ key: 'option-1', value: 'Answer', category: 'sp' }],
+                selectedAnswers: [],
+                answerLimit: 1,
+                skipCount: 0,
+                skipLimit: 1,
+                canSkip: true,
+                canBack: false,
+                autoConfirmSingle: false,
+                processing: false,
+            },
+        });
+
+        const header = wrapper.find('.answer-progress');
+
+        expect(header.text()).toContain('answered_questions: 0/1');
+        expect(header.text()).toContain('skips: 0/1');
+    });
+
     it('allows long answer text to grow across multiple lines', () => {
         const wrapper = mount(QuestionCard, {
             props: {

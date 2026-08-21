@@ -178,13 +178,6 @@ function statusClasses(status: TestMapPartStatus): string {
             </div>
         </div>
 
-        <div
-            class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-muted bg-muted/20 px-4 py-3 text-sm text-muted-foreground"
-        >
-            <span>{{ t('skips') }}</span>
-            <span class="font-semibold text-foreground">{{ props.state.skip_count }} / {{ props.state.skip_limit }}</span>
-        </div>
-
         <p class="text-xs text-muted-foreground">{{ leadDescription }}</p>
     </section>
 </template>
