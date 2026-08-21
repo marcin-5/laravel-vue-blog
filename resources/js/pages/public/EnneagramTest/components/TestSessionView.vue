@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import Stage1 from '../Stage1.vue';
 import Stage2 from '../Stage2.vue';
 import ProgressIndicators from './ProgressIndicators.vue';
+import TestMap from './TestMap.vue';
 import type { EnneagramTestState, SelectedAnswer, TestAction } from '../types';
 
 const props = defineProps<{
@@ -36,7 +37,7 @@ watch(
         <h2 id="enneagram-session-title" class="sr-only">{{ $t('question_progress') }}</h2>
         <p class="sr-only" aria-live="polite">{{ transitionMessage }}</p>
 
-        <ProgressIndicators :state="props.state" />
+        <TestMap :test-map="props.state.test_map" />
 
         <Stage1
             v-if="props.state.stage === 1"
@@ -56,5 +57,7 @@ watch(
             @back="emit('action', 'back')"
             @skip="emit('action', 'skip')"
         />
+
+        <ProgressIndicators :state="props.state" />
     </section>
 </template>

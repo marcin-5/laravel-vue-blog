@@ -69,14 +69,14 @@ const state: EnneagramTestState = {
 };
 
 describe('ProgressIndicators.vue', () => {
-    it('renders target, pool position, map, and lead values without skips', () => {
+    it('renders target, pool position, and lead values without the test map or skips', () => {
         const wrapper = mount(ProgressIndicators, { props: { state } });
 
         expect(wrapper.text()).toContain('6 / 6');
         expect(wrapper.text()).toContain('Pool: 4 / 12');
-        expect(wrapper.text()).toContain('test_map');
         expect(wrapper.text()).toContain('3 / 4');
         expect(wrapper.text()).toContain('1 / 4');
+        expect(wrapper.text()).not.toContain('test_map');
         expect(wrapper.text()).not.toContain('skips');
         expect(wrapper.findAll('[role="progressbar"]')).toHaveLength(3);
     });
