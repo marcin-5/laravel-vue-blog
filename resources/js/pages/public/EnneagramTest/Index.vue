@@ -85,6 +85,7 @@ function startTest(extended: boolean): void {
         <TestSessionView
             v-else-if="state.status === 'in_progress'"
             :auto-confirm-single="autoConfirmSingle"
+            :debug="props.appDebug"
             :processing="processing"
             :state="state"
             @action="handleAction"

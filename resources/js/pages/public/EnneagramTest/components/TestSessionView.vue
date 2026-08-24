@@ -3,6 +3,7 @@ import { shallowRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Stage1 from '../Stage1.vue';
 import Stage2 from '../Stage2.vue';
+import DebugScores from './DebugScores.vue';
 import ProgressIndicators from './ProgressIndicators.vue';
 import TestMap from './TestMap.vue';
 import type { EnneagramTestState, SelectedAnswer, TestAction } from '../types';
@@ -11,6 +12,7 @@ const props = defineProps<{
     state: EnneagramTestState;
     autoConfirmSingle: boolean;
     processing: boolean;
+    debug: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -59,5 +61,7 @@ watch(
         />
 
         <ProgressIndicators :state="props.state" />
+
+        <DebugScores v-if="props.debug && props.state.debug" :debug="props.state.debug" />
     </section>
 </template>

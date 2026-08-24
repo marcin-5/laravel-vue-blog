@@ -15,6 +15,8 @@ beforeEach(function () {
 });
 
 it('starts a standard test with a public server state', function () {
+    config(['enneagram.debug' => false]);
+
     $response = $this->postJson(enneagramApiUrl('enneagram-test.osobliwy.localhost', '/start'), [
         'extended' => false,
     ]);
@@ -57,7 +59,40 @@ it('starts a standard test with a public server state', function () {
         ->and($response->json('state.question.id'))->toBeString()
         ->and($response->json('state'))->not
         ->toHaveKey('scores')
+        ->and($response->json('state'))->not
+        ->toHaveKey('debug')
         ->and($response->json('state'))->not->toHaveKey('pools');
+});
+
+it('exposes live score counters only in debug mode', function () {
+    config(['enneagram.debug' => true]);
+
+    $start = $this
+        ->postJson(enneagramApiUrl('enneagram-test.osobliwy.localhost', '/start'))
+        ->assertSuccessful();
+    $testId = $start->json('testId');
+    $option = $start->json('state.options.0');
+
+    $start
+        ->assertJsonStructure([
+            'state' => [
+                'debug' => [
+                    'stage1' => ['part1', 'part2'],
+                    'stage2' => ['total', 'perPart'],
+                ],
+            ],
+        ])
+        ->assertJsonPath('state.debug.stage1.part1.sp', 0)
+        ->assertJsonPath('state.debug.stage2.perPart.1.1', 0);
+
+    $this
+        ->postJson(enneagramApiUrl('enneagram-test.osobliwy.localhost', '/action'), [
+            'testId' => $testId,
+            'action' => 'answer',
+            'answers' => [$option],
+        ])
+        ->assertSuccessful()
+        ->assertJsonPath("state.debug.stage1.part1.{$option['category']}", 1);
 });
 
 it('starts the English test on the secondary domain', function () {

@@ -73,6 +73,17 @@ export interface StageTwoResult {
     isUnresolvable: boolean;
 }
 
+export interface EnneagramDebugState {
+    stage1: {
+        part1: Record<string, number>;
+        part2: Record<string, number>;
+    };
+    stage2: {
+        total: Record<string, number>;
+        perPart: Record<string, Record<string, number>>;
+    };
+}
+
 export interface TestResult {
     stage1: StageOneResult | null;
     stage2: StageTwoResult | null;
@@ -93,6 +104,7 @@ export interface EnneagramTestState {
     progress: TestProgress;
     test_map: TestMapStage[];
     allowed_actions: AllowedActions;
+    debug?: EnneagramDebugState;
     result: TestResult | null;
 }
 

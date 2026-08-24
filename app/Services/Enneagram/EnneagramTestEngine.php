@@ -300,6 +300,27 @@ final class EnneagramTestEngine
 
     /**
      * @param  array<string, mixed>  $state
+     * @return array{
+     *     stage1: array{part1: array<string, int>, part2: array<string, int>},
+     *     stage2: array{total: array<string, int>, perPart: array<int, array<string, int>>}
+     * }
+     */
+    private function debugScores(array $state): array
+    {
+        return [
+            'stage1' => [
+                'part1' => $state['scores']['stage1']['part1'],
+                'part2' => $state['scores']['stage1']['part2'],
+            ],
+            'stage2' => [
+                'total' => $state['scores']['stage2']['total'],
+                'perPart' => $state['scores']['stage2']['per_part'],
+            ],
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
      * @return array<string, mixed>
      */
     private function decorate(array $state): array
@@ -1160,7 +1181,7 @@ final class EnneagramTestEngine
     {
         $state = $this->decorate($state);
 
-        return [
+        $presented = [
             'version' => $state['version'],
             'locale' => $state['locale'],
             'status' => $state['status'],
@@ -1179,5 +1200,11 @@ final class EnneagramTestEngine
             'allowed_actions' => $state['allowed_actions'],
             'result' => $state['status'] === 'completed' ? $state['result'] : null,
         ];
+
+        if ((bool) config('enneagram.debug', false)) {
+            $presented['debug'] = $this->debugScores($state);
+        }
+
+        return $presented;
     }
 }
