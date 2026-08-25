@@ -16,6 +16,7 @@ const props = defineProps<{
     canBack: boolean;
     autoConfirmSingle: boolean;
     processing: boolean;
+    debug: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -95,6 +96,9 @@ function submitAnswer(): void {
                     size="lg"
                     @click="toggle(option)"
                 >
+                    <span v-if="props.debug" class="my-auto mr-2 shrink-0 font-mono text-xs font-bold text-muted-foreground"
+                        >{{ option.category }}:</span
+                    >
                     {{ option.value }}
                 </Button>
             </div>

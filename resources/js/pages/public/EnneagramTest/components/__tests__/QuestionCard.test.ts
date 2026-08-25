@@ -31,6 +31,7 @@ describe('QuestionCard.vue', () => {
                 canBack: false,
                 autoConfirmSingle: false,
                 processing: false,
+                debug: false,
             },
         });
 
@@ -38,6 +39,7 @@ describe('QuestionCard.vue', () => {
 
         expect(card.classes()).toContain('w-full');
         expect(card.classes()).not.toContain('mx-1');
+        expect(wrapper.text()).not.toContain('sp:');
     });
 
     it('labels selected answers and shows the skip counter beside them', () => {
@@ -53,6 +55,7 @@ describe('QuestionCard.vue', () => {
                 canBack: false,
                 autoConfirmSingle: false,
                 processing: false,
+                debug: false,
             },
         });
 
@@ -75,12 +78,37 @@ describe('QuestionCard.vue', () => {
                 canBack: false,
                 autoConfirmSingle: false,
                 processing: false,
+                debug: false,
             },
         });
 
         const answerButton = wrapper.find('[aria-pressed]');
 
         expect(answerButton.classes()).toEqual(expect.arrayContaining(['h-auto', 'min-h-10', 'items-start', 'whitespace-normal']));
+    });
+
+    it('shows the answer category in debug mode', () => {
+        const wrapper = mount(QuestionCard, {
+            props: {
+                question: { id: 'question-1', question: 'Question' },
+                options: [
+                    { key: 'option-1', value: 'Instinct answer', category: 'sp' },
+                    { key: 'option-2', value: 'Type answer', category: '1' },
+                ],
+                selectedAnswers: [],
+                answerLimit: 1,
+                skipCount: 0,
+                skipLimit: 1,
+                canSkip: true,
+                canBack: false,
+                autoConfirmSingle: false,
+                processing: false,
+                debug: true,
+            },
+        });
+
+        expect(wrapper.text()).toContain('sp:');
+        expect(wrapper.text()).toContain('1:');
     });
 
     it('emits only the fields accepted by the answer API', async () => {
@@ -97,6 +125,7 @@ describe('QuestionCard.vue', () => {
                 canBack: false,
                 autoConfirmSingle: false,
                 processing: false,
+                debug: false,
             },
         });
 

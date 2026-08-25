@@ -45,6 +45,7 @@ watch(
             v-if="props.state.stage === 1"
             :processing="props.processing"
             :auto-confirm-single="props.autoConfirmSingle"
+            :debug="props.debug"
             :state="props.state"
             @answer="emit('action', 'answer', $event)"
             @back="emit('action', 'back')"
@@ -54,6 +55,7 @@ watch(
             v-else
             :processing="props.processing"
             :auto-confirm-single="props.autoConfirmSingle"
+            :debug="props.debug"
             :state="props.state"
             @answer="emit('action', 'answer', $event)"
             @back="emit('action', 'back')"
