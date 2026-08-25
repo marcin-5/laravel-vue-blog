@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 const props = defineProps<{
     stage1Results: StageOneResult | null;
     stage2Results: StageTwoResult | null;
-    debug?: boolean;
+    debugScores?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -71,7 +71,7 @@ const maxScore = computed(() => {
                 </div>
             </div>
 
-            <div v-if="debug" class="mt-12 rounded border-t border-dashed bg-muted p-4 pt-6 text-left">
+            <div v-if="debugScores" class="mt-12 rounded border-t border-dashed bg-muted p-4 pt-6 text-left">
                 <h3 class="mb-4 text-lg font-bold text-foreground">{{ t('debug_data') }}</h3>
 
                 <div class="mb-4">

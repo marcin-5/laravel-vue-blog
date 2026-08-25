@@ -6,7 +6,7 @@ const props = defineProps<{
     state: EnneagramTestState;
     autoConfirmSingle: boolean;
     processing: boolean;
-    debug: boolean;
+    debugHints: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -24,7 +24,7 @@ const emit = defineEmits<{
             :can-back="props.state.allowed_actions.back"
             :can-skip="props.state.allowed_actions.skip"
             :auto-confirm-single="props.autoConfirmSingle"
-            :debug="props.debug"
+            :debug-hints="props.debugHints"
             :options="props.state.options"
             :processing="props.processing"
             :question="props.state.question"

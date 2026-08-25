@@ -132,7 +132,8 @@ export interface ResetTestResponse {
 
 export interface EnneagramPageProps {
     initialLocale: EnneagramLocale;
-    appDebug: boolean;
+    debugHints: boolean;
+    debugScores: boolean;
     autoConfirmSingleDefault: boolean;
     seo: {
         title: string;

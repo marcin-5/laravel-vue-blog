@@ -1175,9 +1175,10 @@ final class EnneagramTestEngine
 
     /**
      * @param  array<string, mixed>  $state
+     * @param  bool  $includeDebug
      * @return array<string, mixed>
      */
-    public function present(array $state): array
+    public function present(array $state, bool $includeDebug = false): array
     {
         $state = $this->decorate($state);
 
@@ -1201,7 +1202,7 @@ final class EnneagramTestEngine
             'result' => $state['status'] === 'completed' ? $state['result'] : null,
         ];
 
-        if ((bool) config('enneagram.debug', false)) {
+        if ($includeDebug) {
             $presented['debug'] = $this->debugScores($state);
         }
 

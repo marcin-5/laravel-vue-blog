@@ -12,7 +12,8 @@ const props = defineProps<{
     state: EnneagramTestState;
     autoConfirmSingle: boolean;
     processing: boolean;
-    debug: boolean;
+    debugHints: boolean;
+    debugScores: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -45,7 +46,7 @@ watch(
             v-if="props.state.stage === 1"
             :processing="props.processing"
             :auto-confirm-single="props.autoConfirmSingle"
-            :debug="props.debug"
+            :debug-hints="props.debugHints"
             :state="props.state"
             @answer="emit('action', 'answer', $event)"
             @back="emit('action', 'back')"
@@ -55,7 +56,7 @@ watch(
             v-else
             :processing="props.processing"
             :auto-confirm-single="props.autoConfirmSingle"
-            :debug="props.debug"
+            :debug-hints="props.debugHints"
             :state="props.state"
             @answer="emit('action', 'answer', $event)"
             @back="emit('action', 'back')"
@@ -64,6 +65,6 @@ watch(
 
         <ProgressIndicators :state="props.state" />
 
-        <DebugScores v-if="props.debug && props.state.debug" :debug="props.state.debug" />
+        <DebugScores v-if="props.debugScores && props.state.debug" :debug="props.state.debug" />
     </section>
 </template>

@@ -13,6 +13,7 @@ final class EnneagramTestSessionService
     public function __construct(
         private readonly EnneagramTestDataLoader $dataLoader,
         private readonly EnneagramTestEngine $engine,
+        private readonly EnneagramDebugAccessService $debugAccess,
         private readonly Session $session,
     ) {
     }
@@ -32,7 +33,7 @@ final class EnneagramTestSessionService
 
         return [
             'testId' => $testId,
-            'state' => $this->engine->present($state),
+            'state' => $this->engine->present($state, $this->debugAccess->scoresEnabled()),
         ];
     }
 
@@ -51,7 +52,7 @@ final class EnneagramTestSessionService
 
         return [
             'testId' => $testId,
-            'state' => $this->engine->present($state),
+            'state' => $this->engine->present($state, $this->debugAccess->scoresEnabled()),
         ];
     }
 

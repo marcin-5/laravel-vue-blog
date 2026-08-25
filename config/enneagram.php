@@ -11,6 +11,8 @@ return [
     |
     */
     'debug' => env('ENNEAGRAM_DEBUG', false),
+    'debug_hints_key' => env('ENNEAGRAM_DEBUG_HINTS_KEY'),
+    'debug_scores_key' => env('ENNEAGRAM_DEBUG_SCORES_KEY'),
 
     /*
     |--------------------------------------------------------------------------

@@ -85,7 +85,8 @@ function startTest(extended: boolean): void {
         <TestSessionView
             v-else-if="state.status === 'in_progress'"
             :auto-confirm-single="autoConfirmSingle"
-            :debug="props.appDebug"
+            :debug-hints="props.debugHints"
+            :debug-scores="props.debugScores"
             :processing="processing"
             :state="state"
             @action="handleAction"
@@ -93,7 +94,7 @@ function startTest(extended: boolean): void {
 
         <Summary
             v-else-if="result"
-            :debug="props.appDebug"
+            :debug-scores="props.debugScores"
             :stage1-results="result.stage1"
             :stage2-results="result.stage2"
             @reset="handleReset"

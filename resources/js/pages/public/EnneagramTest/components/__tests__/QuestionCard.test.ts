@@ -31,7 +31,7 @@ describe('QuestionCard.vue', () => {
                 canBack: false,
                 autoConfirmSingle: false,
                 processing: false,
-                debug: false,
+                debugHints: false,
             },
         });
 
@@ -55,7 +55,7 @@ describe('QuestionCard.vue', () => {
                 canBack: false,
                 autoConfirmSingle: false,
                 processing: false,
-                debug: false,
+                debugHints: false,
             },
         });
 
@@ -78,7 +78,7 @@ describe('QuestionCard.vue', () => {
                 canBack: false,
                 autoConfirmSingle: false,
                 processing: false,
-                debug: false,
+                debugHints: false,
             },
         });
 
@@ -103,7 +103,7 @@ describe('QuestionCard.vue', () => {
                 canBack: false,
                 autoConfirmSingle: false,
                 processing: false,
-                debug: true,
+                debugHints: true,
             },
         });
 
@@ -125,7 +125,7 @@ describe('QuestionCard.vue', () => {
                 canBack: false,
                 autoConfirmSingle: false,
                 processing: false,
-                debug: false,
+                debugHints: false,
             },
         });
 

@@ -65,7 +65,13 @@ it('starts a standard test with a public server state', function () {
 });
 
 it('exposes live score counters only in debug mode', function () {
-    config(['enneagram.debug' => true]);
+    config([
+        'enneagram.debug' => true,
+        'enneagram.debug_scores_key' => 'scores-secret',
+    ]);
+
+    $this->get('http://enneagram-test.osobliwy.localhost/?debug_scores=scores-secret')
+        ->assertSuccessful();
 
     $start = $this
         ->postJson(enneagramApiUrl('enneagram-test.osobliwy.localhost', '/start'))
@@ -93,6 +99,17 @@ it('exposes live score counters only in debug mode', function () {
         ])
         ->assertSuccessful()
         ->assertJsonPath("state.debug.stage1.part1.{$option['category']}", 1);
+});
+
+it('does not expose live score counters without the URL key', function () {
+    config([
+        'enneagram.debug' => true,
+        'enneagram.debug_scores_key' => 'scores-secret',
+    ]);
+
+    $this->postJson(enneagramApiUrl('enneagram-test.osobliwy.localhost', '/start'))
+        ->assertSuccessful()
+        ->assertJsonMissingPath('state.debug');
 });
 
 it('starts the English test on the secondary domain', function () {
