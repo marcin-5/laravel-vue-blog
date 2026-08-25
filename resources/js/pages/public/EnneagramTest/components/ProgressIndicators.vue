@@ -75,7 +75,7 @@ function alternativeTargetPosition(lead: LeadProgress): number | null {
                 :class="
                     props.state.progress.phase === 'tie_breaker'
                         ? 'border-primary/40 bg-primary/10 text-primary'
-                        : 'border-muted bg-muted/20 text-muted-foreground'
+                        : 'border-muted/80 bg-muted text-muted-foreground'
                 "
                 class="mt-3 rounded-md border px-3 py-2 text-sm"
             >

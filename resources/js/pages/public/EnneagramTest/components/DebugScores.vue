@@ -16,8 +16,8 @@ const stageTwoParts = computed(() => Object.entries(props.debug.stage2.perPart).
 <template>
     <section
         aria-labelledby="enneagram-debug-title"
-        class="mx-auto max-w-4xl rounded-lg border border-dashed border-primary/50 bg-muted/30 p-4 text-card-foreground"
         aria-live="polite"
+        class="mx-auto max-w-4xl rounded-lg border border-dashed border-primary/50 bg-muted p-4 text-card-foreground"
     >
         <h2 id="enneagram-debug-title" class="mb-4 text-lg font-bold text-foreground">{{ t('debug_data') }}</h2>
 
