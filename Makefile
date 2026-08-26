@@ -151,7 +151,7 @@ QUEUE_PAUSE_STATE_FILE ?= /tmp/laravel-blog-$(DOCKER_PROJECT_NAME_PROD)-queues-p
         prod-rebuild-full prod-rebuild-caddy \
         prod-rebuild-pg-redis-preflight prod-backup-pg-redis \
         prod-prune prod-versions prod-check-assets prod-logs-queue prod-logs-app \
-        prod-health-queue prod-queue-diag prod-queue-pause-all \
+        prod-health-runtime prod-health-queue prod-queue-diag prod-queue-pause-all \
         prod-queue-continue-all prod-indexnow
 
 prod-up: ## Start production services
@@ -163,8 +163,8 @@ prod-down: ## Stop production services
 prod-restart: ## Restart production services
 	$(DOCKER_COMPOSE_PROD) up -d
 
-prod-build: ## Build/rebuild production images
-	$(DOCKER_COMPOSE_PROD) build
+prod-build: ## Build/rebuild production application and SSR images
+	$(DOCKER_COMPOSE_PROD) build app ssr
 
 prod-logs: ## Tail production logs
 	$(DOCKER_COMPOSE_PROD) logs -f
@@ -276,6 +276,22 @@ prod-health-queue: ## Check health status of the queue worker container (uses Do
 	  sleep 10; \
 	done
 
+prod-health-runtime: ## Wait for app, SSR and queue Docker healthchecks
+	@set -eu; \
+	deadline=$$(( $$(date +%s) + $(PROD_REBUILD_TIMEOUT) )); \
+	while :; do \
+		all_healthy=1; details=''; \
+		for service in app ssr queue; do \
+			cid=$$($(DOCKER_COMPOSE_PROD) ps -q "$$service"); \
+			if [ -z "$$cid" ]; then status=missing; else status=$$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}' "$$cid" 2>/dev/null || echo unknown); fi; \
+			details="$$details $$service=$$status"; \
+			[ "$$status" = healthy ] || all_healthy=0; \
+		done; \
+		if [ "$$all_healthy" -eq 1 ]; then echo "✅ Runtime is healthy:$$details"; exit 0; fi; \
+		if [ "$$(date +%s)" -ge "$$deadline" ]; then echo "❌ Runtime healthchecks failed before timeout:$$details" >&2; exit 1; fi; \
+		echo "⏳ Waiting for runtime healthchecks:$$details"; sleep 5; \
+	done
+
 prod-wait: ## Wait until the app container is ready to accept php exec
 	@echo "Waiting for app container to be ready..."
 	@for i in $$(seq 1 30); do \
@@ -295,57 +311,31 @@ prod-optimize: ## Cache config/routes/views and generate Ziggy
 	-$(DOCKER_COMPOSE_PROD) exec -T app sh -lc "[ -d resources/views ] && php artisan view:cache || echo 'Skipping view:cache: resources/views not found'"
 	-$(DOCKER_COMPOSE_PROD) exec -T app php artisan ziggy:generate
 
-prod-check-assets: ## Verify built assets exist (prints only failures)
-	@$(DOCKER_COMPOSE_PROD) exec -T ssr sh -lc '\
-		if [ -d /var/www/html/bootstrap/ssr ] && [ "$$(ls -A /var/www/html/bootstrap/ssr 2>/dev/null)" ]; then \
-			:; \
-		else \
-			echo "❌ No SSR assets in SSR container!"; \
-		fi'
-	@$(DOCKER_COMPOSE_PROD) exec -T app sh -lc '\
-		if [ -d /var/www/html/bootstrap/ssr ] && [ "$$(ls -A /var/www/html/bootstrap/ssr 2>/dev/null)" ]; then \
-			:; \
-		else \
-			echo "❌ No SSR assets in app container!"; \
-		fi'
-	@$(DOCKER_COMPOSE_PROD) exec -T app sh -lc '\
-		if [ -d /var/www/html/public/build ] && [ "$$(ls -A /var/www/html/public/build 2>/dev/null)" ]; then \
-			:; \
-		else \
-			echo "❌ No Vite build assets in app container!"; \
-		fi'
-	@$(DOCKER_COMPOSE_PROD) exec -T app sh -lc '\
-		if [ -d /var/www/html/public/img ] && [ "$$(ls -A /var/www/html/public/img 2>/dev/null)" ]; then \
-			:; \
-		else \
-			echo "❌ No public/img assets in app container!"; \
-		fi'
-	@$(DOCKER_COMPOSE_PROD) exec -T app sh -lc '\
-		if [ -d /var/www/html/public/pl ] && [ "$$(ls -A /var/www/html/public/pl 2>/dev/null)" ]; then \
-			:; \
-		else \
-			echo "❌ No public/pl assets in app container!"; \
-		fi'
-	@$(DOCKER_COMPOSE_PROD) exec -T app sh -lc '\
-		if [ -d /var/www/html/public/en ] && [ "$$(ls -A /var/www/html/public/en 2>/dev/null)" ]; then \
-			:; \
-		else \
-			echo "❌ No public/en assets in app container!"; \
-		fi'
+prod-check-assets: ## Verify built assets in app and SSR containers
+	@set -eu; \
+	$(DOCKER_COMPOSE_PROD) exec -T app sh -lc '
+		for asset_dir in /var/www/html/bootstrap/ssr /var/www/html/public/build /var/www/html/public/img /var/www/html/public/pl /var/www/html/public/en; do
+			if [ ! -d "$$asset_dir" ] || [ -z "$$(find "$$asset_dir" -mindepth 1 -maxdepth 1 -print -quit)" ]; then
+				echo "❌ Missing or empty asset directory: $$asset_dir" >&2
+				exit 1
+			fi
+		done
+	'; \
+	$(DOCKER_COMPOSE_PROD) exec -T ssr sh -lc '
+		test -d /var/www/html/bootstrap/ssr && test -n "$$(find /var/www/html/bootstrap/ssr -mindepth 1 -maxdepth 1 -print -quit)"
+	'
 
 # Full deployment flow: pull code/images, rebuild, wait for app, optimize, migrate
 prod-deploy: ## Build/Start prod, run optimizations & migrations
 	# If building from source on the server, ensure latest code first:
-	git fetch --all
 	git pull --ff-only
 	@echo "🧹 Clearing old bootstrap cache to prevent worker stuck..."
 	rm -rf /srv/laravel-blog/bootstrap_cache/* 2>/dev/null || true
-	$(DOCKER_COMPOSE_PROD) up -d --build
-	$(MAKE) prod-wait
+	$(DOCKER_COMPOSE_PROD) build app ssr
+	$(DOCKER_COMPOSE_PROD) up -d
+	$(MAKE) prod-health-runtime
 	$(MAKE) prod-versions
 	$(MAKE) prod-check-assets
-	# Optional: use healthchecks and wait for healthy
-	# $(DOCKER_COMPOSE_PROD) up -d --build --wait || true
 	$(MAKE) prod-optimize
 	$(MAKE) prod-migrate
 
@@ -386,12 +376,9 @@ prod-rebuild-full: ## Force a no-cache rebuild of the application services (app,
 		rm -f "$$rollback_file"; \
 		for service in app ssr queue scheduler; do docker image rm -f "$${rollback_prefix}-$$service" >/dev/null 2>&1 || true; done; \
 	}; \
-	verify_runtime() { \
-		make prod-wait || return 1; \
-		make prod-ready || return 1; \
+ verify_runtime() { \
+		make prod-health-runtime || return 1; \
 		make prod-check-assets || return 1; \
-		$(DOCKER_COMPOSE_PROD) exec -T app wget -q -O- --timeout=5 "http://ssr:13714/health" >/dev/null || return 1; \
-		make prod-health-queue || return 1; \
 	}; \
 	rollback_runtime() { \
 		printf '%s\n' '↩️  Restoring the previous application runtime...'; \
@@ -447,7 +434,7 @@ prod-rebuild-full: ## Force a no-cache rebuild of the application services (app,
 	printf '%s\n' '⬇️  Pulling the latest fast-forwardable revision...'; \
 	git pull --ff-only; \
 	printf '%s\n' '🔨 Building fresh application images without cache...'; \
-	$(DOCKER_COMPOSE_PROD) build --no-cache --pull app ssr queue scheduler; \
+	$(DOCKER_COMPOSE_PROD) build --no-cache --pull app ssr; \
 	printf '%s\n' '💾 Recording rollback image references...'; \
 	printf '%s\n' 'services:' > "$$rollback_file"; \
 	for service in app ssr queue scheduler; do \
@@ -570,7 +557,7 @@ prod-rebuild-caddy: ## Force a no-cache rebuild of Caddy without recreating appl
 prod-update: ## Update code from Git and restart selected services with zero-502 maintenance
 	git pull --ff-only
 	@echo "🔨 Building cached images for application services..."
-	$(DOCKER_COMPOSE_PROD) build app ssr queue scheduler
+	$(DOCKER_COMPOSE_PROD) build app ssr
 	$(MAKE) prod-maintenance-on
 	$(MAKE) prod-queue-pause-all
 	@echo "🧹 Clearing old bootstrap cache to prevent worker stuck..."
@@ -580,8 +567,7 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 	-$(DOCKER_COMPOSE_PROD) exec -T app php artisan package:discover --ansi || true
 	@echo "🚀 Recreating core services without touching caddy..."
 	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps app ssr queue scheduler
-	$(MAKE) prod-wait
-	$(MAKE) prod-ready
+	$(MAKE) prod-health-runtime
 	$(MAKE) prod-versions
 	@echo ""
 	@echo "🔍 Checking production assets..."
@@ -594,20 +580,6 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 	@echo "♻️  Re-caching configuration..."
 	$(DOCKER_COMPOSE_PROD) exec -T app php artisan config:cache
 	@echo ""
-	@echo "🔗 Testing SSR server with a test request..."
-	@echo "SSR Server response:"
-	$(DOCKER_COMPOSE_PROD) exec -T app wget -q -O- --timeout=5 "http://ssr:13714/health" 2>&1 || echo "SSR server not responding to /health"
-	@echo ""
-	@echo ""
-	@echo "🔍 Verifying queue worker process..."
-	@$(DOCKER_COMPOSE_PROD) exec -T queue sh -lc 'ps aux | grep -q "[q]ueue:work" || ps aux | grep -q "[s]upervisord"' \
-      && echo "✅ Queue process or supervisor detected." \
-      || echo "❌ No queue process found! Check logs: make prod-logs-queue"
-	$(MAKE) prod-health-queue
-	@echo "🔎 Queue status:"
-	$(DOCKER_COMPOSE_PROD) exec app php artisan queue:monitor redis
-	@echo ""
-	@echo "If SSR still doesn't work, check your Dockerfile to ensure 'npm run build' creates bootstrap/ssr/"
 	$(MAKE) prod-queue-continue-all
 	$(MAKE) prod-maintenance-off
 	@echo ""
@@ -615,12 +587,11 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 
 # Shorthand target to update application data only
 prod-update-data: ## Pull code and rebuild only the app container for data/code updates
-	$(MAKE) prod-maintenance-on
-	$(MAKE) prod-queue-pause-all
-	git fetch --all
 	git pull --ff-only
 	@echo "🔨 Building fresh image for app service..."
-	$(DOCKER_COMPOSE_PROD) build --no-cache app
+	$(DOCKER_COMPOSE_PROD) build app
+	$(MAKE) prod-maintenance-on
+	$(MAKE) prod-queue-pause-all
 	@echo "🚀 Recreating app service..."
 	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps app
 	$(MAKE) prod-wait

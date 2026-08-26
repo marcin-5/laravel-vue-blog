@@ -1,5 +1,6 @@
 services:
   app:
+    image: ${APP_IMAGE:-laravel-app:production}
     volumes:
       - /srv/laravel-blog/storage:/var/www/html/storage
       - /srv/laravel-blog/bootstrap_cache:/var/www/html/bootstrap/cache
@@ -19,6 +20,8 @@ services:
       ENNEAGRAM_DOMAIN_EN: ${ENNEAGRAM_DOMAIN_EN:-enneagram-test.peculiarmatters.blog}
 
   queue:
+    build: !reset null
+    image: ${APP_IMAGE:-laravel-app:production}
     volumes:
       - /srv/laravel-blog/storage:/var/www/html/storage
       - /srv/laravel-blog/bootstrap_cache:/var/www/html/bootstrap/cache
@@ -26,6 +29,8 @@ services:
       - ssr_assets:/var/www/html/bootstrap/ssr
 
   scheduler:
+    build: !reset null
+    image: ${APP_IMAGE:-laravel-app:production}
     volumes:
       - /srv/laravel-blog/storage:/var/www/html/storage
       - /srv/laravel-blog/bootstrap_cache:/var/www/html/bootstrap/cache

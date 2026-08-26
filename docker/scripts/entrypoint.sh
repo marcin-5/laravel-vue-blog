@@ -62,69 +62,62 @@ if [ -d bootstrap/cache ]; then
         bootstrap/cache/routes*.php || true
 fi
 
-# Initialize/sync built assets into mounted volumes if needed
-# 1) Vite build assets (may be a named volume that masks image files)
-if [ -d /opt/built/public/build ]; then
-    echo "Syncing Vite build assets (public/build)..."
-    mkdir -p /var/www/html/public/build
-    if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/public/build/*; fi
-    cp -a /opt/built/public/build/. /var/www/html/public/build/
-fi
+# Initialize/sync built assets into mounted volumes only when the image changed.
+ASSET_VERSION_FILE=/opt/built/assets.sha256
+ASSET_MARKER=bootstrap/cache/.assets-version
 
-# 2) Public images (required for prod-check-assets and when public/ is a volume)
-if [ -d /opt/built/public/img ]; then
-    echo "Syncing public images (public/img)..."
-    mkdir -p /var/www/html/public/img
-    if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/public/img/*; fi
-    cp -a /opt/built/public/img/. /var/www/html/public/img/
-fi
+if [ -f "$ASSET_VERSION_FILE" ] && [ -f "$ASSET_MARKER" ] \
+    && [ "$(cat "$ASSET_VERSION_FILE")" = "$(cat "$ASSET_MARKER")" ]; then
+    echo "Built assets are already synchronized."
+else
+    echo "Synchronizing built assets into mounted volumes..."
 
-# 3) Locale-specific public files (pl, en)
-if [ -d /opt/built/public/pl ]; then
-    echo "Syncing Polish locale assets (public/pl)..."
-    mkdir -p /var/www/html/public/pl
-    if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/public/pl/*; fi
-    cp -a /opt/built/public/pl/. /var/www/html/public/pl/
-fi
-
-if [ -d /opt/built/public/en ]; then
-    echo "Syncing English locale assets (public/en)..."
-    mkdir -p /var/www/html/public/en
-    if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/public/en/*; fi
-    cp -a /opt/built/public/en/. /var/www/html/public/en/
-fi
-
-# 4) Public root files (favicon, icons, etc.)
-if [ -d /opt/built/public ]; then
-    echo "Syncing public root files..."
-    # Copy all files from /opt/built/public to /var/www/html/public/
-    # We use -p to not overwrite directories if they exist as mounts
-    cp /opt/built/public/* /var/www/html/public/ 2>/dev/null || true
-    # Also sync .htaccess specifically as * might miss it in some shells
-    if [ -f /opt/built/public/.htaccess ]; then
-        cp /opt/built/public/.htaccess /var/www/html/public/.htaccess
+    if [ -d /opt/built/public/build ]; then
+        mkdir -p /var/www/html/public/build
+        if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/public/build/*; fi
+        cp -a /opt/built/public/build/. /var/www/html/public/build/
     fi
-fi
 
-# 4) SSR bundle
-if [ -d /opt/built/bootstrap/ssr ]; then
-    echo "Syncing SSR bundle (bootstrap/ssr)..."
-    mkdir -p /var/www/html/bootstrap/ssr
-    if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/bootstrap/ssr/*; fi
-    cp -a /opt/built/bootstrap/ssr/. /var/www/html/bootstrap/ssr/
+    if [ -d /opt/built/public/img ]; then
+        mkdir -p /var/www/html/public/img
+        if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/public/img/*; fi
+        cp -a /opt/built/public/img/. /var/www/html/public/img/
+    fi
+
+    if [ -d /opt/built/public/pl ]; then
+        mkdir -p /var/www/html/public/pl
+        if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/public/pl/*; fi
+        cp -a /opt/built/public/pl/. /var/www/html/public/pl/
+    fi
+
+    if [ -d /opt/built/public/en ]; then
+        mkdir -p /var/www/html/public/en
+        if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/public/en/*; fi
+        cp -a /opt/built/public/en/. /var/www/html/public/en/
+    fi
+
+    if [ -d /opt/built/public ]; then
+        find /opt/built/public -maxdepth 1 -type f -exec cp -p {} /var/www/html/public/ \;
+    fi
+
+    if [ -d /opt/built/bootstrap/ssr ]; then
+        mkdir -p /var/www/html/bootstrap/ssr
+        if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/bootstrap/ssr/*; fi
+        cp -a /opt/built/bootstrap/ssr/. /var/www/html/bootstrap/ssr/
+    fi
+
+    if [ -f "$ASSET_VERSION_FILE" ]; then
+        cp "$ASSET_VERSION_FILE" "$ASSET_MARKER.tmp"
+        mv "$ASSET_MARKER.tmp" "$ASSET_MARKER"
+    fi
 fi
 
 # If running as root, fix ownership and permissions on mounted volumes
 if [ "$(id -u)" = "0" ]; then
     echo "Fixing permissions..."
-    # Change only mandatory
-    chown -R www-data:www-data storage bootstrap/cache
-    chmod -R 775 storage bootstrap/cache
-
-    # For APP_ENV=local do not touch 'app' and 'vendor'
-    if [ "$APP_ENV" != "local" ]; then
-        chown -R www-data:www-data public bootstrap/ssr vendor app || true
-    fi
+    find storage bootstrap/cache ! -user www-data -exec chown www-data:www-data {} +
+    find storage bootstrap/cache -type d ! -perm -g+rwx -exec chmod g+rwx {} +
+    find storage bootstrap/cache -type f ! -perm -g+rw -exec chmod g+rw {} +
 fi
 
 # Laravel-specific initialization for production

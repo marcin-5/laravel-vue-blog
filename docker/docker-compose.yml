@@ -29,11 +29,20 @@ services:
             - INERTIA_SSR_ENABLED=true
             - INERTIA_SSR_URL=http://ssr:13714
         depends_on:
-            - postgres
-            - redis
-            - ssr
+            postgres:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            ssr:
+                condition: service_healthy
         networks:
             - laravel-network
+        healthcheck:
+            test: [ "CMD-SHELL", "php artisan migrate:status >/dev/null 2>&1 || exit 1" ]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 60s
 
     queue:
         build:
@@ -68,9 +77,12 @@ services:
             - INERTIA_SSR_URL=http://ssr:13714
             - SUPERVISOR_PASSWORD=${SUPERVISOR_PASSWORD:-supersecret}
         depends_on:
-            - postgres
-            - redis
-            - ssr
+            postgres:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            ssr:
+                condition: service_healthy
         networks:
             - laravel-network
         healthcheck:
@@ -111,9 +123,12 @@ services:
             - INERTIA_SSR_ENABLED=true
             - INERTIA_SSR_URL=http://ssr:13714
         depends_on:
-            - postgres
-            - redis
-            - ssr
+            postgres:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            ssr:
+                condition: service_healthy
         networks:
             - laravel-network
 
@@ -136,9 +151,16 @@ services:
             ENNEAGRAM_DOMAIN_PL: ${ENNEAGRAM_DOMAIN_PL:-enneagram-test.osobliwy.blog}
             ENNEAGRAM_DOMAIN_EN: ${ENNEAGRAM_DOMAIN_EN:-enneagram-test.peculiarmatters.blog}
         depends_on:
-            - app
+            app:
+                condition: service_healthy
         networks:
             - laravel-network
+        healthcheck:
+            test: [ "CMD", "caddy", "validate", "--config", "/etc/caddy/Caddyfile" ]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 20s
 
     ssr:
         build:
@@ -156,6 +178,12 @@ services:
             - "13714"
         networks:
             - laravel-network
+        healthcheck:
+            test: [ "CMD-SHELL", "node -e \"fetch('http://127.0.0.1:13714/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))\"" ]
+            interval: 10s
+            timeout: 5s
+            retries: 6
+            start_period: 20s
 
     postgres:
         image: ${POSTGRES_IMAGE:-postgres:15.15-alpine}

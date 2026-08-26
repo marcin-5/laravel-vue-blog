@@ -2,14 +2,13 @@
 FROM node:26-trixie-slim AS node-builder
 WORKDIR /app
 
-RUN npm install -g npm@latest
-
 # It's better to install all dependencies for building
 COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build && npm run build:ssr
+RUN npm run build && npm run build:ssr \
+    && find public bootstrap/ssr -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -d ' ' -f1 > assets.sha256
 
 # Stage 2: Base PHP image with common dependencies
 FROM php:8.5-fpm-trixie AS base
@@ -69,20 +68,18 @@ ENTRYPOINT ["entrypoint.sh"]
 # Stage 3: Production image (lean and optimized)
 FROM base AS production
 
-# FIX: Copy the application code BEFORE running composer install.
-# This ensures that 'artisan' and other files are available for composer scripts.
-COPY . .
-
 # Install production PHP dependencies
-RUN mkdir -p storage/app/public storage/framework/cache storage/framework/sessions storage/framework/testing storage/framework/views storage/logs bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache \
-    && chown -R www-data:www-data storage bootstrap/cache
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer install --no-dev --no-scripts --no-autoloader --no-interaction
+
+# Copy application code after the dependency layer so code-only changes retain Composer cache.
+COPY . .
+RUN composer dump-autoload --no-dev --optimize --no-interaction --no-scripts \
+    && php artisan package:discover --ansi
 
 # Copy built assets from node builder
 COPY --from=node-builder /app/public/build ./public/build
-# ✅ COPY SSR BUNDLE - This was missing!
 COPY --from=node-builder /app/bootstrap/ssr ./bootstrap/ssr
+COPY --from=node-builder /app/assets.sha256 /opt/built/assets.sha256
 
 # Prepare snapshots of built assets for seeding into mounted volumes at runtime
 RUN mkdir -p /opt/built/public/build /opt/built/public/img /opt/built/public/pl /opt/built/public/en /opt/built/bootstrap/ssr \
@@ -92,7 +89,7 @@ RUN mkdir -p /opt/built/public/build /opt/built/public/img /opt/built/public/pl 
     && cp -a /var/www/html/public/en/. /opt/built/public/en/ \
     && cp -a /var/www/html/bootstrap/ssr/. /opt/built/bootstrap/ssr/ \
     && cp /var/www/html/public/*.ico /var/www/html/public/*.png /var/www/html/public/*.svg /var/www/html/public/*.xml /var/www/html/public/*.html /var/www/html/public/index.php /var/www/html/public/.htaccess /opt/built/public/ 2>/dev/null || true \
-    && chown -R www-data:www-data /var/www/html \
+    && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
 # Copy production configurations
@@ -131,6 +128,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY . .
 COPY --from=node-builder /app/public/build ./public/build
 COPY --from=node-builder /app/bootstrap/ssr ./bootstrap/ssr
+COPY --from=node-builder /app/assets.sha256 /opt/built/assets.sha256
 
 # Install all PHP dependencies, including dev
 RUN mkdir -p storage/app/public storage/framework/cache storage/framework/sessions storage/framework/testing storage/framework/views storage/logs bootstrap/cache \
@@ -139,7 +137,7 @@ RUN mkdir -p storage/app/public storage/framework/cache storage/framework/sessio
 RUN composer install --no-interaction
 
 # Set up fish plugins and configuration for development
-ENV FISH_CONFIG_DIR /root/.config/fish
+ENV FISH_CONFIG_DIR=/root/.config/fish
 RUN mkdir -p $FISH_CONFIG_DIR/functions && \
     curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish > $FISH_CONFIG_DIR/functions/fisher.fish && \
     fish -c "fisher install IlanCosman/tide@v6 && fisher install jethrokuan/fzf && fisher install jorgebucaran/autopair.fish" && \
