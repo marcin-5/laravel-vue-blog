@@ -84,7 +84,7 @@ test('it does not queue post url when visibility is restricted', function () {
         'visibility' => 'unlisted',
     ]);
 
-    expect(IndexNowQueuedUrl::count())->toBe(2); // Blog landing and about page are queued
+    expect(IndexNowQueuedUrl::count())->toBe(3); // Blog landing, about, and contact pages are queued
     expect(
         IndexNowQueuedUrl::where(
             'url',

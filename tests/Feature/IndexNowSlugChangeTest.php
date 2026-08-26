@@ -137,6 +137,30 @@ test('it queues current and old about urls when blog slug changes', function () 
     expect(IndexNowQueuedUrl::where('url', $oldAboutUrl)->exists())->toBeTrue();
 });
 
+test('it queues current and old contact urls when blog slug changes', function () {
+    $user = User::factory()->create();
+    $blog = Blog::factory()->create([
+        'user_id' => $user->id,
+        'slug' => 'old-blog-slug',
+        'is_published' => true,
+    ]);
+    $oldContactUrl = route('blog.public.contact', [
+        'blog' => $blog->slug,
+        'mainDomain' => $blog->main_domain,
+    ]);
+    IndexNowQueuedUrl::truncate();
+
+    $blog->update(['slug' => 'new-blog-slug']);
+
+    $newContactUrl = route('blog.public.contact', [
+        'blog' => $blog->slug,
+        'mainDomain' => $blog->main_domain,
+    ]);
+
+    expect(IndexNowQueuedUrl::where('url', $newContactUrl)->exists())->toBeTrue();
+    expect(IndexNowQueuedUrl::where('url', $oldContactUrl)->exists())->toBeTrue();
+});
+
 test('it queues about url when about content changes', function () {
     $user = User::factory()->create();
     $blog = Blog::factory()->create([
@@ -153,6 +177,42 @@ test('it queues about url when about content changes', function () {
     ]);
 
     expect(IndexNowQueuedUrl::where('url', $aboutUrl)->exists())->toBeTrue();
+});
+
+test('it queues about url when about seo description changes', function () {
+    $user = User::factory()->create();
+    $blog = Blog::factory()->create([
+        'user_id' => $user->id,
+        'is_published' => true,
+    ]);
+    IndexNowQueuedUrl::truncate();
+
+    $blog->update(['about_seo_description' => 'Updated about SEO description']);
+
+    $aboutUrl = route('blog.public.about', [
+        'blog' => $blog->slug,
+        'mainDomain' => $blog->main_domain,
+    ]);
+
+    expect(IndexNowQueuedUrl::where('url', $aboutUrl)->exists())->toBeTrue();
+});
+
+test('it queues contact url when contact seo description changes', function () {
+    $user = User::factory()->create();
+    $blog = Blog::factory()->create([
+        'user_id' => $user->id,
+        'is_published' => true,
+    ]);
+    IndexNowQueuedUrl::truncate();
+
+    $blog->update(['contact_seo_description' => 'Updated contact SEO description']);
+
+    $contactUrl = route('blog.public.contact', [
+        'blog' => $blog->slug,
+        'mainDomain' => $blog->main_domain,
+    ]);
+
+    expect(IndexNowQueuedUrl::where('url', $contactUrl)->exists())->toBeTrue();
 });
 
 test('it keeps queued urls when one IndexNow host payload fails', function () {

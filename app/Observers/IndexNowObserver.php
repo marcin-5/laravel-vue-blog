@@ -32,13 +32,17 @@ class IndexNowObserver
         if ($shouldSubmit) {
             $relevantAttributes = $model instanceof Post
                 ? ['title', 'seo_title', 'slug', 'excerpt', 'summary', 'content', 'is_published', 'visibility']
-                : ['name', 'seo_title', 'slug', 'description', 'motto', 'footer', 'about', 'about_seo_description', 'is_published', 'visibility'];
+                : ['name', 'seo_title', 'slug', 'description', 'motto', 'footer', 'about', 'about_seo_description', 'contact_seo_description', 'is_published', 'visibility'];
 
             if ($model->wasRecentlyCreated || $model->wasChanged($relevantAttributes)) {
                 IndexNowQueuedUrl::updateOrCreate(['url' => $url]);
 
                 if ($model instanceof Blog && $this->shouldQueueAbout($model)) {
                     IndexNowQueuedUrl::updateOrCreate(['url' => $this->getAboutUrl($model)]);
+                }
+
+                if ($model instanceof Blog && $this->shouldQueueContact($model)) {
+                    IndexNowQueuedUrl::updateOrCreate(['url' => $this->getContactUrl($model)]);
                 }
 
                 if ($model->wasChanged('slug')) {
@@ -53,6 +57,11 @@ class IndexNowObserver
                             IndexNowQueuedUrl::updateOrCreate(['url' => $oldAboutUrl]);
                         }
 
+                        $oldContactUrl = $this->getOldContactUrl($model);
+                        if ($oldContactUrl) {
+                            IndexNowQueuedUrl::updateOrCreate(['url' => $oldContactUrl]);
+                        }
+
                         $this->queuePostsForBlog($model);
                     }
                 }
@@ -63,6 +72,7 @@ class IndexNowObserver
             IndexNowQueuedUrl::where('url', $url)->delete();
             if ($model instanceof Blog) {
                 IndexNowQueuedUrl::where('url', $this->getAboutUrl($model))->delete();
+                IndexNowQueuedUrl::where('url', $this->getContactUrl($model))->delete();
             }
         }
     }
@@ -124,6 +134,14 @@ class IndexNowObserver
         ]);
     }
 
+    protected function getContactUrl(Blog $blog, ?string $slug = null): string
+    {
+        return route('blog.public.contact', [
+            'blog' => $slug ?? $blog->slug,
+            'mainDomain' => $blog->main_domain,
+        ]);
+    }
+
     protected function getOldAboutUrl(Blog $blog): ?string
     {
         $oldSlug = $blog->getOriginal('slug');
@@ -135,11 +153,31 @@ class IndexNowObserver
         return $this->getAboutUrl($blog, $oldSlug);
     }
 
+    protected function getOldContactUrl(Blog $blog): ?string
+    {
+        $oldSlug = $blog->getOriginal('slug');
+
+        if (!$oldSlug || $oldSlug === $blog->slug) {
+            return null;
+        }
+
+        return $this->getContactUrl($blog, $oldSlug);
+    }
+
     protected function shouldQueueAbout(Blog $blog): bool
     {
         return $blog->wasRecentlyCreated || $blog->wasChanged([
             'about',
             'about_seo_description',
+            'slug',
+            'is_published',
+        ]);
+    }
+
+    protected function shouldQueueContact(Blog $blog): bool
+    {
+        return $blog->wasRecentlyCreated || $blog->wasChanged([
+            'contact_seo_description',
             'slug',
             'is_published',
         ]);
