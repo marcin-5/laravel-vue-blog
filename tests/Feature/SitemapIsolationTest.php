@@ -181,6 +181,7 @@ class SitemapIsolationTest extends TestCase
         $blog = Blog::factory()->create([
             'user_id' => $user->id,
             'slug' => 'test-blog',
+            'locale' => 'pl',
             'is_published' => true,
         ]);
 

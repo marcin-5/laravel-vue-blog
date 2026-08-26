@@ -20,9 +20,8 @@ beforeEach(function () {
 });
 
 it('redirects old blog landing URL to subdomain', function () {
-    $response = $this->get("/{$this->blog->slug}");
-
     $mainDomain = config('app.domain');
+    $response = $this->get("http://{$mainDomain}/{$this->blog->slug}");
     $expectedUrl = "http://{$this->blog->slug}.{$mainDomain}";
 
     $response->assertRedirect($expectedUrl);
@@ -30,9 +29,8 @@ it('redirects old blog landing URL to subdomain', function () {
 });
 
 it('redirects old post URL to subdomain', function () {
-    $response = $this->get("/{$this->blog->slug}/{$this->post->slug}");
-
     $mainDomain = config('app.domain');
+    $response = $this->get("http://{$mainDomain}/{$this->blog->slug}/{$this->post->slug}");
     $expectedUrl = "http://{$this->blog->slug}.{$mainDomain}/{$this->post->slug}";
 
     $response->assertRedirect($expectedUrl);
@@ -40,9 +38,8 @@ it('redirects old post URL to subdomain', function () {
 });
 
 it('redirects old tag URL to subdomain', function () {
-    $response = $this->get("/{$this->blog->slug}/tags/{$this->tag->slug}");
-
     $mainDomain = config('app.domain');
+    $response = $this->get("http://{$mainDomain}/{$this->blog->slug}/tags/{$this->tag->slug}");
     $expectedUrl = "http://{$this->blog->slug}.{$mainDomain}/tags/{$this->tag->slug}";
 
     $response->assertRedirect($expectedUrl);
@@ -50,9 +47,8 @@ it('redirects old tag URL to subdomain', function () {
 });
 
 it('redirects old blog prefix URL to subdomain', function () {
-    $response = $this->get("/blogs/{$this->blog->slug}");
-
     $mainDomain = config('app.domain');
+    $response = $this->get("http://{$mainDomain}/blogs/{$this->blog->slug}");
     $expectedUrl = "http://{$this->blog->slug}.{$mainDomain}";
 
     $response->assertRedirect($expectedUrl);

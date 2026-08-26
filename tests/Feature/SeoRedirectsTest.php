@@ -15,7 +15,7 @@ test('it redirects old /blogs/slug to public /slug with 301', function () {
         'locale' => 'pl',
     ]);
 
-    $response = $this->get('/blogs/moj-blog');
+    $response = $this->get('http://' . config('app.domain') . '/blogs/moj-blog');
 
     $response->assertRedirect(getBlogUrl($blog));
     $response->assertStatus(301);
@@ -30,7 +30,7 @@ test('it redirects old /blogs/blog-slug/post-slug to public /blog-slug/post-slug
     ]);
     $post = Post::factory()->create(['blog_id' => $blog->id, 'slug' => 'moj-post']);
 
-    $response = $this->get('/blogs/moj-blog/moj-post');
+    $response = $this->get('http://' . config('app.domain') . '/blogs/moj-blog/moj-post');
 
     $response->assertRedirect(getBlogUrl($blog, '/moj-post'));
     $response->assertStatus(301);

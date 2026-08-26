@@ -14,7 +14,10 @@ it('tracks page views for bots in separate table', function () {
     Queue::fake();
 
     $owner = User::factory()->create();
-    $blog = Blog::factory()->for($owner)->create(['is_published' => true]);
+    $blog = Blog::factory()->for($owner)->create([
+        'is_published' => true,
+        'locale' => 'pl',
+    ]);
     $post = Post::factory()->for($blog)->create();
     $url = "http://{$blog->slug}." . config('app.domain') . "/{$post->slug}";
 

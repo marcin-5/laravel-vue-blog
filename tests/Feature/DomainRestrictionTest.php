@@ -25,9 +25,13 @@ beforeEach(function () {
 
 it('allows blog access on main domains', function () {
     $user = User::factory()->create();
-    $blog = Blog::factory()->create(
-        ['name' => 'enneagram', 'slug' => 'enneagram', 'user_id' => $user->id, 'is_published' => true],
-    );
+    $blog = Blog::factory()->create([
+        'name' => 'enneagram',
+        'slug' => 'enneagram',
+        'user_id' => $user->id,
+        'is_published' => true,
+        'locale' => 'pl',
+    ]);
 
     $response = $this->get('http://osobliwy.localhost/about');
     $response->assertStatus(200);

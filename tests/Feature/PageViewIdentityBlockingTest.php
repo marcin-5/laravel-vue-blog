@@ -12,7 +12,10 @@ beforeEach(function () {
     Cache::flush();
 
     $this->owner = User::factory()->create();
-    $this->blog = Blog::factory()->for($this->owner)->create(['is_published' => true]);
+    $this->blog = Blog::factory()->for($this->owner)->create([
+        'is_published' => true,
+        'locale' => 'pl',
+    ]);
     $this->post = Post::factory()->for($this->blog)->create();
     $this->url = "http://{$this->blog->slug}." . config('app.domain') . "/{$this->post->slug}";
 });
