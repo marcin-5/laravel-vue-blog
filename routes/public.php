@@ -13,12 +13,25 @@ use App\Http\Middleware\HandleTranslations;
 use App\Http\Middleware\TrackMarkdownRequests;
 use App\Http\Middleware\UpdateVisitorOnLogin;
 use App\Models\Blog;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Support\Facades\Route;
 use Spatie\MarkdownResponse\Middleware\ProvideMarkdownResponse;
 
 $reservedSlugs = 'about|contact|newsletter|enneagram-test|admin|api|dashboard|settings|_|_debugbar|_telescope|robots|sitemap|sitemap\.xml|robots\.txt|login|register|logout|www|posts|blogs|groups|data|markdown';
 $reservedRegex = '^(?!(' . $reservedSlugs . ')($|/)).+$';
+$resolveBlog = static function (string $blogSlug): Blog {
+    $blog = Blog::fromSlugAndHost($blogSlug, request()->getHost());
+    abort_unless($blog !== null, 404);
+
+    return $blog;
+};
+$redirectToBlog = static function (Blog $blog, string $path = ''): RedirectResponse {
+    $mainDomain = Blog::mainDomainForHost(request()->getHost());
+    $scheme = request()->isSecure() ? 'https://' : 'http://';
+
+    return redirect()->to($scheme . $blog->slug . '.' . $mainDomain . $path, 301);
+};
 
 // Robots.txt and Sitemap routes (without Inertia and appearance middleware)
 Route::withoutMiddleware([
@@ -64,25 +77,12 @@ Route::domain('{blog:slug}.{mainDomain}')
     });
 
 // Redirect robots to the subdomain
-Route::get('blogs/{blog_slug}/{postSlug}', function (string $blog_slug, string $postSlug) {
-    $blog = Blog::fromSlugAndHost($blog_slug, request()->getHost());
-    abort_unless($blog, 404);
-    $host = request()->getHost();
-    $mainDomain = Blog::mainDomainForHost($host);
-
-    return redirect()->to(
-        (request()->isSecure() ? 'https://' : 'http://') . $blog->slug . '.' . $mainDomain . '/' . $postSlug,
-        301,
-    );
+Route::get('blogs/{blog_slug}/{postSlug}', function (string $blog_slug, string $postSlug) use ($resolveBlog, $redirectToBlog) {
+    return $redirectToBlog($resolveBlog($blog_slug), '/' . $postSlug);
 });
 
-Route::get('blogs/{blog_slug}', function (string $blog_slug) {
-    $blog = Blog::fromSlugAndHost($blog_slug, request()->getHost());
-    abort_unless($blog, 404);
-    $host = request()->getHost();
-    $mainDomain = Blog::mainDomainForHost($host);
-
-    return redirect()->to((request()->isSecure() ? 'https://' : 'http://') . $blog->slug . '.' . $mainDomain, 301);
+Route::get('blogs/{blog_slug}', function (string $blog_slug) use ($resolveBlog, $redirectToBlog) {
+    return $redirectToBlog($resolveBlog($blog_slug));
 });
 
 // Public About page (SSR): provide translations via props
@@ -102,38 +102,19 @@ Route::post('/newsletter/update', [NewsletterController::class, 'update'])->name
 Route::post('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
 // Redirects for old URL structure on main domains
-Route::get('{blog_slug}/tags/{tagSlug}', function (string $blog_slug, string $tagSlug) {
-    $blog = Blog::fromSlugAndHost($blog_slug, request()->getHost());
-    abort_unless($blog, 404);
+Route::get('{blog_slug}/tags/{tagSlug}', function (string $blog_slug, string $tagSlug) use ($resolveBlog, $redirectToBlog) {
+    $blog = $resolveBlog($blog_slug);
     $tag = $blog->tags()->where('slug', $tagSlug)->firstOrFail();
-    $host = request()->getHost();
-    $mainDomain = Blog::mainDomainForHost($host);
 
-    return redirect()->to(
-        (request()->isSecure() ? 'https://' : 'http://') . $blog->slug . '.' . $mainDomain . '/tags/' . $tag->slug,
-        301,
-    );
+    return $redirectToBlog($blog, '/tags/' . $tag->slug);
 })->where('blog_slug', $reservedRegex);
 
-Route::get('{blog_slug}/{postSlug}', function (string $blog_slug, string $postSlug) {
-    $blog = Blog::fromSlugAndHost($blog_slug, request()->getHost());
-    abort_unless($blog, 404);
-    $host = request()->getHost();
-    $mainDomain = Blog::mainDomainForHost($host);
-
-    return redirect()->to(
-        (request()->isSecure() ? 'https://' : 'http://') . $blog->slug . '.' . $mainDomain . '/' . $postSlug,
-        301,
-    );
+Route::get('{blog_slug}/{postSlug}', function (string $blog_slug, string $postSlug) use ($resolveBlog, $redirectToBlog) {
+    return $redirectToBlog($resolveBlog($blog_slug), '/' . $postSlug);
 })->where('blog_slug', $reservedRegex);
 
-Route::get('{blog_slug}', function (string $blog_slug) {
-    $blog = Blog::fromSlugAndHost($blog_slug, request()->getHost());
-    abort_unless($blog, 404);
-    $host = request()->getHost();
-    $mainDomain = Blog::mainDomainForHost($host);
-
-    return redirect()->to((request()->isSecure() ? 'https://' : 'http://') . $blog->slug . '.' . $mainDomain, 301);
+Route::get('{blog_slug}', function (string $blog_slug) use ($resolveBlog, $redirectToBlog) {
+    return $redirectToBlog($resolveBlog($blog_slug));
 })->where('blog_slug', $reservedRegex);
 
 Route::get('/', [PublicHomeController::class, 'welcome'])->name('home');
