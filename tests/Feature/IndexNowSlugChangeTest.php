@@ -1,17 +1,23 @@
 <?php
 
+use App\Jobs\IndexNowSubmitJob;
 use App\Models\Blog;
 use App\Models\IndexNowQueuedUrl;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    Http::fake();
+    Http::fake(function ($request) {
+        return $request->data()['host'] === config('app.indexnow_test_fail_host')
+            ? Http::response([], 500)
+            : Http::response([], 200);
+    });
     Queue::fake();
     IndexNowQueuedUrl::truncate();
     config(['services.indexnow.key' => 'test-key']);
@@ -105,4 +111,59 @@ test('it queues old urls for all posts when blog slug changes', function () {
     expect(IndexNowQueuedUrl::where('url', $oldBlogUrl)->exists())->toBeTrue();
     expect(IndexNowQueuedUrl::where('url', $newPostUrl)->exists())->toBeTrue();
     expect(IndexNowQueuedUrl::where('url', $oldPostUrl)->exists())->toBeTrue();
+});
+
+test('it queues current and old about urls when blog slug changes', function () {
+    $user = User::factory()->create();
+    $blog = Blog::factory()->create([
+        'user_id' => $user->id,
+        'slug' => 'old-blog-slug',
+        'is_published' => true,
+    ]);
+    $oldAboutUrl = route('blog.public.about', [
+        'blog' => $blog->slug,
+        'mainDomain' => $blog->main_domain,
+    ]);
+    IndexNowQueuedUrl::truncate();
+
+    $blog->update(['slug' => 'new-blog-slug']);
+
+    $newAboutUrl = route('blog.public.about', [
+        'blog' => $blog->slug,
+        'mainDomain' => $blog->main_domain,
+    ]);
+
+    expect(IndexNowQueuedUrl::where('url', $newAboutUrl)->exists())->toBeTrue();
+    expect(IndexNowQueuedUrl::where('url', $oldAboutUrl)->exists())->toBeTrue();
+});
+
+test('it queues about url when about content changes', function () {
+    $user = User::factory()->create();
+    $blog = Blog::factory()->create([
+        'user_id' => $user->id,
+        'is_published' => true,
+    ]);
+    IndexNowQueuedUrl::truncate();
+
+    $blog->update(['about' => 'Updated about content']);
+
+    $aboutUrl = route('blog.public.about', [
+        'blog' => $blog->slug,
+        'mainDomain' => $blog->main_domain,
+    ]);
+
+    expect(IndexNowQueuedUrl::where('url', $aboutUrl)->exists())->toBeTrue();
+});
+
+test('it keeps queued urls when one IndexNow host payload fails', function () {
+    $firstUrl = 'https://enneagram.osobliwy.blog';
+    $secondUrl = 'https://enneagram.peculiarmatters.blog';
+    IndexNowQueuedUrl::create(['url' => $firstUrl]);
+    IndexNowQueuedUrl::create(['url' => $secondUrl]);
+    Cache::forget('index_now_next_run');
+    config(['app.indexnow_test_fail_host' => 'enneagram.peculiarmatters.blog']);
+
+    app(IndexNowSubmitJob::class)->handle(app(\App\Services\IndexNowService::class));
+
+    expect(IndexNowQueuedUrl::count())->toBe(2);
 });

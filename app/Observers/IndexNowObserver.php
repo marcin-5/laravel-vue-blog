@@ -32,10 +32,14 @@ class IndexNowObserver
         if ($shouldSubmit) {
             $relevantAttributes = $model instanceof Post
                 ? ['title', 'seo_title', 'slug', 'excerpt', 'summary', 'content', 'is_published', 'visibility']
-                : ['name', 'seo_title', 'slug', 'description', 'motto', 'footer', 'is_published', 'visibility'];
+                : ['name', 'seo_title', 'slug', 'description', 'motto', 'footer', 'about', 'about_seo_description', 'is_published', 'visibility'];
 
             if ($model->wasRecentlyCreated || $model->wasChanged($relevantAttributes)) {
                 IndexNowQueuedUrl::updateOrCreate(['url' => $url]);
+
+                if ($model instanceof Blog && $this->shouldQueueAbout($model)) {
+                    IndexNowQueuedUrl::updateOrCreate(['url' => $this->getAboutUrl($model)]);
+                }
 
                 if ($model->wasChanged('slug')) {
                     $oldUrl = $this->getOldUrl($model);
@@ -44,6 +48,11 @@ class IndexNowObserver
                     }
 
                     if ($model instanceof Blog) {
+                        $oldAboutUrl = $this->getOldAboutUrl($model);
+                        if ($oldAboutUrl) {
+                            IndexNowQueuedUrl::updateOrCreate(['url' => $oldAboutUrl]);
+                        }
+
                         $this->queuePostsForBlog($model);
                     }
                 }
@@ -52,6 +61,9 @@ class IndexNowObserver
             }
         } else {
             IndexNowQueuedUrl::where('url', $url)->delete();
+            if ($model instanceof Blog) {
+                IndexNowQueuedUrl::where('url', $this->getAboutUrl($model))->delete();
+            }
         }
     }
 
@@ -104,6 +116,35 @@ class IndexNowObserver
         ]);
     }
 
+    protected function getAboutUrl(Blog $blog, ?string $slug = null): string
+    {
+        return route('blog.public.about', [
+            'blog' => $slug ?? $blog->slug,
+            'mainDomain' => $blog->main_domain,
+        ]);
+    }
+
+    protected function getOldAboutUrl(Blog $blog): ?string
+    {
+        $oldSlug = $blog->getOriginal('slug');
+
+        if (!$oldSlug || $oldSlug === $blog->slug) {
+            return null;
+        }
+
+        return $this->getAboutUrl($blog, $oldSlug);
+    }
+
+    protected function shouldQueueAbout(Blog $blog): bool
+    {
+        return $blog->wasRecentlyCreated || $blog->wasChanged([
+            'about',
+            'about_seo_description',
+            'slug',
+            'is_published',
+        ]);
+    }
+
     protected function queuePostsForBlog(Blog $blog): void
     {
         $oldBlogSlug = $blog->getOriginal('slug');
@@ -113,7 +154,7 @@ class IndexNowObserver
 
         $mainDomain = $blog->main_domain;
 
-        $blog->posts()->published()->public()->each(function (Post $post) use ($blog, $oldBlogSlug, $mainDomain) {
+        $blog->posts()->published()->public()->whereNull('group_id')->each(function (Post $post) use ($blog, $oldBlogSlug, $mainDomain) {
             $newUrl = route('blog.public.post', [
                 'blog' => $blog->slug,
                 'postSlug' => $post->slug,

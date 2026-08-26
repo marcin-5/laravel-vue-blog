@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Blog;
 use App\Models\Post;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
@@ -22,7 +23,7 @@ class DomainLinkTest extends TestCase
         $this->withoutExceptionHandling();
         $user = User::factory()->create();
 
-        Blog::factory()->create([
+        $plBlog = Blog::factory()->create([
             'user_id' => $user->id,
             'name' => 'Polski Blog',
             'slug' => 'polski-blog',
@@ -30,7 +31,7 @@ class DomainLinkTest extends TestCase
             'is_published' => true,
         ]);
 
-        Blog::factory()->create([
+        $enBlog = Blog::factory()->create([
             'user_id' => $user->id,
             'name' => 'English Blog',
             'slug' => 'english-blog',
@@ -142,6 +143,52 @@ class DomainLinkTest extends TestCase
                 ['blog' => 'english-blog', 'postSlug' => 'english-post', 'mainDomain' => $this->domainSecondary],
             ),
         );
+    }
+
+    public function test_same_slug_is_resolved_using_the_domain_locale(): void
+    {
+        $user = User::factory()->create();
+
+        $plBlog = Blog::factory()->create([
+            'user_id' => $user->id,
+            'name' => 'Polski Enneagram',
+            'slug' => 'enneagram',
+            'locale' => 'pl',
+            'is_published' => true,
+        ]);
+
+        $enBlog = Blog::factory()->create([
+            'user_id' => $user->id,
+            'name' => 'English Enneagram',
+            'slug' => 'enneagram',
+            'locale' => 'en',
+            'is_published' => true,
+        ]);
+
+        Tag::factory()->for($plBlog)->create(['slug' => 'same-tag']);
+        Tag::factory()->for($enBlog)->create(['slug' => 'same-tag']);
+
+        $this->get('http://enneagram.' . $this->domain)
+            ->assertInertia(fn($page) => $page
+                ->where('blog.name', 'Polski Enneagram'),
+            );
+
+        $this->get('http://enneagram.' . $this->domainSecondary)
+            ->assertInertia(fn($page) => $page
+                ->where('blog.name', 'English Enneagram'),
+            );
+
+        $this->get('http://' . $this->domain . '/enneagram')
+            ->assertRedirect('http://enneagram.' . $this->domain);
+
+        $this->get('http://' . $this->domainSecondary . '/enneagram')
+            ->assertRedirect('http://enneagram.' . $this->domainSecondary);
+
+        $this->get('http://' . $this->domain . '/enneagram/tags/same-tag')
+            ->assertRedirect('http://enneagram.' . $this->domain . '/tags/same-tag');
+
+        $this->get('http://' . $this->domainSecondary . '/enneagram/tags/same-tag')
+            ->assertRedirect('http://enneagram.' . $this->domainSecondary . '/tags/same-tag');
     }
 
     private function prepareForDomain(string $domain): void

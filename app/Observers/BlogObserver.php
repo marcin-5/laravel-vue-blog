@@ -17,7 +17,7 @@ class BlogObserver
 
     public function updating(Blog $blog): void
     {
-        if ($blog->isDirty('name') || empty($blog->slug)) {
+        if ($blog->isDirty('name') || $blog->isDirty('locale') || empty($blog->slug)) {
             $this->ensureSlug($blog, $blog->id);
         }
     }
@@ -78,6 +78,8 @@ class BlogObserver
         if ($ignoreId) {
             $query->where('id', '!=', $ignoreId);
         }
+        $query->where('locale', $blog->locale);
+
         while ($query->clone()->where('slug', $slug)->exists() || in_array($slug, $reserved)) {
             $slug = ($base ?: 'blog') . '-' . $i++;
         }

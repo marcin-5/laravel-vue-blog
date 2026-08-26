@@ -112,20 +112,106 @@ class Blog extends Model
      */
     public static function fromHost(string $host): ?self
     {
-        $mainDomains = array_filter([
-            config('app.domain'),
-            config('app.domain_secondary'),
-        ]);
+        $resolvedHost = self::resolveBlogHost($host);
 
-        foreach ($mainDomains as $domain) {
-            if ($domain && str_ends_with($host, '.' . $domain)) {
-                $slug = str_replace('.' . $domain, '', $host);
+        if (!$resolvedHost) {
+            return null;
+        }
 
-                return self::withoutGlobalScopes()->where('slug', $slug)->first();
+        return self::withoutGlobalScopes()
+            ->where('slug', $resolvedHost['slug'])
+            ->where('locale', $resolvedHost['locale'])
+            ->first();
+    }
+
+    /**
+     * Resolve a blog slug using the locale assigned to the source host.
+     */
+    public static function fromSlugAndHost(string $slug, string $host): ?self
+    {
+        $locale = self::resolveMainDomainLocale($host);
+
+        if (!$locale) {
+            return null;
+        }
+
+        return self::withoutGlobalScopes()
+            ->where('slug', $slug)
+            ->where('locale', $locale)
+            ->first();
+    }
+
+    /**
+     * Resolve the main domain represented by a request host.
+     */
+    public static function mainDomainForHost(string $host): string
+    {
+        foreach (self::mainDomains() as $domain) {
+            if ($host === $domain) {
+                return $domain;
+            }
+        }
+
+        return (string) config('app.domain');
+    }
+
+    /**
+     * Add the host locale to public implicit route model binding.
+     */
+    public function resolveRouteBindingQuery($query, $value, $field = null): Builder
+    {
+        $query = parent::resolveRouteBindingQuery($query, $value, $field);
+        $resolvedHost = self::resolveBlogHost(request()->getHost());
+
+        if ($resolvedHost) {
+            $query->where('blogs.locale', $resolvedHost['locale']);
+        }
+
+        return $query;
+    }
+
+    /**
+     * @return array{slug: string, locale: string}|null
+     */
+    private static function resolveBlogHost(string $host): ?array
+    {
+        foreach (self::mainDomains() as $domain) {
+            $suffix = '.' . $domain;
+
+            if (!str_ends_with($host, $suffix)) {
+                continue;
+            }
+
+            $slug = substr($host, 0, -strlen($suffix));
+            $locale = self::resolveMainDomainLocale($domain);
+
+            if ($slug !== '' && $locale && !str_contains($slug, '.')) {
+                return [
+                    'slug' => $slug,
+                    'locale' => $locale,
+                ];
             }
         }
 
         return null;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function mainDomains(): array
+    {
+        return array_values(array_filter([
+            config('app.domain'),
+            config('app.domain_secondary'),
+        ]));
+    }
+
+    private static function resolveMainDomainLocale(string $domain): ?string
+    {
+        $domainLocales = config('app.domain_locales', []);
+
+        return $domainLocales[$domain] ?? null;
     }
 
     /**

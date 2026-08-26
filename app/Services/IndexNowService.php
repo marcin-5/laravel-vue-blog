@@ -29,46 +29,67 @@ readonly class IndexNowService
             return true;
         }
 
+        $urlsByHost = [];
+        foreach (array_unique($urls) as $url) {
+            $host = parse_url($url, PHP_URL_HOST);
+
+            if (!$host) {
+                Log::error('IndexNow submission failed: URL has no host.', ['url' => $url]);
+
+                return false;
+            }
+
+            $urlsByHost[$host][] = $url;
+        }
+
+        if (!$urlsByHost) {
+            return false;
+        }
+
         $key = $this->getApiKey();
         if (app()->runningUnitTests() && !$key) {
             $key = 'test-key';
         }
-        $host = parse_url(config('app.url'), PHP_URL_HOST);
-        if (app()->runningUnitTests() && !$host) {
-            $host = 'example.org';
-        }
 
-        if (!$key || !$host) {
+        if (!$key) {
             Log::error('IndexNow submission failed: Missing API Key or App Host.');
             return false;
         }
 
         $this->ensureKeyFileExists();
 
-        $keyLocation = url($key . '.txt');
+        $allSuccessful = true;
 
-        $payload = [
-            'host' => $host,
-            'key' => $key,
-            'keyLocation' => $keyLocation,
-            'urlList' => $urls,
-        ];
+        foreach ($urlsByHost as $host => $hostUrls) {
+            $scheme = parse_url($hostUrls[0], PHP_URL_SCHEME) ?: 'https';
+            $keyLocation = $scheme . '://' . $host . '/' . $key . '.txt';
+            $payload = [
+                'host' => $host,
+                'key' => $key,
+                'keyLocation' => $keyLocation,
+                'urlList' => $hostUrls,
+            ];
 
-        try {
-            $response = Http::post($endpoint, $payload);
+            try {
+                $response = Http::post($endpoint, $payload);
 
-            Log::info('IndexNow API response', [
-                'status' => $response->status(),
-                'body' => $response->json(),
-                'urls_count' => count($urls),
-            ]);
+                Log::info('IndexNow API response', [
+                    'status' => $response->status(),
+                    'body' => $response->json(),
+                    'host' => $host,
+                    'urls_count' => count($hostUrls),
+                ]);
 
-            return $response->successful();
-        } catch (Exception $e) {
-            Log::error('IndexNow API request failed: ' . $e->getMessage());
-
-            return false;
+                if (!$response->successful()) {
+                    $allSuccessful = false;
+                }
+            } catch (Exception $e) {
+                Log::error('IndexNow API request failed: ' . $e->getMessage(), ['host' => $host]);
+                $allSuccessful = false;
+            }
         }
+
+        return $allSuccessful;
     }
 
     /**

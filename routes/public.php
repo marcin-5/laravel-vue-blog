@@ -13,7 +13,6 @@ use App\Http\Middleware\HandleTranslations;
 use App\Http\Middleware\TrackMarkdownRequests;
 use App\Http\Middleware\UpdateVisitorOnLogin;
 use App\Models\Blog;
-use App\Models\Tag;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Support\Facades\Route;
 use Spatie\MarkdownResponse\Middleware\ProvideMarkdownResponse;
@@ -66,10 +65,10 @@ Route::domain('{blog:slug}.{mainDomain}')
 
 // Redirect robots to the subdomain
 Route::get('blogs/{blog_slug}/{postSlug}', function (string $blog_slug, string $postSlug) {
-    $mainDomains = [config('app.domain'), config('app.domain_secondary')];
-    $blog = Blog::withoutGlobalScopes()->where('slug', $blog_slug)->firstOrFail();
+    $blog = Blog::fromSlugAndHost($blog_slug, request()->getHost());
+    abort_unless($blog, 404);
     $host = request()->getHost();
-    $mainDomain = collect($mainDomains)->first(fn($d) => str_ends_with($host, $d)) ?? $mainDomains[0];
+    $mainDomain = Blog::mainDomainForHost($host);
 
     return redirect()->to(
         (request()->isSecure() ? 'https://' : 'http://') . $blog->slug . '.' . $mainDomain . '/' . $postSlug,
@@ -78,10 +77,10 @@ Route::get('blogs/{blog_slug}/{postSlug}', function (string $blog_slug, string $
 });
 
 Route::get('blogs/{blog_slug}', function (string $blog_slug) {
-    $mainDomains = [config('app.domain'), config('app.domain_secondary')];
-    $blog = Blog::withoutGlobalScopes()->where('slug', $blog_slug)->firstOrFail();
+    $blog = Blog::fromSlugAndHost($blog_slug, request()->getHost());
+    abort_unless($blog, 404);
     $host = request()->getHost();
-    $mainDomain = collect($mainDomains)->first(fn($d) => str_ends_with($host, $d)) ?? $mainDomains[0];
+    $mainDomain = Blog::mainDomainForHost($host);
 
     return redirect()->to((request()->isSecure() ? 'https://' : 'http://') . $blog->slug . '.' . $mainDomain, 301);
 });
@@ -103,11 +102,12 @@ Route::post('/newsletter/update', [NewsletterController::class, 'update'])->name
 Route::post('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
 // Redirects for old URL structure on main domains
-Route::get('{blog_slug}/tags/{tag:slug}', function (string $blog_slug, Tag $tag) {
-    $mainDomains = [config('app.domain'), config('app.domain_secondary')];
-    $blog = Blog::withoutGlobalScopes()->where('slug', $blog_slug)->firstOrFail();
+Route::get('{blog_slug}/tags/{tagSlug}', function (string $blog_slug, string $tagSlug) {
+    $blog = Blog::fromSlugAndHost($blog_slug, request()->getHost());
+    abort_unless($blog, 404);
+    $tag = $blog->tags()->where('slug', $tagSlug)->firstOrFail();
     $host = request()->getHost();
-    $mainDomain = collect($mainDomains)->first(fn($d) => str_ends_with($host, $d)) ?? $mainDomains[0];
+    $mainDomain = Blog::mainDomainForHost($host);
 
     return redirect()->to(
         (request()->isSecure() ? 'https://' : 'http://') . $blog->slug . '.' . $mainDomain . '/tags/' . $tag->slug,
@@ -116,10 +116,10 @@ Route::get('{blog_slug}/tags/{tag:slug}', function (string $blog_slug, Tag $tag)
 })->where('blog_slug', $reservedRegex);
 
 Route::get('{blog_slug}/{postSlug}', function (string $blog_slug, string $postSlug) {
-    $mainDomains = [config('app.domain'), config('app.domain_secondary')];
-    $blog = Blog::withoutGlobalScopes()->where('slug', $blog_slug)->firstOrFail();
+    $blog = Blog::fromSlugAndHost($blog_slug, request()->getHost());
+    abort_unless($blog, 404);
     $host = request()->getHost();
-    $mainDomain = collect($mainDomains)->first(fn($d) => str_ends_with($host, $d)) ?? $mainDomains[0];
+    $mainDomain = Blog::mainDomainForHost($host);
 
     return redirect()->to(
         (request()->isSecure() ? 'https://' : 'http://') . $blog->slug . '.' . $mainDomain . '/' . $postSlug,
@@ -128,10 +128,10 @@ Route::get('{blog_slug}/{postSlug}', function (string $blog_slug, string $postSl
 })->where('blog_slug', $reservedRegex);
 
 Route::get('{blog_slug}', function (string $blog_slug) {
-    $mainDomains = [config('app.domain'), config('app.domain_secondary')];
-    $blog = Blog::withoutGlobalScopes()->where('slug', $blog_slug)->firstOrFail();
+    $blog = Blog::fromSlugAndHost($blog_slug, request()->getHost());
+    abort_unless($blog, 404);
     $host = request()->getHost();
-    $mainDomain = collect($mainDomains)->first(fn($d) => str_ends_with($host, $d)) ?? $mainDomains[0];
+    $mainDomain = Blog::mainDomainForHost($host);
 
     return redirect()->to((request()->isSecure() ? 'https://' : 'http://') . $blog->slug . '.' . $mainDomain, 301);
 })->where('blog_slug', $reservedRegex);

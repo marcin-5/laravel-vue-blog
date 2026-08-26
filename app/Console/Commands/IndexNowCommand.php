@@ -10,59 +10,91 @@ use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
-#[Signature('blog:indexnow {path? : blog_slug or blog_slug/post_slug} {--logs : Show only recent logs}')]
+#[Signature('blog:indexnow {path? : blog_slug, blog_slug/post_slug, or blog_slug/about} {--locale= : Blog locale (pl or en)} {--logs : Show only recent logs}')]
 #[Description('Submit URLs to IndexNow API')]
 class IndexNowCommand extends Command
 {
     /**
      * Execute the console command.
      */
-    public function handle(IndexNowService $indexNowService): void
+    public function handle(IndexNowService $indexNowService): int
     {
         if ($this->option('logs')) {
             $this->displayRecentLogs(20);
 
-            return;
+            return self::SUCCESS;
         }
 
         $path = $this->argument('path');
+        $locale = $this->option('locale');
+
+        if ($locale && !in_array($locale, config('app.supported_locales', []), true)) {
+            $this->error('Locale must be one of: ' . implode(', ', config('app.supported_locales', [])) . '.');
+
+            return self::FAILURE;
+        }
 
         if (!$path) {
             // Submit all pages
-            $this->info('Submitting all blogs and posts...');
+            $this->info('Submitting all blogs, about pages, and posts...');
             $urls = $this->getAllUrls();
         } elseif (!str_contains($path, '/')) {
             // Submit all pages for a given blog
             $blogSlug = $path;
-            $blog = Blog::where('slug', $blogSlug)->first();
+            $blog = $this->findBlog($blogSlug);
             if (!$blog) {
-                $this->error("Blog not found: $blogSlug");
-                return;
+                return self::FAILURE;
+            }
+            if (!$blog->is_published) {
+                $this->error("Blog is not published: $blogSlug");
+
+                return self::FAILURE;
             }
             $this->info("Submitting all pages for blog: $blogSlug...");
             $urls = $this->getBlogUrls($blog);
         } else {
             // Submit a single page
-            [$blogSlug, $postSlug] = explode('/', $path, 2);
-            $post = Post::whereHas('blog', fn($q) => $q->where('slug', $blogSlug))
-                ->where('slug', $postSlug)
-                ->first();
+            [$blogSlug, $pageSlug] = explode('/', $path, 2);
+            $blog = $this->findBlog($blogSlug);
 
-            if (!$post) {
-                $this->error("Post not found: $blogSlug/$postSlug");
-                return;
+            if (!$blog) {
+                return self::FAILURE;
             }
-            $this->info("Submitting post: $blogSlug/$postSlug...");
-            $urls = [route('blog.public.post', [
-                'blog' => $blogSlug,
-                'postSlug' => $postSlug,
-                'mainDomain' => $post->blog->main_domain,
-            ])];
+
+            if ($pageSlug === 'about') {
+                if (!$blog->is_published) {
+                    $this->error("Blog is not published: $blogSlug");
+
+                    return self::FAILURE;
+                }
+
+                $this->info("Submitting about page: $blogSlug/about...");
+                $urls = [$this->getAboutUrl($blog)];
+            } else {
+                $post = $blog->posts()
+                    ->published()
+                    ->public()
+                    ->whereNull('group_id')
+                    ->where('slug', $pageSlug)
+                    ->first();
+
+                if (!$post) {
+                    $this->error("Post not found: $blogSlug/$pageSlug");
+
+                    return self::FAILURE;
+                }
+                $this->info("Submitting post: $blogSlug/$pageSlug...");
+                $urls = [route('blog.public.post', [
+                    'blog' => $blogSlug,
+                    'postSlug' => $pageSlug,
+                    'mainDomain' => $blog->main_domain,
+                ])];
+            }
         }
 
         if (empty($urls)) {
             $this->warn('No URLs found to submit.');
-            return;
+            return self::SUCCESS;
         }
 
         $filteredUrls = array_filter($urls, function ($url) use ($indexNowService) {
@@ -74,7 +106,7 @@ class IndexNowCommand extends Command
 
         if (empty($filteredUrls)) {
             $this->warn('All URLs were filtered out by robots.txt.');
-            return;
+            return self::SUCCESS;
         }
 
         $this->info('Submitting ' . count($filteredUrls) . ' URLs to IndexNow...');
@@ -85,6 +117,8 @@ class IndexNowCommand extends Command
         }
 
         $this->displayRecentLogs();
+
+        return self::SUCCESS;
     }
 
     /**
@@ -142,12 +176,16 @@ class IndexNowCommand extends Command
     {
         $urls = [];
 
-        Blog::where('is_published', true)->each(function ($blog) use (&$urls) {
+        Blog::withoutGlobalScopes()->where('is_published', true)->each(function (Blog $blog) use (&$urls): void {
             $urls[] = $blog->public_url;
+            $urls[] = $this->getAboutUrl($blog);
         });
 
-        Post::published()->public()->whereHas('blog', fn($q) => $q->where('is_published', true))
-            ->each(function ($post) use (&$urls) {
+        Post::published()->public()->whereNull('group_id')->whereHas('blog', fn($q) => $q
+            ->withoutGlobalScopes()
+            ->where('is_published', true))
+            ->with('blog')
+            ->each(function (Post $post) use (&$urls): void {
                 $urls[] = route('blog.public.post', [
                     'blog' => $post->blog->slug,
                     'postSlug' => $post->slug,
@@ -160,9 +198,9 @@ class IndexNowCommand extends Command
 
     protected function getBlogUrls(Blog $blog): array
     {
-        $urls = [$blog->public_url];
+        $urls = [$blog->public_url, $this->getAboutUrl($blog)];
 
-        $blog->posts()->published()->public()->each(function ($post) use ($blog, &$urls) {
+        $blog->posts()->published()->public()->whereNull('group_id')->each(function (Post $post) use ($blog, &$urls): void {
             $urls[] = route('blog.public.post', [
                 'blog' => $blog->slug,
                 'postSlug' => $post->slug,
@@ -171,5 +209,39 @@ class IndexNowCommand extends Command
         });
 
         return $urls;
+    }
+
+    protected function findBlog(string $slug): ?Blog
+    {
+        $query = Blog::withoutGlobalScopes()->where('slug', $slug);
+        $locale = $this->option('locale');
+
+        if ($locale) {
+            $query->where('locale', $locale);
+        }
+
+        $blogs = $query->get();
+
+        if ($blogs->isEmpty()) {
+            $this->error("Blog not found: $slug");
+
+            return null;
+        }
+
+        if ($blogs->count() > 1) {
+            $this->error("Multiple blogs found for slug '$slug'. Use --locale=pl or --locale=en.");
+
+            return null;
+        }
+
+        return $blogs->first();
+    }
+
+    protected function getAboutUrl(Blog $blog): string
+    {
+        return route('blog.public.about', [
+            'blog' => $blog->slug,
+            'mainDomain' => $blog->main_domain,
+        ]);
     }
 }

@@ -174,7 +174,8 @@ prod-logs-queue: ## Tail only queue container logs
 prod-logs-app: ## Tail only app container logs
 	$(DOCKER_COMPOSE_PROD) logs -f app
 
-prod-indexnow: ## 🚀 Run IndexNow command in production (Examples: make prod-indexnow ARGS="blog_slug/post_slug")
+# `--locale` may be omitted when the blog slug is unique across locales; use it when the slug is shared.
+prod-indexnow: ## 🚀 Run IndexNow command in production (Examples: make prod-indexnow ARGS="blog-slug --locale=pl" or ARGS="blog-slug/about --locale=en")
 	$(DOCKER_COMPOSE_PROD) exec -T app php artisan blog:indexnow $(ARGS)
 
 prod-indexnow-logs: ## 📜 Show recent IndexNow API response logs from production
