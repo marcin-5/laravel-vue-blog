@@ -31,7 +31,13 @@ trait HasMarkdownContent
         }
 
         $html = $parser->text($content);
+        $cachePath = config('app.htmlpurifier.cache_path');
+        if (!is_dir($cachePath)) {
+            mkdir($cachePath, 0775, true);
+        }
+
         $config = HTMLPurifier_Config::createDefault();
+        $config->set('Cache.SerializerPath', $cachePath);
         $config->set('HTML.SafeIframe', false);
         $config->set('URI.SafeIframeRegexp', null);
         $config->set('CSS.AllowedProperties', []);

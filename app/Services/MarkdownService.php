@@ -20,8 +20,14 @@ class MarkdownService
             $this->parsedown->setSafeMode(false);
         }
 
+        $cachePath = config('app.htmlpurifier.cache_path');
+        if (!is_dir($cachePath)) {
+            mkdir($cachePath, 0775, true);
+        }
+
         // Configure a conservative purifier profile to prevent XSS while allowing common formatting
         $config = HTMLPurifier_Config::createDefault();
+        $config->set('Cache.SerializerPath', $cachePath);
         // You can adjust allowed elements/attributes as needed; defaults are fairly safe
         // e.g., allow basic formatting and links/images
         $config->set('HTML.SafeIframe', false);

@@ -98,6 +98,9 @@ return [
     'domain' => $primaryDomain,
     'domain_secondary' => $secondaryDomain,
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
+    'htmlpurifier' => [
+        'cache_path' => storage_path('framework/cache/htmlpurifier'),
+    ],
 
     /*
     |--------------------------------------------------------------------------

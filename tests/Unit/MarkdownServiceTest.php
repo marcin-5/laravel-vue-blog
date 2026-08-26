@@ -26,6 +26,14 @@ it('converts basic markdown to html', function () {
     expect($result)->toContain('<strong>bold</strong>');
 });
 
+it('stores purifier definitions in application storage', function () {
+    $service = new MarkdownService;
+
+    $service->convertToHtml('**bold**');
+
+    expect(is_dir(storage_path('framework/cache/htmlpurifier')))->toBeTrue();
+});
+
 it('converts markdown with links', function () {
     $service = new MarkdownService;
 
