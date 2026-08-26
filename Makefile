@@ -148,6 +148,7 @@ QUEUE_PAUSE_STATE_FILE ?= /tmp/laravel-blog-$(DOCKER_PROJECT_NAME_PROD)-queues-p
 .PHONY: prod-up prod-down prod-restart prod-build prod-logs \
         prod-migrate prod-optimize prod-deploy prod-update prod-wait \
         prod-maintenance-on prod-maintenance-off prod-rebuild-pg-redis \
+        prod-rebuild-full prod-rebuild-caddy \
         prod-rebuild-pg-redis-preflight prod-backup-pg-redis \
         prod-prune prod-versions prod-check-assets prod-logs-queue prod-logs-app \
         prod-health-queue prod-queue-diag prod-queue-pause-all \
@@ -371,16 +372,209 @@ prod-ready: ## Check if the app is ready to handle requests (PHP-FPM/DB)
 	done; \
 	echo "❌ App failed to become ready in time."; exit 1
 
-# Shorthand target to update code and restart selected services
+# Production deployment paths:
+# - `prod-update` is the cached daily application deployment and does not rebuild Caddy.
+# - `prod-rebuild-full` is for dependency/base-image changes requiring a fresh application build.
+# - `prod-rebuild-caddy` is for Caddyfile, plugin, or Caddy image changes only.
+prod-rebuild-full: ## Force a no-cache rebuild of the application services (app, ssr, queue, scheduler)
+	@set -eu; \
+	maintenance_enabled=0; queues_paused=0; rollback_attempted=0; migration_attempted=0; \
+	rollback_file=$$(mktemp "$${TMPDIR:-/tmp}/laravel-blog-prod-rebuild.XXXXXX"); \
+	rollback_prefix="laravel-blog-prod-rebuild-$$$$"; \
+	fail() { printf '%s\n' "❌ [prod-rebuild-full] $$1" >&2; exit 1; }; \
+	cleanup() { \
+		rm -f "$$rollback_file"; \
+		for service in app ssr queue scheduler; do docker image rm -f "$${rollback_prefix}-$$service" >/dev/null 2>&1 || true; done; \
+	}; \
+	verify_runtime() { \
+		make prod-wait || return 1; \
+		make prod-ready || return 1; \
+		make prod-check-assets || return 1; \
+		$(DOCKER_COMPOSE_PROD) exec -T app wget -q -O- --timeout=5 "http://ssr:13714/health" >/dev/null || return 1; \
+		make prod-health-queue || return 1; \
+	}; \
+	rollback_runtime() { \
+		printf '%s\n' '↩️  Restoring the previous application runtime...'; \
+		$(DOCKER_COMPOSE_PROD) -f "$$rollback_file" up -d --force-recreate --no-deps app ssr queue scheduler; \
+		verify_runtime; \
+	}; \
+	on_exit() { \
+		status=$$?; \
+		trap - EXIT; \
+		if [ "$$status" -eq 0 ]; then cleanup; return 0; fi; \
+		if [ "$$maintenance_enabled" -eq 0 ]; then \
+			printf '%s\n' '❌ Full application rebuild failed before maintenance; the running production was not switched.' >&2; \
+			cleanup; return "$$status"; \
+		fi; \
+		if [ "$$migration_attempted" -eq 1 ]; then \
+			printf '%s\n' '❌ Migration failed; maintenance remains enabled because the old runtime may not be compatible with the new schema.' >&2; \
+			printf '%s\n' 'ℹ️  Diagnose with make prod-logs, make prod-logs-queue and make prod-queue-diag.' >&2; \
+			cleanup; return "$$status"; \
+		fi; \
+		rollback_status=0; \
+		if [ "$$rollback_attempted" -eq 0 ]; then \
+			rollback_attempted=1; \
+			set +e; rollback_runtime || rollback_status=$$?; \
+			if [ "$$rollback_status" -eq 0 ] && [ "$$queues_paused" -eq 1 ]; then \
+				make prod-queue-continue-all || rollback_status=$$?; \
+				[ "$$rollback_status" -eq 0 ] && queues_paused=0; \
+			fi; \
+			if [ "$$rollback_status" -eq 0 ]; then \
+				make prod-maintenance-off || rollback_status=$$?; \
+				[ "$$rollback_status" -eq 0 ] && maintenance_enabled=0; \
+			fi; \
+			set -e; \
+		fi; \
+		if [ "$$rollback_status" -eq 0 ]; then \
+			printf '%s\n' '✅ Previous application runtime restored and verified; maintenance disabled.' >&2; \
+		else \
+			printf '%s\n' '❌ Automatic rollback failed; maintenance remains enabled.' >&2; \
+			printf '%s\n' 'ℹ️  Diagnose with make prod-logs, make prod-logs-queue and make prod-queue-diag, then rerun make prod-rebuild-full.' >&2; \
+		fi; \
+		cleanup; return "$$status"; \
+	}; \
+	trap on_exit EXIT; \
+	printf '%s\n' '🔎 Validating production Compose and required running services...'; \
+	$(DOCKER_COMPOSE_PROD) config --quiet || fail 'Production Compose configuration is invalid.'; \
+	for service in app ssr queue scheduler caddy postgres redis; do \
+		container_id=$$($(DOCKER_COMPOSE_PROD) ps -q "$$service"); \
+		[ -n "$$container_id" ] || fail "Required '$$service' container does not exist or is not running."; \
+	done; \
+	[ ! -e "$(QUEUE_PAUSE_STATE_FILE)" ] || fail 'A previous queue pause is still recorded; inspect the queue before continuing.'; \
+	app_container=$$($(DOCKER_COMPOSE_PROD) ps -q app); ssr_container=$$($(DOCKER_COMPOSE_PROD) ps -q ssr); queue_container=$$($(DOCKER_COMPOSE_PROD) ps -q queue); scheduler_container=$$($(DOCKER_COMPOSE_PROD) ps -q scheduler); \
+	old_app_image=$$(docker inspect -f '{{.Image}}' "$$app_container"); old_ssr_image=$$(docker inspect -f '{{.Image}}' "$$ssr_container"); old_queue_image=$$(docker inspect -f '{{.Image}}' "$$queue_container"); old_scheduler_image=$$(docker inspect -f '{{.Image}}' "$$scheduler_container"); \
+	for image in "$$old_app_image" "$$old_ssr_image" "$$old_queue_image" "$$old_scheduler_image"; do docker image inspect "$$image" >/dev/null || fail "Could not inspect rollback image '$$image'."; done; \
+	printf '%s\n' '⬇️  Pulling the latest fast-forwardable revision...'; \
+	git pull --ff-only; \
+	printf '%s\n' '🔨 Building fresh application images without cache...'; \
+	$(DOCKER_COMPOSE_PROD) build --no-cache --pull app ssr queue scheduler; \
+	printf '%s\n' '💾 Recording rollback image references...'; \
+	printf '%s\n' 'services:' > "$$rollback_file"; \
+	for service in app ssr queue scheduler; do \
+		case "$$service" in \
+			app) old_image="$$old_app_image" ;; ssr) old_image="$$old_ssr_image" ;; queue) old_image="$$old_queue_image" ;; scheduler) old_image="$$old_scheduler_image" ;; \
+		esac; \
+		rollback_image="$${rollback_prefix}-$$service"; \
+		docker tag "$$old_image" "$$rollback_image"; \
+		printf '  %s:\n    image: %s\n' "$$service" "$$rollback_image" >> "$$rollback_file"; \
+	done; \
+	printf '%s\n' '🛠️  Enabling maintenance mode...'; \
+	maintenance_enabled=1; \
+	make prod-maintenance-on; \
+	printf '%s\n' '⏸️  Pausing production queues when supported...'; \
+	make prod-queue-pause-all; \
+	if [ -f "$(QUEUE_PAUSE_STATE_FILE)" ]; then queues_paused=1; fi; \
+	printf '%s\n' '🧹 Clearing old bootstrap cache to prevent stale workers...'; \
+	rm -rf /srv/laravel-blog/bootstrap_cache/* 2>/dev/null || true; \
+	printf '%s\n' '🚀 Recreating only application services...'; \
+	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps app ssr queue scheduler; \
+	verify_runtime; \
+	make prod-versions; \
+	printf '%s\n' '🗄️  Running database migrations...'; \
+	migration_attempted=1; \
+	make prod-migrate; \
+	printf '%s\n' '♻️  Re-caching the application...'; \
+	make prod-optimize; \
+	printf '%s\n' '▶️  Resuming production queues...'; \
+	if [ "$$queues_paused" -eq 1 ]; then make prod-queue-continue-all; queues_paused=0; fi; \
+	make prod-maintenance-off; \
+	maintenance_enabled=0; \
+	printf '%s\n' '✅ Full production application rebuild completed.'
+
+prod-rebuild-caddy: ## Force a no-cache rebuild of Caddy without recreating application services
+	@set -eu; \
+	maintenance_enabled=0; rollback_attempted=0; \
+	rollback_file=$$(mktemp "$${TMPDIR:-/tmp}/laravel-blog-caddy-rollback.XXXXXX"); \
+	maintenance_file=$$(mktemp "$${TMPDIR:-/tmp}/laravel-blog-caddy-maintenance.XXXXXX"); \
+	normal_file=$$(mktemp "$${TMPDIR:-/tmp}/laravel-blog-caddy-normal.XXXXXX"); \
+	rollback_image="laravel-blog-caddy-rollback-$$$$"; \
+	fail() { printf '%s\n' "❌ [prod-rebuild-caddy] $$1" >&2; exit 1; }; \
+	cleanup() { \
+		rm -f "$$rollback_file" "$$maintenance_file" "$$normal_file"; \
+		docker image rm -f "$$rollback_image" >/dev/null 2>&1 || true; \
+	}; \
+	verify_caddy() { \
+		cid=$$($(DOCKER_COMPOSE_PROD) ps -q caddy) || return 1; \
+		[ -n "$$cid" ] || return 1; \
+		[ "$$(docker inspect -f '{{.State.Running}}' "$$cid" 2>/dev/null)" = 'true' ] || return 1; \
+		$(DOCKER_COMPOSE_PROD) exec -T caddy caddy validate --config /etc/caddy/Caddyfile || return 1; \
+	}; \
+	rollback_runtime() { \
+		printf '%s\n' '↩️  Restoring the previous Caddy runtime...'; \
+		$(DOCKER_COMPOSE_PROD) -f "$$rollback_file" up -d --force-recreate --no-deps caddy || return 1; \
+		cid=$$($(DOCKER_COMPOSE_PROD) -f "$$rollback_file" ps -q caddy) || return 1; \
+		[ "$$(docker inspect -f '{{.State.Running}}' "$$cid" 2>/dev/null)" = 'true' ] || return 1; \
+		$(DOCKER_COMPOSE_PROD) -f "$$rollback_file" exec -T caddy caddy validate --config /etc/caddy/Caddyfile || return 1; \
+		$(DOCKER_COMPOSE_PROD) -f "$$rollback_file" -f "$$normal_file" up -d --force-recreate --no-deps caddy || return 1; \
+		$(DOCKER_COMPOSE_PROD) -f "$$rollback_file" -f "$$normal_file" exec -T caddy caddy validate --config /etc/caddy/Caddyfile || return 1; \
+		make prod-maintenance-off || return 1; \
+	}; \
+	on_exit() { \
+		status=$$?; \
+		trap - EXIT; \
+		if [ "$$status" -eq 0 ]; then cleanup; return 0; fi; \
+		if [ "$$maintenance_enabled" -eq 0 ]; then \
+			printf '%s\n' '❌ Caddy rebuild failed before maintenance; the running production was not switched.' >&2; \
+			cleanup; return "$$status"; \
+		fi; \
+		rollback_status=0; \
+		if [ "$$rollback_attempted" -eq 0 ]; then \
+			rollback_attempted=1; \
+			set +e; rollback_runtime || rollback_status=$$?; set -e; \
+		fi; \
+		if [ "$$rollback_status" -eq 0 ]; then \
+			maintenance_enabled=0; \
+			printf '%s\n' '✅ Previous Caddy runtime restored and verified; maintenance disabled.' >&2; \
+		else \
+			printf '%s\n' '❌ Automatic Caddy rollback failed; maintenance remains enabled.' >&2; \
+			printf '%s\n' 'ℹ️  Diagnose with make prod-logs and rerun make prod-rebuild-caddy after fixing the issue.' >&2; \
+		fi; \
+		cleanup; return "$$status"; \
+	}; \
+	trap on_exit EXIT; \
+	printf '%s\n' '🔎 Validating production Compose and the running Caddy service...'; \
+	$(DOCKER_COMPOSE_PROD) config --quiet || fail 'Production Compose configuration is invalid.'; \
+	caddy_container=$$($(DOCKER_COMPOSE_PROD) ps -q caddy); \
+	[ -n "$$caddy_container" ] || fail 'Caddy container does not exist or is not running.'; \
+	[ "$$(docker inspect -f '{{.State.Running}}' "$$caddy_container" 2>/dev/null)" = 'true' ] || fail 'Caddy container is not running.'; \
+	$(DOCKER_COMPOSE_PROD) exec -T caddy caddy validate --config /etc/caddy/Caddyfile || fail 'The current normal Caddyfile is invalid.'; \
+	old_caddy_image=$$(docker inspect -f '{{.Image}}' "$$caddy_container"); \
+	docker image inspect "$$old_caddy_image" >/dev/null || fail 'Could not inspect the current Caddy image for rollback.'; \
+	printf '%s\n' '⬇️  Pulling the latest fast-forwardable revision...'; \
+	git pull --ff-only; \
+	printf '%s\n' '🔨 Building the Caddy image without cache...'; \
+	$(DOCKER_COMPOSE_PROD) build --no-cache --pull caddy; \
+	docker tag "$$old_caddy_image" "$$rollback_image"; \
+	printf '%s\n' 'services:' > "$$rollback_file"; \
+	printf '  caddy:\n    image: %s\n    volumes:\n      - ./Caddyfile.maintenance:/etc/caddy/Caddyfile:ro\n' "$$rollback_image" >> "$$rollback_file"; \
+	printf '%s\n' 'services:' > "$$maintenance_file"; \
+	printf '  caddy:\n    volumes:\n      - ./Caddyfile.maintenance:/etc/caddy/Caddyfile:ro\n' >> "$$maintenance_file"; \
+	printf '%s\n' 'services:' > "$$normal_file"; \
+	printf '%s\n' '  caddy:' '    volumes:' '      - ./Caddyfile:/etc/caddy/Caddyfile:ro' >> "$$normal_file"; \
+	printf '%s\n' '🛠️  Enabling maintenance mode before replacing Caddy...'; \
+	maintenance_enabled=1; \
+	make prod-maintenance-on; \
+	printf '%s\n' '🚀 Recreating only the Caddy service with its maintenance configuration...'; \
+	$(DOCKER_COMPOSE_PROD) -f "$$maintenance_file" up -d --force-recreate --no-deps caddy; \
+	$(DOCKER_COMPOSE_PROD) -f "$$maintenance_file" exec -T caddy caddy validate --config /etc/caddy/Caddyfile; \
+	caddy_container=$$($(DOCKER_COMPOSE_PROD) -f "$$maintenance_file" ps -q caddy); \
+	[ "$$(docker inspect -f '{{.State.Running}}' "$$caddy_container" 2>/dev/null)" = 'true' ] || fail 'The rebuilt Caddy container is not running.'; \
+	printf '%s\n' '🔗 Restoring and validating the normal Caddyfile...'; \
+	$(DOCKER_COMPOSE_PROD) -f "$$normal_file" up -d --force-recreate --no-deps caddy; \
+	$(DOCKER_COMPOSE_PROD) -f "$$normal_file" exec -T caddy caddy validate --config /etc/caddy/Caddyfile; \
+	make prod-maintenance-off; \
+	maintenance_enabled=0; \
+	printf '%s\n' '✅ Caddy-only production rebuild completed.'
+
+# Shorthand target to update code and restart selected services using cached images
 prod-update: ## Update code from Git and restart selected services with zero-502 maintenance
+	git pull --ff-only
+	@echo "🔨 Building cached images for application services..."
+	$(DOCKER_COMPOSE_PROD) build app ssr queue scheduler
 	$(MAKE) prod-maintenance-on
 	$(MAKE) prod-queue-pause-all
-	git fetch --all
-	git pull --ff-only
 	@echo "🧹 Clearing old bootstrap cache to prevent worker stuck..."
 	rm -rf /srv/laravel-blog/bootstrap_cache/* 2>/dev/null || true
-	@echo "🔨 Building fresh images for core services and Caddy..."
-	$(DOCKER_COMPOSE_PROD) build --no-cache --pull app ssr queue scheduler caddy
 	@echo "🔧 Clearing Laravel caches before recreate..."
 	-$(DOCKER_COMPOSE_PROD) exec -T app php artisan optimize:clear || true
 	-$(DOCKER_COMPOSE_PROD) exec -T app php artisan package:discover --ansi || true
@@ -414,8 +608,6 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 	$(DOCKER_COMPOSE_PROD) exec app php artisan queue:monitor redis
 	@echo ""
 	@echo "If SSR still doesn't work, check your Dockerfile to ensure 'npm run build' creates bootstrap/ssr/"
-	@echo "🔐 Recreating Caddy with the Hostinger DNS-01 provider..."
-	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps caddy
 	$(MAKE) prod-queue-continue-all
 	$(MAKE) prod-maintenance-off
 	@echo ""
