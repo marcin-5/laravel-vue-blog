@@ -8,6 +8,7 @@ vendor
 .ai
 storage/*.key
 /public/build
+/bootstrap/cache
 /bootstrap/ssr
 /storage/app/public/*
 /.env

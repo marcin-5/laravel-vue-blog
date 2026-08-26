@@ -278,15 +278,17 @@ prod-health-queue: ## Check health status of the queue worker container (uses Do
 
 prod-health-runtime: ## Wait for app, SSR and queue Docker healthchecks
 	@set -eu; \
-	deadline=$$(( $$(date +%s) + $(PROD_REBUILD_TIMEOUT) )); \
+	deadline=$$(( $$(date +%s) + $(PROD_REBUILD_TIMEOUT) )); missing_healthcheck=0; \
 	while :; do \
 		all_healthy=1; details=''; \
 		for service in app ssr queue; do \
 			cid=$$($(DOCKER_COMPOSE_PROD) ps -q "$$service"); \
 			if [ -z "$$cid" ]; then status=missing; else status=$$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}' "$$cid" 2>/dev/null || echo unknown); fi; \
 			details="$$details $$service=$$status"; \
+			[ "$$status" = no-healthcheck ] && missing_healthcheck=1; \
 			[ "$$status" = healthy ] || all_healthy=0; \
 		done; \
+		if [ "$$missing_healthcheck" -eq 1 ]; then echo "❌ Runtime healthchecks are missing:$$details. Recreate app, ssr and queue with the current Compose configuration." >&2; exit 1; fi; \
 		if [ "$$all_healthy" -eq 1 ]; then echo "✅ Runtime is healthy:$$details"; exit 0; fi; \
 		if [ "$$(date +%s)" -ge "$$deadline" ]; then echo "❌ Runtime healthchecks failed before timeout:$$details" >&2; exit 1; fi; \
 		echo "⏳ Waiting for runtime healthchecks:$$details"; sleep 5; \

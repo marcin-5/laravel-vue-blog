@@ -73,7 +73,8 @@ RUN composer install --no-dev --no-scripts --no-autoloader --no-interaction
 
 # Copy application code after the dependency layer so code-only changes retain Composer cache.
 COPY . .
-RUN composer dump-autoload --no-dev --optimize --no-interaction --no-scripts \
+RUN mkdir -p bootstrap/cache \
+    && composer dump-autoload --no-dev --optimize --no-interaction --no-scripts \
     && php artisan package:discover --ansi
 
 # Copy built assets from node builder
