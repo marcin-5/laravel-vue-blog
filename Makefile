@@ -148,7 +148,7 @@ QUEUE_PAUSE_STATE_FILE ?= /tmp/laravel-blog-$(DOCKER_PROJECT_NAME_PROD)-queues-p
 .PHONY: prod-up prod-down prod-restart prod-build prod-logs \
         prod-migrate prod-optimize prod-deploy prod-update prod-wait \
         prod-maintenance-on prod-maintenance-off prod-rebuild-pg-redis \
-        prod-rebuild-full prod-rebuild-caddy \
+        prod-rebuild-app-services prod-rebuild-caddy \
         prod-rebuild-pg-redis-preflight prod-backup-pg-redis \
         prod-prune prod-versions prod-check-assets prod-logs-queue prod-logs-app \
         prod-health-runtime prod-health-queue prod-queue-diag prod-queue-pause-all \
@@ -366,14 +366,14 @@ prod-ready: ## Check if the app is ready to handle requests (PHP-FPM/DB)
 
 # Production deployment paths:
 # - `prod-update` is the cached daily application deployment and does not rebuild Caddy.
-# - `prod-rebuild-full` is for dependency/base-image changes requiring a fresh application build.
+# - `prod-rebuild-app-services` is for dependency/base-image changes requiring a fresh application build.
 # - `prod-rebuild-caddy` is for Caddyfile, plugin, or Caddy image changes only.
-prod-rebuild-full: ## Force a no-cache rebuild of the application services (app, ssr, queue, scheduler)
+prod-rebuild-app-services: ## Force a no-cache rebuild of the application services (app, ssr, queue, scheduler)
 	@set -eu; \
 	maintenance_enabled=0; queues_paused=0; rollback_attempted=0; migration_attempted=0; \
 	rollback_file=$$(mktemp "$${TMPDIR:-/tmp}/laravel-blog-prod-rebuild.XXXXXX"); \
 	rollback_prefix="laravel-blog-prod-rebuild-$$$$"; \
-	fail() { printf '%s\n' "❌ [prod-rebuild-full] $$1" >&2; exit 1; }; \
+	fail() { printf '%s\n' "❌ [prod-rebuild-app-services] $$1" >&2; exit 1; }; \
 	cleanup() { \
 		rm -f "$$rollback_file"; \
 		for service in app ssr queue scheduler; do docker image rm -f "$${rollback_prefix}-$$service" >/dev/null 2>&1 || true; done; \
@@ -418,7 +418,7 @@ prod-rebuild-full: ## Force a no-cache rebuild of the application services (app,
 			printf '%s\n' '✅ Previous application runtime restored and verified; maintenance disabled.' >&2; \
 		else \
 			printf '%s\n' '❌ Automatic rollback failed; maintenance remains enabled.' >&2; \
-			printf '%s\n' 'ℹ️  Diagnose with make prod-logs, make prod-logs-queue and make prod-queue-diag, then rerun make prod-rebuild-full.' >&2; \
+			printf '%s\n' 'ℹ️  Diagnose with make prod-logs, make prod-logs-queue and make prod-queue-diag, then rerun make prod-rebuild-app-services.' >&2; \
 		fi; \
 		cleanup; return "$$status"; \
 	}; \
