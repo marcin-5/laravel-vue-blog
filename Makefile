@@ -141,6 +141,8 @@ PROD_REBUILD_STOP_TIMEOUT ?= 30
 PROD_REBUILD_CONFIRM ?= 0
 ALLOW_POSTGRES_MAJOR_UPGRADE ?= 0
 ALLOW_REDIS_MAJOR_UPGRADE ?= 0
+PROD_DIAG_LOG_LINES ?= 50
+PROD_DIAG_URL ?=
 # DOCKER_COMPOSE_PROD = docker compose --env-file .env -p $(PROJECT_NAME) $(COMPOSE_FILES_PROD)
 DOCKER_COMPOSE_PROD = POSTGRES_IMAGE="$(POSTGRES_IMAGE)" REDIS_IMAGE="$(REDIS_IMAGE)" docker compose --env-file .env -p $(DOCKER_PROJECT_NAME_PROD) $(COMPOSE_FILES_PROD)
 QUEUE_PAUSE_STATE_FILE ?= /tmp/laravel-blog-$(DOCKER_PROJECT_NAME_PROD)-queues-paused
@@ -152,7 +154,7 @@ QUEUE_PAUSE_STATE_FILE ?= /tmp/laravel-blog-$(DOCKER_PROJECT_NAME_PROD)-queues-p
         prod-rebuild-pg-redis-preflight prod-backup-pg-redis \
         prod-prune prod-versions prod-check-assets prod-logs-queue prod-logs-app \
         prod-health-runtime prod-health-queue prod-queue-diag prod-queue-pause-all \
-        prod-queue-continue-all prod-indexnow
+        prod-queue-continue-all prod-indexnow prod-diagnose
 
 prod-up: ## Start production services
 	$(DOCKER_COMPOSE_PROD) up -d
@@ -256,6 +258,64 @@ prod-queue-diag: ## 🔍 Generate diagnostic data for queue worker debugging
 	-$(DOCKER_COMPOSE_PROD) exec -T queue php artisan tinker --execute="Illuminate\\Support\\Facades\\Redis::ping(); echo 'OK';" || echo "Redis connection failed"
 	@echo ""
 	@echo "=== End of Diagnostics ==="
+
+prod-diagnose: ## 🔍 Generate a read-only production diagnostic report (set PROD_DIAG_URL for HTTP)
+	@set -eu; \
+	failed=0; \
+	log_lines="$(PROD_DIAG_LOG_LINES)"; \
+	if ! printf '%s\n' "$$log_lines" | grep -Eq '^[1-9][0-9]*$$'; then \
+		echo "❌ PROD_DIAG_LOG_LINES must be a positive integer." >&2; exit 2; \
+	fi; \
+	if ! $(DOCKER_COMPOSE_PROD) config --quiet; then \
+		echo "❌ Production Compose configuration is invalid." >&2; exit 1; \
+	fi; \
+	app_container=$$($(DOCKER_COMPOSE_PROD) ps -q app); \
+	if [ -z "$$app_container" ]; then \
+		echo "❌ Required app container does not exist or is not running." >&2; exit 1; \
+	fi; \
+	run_optional() { \
+		label="$$1"; shift; \
+		printf '%s\n' "--- $$label ---"; \
+		if ! env "$$@"; then \
+			printf '%s\n' "⚠️  $$label failed; continuing diagnostic report." >&2; failed=1; \
+		fi; \
+	}; \
+	printf '%s\n' '=== Production Diagnostics (read-only) ==='; \
+	printf '%s\n' "Compose project: $(DOCKER_PROJECT_NAME_PROD)"; \
+	printf '%s\n' "Log lines: $$log_lines"; \
+	printf '%s\n' 'HTTP URL configured: $(if $(PROD_DIAG_URL),yes,no)'; \
+	run_optional 'Container status' sh -c '$(DOCKER_COMPOSE_PROD) ps --all'; \
+	printf '%s\n' '--- Service images and healthchecks ---'; \
+	for service in app ssr queue scheduler caddy postgres redis; do \
+		cid=$$($(DOCKER_COMPOSE_PROD) ps -aq "$$service" 2>/dev/null || true); \
+		if [ -z "$$cid" ]; then \
+			printf '%s\n' "$$service: missing or stopped"; \
+			continue; \
+		fi; \
+		image=$$(docker inspect -f '{{.Config.Image}}' "$$cid" 2>/dev/null || printf '%s' unknown); \
+		image_id=$$(docker inspect -f '{{.Image}}' "$$cid" 2>/dev/null || printf '%s' unknown); \
+		health=$$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}' "$$cid" 2>/dev/null || printf '%s' unknown); \
+		printf '%s\n' "$$service: container=$$cid image=$$image image_id=$$image_id health=$$health"; \
+	done; \
+	run_optional 'Application logs' sh -c '$(DOCKER_COMPOSE_PROD) logs --no-color --tail="$$1" app' sh "$$log_lines"; \
+	run_optional 'Laravel log' sh -c '$(DOCKER_COMPOSE_PROD) exec -T app sh -lc '\''if [ -d /var/www/html/storage/logs ]; then for log in /var/www/html/storage/logs/*.log; do [ -f "$$log" ] && { printf "--- %s ---\\n" "$$log"; tail -n "$$1" "$$log"; }; done; else echo "storage/logs is missing"; fi'\'' sh "$$1"' sh "$$log_lines"; \
+	run_optional 'Queue logs' sh -c '$(DOCKER_COMPOSE_PROD) logs --no-color --tail="$$1" queue' sh "$$log_lines"; \
+	run_optional 'Supervisor queue log' sh -c '$(DOCKER_COMPOSE_PROD) exec -T queue sh -lc '\''if [ -f /var/www/html/storage/logs/supervisor_queue.log ]; then tail -n "$$1" /var/www/html/storage/logs/supervisor_queue.log; else echo "supervisor_queue.log is missing"; fi'\'' sh "$$1"' sh "$$log_lines"; \
+	run_optional 'PHP-FPM processes' sh -c '$(DOCKER_COMPOSE_PROD) exec -T app sh -lc '\''ps -eo user,pid,ppid,stat,etime,args | grep "[p]hp-fpm" || true'\'''; \
+	run_optional 'www-data identity' sh -c '$(DOCKER_COMPOSE_PROD) exec -T app id www-data'; \
+	run_optional 'Runtime permissions' sh -c '$(DOCKER_COMPOSE_PROD) exec -T --user www-data app sh -lc '\''for path in /var/www/html/bootstrap/cache /var/www/html/storage/logs /var/www/html/storage/framework/cache/htmlpurifier; do if [ -e "$$path" ]; then owner=$$(stat -c "%U:%G" "$$path"); mode=$$(stat -c "%a" "$$path"); writable=$$(test -w "$$path" && printf yes || printf no); printf "%s owner=%s mode=%s writable=%s\\n" "$$path" "$$owner" "$$mode" "$$writable"; else printf "%s missing\\n" "$$path"; fi; done'\'''; \
+	run_optional 'Laravel autoload and cache' sh -c '$(DOCKER_COMPOSE_PROD) exec -T app sh -lc '\''for path in /var/www/html/vendor/autoload.php /var/www/html/bootstrap/cache/config.php /var/www/html/bootstrap/cache/routes-v7.php /var/www/html/bootstrap/cache/events.php; do if [ -e "$$path" ]; then stat -c "%n present owner=%U:%G mode=%a" "$$path"; else printf "%s missing\\n" "$$path"; fi; done; php -r '\''require "vendor/autoload.php"; exit(class_exists("Illuminate\\Foundation\\Application") ? 0 : 1);'\'' && printf "%s\\n" "Laravel class load: ok"'\'''; \
+	run_optional 'Safe environment configuration' sh -c '$(DOCKER_COMPOSE_PROD) exec -T app sh -lc '\''env | while IFS="=" read -r name value; do case "$$name" in APP_ENV|APP_DEBUG|APP_URL|DB_CONNECTION|DB_HOST|DB_PORT|CACHE_STORE|QUEUE_CONNECTION|REDIS_HOST|REDIS_PORT) printf "%s=%s\\n" "$$name" "$$value" ;; esac; done; printf "%s\\n" "Secret environment values are omitted."'\'''; \
+	if [ -n "$(PROD_DIAG_URL)" ]; then \
+		printf '%s\n' '--- HTTP check ---'; \
+		if curl --silent --show-error --location --max-time 5 --output /dev/null --write-out 'HTTP status: %{http_code}\n' "$(PROD_DIAG_URL)"; then :; else \
+			printf '%s\n' '⚠️  HTTP check failed; continuing diagnostic report.' >&2; failed=1; \
+		fi; \
+	else \
+		printf '%s\n' '--- HTTP check skipped (set PROD_DIAG_URL to enable) ---'; \
+	fi; \
+	printf '%s\n' '=== End of Production Diagnostics ==='; \
+	if [ "$$failed" -eq 1 ]; then printf '%s\n' '⚠️  One or more optional diagnostic checks failed; review the report.' >&2; fi
 
 prod-health-queue: ## Check health status of the queue worker container (uses Docker healthcheck)
  cid=$$($(DOCKER_COMPOSE_PROD) ps -q queue); \
