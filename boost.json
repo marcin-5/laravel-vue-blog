@@ -9,7 +9,8 @@
     "packages": [
         "spatie/laravel-permission",
         "fruitcake/laravel-debugbar",
-        "spatie/laravel-translatable"
+        "spatie/laravel-translatable",
+        "pestphp/pest-plugin-evals"
     ],
     "sail": false,
     "skills": [
@@ -21,6 +22,7 @@
         "laravel-permission-development",
         "translatable-development",
         "debug-using-debugbar",
+        "test-ai-agent",
         "laravel-inertia-vue",
         "laravel-performance-caching",
         "laravel-query-builders",
