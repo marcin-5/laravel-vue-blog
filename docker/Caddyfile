@@ -1,36 +1,52 @@
+(security_headers) {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), geolocation=(), microphone=(), payment=(), usb=()"
+		Cross-Origin-Opener-Policy "same-origin"
+		Cross-Origin-Resource-Policy "same-origin"
+	}
+}
+
 {$APP_DOMAIN}, *.{$APP_DOMAIN}, {$APP_DOMAIN_WWW}, {$APP_DOMAIN_SECONDARY}, *.{$APP_DOMAIN_SECONDARY} {
-    tls {
-        dns hostinger {env.HOSTINGER_API_TOKEN}
-        dns_ttl 60s
-    }
+	tls {
+		dns hostinger {env.HOSTINGER_API_TOKEN}
+		dns_ttl 60s
+	}
 
-    @www host {$APP_DOMAIN_WWW}
-    redir @www https://{$APP_DOMAIN}{uri} permanent
+	import security_headers
 
-    root * /var/www/html/public
-    encode zstd gzip
-    header /build/assets/* Cache-Control "public, max-age=31536000, immutable"
-    @dynamicSystemFiles path /sitemap.xml /robots.txt
-    php_fastcgi @dynamicSystemFiles app:9000 {
-        try_files /index.php
-    }
-    php_fastcgi app:9000
-    file_server
+	@www host {$APP_DOMAIN_WWW}
+	redir @www https://{$APP_DOMAIN}{uri} permanent
+
+	root * /var/www/html/public
+	encode zstd gzip
+	header /build/assets/* Cache-Control "public, max-age=31536000, immutable"
+	@dynamicSystemFiles path /sitemap.xml /robots.txt
+	php_fastcgi @dynamicSystemFiles app:9000 {
+		try_files /index.php
+	}
+	php_fastcgi app:9000
+	file_server
 }
 
 {$ENNEAGRAM_DOMAIN_PL}, {$ENNEAGRAM_DOMAIN_EN} {
-    tls {
-        dns hostinger {env.HOSTINGER_API_TOKEN}
-        dns_ttl 60s
-    }
+	tls {
+		dns hostinger {env.HOSTINGER_API_TOKEN}
+		dns_ttl 60s
+	}
 
-    root * /var/www/html/public
-    encode zstd gzip
-    header /build/assets/* Cache-Control "public, max-age=31536000, immutable"
-    @dynamicSystemFiles path /sitemap.xml /robots.txt
-    php_fastcgi @dynamicSystemFiles app:9000 {
-        try_files /index.php
-    }
-    php_fastcgi app:9000
-    file_server
+	import security_headers
+
+	root * /var/www/html/public
+	encode zstd gzip
+	header /build/assets/* Cache-Control "public, max-age=31536000, immutable"
+	@dynamicSystemFiles path /sitemap.xml /robots.txt
+	php_fastcgi @dynamicSystemFiles app:9000 {
+		try_files /index.php
+	}
+	php_fastcgi app:9000
+	file_server
 }
