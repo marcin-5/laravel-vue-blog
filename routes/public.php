@@ -4,6 +4,7 @@ use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\PublicBlogController;
 use App\Http\Controllers\PublicHomeController;
 use App\Http\Controllers\RobotsController;
+use App\Http\Controllers\SecurityTxtController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Middleware\ContentSecurityPolicy;
 use App\Http\Middleware\EnsureVisitorId;
@@ -44,6 +45,7 @@ Route::withoutMiddleware([
     UpdateVisitorOnLogin::class,
 ])
     ->group(function () {
+        Route::get('.well-known/security.txt', SecurityTxtController::class);
         Route::get('robots.txt', [RobotsController::class, 'generate']);
         Route::get('sitemap.xml', [SitemapController::class, 'generate'])->name('sitemap');
     });
