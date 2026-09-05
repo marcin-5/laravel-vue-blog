@@ -87,6 +87,7 @@ export function createDefaultGroupFormData(locale: string = 'en'): GroupFormData
         content: null,
         footer: null,
         is_published: false,
+        allow_registration: false,
         locale,
         sidebar: 0,
         page_size: 10,
@@ -103,6 +104,7 @@ export function createFormDataFromGroup(group: Group | undefined, defaultLocale:
         content: group.content ?? null,
         footer: group.footer ?? null,
         is_published: group.is_published,
+        allow_registration: group.allow_registration ?? false,
         locale: group.locale || defaultLocale,
         sidebar: group.sidebar ?? 0,
         page_size: group.page_size ?? 10,
@@ -116,6 +118,7 @@ export function populateFormFromGroup(form: InertiaForm<GroupFormData>, group: G
     form.content = data.content;
     form.footer = data.footer;
     form.is_published = data.is_published;
+    form.allow_registration = data.allow_registration;
     form.locale = data.locale;
     form.sidebar = data.sidebar;
     form.page_size = data.page_size;

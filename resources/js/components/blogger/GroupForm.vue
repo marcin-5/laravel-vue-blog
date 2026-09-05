@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import EntityMarkdownField from '@/components/blogger/EntityMarkdownField.vue';
 import EntityThemeSection from '@/components/blogger/EntityThemeSection.vue';
+import FormCheckboxField from '@/components/blogger/FormCheckboxField.vue';
 import FormPublishingSettings from '@/components/blogger/FormPublishingSettings.vue';
 import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
 import PostFormField from '@/components/blogger/PostFormField.vue';
@@ -47,6 +48,7 @@ const baseTranslations = computed(() => ({
     contentPlaceholder: props.isEdit ? '' : t('blogger.group_form.content_placeholder'),
     footer: t('blogger.group_form.footer_label'),
     footerPlaceholder: props.isEdit ? '' : t('blogger.group_form.footer_placeholder'),
+    allowRegistration: t('blogger.group_form.allow_registration_label'),
 }));
 
 const contentTranslations = createMarkdownTranslations(useMarkdownPreviewSection());
@@ -104,6 +106,13 @@ function handleCancel() {
                 :placeholder="baseTranslations.footerPlaceholder"
                 :translations="footerTranslations"
                 @cancel="handleCancel"
+            />
+
+            <FormCheckboxField
+                :id="`${fieldIdPrefix}-allow-registration`"
+                v-model="form.allow_registration"
+                :error="form.errors.allow_registration"
+                :label="baseTranslations.allowRegistration"
             />
 
             <FormPublishingSettings v-model="form" :errors="form.errors" :id-prefix="fieldIdPrefix" />

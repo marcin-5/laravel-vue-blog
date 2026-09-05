@@ -248,6 +248,7 @@ export interface AdminGroup {
     content: string | null;
     footer: string | null;
     is_published: boolean;
+    allow_registration: boolean;
     locale: string;
     sidebar?: number;
     page_size?: number;
@@ -397,6 +398,7 @@ export interface GroupFormData {
     content: string | null;
     footer: string | null;
     is_published: boolean;
+    allow_registration: boolean;
     locale: string;
     sidebar: number;
     page_size: number;

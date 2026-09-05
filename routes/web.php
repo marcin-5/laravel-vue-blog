@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GroupController;
+use App\Http\Middleware\RedirectGuestToGroupRegistration;
 use Illuminate\Support\Facades\Route;
 
 // Test-only helper route to verify locale resolution in middleware
@@ -19,7 +20,9 @@ Route::middleware(['auth', 'verified', 'noindex'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('_')->group(function () {
-        Route::get('/{group:slug}', [GroupController::class, 'landing'])->name('group.landing');
+        Route::get('/{group:slug}', [GroupController::class, 'landing'])
+            ->middleware(RedirectGuestToGroupRegistration::class)
+            ->name('group.landing');
         Route::get('/{group:slug}/{postSlug}', [GroupController::class, 'post'])->name('group.post');
     });
 });

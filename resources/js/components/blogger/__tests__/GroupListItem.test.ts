@@ -74,6 +74,7 @@ describe('GroupListItem.vue', () => {
         content: 'Test Content',
         footer: 'Test Footer',
         is_published: true,
+        allow_registration: false,
         locale: 'en',
     };
 

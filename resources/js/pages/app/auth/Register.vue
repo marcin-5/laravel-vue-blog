@@ -13,6 +13,9 @@ const { t } = useI18n();
 
 const props = defineProps<{
     registrationEnabled: boolean;
+    registrationAction?: string;
+    groupName?: string;
+    groupUrl?: string;
 }>();
 
 const form = useForm({
@@ -24,7 +27,7 @@ const form = useForm({
 
 const submit = () => {
     if (!props.registrationEnabled) return;
-    form.post(route('register'), {
+    form.post(props.registrationAction ?? route('register'), {
         onFinish: () => form.reset('password', 'password_confirmation'),
     });
 };
@@ -40,6 +43,13 @@ const submit = () => {
         <template v-if="props.registrationEnabled">
             <form class="flex flex-col gap-6" @submit.prevent="submit">
                 <div class="grid gap-6">
+                    <div v-if="props.groupName" class="text-center text-sm text-muted-foreground">
+                        {{ t('auth.register.group_description', { group: props.groupName }) }}
+                        <TextLink v-if="props.groupUrl" :href="props.groupUrl" class="underline underline-offset-4">
+                            {{ t('auth.register.group_link') }}
+                        </TextLink>
+                    </div>
+
                     <div class="grid gap-2">
                         <Label for="name">{{ t('auth.register.name') }}</Label>
                         <Input

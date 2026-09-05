@@ -206,7 +206,8 @@
             "content_label": "Treść Grupy",
             "content_placeholder": "Treść wyświetlana na stronie głównej grupy (Markdown)...",
             "footer_label": "Stopka Grupy",
-            "footer_placeholder": "Stopka grupy (Markdown)..."
+            "footer_placeholder": "Stopka grupy (Markdown)...",
+            "allow_registration_label": "Zezwól nowym użytkownikom na rejestrację w tej grupie"
         },
         "status": {
             "published": "Opublikowano",

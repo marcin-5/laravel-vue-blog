@@ -30,6 +30,7 @@ class GroupsTest extends TestCase
         $this->assertDatabaseHas('groups', [
             'name' => 'A-Team',
             'slug' => 'a-team',
+            'allow_registration' => false,
         ]);
     }
 
@@ -47,6 +48,7 @@ class GroupsTest extends TestCase
             'content' => 'Updated content',
             'footer' => 'Updated footer',
             'is_published' => true,
+            'allow_registration' => true,
             'locale' => 'pl',
             'sidebar' => 20,
             'page_size' => 10,
@@ -58,6 +60,7 @@ class GroupsTest extends TestCase
             'id' => $group->id,
             'name' => 'New Name',
             'slug' => 'old-name', // Slug should generally stay the same for SEO
+            'allow_registration' => true,
         ]);
     }
 }

@@ -6,11 +6,13 @@ use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\HandleTranslations;
 use App\Http\Middleware\NoIndexMiddleware;
+use App\Http\Middleware\RedirectGuestToGroupRegistration;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\TrackPageViews;
 use App\Http\Middleware\UpdateVisitorOnLogin;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -46,11 +48,14 @@ return Application::configure(basePath: dirname(__DIR__))
             StartSession::class,
             SetLocale::class,
             SubstituteBindings::class,
+            RedirectGuestToGroupRegistration::class,
+            Authenticate::class,
         ]);
 
         $middleware->alias([
             'track-page-views' => TrackPageViews::class,
             'noindex' => NoIndexMiddleware::class,
+            'group.registration' => RedirectGuestToGroupRegistration::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

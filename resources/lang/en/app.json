@@ -206,7 +206,8 @@
             "content_label": "Group Content",
             "content_placeholder": "Content displayed on the group's landing page (Markdown)...",
             "footer_label": "Group Footer",
-            "footer_placeholder": "Group footer (Markdown)..."
+            "footer_placeholder": "Group footer (Markdown)...",
+            "allow_registration_label": "Allow new users to register for this group"
         },
         "status": {
             "published": "Published",

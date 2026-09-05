@@ -30,11 +30,13 @@ class Group extends Model
         'sidebar',
         'page_size',
         'is_published',
+        'allow_registration',
         'locale',
     ];
 
     protected $casts = [
         'is_published' => 'boolean',
+        'allow_registration' => 'boolean',
         'sidebar' => 'integer',
         'page_size' => 'integer',
         'theme' => 'array',
@@ -50,7 +52,7 @@ class Group extends Model
     }
 
     /**
-     * Właściciel grupy.
+     * Group owner.
      */
     public function user(): BelongsTo
     {
@@ -58,18 +60,19 @@ class Group extends Model
     }
 
     /**
-     * Członkowie grupy.
+     * Group members.
      */
     public function members(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'group_user')
+        return $this
+            ->belongsToMany(User::class, 'group_user')
             ->using(GroupMember::class)
             ->withPivot(['role', 'joined_at'])
             ->withTimestamps();
     }
 
     /**
-     * Posty w grupie.
+     * Posts in the group.
      */
     public function posts(): HasMany
     {

@@ -21,6 +21,7 @@ class StoreGroupRequest extends FormRequest
             'content' => ['nullable', 'string'],
             'footer' => ['nullable', 'string'],
             'is_published' => ['sometimes', 'boolean'],
+            'allow_registration' => ['sometimes', 'boolean'],
             'locale' => ['sometimes', 'string', 'in:' . implode(',', $config['supported_locales'])],
             'sidebar' => [
                 'sometimes',
@@ -50,6 +51,7 @@ class StoreGroupRequest extends FormRequest
             'content' => $validated['content'] ?? null,
             'footer' => $validated['footer'] ?? null,
             'is_published' => (bool) ($validated['is_published'] ?? false),
+            'allow_registration' => (bool) ($validated['allow_registration'] ?? false),
             'locale' => $validated['locale'] ?? app()->getLocale() ?? $config['locale'],
             'sidebar' => (int) ($validated['sidebar'] ?? $config['sidebar']),
             'page_size' => (int) ($validated['page_size'] ?? $config['page_size']),

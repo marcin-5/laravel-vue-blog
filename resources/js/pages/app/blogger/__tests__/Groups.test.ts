@@ -83,8 +83,28 @@ vi.mock('@/composables/useUIState', () => ({
 
 describe('Groups.vue', () => {
     const mockGroups: AdminGroup[] = [
-        { id: 1, name: 'Group 1', slug: 'group-1', user_id: 1, content: null, footer: null, is_published: true, locale: 'en' },
-        { id: 2, name: 'Group 2', slug: 'group-2', user_id: 1, content: null, footer: null, is_published: true, locale: 'en' },
+        {
+            id: 1,
+            name: 'Group 1',
+            slug: 'group-1',
+            user_id: 1,
+            content: null,
+            footer: null,
+            is_published: true,
+            allow_registration: false,
+            locale: 'en',
+        },
+        {
+            id: 2,
+            name: 'Group 2',
+            slug: 'group-2',
+            user_id: 1,
+            content: null,
+            footer: null,
+            is_published: true,
+            allow_registration: false,
+            locale: 'en',
+        },
     ];
 
     const defaultProps = {

@@ -139,6 +139,7 @@ describe('blogFormUtils', () => {
             const data = createDefaultGroupFormData('pl');
             expect(data.locale).toBe('pl');
             expect(data.name).toBe('');
+            expect(data.allow_registration).toBe(false);
             expect(data.theme).toEqual({ light: {}, dark: {} });
         });
     });
@@ -155,6 +156,7 @@ describe('blogFormUtils', () => {
                 content: 'Content',
                 footer: 'Footer',
                 is_published: true,
+                allow_registration: true,
                 locale: 'de',
                 sidebar: 1,
                 page_size: 20,
@@ -168,6 +170,7 @@ describe('blogFormUtils', () => {
                 content: 'Content',
                 footer: 'Footer',
                 is_published: true,
+                allow_registration: true,
                 locale: 'de',
                 sidebar: 1,
                 page_size: 20,
@@ -183,6 +186,7 @@ describe('blogFormUtils', () => {
                 content: '',
                 footer: '',
                 is_published: false,
+                allow_registration: false,
                 locale: '',
                 sidebar: 0,
                 page_size: 0,
@@ -192,6 +196,7 @@ describe('blogFormUtils', () => {
             const group: Partial<Group> = {
                 name: 'Updated Group',
                 is_published: true,
+                allow_registration: true,
                 locale: 'it',
             };
 
@@ -199,6 +204,7 @@ describe('blogFormUtils', () => {
 
             expect(form.name).toBe('Updated Group');
             expect(form.is_published).toBe(true);
+            expect(form.allow_registration).toBe(true);
             expect(form.locale).toBe('it');
         });
     });

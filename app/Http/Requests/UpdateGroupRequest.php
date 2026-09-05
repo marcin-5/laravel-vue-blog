@@ -20,6 +20,7 @@ class UpdateGroupRequest extends FormRequest
             'content' => ['nullable', 'string'],
             'footer' => ['nullable', 'string'],
             'is_published' => ['sometimes', 'boolean'],
+            'allow_registration' => ['sometimes', 'boolean'],
             'locale' => ['sometimes', 'string', 'in:' . implode(',', $config['supported_locales'])],
             'sidebar' => [
                 'sometimes',
@@ -48,6 +49,7 @@ class UpdateGroupRequest extends FormRequest
             'content',
             'footer',
             'is_published',
+            'allow_registration',
             'locale',
             'sidebar',
             'page_size',
@@ -57,7 +59,7 @@ class UpdateGroupRequest extends FormRequest
         foreach ($fields as $field) {
             if (array_key_exists($field, $validated)) {
                 $data[$field] = $validated[$field];
-                if ($field === 'is_published') {
+                if (in_array($field, ['is_published', 'allow_registration'])) {
                     $data[$field] = (bool) $validated[$field];
                 }
                 if (in_array($field, ['sidebar', 'page_size'])) {
