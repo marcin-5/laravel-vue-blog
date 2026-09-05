@@ -7,7 +7,21 @@ test('registration screen can be rendered', function () {
 
     $response = $this->get('/register');
 
-    $response->assertStatus(200);
+    $response->assertInertia(fn($page) => $page
+        ->component('app/auth/Register')
+        ->where('registrationEnabled', true)
+    );
+});
+
+test('registration screen is unavailable when configuration contains false as text', function () {
+    Config::set('auth.registration_enabled', 'false');
+
+    $response = $this->get('/register');
+
+    $response->assertInertia(fn($page) => $page
+        ->component('app/auth/Register')
+        ->where('registrationEnabled', false)
+    );
 });
 
 test('new users can register', function () {

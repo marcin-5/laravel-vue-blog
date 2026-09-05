@@ -23,7 +23,7 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        abort_unless(config('auth.registration_enabled', false), 404);
+        abort_unless($this->isRegistrationEnabled(), 404);
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -50,7 +50,12 @@ class RegisteredUserController extends Controller
     public function create(): Response
     {
         return Inertia::render('app/auth/Register', [
-            'registrationEnabled' => (bool) config('auth.registration_enabled', false),
+            'registrationEnabled' => $this->isRegistrationEnabled(),
         ]);
+    }
+
+    private function isRegistrationEnabled(): bool
+    {
+        return filter_var(config('auth.registration_enabled', false), FILTER_VALIDATE_BOOLEAN);
     }
 }
