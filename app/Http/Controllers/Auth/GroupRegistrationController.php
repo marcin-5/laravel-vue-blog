@@ -37,7 +37,6 @@ class GroupRegistrationController extends Controller
             'registrationEnabled' => true,
             'registrationAction' => route('group.register.store', $group),
             'groupName' => $group->name,
-            'groupUrl' => route('group.landing', $group),
             'translations' => [
                 'locale' => app()->getLocale(),
                 'messages' => $this->translations->getPageTranslations('auth'),
