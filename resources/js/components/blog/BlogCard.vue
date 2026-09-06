@@ -20,7 +20,7 @@ const hasCategories = computed(() => props.blog.categories.length > 0);
 </script>
 
 <template>
-    <Card class="border-gray-200 bg-olive-100 p-4 hover:shadow-md dark:border-gray-800 dark:bg-mist-900">
+    <Card class="border-stone-300 bg-olive-100 p-4 hover:shadow-md dark:border-neutral-700 dark:bg-mist-900">
         <h2 class="mb-1 font-header text-xl font-semibold text-mist-800 dark:text-mist-100">
             <a :href="blogUrl" class="hover:underline" @click="handleContentClick">
                 {{ blog.name }}
@@ -31,7 +31,7 @@ const hasCategories = computed(() => props.blog.categories.length > 0);
 
         <div
             v-if="hasDescription"
-            class="mb-3 font-excerpt text-sm text-mist-600 dark:text-mist-300"
+            class="text-md mb-3 font-excerpt text-mist-700 dark:text-mist-300"
             data-nosnippet
             v-html="props.blog.descriptionHtml"
         />
@@ -40,7 +40,7 @@ const hasCategories = computed(() => props.blog.categories.length > 0);
             <span
                 v-for="category in blog.categories"
                 :key="category.id"
-                class="rounded-full bg-olive-50 px-2 py-0.5 text-xs text-gray-700 dark:bg-mist-800 dark:text-mist-200"
+                class="rounded-full bg-olive-50 px-2 py-1 text-xs text-gray-700 dark:bg-zinc-700 dark:text-mist-200"
             >
                 {{ getCategoryDisplayName(category) }}
             </span>
