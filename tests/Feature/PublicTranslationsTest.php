@@ -13,6 +13,11 @@ it('contains required public blog posts list translation keys (en and pl)', func
         'blog.posts_list.empty',
         'blog.posts_list.show_excerpts',
         'blog.posts_list.view_excerpt',
+        'group.posts_list.title',
+        'comments.title',
+        'comments.create_thread.title',
+        'comments.actions.reply',
+        'comments.errors.load',
     ];
 
     foreach ($requiredKeys as $key) {

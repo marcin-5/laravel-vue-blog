@@ -86,6 +86,58 @@
             "unlock_extension": "Odblokuj"
         }
     },
+    "group": {
+        "posts_list": {
+            "title": "Wpisy na grupie",
+            "active_tag": "Wpisy na grupie z tagiem"
+        }
+    },
+    "comments": {
+        "title": "Dyskusja",
+        "subtitle": "Porozmawiaj o tym wpisie w uporządkowanych wątkach.",
+        "closed": "Komentowanie tego wpisu jest zamknięte.",
+        "empty_threads": "Nie ma jeszcze tematów dyskusji.",
+        "empty": "W tej dyskusji nie ma jeszcze komentarzy.",
+        "auth_required": "Zaloguj się, aby dołączyć do dyskusji.",
+        "unknown_author": "Członek społeczności",
+        "max_depth": "Osiągnięto maksymalny poziom zagnieżdżenia odpowiedzi.",
+        "thread_locked": "Ta dyskusja jest zamknięta na nowe odpowiedzi.",
+        "locked": "Zamknięta",
+        "lock": "Pozostaw dyskusję rozwiniętą",
+        "unlock": "Zezwól na zwijanie dyskusji",
+        "visibility": {
+            "public": "Publiczna",
+            "registered": "Tylko dla zalogowanych",
+            "registered_short": "Zalogowani"
+        },
+        "create_thread": {
+            "title": "Rozpocznij dyskusję",
+            "description": "Wybierz temat i napisz pierwszy komentarz.",
+            "subject": "Temat",
+            "subject_placeholder": "Temat dyskusji",
+            "visibility": "Widoczność",
+            "content": "Pierwszy komentarz",
+            "content_placeholder": "Napisz pierwszy komentarz..."
+        },
+        "reply": {
+            "placeholder": "Napisz odpowiedź..."
+        },
+        "actions": {
+            "new_thread": "Nowy temat",
+            "creating": "Tworzenie...",
+            "create": "Rozpocznij dyskusję",
+            "reply": "Odpowiedz"
+        },
+        "success": {
+            "created": "Dyskusja rozpoczęta.",
+            "replied": "Odpowiedź została dodana."
+        },
+        "errors": {
+            "load": "Nie udało się wczytać tej dyskusji.",
+            "create": "Nie udało się rozpocząć dyskusji.",
+            "reply": "Nie udało się dodać odpowiedzi."
+        }
+    },
     "welcome": {
         "my_groups": "Moje grupy"
     },

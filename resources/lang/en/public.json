@@ -86,6 +86,58 @@
             "unlock_extension": "Unlock"
         }
     },
+    "group": {
+        "posts_list": {
+            "title": "Group posts",
+            "active_tag": "Group posts tagged"
+        }
+    },
+    "comments": {
+        "title": "Discussion",
+        "subtitle": "Discuss this post in organized topics.",
+        "closed": "Comments are closed for this post.",
+        "empty_threads": "There are no discussion topics yet.",
+        "empty": "There are no comments in this discussion yet.",
+        "auth_required": "Sign in to join this discussion.",
+        "unknown_author": "Community member",
+        "max_depth": "The maximum reply depth has been reached.",
+        "thread_locked": "This discussion is closed for new replies.",
+        "locked": "Closed",
+        "lock": "Keep discussion open",
+        "unlock": "Allow discussion to collapse",
+        "visibility": {
+            "public": "Public",
+            "registered": "Registered users",
+            "registered_short": "Registered"
+        },
+        "create_thread": {
+            "title": "Start a discussion",
+            "description": "Choose a topic and write the opening comment.",
+            "subject": "Topic",
+            "subject_placeholder": "Discussion topic",
+            "visibility": "Visibility",
+            "content": "Opening comment",
+            "content_placeholder": "Write the first comment..."
+        },
+        "reply": {
+            "placeholder": "Write a reply..."
+        },
+        "actions": {
+            "new_thread": "New topic",
+            "creating": "Creating...",
+            "create": "Start discussion",
+            "reply": "Reply"
+        },
+        "success": {
+            "created": "Discussion started.",
+            "replied": "Reply added."
+        },
+        "errors": {
+            "load": "Unable to load this discussion.",
+            "create": "Unable to start the discussion.",
+            "reply": "Unable to add the reply."
+        }
+    },
     "welcome": {
         "my_groups": "My groups"
     },

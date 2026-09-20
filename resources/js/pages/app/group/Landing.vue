@@ -50,7 +50,7 @@ const { t } = useI18n();
 const hasLandingContent = computed(() => !!props.group.content);
 const hasFooterContent = computed(() => !!props.group.footer);
 
-const postsListTitle = computed(() => t('blog.posts_list.title'));
+const postsListTitle = computed(() => t('group.posts_list.title'));
 </script>
 
 <template>

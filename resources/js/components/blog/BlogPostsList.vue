@@ -84,7 +84,13 @@ const paginationLinks = computed(() => props.pagination?.links ?? []);
 const hasPosts = computed(() => props.posts.length > 0);
 const hasPagination = computed(() => paginationLinks.value.length > 0);
 const hasTags = computed(() => Boolean(props.allTags?.length));
-const postsListTitle = computed(() => (!props.activeTag ? t('blog.posts_list.title') : t('blog.posts_list.active_tag')));
+const postsListTitle = computed(() => {
+    if (props.isGroup) {
+        return props.activeTag ? t('group.posts_list.active_tag') : t('group.posts_list.title');
+    }
+
+    return !props.activeTag ? t('blog.posts_list.title') : t('blog.posts_list.active_tag');
+});
 
 function getPostRouteParams(post: PostItem) {
     const params: Record<string, any> = props.isGroup
