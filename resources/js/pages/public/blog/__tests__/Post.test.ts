@@ -30,6 +30,14 @@ vi.mock('@/components/blog/PostExtensions.vue', () => ({
     default: { name: 'PostExtensions', props: ['extensions'], template: '<div class="post-extensions" />' },
 }));
 
+vi.mock('@/components/comments/PostComments.vue', () => ({
+    default: {
+        name: 'PostComments',
+        props: ['postId', 'threads', 'allowComments', 'commentsMaxDepth'],
+        template: '<div class="post-comments" />',
+    },
+}));
+
 vi.mock('@/components/blog/PostRelatedPosts.vue', () => ({
     default: { name: 'PostRelatedPosts', props: ['items'], template: '<div class="related-posts" />' },
 }));
