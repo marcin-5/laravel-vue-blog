@@ -27,4 +27,17 @@ class CommentPolicy
             && $this->viewAny($user, $thread)
             && $thread->post->allow_comments;
     }
+
+    public function update(User $user, Comment $comment): bool
+    {
+        $comment->loadMissing(['thread.post']);
+
+        return $comment->user_id === $user->id
+            && $this->view($user, $comment);
+    }
+
+    public function delete(User $user, Comment $comment): bool
+    {
+        return $this->update($user, $comment);
+    }
 }

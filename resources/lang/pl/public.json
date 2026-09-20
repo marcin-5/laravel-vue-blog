@@ -129,16 +129,28 @@
             "new_thread": "Nowy temat",
             "creating": "Tworzenie...",
             "create": "Rozpocznij dyskusję",
-            "reply": "Odpowiedz"
+            "reply": "Odpowiedz",
+            "edit": "Edytuj",
+            "delete": "Usuń",
+            "save": "Zapisz",
+            "delete_thread": "Usuń dyskusję"
         },
         "success": {
             "created": "Dyskusja rozpoczęta.",
-            "replied": "Odpowiedź została dodana."
+            "replied": "Odpowiedź została dodana.",
+            "updated": "Komentarz został zaktualizowany.",
+            "deleted": "Komentarz i zależne odpowiedzi zostały usunięte.",
+            "thread_deleted": "Dyskusja została usunięta."
         },
         "errors": {
             "load": "Nie udało się wczytać tej dyskusji.",
             "create": "Nie udało się rozpocząć dyskusji.",
-            "reply": "Nie udało się dodać odpowiedzi."
+            "reply": "Nie udało się dodać odpowiedzi.",
+            "manage": "Nie udało się zmienić tej dyskusji."
+        },
+        "confirm": {
+            "delete_comment": "Usunąć ten komentarz wraz ze wszystkimi zależnymi odpowiedziami? Tej operacji nie można cofnąć.",
+            "delete_thread": "Usunąć tę dyskusję, jej temat i wszystkie komentarze? Tej operacji nie można cofnąć."
         }
     },
     "welcome": {

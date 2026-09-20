@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCommentRequest;
+use App\Http\Requests\UpdateCommentRequest;
 use App\Http\Resources\CommentResource;
 use App\Models\Comment;
 use App\Models\Thread;
@@ -54,5 +55,24 @@ class ThreadCommentController extends Controller
         $comment = $commentService->createComment($thread, $user, $request->validated());
 
         return new CommentResource($comment)->response()->setStatusCode(201);
+    }
+
+    public function update(
+        UpdateCommentRequest $request,
+        Comment $comment,
+        CommentService $commentService,
+    ): CommentResource {
+        return new CommentResource($commentService->updateComment($comment, $request->validated('content')));
+    }
+
+    public function destroy(
+        Request $request,
+        Comment $comment,
+        CommentService $commentService,
+    ): JsonResponse {
+        abort_unless($request->user()?->can('delete', $comment), 403);
+        $commentService->deleteComment($comment);
+
+        return response()->json(status: 204);
     }
 }

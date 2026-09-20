@@ -41,6 +41,14 @@ class ThreadPolicy
             && $this->viewAny($user, $post);
     }
 
+    public function delete(User $user, Thread $thread): bool
+    {
+        $thread->loadMissing(['post.blog', 'post.group']);
+
+        return $thread->user_id === $user->id
+            && $this->view($user, $thread);
+    }
+
     private function isGroupMember(User $user, Post $post): bool
     {
         return $post->group->user_id === $user->id

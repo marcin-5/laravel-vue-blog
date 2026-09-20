@@ -41,6 +41,7 @@ const { t } = useI18n();
 const { toast } = useToast();
 const page = usePage<AppPageProps>();
 const isAuthenticated = computed(() => Boolean(page.props.auth?.user));
+const currentUserId = computed(() => page.props.auth?.user?.id ?? null);
 const registrationEnabled = computed(() => page.props.registrationEnabled ?? true);
 const threadList = ref<Thread[]>([...props.threads]);
 const comments = ref<Record<number, Comment[]>>({});
@@ -167,6 +168,77 @@ async function createComment(threadId: number, payload: { parentId?: number; con
         });
     }
 }
+
+function csrfToken(): string {
+    return document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '';
+}
+
+async function mutate(url: string, method: 'PATCH' | 'DELETE', body?: Record<string, string>): Promise<void> {
+    const response = await fetch(url, {
+        method,
+        credentials: 'same-origin',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken(),
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: body ? JSON.stringify(body) : undefined,
+    });
+
+    if (!response.ok) {
+        throw new Error(t('comments.errors.manage', 'Unable to update the discussion.'));
+    }
+}
+
+async function updateComment(payload: { commentId: number; content: string }): Promise<void> {
+    try {
+        await mutate(route('comments.update', { comment: payload.commentId }), 'PATCH', { content: payload.content });
+        const threadId = Object.entries(comments.value).find(([, values]) => values.some((comment) => containsComment(comment, payload.commentId)))?.[0];
+        if (threadId) {
+            await loadComments(Number(threadId), true);
+        }
+        toast({ title: t('comments.success.updated', 'Comment updated.'), variant: 'success' });
+    } catch (error) {
+        toast({ title: error instanceof Error ? error.message : t('comments.errors.manage', 'Unable to update the discussion.'), variant: 'destructive' });
+    }
+}
+
+async function deleteComment(commentId: number): Promise<void> {
+    try {
+        await mutate(route('comments.destroy', { comment: commentId }), 'DELETE');
+        const threadId = Object.entries(comments.value).find(([, values]) => values.some((comment) => containsComment(comment, commentId)))?.[0];
+        if (threadId) {
+            await loadComments(Number(threadId), true);
+        }
+        toast({ title: t('comments.success.deleted', 'Comment and dependent replies deleted.'), variant: 'success' });
+    } catch (error) {
+        toast({ title: error instanceof Error ? error.message : t('comments.errors.manage', 'Unable to update the discussion.'), variant: 'destructive' });
+    }
+}
+
+function containsComment(comment: Comment, commentId: number): boolean {
+    return comment.id === commentId || Boolean(comment.children?.some((child) => containsComment(child, commentId)));
+}
+
+async function deleteThread(threadId: number): Promise<void> {
+    if (!confirm(t('comments.confirm.delete_thread', 'Delete this discussion, its topic, and all comments? This cannot be undone.'))) {
+        return;
+    }
+
+    try {
+        await mutate(route('threads.destroy', { thread: threadId }), 'DELETE');
+        threadList.value = threadList.value.filter((thread) => thread.id !== threadId);
+        const nextComments = { ...comments.value };
+        delete nextComments[threadId];
+        comments.value = nextComments;
+        updateSet(expandedIds, (set) => set.delete(threadId));
+        updateSet(lockedIds, (set) => set.delete(threadId));
+        toast({ title: t('comments.success.thread_deleted', 'Discussion deleted.'), variant: 'success' });
+    } catch (error) {
+        toast({ title: error instanceof Error ? error.message : t('comments.errors.manage', 'Unable to update the discussion.'), variant: 'destructive' });
+    }
+}
 </script>
 
 <template>
@@ -202,6 +274,7 @@ async function createComment(threadId: number, payload: { parentId?: number; con
                 :can-reply="canReply"
                 :comments="comments[thread.id] ?? []"
                 :comments-max-depth="commentsMaxDepth"
+                :current-user-id="currentUserId"
                 :error="errors[thread.id]"
                 :expanded="expandedIds.has(thread.id)"
                 :is-authenticated="isAuthenticated"
@@ -210,6 +283,9 @@ async function createComment(threadId: number, payload: { parentId?: number; con
                 :thread="thread"
                 @reply="createComment(thread.id, $event)"
                 @thread-reply="createComment(thread.id, $event)"
+                @edit="updateComment"
+                @delete="deleteComment"
+                @delete-thread="deleteThread(thread.id)"
                 @toggle="toggleThread(thread.id)"
                 @toggle-lock="toggleLock(thread.id)"
             />

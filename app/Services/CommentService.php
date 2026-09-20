@@ -73,4 +73,47 @@ class CommentService
             ])->load('user');
         });
     }
+
+    public function updateComment(Comment $comment, string $content): Comment
+    {
+        $comment->update(['content' => $content]);
+
+        return $comment->load('user');
+    }
+
+    public function deleteComment(Comment $comment): void
+    {
+        DB::transaction(function () use ($comment): void {
+            $descendantIds = [];
+            $parentIds = [$comment->id];
+
+            while ($parentIds !== []) {
+                $childIds = Comment::query()
+                    ->whereIn('parent_id', $parentIds)
+                    ->pluck('id')
+                    ->all();
+
+                if ($childIds === []) {
+                    break;
+                }
+
+                $descendantIds = [...$descendantIds, ...$childIds];
+                $parentIds = $childIds;
+            }
+
+            if ($descendantIds !== []) {
+                Comment::query()->whereIn('id', $descendantIds)->delete();
+            }
+
+            $comment->delete();
+        });
+    }
+
+    public function deleteThread(Thread $thread): void
+    {
+        DB::transaction(function () use ($thread): void {
+            $thread->comments()->delete();
+            $thread->delete();
+        });
+    }
 }

@@ -129,16 +129,28 @@
             "new_thread": "New topic",
             "creating": "Creating...",
             "create": "Start discussion",
-            "reply": "Reply"
+            "reply": "Reply",
+            "edit": "Edit",
+            "delete": "Delete",
+            "save": "Save",
+            "delete_thread": "Delete discussion"
         },
         "success": {
             "created": "Discussion started.",
-            "replied": "Reply added."
+            "replied": "Reply added.",
+            "updated": "Comment updated.",
+            "deleted": "Comment and dependent replies deleted.",
+            "thread_deleted": "Discussion deleted."
         },
         "errors": {
             "load": "Unable to load this discussion.",
             "create": "Unable to start the discussion.",
-            "reply": "Unable to add the reply."
+            "reply": "Unable to add the reply.",
+            "manage": "Unable to update the discussion."
+        },
+        "confirm": {
+            "delete_comment": "Delete this comment and all dependent replies? This cannot be undone.",
+            "delete_thread": "Delete this discussion, its topic, and all comments? This cannot be undone."
         }
     },
     "welcome": {

@@ -41,4 +41,15 @@ class PostThreadController extends Controller
 
         return new ThreadResource($thread)->response()->setStatusCode(201);
     }
+
+    public function destroy(
+        Request $request,
+        Thread $thread,
+        CommentService $commentService,
+    ): JsonResponse {
+        abort_unless($request->user()?->can('delete', $thread), 403);
+        $commentService->deleteThread($thread);
+
+        return response()->json(status: 204);
+    }
 }

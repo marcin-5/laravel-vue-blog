@@ -211,3 +211,62 @@ it('requires group membership to read group threads', function () {
         'content' => 'Member reply',
     ])->assertCreated();
 });
+
+it('allows users to edit and delete their own comments with dependent replies', function () {
+    $author = User::factory()->create();
+    $blog = Blog::factory()->create(['user_id' => $author->id, 'is_published' => true]);
+    $post = Post::factory()->create(['blog_id' => $blog->id, 'user_id' => $author->id]);
+    $thread = Thread::factory()->create(['post_id' => $post->id, 'user_id' => $author->id]);
+    $comment = Comment::factory()->create(['thread_id' => $thread->id, 'user_id' => $author->id, 'depth' => 1]);
+    $reply = Comment::factory()->create([
+        'thread_id' => $thread->id,
+        'user_id' => $author->id,
+        'parent_id' => $comment->id,
+        'depth' => 2,
+    ]);
+
+    actingAs($author)->patchJson('/comments/' . $comment->id, ['content' => 'Edited comment'])
+        ->assertOk()
+        ->assertJsonPath('content', 'Edited comment');
+
+    actingAs($author)->deleteJson('/comments/' . $comment->id)->assertNoContent();
+
+    $this->assertDatabaseMissing('comments', ['id' => $comment->id]);
+    $this->assertDatabaseMissing('comments', ['id' => $reply->id]);
+});
+
+it('prevents users from editing or deleting comments they do not own', function () {
+    $author = User::factory()->create();
+    $outsider = User::factory()->create();
+    $blog = Blog::factory()->create(['user_id' => $author->id, 'is_published' => true]);
+    $post = Post::factory()->create(['blog_id' => $blog->id, 'user_id' => $author->id]);
+    $thread = Thread::factory()->create(['post_id' => $post->id, 'user_id' => $author->id]);
+    $comment = Comment::factory()->create(['thread_id' => $thread->id, 'user_id' => $author->id]);
+
+    actingAs($outsider)->patchJson('/comments/' . $comment->id, ['content' => 'Not allowed'])->assertForbidden();
+    actingAs($outsider)->deleteJson('/comments/' . $comment->id)->assertForbidden();
+});
+
+it('allows a thread creator to delete the topic and all its comments', function () {
+    $author = User::factory()->create();
+    $participant = User::factory()->create();
+    $blog = Blog::factory()->create(['user_id' => $author->id, 'is_published' => true]);
+    $post = Post::factory()->create(['blog_id' => $blog->id, 'user_id' => $author->id]);
+    $thread = Thread::factory()->create(['post_id' => $post->id, 'user_id' => $author->id]);
+    $comment = Comment::factory()->create(['thread_id' => $thread->id, 'user_id' => $participant->id]);
+
+    actingAs($author)->deleteJson('/threads/' . $thread->id)->assertNoContent();
+
+    $this->assertDatabaseMissing('threads', ['id' => $thread->id]);
+    $this->assertDatabaseMissing('comments', ['id' => $comment->id]);
+});
+
+it('prevents non-creators from deleting a thread', function () {
+    $author = User::factory()->create();
+    $outsider = User::factory()->create();
+    $blog = Blog::factory()->create(['user_id' => $author->id, 'is_published' => true]);
+    $post = Post::factory()->create(['blog_id' => $blog->id, 'user_id' => $author->id]);
+    $thread = Thread::factory()->create(['post_id' => $post->id, 'user_id' => $author->id]);
+
+    actingAs($outsider)->deleteJson('/threads/' . $thread->id)->assertForbidden();
+});

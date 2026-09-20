@@ -39,6 +39,15 @@ Route::get('threads/{thread}/comments', [ThreadCommentController::class, 'index'
 Route::post('threads/{thread}/comments', [ThreadCommentController::class, 'store'])
     ->middleware('auth')
     ->name('threads.comments.store');
+Route::patch('comments/{comment}', [ThreadCommentController::class, 'update'])
+    ->middleware('auth')
+    ->name('comments.update');
+Route::delete('comments/{comment}', [ThreadCommentController::class, 'destroy'])
+    ->middleware('auth')
+    ->name('comments.destroy');
+Route::delete('threads/{thread}', [PostThreadController::class, 'destroy'])
+    ->middleware('auth')
+    ->name('threads.destroy');
 
 // Grouped route files for app areas
 require __DIR__ . '/blogs.php';

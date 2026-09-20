@@ -7,7 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { Comment, Thread } from '@/types/blog.types';
-import { ChevronDown, Lock, LockOpen } from 'lucide-vue-next';
+import { ChevronDown, Lock, LockOpen, Trash2 } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
 
 withDefaults(
@@ -21,6 +21,7 @@ withDefaults(
         isAuthenticated: boolean;
         canReply: boolean;
         commentsMaxDepth?: number;
+        currentUserId?: number | null;
     }>(),
     {
         comments: () => [],
@@ -35,6 +36,9 @@ const emit = defineEmits<{
     (event: 'toggle-lock'): void;
     (event: 'reply', payload: { parentId: number; content: string }): void;
     (event: 'thread-reply', payload: { content: string }): void;
+    (event: 'edit', payload: { commentId: number; content: string }): void;
+    (event: 'delete', commentId: number): void;
+    (event: 'delete-thread'): void;
 }>();
 
 const { t } = useI18n();
@@ -89,6 +93,17 @@ function formatDate(value?: string): string {
                         </TooltipContent>
                     </Tooltip>
                 </TooltipProvider>
+                <Button
+                    v-if="currentUserId === thread.user_id"
+                    :aria-label="t('comments.actions.delete_thread', 'Delete discussion')"
+                    class="h-8 w-8 shrink-0 text-destructive"
+                    size="icon"
+                    type="button"
+                    variant="ghost"
+                    @click.stop="emit('delete-thread')"
+                >
+                    <Trash2 class="h-4 w-4" />
+                </Button>
             </div>
 
             <CollapsibleContent>
@@ -108,8 +123,11 @@ function formatDate(value?: string): string {
                         :can-reply="canReply"
                         :comments="comments"
                         :comments-max-depth="commentsMaxDepth"
+                        :current-user-id="currentUserId"
                         :is-authenticated="isAuthenticated"
                         @reply="emit('reply', $event)"
+                        @edit="emit('edit', $event)"
+                        @delete="emit('delete', $event)"
                     />
 
                     <div v-if="thread.is_locked" class="rounded-md border border-dashed border-border p-3 text-sm text-muted-foreground">

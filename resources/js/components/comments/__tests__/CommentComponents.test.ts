@@ -86,4 +86,76 @@ describe('comment components', () => {
         expect(articles[1].element.style.paddingInlineStart).toBe('0.75rem');
         expect(articles[2].element.style.paddingInlineStart).toBe('1.5rem');
     });
+
+    it('shows management actions only for the comment owner and confirms deletion', async () => {
+        vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
+        const wrapper = mount(CommentItem, {
+            props: {
+                canReply: false,
+                comment,
+                currentUserId: comment.user_id,
+                isAuthenticated: true,
+            },
+            global: {
+                stubs: {
+                    CommentReplyForm: true,
+                },
+            },
+        });
+
+        expect(wrapper.text()).toContain('Edit');
+        expect(wrapper.text()).toContain('Delete');
+
+        await wrapper.find('button.text-destructive').trigger('click');
+
+        expect(confirm).toHaveBeenCalled();
+        expect(wrapper.emitted('delete')).toEqual([[comment.id]]);
+        vi.unstubAllGlobals();
+    });
+
+    it('hides reply for own comments and keeps management actions on own nested replies', () => {
+        const wrapper = mount(CommentItem, {
+            props: {
+                canReply: true,
+                comment,
+                currentUserId: comment.user_id,
+                isAuthenticated: true,
+            },
+            global: {
+                stubs: {
+                    CommentReplyForm: true,
+                },
+            },
+        });
+
+        expect(wrapper.findAll('button').some((button) => button.text().includes('Reply'))).toBe(true);
+
+        const ownNestedComment = {
+            ...comment,
+            children: [
+                {
+                    ...comment.children[0],
+                    user_id: comment.user_id,
+                    children: [],
+                },
+            ],
+        };
+        const ownReplyWrapper = mount(CommentItem, {
+            props: {
+                canReply: true,
+                comment: ownNestedComment,
+                currentUserId: comment.user_id,
+                isAuthenticated: true,
+            },
+            global: {
+                stubs: {
+                    CommentReplyForm: true,
+                },
+            },
+        });
+
+        expect(ownReplyWrapper.findAll('button').some((button) => button.text().includes('Reply'))).toBe(false);
+        expect(ownReplyWrapper.text()).toContain('Edit');
+        expect(ownReplyWrapper.text()).toContain('Delete');
+    });
 });
