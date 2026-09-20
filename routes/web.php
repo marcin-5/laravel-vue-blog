@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\PostThreadController;
+use App\Http\Controllers\ThreadCommentController;
 use App\Http\Middleware\RedirectGuestToGroupRegistration;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +28,17 @@ Route::middleware(['auth', 'verified', 'noindex'])->group(function () {
         Route::get('/{group:slug}/{postSlug}', [GroupController::class, 'post'])->name('group.post');
     });
 });
+
+Route::get('posts/{post}/threads', [PostThreadController::class, 'index'])
+    ->name('posts.threads.index');
+Route::post('posts/{post}/threads', [PostThreadController::class, 'store'])
+    ->middleware('auth')
+    ->name('posts.threads.store');
+Route::get('threads/{thread}/comments', [ThreadCommentController::class, 'index'])
+    ->name('threads.comments.index');
+Route::post('threads/{thread}/comments', [ThreadCommentController::class, 'store'])
+    ->middleware('auth')
+    ->name('threads.comments.store');
 
 // Grouped route files for app areas
 require __DIR__ . '/blogs.php';
