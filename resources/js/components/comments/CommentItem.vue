@@ -24,9 +24,13 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const isReplying = ref(false);
+const INDENTATION_STEP_REM = 0.75;
+const MAX_INDENTATION_LEVEL = 6;
 const hasChildren = computed(() => Boolean(props.comment.children?.length));
 const canReplyAtDepth = computed(() => props.commentsMaxDepth === 0 || props.comment.depth < props.commentsMaxDepth);
-const indentation = computed(() => `${Math.min(Math.max(props.comment.depth - 1, 0), 6) * 1.5}rem`);
+const indentation = computed(
+    () => `${Math.min(Math.max(props.comment.depth - 1, 0), MAX_INDENTATION_LEVEL) * INDENTATION_STEP_REM}rem`,
+);
 
 function formatDate(value?: string): string {
     if (!value) {
@@ -43,7 +47,7 @@ function submitReply(payload: { content: string }): void {
 </script>
 
 <template>
-    <article :style="{ paddingInlineStart: indentation }" class="border-s-2 border-border ps-4">
+    <article :style="{ paddingInlineStart: indentation }" class="border-s border-border ps-4">
         <div class="rounded-md bg-muted/30 p-3">
             <div class="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-sm">
                 <strong class="text-foreground">{{ comment.user?.name ?? t('comments.unknown_author', 'Community member') }}</strong>
