@@ -66,7 +66,11 @@ function submit(): void {
             </Button>
             <Button :disabled="disabled || !content.trim()" size="sm" type="submit">
                 <Send class="mr-2 h-4 w-4" />
-                {{ t('comments.actions.reply', 'Reply') }}
+                {{
+                    isThreadLevel
+                        ? t('comments.actions.comment', 'Comment')
+                        : t('comments.actions.reply', 'Reply')
+                }}
             </Button>
         </div>
     </form>

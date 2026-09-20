@@ -60,11 +60,13 @@ describe('comment components', () => {
         });
 
         expect(wrapper.get('textarea').attributes('placeholder')).toBe('Write a comment...');
+        expect(wrapper.get('button[type="submit"]').text()).toContain('Comment');
 
         await wrapper.setProps({ isThreadLevel: false });
         await nextTick();
 
         expect(wrapper.get('textarea').attributes('placeholder')).toBe('Write a reply...');
+        expect(wrapper.get('button[type="submit"]').text()).toContain('Reply');
     });
 
     it('uses a fixed indentation step for nested comment levels', () => {
