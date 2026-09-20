@@ -80,7 +80,7 @@ function mountComments() {
 describe('PostComments.vue', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        usePage.mockReturnValue({ props: { auth: { user: { id: 1 } } } });
+        usePage.mockReturnValue({ props: { auth: { user: { id: 1 } }, registrationEnabled: true } });
         (globalThis as { route?: (name: string, params?: Record<string, number>) => string }).route = (name, params) =>
             `/${name}/${Object.values(params ?? {})[0] ?? ''}`;
         vi.stubGlobal(
@@ -99,6 +99,33 @@ describe('PostComments.vue', () => {
         expect(items).toHaveLength(2);
         expect(items[0].props('expanded')).toBe(false);
         expect(items[1].props('expanded')).toBe(false);
+    });
+
+    it('hides an empty discussion when registration is disabled', () => {
+        usePage.mockReturnValue({ props: { auth: null, registrationEnabled: false } });
+
+        const wrapper = mount(PostComments, {
+            props: {
+                postId: 10,
+                threads: [],
+            },
+        });
+
+        expect(wrapper.find('section').exists()).toBe(false);
+    });
+
+    it('keeps an empty group discussion available when public registration is disabled', () => {
+        usePage.mockReturnValue({ props: { auth: { user: { id: 1 } }, registrationEnabled: false } });
+
+        const wrapper = mount(PostComments, {
+            props: {
+                isGroup: true,
+                postId: 10,
+                threads: [],
+            },
+        });
+
+        expect(wrapper.find('section').exists()).toBe(true);
     });
 
     it('loads comments on expansion and collapses unlocked threads', async () => {

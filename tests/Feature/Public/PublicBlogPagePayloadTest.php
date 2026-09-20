@@ -5,6 +5,7 @@ use App\Models\Post;
 use App\Models\Tag;
 use App\Models\Thread;
 use App\Models\User;
+use Illuminate\Support\Facades\Config;
 use Inertia\Testing\AssertableInertia as Assert;
 
 function createPublicBlogWithPosts(array $attributes = []): Blog
@@ -102,6 +103,22 @@ it('exposes comment settings and thread summaries on the post page', function ()
             ->etc(),
         );
 });
+
+it('shares registration availability with public pages', function (bool $registrationEnabled) {
+    Config::set('auth.registration_enabled', $registrationEnabled);
+    $blog = createPublicBlogWithPosts();
+
+    $this
+        ->get(getBlogUrl($blog))
+        ->assertSuccessful()
+        ->assertInertia(fn(Assert $page) => $page
+            ->where('registrationEnabled', $registrationEnabled)
+            ->etc(),
+        );
+})->with([
+    'enabled' => true,
+    'disabled' => false,
+]);
 
 it('exposes the active tag and the filtered posts on the tag page', function () {
     $blog = createPublicBlogWithPosts();

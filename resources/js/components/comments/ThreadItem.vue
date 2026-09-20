@@ -118,6 +118,7 @@ function formatDate(value?: string): string {
                     <CommentReplyForm
                         v-else
                         :is-authenticated="isAuthenticated"
+                        :is-thread-level="true"
                         @submit="emit('thread-reply', $event)"
                     />
                 </div>

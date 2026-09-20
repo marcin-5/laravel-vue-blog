@@ -41,6 +41,7 @@ const { t } = useI18n();
 const { toast } = useToast();
 const page = usePage<AppPageProps>();
 const isAuthenticated = computed(() => Boolean(page.props.auth?.user));
+const registrationEnabled = computed(() => page.props.registrationEnabled ?? true);
 const threadList = ref<Thread[]>([...props.threads]);
 const comments = ref<Record<number, Comment[]>>({});
 const loadingThreadIds = ref<Set<number>>(new Set());
@@ -50,6 +51,8 @@ const errors = ref<Record<number, string>>({});
 const showCreateDialog = ref(false);
 const isCreatingThread = ref(false);
 const createThreadError = ref('');
+
+const shouldRender = computed(() => props.isGroup || registrationEnabled.value || threadList.value.length > 0);
 
 const threadHttp = useHttp<ThreadPayload, Thread>({ title: '', visibility: 'public', content: '' });
 const commentHttp = useHttp<CommentPayload, Comment>({ parent_id: null, content: '' });
@@ -167,7 +170,7 @@ async function createComment(threadId: number, payload: { parentId?: number; con
 </script>
 
 <template>
-    <section class="mt-10 space-y-4" aria-labelledby="post-comments-title">
+    <section v-if="shouldRender" class="mt-10 space-y-4" aria-labelledby="post-comments-title">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <h2 id="post-comments-title" class="text-xl font-semibold text-foreground">

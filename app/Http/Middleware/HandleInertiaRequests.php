@@ -56,6 +56,7 @@ class HandleInertiaRequests extends Middleware
                     ],
                 ]) : null,
             ],
+            'registrationEnabled' => filter_var(config('auth.registration_enabled', true), FILTER_VALIDATE_BOOLEAN),
             'userGroups' => fn(): array => $request->user()?->groups()
                 ->select('groups.id', 'groups.name', 'groups.slug')
                 ->get()
