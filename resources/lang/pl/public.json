@@ -119,6 +119,9 @@
             "content": "Pierwszy komentarz",
             "content_placeholder": "Napisz pierwszy komentarz..."
         },
+        "comment": {
+            "placeholder": "Napisz komentarz..."
+        },
         "reply": {
             "placeholder": "Napisz odpowiedź..."
         },

@@ -3,18 +3,20 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Link } from '@inertiajs/vue3';
 import { Send, X } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-withDefaults(
+const props = withDefaults(
     defineProps<{
         isAuthenticated: boolean;
         disabled?: boolean;
         showCancel?: boolean;
+        isThreadLevel?: boolean;
     }>(),
     {
         disabled: false,
         showCancel: false,
+        isThreadLevel: false,
     },
 );
 
@@ -25,6 +27,11 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const content = ref('');
+const placeholder = computed(() =>
+    props.isThreadLevel
+        ? t('comments.comment.placeholder', 'Write a comment...')
+        : t('comments.reply.placeholder', 'Write a reply...'),
+);
 
 function submit(): void {
     const value = content.value.trim();
@@ -47,9 +54,9 @@ function submit(): void {
     <form v-else class="space-y-2" @submit.prevent="submit">
         <Textarea
             v-model="content"
-            :aria-label="t('comments.reply.placeholder', 'Write a reply...')"
+            :aria-label="placeholder"
             :disabled="disabled"
-            :placeholder="t('comments.reply.placeholder', 'Write a reply...')"
+            :placeholder="placeholder"
             rows="3"
         />
         <div class="flex justify-end gap-2">
