@@ -41,6 +41,8 @@ trait HandlesPostValidation
                 'string',
                 'in:' . implode(',', $config['allowed_visibility'] ?? ['public', 'registered']),
             ],
+            'allow_comments' => ['sometimes', 'boolean'],
+            'comments_max_depth' => ['sometimes', 'integer', 'min:0', 'max:100'],
             'tags' => ['nullable', 'array'],
             'tags.*' => ['string'],
             'related_posts' => ['nullable', 'array'],

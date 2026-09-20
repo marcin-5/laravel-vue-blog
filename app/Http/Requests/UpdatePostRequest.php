@@ -75,6 +75,14 @@ class UpdatePostRequest extends FormRequest
             $data['visibility'] = $validated['visibility'];
         }
 
+        if (array_key_exists('allow_comments', $validated)) {
+            $data['allow_comments'] = (bool) $validated['allow_comments'];
+        }
+
+        if (array_key_exists('comments_max_depth', $validated)) {
+            $data['comments_max_depth'] = (int) $validated['comments_max_depth'];
+        }
+
         if (array_key_exists('related_posts', $validated)) {
             $data['related_posts'] = $validated['related_posts'];
         }

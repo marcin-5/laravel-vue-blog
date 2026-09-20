@@ -24,6 +24,8 @@ return [
         'defaults' => [
             'is_published' => false,
             'visibility' => 'public',
+            'allow_comments' => true,
+            'comments_max_depth' => 5,
         ],
 
         'allowed_visibility' => ['public', 'registered', 'unlisted', 'extension'],

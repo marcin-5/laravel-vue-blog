@@ -62,6 +62,8 @@ export interface PostDetails extends PostItem {
     contentHtml: string;
     extensions?: PostExtension[];
     visibility?: PostVisibility;
+    allow_comments?: boolean;
+    comments_max_depth?: number;
     relatedPosts?: (RelatedPostItem & { blog_slug?: string | null })[];
     externalLinks?: ExternalLinkItem[];
 }
@@ -205,6 +207,8 @@ export interface AdminPostItem {
     content?: string | null;
     is_published: boolean;
     visibility?: PostVisibility;
+    allow_comments?: boolean;
+    comments_max_depth?: number;
     published_at?: string | null;
     created_at?: string | null;
     updated_at?: string | null;
@@ -360,10 +364,43 @@ export interface PostFormData {
     content: string;
     is_published: boolean;
     visibility: string;
+    allow_comments: boolean;
+    comments_max_depth: number;
     related_posts: RelatedPostItem[];
     external_links: ExternalLinkItem[];
     tags: string[];
     [key: string]: any; // Index signature for Inertia form compatibility
+}
+
+export interface ThreadAuthor {
+    id: number;
+    name: string;
+}
+
+export interface ThreadItem {
+    id: number;
+    post_id: number;
+    user_id: number;
+    title: string;
+    visibility: 'public' | 'registered';
+    is_locked: boolean;
+    author: ThreadAuthor;
+    comments_count?: number;
+    created_at: string;
+    updated_at?: string;
+}
+
+export interface CommentItem {
+    id: number;
+    thread_id: number;
+    user_id: number;
+    parent_id?: number | null;
+    content: string;
+    depth: number;
+    user: ThreadAuthor;
+    created_at: string;
+    updated_at?: string;
+    children?: CommentItem[];
 }
 
 export interface UsePostFormLogicOptions {

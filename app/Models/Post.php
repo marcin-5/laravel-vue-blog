@@ -44,7 +44,14 @@ class Post extends Model
         'content',
         'is_published',
         'visibility',
+        'allow_comments',
+        'comments_max_depth',
         'published_at',
+    ];
+
+    protected $attributes = [
+        'allow_comments' => true,
+        'comments_max_depth' => 5,
     ];
 
     protected $appends = [];
@@ -86,6 +93,11 @@ class Post extends Model
     public function newsletterLogs(): HasMany
     {
         return $this->hasMany(NewsletterLog::class);
+    }
+
+    public function threads(): HasMany
+    {
+        return $this->hasMany(Thread::class);
     }
 
     public function relatedPosts(): HasMany
@@ -198,6 +210,8 @@ class Post extends Model
     {
         return [
             'is_published' => 'boolean',
+            'allow_comments' => 'boolean',
+            'comments_max_depth' => 'integer',
             'published_at' => 'datetime',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',

@@ -64,6 +64,8 @@ class StorePostRequest extends FormRequest
             'content' => $validated['content'] ?? null,
             'is_published' => (bool) ($validated['is_published'] ?? $config['is_published'] ?? false),
             'visibility' => $validated['visibility'] ?? $config['visibility'] ?? 'public',
+            'allow_comments' => (bool) ($validated['allow_comments'] ?? $config['allow_comments'] ?? true),
+            'comments_max_depth' => (int) ($validated['comments_max_depth'] ?? $config['comments_max_depth'] ?? 5),
             'related_posts' => $validated['related_posts'] ?? [],
             'external_links' => $validated['external_links'] ?? [],
             'tags' => $validated['tags'] ?? [],

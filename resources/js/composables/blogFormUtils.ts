@@ -136,6 +136,8 @@ export function createDefaultPostFormData(blogId?: number): PostFormData {
         content: '',
         is_published: false,
         visibility: 'public',
+        allow_comments: true,
+        comments_max_depth: 5,
         related_posts: [],
         external_links: [],
         tags: [],
@@ -156,6 +158,8 @@ export function createFormDataFromPost(post: Post | undefined, blogId?: number):
         content: post.content ?? '',
         is_published: post.is_published,
         visibility: post.visibility ?? 'public',
+        allow_comments: post.allow_comments ?? true,
+        comments_max_depth: post.comments_max_depth ?? 5,
         related_posts: post.related_posts ?? [],
         external_links: post.external_links ?? [],
         tags: (post.tags ?? []).map((tag) => tag.slug),
@@ -173,6 +177,8 @@ export function populateFormFromPost(form: InertiaForm<PostFormData>, post: Post
     form.content = data.content;
     form.is_published = data.is_published;
     form.visibility = data.visibility;
+    form.allow_comments = data.allow_comments;
+    form.comments_max_depth = data.comments_max_depth;
     form.related_posts = data.related_posts;
     form.external_links = data.external_links;
     form.tags = data.tags;

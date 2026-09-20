@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import FormCheckboxField from '@/components/blogger/FormCheckboxField.vue';
+import FormNumberField from '@/components/blogger/FormNumberField.vue';
 import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
 import MarkdownPreviewSection from '@/components/blogger/MarkdownPreviewSection.vue';
 import PostExternalLinksSection from '@/components/blogger/PostExternalLinksSection.vue';
@@ -87,6 +88,11 @@ const translationKeys = computed(() => ({
     // Visibility
     unlisted: t('blogger.post_form.unlisted_label'),
     extension: t('blogger.post_form.extension_label'),
+
+    // Comments
+    allowComments: t('blogger.post_form.allow_comments_label'),
+    commentsMaxDepth: t('blogger.post_form.comments_max_depth_label'),
+    commentsMaxDepthHint: t('blogger.post_form.comments_max_depth_hint'),
 
     // Characters hint
     characters: t('blogger.post_form.characters'),
@@ -201,6 +207,25 @@ const { getRangeClass, getThresholdClass } = useSeoLengthClasses();
                 <FormCheckboxField :id="`${fieldIdPrefix}-unlisted`" v-model="isUnlisted" :label="translationKeys.unlisted" />
 
                 <FormCheckboxField :id="`${fieldIdPrefix}-extension`" v-model="isExtension" :label="translationKeys.extension" />
+
+                <FormCheckboxField
+                    v-if="!isExtension"
+                    :id="`${fieldIdPrefix}-allow-comments`"
+                    v-model="form.allow_comments"
+                    :label="translationKeys.allowComments"
+                />
+            </div>
+
+            <div v-if="!isExtension && form.allow_comments" class="max-w-xs">
+                <FormNumberField
+                    :id="`${fieldIdPrefix}-comments-max-depth`"
+                    v-model="form.comments_max_depth"
+                    :error="form.errors?.comments_max_depth"
+                    :hint="translationKeys.commentsMaxDepthHint"
+                    :label="translationKeys.commentsMaxDepth"
+                    :max="100"
+                    :min="0"
+                />
             </div>
 
             <PostFormField

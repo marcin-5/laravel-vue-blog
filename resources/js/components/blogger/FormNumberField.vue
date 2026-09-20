@@ -27,7 +27,7 @@ const emit = defineEmits<Emits>();
 function handleInput(event: Event) {
     const target = event.target as HTMLInputElement;
     const value = parseInt(target.value, 10);
-    emit('update:modelValue', value);
+    emit('update:modelValue', Number.isNaN(value) ? 0 : value);
 }
 </script>
 

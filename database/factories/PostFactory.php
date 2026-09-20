@@ -34,6 +34,8 @@ class PostFactory extends Factory
             'content' => $this->faker->paragraphs(3, true),
             'is_published' => true,
             'visibility' => Post::VIS_PUBLIC,
+            'allow_comments' => true,
+            'comments_max_depth' => 5,
             'published_at' => $this->faker->dateTimeBetween('-30 days', 'now'),
         ];
     }

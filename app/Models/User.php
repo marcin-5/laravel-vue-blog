@@ -239,6 +239,16 @@ class User extends Authenticatable
         return $this->hasMany(Group::class, 'user_id');
     }
 
+    public function threads(): HasMany
+    {
+        return $this->hasMany(Thread::class);
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+
     /**
      * Get the attributes that should be cast.
      *
