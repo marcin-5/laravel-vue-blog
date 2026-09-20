@@ -3,6 +3,7 @@
 use App\Models\Blog;
 use App\Models\Post;
 use App\Models\Tag;
+use App\Models\Thread;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -73,6 +74,31 @@ it('exposes grouped chrome and listing props alongside the post on the post page
             ->has('listing.allTags')
             ->has('translations.messages')
             ->where('translations.locale', 'pl')
+            ->etc(),
+        );
+});
+
+it('exposes comment settings and thread summaries on the post page', function () {
+    $blog = createPublicBlogWithPosts();
+    $post = $blog->posts()->first();
+    $post->update([
+        'allow_comments' => false,
+        'comments_max_depth' => 0,
+    ]);
+    Thread::factory()->create([
+        'post_id' => $post->id,
+        'user_id' => $blog->user_id,
+        'visibility' => Thread::VIS_PUBLIC,
+    ]);
+
+    $this
+        ->get(getBlogUrl($blog, "/$post->slug"))
+        ->assertSuccessful()
+        ->assertInertia(fn(Assert $page) => $page
+            ->where('post.allow_comments', false)
+            ->where('post.comments_max_depth', 0)
+            ->has('post.threads', 1)
+            ->where('post.threads.0.title', fn(string $title) => $title !== '')
             ->etc(),
         );
 });

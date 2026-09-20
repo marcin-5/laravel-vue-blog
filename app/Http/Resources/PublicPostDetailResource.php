@@ -24,6 +24,9 @@ class PublicPostDetailResource extends JsonResource
             'contentHtml' => $this->content_html,
             'published_at' => $this->published_at?->format('Y-m-d'),
             'visibility' => $this->visibility,
+            'allow_comments' => $this->allow_comments,
+            'comments_max_depth' => $this->comments_max_depth,
+            'threads' => ThreadResource::collection($this->whenLoaded('threads')),
             'excerpt' => $this->excerpt,
             'summary' => $this->summary,
             'extensions' => $this->extensions->map(fn($ext) => [

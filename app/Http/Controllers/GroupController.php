@@ -57,7 +57,12 @@ class GroupController extends Controller
             ->posts()
             ->where('slug', $postSlug)
             ->forGroupView()
-            ->with(['user', 'extensions', 'group.user'])
+            ->with([
+                'user',
+                'extensions',
+                'group.user',
+                'threads' => fn($q) => $q->with('user')->withCount('comments')->latest()->latest('id'),
+            ])
             ->firstOrFail();
 
         $paginatedPosts = $query->handle($group);

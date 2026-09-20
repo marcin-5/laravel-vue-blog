@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
+import PostComments from '@/components/comments/PostComments.vue';
 import PostBackLink from '@/components/blog/PostBackLink.vue';
 import PostContent from '@/components/blog/PostContent.vue';
 import PostExtensions from '@/components/blog/PostExtensions.vue';
@@ -40,6 +41,12 @@ const landingUrl = computed(() => props.chrome.navigation?.landingUrl ?? props.b
             <!-- Optional related posts and external links -->
             <PostRelatedPosts :items="post.relatedPosts || []" />
             <PostExternalLinks :items="post.externalLinks || []" />
+            <PostComments
+                :allow-comments="post.allow_comments !== false"
+                :comments-max-depth="post.comments_max_depth ?? 5"
+                :post-id="post.id"
+                :threads="post.threads || []"
+            />
         </template>
 
         <template #navigation>

@@ -15,6 +15,7 @@ use App\Http\Resources\PublicPostDetailResource;
 use App\Models\Blog;
 use App\Models\Post;
 use App\Models\Tag;
+use App\Models\Thread;
 use App\Queries\Public\PublicBlogPostsQuery;
 use App\Services\BlogNavigationService;
 use App\Services\MarkdownService;
@@ -105,6 +106,13 @@ class PublicBlogController extends BasePublicController
                 'relatedPosts' => fn($q) => $q->orderBy('display_order'),
                 'relatedPosts.relatedPost.blog',
                 'externalLinks' => fn($q) => $q->orderBy('display_order'),
+                'threads' => function ($q) use ($request): void {
+                    $q->with('user')->withCount('comments')->latest()->latest('id');
+
+                    if ($request->user() === null) {
+                        $q->where('visibility', Thread::VIS_PUBLIC);
+                    }
+                },
             ])
             ->firstOrFail();
 

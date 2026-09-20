@@ -64,8 +64,40 @@ export interface PostDetails extends PostItem {
     visibility?: PostVisibility;
     allow_comments?: boolean;
     comments_max_depth?: number;
+    threads?: Thread[];
     relatedPosts?: (RelatedPostItem & { blog_slug?: string | null })[];
     externalLinks?: ExternalLinkItem[];
+}
+
+export interface ThreadAuthor {
+    id: number;
+    name: string;
+}
+
+export interface Thread {
+    id: number;
+    post_id: number;
+    user_id: number;
+    title: string;
+    visibility: 'public' | 'registered';
+    is_locked: boolean;
+    author?: ThreadAuthor;
+    comments_count?: number;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface Comment {
+    id: number;
+    thread_id: number;
+    user_id: number;
+    parent_id: number | null;
+    content: string;
+    depth: number;
+    user?: ThreadAuthor;
+    created_at?: string;
+    updated_at?: string;
+    children?: Comment[];
 }
 
 export interface NavPost {

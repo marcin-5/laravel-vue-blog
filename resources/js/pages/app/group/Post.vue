@@ -4,6 +4,7 @@ import BlogLayout from '@/components/blog/BlogLayout.vue';
 import BlogPostNav from '@/components/blog/BlogPostNav.vue';
 import BlogPostsList from '@/components/blog/BlogPostsList.vue';
 import BorderDivider from '@/components/blog/BorderDivider.vue';
+import PostComments from '@/components/comments/PostComments.vue';
 import PostContent from '@/components/blog/PostContent.vue';
 import PostExtensions from '@/components/blog/PostExtensions.vue';
 import PostHeader from '@/components/blog/PostHeader.vue';
@@ -43,6 +44,13 @@ defineProps<{
             <PostContent :author="post.author" :content="post.contentHtml" />
             <PostExtensions :extensions="post.extensions || []" />
             <PostContent v-if="post.summaryHtml" :author="post.author" :content="post.summaryHtml" class="mt-8" />
+            <PostComments
+                :allow-comments="post.allow_comments !== false"
+                :comments-max-depth="post.comments_max_depth ?? 5"
+                :is-group="true"
+                :post-id="post.id"
+                :threads="post.threads || []"
+            />
         </template>
 
         <template #middle-divider>
