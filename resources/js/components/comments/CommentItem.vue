@@ -101,7 +101,13 @@ function deleteComment(): void {
                         <Pencil class="mr-1 h-3.5 w-3.5" />
                         {{ t('comments.actions.edit', 'Edit') }}
                     </Button>
-                    <Button class="h-8 px-2 text-xs text-destructive" size="sm" type="button" variant="ghost" @click="deleteComment">
+                    <Button
+                        class="h-8 px-2 text-xs text-destructive hover:text-destructive-hover"
+                        size="sm"
+                        type="button"
+                        variant="ghost"
+                        @click="deleteComment"
+                    >
                         <Trash2 class="mr-1 h-3.5 w-3.5" />
                         {{ t('comments.actions.delete', 'Delete') }}
                     </Button>

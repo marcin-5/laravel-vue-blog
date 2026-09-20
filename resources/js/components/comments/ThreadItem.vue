@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import CommentReplyForm from '@/components/comments/CommentReplyForm.vue';
 import CommentTree from '@/components/comments/CommentTree.vue';
 import { Badge } from '@/components/ui/badge';
@@ -96,7 +96,7 @@ function formatDate(value?: string): string {
                 <Button
                     v-if="currentUserId === thread.user_id"
                     :aria-label="t('comments.actions.delete_thread', 'Delete discussion')"
-                    class="h-8 w-8 shrink-0 text-destructive"
+                    class="h-8 w-8 shrink-0 text-destructive hover:text-destructive-hover"
                     size="icon"
                     type="button"
                     variant="ghost"
@@ -113,7 +113,7 @@ function formatDate(value?: string): string {
                         <time v-if="thread.created_at" :datetime="thread.created_at">{{ formatDate(thread.created_at) }}</time>
                     </div>
 
-                    <div v-if="loading" class="space-y-3" aria-live="polite">
+                    <div v-if="loading" aria-live="polite" class="space-y-3">
                         <Skeleton class="h-20 w-full" />
                         <Skeleton class="h-16 w-11/12" />
                     </div>
@@ -125,20 +125,15 @@ function formatDate(value?: string): string {
                         :comments-max-depth="commentsMaxDepth"
                         :current-user-id="currentUserId"
                         :is-authenticated="isAuthenticated"
-                        @reply="emit('reply', $event)"
-                        @edit="emit('edit', $event)"
                         @delete="emit('delete', $event)"
+                        @edit="emit('edit', $event)"
+                        @reply="emit('reply', $event)"
                     />
 
                     <div v-if="thread.is_locked" class="rounded-md border border-dashed border-border p-3 text-sm text-muted-foreground">
                         {{ t('comments.thread_locked', 'This discussion is closed for new replies.') }}
                     </div>
-                    <CommentReplyForm
-                        v-else
-                        :is-authenticated="isAuthenticated"
-                        :is-thread-level="true"
-                        @submit="emit('thread-reply', $event)"
-                    />
+                    <CommentReplyForm v-else :is-authenticated="isAuthenticated" :is-thread-level="true" @submit="emit('thread-reply', $event)" />
                 </div>
             </CollapsibleContent>
         </Collapsible>

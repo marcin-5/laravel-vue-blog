@@ -215,8 +215,8 @@
     --constructive: hsl(121 21% 21%);
     --constructive-hover: hsl(126 35% 25%);
     --constructive-foreground: hsl(135 35% 91%);
-    --destructive: hsl(5 53% 35%);
-    --destructive-hover: hsl(0 44% 49%);
+    --destructive: hsl(5 53% 53%);
+    --destructive-hover: hsl(0 44% 69%);
     --destructive-foreground: hsl(5 89% 98%);
     --secondary: hsl(102 21% 12%);
     --secondary-hover: hsl(102 20% 25%);
