@@ -114,6 +114,17 @@ describe('PostForm.vue', () => {
         expect(section.find('h3').text()).toBe('blogger.post_form.related_posts_label');
     });
 
+    it('does not render related posts section for group posts', () => {
+        const wrapper = mount(PostForm, {
+            props: {
+                groupId: 1,
+                form: { ...mockForm, group_id: 1, related_posts: [] } as any,
+            },
+        });
+
+        expect(wrapper.findComponent({ name: 'PostRelatedPostsSection' }).exists()).toBe(false);
+    });
+
     it('renders external links section', () => {
         const wrapper = mount(PostForm);
         const section = wrapper.findComponent({ name: 'PostExternalLinksSection' });

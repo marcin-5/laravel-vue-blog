@@ -314,6 +314,7 @@ const { getRangeClass, getThresholdClass } = useSeoLengthClasses();
 
             <template v-if="!isExtension">
                 <PostRelatedPostsSection
+                    v-if="!props.groupId && !form.group_id"
                     :current-post-id="props.post?.id"
                     :id-prefix="fieldIdPrefix"
                     :items="form.related_posts"
