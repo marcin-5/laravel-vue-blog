@@ -33,6 +33,25 @@ test('welcome page passes user groups to logged-in users with groups', function 
     );
 });
 
+test('welcome page includes groups owned by the logged-in user', function () {
+    $user = User::factory()->create();
+    $group = Group::factory()->create(['user_id' => $user->id]);
+
+    $response = $this->actingAs($user)->get('/');
+
+    $response->assertInertia(
+        fn(Assert $page) => $page
+            ->component('public/Welcome')
+            ->where('userGroups', [
+                [
+                    'id' => $group->id,
+                    'name' => $group->name,
+                    'slug' => $group->slug,
+                ],
+            ]),
+    );
+});
+
 test('welcome page passes empty user groups array to logged-in users without groups', function () {
     $user = User::factory()->create();
 

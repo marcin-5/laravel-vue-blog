@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Group;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -57,10 +58,15 @@ class HandleInertiaRequests extends Middleware
                 ]) : null,
             ],
             'registrationEnabled' => filter_var(config('auth.registration_enabled', true), FILTER_VALIDATE_BOOLEAN),
-            'userGroups' => fn(): array => $request->user()?->groups()
+            'userGroups' => fn(): array => $request->user() === null ? [] : Group::query()
+                ->where(function ($query) use ($request): void {
+                    $query
+                        ->where('groups.user_id', $request->user()->id)
+                        ->orWhereHas('members', fn($members) => $members->where('users.id', $request->user()->id));
+                })
                 ->select('groups.id', 'groups.name', 'groups.slug')
                 ->get()
-                ->map(fn($group): array => [
+                ->map(fn(Group $group): array => [
                     'id' => $group->id,
                     'name' => $group->name,
                     'slug' => $group->slug,
