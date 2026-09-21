@@ -368,6 +368,7 @@ export interface BloggerItemContext<T extends ManageableItem, P extends AdminPos
     editingPostId: number | null;
     expandedExtensionsForId: number | null;
     editForm?: any;
+    postEditForm?: any;
     actions: BloggerItemActions<P>;
 }
 

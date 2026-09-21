@@ -63,7 +63,7 @@ const handleToggleExtensions = (post: AdminPostItem) => actions.toggleExtensions
                 <PostListItem
                     v-for="post in context.item.posts"
                     :key="post.id"
-                    :edit-form="context.editForm"
+                    :edit-form="context.postEditForm"
                     :is-editing="context.editingPostId === post.id"
                     :is-extensions-expanded="context.expandedExtensionsForId === post.id"
                     :post="post"

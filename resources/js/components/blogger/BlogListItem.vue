@@ -26,6 +26,7 @@ const {
     isEditing,
     isPostsExpanded,
     postForm: rawPostForm,
+    postEditForm,
     cancelCreateExtension,
     cancelCreatePost,
     cancelEdit,
@@ -54,6 +55,7 @@ const context = computed<BloggerItemContext<Blog, PostItem>>(() => ({
     editingPostId: editingPostId.value,
     expandedExtensionsForId: expandedExtensionsForId.value,
     editForm,
+    postEditForm,
     actions: {
         edit,
         createPost,
