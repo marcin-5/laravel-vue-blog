@@ -19,6 +19,8 @@ export function usePostForm() {
         content: '' as string,
         is_published: false as boolean,
         visibility: 'public' as string,
+        allow_comments: true as boolean,
+        comments_max_depth: 5 as number,
         related_posts: [] as any[],
         external_links: [] as any[],
         tags: [] as string[],
@@ -32,6 +34,8 @@ export function usePostForm() {
         content: '' as string | null,
         is_published: false as boolean,
         visibility: 'public' as string,
+        allow_comments: true as boolean,
+        comments_max_depth: 5 as number,
         related_posts: [] as any[],
         external_links: [] as any[],
         tags: [] as string[],
@@ -104,6 +108,8 @@ export function usePostForm() {
         postEditForm.content = post.content ?? '';
         postEditForm.is_published = post.is_published;
         postEditForm.visibility = post.visibility ?? 'public';
+        postEditForm.allow_comments = post.allow_comments ?? true;
+        postEditForm.comments_max_depth = post.comments_max_depth ?? 5;
         postEditForm.related_posts = [...(post.related_posts || [])];
         postEditForm.external_links = [...(post.external_links || [])];
         postEditForm.tags = (post as any).tags?.map((t: any) => t.slug) || [];

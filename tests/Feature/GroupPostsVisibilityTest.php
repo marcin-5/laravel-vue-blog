@@ -66,3 +66,27 @@ it('does not display unpublished posts on group landing page', function () {
             ->has('posts', 0),
         );
 });
+
+it('includes comment settings and thread summaries on a group post page', function () {
+    $user = User::factory()->create();
+    $group = Group::factory()->create(['user_id' => $user->id, 'slug' => 'comment-group']);
+    $post = Post::factory()->create([
+        'group_id' => $group->id,
+        'visibility' => Post::VIS_RESTRICTED,
+        'is_published' => true,
+        'published_at' => now()->subDay(),
+        'allow_comments' => true,
+        'comments_max_depth' => 5,
+        'slug' => 'first-post',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('group.post', [$group->slug, $post->slug]))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->component('app/group/Post')
+            ->where('post.allow_comments', true)
+            ->where('post.comments_max_depth', 5)
+            ->has('post.threads', 0),
+        );
+});

@@ -20,6 +20,8 @@ readonly class GroupService
         'content',
         'is_published',
         'visibility',
+        'allow_comments',
+        'comments_max_depth',
         'published_at',
         'created_at',
     ];

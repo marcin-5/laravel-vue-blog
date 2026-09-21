@@ -332,7 +332,12 @@ const { getRangeClass, getThresholdClass } = useSeoLengthClasses();
                     @update-item="updateExternalLink"
                 />
 
-                <PostTagsSelector v-model="form.tags" :blog-id="props.post?.blog_id || form.blog_id" :id-prefix="fieldIdPrefix" />
+                <PostTagsSelector
+                    v-if="!props.groupId && !form.group_id && (props.post?.blog_id || form.blog_id)"
+                    v-model="form.tags"
+                    :blog-id="props.post?.blog_id || form.blog_id"
+                    :id-prefix="fieldIdPrefix"
+                />
             </template>
 
             <FormSubmitActions
