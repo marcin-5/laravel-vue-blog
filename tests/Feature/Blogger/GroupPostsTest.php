@@ -76,6 +76,25 @@ it('contributor can update a post in a group', function () {
     expect($post->fresh()->title)->toBe('Updated by Contributor');
 });
 
+it('owner can update a group post when the form sends empty tags', function () {
+    $owner = User::factory()->create();
+    $group = Group::factory()->create(['user_id' => $owner->id]);
+    $post = Post::factory()->create([
+        'group_id' => $group->id,
+        'user_id' => $owner->id,
+    ]);
+
+    actingAs($owner)
+        ->patch(route('posts.update', $post), [
+            'title' => 'Updated group post',
+            'content' => 'Updated content',
+            'tags' => [],
+        ])
+        ->assertRedirect();
+
+    expect($post->fresh()->title)->toBe('Updated group post');
+});
+
 it('regular member cannot create a post in a group', function () {
     $owner = User::factory()->create();
     $member = User::factory()->create();

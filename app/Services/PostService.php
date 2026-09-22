@@ -73,7 +73,7 @@ readonly class PostService
             $this->syncRelations($post, $relatedPosts ?? [], $externalLinks ?? []);
         }
 
-        if ($tags !== null) {
+        if ($tags !== null && $post->blog !== null) {
             $this->syncTags($post, $tags, $post->blog);
         }
 
