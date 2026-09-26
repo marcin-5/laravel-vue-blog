@@ -16,11 +16,13 @@ const emit = defineEmits<{ select: [conversation: PrivateConversation] }>();
             type="button"
             @click="emit('select', conversation)"
         >
-            <div class="flex items-start justify-between gap-3">
+            <span class="flex items-start justify-between gap-3">
                 <span class="font-medium">{{ conversation.subject }}</span>
-                <span class="shrink-0 text-xs text-muted-foreground">{{ formatDate(conversation.updated_at) }}</span>
-            </div>
-            <p class="mt-1 text-xs text-muted-foreground">{{ conversation.initiator.name }} · {{ conversation.messages_count ?? 0 }}</p>
+            </span>
+            <span class="mt-1 flex items-start justify-between gap-3 text-xs text-muted-foreground">
+                <span>{{ conversation.initiator.name }} · {{ conversation.messages_count ?? 0 }}</span>
+                <span class="shrink-0">{{ formatDate(conversation.updated_at) }}</span>
+            </span>
         </button>
     </div>
 </template>
