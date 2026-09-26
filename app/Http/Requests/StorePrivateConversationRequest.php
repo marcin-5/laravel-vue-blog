@@ -9,6 +9,14 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StorePrivateConversationRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'subject' => trim((string) $this->input('subject', '')),
+            'content' => trim((string) $this->input('content', '')),
+        ]);
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      */

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\PrivateConversationController;
 use App\Http\Controllers\PostThreadController;
 use App\Http\Controllers\ThreadCommentController;
 use App\Http\Middleware\RedirectGuestToGroupRegistration;
@@ -48,6 +49,10 @@ Route::delete('comments/{comment}', [ThreadCommentController::class, 'destroy'])
 Route::delete('threads/{thread}', [PostThreadController::class, 'destroy'])
     ->middleware('auth')
     ->name('threads.destroy');
+
+Route::post('private-conversations', [PrivateConversationController::class, 'store'])
+    ->middleware('auth')
+    ->name('private-conversations.store');
 
 // Grouped route files for app areas
 require __DIR__ . '/blogs.php';

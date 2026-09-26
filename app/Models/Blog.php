@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
+use Throwable;
 
 /**
  * @property int $id
@@ -90,6 +91,13 @@ class Blog extends Model
             ->first();
     }
 
+    private static function resolveMainDomainLocale(string $domain): ?string
+    {
+        $domainLocales = config('app.domain_locales', []);
+
+        return $domainLocales[$domain] ?? null;
+    }
+
     /**
      * Resolve the main domain represented by a request host.
      */
@@ -102,6 +110,17 @@ class Blog extends Model
         }
 
         return (string) config('app.domain');
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function mainDomains(): array
+    {
+        return array_values(array_filter([
+            config('app.domain'),
+            config('app.domain_secondary'),
+        ]));
     }
 
     protected static function booted(): void
@@ -179,24 +198,6 @@ class Blog extends Model
         }
 
         return null;
-    }
-
-    /**
-     * @return list<string>
-     */
-    private static function mainDomains(): array
-    {
-        return array_values(array_filter([
-            config('app.domain'),
-            config('app.domain_secondary'),
-        ]));
-    }
-
-    private static function resolveMainDomainLocale(string $domain): ?string
-    {
-        $domainLocales = config('app.domain_locales', []);
-
-        return $domainLocales[$domain] ?? null;
     }
 
     /**
@@ -327,7 +328,7 @@ class Blog extends Model
 
         try {
             return route('blog.public.landing', ['blog' => $this->slug, 'mainDomain' => $this->main_domain]);
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return '';
         }
     }

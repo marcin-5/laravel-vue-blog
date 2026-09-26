@@ -2,28 +2,23 @@
 
 namespace App\Http\Requests;
 
-use App\Models\PrivateMessage;
-use App\Policies\PrivateMessagePolicy;
+use App\Models\PrivateConversation;
+use App\Policies\PrivateConversationPolicy;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdatePrivateMessageRequest extends FormRequest
+class UpdatePrivateConversationNotificationsRequest extends FormRequest
 {
-    protected function prepareForValidation(): void
-    {
-        $this->merge(['content' => trim((string) $this->input('content', ''))]);
-    }
-
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        $privateMessage = $this->route('privateMessage');
+        $conversation = $this->route('privateConversation');
 
-        return $privateMessage instanceof PrivateMessage
+        return $conversation instanceof PrivateConversation
             && $this->user() !== null
-            && (new PrivateMessagePolicy)->update($this->user(), $privateMessage);
+            && (new PrivateConversationPolicy)->update($this->user(), $conversation);
     }
 
     /**
@@ -34,7 +29,7 @@ class UpdatePrivateMessageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'content' => ['required', 'string', 'max:10000'],
+            'email_notifications' => ['required', 'boolean'],
         ];
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Policies\PrivateConversationPolicy;
 
 class GroupPostResource extends JsonResource
 {
@@ -20,6 +21,9 @@ class GroupPostResource extends JsonResource
             'slug' => $this->slug,
             'author' => $this->user?->name ?? $this->group?->user?->name,
             'author_email' => $this->user?->email ?? $this->group?->user?->email,
+            'private_message_url' => $this->canStartPrivateConversation($request)
+                ? route('private-conversations.store')
+                : null,
             'summaryHtml' => $this->summary_html,
             'contentHtml' => $this->content_html,
             'allow_comments' => $this->allow_comments,
@@ -36,5 +40,11 @@ class GroupPostResource extends JsonResource
                     'contentHtml' => $ext->content_html,
                 ])->values(),
         ];
+    }
+
+    private function canStartPrivateConversation(Request $request): bool
+    {
+        return $request->user() !== null
+            && (new PrivateConversationPolicy)->create($request->user(), $this->resource);
     }
 }

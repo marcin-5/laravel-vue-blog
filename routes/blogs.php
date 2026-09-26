@@ -7,6 +7,7 @@ use App\Http\Controllers\Blogger\PostsController;
 use App\Http\Controllers\Blogger\TagsController;
 use App\Http\Controllers\Blogger\PublicDataController;
 use App\Http\Controllers\Blogger\StatsController as BloggerStatsController;
+use App\Http\Controllers\PrivateConversationController;
 use App\Http\Controllers\MarkdownController;
 use Illuminate\Support\Facades\Route;
 
@@ -76,4 +77,17 @@ Route::middleware(['auth', 'verified', 'noindex'])->group(function () {
     // Public data routes for related posts selection
     Route::get('data/blogs', [PublicDataController::class, 'blogs'])->name('blogger.data.blogs');
     Route::get('data/blogs/{blog}/posts', [PublicDataController::class, 'posts'])->name('blogger.data.posts');
+
+    Route::get('private-conversations', [PrivateConversationController::class, 'index'])
+        ->name('private-conversations.index');
+    Route::get('private-conversations/{privateConversation}', [PrivateConversationController::class, 'show'])
+        ->name('private-conversations.show');
+    Route::post('private-conversations/{privateConversation}/messages', [PrivateConversationController::class, 'reply'])
+        ->name('private-conversations.messages.store');
+    Route::patch('private-messages/{privateMessage}', [PrivateConversationController::class, 'update'])
+        ->name('private-messages.update');
+    Route::delete('private-messages/{privateMessage}', [PrivateConversationController::class, 'destroy'])
+        ->name('private-messages.destroy');
+    Route::patch('private-conversations/{privateConversation}/notifications', [PrivateConversationController::class, 'updateNotifications'])
+        ->name('private-conversations.notifications.update');
 });
