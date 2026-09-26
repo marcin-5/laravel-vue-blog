@@ -15,7 +15,7 @@ import PrivateMessagesFilters from './components/PrivateMessagesFilters.vue';
 import { usePrivateMessages } from '@/composables/usePrivateMessages';
 
 interface Props {
-    conversations: { data: PrivateConversation[] };
+    conversations: PrivateConversation[];
     pagination: PrivateConversationPaginationData;
     selectedConversation: PrivateConversation | null;
     filters: PrivateConversationFilters;
@@ -42,12 +42,12 @@ const breadcrumbs: BreadcrumbItem[] = [
                 @sort-by-change="changeSortBy"
                 @sort-dir-change="changeSortDir"
             />
-            <div v-if="props.conversations.data.length === 0" class="rounded-lg border p-8 text-center text-muted-foreground">
+            <div v-if="props.conversations.length === 0" class="rounded-lg border p-8 text-center text-muted-foreground">
                 {{ t('messages.private_messaging.panel.empty', 'You have no private conversations.') }}
             </div>
             <div v-else class="grid gap-4 lg:grid-cols-[minmax(16rem,24rem)_1fr]">
                 <PrivateConversationList
-                    :conversations="props.conversations.data"
+                    :conversations="props.conversations"
                     :selected-id="props.selectedConversation?.id"
                     @select="(conversation) => visitPage(route('private-conversations.show', conversation.id))"
                 />
