@@ -1,9 +1,13 @@
 <script lang="ts" setup>
+import PrivateMessageDialog from '@/components/blog/PrivateMessageDialog.vue';
+import { Button } from '@/components/ui/button';
 import ViewStatsComponent from '@/components/blog/ViewStats.vue';
-import type { SEO } from '@/types';
+import type { AppPageProps, SEO } from '@/types';
 import type { PostDetails, ViewStats } from '@/types/blog.types';
+import { usePage } from '@inertiajs/vue3';
+import { Mail } from 'lucide-vue-next';
 import { formatDate, shouldShowUpdatedDate } from '@/utils/dateUtils';
-import { computed } from 'vue';
+import { computed, shallowRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
@@ -14,6 +18,8 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
+const page = usePage<AppPageProps>();
+const dialogOpen = shallowRef(false);
 
 const authorLabel = computed(() => t('blog.post.author', ''));
 const publishedLabel = computed(() => t('blog.post.published', 'Published:'));
@@ -24,6 +30,7 @@ const modifiedTime = computed(() => props.seo?.modifiedTime ?? null);
 
 const showUpdated = computed(() => shouldShowUpdatedDate(publishedTime.value, modifiedTime.value));
 const formattedUpdatedDate = computed(() => formatDate(modifiedTime.value, props.locale));
+const canStartPrivateMessage = computed(() => Boolean(page.props.auth.user && props.post.private_message_url));
 </script>
 
 <template>
@@ -47,6 +54,18 @@ const formattedUpdatedDate = computed(() => formatDate(modifiedTime.value, props
         >
             {{ authorLabel }}
             <a :href="`mailto:${post.author_email}`" class="hover:text-primary">{{ post.author }}</a>
+            <Button
+                v-if="canStartPrivateMessage"
+                class="ml-2 h-7 gap-1 px-2 text-xs"
+                size="sm"
+                type="button"
+                variant="outline"
+                @click="dialogOpen = true"
+            >
+                <Mail class="size-3.5" />
+                {{ t('private_messaging.actions.contact_owner', 'Private message') }}
+            </Button>
         </p>
+        <PrivateMessageDialog v-if="canStartPrivateMessage" v-model:open="dialogOpen" :post-id="post.id" :store-url="post.private_message_url" />
     </header>
 </template>

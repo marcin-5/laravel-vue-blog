@@ -33,6 +33,44 @@
         "info": "Info"
     },
     "messages": {
+        "private_messaging": {
+            "dialog": {
+                "title": "Send private message",
+                "description": "Only you and the post owner can see this conversation."
+            },
+            "fields": {
+                "subject": "Subject",
+                "subject_placeholder": "Message subject",
+                "content": "Message",
+                "content_placeholder": "Write your message...",
+                "email_notifications": "Notify me by email about replies"
+            },
+            "actions": {
+                "contact_owner": "Private message",
+                "sending": "Sending...",
+                "send": "Send message",
+                "reply": "Reply",
+                "save": "Save",
+                "edit": "Edit",
+                "delete": "Delete",
+                "close": "Close"
+            },
+            "panel": {
+                "title": "Private messages",
+                "empty": "You have no private conversations.",
+                "select": "Select a conversation to read its messages.",
+                "sort_by": "Sort by",
+                "sort_subject": "Subject",
+                "sort_created": "Created date",
+                "sort_updated": "Updated date",
+                "direction": "Direction",
+                "ascending": "Ascending",
+                "descending": "Descending",
+                "notifications": "Email notifications for replies",
+                "reply_placeholder": "Write a reply...",
+                "confirm_delete": "Delete this message?"
+            }
+        },
         "extension_created": "Extension created successfully.",
         "extension_updated": "Extension updated successfully.",
         "extension_deleted": "Extension deleted successfully."

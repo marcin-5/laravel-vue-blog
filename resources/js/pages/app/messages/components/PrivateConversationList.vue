@@ -1,0 +1,26 @@
+<script setup lang="ts">
+import type { PrivateConversation } from '@/types/private-messaging.types';
+import { formatDate } from '@/utils/dateUtils';
+
+defineProps<{ conversations: PrivateConversation[]; selectedId?: number | null }>();
+const emit = defineEmits<{ select: [conversation: PrivateConversation] }>();
+</script>
+
+<template>
+    <div class="divide-y rounded-lg border">
+        <button
+            v-for="conversation in conversations"
+            :key="conversation.id"
+            class="block w-full px-4 py-3 text-left transition-colors hover:bg-muted/50"
+            :class="conversation.id === selectedId ? 'bg-muted' : ''"
+            type="button"
+            @click="emit('select', conversation)"
+        >
+            <div class="flex items-start justify-between gap-3">
+                <span class="font-medium">{{ conversation.subject }}</span>
+                <span class="shrink-0 text-xs text-muted-foreground">{{ formatDate(conversation.updated_at) }}</span>
+            </div>
+            <p class="mt-1 text-xs text-muted-foreground">{{ conversation.initiator.name }} · {{ conversation.messages_count ?? 0 }}</p>
+        </button>
+    </div>
+</template>

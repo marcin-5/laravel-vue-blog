@@ -33,6 +33,44 @@
         "info": "Informacje"
     },
     "messages": {
+        "private_messaging": {
+            "dialog": {
+                "title": "Wyślij prywatną wiadomość",
+                "description": "Tylko Ty i właściciel wpisu widzicie tę rozmowę."
+            },
+            "fields": {
+                "subject": "Temat",
+                "subject_placeholder": "Temat wiadomości",
+                "content": "Wiadomość",
+                "content_placeholder": "Napisz wiadomość...",
+                "email_notifications": "Powiadamiaj mnie e-mailem o odpowiedziach"
+            },
+            "actions": {
+                "contact_owner": "Prywatna wiadomość",
+                "sending": "Wysyłanie...",
+                "send": "Wyślij wiadomość",
+                "reply": "Odpowiedz",
+                "save": "Zapisz",
+                "edit": "Edytuj",
+                "delete": "Usuń",
+                "close": "Zamknij"
+            },
+            "panel": {
+                "title": "Prywatne wiadomości",
+                "empty": "Nie masz jeszcze prywatnych rozmów.",
+                "select": "Wybierz rozmowę, aby przeczytać wiadomości.",
+                "sort_by": "Sortuj według",
+                "sort_subject": "Tematu",
+                "sort_created": "Daty utworzenia",
+                "sort_updated": "Daty aktualizacji",
+                "direction": "Kierunek",
+                "ascending": "Rosnąco",
+                "descending": "Malejąco",
+                "notifications": "Powiadomienia e-mail o odpowiedziach",
+                "reply_placeholder": "Napisz odpowiedź...",
+                "confirm_delete": "Usunąć tę wiadomość?"
+            }
+        },
         "extension_created": "Rozszerzenie zostało utworzone pomyślnie.",
         "extension_updated": "Rozszerzenie zostało zaktualizowane pomyślnie.",
         "extension_deleted": "Rozszerzenie zostało usunięte pomyślnie."

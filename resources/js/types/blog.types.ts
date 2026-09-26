@@ -58,6 +58,7 @@ export interface PostExtension {
 export interface PostDetails extends PostItem {
     author: string;
     author_email: string | null;
+    private_message_url?: string | null;
     summaryHtml?: string | null;
     contentHtml: string;
     extensions?: PostExtension[];
