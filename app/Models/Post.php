@@ -90,6 +90,11 @@ class Post extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function privateConversations(): HasMany
+    {
+        return $this->hasMany(PrivateConversation::class);
+    }
+
     public function newsletterLogs(): HasMany
     {
         return $this->hasMany(NewsletterLog::class);

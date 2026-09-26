@@ -249,6 +249,26 @@ class User extends Authenticatable
         return $this->hasMany(Comment::class);
     }
 
+    public function initiatedPrivateConversations(): HasMany
+    {
+        return $this->hasMany(PrivateConversation::class, 'initiator_id');
+    }
+
+    public function ownedPrivateConversations(): HasMany
+    {
+        return $this->hasMany(PrivateConversation::class, 'owner_id');
+    }
+
+    public function privateMessages(): HasMany
+    {
+        return $this->hasMany(PrivateMessage::class);
+    }
+
+    public function privateConversationParticipants(): HasMany
+    {
+        return $this->hasMany(PrivateConversationParticipant::class);
+    }
+
     /**
      * Get the attributes that should be cast.
      *

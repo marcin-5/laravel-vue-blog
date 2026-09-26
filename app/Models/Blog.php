@@ -73,6 +73,37 @@ class Blog extends Model
         'creation_date',
     ];
 
+    /**
+     * Resolve a blog slug using the locale assigned to the source host.
+     */
+    public static function fromSlugAndHost(string $slug, string $host): ?self
+    {
+        $locale = self::resolveMainDomainLocale($host);
+
+        if (!$locale) {
+            return null;
+        }
+
+        return self::withoutGlobalScopes()
+            ->where('slug', $slug)
+            ->where('locale', $locale)
+            ->first();
+    }
+
+    /**
+     * Resolve the main domain represented by a request host.
+     */
+    public static function mainDomainForHost(string $host): string
+    {
+        foreach (self::mainDomains() as $domain) {
+            if ($host === $domain) {
+                return $domain;
+            }
+        }
+
+        return (string) config('app.domain');
+    }
+
     protected static function booted(): void
     {
         static::addGlobalScope('locale', function (Builder $builder) {
@@ -125,52 +156,6 @@ class Blog extends Model
     }
 
     /**
-     * Resolve a blog slug using the locale assigned to the source host.
-     */
-    public static function fromSlugAndHost(string $slug, string $host): ?self
-    {
-        $locale = self::resolveMainDomainLocale($host);
-
-        if (!$locale) {
-            return null;
-        }
-
-        return self::withoutGlobalScopes()
-            ->where('slug', $slug)
-            ->where('locale', $locale)
-            ->first();
-    }
-
-    /**
-     * Resolve the main domain represented by a request host.
-     */
-    public static function mainDomainForHost(string $host): string
-    {
-        foreach (self::mainDomains() as $domain) {
-            if ($host === $domain) {
-                return $domain;
-            }
-        }
-
-        return (string) config('app.domain');
-    }
-
-    /**
-     * Add the host locale to public implicit route model binding.
-     */
-    public function resolveRouteBindingQuery($query, $value, $field = null): Builder
-    {
-        $query = parent::resolveRouteBindingQuery($query, $value, $field);
-        $resolvedHost = self::resolveBlogHost(request()->getHost());
-
-        if ($resolvedHost) {
-            $query->where('blogs.locale', $resolvedHost['locale']);
-        }
-
-        return $query;
-    }
-
-    /**
      * @return array{slug: string, locale: string}|null
      */
     private static function resolveBlogHost(string $host): ?array
@@ -212,6 +197,24 @@ class Blog extends Model
         $domainLocales = config('app.domain_locales', []);
 
         return $domainLocales[$domain] ?? null;
+    }
+
+    /**
+     * Add the host locale to public implicit route model binding.
+     */
+    public function resolveRouteBindingQuery(
+        $query,
+        $value,
+        $field = null,
+    ): \Illuminate\Contracts\Database\Eloquent\Builder {
+        $query = parent::resolveRouteBindingQuery($query, $value, $field);
+        $resolvedHost = self::resolveBlogHost(request()->getHost());
+
+        if ($resolvedHost) {
+            $query->where('blogs.locale', $resolvedHost['locale']);
+        }
+
+        return $query;
     }
 
     /**
@@ -260,6 +263,11 @@ class Blog extends Model
     public function newsletterSubscriptions(): HasMany
     {
         return $this->hasMany(NewsletterSubscription::class);
+    }
+
+    public function privateConversations(): HasMany
+    {
+        return $this->hasMany(PrivateConversation::class);
     }
 
     /**

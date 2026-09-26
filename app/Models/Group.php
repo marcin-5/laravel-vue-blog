@@ -78,4 +78,9 @@ class Group extends Model
     {
         return $this->hasMany(Post::class);
     }
+
+    public function privateConversations(): HasMany
+    {
+        return $this->hasMany(PrivateConversation::class);
+    }
 }
