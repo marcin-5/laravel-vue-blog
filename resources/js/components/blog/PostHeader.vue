@@ -43,10 +43,10 @@ const formattedUpdatedDate = computed(() => formatDate(modifiedTime.value, props
         <p
             v-if="post.author"
             :style="{ fontFamily: 'var(--blog-footer-font)', fontSize: 'calc(1rem * var(--blog-body-scale))' }"
-            class="text-primary"
+            class="text-foreground"
         >
             {{ authorLabel }}
-            <a :href="`mailto:${post.author_email}`">{{ post.author }}</a>
+            <a :href="`mailto:${post.author_email}`" class="hover:text-primary">{{ post.author }}</a>
         </p>
     </header>
 </template>
