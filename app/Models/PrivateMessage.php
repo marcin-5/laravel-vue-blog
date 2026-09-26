@@ -16,6 +16,8 @@ class PrivateMessage extends Model
         'private_conversation_id',
         'user_id',
         'content',
+        'notification_version',
+        'notification_sent_version',
     ];
 
     /**
@@ -26,6 +28,8 @@ class PrivateMessage extends Model
         return [
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
+            'notification_version' => 'integer',
+            'notification_sent_version' => 'integer',
         ];
     }
 

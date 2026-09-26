@@ -2,17 +2,39 @@
 
 namespace App\Services;
 
+use App\Jobs\SendPrivateMessageNotification;
 use App\Models\Post;
 use App\Models\PrivateConversation;
 use App\Models\PrivateMessage;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class PrivateConversationService
 {
     /**
+     * @throws Throwable
+     */
+    public function reply(PrivateConversation $conversation, User $user, string $content): PrivateMessage
+    {
+        return DB::transaction(function () use ($conversation, $user, $content): PrivateMessage {
+            $message = $conversation->messages()->create([
+                'user_id' => $user->id,
+                'content' => $content,
+                'notification_version' => 1,
+            ]);
+
+            $conversation->touch();
+            $this->scheduleNotification($message);
+
+            return $message->load('user');
+        });
+    }
+
+    /**
      * @param  array{subject: string, content: string, email_notifications?: bool}  $data
+     * @throws Throwable
      */
     public function create(Post $post, User $initiator, array $data): PrivateConversation
     {
@@ -34,9 +56,10 @@ class PrivateConversationService
                 'subject' => $data['subject'],
             ]);
 
-            $conversation->messages()->create([
+            $message = $conversation->messages()->create([
                 'user_id' => $initiator->id,
                 'content' => $data['content'],
+                'notification_version' => 1,
             ]);
 
             $conversation->participants()->createMany([
@@ -50,34 +73,40 @@ class PrivateConversationService
                 ],
             ]);
 
+            $this->scheduleNotification($message);
+
             return $conversation->load(['messages.user', 'participants']);
         });
     }
 
-    public function reply(PrivateConversation $conversation, User $user, string $content): PrivateMessage
+    private function scheduleNotification(PrivateMessage $message): void
     {
-        return DB::transaction(function () use ($conversation, $user, $content): PrivateMessage {
-            $message = $conversation->messages()->create([
-                'user_id' => $user->id,
-                'content' => $content,
-            ]);
-
-            $conversation->touch();
-
-            return $message->load('user');
-        });
+        SendPrivateMessageNotification::dispatch(
+            $message->id,
+            $message->notification_version,
+        )->delay(now()->addMinutes(15))->afterCommit();
     }
 
+    /**
+     * @throws Throwable
+     */
     public function updateMessage(PrivateMessage $message, string $content): PrivateMessage
     {
         return DB::transaction(function () use ($message, $content): PrivateMessage {
             $message->update(['content' => $content]);
+            $message->increment('notification_version');
             $message->conversation()->touch();
+
+            $message->refresh();
+            $this->scheduleNotification($message);
 
             return $message->load('user');
         });
     }
 
+    /**
+     * @throws Throwable
+     */
     public function deleteMessage(PrivateMessage $message): void
     {
         DB::transaction(function () use ($message): void {
