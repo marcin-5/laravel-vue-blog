@@ -15,6 +15,7 @@ const props = defineProps<{
     viewStats?: ViewStats | null;
     locale?: string;
     seo?: Pick<SEO, 'publishedTime' | 'modifiedTime'> | null;
+    privateMessageGroupId?: number;
 }>();
 
 const { t } = useI18n();
@@ -66,6 +67,12 @@ const canStartPrivateMessage = computed(() => Boolean(page.props.auth.user && pr
                 {{ t('private_messaging.actions.contact_owner', 'Private message') }}
             </Button>
         </p>
-        <PrivateMessageDialog v-if="canStartPrivateMessage" v-model:open="dialogOpen" :post-id="post.id" :store-url="post.private_message_url" />
+        <PrivateMessageDialog
+            v-if="canStartPrivateMessage"
+            v-model:open="dialogOpen"
+            :group-id="privateMessageGroupId"
+            :post-id="privateMessageGroupId ? undefined : post.id"
+            :store-url="post.private_message_url"
+        />
     </header>
 </template>

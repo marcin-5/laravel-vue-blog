@@ -9,6 +9,7 @@ use App\Http\Requests\UpdatePrivateConversationNotificationsRequest;
 use App\Http\Requests\UpdatePrivateMessageRequest;
 use App\Http\Resources\PrivateConversationResource;
 use App\Models\Post;
+use App\Models\Group;
 use App\Models\PrivateConversation;
 use App\Models\PrivateMessage;
 use App\Services\PrivateConversationService;
@@ -49,9 +50,11 @@ class PrivateConversationController extends Controller
 
     public function store(StorePrivateConversationRequest $request): RedirectResponse
     {
-        $post = Post::query()->findOrFail($request->validated('post_id'));
+        $target = $request->filled('post_id')
+            ? Post::query()->findOrFail($request->validated('post_id'))
+            : Group::query()->findOrFail($request->validated('group_id'));
         $conversation = $this->conversationService->create(
-            $post,
+            $target,
             $request->user(),
             $request->validated(),
         );

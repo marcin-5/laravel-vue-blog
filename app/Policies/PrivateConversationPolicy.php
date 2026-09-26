@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\PrivateConversation;
+use App\Models\Group;
 use App\Models\Post;
 use App\Models\User;
 
@@ -44,6 +45,11 @@ class PrivateConversationPolicy
         return $post->blog !== null
             && $post->blog->is_published
             && $post->blog->user_id !== $user->id;
+    }
+
+    public function createForGroup(User $user, Group $group): bool
+    {
+        return $group->user_id !== null && $group->user_id !== $user->id;
     }
 
     /**

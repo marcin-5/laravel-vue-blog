@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Jobs\SendPrivateMessageNotification;
 use App\Models\Post;
+use App\Models\Group;
 use App\Models\PrivateConversation;
 use App\Models\PrivateMessage;
 use App\Models\User;
@@ -36,21 +37,25 @@ class PrivateConversationService
      * @param  array{subject: string, content: string, email_notifications?: bool}  $data
      * @throws Throwable
      */
-    public function create(Post $post, User $initiator, array $data): PrivateConversation
+    public function create(Post|Group $target, User $initiator, array $data): PrivateConversation
     {
-        return DB::transaction(function () use ($post, $initiator, $data): PrivateConversation {
-            $post->loadMissing(['blog', 'group']);
+        return DB::transaction(function () use ($target, $initiator, $data): PrivateConversation {
+            if ($target instanceof Post) {
+                $target->loadMissing(['blog', 'group']);
+            }
 
-            $ownerId = $post->group?->user_id ?? $post->blog?->user_id;
+            $ownerId = $target instanceof Group
+                ? $target->user_id
+                : ($target->group?->user_id ?? $target->blog?->user_id);
 
             if ($ownerId === null || $ownerId === $initiator->id) {
                 throw new AuthorizationException;
             }
 
             $conversation = PrivateConversation::create([
-                'blog_id' => $post->blog_id,
-                'group_id' => $post->group_id,
-                'post_id' => $post->id,
+                'blog_id' => $target instanceof Post ? $target->blog_id : null,
+                'group_id' => $target instanceof Group ? $target->id : $target->group_id,
+                'post_id' => $target instanceof Post ? $target->id : null,
                 'initiator_id' => $initiator->id,
                 'owner_id' => $ownerId,
                 'subject' => $data['subject'],

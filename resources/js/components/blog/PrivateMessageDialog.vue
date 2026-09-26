@@ -11,7 +11,8 @@ import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
     open: boolean;
-    postId: number;
+    postId?: number;
+    groupId?: number;
     storeUrl?: string | null;
 }>();
 
@@ -21,7 +22,8 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const form = useForm({
-    post_id: props.postId,
+    post_id: props.postId ?? null,
+    group_id: props.groupId ?? null,
     subject: '',
     content: '',
     email_notifications: true,

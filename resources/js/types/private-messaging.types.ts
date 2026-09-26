@@ -26,7 +26,7 @@ export interface PrivateConversation {
     id: number;
     blog_id: number | null;
     group_id: number | null;
-    post_id: number;
+    post_id: number | null;
     subject: string;
     initiator: PrivateMessageAuthor;
     owner: PrivateMessageAuthor;

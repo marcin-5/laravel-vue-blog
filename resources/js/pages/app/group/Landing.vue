@@ -21,6 +21,7 @@ const props = defineProps<{
         footer: string | null;
         created_at: string | null;
         updated_at: string | null;
+        private_message_url?: string | null;
     };
     authorName: string | null;
     authorEmail: string | null;
@@ -42,6 +43,7 @@ const groupAsPost = computed<PostDetails>(() => ({
     author_email: props.authorEmail,
     contentHtml: props.group.content || '',
     published_at: props.group.created_at,
+    private_message_url: props.group.private_message_url,
 }));
 
 const { t } = useI18n();
@@ -65,6 +67,7 @@ const postsListTitle = computed(() => t('group.posts_list.title'));
             <PostHeader
                 :locale="translations.locale"
                 :post="groupAsPost"
+                :private-message-group-id="group.id"
                 :seo="{ publishedTime: group.created_at, modifiedTime: group.updated_at }"
             />
             <BorderDivider v-if="!sidebar" class="mb-8" />
