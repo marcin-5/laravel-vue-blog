@@ -1,5 +1,6 @@
 # Stage 1: Build frontend assets
-FROM node:26-trixie-slim AS node-builder
+ARG NODE_VERSION=26
+FROM node:${NODE_VERSION}-trixie-slim AS node-builder
 WORKDIR /app
 
 # It's better to install all dependencies for building
@@ -121,9 +122,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
     mc \
     gnupg \
-    nodejs \
-    npm \
     && rm -rf /var/lib/apt/lists/*
+
+# Use the same Node.js runtime as the asset builder and SSR image. Installing
+# Debian's nodejs/npm here would otherwise select the older distribution version.
+COPY --from=node-builder /usr/local/bin/node /usr/local/bin/node
+COPY --from=node-builder /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
 
 # FIX: Copy the application code and assets BEFORE running composer install.
 COPY . .
@@ -171,7 +177,7 @@ EXPOSE 9000
 CMD ["php-fpm"]
 
 # Stage 5: SSR runtime image for running Inertia SSR server
-FROM node:26-trixie-slim AS ssr-runtime
+FROM node:${NODE_VERSION}-trixie-slim AS ssr-runtime
 WORKDIR /var/www/html
 # Install only runtime Node dependencies required by the SSR server
 # We need netcat for the deploy.sh script's health check

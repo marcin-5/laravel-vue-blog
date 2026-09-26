@@ -24,7 +24,7 @@ Choose your setup:
 - Or local tools:
     - PHP 8.5+
     - Composer 2.6+
-    - Node.js 18+ and npm 9+
+    - Node.js 26+ and npm 11+
     - A database (MySQL/MariaDB/PostgreSQL) or SQLite
 
 ## Quick Start (with Docker)
