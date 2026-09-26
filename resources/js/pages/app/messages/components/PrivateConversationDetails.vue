@@ -1,8 +1,9 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import type { PrivateConversation, PrivateMessage } from '@/types/private-messaging.types';
+import { formatDateTime } from '@/utils/dateUtils';
 import { useForm } from '@inertiajs/vue3';
 import { shallowRef } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -62,7 +63,7 @@ function updateNotifications(value: boolean): void {
             <article v-for="message in props.conversation.messages ?? []" :key="message.id" class="rounded-md bg-muted/40 p-3">
                 <div class="mb-2 flex items-center justify-between gap-3 text-xs text-muted-foreground">
                     <span>{{ message.author?.name }}</span>
-                    <span>{{ message.created_at }}</span>
+                    <span>{{ formatDateTime(message.created_at) }}</span>
                 </div>
                 <template v-if="editingId === message.id">
                     <Textarea v-model="editForm.content" rows="4" />
@@ -88,8 +89,8 @@ function updateNotifications(value: boolean): void {
         <form class="space-y-2 border-t pt-4" @submit.prevent="reply">
             <Textarea
                 v-model="replyForm.content"
-                rows="4"
                 :placeholder="t('messages.private_messaging.panel.reply_placeholder', 'Write a reply...')"
+                rows="4"
             />
             <Button :disabled="replyForm.processing || !replyForm.content.trim()" type="submit">
                 {{
