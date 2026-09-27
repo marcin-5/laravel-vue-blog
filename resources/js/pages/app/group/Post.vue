@@ -30,7 +30,7 @@ defineProps<{
 <template>
     <Head :title="post.title + ' - ' + group.name" />
 
-    <BlogLayout :isPublic="false" :sidebar="sidebar" :theme="theme" maxWidthClass="max-w-5xl xl:max-w-7xl 2xl:max-w-screen-2xl">
+    <BlogLayout :isPublic="false" :sidebar="sidebar" :theme="theme">
         <template #top-divider>
             <BorderDivider class="mb-4" />
         </template>
