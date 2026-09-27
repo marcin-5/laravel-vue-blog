@@ -6,6 +6,7 @@ use App\Models\PrivateConversation;
 use App\Models\PrivateConversationParticipant;
 use App\Models\PrivateMessage;
 use App\Models\User;
+use App\Services\PrivateConversationService;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
 
@@ -39,15 +40,18 @@ it('queues delayed notifications for new, replied to, and edited messages', func
         'user_id' => $initiator->id,
     ]);
 
-    app(\App\Services\PrivateConversationService::class)->reply($conversation, $owner, 'Reply');
-    app(\App\Services\PrivateConversationService::class)->updateMessage($message, 'Updated');
+    app(PrivateConversationService::class)->reply($conversation, $owner, 'Reply');
+    app(PrivateConversationService::class)->updateMessage($message, 'Updated');
 
     Queue::assertPushed(SendPrivateMessageNotification::class, 2);
-    Queue::assertPushed(SendPrivateMessageNotification::class, function (SendPrivateMessageNotification $job) use ($message): bool {
-        return $job->messageId === $message->id
-            && $job->notificationVersion === 2
-            && $job->delay?->equalTo(now()->addMinutes(15));
-    });
+    Queue::assertPushed(
+        SendPrivateMessageNotification::class,
+        function (SendPrivateMessageNotification $job) use ($message): bool {
+            return $job->messageId === $message->id
+                && $job->notificationVersion === 2
+                && $job->delay?->equalTo(now()->addMinutes(15));
+        },
+    );
 });
 
 it('sends the latest message only when the version and preference are current', function () {
@@ -63,7 +67,10 @@ it('sends the latest message only when the version and preference are current', 
 
     (new SendPrivateMessageNotification($message->id, 1))->handle();
 
-    Mail::assertSent(PrivateMessageNotification::class, fn(PrivateMessageNotification $mail): bool => $mail->hasTo($owner->email));
+    Mail::assertSent(
+        PrivateMessageNotification::class,
+        fn(PrivateMessageNotification $mail): bool => $mail->hasTo($owner->email),
+    );
     expect($message->refresh()->notification_sent_version)->toBe(1);
 });
 
@@ -85,6 +92,23 @@ it('does not send stale or disabled notifications and is idempotent', function (
 
     Mail::assertNothingSent();
     expect($message->refresh()->notification_sent_version)->toBe(2);
+});
+
+it('does not send a notification after its message or conversation was deleted', function () {
+    Mail::fake();
+    $initiator = User::factory()->create();
+    $owner = User::factory()->create();
+    $conversation = notificationConversation($initiator, $owner);
+    $message = PrivateMessage::factory()->create([
+        'private_conversation_id' => $conversation->id,
+        'user_id' => $initiator->id,
+    ]);
+
+    app(PrivateConversationService::class)->deleteMessage($message);
+
+    new SendPrivateMessageNotification($message->id, 1)->handle();
+
+    Mail::assertNothingSent();
 });
 
 it('renders translated subject and message content', function () {

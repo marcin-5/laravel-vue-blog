@@ -66,6 +66,9 @@
                 "all_blogs": "All blogs",
                 "all_groups": "All groups",
                 "context_invalid": "The selected context is not available.",
+                "source_post": "Started from post: {label}",
+                "source_blog": "Started from blog: {label}",
+                "source_group": "Started from group: {label}",
                 "sort_by": "Sort by",
                 "sort_subject": "Subject",
                 "sort_created": "Created date",
@@ -75,7 +78,9 @@
                 "descending": "Descending",
                 "notifications": "Email notifications for replies",
                 "reply_placeholder": "Write a reply...",
-                "confirm_delete": "Delete this message?"
+                "confirm_delete": "Delete this message?",
+                "confirm_delete_thread": "Delete this conversation and all its messages?",
+                "delete_thread": "Delete conversation"
             }
         },
         "extension_created": "Extension created successfully.",

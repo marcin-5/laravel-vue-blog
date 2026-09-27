@@ -53,6 +53,7 @@
                 "save": "Zapisz",
                 "edit": "Edytuj",
                 "delete": "Usuń",
+                "delete_thread": "Usuń rozmowę",
                 "close": "Zamknij"
             },
             "panel": {
@@ -66,6 +67,9 @@
                 "all_blogs": "Wszystkie blogi",
                 "all_groups": "Wszystkie grupy",
                 "context_invalid": "Wybrany kontekst nie jest dostępny.",
+                "source_post": "Rozpoczęto z wpisu: {label}",
+                "source_blog": "Rozpoczęto ze strony bloga: {label}",
+                "source_group": "Rozpoczęto ze strony grupy: {label}",
                 "sort_by": "Sortuj według",
                 "sort_subject": "Tematu",
                 "sort_created": "Daty utworzenia",
@@ -75,7 +79,9 @@
                 "descending": "Malejąco",
                 "notifications": "Powiadomienia e-mail o odpowiedziach",
                 "reply_placeholder": "Napisz odpowiedź...",
-                "confirm_delete": "Usunąć tę wiadomość?"
+                "confirm_delete": "Usunąć tę wiadomość?",
+                "confirm_delete_thread": "Usunąć tę rozmowę wraz ze wszystkimi wiadomościami?",
+                "delete_thread": "Usuń rozmowę"
             }
         },
         "extension_created": "Rozszerzenie zostało utworzone pomyślnie.",

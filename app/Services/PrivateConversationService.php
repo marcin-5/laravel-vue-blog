@@ -112,12 +112,47 @@ class PrivateConversationService
     /**
      * @throws Throwable
      */
-    public function deleteMessage(PrivateMessage $message): void
+    public function deleteMessage(PrivateMessage $message): bool
     {
-        DB::transaction(function () use ($message): void {
-            $conversation = $message->conversation;
+        return DB::transaction(function () use ($message): bool {
+            $conversation = $message->conversation()->lockForUpdate()->first();
+
+            if ($conversation === null) {
+                return false;
+            }
+
+            $messageIds = $conversation->messages()
+                ->orderBy('created_at')
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->pluck('id');
+
+            if ($messageIds->last() !== $message->id) {
+                return false;
+            }
+
+            if ($messageIds->count() === 1) {
+                $this->deleteConversation($conversation);
+
+                return true;
+            }
+
             $message->delete();
-            $conversation?->touch();
+            $conversation->touch();
+
+            return false;
+        });
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function deleteConversation(PrivateConversation $conversation): void
+    {
+        DB::transaction(function () use ($conversation): void {
+            $conversation->messages()->delete();
+            $conversation->participants()->delete();
+            $conversation->delete();
         });
     }
 }

@@ -16,7 +16,6 @@ use App\Models\PrivateMessage;
 use App\Services\PrivateConversationService;
 use App\Services\TranslationService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -64,6 +63,11 @@ class PrivateConversationController extends Controller
             'initiator:id,name',
             'owner:id,name',
             'participants',
+            'blog:id,name,slug,locale',
+            'group:id,name,slug',
+            'post:id,title,slug,blog_id,group_id',
+            'post.blog:id,name,slug,locale',
+            'post.group:id,name,slug',
             'messages' => fn($query) => $query->with('user:id,name')->oldest()->oldest('id'),
         ]);
 
@@ -113,12 +117,31 @@ class PrivateConversationController extends Controller
         return back();
     }
 
-    public function destroy(Request $request, PrivateMessage $privateMessage): RedirectResponse
+    public function destroy(PrivateMessage $privateMessage): RedirectResponse
     {
         Gate::authorize('delete', $privateMessage);
-        $this->conversationService->deleteMessage($privateMessage);
+        $conversation = $privateMessage->conversation;
+        $conversationDeleted = $this->conversationService->deleteMessage($privateMessage);
+
+        if ($conversationDeleted) {
+            return redirect()->route($conversation->blog_id !== null
+                ? 'blog-private-conversations.index'
+                : 'group-private-conversations.index');
+        }
 
         return back();
+    }
+
+    public function destroyConversation(PrivateConversation $privateConversation): RedirectResponse
+    {
+        Gate::authorize('delete', $privateConversation);
+        $indexRoute = $privateConversation->blog_id !== null
+            ? 'blog-private-conversations.index'
+            : 'group-private-conversations.index';
+
+        $this->conversationService->deleteConversation($privateConversation);
+
+        return redirect()->route($indexRoute);
     }
 
     public function updateNotifications(
@@ -153,7 +176,16 @@ class PrivateConversationController extends Controller
         }
 
         $conversations = $conversationQuery
-            ->with(['initiator:id,name', 'owner:id,name', 'participants'])
+            ->with([
+                'initiator:id,name',
+                'owner:id,name',
+                'participants',
+                'blog:id,name,slug,locale',
+                'group:id,name,slug',
+                'post:id,title,slug,blog_id,group_id',
+                'post.blog:id,name,slug,locale',
+                'post.group:id,name,slug',
+            ])
             ->withCount('messages')
             ->orderBy('private_conversations.' . $sortBy, $sortDirection)
             ->orderBy('private_conversations.id', $sortDirection)

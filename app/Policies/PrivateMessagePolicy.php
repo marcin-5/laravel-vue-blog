@@ -42,8 +42,11 @@ class PrivateMessagePolicy
      */
     public function update(User $user, PrivateMessage $privateMessage): bool
     {
-        return $privateMessage->user_id === $user->id
-            && $this->view($user, $privateMessage);
+        if ($privateMessage->user_id !== $user->id || !$this->view($user, $privateMessage)) {
+            return false;
+        }
+
+        return $this->lastMessageId($privateMessage) === $privateMessage->id;
     }
 
     /**
@@ -51,8 +54,22 @@ class PrivateMessagePolicy
      */
     public function delete(User $user, PrivateMessage $privateMessage): bool
     {
-        return $privateMessage->user_id === $user->id
-            && $this->view($user, $privateMessage);
+        $conversation = $privateMessage->conversation;
+
+        if ($conversation === null
+            || ($conversation->initiator_id !== $user->id && $conversation->owner_id !== $user->id)) {
+            return false;
+        }
+
+        return $this->lastMessageId($privateMessage) === $privateMessage->id;
+    }
+
+    private function lastMessageId(PrivateMessage $privateMessage): ?int
+    {
+        return $privateMessage->conversation?->messages()
+            ->latest('created_at')
+            ->latest('id')
+            ->value('id');
     }
 
     /**

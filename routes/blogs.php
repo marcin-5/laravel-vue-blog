@@ -96,6 +96,8 @@ Route::middleware(['auth', 'verified', 'noindex'])->group(function () {
         ->name('private-messages.update');
     Route::delete('private-messages/{privateMessage}', [PrivateConversationController::class, 'destroy'])
         ->name('private-messages.destroy');
+    Route::delete('private-conversations/{privateConversation}', [PrivateConversationController::class, 'destroyConversation'])
+        ->name('private-conversations.destroy');
     Route::patch('private-conversations/{privateConversation}/notifications', [PrivateConversationController::class, 'updateNotifications'])
         ->name('private-conversations.notifications.update');
 });

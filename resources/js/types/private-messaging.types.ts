@@ -7,6 +7,12 @@ export interface PrivateConversationContextOption {
     name: string;
 }
 
+export interface PrivateConversationSource {
+    type: 'post' | 'blog' | 'group';
+    label: string;
+    url: string;
+}
+
 export interface PrivateConversationParticipant {
     user_id: number;
     email_notifications: boolean;
@@ -34,6 +40,7 @@ export interface PrivateConversation {
     group_id: number | null;
     post_id: number | null;
     subject: string;
+    source: PrivateConversationSource | null;
     initiator: PrivateMessageAuthor;
     owner: PrivateMessageAuthor;
     messages_count?: number;

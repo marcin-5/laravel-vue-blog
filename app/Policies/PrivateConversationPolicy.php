@@ -65,7 +65,8 @@ class PrivateConversationPolicy
      */
     public function delete(User $user, PrivateConversation $privateConversation): bool
     {
-        return $this->view($user, $privateConversation);
+        return $privateConversation->initiator_id === $user->id
+            || $privateConversation->owner_id === $user->id;
     }
 
     /**

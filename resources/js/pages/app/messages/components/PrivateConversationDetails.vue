@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import type { PrivateConversation, PrivateMessage } from '@/types/private-messaging.types';
 import { formatDateTime } from '@/utils/dateUtils';
 import { useForm } from '@inertiajs/vue3';
-import { shallowRef } from 'vue';
+import { computed, shallowRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{ conversation: PrivateConversation; userId: number }>();
@@ -14,6 +14,11 @@ const replyForm = useForm({ content: '' });
 const notificationForm = useForm({ email_notifications: props.conversation.email_notifications ?? true });
 const editingId = shallowRef<number | null>(null);
 const editForm = useForm({ content: '' });
+const orderedMessages = computed(() => props.conversation.messages ?? []);
+const lastMessageId = computed(() => orderedMessages.value.at(-1)?.id ?? null);
+const canDeleteConversation = computed(
+    () => props.conversation.initiator.id === props.userId || props.conversation.owner.id === props.userId,
+);
 
 function startEdit(message: PrivateMessage): void {
     editingId.value = message.id;
@@ -28,6 +33,11 @@ function saveEdit(message: PrivateMessage): void {
 function deleteMessage(message: PrivateMessage): void {
     if (!window.confirm(t('messages.private_messaging.panel.confirm_delete', 'Delete this message?'))) return;
     useForm({}).delete(route('private-messages.destroy', message.id), { preserveScroll: true });
+}
+
+function deleteConversation(): void {
+    if (!window.confirm(t('messages.private_messaging.panel.confirm_delete_thread', 'Delete this conversation and all its messages?'))) return;
+    useForm({}).delete(route('private-conversations.destroy', props.conversation.id));
 }
 
 function reply(): void {
@@ -53,10 +63,15 @@ function updateNotifications(value: boolean): void {
                 <h2 class="text-xl font-semibold">{{ props.conversation.subject }}</h2>
                 <p class="text-sm text-muted-foreground">{{ props.conversation.initiator.name }} · {{ props.conversation.owner.name }}</p>
             </div>
-            <label class="flex items-center gap-2 text-sm text-muted-foreground">
-                <Switch :model-value="notificationForm.email_notifications" @update:model-value="updateNotifications(Boolean($event))" />
-                {{ t('messages.private_messaging.panel.notifications', 'Email notifications for replies') }}
-            </label>
+            <div class="flex flex-wrap items-center gap-3">
+                <Button v-if="canDeleteConversation" size="sm" variant="destructive" @click="deleteConversation">
+                    {{ t('messages.private_messaging.actions.delete_thread', 'Delete conversation') }}
+                </Button>
+                <label class="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Switch :model-value="notificationForm.email_notifications" @update:model-value="updateNotifications(Boolean($event))" />
+                    {{ t('messages.private_messaging.panel.notifications', 'Email notifications for replies') }}
+                </label>
+            </div>
         </header>
 
         <div class="space-y-3">
@@ -77,11 +92,23 @@ function updateNotifications(value: boolean): void {
                     </div>
                 </template>
                 <p v-else class="text-sm whitespace-pre-wrap">{{ message.content }}</p>
-                <div v-if="message.can_edit && message.user_id === props.userId && editingId !== message.id" class="mt-2 flex gap-2">
-                    <Button size="sm" variant="ghost" @click="startEdit(message)">{{ t('messages.private_messaging.actions.edit', 'Edit') }}</Button>
-                    <Button size="sm" variant="ghost" @click="deleteMessage(message)">{{
-                        t('messages.private_messaging.actions.delete', 'Delete')
-                    }}</Button>
+                <div v-if="editingId !== message.id" class="mt-2 flex gap-2">
+                    <Button
+                        v-if="message.can_edit && message.user_id === props.userId && message.id === lastMessageId"
+                        size="sm"
+                        variant="ghost"
+                        @click="startEdit(message)"
+                    >
+                        {{ t('messages.private_messaging.actions.edit', 'Edit') }}
+                    </Button>
+                    <Button
+                        v-if="canDeleteConversation && message.id === lastMessageId"
+                        size="sm"
+                        variant="ghost"
+                        @click="deleteMessage(message)"
+                    >
+                        {{ t('messages.private_messaging.actions.delete', 'Delete') }}
+                    </Button>
                 </div>
             </article>
         </div>
