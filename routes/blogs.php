@@ -78,10 +78,18 @@ Route::middleware(['auth', 'verified', 'noindex'])->group(function () {
     Route::get('data/blogs', [PublicDataController::class, 'blogs'])->name('blogger.data.blogs');
     Route::get('data/blogs/{blog}/posts', [PublicDataController::class, 'posts'])->name('blogger.data.posts');
 
-    Route::get('private-conversations', [PrivateConversationController::class, 'index'])
-        ->name('private-conversations.index');
-    Route::get('private-conversations/{privateConversation}', [PrivateConversationController::class, 'show'])
-        ->name('private-conversations.show');
+    Route::get('blog-private-conversations', [PrivateConversationController::class, 'blogIndex'])
+        ->defaults('context', 'blog')
+        ->name('blog-private-conversations.index');
+    Route::get('blog-private-conversations/{privateConversation}', [PrivateConversationController::class, 'blogShow'])
+        ->defaults('context', 'blog')
+        ->name('blog-private-conversations.show');
+    Route::get('group-private-conversations', [PrivateConversationController::class, 'groupIndex'])
+        ->defaults('context', 'group')
+        ->name('group-private-conversations.index');
+    Route::get('group-private-conversations/{privateConversation}', [PrivateConversationController::class, 'groupShow'])
+        ->defaults('context', 'group')
+        ->name('group-private-conversations.show');
     Route::post('private-conversations/{privateConversation}/messages', [PrivateConversationController::class, 'reply'])
         ->name('private-conversations.messages.store');
     Route::patch('private-messages/{privateMessage}', [PrivateConversationController::class, 'update'])

@@ -39,7 +39,12 @@ class PrivateMessageNotification extends Mailable
         return new Content(
             markdown: 'emails.private-message',
             with: [
-                'conversationUrl' => route('private-conversations.show', $this->message->conversation),
+                'conversationUrl' => route(
+                    $this->message->conversation->blog_id !== null
+                        ? 'blog-private-conversations.show'
+                        : 'group-private-conversations.show',
+                    $this->message->conversation,
+                ),
             ],
         );
     }

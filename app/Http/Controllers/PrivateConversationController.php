@@ -8,6 +8,7 @@ use App\Http\Requests\StorePrivateMessageRequest;
 use App\Http\Requests\UpdatePrivateConversationNotificationsRequest;
 use App\Http\Requests\UpdatePrivateMessageRequest;
 use App\Http\Resources\PrivateConversationResource;
+use App\Models\Blog;
 use App\Models\Post;
 use App\Models\Group;
 use App\Models\PrivateConversation;
@@ -27,16 +28,37 @@ class PrivateConversationController extends Controller
         private readonly TranslationService $translations,
     ) {}
 
-    public function index(PrivateConversationIndexRequest $request): Response
+    public function blogIndex(PrivateConversationIndexRequest $request): Response
     {
-        return $this->renderIndex($request);
+        return $this->renderIndex($request, 'blog');
     }
 
-    public function show(
+    public function groupIndex(PrivateConversationIndexRequest $request): Response
+    {
+        return $this->renderIndex($request, 'group');
+    }
+
+    public function blogShow(
         PrivateConversationIndexRequest $request,
         PrivateConversation $privateConversation,
     ): Response {
+        return $this->renderShow($request, $privateConversation, 'blog');
+    }
+
+    public function groupShow(
+        PrivateConversationIndexRequest $request,
+        PrivateConversation $privateConversation,
+    ): Response {
+        return $this->renderShow($request, $privateConversation, 'group');
+    }
+
+    private function renderShow(
+        PrivateConversationIndexRequest $request,
+        PrivateConversation $privateConversation,
+        string $context,
+    ): Response {
         $this->authorize('view', $privateConversation);
+        abort_unless($this->conversationMatchesContext($privateConversation, $context), 404);
 
         $privateConversation->load([
             'initiator:id,name',
@@ -45,7 +67,7 @@ class PrivateConversationController extends Controller
             'messages' => fn($query) => $query->with('user:id,name')->oldest()->oldest('id'),
         ]);
 
-        return $this->renderIndex($request, $privateConversation);
+        return $this->renderIndex($request, $context, $privateConversation);
     }
 
     public function store(StorePrivateConversationRequest $request): RedirectResponse
@@ -59,7 +81,11 @@ class PrivateConversationController extends Controller
             $request->validated(),
         );
 
-        return redirect()->route('private-conversations.show', $conversation);
+        $route = $conversation->blog_id !== null
+            ? 'blog-private-conversations.show'
+            : 'group-private-conversations.show';
+
+        return redirect()->route($route, $conversation);
     }
 
     public function reply(
@@ -108,15 +134,25 @@ class PrivateConversationController extends Controller
 
     private function renderIndex(
         PrivateConversationIndexRequest $request,
+        string $context,
         ?PrivateConversation $selectedConversation = null,
     ): Response {
         $validated = $request->validated();
         $sortBy = $validated['sort_by'] ?? 'updated_at';
         $sortDirection = $validated['sort_dir'] ?? 'desc';
         $perPage = $validated['per_page'] ?? 20;
+        $contextColumn = $context === 'blog' ? 'blog_id' : 'group_id';
+        $contextId = isset($validated[$contextColumn]) ? (int) $validated[$contextColumn] : null;
 
-        $conversations = PrivateConversation::query()
+        $conversationQuery = PrivateConversation::query()
             ->whereHas('participants', fn($query) => $query->where('user_id', $request->user()->id))
+            ->whereNotNull($contextColumn);
+
+        if ($contextId !== null) {
+            $conversationQuery->where($contextColumn, $contextId);
+        }
+
+        $conversations = $conversationQuery
             ->with(['initiator:id,name', 'owner:id,name', 'participants'])
             ->withCount('messages')
             ->orderBy('private_conversations.' . $sortBy, $sortDirection)
@@ -137,14 +173,48 @@ class PrivateConversationController extends Controller
                 ? new PrivateConversationResource($selectedConversation)
                 : null,
             'filters' => [
+                'context' => $context,
+                'context_id' => $contextId,
                 'sort_by' => $sortBy,
                 'sort_dir' => $sortDirection,
                 'per_page' => $perPage,
             ],
+            'contextOptions' => $this->contextOptions($request, $context),
             'translations' => [
                 'locale' => app()->getLocale(),
                 'messages' => $this->translations->getPageTranslations('dashboard'),
             ],
         ]);
+    }
+
+    /**
+     * @return array<int, array{id: int, name: string}>
+     */
+    private function contextOptions(PrivateConversationIndexRequest $request, string $context): array
+    {
+        $column = $context === 'blog' ? 'blog_id' : 'group_id';
+        $model = $context === 'blog' ? Blog::class : Group::class;
+        $contextIds = PrivateConversation::query()
+            ->whereHas('participants', fn($query) => $query->where('user_id', $request->user()->id))
+            ->whereNotNull($column)
+            ->distinct()
+            ->pluck($column);
+
+        return $model::query()
+            ->whereIn('id', $contextIds)
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn(Blog|Group $contextModel): array => [
+                'id' => $contextModel->id,
+                'name' => $contextModel->name,
+            ])
+            ->all();
+    }
+
+    private function conversationMatchesContext(PrivateConversation $conversation, string $context): bool
+    {
+        return $context === 'blog'
+            ? $conversation->blog_id !== null
+            : $conversation->group_id !== null;
     }
 }

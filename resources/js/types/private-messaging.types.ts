@@ -1,5 +1,11 @@
 export type PrivateConversationSortField = 'subject' | 'created_at' | 'updated_at';
 export type PrivateConversationSortDirection = 'asc' | 'desc';
+export type PrivateConversationContext = 'blog' | 'group';
+
+export interface PrivateConversationContextOption {
+    id: number;
+    name: string;
+}
 
 export interface PrivateConversationParticipant {
     user_id: number;
@@ -38,6 +44,8 @@ export interface PrivateConversation {
 }
 
 export interface PrivateConversationFilters {
+    context: PrivateConversationContext;
+    context_id: number | null;
     sort_by: PrivateConversationSortField;
     sort_dir: PrivateConversationSortDirection;
     per_page: number;

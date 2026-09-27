@@ -23,10 +23,18 @@ class PrivateConversationIndexRequest extends FormRequest
      */
     public function rules(): array
     {
+        $context = $this->route('context');
+
         return [
             'sort_by' => ['sometimes', 'string', Rule::in(['subject', 'created_at', 'updated_at'])],
             'sort_dir' => ['sometimes', 'string', Rule::in(['asc', 'desc'])],
             'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            'blog_id' => $context === 'blog'
+                ? ['sometimes', 'integer', 'exists:blogs,id']
+                : ['prohibited'],
+            'group_id' => $context === 'group'
+                ? ['sometimes', 'integer', 'exists:groups,id']
+                : ['prohibited'],
         ];
     }
 }

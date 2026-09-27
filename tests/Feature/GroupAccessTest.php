@@ -2,6 +2,7 @@
 
 use App\Models\Group;
 use App\Models\Post;
+use App\Models\PrivateConversation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -46,7 +47,10 @@ it('exposes group private messaging to a member and creates a conversation for t
             'subject' => 'Group question',
             'content' => 'A question for the group owner.',
         ])
-        ->assertRedirect();
+        ->assertRedirect(route(
+            'group-private-conversations.show',
+            PrivateConversation::query()->latest('id')->firstOrFail(),
+        ));
 
     expect($group->privateConversations()->latest('id')->firstOrFail()->owner_id)->toBe($owner->id);
 });

@@ -1,4 +1,9 @@
-import type { PrivateConversationFilters, PrivateConversationSortDirection, PrivateConversationSortField } from '@/types/private-messaging.types';
+import type {
+    PrivateConversationContext,
+    PrivateConversationFilters,
+    PrivateConversationSortDirection,
+    PrivateConversationSortField,
+} from '@/types/private-messaging.types';
 import { router } from '@inertiajs/vue3';
 import type { AcceptableValue } from 'reka-ui';
 import { readonly, shallowRef } from 'vue';
@@ -9,11 +14,15 @@ export function usePrivateMessages(initialFilters: PrivateConversationFilters) {
     const sortBy = shallowRef<PrivateConversationSortField>(initialFilters.sort_by);
     const sortDir = shallowRef<PrivateConversationSortDirection>(initialFilters.sort_dir);
     const perPage = shallowRef(String(initialFilters.per_page));
+    const contextId = shallowRef<number | null>(initialFilters.context_id);
+    const context: PrivateConversationContext = initialFilters.context;
+    const indexRoute = context === 'blog' ? 'blog-private-conversations.index' : 'group-private-conversations.index';
 
     function reload(): void {
         router.get(
-            route('private-conversations.index'),
+            route(indexRoute),
             {
+                [`${context}_id`]: contextId.value ?? undefined,
                 sort_by: sortBy.value,
                 sort_dir: sortDir.value,
                 per_page: perPage.value,
@@ -32,6 +41,12 @@ export function usePrivateMessages(initialFilters: PrivateConversationFilters) {
             sortBy.value = normalized as PrivateConversationSortField;
             reload();
         }
+    }
+
+    function changeContext(value: AcceptableValue | undefined): void {
+        const normalized = asString(value);
+        contextId.value = normalized ? Number(normalized) : null;
+        reload();
     }
 
     function changeSortDir(value: AcceptableValue | undefined): void {
@@ -58,6 +73,8 @@ export function usePrivateMessages(initialFilters: PrivateConversationFilters) {
         sortBy: readonly(sortBy),
         sortDir: readonly(sortDir),
         perPage: readonly(perPage),
+        contextId: readonly(contextId),
+        changeContext,
         changeSortBy,
         changeSortDir,
         changePerPage,

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Blog;
+use App\Models\Group;
 use App\Models\Post;
 use App\Models\PrivateConversation;
 use App\Models\PrivateConversationParticipant;
@@ -10,7 +11,9 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 function createPrivateConversationFor(User $initiator, User $owner, string $subject = 'A subject'): PrivateConversation
 {
+    $blog = Blog::factory()->create(['user_id' => $owner->id]);
     $conversation = PrivateConversation::factory()->create([
+        'blog_id' => $blog->id,
         'initiator_id' => $initiator->id,
         'owner_id' => $owner->id,
         'subject' => $subject,
@@ -52,7 +55,7 @@ it('creates a private conversation from a blog post for an authenticated user', 
 
     $conversation = PrivateConversation::query()->latest('id')->firstOrFail();
 
-    $response->assertRedirect(route('private-conversations.show', $conversation));
+    $response->assertRedirect(route('blog-private-conversations.show', $conversation));
     $this->assertDatabaseHas('private_conversations', [
         'id' => $conversation->id,
         'blog_id' => $blog->id,
@@ -98,7 +101,7 @@ it('forbids a non-participant from viewing a private conversation', function () 
     $outsider = User::factory()->create();
     $conversation = createPrivateConversationFor($initiator, $owner);
 
-    $response = $this->actingAs($outsider)->get(route('private-conversations.show', $conversation));
+    $response = $this->actingAs($outsider)->get(route('blog-private-conversations.show', $conversation));
 
     $response->assertForbidden();
 });
@@ -143,7 +146,7 @@ it('sorts conversations by an allow-listed subject column with a stable order', 
     $beta = createPrivateConversationFor($initiator, $owner, 'Beta');
 
     $this->actingAs($initiator)
-        ->get(route('private-conversations.index', ['sort_by' => 'subject', 'sort_dir' => 'asc']))
+        ->get(route('blog-private-conversations.index', ['sort_by' => 'subject', 'sort_dir' => 'asc']))
         ->assertSuccessful()
         ->assertInertia(fn(Assert $page) => $page
             ->component('app/messages/Index', false)
@@ -154,8 +157,72 @@ it('sorts conversations by an allow-listed subject column with a stable order', 
         );
 
     $this->actingAs($initiator)
-        ->get(route('private-conversations.index', ['sort_by' => 'subjects']))
+        ->get(route('blog-private-conversations.index', ['sort_by' => 'subjects']))
         ->assertInvalid(['sort_by']);
+});
+
+it('separates blog and group conversations and filters only available contexts', function () {
+    $owner = User::factory()->create();
+    $initiator = User::factory()->create();
+    $blog = Blog::factory()->create(['user_id' => $owner->id]);
+    $group = Group::factory()->create(['user_id' => $owner->id]);
+    $blogConversation = PrivateConversation::factory()->create([
+        'blog_id' => $blog->id,
+        'initiator_id' => $initiator->id,
+        'owner_id' => $owner->id,
+        'subject' => 'Blog conversation',
+    ]);
+    $groupConversation = PrivateConversation::factory()->create([
+        'blog_id' => null,
+        'group_id' => $group->id,
+        'initiator_id' => $initiator->id,
+        'owner_id' => $owner->id,
+        'subject' => 'Group conversation',
+    ]);
+    PrivateConversationParticipant::factory()->create([
+        'private_conversation_id' => $blogConversation->id,
+        'user_id' => $initiator->id,
+    ]);
+    PrivateConversationParticipant::factory()->create([
+        'private_conversation_id' => $groupConversation->id,
+        'user_id' => $initiator->id,
+    ]);
+
+    $this->actingAs($initiator)
+        ->get(route('blog-private-conversations.index'))
+        ->assertInertia(fn(Assert $page) => $page
+            ->where('conversations.0.id', $blogConversation->id)
+            ->where('pagination.total', 1)
+            ->where('filters.context', 'blog')
+            ->where('contextOptions.0.id', $blog->id)
+        );
+
+    $this->actingAs($initiator)
+        ->get(route('group-private-conversations.index', ['group_id' => $group->id]))
+        ->assertInertia(fn(Assert $page) => $page
+            ->where('conversations.0.id', $groupConversation->id)
+            ->where('pagination.total', 1)
+            ->where('filters.context', 'group')
+            ->where('filters.context_id', $group->id)
+        );
+
+    $this->actingAs($initiator)
+        ->get(route('blog-private-conversations.index', ['blog_id' => $blog->id + 100000]))
+        ->assertInvalid(['blog_id']);
+
+    $this->actingAs($initiator)
+        ->get(route('group-private-conversations.index', ['blog_id' => $blog->id]))
+        ->assertInvalid(['blog_id']);
+});
+
+it('does not open a conversation through the wrong context route', function () {
+    $owner = User::factory()->create();
+    $initiator = User::factory()->create();
+    $conversation = createPrivateConversationFor($initiator, $owner);
+
+    $this->actingAs($initiator)
+        ->get(route('group-private-conversations.show', $conversation))
+        ->assertNotFound();
 });
 
 it('updates notification preference only for the authenticated participant', function () {

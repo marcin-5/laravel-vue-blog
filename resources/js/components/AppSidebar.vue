@@ -50,7 +50,7 @@ const mainNavItems = computed<NavItem[]>(() => [
     },
     {
         title: t('common.nav.messages'),
-        href: '/private-conversations',
+        href: route('blog-private-conversations.index'),
         icon: Mail,
         roles: ['view_blogs'],
     },
@@ -71,7 +71,7 @@ const footerNavItems = computed<NavItem[]>(() => [
     },
     {
         title: t('common.nav.messages'),
-        href: '/private-conversations',
+        href: route('group-private-conversations.index'),
         icon: Mail,
         roles: ['contribute_groups'],
     },
