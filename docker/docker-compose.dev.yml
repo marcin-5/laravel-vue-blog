@@ -88,6 +88,8 @@ services:
       - laravel-network
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
 
   redis:
     image: redis:7-alpine
@@ -95,8 +97,10 @@ services:
     networks:
       - laravel-network
     volumes:
-      - redis_data:/data
+      - redis_data_dev:/data
 
 volumes:
   fish_history:
   fish_config:
+  postgres_data_dev:
+  redis_data_dev:
