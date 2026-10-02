@@ -7,6 +7,10 @@ vi.mock('@/components/blog/ViewStats.vue', () => ({
     default: { name: 'ViewStats', props: ['anonymous', 'bots', 'consented', 'markdown'], template: '<div class="view-stats" />' },
 }));
 
+vi.mock('@inertiajs/vue3', () => ({
+    usePage: () => ({ props: { auth: { user: null } } }),
+}));
+
 vi.mock('vue-i18n', () => ({
     useI18n: () => ({ t: (key: string) => key }),
 }));
