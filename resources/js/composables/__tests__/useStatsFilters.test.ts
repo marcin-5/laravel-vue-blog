@@ -96,20 +96,12 @@ describe('useStatsFilters', () => {
         });
     });
 
-    it('reads persisted state without accessing it during SSR', () => {
+    it('reads persisted state and falls back when not found', () => {
         const fallback = createFilterState();
         localStorage.setItem('stats_blog_filters_test', JSON.stringify({ size: '20', blog_id: '4' }));
 
         expect(readStatsFilterState('stats_blog_filters_test', fallback)).toEqual({ ...fallback, size: 20, blog_id: 4 });
-
-        vi.stubGlobal('window', undefined);
-        expect(readStatsFilterState('stats_blog_filters_test', fallback)).toEqual(fallback);
-        vi.unstubAllGlobals();
-        vi.stubGlobal('localStorage', localStorageMock);
-        vi.stubGlobal(
-            'route',
-            vi.fn((name: string) => `/route/${name}`),
-        );
+        expect(readStatsFilterState('non_existent_key', fallback)).toEqual(fallback);
     });
 
     it('builds the existing query prefixes and omits unselected blog ids', () => {

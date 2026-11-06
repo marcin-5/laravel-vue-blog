@@ -13,40 +13,30 @@ describe('useVisitorId', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.stubGlobal('localStorage', {
-            getItem: vi.fn(),
-            setItem: vi.fn(),
-        });
-        vi.stubGlobal('document', {
-            cookie: '',
-        });
+        localStorage.clear();
+        document.cookie = '';
     });
 
     it('syncs visitor_id from cookie to localStorage if LS is empty', () => {
-        vi.mocked(localStorage.getItem).mockReturnValue(null);
-        vi.stubGlobal('document', {
-            cookie: 'visitor_id=test-id-from-cookie',
-        });
+        document.cookie = 'visitor_id=test-id-from-cookie';
 
         initializeVisitorId();
 
-        expect(localStorage.setItem).toHaveBeenCalledWith(LOCAL_STORAGE_KEY, 'test-id-from-cookie');
+        expect(localStorage.getItem(LOCAL_STORAGE_KEY)).toBe('test-id-from-cookie');
     });
 
     it('does not overwrite localStorage if already set', () => {
-        vi.mocked(localStorage.getItem).mockReturnValue('existing-id');
-        vi.stubGlobal('document', {
-            cookie: 'visitor_id=new-id',
-        });
+        localStorage.setItem(LOCAL_STORAGE_KEY, 'existing-id');
+        document.cookie = 'visitor_id=new-id';
 
         initializeVisitorId();
 
         // syncVisitorId is called, but it shouldn't setItem if visitorId is already truthy
-        expect(localStorage.setItem).not.toHaveBeenCalled();
+        expect(localStorage.getItem(LOCAL_STORAGE_KEY)).toBe('existing-id');
     });
 
     it('attaches X-Visitor-Id header to Inertia requests', () => {
-        vi.mocked(localStorage.getItem).mockReturnValue('test-visitor-id');
+        localStorage.setItem(LOCAL_STORAGE_KEY, 'test-visitor-id');
 
         let beforeHandler: any;
         vi.mocked(router.on).mockImplementation((event: string, handler: any) => {
@@ -76,19 +66,17 @@ describe('useVisitorId', () => {
             return vi.fn();
         });
 
-        vi.mocked(localStorage.getItem).mockReturnValue(null);
-        vi.stubGlobal('document', {
-            cookie: 'visitor_id=refreshed-id',
-        });
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+        document.cookie = 'visitor_id=refreshed-id';
 
         initializeVisitorId();
 
         // Initial sync happened. Now simulate success.
         vi.clearAllMocks();
-        vi.mocked(localStorage.getItem).mockReturnValue(null);
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
 
         successHandler();
 
-        expect(localStorage.setItem).toHaveBeenCalledWith(LOCAL_STORAGE_KEY, 'refreshed-id');
+        expect(localStorage.getItem(LOCAL_STORAGE_KEY)).toBe('refreshed-id');
     });
 });

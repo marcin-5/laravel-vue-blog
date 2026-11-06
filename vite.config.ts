@@ -1,7 +1,7 @@
+import inertia from '@inertiajs/vite';
 import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
 import laravel from 'laravel-vite-plugin';
-import inertia from '@inertiajs/vite';
 import { defineConfig } from 'vite';
 import { configDefaults } from 'vitest/config';
 // import logFileChanges from './vite-log-plugin.js';
@@ -73,5 +73,7 @@ export default defineConfig({
         environment: 'jsdom',
         exclude: [...configDefaults.exclude, 'tests/**'],
         globals: true,
+        pool: 'vmThreads',
+        setupFiles: ['resources/js/__tests__/setup.ts'],
     },
 });
