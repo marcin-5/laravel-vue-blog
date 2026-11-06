@@ -8,7 +8,7 @@ import { useMarkdownPreviewSection } from '@/composables/useMarkdownPreviewSecti
 import { Button } from '@/components/ui/button';
 import { Check, FileText, Plus, X } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface Tag {
     id: number;
@@ -197,6 +197,7 @@ onMounted(loadTags);
                     <DialogTitle
                         >{{ t('blogger.tags.landing_page_label') }}<span v-if="editingTag">: {{ editingTag.name }}</span></DialogTitle
                     >
+                    <DialogDescription>{{ t('blogger.tags.landing_page_description') }}</DialogDescription>
                 </DialogHeader>
                 <EntityMarkdownField
                     v-if="editingTag"

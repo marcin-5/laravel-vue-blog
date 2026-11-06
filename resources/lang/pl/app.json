@@ -456,6 +456,7 @@
             "add_label": "Dodaj tag",
             "add_button": "Dodaj",
             "landing_page_label": "Treść strony taga",
+            "landing_page_description": "Edytuj treść strony wyświetlanej dla tego taga.",
             "save_landing_page": "Zapisz treść taga"
         },
         "post_item": {

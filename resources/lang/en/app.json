@@ -455,6 +455,7 @@
             "add_label": "Add tag",
             "add_button": "Add",
             "landing_page_label": "Tag landing page content",
+            "landing_page_description": "Edit the landing page content shown for this tag.",
             "save_landing_page": "Save tag content"
         },
         "post_item": {

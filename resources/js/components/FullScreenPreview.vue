@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useAppearance } from '@/composables/useAppearance';
 import { MoonIcon, SunIcon } from '@heroicons/vue/24/outline';
 import { useMediaQuery } from '@vueuse/core';
+import { FocusScope } from 'reka-ui';
 import { computed } from 'vue';
 
 interface Props {
@@ -76,44 +77,48 @@ function handleCancel() {
 </script>
 
 <template>
-    <div class="fixed inset-0 z-50 bg-background text-foreground">
-        <div class="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background p-4">
-            <h2 class="text-lg font-semibold">{{ props.previewModeTitleLabel }}</h2>
-            <div class="flex gap-2">
-                <Button v-if="!props.hideSaveButton" :disabled="props.isProcessing" type="button" variant="constructive" @click="handleSave">
-                    {{ props.isEdit ? props.saveButtonLabel : props.createButtonLabel || props.saveButtonLabel }}
-                </Button>
-                <Button type="button" variant="destructive" @click="handleCancel">{{ props.cancelButtonLabel }}</Button>
-                <Button type="button" variant="toggle" @click="toggleLayout">
-                    {{ props.toggleLayoutButtonLabel }}
-                </Button>
-                <Button class="flex items-center gap-2" type="button" variant="toggle" @click="toggleTheme">
-                    <SunIcon v-if="isDarkMode" class="h-4 w-4" />
-                    <MoonIcon v-else class="h-4 w-4" />
-                </Button>
-                <Button type="button" variant="exit" @click="handleExit">{{ props.exitPreviewButtonLabel }}</Button>
-            </div>
-        </div>
-        <div class="h-full overflow-auto p-4">
-            <div :class="props.previewLayout === 'vertical' ? 'flex h-full gap-4' : 'space-y-4'">
-                <div :class="props.previewLayout === 'vertical' ? 'w-1/2' : ''">
-                    <PostFormField
-                        id="fullscreen-markdown"
-                        :input-class="'h-96 font-mono text-sm'"
-                        :label="props.markdownLabel"
-                        :model-value="props.content"
-                        :placeholder="props.markdownPlaceholder"
-                        :hint="props.hint"
-                        type="textarea"
-                        @input="handleInput"
-                        @update:model-value="(value: any) => emit('update:content', value || '')"
-                    />
+    <Teleport to="body">
+        <FocusScope trapped loop as-child>
+            <div data-dismissable-layer="" class="pointer-events-auto fixed inset-0 z-50 bg-background text-foreground">
+                <div class="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background p-4">
+                    <h2 class="text-lg font-semibold">{{ props.previewModeTitleLabel }}</h2>
+                    <div class="flex gap-2">
+                        <Button v-if="!props.hideSaveButton" :disabled="props.isProcessing" type="button" variant="constructive" @click="handleSave">
+                            {{ props.isEdit ? props.saveButtonLabel : props.createButtonLabel || props.saveButtonLabel }}
+                        </Button>
+                        <Button type="button" variant="destructive" @click="handleCancel">{{ props.cancelButtonLabel }}</Button>
+                        <Button type="button" variant="toggle" @click="toggleLayout">
+                            {{ props.toggleLayoutButtonLabel }}
+                        </Button>
+                        <Button class="flex items-center gap-2" type="button" variant="toggle" @click="toggleTheme">
+                            <SunIcon v-if="isDarkMode" class="h-4 w-4" />
+                            <MoonIcon v-else class="h-4 w-4" />
+                        </Button>
+                        <Button type="button" variant="exit" @click="handleExit">{{ props.exitPreviewButtonLabel }}</Button>
+                    </div>
                 </div>
-                <div :class="props.previewLayout === 'vertical' ? 'w-1/2' : ''">
-                    <h3 class="mb-2 text-sm font-medium">{{ props.previewLabel }}</h3>
-                    <MarkdownPreview :html="props.previewHtml" class="h-96" />
+                <div class="h-full overflow-auto p-4">
+                    <div :class="props.previewLayout === 'vertical' ? 'flex h-full gap-4' : 'space-y-4'">
+                        <div :class="props.previewLayout === 'vertical' ? 'w-1/2' : ''">
+                            <PostFormField
+                                id="fullscreen-markdown"
+                                :input-class="'h-96 font-mono text-sm'"
+                                :label="props.markdownLabel"
+                                :model-value="props.content"
+                                :placeholder="props.markdownPlaceholder"
+                                :hint="props.hint"
+                                type="textarea"
+                                @input="handleInput"
+                                @update:model-value="(value: any) => emit('update:content', value || '')"
+                            />
+                        </div>
+                        <div :class="props.previewLayout === 'vertical' ? 'w-1/2' : ''">
+                            <h3 class="mb-2 text-sm font-medium">{{ props.previewLabel }}</h3>
+                            <MarkdownPreview :html="props.previewHtml" class="h-96" />
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
+        </FocusScope>
+    </Teleport>
 </template>
