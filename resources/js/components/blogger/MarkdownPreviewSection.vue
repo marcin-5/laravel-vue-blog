@@ -5,6 +5,7 @@ import PostFormField from '@/components/blogger/PostFormField.vue';
 import MarkdownPreview from '@/components/MarkdownPreview.vue';
 import { Button } from '@/components/ui/button';
 import InputError from '@/components/InputError.vue';
+import { computed } from 'vue';
 
 interface TranslationKeys {
     cancel: string;
@@ -14,7 +15,8 @@ interface TranslationKeys {
     markdownLabel: string;
     previewLabel: string;
     previewModeTitle: string;
-    toggleLayout: string;
+    horizontalLayout: string;
+    verticalLayout: string;
     closePreview: string;
     preview: string;
     fullPreview: string;
@@ -60,6 +62,10 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>();
 
+const toggleLayoutLabel = computed(() =>
+    props.previewLayout === 'vertical' ? props.translations.horizontalLayout : props.translations.verticalLayout,
+);
+
 function handleLayoutToggle() {
     const newLayout = props.previewLayout === 'vertical' ? 'horizontal' : 'vertical';
     emit('setLayout', newLayout);
@@ -86,7 +92,7 @@ function handleLayoutToggle() {
             :preview-layout="props.previewLayout"
             :preview-mode-title-label="props.translations.previewModeTitle"
             :save-button-label="props.translations.save"
-            :toggle-layout-button-label="props.translations.toggleLayout"
+            :toggle-layout-button-label="toggleLayoutLabel"
             @cancel="emit('cancel')"
             @exit="emit('toggleFullPreview')"
             @input="emit('input')"
@@ -131,7 +137,7 @@ function handleLayoutToggle() {
                 {{ props.isFullPreview ? props.translations.splitView : props.translations.fullPreview }}
             </Button>
             <Button v-if="props.isPreviewMode && !props.isFullPreview" size="sm" type="button" variant="toggle" @click="handleLayoutToggle">
-                {{ props.translations.toggleLayout }}
+                {{ toggleLayoutLabel }}
             </Button>
         </div>
     </div>

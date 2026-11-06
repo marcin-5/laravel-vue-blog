@@ -7,7 +7,6 @@ import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
 import PostFormField from '@/components/blogger/PostFormField.vue';
 import { useBloggerFormTranslations } from '@/composables/useBloggerFormTranslations';
 import { useGroupFormLogic } from '@/composables/useGroupFormLogic';
-import { useMarkdownPreviewSection } from '@/composables/useMarkdownPreviewSection';
 import type { AdminGroup as Group, GroupFormData } from '@/types/blog.types';
 import { InertiaForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -51,8 +50,8 @@ const baseTranslations = computed(() => ({
     allowRegistration: t('blogger.group_form.allow_registration_label'),
 }));
 
-const contentTranslations = createMarkdownTranslations(useMarkdownPreviewSection());
-const footerTranslations = createMarkdownTranslations(useMarkdownPreviewSection());
+const contentTranslations = createMarkdownTranslations();
+const footerTranslations = createMarkdownTranslations();
 
 function handleSubmit() {
     emit('submit', form);

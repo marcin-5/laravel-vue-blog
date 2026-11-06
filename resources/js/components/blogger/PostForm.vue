@@ -98,8 +98,8 @@ const translationKeys = computed(() => ({
     characters: t('blogger.post_form.characters'),
 }));
 
-const contentTranslations = createMarkdownTranslations(contentPreview);
-const summaryTranslations = createMarkdownTranslations(summaryPreview);
+const contentTranslations = createMarkdownTranslations();
+const summaryTranslations = createMarkdownTranslations();
 
 const relatedPostsTranslations = computed(() => ({
     label: t('blogger.post_form.related_posts_label'),

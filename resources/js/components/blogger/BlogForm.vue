@@ -9,7 +9,6 @@ import BlogTagsSection from '@/components/blogger/BlogTagsSection.vue';
 import { useBlogFormLogic } from '@/composables/useBlogFormLogic';
 import { createApplyHandler } from '@/composables/useFormApply';
 import { useBloggerFormTranslations } from '@/composables/useBloggerFormTranslations';
-import { useMarkdownPreviewSection } from '@/composables/useMarkdownPreviewSection';
 import type { AdminBlog as Blog, BlogFormData, Category } from '@/types/blog.types';
 import { InertiaForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -61,10 +60,10 @@ const seoTranslations = computed(() => ({
     characters: t('blogger.post_form.characters'),
 }));
 
-const descriptionMarkdownTranslations = createMarkdownTranslations(useMarkdownPreviewSection());
-const landingMarkdownTranslations = createMarkdownTranslations(useMarkdownPreviewSection());
-const aboutMarkdownTranslations = createMarkdownTranslations(useMarkdownPreviewSection());
-const footerMarkdownTranslations = createMarkdownTranslations(useMarkdownPreviewSection());
+const descriptionMarkdownTranslations = createMarkdownTranslations();
+const landingMarkdownTranslations = createMarkdownTranslations();
+const aboutMarkdownTranslations = createMarkdownTranslations();
+const footerMarkdownTranslations = createMarkdownTranslations();
 
 const contentTranslations = computed(() => ({
     description: {

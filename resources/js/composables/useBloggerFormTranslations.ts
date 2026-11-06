@@ -1,4 +1,3 @@
-import { type MarkdownPreviewSection } from '@/types/blog.types';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -60,7 +59,7 @@ export function useBloggerFormTranslations() {
         footerScale: t('blogger.form.theme_footer_scale'),
     }));
 
-    function createMarkdownTranslations(previewSection: MarkdownPreviewSection) {
+    function createMarkdownTranslations() {
         return computed(() => ({
             cancel: actionTranslations.value.cancel,
             create: actionTranslations.value.create,
@@ -69,8 +68,8 @@ export function useBloggerFormTranslations() {
             markdownLabel: t('blogger.post_form.markdown_label'),
             previewLabel: t('blogger.post_form.preview_label'),
             previewModeTitle: t('blogger.post_form.preview_mode_title'),
-            toggleLayout:
-                previewSection.previewLayout.value === 'vertical' ? t('blogger.post_form.horizontal_button') : t('blogger.post_form.vertical_button'),
+            horizontalLayout: t('blogger.post_form.horizontal_button'),
+            verticalLayout: t('blogger.post_form.vertical_button'),
             closePreview: t('blogger.post_form.close_button'),
             preview: t('blogger.post_form.preview_button'),
             fullPreview: t('blogger.post_form.full_preview_button'),

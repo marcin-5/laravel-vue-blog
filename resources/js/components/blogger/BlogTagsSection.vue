@@ -4,7 +4,6 @@ import { useHttp } from '@inertiajs/vue3';
 import { Input } from '@/components/ui/input';
 import EntityMarkdownField from '@/components/blogger/EntityMarkdownField.vue';
 import { useBloggerFormTranslations } from '@/composables/useBloggerFormTranslations';
-import { useMarkdownPreviewSection } from '@/composables/useMarkdownPreviewSection';
 import { Button } from '@/components/ui/button';
 import { Check, FileText, Plus, X } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
@@ -42,7 +41,7 @@ const editingTag = ref<Tag | null>(null);
 const isLandingPageDialogOpen = ref(false);
 const { t } = useI18n();
 const { createMarkdownTranslations } = useBloggerFormTranslations();
-const markdownTranslations = createMarkdownTranslations(useMarkdownPreviewSection());
+const markdownTranslations = createMarkdownTranslations();
 const http = useHttp<
     {
         name: string;
