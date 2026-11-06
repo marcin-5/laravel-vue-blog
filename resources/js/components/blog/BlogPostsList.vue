@@ -109,7 +109,7 @@ function isTagActive(tag: Tag): boolean {
 
         <div v-if="hasTags" class="mb-4">
             <div class="flex flex-wrap gap-2">
-                <Link v-for="tag in allTags" :key="tag.id" :class="getTagChipClasses(isTagActive(tag))" :href="getTagHref(tag)" preserve-scroll>
+                <Link v-for="tag in allTags" :key="tag.id" :class="getTagChipClasses(isTagActive(tag))" :href="getTagHref(tag)" preserve-scroll preserve-state>
                     #{{ tag.name }}
                 </Link>
                 <Link

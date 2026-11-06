@@ -151,6 +151,7 @@ describe('BlogPostsList multi-tag filters', () => {
         const betaLink = wrapper.findAll('a').find((link) => link.text() === '#Beta');
 
         expect(betaLink?.attributes('href')).toBe('/blogs/sample-blog/tags/beta#posts-list');
+        expect(betaLink?.attributes('preserve-state')).toBe('');
         expect(wrapper.find('[role="group"]').exists()).toBe(false);
     });
 });
