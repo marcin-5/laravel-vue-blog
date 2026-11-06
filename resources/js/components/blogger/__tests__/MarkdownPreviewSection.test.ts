@@ -46,6 +46,14 @@ describe('MarkdownPreviewSection', () => {
         expect(wrapper.findAll('button').some((button) => button.text() === 'Horizontal')).toBe(false);
     });
 
+    it('emits the typed value with the input event so the preview renders the latest text', async () => {
+        const wrapper = mountSection('vertical');
+
+        await wrapper.find('#landing-markdown').setValue('**bold**');
+
+        expect(wrapper.emitted('input')).toEqual([['**bold**']]);
+    });
+
     it('emits the opposite layout when the layout button is clicked', async () => {
         const wrapper = mountSection('vertical');
 

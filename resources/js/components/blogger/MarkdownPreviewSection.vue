@@ -44,7 +44,7 @@ interface Props {
 
 interface Emits {
     (e: 'update:modelValue', value: string): void;
-    (e: 'input'): void;
+    (e: 'input', value: string): void;
     (e: 'cancel'): void;
     (e: 'submit'): void;
     (e: 'togglePreview', content: string): void;
@@ -95,7 +95,7 @@ function handleLayoutToggle() {
             :toggle-layout-button-label="toggleLayoutLabel"
             @cancel="emit('cancel')"
             @exit="emit('toggleFullPreview')"
-            @input="emit('input')"
+            @input="(value: string) => emit('input', value)"
             @layout="(layout: PreviewLayout) => emit('setLayout', layout)"
             @save="emit('submit')"
             @update:content="(value: string) => emit('update:modelValue', value)"
@@ -114,7 +114,7 @@ function handleLayoutToggle() {
                         :placeholder="props.placeholder"
                         :rows="props.isPreviewMode ? (props.isEdit ? 20 : 30) : props.rows"
                         type="textarea"
-                        @input="emit('input')"
+                        @input="(value: string) => emit('input', value)"
                         @update:model-value="(value: any) => emit('update:modelValue', value)"
                     />
                 </div>

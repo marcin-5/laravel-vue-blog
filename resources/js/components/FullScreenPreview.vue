@@ -54,8 +54,8 @@ function toggleTheme() {
     updateAppearance(isDarkMode.value ? 'light' : 'dark');
 }
 
-function handleInput() {
-    emit('input', props.content);
+function handleInput(value: string) {
+    emit('input', value);
 }
 
 function toggleLayout() {

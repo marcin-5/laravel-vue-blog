@@ -56,7 +56,7 @@ function handleCancel() {
         :show-save-button="false"
         :translations="props.translations"
         @cancel="handleCancel"
-        @input="preview.handleInput(props.modelValue || '')"
+        @input="(value: string) => preview.handleInput(value || '')"
         @set-layout="preview.setLayout"
         @toggle-full-preview="handleToggleFullPreview"
         @toggle-preview="handleTogglePreview"

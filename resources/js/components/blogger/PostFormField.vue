@@ -23,12 +23,12 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const modelValue = defineModel<string | null>({ required: false, default: '' });
-const emit = defineEmits<{ input: [] }>();
+const emit = defineEmits<{ input: [value: string] }>();
 
 function handleInput(event: Event) {
     const target = event.target as HTMLInputElement | HTMLTextAreaElement;
     modelValue.value = target.value;
-    emit('input');
+    emit('input', target.value);
 }
 </script>
 

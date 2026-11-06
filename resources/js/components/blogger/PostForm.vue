@@ -186,13 +186,13 @@ const handleToggleContentPreview = () => contentPreview.togglePreview(form.conte
 
 const handleToggleContentFullPreview = () => contentPreview.toggleFullPreview(form.content);
 
-const handleContentInput = () => contentPreview.handleInput(form.content);
+const handleContentInput = (value: string) => contentPreview.handleInput(value);
 
 const handleToggleSummaryPreview = () => summaryPreview.togglePreview(form.summary);
 
 const handleToggleSummaryFullPreview = () => summaryPreview.toggleFullPreview(form.summary);
 
-const handleSummaryInput = () => summaryPreview.handleInput(form.summary);
+const handleSummaryInput = (value: string) => summaryPreview.handleInput(value);
 
 // helpers for SEO data length validation
 const { getRangeClass, getThresholdClass } = useSeoLengthClasses();
