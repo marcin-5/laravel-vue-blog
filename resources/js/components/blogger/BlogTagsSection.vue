@@ -2,13 +2,29 @@
 import { onMounted, ref } from 'vue';
 import { useHttp } from '@inertiajs/vue3';
 import { Input } from '@/components/ui/input';
-import { Check, Plus, X } from 'lucide-vue-next';
+import EntityMarkdownField from '@/components/blogger/EntityMarkdownField.vue';
+import { useBloggerFormTranslations } from '@/composables/useBloggerFormTranslations';
+import { useMarkdownPreviewSection } from '@/composables/useMarkdownPreviewSection';
+import { Button } from '@/components/ui/button';
+import { Check, FileText, Plus, X } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface Tag {
     id: number;
     name: string;
     slug: string;
     originalName: string;
+}
+
+interface TagResponse {
+    id: number;
+    name: string;
+    slug: string;
+}
+
+interface TagLandingPageResponse {
+    content: string;
 }
 
 interface Props {
@@ -22,10 +38,22 @@ const props = withDefaults(defineProps<Props>(), {
 
 const tags = ref<Tag[]>([]);
 const newTagName = ref('');
-const http = useHttp({
+const editingTag = ref<Tag | null>(null);
+const isLandingPageDialogOpen = ref(false);
+const { t } = useI18n();
+const { createMarkdownTranslations } = useBloggerFormTranslations();
+const markdownTranslations = createMarkdownTranslations(useMarkdownPreviewSection());
+const http = useHttp<
+    {
+        name: string;
+        slug: string;
+    },
+    TagResponse | TagResponse[]
+>({
     name: '',
     slug: '',
 });
+const landingPageHttp = useHttp<{ content: string }, TagLandingPageResponse>({ content: '' });
 
 function sortTags() {
     tags.value.sort((a, b) => a.name.localeCompare(b.name));
@@ -33,7 +61,12 @@ function sortTags() {
 
 async function loadTags() {
     try {
-        const data = (await http.get(route('blogger.tags.index', { blog: props.blogId }))) as any[];
+        const response = await http.get(route('blogger.tags.index', { blog: props.blogId }));
+        if (!Array.isArray(response)) {
+            return;
+        }
+
+        const data = response as TagResponse[];
         tags.value = data.map((tag) => ({
             ...tag,
             originalName: tag.name,
@@ -50,7 +83,7 @@ async function createTag() {
     }
     try {
         http.name = newTagName.value;
-        const tag = (await http.post(route('blogger.tags.store', { blog: props.blogId }))) as any;
+        const tag = (await http.post(route('blogger.tags.store', { blog: props.blogId }))) as TagResponse;
         tags.value.push({ ...tag, originalName: tag.name });
         newTagName.value = '';
         sortTags();
@@ -62,7 +95,7 @@ async function createTag() {
 async function updateTag(tag: Tag) {
     try {
         http.name = tag.name;
-        const updated = (await http.patch(route('blogger.tags.update', { blog: props.blogId, tag: tag.slug }))) as any;
+        const updated = (await http.patch(route('blogger.tags.update', { blog: props.blogId, tag: tag.slug }))) as TagResponse;
         tag.originalName = updated.name;
         tag.name = updated.name;
         tag.slug = updated.slug;
@@ -78,6 +111,34 @@ async function deleteTag(tag: Tag) {
         tags.value = tags.value.filter((t) => t.id !== tag.id);
     } catch (error) {
         console.error('Failed to delete tag', error);
+    }
+}
+
+async function editLandingPage(tag: Tag) {
+    try {
+        editingTag.value = tag;
+        landingPageHttp.content = '';
+        isLandingPageDialogOpen.value = true;
+        const response = await landingPageHttp.get(route('blogger.tags.landing-page.show', { blog: props.blogId, tag: tag.slug }));
+        landingPageHttp.content = response.content;
+    } catch (error) {
+        editingTag.value = null;
+        isLandingPageDialogOpen.value = false;
+        console.error('Failed to load tag landing page', error);
+    }
+}
+
+async function saveLandingPage() {
+    if (!editingTag.value) {
+        return;
+    }
+
+    try {
+        await landingPageHttp.put(route('blogger.tags.landing-page.update', { blog: props.blogId, tag: editingTag.value.slug }));
+        editingTag.value = null;
+        isLandingPageDialogOpen.value = false;
+    } catch {
+        // Errors are automatically handled by http.errors
     }
 }
 
@@ -100,6 +161,9 @@ onMounted(loadTags);
                     @click="updateTag(tag)"
                 >
                     <Check class="h-4 w-4" />
+                </button>
+                <button class="text-primary hover:text-primary/80" type="button" @click="editLandingPage(tag)">
+                    <FileText class="h-4 w-4" />
                 </button>
                 <button class="text-error hover:text-error-hover" type="button" @click="deleteTag(tag)">
                     <X class="h-4 w-4" />
@@ -127,5 +191,29 @@ onMounted(loadTags);
         <div v-if="http.errors.name || http.errors.slug" class="mt-2 text-sm font-semibold text-error">
             {{ http.errors.name || http.errors.slug }}
         </div>
+        <Dialog v-model:open="isLandingPageDialogOpen">
+            <DialogContent class="max-h-[90vh] overflow-y-auto sm:max-w-3xl md:max-w-4xl lg:max-w-5xl">
+                <DialogHeader>
+                    <DialogTitle
+                        >{{ t('blogger.tags.landing_page_label') }}<span v-if="editingTag">: {{ editingTag.name }}</span></DialogTitle
+                    >
+                </DialogHeader>
+                <EntityMarkdownField
+                    v-if="editingTag"
+                    :id="`${props.idPrefix}-${editingTag.id}-landing-page`"
+                    v-model="landingPageHttp.content"
+                    :error="landingPageHttp.errors.content"
+                    :is-edit="true"
+                    :is-processing="landingPageHttp.processing"
+                    :label="t('blogger.tags.landing_page_label')"
+                    :translations="markdownTranslations"
+                />
+                <DialogFooter>
+                    <Button :disabled="landingPageHttp.processing || !editingTag" type="button" @click="saveLandingPage">
+                        {{ t('blogger.tags.save_landing_page') }}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>

@@ -453,7 +453,9 @@
             "section_title": "Blog tags",
             "add_placeholder": "New tag...",
             "add_label": "Add tag",
-            "add_button": "Add"
+            "add_button": "Add",
+            "landing_page_label": "Tag landing page content",
+            "save_landing_page": "Save tag content"
         },
         "post_item": {
             "close_button": "Close",

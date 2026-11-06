@@ -2,7 +2,9 @@
 
 use App\Models\Blog;
 use App\Models\Post;
+use App\Models\LandingPage;
 use App\Models\Tag;
+use App\Models\TagLandingPage;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -36,6 +38,83 @@ it('lists only posts assigned to the given tag within the blog', function () {
         ->has('listing.pagination')
         ->where('seo.canonicalUrl', getBlogUrl($blog, "/tags/$tag->slug")),
     );
+});
+
+it('renders dedicated landing content for a single tag when multiple filtering is disabled', function () {
+    $owner = User::factory()->create();
+    $blog = Blog::factory()->for($owner)->create(['is_published' => true]);
+    LandingPage::factory()->for($blog)->create(['content' => 'Blog home content']);
+    $tag = Tag::factory()->for($blog)->create();
+    TagLandingPage::factory()->for($tag)->create(['content' => 'Tag-specific content']);
+
+    $this->get(getBlogUrl($blog, "/tags/$tag->slug"))
+        ->assertOk()
+        ->assertInertia(fn(Assert $page) => $page
+            ->where('landingHtml', fn(string $html) => str_contains($html, 'Tag-specific content') && !str_contains($html, 'Blog home content'))
+            ->etc(),
+        );
+});
+
+it('falls back to blog landing content when a tag has no landing content', function () {
+    $owner = User::factory()->create();
+    $blog = Blog::factory()->for($owner)->create(['is_published' => true]);
+    LandingPage::factory()->for($blog)->create(['content' => 'Blog home content']);
+    $tag = Tag::factory()->for($blog)->create();
+
+    $this->get(getBlogUrl($blog, "/tags/$tag->slug"))
+        ->assertOk()
+        ->assertInertia(fn(Assert $page) => $page
+            ->where('landingHtml', fn(string $html) => str_contains($html, 'Blog home content') && !str_contains($html, 'Tag-specific content'))
+            ->etc(),
+        );
+});
+
+it('falls back to blog landing content when tag landing markdown is empty', function () {
+    $owner = User::factory()->create();
+    $blog = Blog::factory()->for($owner)->create(['is_published' => true]);
+    LandingPage::factory()->for($blog)->create(['content' => 'Blog home content']);
+    $tag = Tag::factory()->for($blog)->create();
+    TagLandingPage::factory()->for($tag)->create(['content' => '']);
+
+    $this->get(getBlogUrl($blog, "/tags/$tag->slug"))
+        ->assertOk()
+        ->assertInertia(fn(Assert $page) => $page
+            ->where('landingHtml', fn(string $html) => str_contains($html, 'Blog home content'))
+            ->etc(),
+        );
+});
+
+it('renders blog landing content when no tag is selected', function () {
+    $owner = User::factory()->create();
+    $blog = Blog::factory()->for($owner)->create(['is_published' => true]);
+    LandingPage::factory()->for($blog)->create(['content' => 'Blog home content']);
+    $tag = Tag::factory()->for($blog)->create();
+    TagLandingPage::factory()->for($tag)->create(['content' => 'Tag-specific content']);
+
+    $this->get(getBlogUrl($blog))
+        ->assertOk()
+        ->assertInertia(fn(Assert $page) => $page
+            ->where('landingHtml', fn(string $html) => str_contains($html, 'Blog home content') && !str_contains($html, 'Tag-specific content'))
+            ->etc(),
+        );
+});
+
+it('uses blog landing content for one selected tag when multiple filtering is enabled', function () {
+    $owner = User::factory()->create();
+    $blog = Blog::factory()->for($owner)->create([
+        'is_published' => true,
+        'allow_multiple_tag_filtering' => true,
+    ]);
+    LandingPage::factory()->for($blog)->create(['content' => 'Blog home content']);
+    $tag = Tag::factory()->for($blog)->create();
+    TagLandingPage::factory()->for($tag)->create(['content' => 'Tag-specific content']);
+
+    $this->get(getBlogUrl($blog, "/tags/$tag->slug"))
+        ->assertOk()
+        ->assertInertia(fn(Assert $page) => $page
+            ->where('landingHtml', fn(string $html) => str_contains($html, 'Blog home content') && !str_contains($html, 'Tag-specific content'))
+            ->etc(),
+        );
 });
 
 it('returns 404 when tag does not belong to the blog', function () {

@@ -454,7 +454,9 @@
             "section_title": "Tagi bloga",
             "add_placeholder": "Nowy tag...",
             "add_label": "Dodaj tag",
-            "add_button": "Dodaj"
+            "add_button": "Dodaj",
+            "landing_page_label": "Treść strony taga",
+            "save_landing_page": "Zapisz treść taga"
         },
         "post_item": {
             "close_button": "Zamknij",

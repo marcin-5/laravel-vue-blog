@@ -51,6 +51,7 @@ class PublicBlogController extends BasePublicController
     /**
      * Show the public landing page for a blog by slug.
      * Route: /{blog:slug}
+     * @throws FileNotFoundException
      */
     public function landing(Request $request, Blog $blog, string $mainDomain, PublicBlogPostsQuery $query): Response
     {
@@ -77,6 +78,113 @@ class PublicBlogController extends BasePublicController
         config([
             'app.name' => SetLocale::getAppNameForLocale($locale),
         ]);
+    }
+
+    /**
+     * @return Collection<int, Tag>
+     */
+    private function resolveActiveTags(
+        Request $request,
+        Blog $blog,
+        ?Tag $routeTag = null,
+        bool $includeLegacyQueryTag = false,
+    ): Collection {
+        $slugs = [];
+
+        if ($blog->allow_multiple_tag_filtering && is_array($request->query('tags'))) {
+            $slugs = array_values(
+                array_filter(
+                    $request->query('tags'),
+                    static fn(mixed $slug): bool => is_string($slug) && $slug !== '' && strlen($slug) <= 255,
+                ),
+            );
+        }
+
+        if ($includeLegacyQueryTag && is_string($request->query('tag')) && $request->query('tag') !== '') {
+            $slugs[] = $request->query('tag');
+        }
+
+        if ($routeTag !== null) {
+            $slugs[] = $routeTag->slug;
+        }
+
+        $slugs = array_values(array_unique($slugs));
+        if ($slugs === []) {
+            return new Collection;
+        }
+
+        $tagsBySlug = $blog->tags()->whereIn('slug', $slugs)->get()->keyBy('slug');
+
+        return new Collection(
+            array_values(
+                array_filter(
+                    array_map(
+                        static fn(string $slug): ?Tag => $tagsBySlug->get($slug),
+                        $slugs,
+                    ),
+                ),
+            ),
+        );
+    }
+
+    private function resolveTagOperator(Request $request, Blog $blog): string
+    {
+        return $blog->allow_multiple_tag_filtering && strtoupper((string) $request->query('operator')) === 'OR'
+            ? 'OR'
+            : 'AND';
+    }
+
+    /**
+     * @param  Collection<int, Tag>  $activeTags
+     * @throws FileNotFoundException
+     */
+    private function renderLandingPage(
+        Blog $blog,
+        LengthAwarePaginator $paginator,
+        Collection $activeTags,
+        string $operator,
+        ?Tag $routeTag = null,
+    ): Response {
+        $landingHtml = $blog->landingPage?->content_html ?? '';
+
+        if (!$blog->allow_multiple_tag_filtering && $activeTags->count() === 1) {
+            $tagLandingPage = $activeTags->first()->landingPage;
+
+            if (trim($tagLandingPage?->content ?? '') !== '') {
+                $landingHtml = $tagLandingPage->content_html;
+            }
+        }
+
+        return $this->renderWithTranslations('public/blog/Landing', 'blog', [
+            'blog' => new PublicBlogDetailResource($blog),
+            'landingHtml' => $landingHtml,
+            'chrome' => $this->payloadBuilder->buildChrome(
+                $blog,
+                $this->navigation->getLandingNavigation($blog, $routeTag, $activeTags->all(), $operator),
+            )->toArray(),
+            'listing' => $this->payloadBuilder->buildListing($blog, $paginator, $activeTags, $operator)->toArray(),
+            'seo' => $this->seoBuilder->buildLandingSeo(
+                $blog,
+                $paginator,
+                $this->buildLandingMetaDescription($blog),
+                $routeTag,
+                $activeTags->map(static fn(Tag $tag): array => [
+                    'name' => $tag->name,
+                    'slug' => $tag->slug,
+                ])->all(),
+                $operator,
+            )->toArray(),
+            'viewStats' => Inertia::defer(fn() => $this->getViewStats(Blog::class, $blog->id, $blog->user_id)),
+        ]);
+    }
+
+    private function buildLandingMetaDescription(Blog $blog): string
+    {
+        $descriptionHtml = str_replace('-!-', '', $this->markdown->convertToHtml($blog->description));
+
+        return $blog->seo_description ?: $this->seo->generateMetaDescription(
+            $descriptionHtml ?: $blog->landingPage?->content_html ?: $blog->name,
+        );
     }
 
     /**
@@ -163,91 +271,6 @@ class PublicBlogController extends BasePublicController
         $paginator = $query->handle($blog, $activeTags, $operator);
 
         return $this->renderLandingPage($blog, $paginator, $activeTags, $operator, $tag);
-    }
-
-    /**
-     * @return Collection<int, Tag>
-     */
-    private function resolveActiveTags(Request $request, Blog $blog, ?Tag $routeTag = null, bool $includeLegacyQueryTag = false): Collection
-    {
-        $slugs = [];
-
-        if ($blog->allow_multiple_tag_filtering && is_array($request->query('tags'))) {
-            $slugs = array_values(array_filter(
-                $request->query('tags'),
-                static fn(mixed $slug): bool => is_string($slug) && $slug !== '' && strlen($slug) <= 255,
-            ));
-        }
-
-        if ($includeLegacyQueryTag && is_string($request->query('tag')) && $request->query('tag') !== '') {
-            $slugs[] = $request->query('tag');
-        }
-
-        if ($routeTag !== null) {
-            $slugs[] = $routeTag->slug;
-        }
-
-        $slugs = array_values(array_unique($slugs));
-        if ($slugs === []) {
-            return new Collection;
-        }
-
-        $tagsBySlug = $blog->tags()->whereIn('slug', $slugs)->get()->keyBy('slug');
-
-        return new Collection(array_values(array_filter(array_map(
-            static fn(string $slug): ?Tag => $tagsBySlug->get($slug),
-            $slugs,
-        ))));
-    }
-
-    private function resolveTagOperator(Request $request, Blog $blog): string
-    {
-        return $blog->allow_multiple_tag_filtering && strtoupper((string) $request->query('operator')) === 'OR'
-            ? 'OR'
-            : 'AND';
-    }
-
-    /**
-     * @param  Collection<int, Tag>  $activeTags
-     */
-    private function renderLandingPage(
-        Blog $blog,
-        LengthAwarePaginator $paginator,
-        Collection $activeTags,
-        string $operator,
-        ?Tag $routeTag = null,
-    ): Response
-    {
-        return $this->renderWithTranslations('public/blog/Landing', 'blog', [
-            'blog' => new PublicBlogDetailResource($blog),
-            'landingHtml' => $blog->landingPage?->content_html ?? '',
-            'chrome' => $this->payloadBuilder->buildChrome(
-                $blog,
-                $this->navigation->getLandingNavigation($blog, $routeTag, $activeTags->all(), $operator),
-            )->toArray(),
-            'listing' => $this->payloadBuilder->buildListing($blog, $paginator, $activeTags, $operator)->toArray(),
-            'seo' => $this->seoBuilder->buildLandingSeo(
-                $blog,
-                $paginator,
-                $this->buildLandingMetaDescription($blog),
-                $routeTag,
-                $activeTags->map(static fn(Tag $tag): array => [
-                    'name' => $tag->name,
-                    'slug' => $tag->slug,
-                ])->all(),
-                $operator,
-            )->toArray(),
-            'viewStats' => Inertia::defer(fn() => $this->getViewStats(Blog::class, $blog->id, $blog->user_id)),
-        ]);
-    }
-
-    private function buildLandingMetaDescription(Blog $blog): string
-    {
-        $descriptionHtml = str_replace('-!-', '', $this->markdown->convertToHtml($blog->description));
-
-        return $blog->seo_description ?: $this->seo->generateMetaDescription(
-            $descriptionHtml ?: $blog->landingPage?->content_html ?: $blog->name,
-        );
     }
 
     /**

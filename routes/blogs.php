@@ -55,6 +55,8 @@ Route::middleware(['auth', 'verified', 'noindex'])->group(function () {
     Route::prefix('blogs/{blog}')->group(function () {
         Route::get('tags', [TagsController::class, 'index'])->name('blogger.tags.index');
         Route::post('tags', [TagsController::class, 'store'])->name('blogger.tags.store');
+        Route::get('tags/{tag}/landing-page', [TagsController::class, 'landingPage'])->name('blogger.tags.landing-page.show');
+        Route::put('tags/{tag}/landing-page', [TagsController::class, 'updateLandingPage'])->name('blogger.tags.landing-page.update');
         Route::patch('tags/{tag}', [TagsController::class, 'update'])->name('blogger.tags.update');
         Route::delete('tags/{tag}', [TagsController::class, 'destroy'])->name('blogger.tags.destroy');
     });

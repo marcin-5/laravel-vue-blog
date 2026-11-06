@@ -24,6 +24,40 @@ class TagsController extends AuthenticatedController
     }
 
     /**
+     * Get landing page content for a tag.
+     */
+    public function landingPage(Blog $blog, Tag $tag): JsonResponse
+    {
+        $this->authorize('update', $blog);
+        abort_unless($tag->blog_id === $blog->id, 404);
+
+        return response()->json([
+            'content' => $tag->landingPage?->content ?? '',
+        ]);
+    }
+
+    /**
+     * Save landing page content for a tag.
+     */
+    public function updateLandingPage(Request $request, Blog $blog, Tag $tag): JsonResponse
+    {
+        $this->authorize('update', $blog);
+        abort_unless($tag->blog_id === $blog->id, 404);
+
+        $data = $request->validate([
+            'content' => ['nullable', 'string'],
+        ]);
+
+        $landingPage = $tag->landingPage()->firstOrNew();
+        $landingPage->content = $data['content'] ?? '';
+        $landingPage->save();
+
+        return response()->json([
+            'content' => $landingPage->content,
+        ]);
+    }
+
+    /**
      * Create a new tag for a blog.
      */
     public function store(Request $request, Blog $blog): JsonResponse
