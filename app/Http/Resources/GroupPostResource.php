@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Policies\PrivateConversationPolicy;
+use App\Services\MarkdownService;
 
 class GroupPostResource extends JsonResource
 {
@@ -30,7 +31,7 @@ class GroupPostResource extends JsonResource
             'comments_max_depth' => $this->comments_max_depth,
             'threads' => ThreadResource::collection($this->whenLoaded('threads')),
             'published_at' => $this->published_at?->format('Y-m-d H:i'),
-            'excerpt' => $this->excerpt,
+            'excerpt' => app(MarkdownService::class)->convertToHtml($this->excerpt),
             'summary' => $this->summary,
             'extensions' => $this->extensions
                 ->where('is_published', true)
