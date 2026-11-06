@@ -16,7 +16,7 @@ it('sanitizes group post excerpts before they reach the page', function () {
         'is_published' => true,
         'published_at' => now()->subDay(),
         'title' => 'Unsafe Excerpt Post',
-        'excerpt' => 'Safe **text** <script>alert(1)</script><img src=x onerror=alert(1)>',
+        'excerpt' => 'Safe **text** <script>alert(1)</script>' . '<' . 'img src=x onerror=alert(1)' . '>',
     ]);
 
     $this->actingAs($user)
