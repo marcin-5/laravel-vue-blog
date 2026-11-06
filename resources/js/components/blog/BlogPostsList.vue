@@ -2,6 +2,7 @@
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useBlogExcerpts } from '@/composables/useBlogExcerpts';
+import { useBlogPostsListLinks, type ActiveTag, type TagOperator } from '@/composables/useBlogPostsListLinks';
 import type { PostItem, Tag } from '@/types/blog.types';
 import type { Pagination } from '@/types';
 import { formatDate } from '@/utils/dateUtils';
@@ -10,8 +11,6 @@ import { Info, Mail } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-type ActiveTag = Pick<Tag, 'id' | 'name' | 'slug'>;
-type TagOperator = 'AND' | 'OR';
 const TAG_OPERATORS: TagOperator[] = ['AND', 'OR'];
 
 type PaginationLink = {
@@ -36,17 +35,6 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const { showExcerpts } = useBlogExcerpts(props.blogSlug);
-
-const POST_ROUTE_NAMES = {
-    group: 'group.post',
-    blog: 'blog.public.post',
-} as const;
-
-const ROUTE_NAMES = {
-    blogLanding: 'blog.public.landing',
-    blogTag: 'blog.public.tag',
-    newsletter: 'newsletter.index',
-} as const;
 
 const PAGINATION_LABEL_TRANSLATIONS: Record<string, string> = {
     previous: 'blog.pagination.previous',
@@ -84,14 +72,21 @@ const inactivePaginationClasses = 'border-border bg-card';
 const enabledPaginationClasses = 'hover:bg-secondary';
 const disabledPaginationClasses = 'pointer-events-none opacity-50';
 
-const postRouteName = computed(() => (props.isGroup ? POST_ROUTE_NAMES.group : POST_ROUTE_NAMES.blog));
 const paginationLinks = computed(() => props.pagination?.links ?? []);
 const hasPosts = computed(() => props.posts.length > 0);
 const hasPagination = computed(() => paginationLinks.value.length > 0);
 const hasTags = computed(() => Boolean(props.allTags?.length));
-const isMultiTagMode = computed(() => !props.isGroup && props.allowMultipleTagFiltering);
-const selectedTags = computed(() => props.activeTags ?? (props.activeTag ? [props.activeTag] : []));
-const activeOperator = computed(() => props.operator ?? 'AND');
+
+const {
+    selectedTags,
+    activeOperator,
+    isMultiTagMode,
+    getPostHref,
+    getTagHref,
+    getBlogLandingHref,
+    getMultiTagFilterHref,
+    getNewsletterHref,
+} = useBlogPostsListLinks(props);
 const postsListTitle = computed(() => {
     if (props.isGroup) {
         return props.activeTag ? t('group.posts_list.active_tag') : t('group.posts_list.title');
@@ -114,72 +109,6 @@ const selectedTagNames = computed(() => {
     return `${names.slice(0, -1).join(', ')}${conjunction}${names[names.length - 1]}`;
 });
 
-function getPostRouteParams(post: PostItem) {
-    const params: Record<string, any> = props.isGroup
-        ? { group: props.blogSlug, postSlug: post.slug }
-        : { blog: props.blogSlug, mainDomain: props.mainDomain, postSlug: post.slug };
-
-    if (isMultiTagMode.value && selectedTags.value.length > 0) {
-        params.tags = selectedTags.value.map((tag) => tag.slug);
-        params.operator = activeOperator.value;
-    } else if (props.activeTag) {
-        params.tag = props.activeTag.slug;
-    }
-
-    return params;
-}
-
-function getPostHref(post: PostItem): string {
-    return route(postRouteName.value, getPostRouteParams(post));
-}
-
-function getBlogLandingHref(): string {
-    const anchor = props.isGroup ? '#group-posts-list' : '#posts-list';
-    const params = props.isGroup ? { blog: props.blogSlug } : { blog: props.blogSlug, mainDomain: props.mainDomain };
-
-    if (!isMultiTagMode.value) {
-        return `${route(ROUTE_NAMES.blogLanding, params)}${anchor}`;
-    }
-
-    return getMultiTagFilterHref([], activeOperator.value, anchor);
-}
-
-function getTagHref(tag: Tag): string {
-    if (isMultiTagMode.value) {
-        const selectedSlugs = new Set(selectedTags.value.map((activeTag) => activeTag.slug));
-        if (selectedSlugs.has(tag.slug)) {
-            selectedSlugs.delete(tag.slug);
-        } else {
-            selectedSlugs.add(tag.slug);
-        }
-
-        return getMultiTagFilterHref([...selectedSlugs], activeOperator.value, '#posts-list');
-    }
-    const anchor = props.isGroup ? '#group-posts-list' : '#posts-list';
-    const params = props.isGroup ? { blog: props.blogSlug, tag: tag.slug } : { blog: props.blogSlug, mainDomain: props.mainDomain, tag: tag.slug };
-    return `${route(ROUTE_NAMES.blogTag, params)}${anchor}`;
-}
-
-function getMultiTagFilterHref(slugs: string[], operator: TagOperator, anchor: string): string {
-    const params = { blog: props.blogSlug, mainDomain: props.mainDomain };
-    const landingRoute = route(ROUTE_NAMES.blogLanding, params);
-    const query = new URLSearchParams();
-
-    if (typeof window !== 'undefined') {
-        const currentUrl = new URL(window.location.href);
-        currentUrl.searchParams.forEach((value, key) => {
-            if (!key.startsWith('tags[') && !['tags', 'tag', 'operator', 'page'].includes(key)) {
-                query.append(key, value);
-            }
-        });
-    }
-
-    slugs.forEach((slug) => query.append('tags[]', slug));
-    query.set('operator', operator);
-
-    return `${landingRoute}${landingRoute.includes('?') ? '&' : '?'}${query.toString()}${anchor}`;
-}
-
 function setTagOperator(operator: TagOperator): void {
     const href = getMultiTagFilterHref(
         selectedTags.value.map((tag) => tag.slug),
@@ -192,10 +121,6 @@ function setTagOperator(operator: TagOperator): void {
 
 function isTagActive(tag: Tag): boolean {
     return selectedTags.value.some((activeTag) => activeTag.id === tag.id);
-}
-
-function getNewsletterHref(): string {
-    return route(ROUTE_NAMES.newsletter, { blog_id: props.blogId });
 }
 
 function getTagLinkClasses(tag: Tag) {
