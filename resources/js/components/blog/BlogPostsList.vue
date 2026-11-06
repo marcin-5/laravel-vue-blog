@@ -48,8 +48,17 @@ const hasPosts = computed(() => props.posts.length > 0);
 const hasPagination = computed(() => paginationLinks.value.length > 0);
 const hasTags = computed(() => Boolean(props.allTags?.length));
 
-const { selectedTags, activeOperator, isMultiTagMode, getPostHref, getTagHref, getBlogLandingHref, getMultiTagFilterHref, getNewsletterHref } =
-    useBlogPostsListLinks(props);
+const {
+    anchorId,
+    selectedTags,
+    activeOperator,
+    isMultiTagMode,
+    getPostHref,
+    getTagHref,
+    getBlogLandingHref,
+    getMultiTagFilterHref,
+    getNewsletterHref,
+} = useBlogPostsListLinks(props);
 const postsListTitle = computed(() => {
     if (props.isGroup) {
         return props.activeTag ? t('group.posts_list.active_tag') : t('group.posts_list.title');
@@ -76,7 +85,7 @@ function setTagOperator(operator: TagOperator): void {
     const href = getMultiTagFilterHref(
         selectedTags.value.map((tag) => tag.slug),
         operator,
-        '#posts-list',
+        anchorId.value,
     );
 
     router.visit(href, { preserveScroll: true });
@@ -92,7 +101,7 @@ function getTagLinkClasses(tag: Tag) {
 </script>
 
 <template>
-    <section :id="props.isGroup ? 'group-posts-list' : 'posts-list'" :aria-label="t('blog.posts_list.aria')" :style="sectionStyle">
+    <section :id="anchorId.slice(1)" :aria-label="t('blog.posts_list.aria')" :style="sectionStyle">
         <div class="mb-4 flex items-center justify-between gap-4">
             <h2 :style="headerStyle" class="text-xl font-semibold text-primary opacity-90">
                 {{ postsListTitle }}:

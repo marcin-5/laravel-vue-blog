@@ -71,7 +71,7 @@ export function useBlogPostsListLinks(props: BlogPostsListLinkProps) {
                 selectedSlugs.add(tag.slug);
             }
 
-            return getMultiTagFilterHref([...selectedSlugs], activeOperator.value, '#posts-list');
+            return getMultiTagFilterHref([...selectedSlugs], activeOperator.value, anchorId.value);
         }
 
         const params = props.isGroup
