@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { PostExtension } from '@/types/blog.types';
+import { blogBodyTextStyle } from '@/utils/blogStyles';
 import { Lock, LockOpen } from 'lucide-vue-next';
 import { ref } from 'vue';
 
@@ -87,11 +88,7 @@ function toggleLock(id: number) {
                 </div>
                 <CollapsibleContent>
                     <div class="border-t border-border p-4">
-                        <article
-                            :style="{ fontFamily: 'var(--blog-body-font)', fontSize: 'calc(1rem * var(--blog-body-scale))' }"
-                            class="prose dark:prose-invert max-w-none text-primary"
-                            v-html="extension.contentHtml"
-                        />
+                        <article :style="blogBodyTextStyle" class="prose dark:prose-invert max-w-none text-primary" v-html="extension.contentHtml" />
                     </div>
                 </CollapsibleContent>
             </Collapsible>

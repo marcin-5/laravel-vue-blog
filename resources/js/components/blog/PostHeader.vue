@@ -7,6 +7,7 @@ import type { PostDetails, ViewStats } from '@/types/blog.types';
 import { usePage } from '@inertiajs/vue3';
 import { Mail } from 'lucide-vue-next';
 import { formatDate, shouldShowUpdatedDate } from '@/utils/dateUtils';
+import { blogHeaderStyle } from '@/utils/blogStyles';
 import { computed, shallowRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -35,7 +36,7 @@ const canStartPrivateMessage = computed(() => Boolean(page.props.auth.user && pr
 </script>
 
 <template>
-    <header :style="{ fontFamily: 'var(--blog-header-font)', fontSize: 'calc(2rem * var(--blog-header-scale))' }" class="mb-4">
+    <header :style="blogHeaderStyle" class="mb-4">
         <h1 class="mb-2 font-[inherit] text-[1em] leading-tight font-bold text-foreground">{{ post.title }}</h1>
         <ViewStatsComponent
             v-if="viewStats"

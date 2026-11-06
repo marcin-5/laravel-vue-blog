@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import ViewStatsComponent from '@/components/blog/ViewStats.vue';
 import type { Blog, ViewStats } from '@/types/blog.types';
+import { blogBodyTextStyle, blogHeaderStyle } from '@/utils/blogStyles';
 
 defineProps<{
     blog: Blog & {
@@ -12,7 +13,7 @@ defineProps<{
 </script>
 
 <template>
-    <header :style="{ fontFamily: 'var(--blog-header-font)', fontSize: 'calc(2rem * var(--blog-header-scale))' }" class="mb-4">
+    <header :style="blogHeaderStyle" class="mb-4">
         <h1 class="mb-2 font-[inherit] text-[1em] leading-tight font-bold text-foreground">{{ blog.name }}</h1>
         <ViewStatsComponent
             v-if="viewStats"
@@ -30,12 +31,7 @@ defineProps<{
         </p>
     </header>
     <section>
-        <div
-            v-if="blog.descriptionHtml"
-            :style="{ fontFamily: 'var(--blog-body-font)', fontSize: 'calc(1rem * var(--blog-body-scale))' }"
-            class="prose max-w-none text-primary/90"
-            v-html="blog.descriptionHtml"
-        />
+        <div v-if="blog.descriptionHtml" :style="blogBodyTextStyle" class="prose max-w-none text-primary/90" v-html="blog.descriptionHtml" />
     </section>
     <footer :style="{ fontFamily: 'var(--blog-footer-font)', fontSize: 'calc(1rem * var(--blog-body-scale))' }" class="origin-right">
         <div v-if="blog.authorName && blog.authorEmail" class="author mb-8 max-w-11/12 text-end text-muted-foreground">

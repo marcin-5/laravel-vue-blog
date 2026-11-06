@@ -6,6 +6,14 @@ import { useBlogExcerpts } from '@/composables/useBlogExcerpts';
 import { useBlogPostsListLinks, type ActiveTag, type TagOperator } from '@/composables/useBlogPostsListLinks';
 import type { PostItem, Tag } from '@/types/blog.types';
 import type { Pagination } from '@/types';
+import {
+    blogBodyTextStyle,
+    blogHeaderStyle,
+    clearTagFilterClasses,
+    getTagChipClasses,
+    tagChipBaseClasses,
+    tagChipSizeClasses,
+} from '@/utils/blogStyles';
 import { Link, router } from '@inertiajs/vue3';
 import { Mail } from 'lucide-vue-next';
 import { computed } from 'vue';
@@ -29,19 +37,6 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const { showExcerpts } = useBlogExcerpts(props.blogSlug);
-
-const sectionStyle = {
-    fontFamily: 'var(--blog-body-font)',
-    fontSize: 'calc(1rem * var(--blog-body-scale))',
-};
-
-const headerStyle = {
-    fontFamily: 'var(--blog-header-font)',
-};
-
-const tagLinkBaseClasses = 'rounded-full border px-2 py-0.5 text-sm font-medium transition-colors';
-const activeTagLinkClasses = 'border-link bg-link/10 text-foreground';
-const inactiveTagLinkClasses = 'border-border bg-card text-muted-foreground hover:border-link hover:text-link';
 
 const paginationLinks = computed(() => props.pagination?.links ?? []);
 const hasPosts = computed(() => props.posts.length > 0);
@@ -94,16 +89,12 @@ function setTagOperator(operator: TagOperator): void {
 function isTagActive(tag: Tag): boolean {
     return selectedTags.value.some((activeTag) => activeTag.id === tag.id);
 }
-
-function getTagLinkClasses(tag: Tag) {
-    return [tagLinkBaseClasses, isTagActive(tag) ? activeTagLinkClasses : inactiveTagLinkClasses];
-}
 </script>
 
 <template>
-    <section :id="anchorId.slice(1)" :aria-label="t('blog.posts_list.aria')" :style="sectionStyle">
+    <section :id="anchorId.slice(1)" :aria-label="t('blog.posts_list.aria')" :style="blogBodyTextStyle">
         <div class="mb-4 flex items-center justify-between gap-4">
-            <h2 :style="headerStyle" class="text-xl font-semibold text-primary opacity-90">
+            <h2 :style="blogHeaderStyle" class="text-xl font-semibold text-primary opacity-90">
                 {{ postsListTitle }}:
                 <span v-if="selectedTags.length > 0" class="font-semibold text-primary-foreground">
                     {{ selectedTagNames }}
@@ -118,12 +109,12 @@ function getTagLinkClasses(tag: Tag) {
 
         <div v-if="hasTags" class="mb-4">
             <div class="flex flex-wrap gap-2">
-                <Link v-for="tag in allTags" :key="tag.id" :class="getTagLinkClasses(tag)" :href="getTagHref(tag)" preserve-scroll>
+                <Link v-for="tag in allTags" :key="tag.id" :class="getTagChipClasses(isTagActive(tag))" :href="getTagHref(tag)" preserve-scroll>
                     #{{ tag.name }}
                 </Link>
                 <Link
                     v-if="selectedTags.length > 0"
-                    :class="[tagLinkBaseClasses, 'border-link bg-link-hover/10 text-link-hover']"
+                    :class="[tagChipBaseClasses, tagChipSizeClasses.sm, clearTagFilterClasses]"
                     :href="getBlogLandingHref()"
                     preserve-scroll
                 >
@@ -139,8 +130,7 @@ function getTagLinkClasses(tag: Tag) {
                         v-for="tagOperator in TAG_OPERATORS"
                         :key="tagOperator"
                         :aria-pressed="activeOperator === tagOperator"
-                        :class="activeOperator === tagOperator ? activeTagLinkClasses : inactiveTagLinkClasses"
-                        class="rounded-full border px-2 py-0.5 text-xs font-medium transition-colors"
+                        :class="getTagChipClasses(activeOperator === tagOperator, 'xs')"
                         type="button"
                         @click="setTagOperator(tagOperator)"
                     >
