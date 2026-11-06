@@ -49,8 +49,13 @@ function getPaginationLinkClasses(link: PaginationLink) {
 
 <template>
     <nav :aria-label="t('blog.pagination.aria')" :style="navigationStyle" class="mt-4 flex items-center justify-center gap-1">
-        <Link v-for="(link, index) in links" :key="index" :class="getPaginationLinkClasses(link)" :href="link.url || ''" preserve-scroll>
-            {{ translatePaginationLabel(String(link.label)) }}
-        </Link>
+        <template v-for="(link, index) in links" :key="index">
+            <Link v-if="link.url" :class="getPaginationLinkClasses(link)" :href="link.url" preserve-scroll>
+                {{ translatePaginationLabel(String(link.label)) }}
+            </Link>
+            <span v-else :class="getPaginationLinkClasses(link)">
+                {{ translatePaginationLabel(String(link.label)) }}
+            </span>
+        </template>
     </nav>
 </template>

@@ -47,7 +47,7 @@ describe('BlogPostsPagination', () => {
 
     it('translates previous and next labels and strips arrow decorations', () => {
         const wrapper = mountPagination();
-        const texts = wrapper.findAll('a').map((link) => link.text());
+        const texts = wrapper.findAll('nav > *').map((item) => item.text());
 
         expect(texts).toEqual(['Wstecz', '1', '2', 'Dalej']);
     });
@@ -60,7 +60,7 @@ describe('BlogPostsPagination', () => {
 
     it('marks the active page with the active classes', () => {
         const wrapper = mountPagination();
-        const activeLink = wrapper.findAll('a')[1];
+        const activeLink = wrapper.findAll('nav > *')[1];
 
         expect(activeLink.classes()).toContain('border-foreground');
         expect(activeLink.classes()).not.toContain('border-border');
@@ -68,11 +68,11 @@ describe('BlogPostsPagination', () => {
 
     it('disables links without a url', () => {
         const wrapper = mountPagination();
-        const previousLink = wrapper.findAll('a')[0];
-        const enabledLink = wrapper.findAll('a')[2];
+        const previousItem = wrapper.findAll('nav > *')[0];
+        const enabledLink = wrapper.findAll('a')[1];
 
-        expect(previousLink.classes()).toContain('pointer-events-none');
-        expect(previousLink.classes()).not.toContain('hover:bg-secondary');
+        expect(previousItem.classes()).toContain('pointer-events-none');
+        expect(previousItem.classes()).not.toContain('hover:bg-secondary');
         expect(enabledLink.classes()).toContain('hover:bg-secondary');
         expect(enabledLink.classes()).not.toContain('pointer-events-none');
     });
@@ -83,9 +83,12 @@ describe('BlogPostsPagination', () => {
         expect(wrapper.findAll('a')[2].attributes('href')).toBe('/blogs/sample-blog?page=2');
     });
 
-    it('renders an empty href for links without a url', () => {
+    it('renders links without a url as spans without href', () => {
         const wrapper = mountPagination();
+        const previousItem = wrapper.findAll('nav > *')[0];
 
-        expect(wrapper.findAll('a')[0].attributes('href')).toBe('');
+        expect(previousItem.element.tagName).toBe('SPAN');
+        expect(previousItem.attributes('href')).toBeUndefined();
+        expect(wrapper.findAll('a')).toHaveLength(3);
     });
 });
