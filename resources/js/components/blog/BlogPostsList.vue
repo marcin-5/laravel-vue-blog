@@ -97,7 +97,21 @@ const postsListTitle = computed(() => {
         return props.activeTag ? t('group.posts_list.active_tag') : t('group.posts_list.title');
     }
 
-    return selectedTags.value.length === 0 ? t('blog.posts_list.title') : t('blog.posts_list.active_tag');
+    if (selectedTags.value.length === 1) {
+        return t('blog.posts_list.active_tag');
+    }
+
+    return selectedTags.value.length > 1 ? t('blog.posts_list.active_tags') : t('blog.posts_list.title');
+});
+const selectedTagNames = computed(() => {
+    const names = selectedTags.value.map((tag) => tag.name);
+    const conjunction = activeOperator.value === 'AND' ? t('blog.posts_list.tag_conjunction_and') : t('blog.posts_list.tag_conjunction_or');
+
+    if (names.length < 2) {
+        return names.join('');
+    }
+
+    return `${names.slice(0, -1).join(', ')}${conjunction}${names[names.length - 1]}`;
 });
 
 function getPostRouteParams(post: PostItem) {
@@ -214,7 +228,7 @@ function getPaginationLinkClasses(link: PaginationLink) {
             <h2 :style="headerStyle" class="text-xl font-semibold text-primary opacity-90">
                 {{ postsListTitle }}:
                 <span v-if="selectedTags.length > 0" class="font-semibold text-primary-foreground">
-                    {{ selectedTags.map((tag) => tag.name).join(', ') }}
+                    {{ selectedTagNames }}
                 </span>
             </h2>
 
@@ -238,7 +252,7 @@ function getPaginationLinkClasses(link: PaginationLink) {
                     {{ t('blog.posts_list.clear_filter') }}
                 </Link>
                 <div
-                    v-if="isMultiTagMode"
+                    v-if="isMultiTagMode && selectedTags.length >= 2"
                     :aria-label="t('blog.posts_list.operator_label')"
                     class="ml-auto flex shrink-0 flex-nowrap items-center gap-2"
                     role="group"

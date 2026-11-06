@@ -55,11 +55,13 @@
             "view_excerpt": "View excerpt",
             "newsletter_subscribe": "Subscribe to newsletter",
             "active_tag": "Posts tagged",
-            "all_tags": "All tags",
+            "active_tags": "Posts tagged",
+            "tag_conjunction_and": " and ",
+            "tag_conjunction_or": " or ",
             "clear_filter": "Clear",
             "operator_label": "Match tags",
-            "operator_and": "All (AND)",
-            "operator_or": "Any (OR)"
+            "operator_and": "All",
+            "operator_or": "Any"
         },
         "post_nav": {
             "aria": "Post navigation",

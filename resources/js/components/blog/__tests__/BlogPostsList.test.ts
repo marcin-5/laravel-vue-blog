@@ -9,7 +9,7 @@ vi.mock('@inertiajs/vue3', async () => {
 
     return {
         Link: defineComponent({
-            name: 'Link',
+            name: 'InertiaLink',
             props: { href: { type: String, required: true } },
             setup(props, { slots }) {
                 return () => h('a', { href: props.href }, slots.default?.());
@@ -19,7 +19,15 @@ vi.mock('@inertiajs/vue3', async () => {
     };
 });
 
-vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: (key: string) => key }) }));
+vi.mock('vue-i18n', () => ({
+    useI18n: () => ({
+        t: (key: string) =>
+            ({
+                'blog.posts_list.tag_conjunction_and': ' i ',
+                'blog.posts_list.tag_conjunction_or': ' lub ',
+            })[key] ?? key,
+    }),
+}));
 vi.mock('@/composables/useBlogExcerpts', () => ({ useBlogExcerpts: () => ({ showExcerpts: { value: false } }) }));
 vi.mock('@/components/ui/switch', () => ({ Switch: { template: '<input type="checkbox" />' } }));
 vi.mock('@/components/ui/tooltip', () => ({
@@ -62,15 +70,37 @@ describe('BlogPostsList multi-tag filters', () => {
     it('defaults the operator to AND and restores selections from the payload', () => {
         const wrapper = mountList({
             allowMultipleTagFiltering: true,
-            activeTags: [tagA],
+            activeTags: [tagA, tagB],
             operator: undefined,
         });
         const alphaLink = wrapper.findAll('a').find((link) => link.text() === '#Alpha');
 
         expect(wrapper.find('button[aria-pressed="true"]').text()).toBe('blog.posts_list.operator_and');
-        expect(wrapper.find('a[href*="tags%5B%5D=beta"]').exists()).toBe(true);
+        expect(wrapper.find('a[href*="tags%5B%5D=alpha"]').exists()).toBe(true);
         expect(alphaLink?.classes()).toContain('bg-link/10');
-        expect(new URL(alphaLink!.attributes('href')!, window.location.origin).searchParams.has('tags[]')).toBe(false);
+        expect(new URL(alphaLink!.attributes('href')!, window.location.origin).searchParams.getAll('tags[]')).toEqual(['beta']);
+        expect(wrapper.find('[role="group"]').exists()).toBe(true);
+    });
+
+    it('shows the operator and conjunction only for multiple selected tags', () => {
+        const wrapper = mountList({
+            allowMultipleTagFiltering: true,
+            activeTags: [tagA, tagB],
+            operator: 'OR',
+        });
+
+        expect(wrapper.find('[role="group"]').exists()).toBe(true);
+        expect(wrapper.find('h2').text()).toContain('blog.posts_list.active_tags: Alpha lub Beta');
+
+        const andWrapper = mountList({ allowMultipleTagFiltering: true, activeTags: [tagA, tagB], operator: 'AND' });
+        expect(andWrapper.find('h2').text()).toContain('blog.posts_list.active_tags: Alpha i Beta');
+    });
+
+    it('uses the singular title and hides the operator for one selected tag', () => {
+        const wrapper = mountList({ allowMultipleTagFiltering: true, activeTags: [tagA] });
+
+        expect(wrapper.find('[role="group"]').exists()).toBe(false);
+        expect(wrapper.find('h2').text()).toContain('blog.posts_list.active_tag: Alpha');
     });
 
     it('toggles tags while preserving unrelated query parameters and the selected operator', () => {

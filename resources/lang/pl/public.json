@@ -55,11 +55,13 @@
             "view_excerpt": "Zobacz skrót",
             "newsletter_subscribe": "Zapisz się do newslettera",
             "active_tag": "Wpisy z tagiem",
-            "all_tags": "Wszystkie tagi",
+            "active_tags": "Wpisy z tagami",
+            "tag_conjunction_and": " i ",
+            "tag_conjunction_or": " lub ",
             "clear_filter": "Wyczyść",
             "operator_label": "Łączenie tagów",
-            "operator_and": "Wszystkie (AND)",
-            "operator_or": "Dowolny (OR)"
+            "operator_and": "Wszystkie",
+            "operator_or": "Dowolny"
         },
         "post_nav": {
             "aria": "Nawigacja między postami",
