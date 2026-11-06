@@ -89,7 +89,7 @@ const paginationLinks = computed(() => props.pagination?.links ?? []);
 const hasPosts = computed(() => props.posts.length > 0);
 const hasPagination = computed(() => paginationLinks.value.length > 0);
 const hasTags = computed(() => Boolean(props.allTags?.length));
-const isMultiTagMode = computed(() => !props.isGroup && props.allowMultipleTagFiltering === true);
+const isMultiTagMode = computed(() => !props.isGroup && props.allowMultipleTagFiltering);
 const selectedTags = computed(() => props.activeTags ?? (props.activeTag ? [props.activeTag] : []));
 const activeOperator = computed(() => props.operator ?? 'AND');
 const postsListTitle = computed(() => {
@@ -237,20 +237,24 @@ function getPaginationLinkClasses(link: PaginationLink) {
                 >
                     {{ t('blog.posts_list.clear_filter') }}
                 </Link>
-            </div>
-            <div v-if="isMultiTagMode" class="mt-3 flex items-center gap-2 text-sm" role="group" :aria-label="t('blog.posts_list.operator_label')">
-                <span class="text-muted-foreground">{{ t('blog.posts_list.operator_label') }}:</span>
-                <button
-                    v-for="tagOperator in TAG_OPERATORS"
-                    :key="tagOperator"
-                    type="button"
-                    class="rounded border px-2 py-1 transition-colors"
-                    :class="activeOperator === tagOperator ? activeTagLinkClasses : inactiveTagLinkClasses"
-                    :aria-pressed="activeOperator === tagOperator"
-                    @click="setTagOperator(tagOperator)"
+                <div
+                    v-if="isMultiTagMode"
+                    :aria-label="t('blog.posts_list.operator_label')"
+                    class="ml-auto flex shrink-0 flex-nowrap items-center gap-2"
+                    role="group"
                 >
-                    {{ t(`blog.posts_list.operator_${tagOperator.toLowerCase()}`) }}
-                </button>
+                    <button
+                        v-for="tagOperator in TAG_OPERATORS"
+                        :key="tagOperator"
+                        :aria-pressed="activeOperator === tagOperator"
+                        :class="activeOperator === tagOperator ? activeTagLinkClasses : inactiveTagLinkClasses"
+                        class="rounded-full border px-2 py-0.5 text-xs font-medium transition-colors"
+                        type="button"
+                        @click="setTagOperator(tagOperator)"
+                    >
+                        {{ t(`blog.posts_list.operator_${tagOperator.toLowerCase()}`) }}
+                    </button>
+                </div>
             </div>
         </div>
 
