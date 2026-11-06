@@ -4,6 +4,16 @@ import { computed } from 'vue';
 export type ActiveTag = Pick<Tag, 'id' | 'name' | 'slug'>;
 export type TagOperator = 'AND' | 'OR';
 
+export type RouteParams = {
+    blog?: string;
+    group?: string;
+    mainDomain?: string;
+    postSlug: string;
+    tag?: string;
+    tags?: string[];
+    operator?: TagOperator;
+};
+
 export type BlogPostsListLinkProps = {
     blogSlug: string;
     mainDomain?: string;
@@ -33,8 +43,8 @@ export function useBlogPostsListLinks(props: BlogPostsListLinkProps) {
     const selectedTags = computed(() => props.activeTags ?? (props.activeTag ? [props.activeTag] : []));
     const activeOperator = computed(() => props.operator ?? 'AND');
 
-    function getPostRouteParams(post: PostItem): Record<string, any> {
-        const params: Record<string, any> = props.isGroup
+    function getPostRouteParams(post: PostItem): RouteParams {
+        const params: RouteParams = props.isGroup
             ? { group: props.blogSlug, postSlug: post.slug }
             : { blog: props.blogSlug, mainDomain: props.mainDomain, postSlug: post.slug };
 
