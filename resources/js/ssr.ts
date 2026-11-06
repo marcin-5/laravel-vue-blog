@@ -247,7 +247,7 @@ export default function render(page: Page) {
  * In production (standalone), we need to explicitly start the HTTP server.
  * In development, Vite handles this automatically via the exported render function.
  */
-const isProduction = process.env.NODE_ENV === 'production' || !process.env.VITE_DEV_SERVER_URL;
+const isProduction = process.env.NODE_ENV === 'production';
 
 if (isProduction) {
     startSafeSsrServer(render);
