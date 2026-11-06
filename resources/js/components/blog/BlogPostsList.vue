@@ -74,8 +74,8 @@ const navigationStyle = {
     fontFamily: 'var(--blog-nav-font)',
 };
 
-const tagLinkBaseClasses = 'rounded-full border px-2 py-0.5 text-xs font-medium transition-colors';
-const activeTagLinkClasses = 'border-link bg-link/10 text-link';
+const tagLinkBaseClasses = 'rounded-full border px-2 py-0.5 text-sm font-medium transition-colors';
+const activeTagLinkClasses = 'border-link bg-link/10 text-foreground';
 const inactiveTagLinkClasses = 'border-border bg-card text-muted-foreground hover:border-link hover:text-link';
 
 const paginationBaseClasses = 'rounded border px-2 py-1 text-sm text-primary transition-colors';
