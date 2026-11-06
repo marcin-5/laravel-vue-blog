@@ -35,6 +35,7 @@ class PublicBlogDetailResource extends JsonResource
             'authorName' => $this->user?->name,
             'authorEmail' => $this->user?->email,
             'sidebar' => (int) ($this->sidebar ?? 0),
+            'allowMultipleTagFiltering' => (bool) $this->allow_multiple_tag_filtering,
         ];
     }
 }

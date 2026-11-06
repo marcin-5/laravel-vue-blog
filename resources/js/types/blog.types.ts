@@ -29,6 +29,7 @@ export interface Blog {
     contact_seo_description?: string | null;
     theme?: BlogTheme;
     main_domain?: string | null;
+    allowMultipleTagFiltering?: boolean;
 }
 
 export interface BlogItem extends Blog {
@@ -136,6 +137,8 @@ export interface PostListing {
     posts: PostItem[];
     pagination?: Pagination | null;
     activeTag?: Pick<Tag, 'id' | 'name' | 'slug'> | null;
+    activeTags?: Pick<Tag, 'id' | 'name' | 'slug'>[];
+    operator?: 'AND' | 'OR';
     allTags?: Tag[];
 }
 
@@ -265,6 +268,7 @@ export interface AdminBlog {
     footer?: string | null;
     about?: string | null;
     is_published: boolean;
+    allow_multiple_tag_filtering: boolean;
     locale: string;
     sidebar?: number; // -50..50
     page_size?: number; // default 10
@@ -454,6 +458,7 @@ export interface BlogFormData {
     footer: string | null;
     motto: string | null;
     is_published: boolean;
+    allow_multiple_tag_filtering: boolean;
     locale: string;
     sidebar: number;
     page_size: number;

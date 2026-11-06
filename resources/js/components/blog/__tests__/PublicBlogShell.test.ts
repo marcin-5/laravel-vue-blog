@@ -33,7 +33,19 @@ vi.mock('@/components/blog/BlogFooter.vue', () => ({
 vi.mock('@/components/blog/BlogPostsList.vue', () => ({
     default: {
         name: 'BlogPostsList',
-        props: ['posts', 'blogSlug', 'mainDomain', 'blogId', 'pagination', 'isGroup', 'activeTag', 'allTags'],
+        props: [
+            'posts',
+            'blogSlug',
+            'mainDomain',
+            'blogId',
+            'pagination',
+            'isGroup',
+            'activeTag',
+            'activeTags',
+            'operator',
+            'allowMultipleTagFiltering',
+            'allTags',
+        ],
         template: '<div class="posts-list" />',
     },
 }));
@@ -70,6 +82,8 @@ const listing: PostListing = {
     posts: [{ id: 1, title: 'Post', slug: 'post' }],
     pagination: null,
     activeTag: { id: 3, name: 'Laravel', slug: 'laravel' },
+    activeTags: [{ id: 3, name: 'Laravel', slug: 'laravel' }],
+    operator: 'AND',
     allTags: [],
 };
 
@@ -101,8 +115,16 @@ describe('PublicBlogShell.vue', () => {
 
     it('renders the footer only when the footer html has content', () => {
         expect(mountShell().findComponent({ name: 'BlogFooter' }).exists()).toBe(true);
-        expect(mountShell({ chrome: { ...chrome, footerHtml: '   ' } }).findComponent({ name: 'BlogFooter' }).exists()).toBe(false);
-        expect(mountShell({ chrome: { ...chrome, footerHtml: null } }).findComponent({ name: 'BlogFooter' }).exists()).toBe(false);
+        expect(
+            mountShell({ chrome: { ...chrome, footerHtml: '   ' } })
+                .findComponent({ name: 'BlogFooter' })
+                .exists(),
+        ).toBe(false);
+        expect(
+            mountShell({ chrome: { ...chrome, footerHtml: null } })
+                .findComponent({ name: 'BlogFooter' })
+                .exists(),
+        ).toBe(false);
     });
 
     it('builds the posts list and the post nav from the listing', () => {
@@ -111,6 +133,9 @@ describe('PublicBlogShell.vue', () => {
         const postsList = wrapper.findComponent({ name: 'BlogPostsList' });
         expect(postsList.props('posts')).toEqual(listing.posts);
         expect(postsList.props('activeTag')).toEqual(listing.activeTag);
+        expect(postsList.props('activeTags')).toEqual(listing.activeTags);
+        expect(postsList.props('operator')).toBe('AND');
+        expect(postsList.props('allowMultipleTagFiltering')).toBeUndefined();
         expect(postsList.props('allTags')).toEqual(listing.allTags);
         expect(postsList.props('blogId')).toBe(blog.id);
         expect(postsList.props('blogSlug')).toBe(blog.slug);

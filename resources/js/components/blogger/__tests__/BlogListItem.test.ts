@@ -107,6 +107,7 @@ function createBlog(id: number): AdminBlog {
         seo_description: null,
         description: null,
         is_published: true,
+        allow_multiple_tag_filtering: false,
         locale: 'en',
     };
 }

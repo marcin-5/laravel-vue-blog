@@ -29,6 +29,7 @@ use Throwable;
  * @property string|null $motto
  * @property string|null $footer
  * @property bool $is_published
+ * @property bool $allow_multiple_tag_filtering
  * @property string $locale
  * @property Carbon $created_at
  * @property Carbon $updated_at
@@ -56,6 +57,7 @@ class Blog extends Model
         'motto',
         'footer',
         'is_published',
+        'allow_multiple_tag_filtering',
         'locale',
         'sidebar',
         'page_size',
@@ -63,8 +65,13 @@ class Blog extends Model
         'about',
     ];
 
+    protected $attributes = [
+        'allow_multiple_tag_filtering' => false,
+    ];
+
     protected $casts = [
         'is_published' => 'boolean',
+        'allow_multiple_tag_filtering' => 'boolean',
         'sidebar' => 'integer',
         'page_size' => 'integer',
         'theme' => 'array',

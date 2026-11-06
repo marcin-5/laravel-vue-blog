@@ -41,6 +41,7 @@ describe('blogFormUtils', () => {
             expect(data.name).toBe('');
             expect(data.seo_title).toBe(null);
             expect(data.is_published).toBe(false);
+            expect(data.allow_multiple_tag_filtering).toBe(false);
             expect(data.theme).toEqual({ light: {}, dark: {} });
         });
 
@@ -64,6 +65,7 @@ describe('blogFormUtils', () => {
                 footer: 'Footer',
                 motto: 'Motto',
                 is_published: true,
+                allow_multiple_tag_filtering: true,
                 locale: 'de',
                 sidebar: 1,
                 page_size: 20,
@@ -84,6 +86,7 @@ describe('blogFormUtils', () => {
                 footer: 'Footer',
                 motto: 'Motto',
                 is_published: true,
+                allow_multiple_tag_filtering: true,
                 locale: 'de',
                 sidebar: 1,
                 page_size: 20,
@@ -110,6 +113,7 @@ describe('blogFormUtils', () => {
                 footer: '',
                 motto: '',
                 is_published: false,
+                allow_multiple_tag_filtering: false,
                 locale: '',
                 sidebar: 0,
                 page_size: 0,
@@ -122,6 +126,7 @@ describe('blogFormUtils', () => {
                 name: 'Updated Name',
                 seo_title: 'Updated SEO',
                 is_published: true,
+                allow_multiple_tag_filtering: true,
                 locale: 'it',
             };
 
@@ -130,6 +135,7 @@ describe('blogFormUtils', () => {
             expect(form.name).toBe('Updated Name');
             expect(form.seo_title).toBe('Updated SEO');
             expect(form.is_published).toBe(true);
+            expect(form.allow_multiple_tag_filtering).toBe(true);
             expect(form.locale).toBe('it');
         });
     });

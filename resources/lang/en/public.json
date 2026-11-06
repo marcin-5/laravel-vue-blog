@@ -56,7 +56,10 @@
             "newsletter_subscribe": "Subscribe to newsletter",
             "active_tag": "Posts tagged",
             "all_tags": "All tags",
-            "clear_filter": "Clear"
+            "clear_filter": "Clear",
+            "operator_label": "Match tags",
+            "operator_and": "All (AND)",
+            "operator_or": "Any (OR)"
         },
         "post_nav": {
             "aria": "Post navigation",

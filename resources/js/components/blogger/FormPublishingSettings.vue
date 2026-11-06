@@ -8,6 +8,7 @@ import { useI18n } from 'vue-i18n';
 interface Props {
     modelValue: {
         is_published: boolean;
+        allow_multiple_tag_filtering?: boolean;
         locale: string;
         sidebar: number;
         page_size: number;
@@ -26,6 +27,7 @@ const { t } = useI18n();
 
 const translations = computed(() => ({
     published: t('blogger.form.published_label'),
+    allowMultipleTagFiltering: t('blogger.form.allow_multiple_tag_filtering_label'),
     locale: t('blogger.form.locale_label'),
     sidebar: t('blogger.form.sidebar_label'),
     sidebarHint: t('blogger.form.sidebar_hint'),
@@ -52,6 +54,13 @@ const model = computed({
                 :additional-info="additionalInfo"
                 :error="errors.is_published"
                 :label="translations.published"
+            />
+            <FormCheckboxField
+                v-if="model.allow_multiple_tag_filtering !== undefined"
+                :id="`${idPrefix}-allow-multiple-tag-filtering`"
+                v-model="model.allow_multiple_tag_filtering"
+                :error="errors.allow_multiple_tag_filtering"
+                :label="translations.allowMultipleTagFiltering"
             />
             <div class="ml-auto">
                 <FormSelectField

@@ -315,6 +315,7 @@
             "about_label": "About",
             "about_placeholder": "Content for the 'About' page (Markdown)...",
             "published_label": "Published",
+            "allow_multiple_tag_filtering_label": "Allow readers to filter by multiple tags",
             "locale_label": "Locale",
             "sidebar_label": "Sidebar position\/width",
             "sidebar_hint": "-50..-1 = left (% width), 0 = none, 1..50 = right (% width)",

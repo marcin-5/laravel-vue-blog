@@ -316,6 +316,7 @@
             "about_label": "O nas",
             "about_placeholder": "Treść strony 'O nas' (Markdown)...",
             "published_label": "Opublikowany",
+            "allow_multiple_tag_filtering_label": "Pozwól czytelnikom filtrować według wielu tagów",
             "locale_label": "Język",
             "sidebar_label": "Pozycja\/szerokość paska bocznego",
             "sidebar_hint": "-50..-1 = lewo (% szerokości), 0 = brak, 1..50 = prawo (% szerokości)",

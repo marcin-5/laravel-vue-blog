@@ -13,6 +13,7 @@ use App\Models\Blog;
 use App\Models\Tag;
 use App\Services\MarkdownService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 readonly class PublicBlogPagePayloadBuilder
 {
@@ -41,16 +42,23 @@ readonly class PublicBlogPagePayloadBuilder
     /**
      * Build the posts listing part of a public blog page payload.
      */
-    public function buildListing(Blog $blog, LengthAwarePaginator $paginator, ?Tag $tag = null): PublicPostListingData
+    /**
+     * @param  Collection<int, Tag>  $tags
+     */
+    public function buildListing(Blog $blog, LengthAwarePaginator $paginator, Collection $tags, string $operator = 'AND'): PublicPostListingData
     {
+        $activeTags = $tags->map(static fn(Tag $tag): array => [
+            'id' => $tag->id,
+            'name' => $tag->name,
+            'slug' => $tag->slug,
+        ])->values()->all();
+
         return new PublicPostListingData(
             posts: PublicPostResource::collection($paginator->items()),
             pagination: $this->formatPagination($paginator),
-            activeTag: $tag ? [
-                'id' => $tag->id,
-                'name' => $tag->name,
-                'slug' => $tag->slug,
-            ] : null,
+            activeTag: count($activeTags) === 1 ? $activeTags[0] : null,
+            activeTags: $activeTags,
+            operator: $operator,
             allTags: TagResource::collection($blog->tags->sortBy('name')->values()),
         );
     }

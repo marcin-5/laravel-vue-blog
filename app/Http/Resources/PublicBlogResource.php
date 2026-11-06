@@ -19,6 +19,7 @@ class PublicBlogResource extends JsonResource
             'motto' => $this->motto,
             'displayedMotto' => app(MottoSelector::class)->select($this->motto),
             'theme' => $this->theme,
+            'allowMultipleTagFiltering' => (bool) $this->allow_multiple_tag_filtering,
         ];
     }
 }

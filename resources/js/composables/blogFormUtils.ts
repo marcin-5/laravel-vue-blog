@@ -27,6 +27,7 @@ export function createDefaultFormData(locale: string = 'en'): BlogFormData {
         footer: null,
         motto: null,
         is_published: false,
+        allow_multiple_tag_filtering: false,
         locale,
         categories: [],
         sidebar: 0,
@@ -51,6 +52,7 @@ export function createFormDataFromBlog(blog: Blog | undefined, defaultLocale: st
         footer: blog.footer ?? null,
         motto: blog.motto ?? null,
         is_published: blog.is_published,
+        allow_multiple_tag_filtering: blog.allow_multiple_tag_filtering ?? false,
         locale: blog.locale || defaultLocale,
         sidebar: blog.sidebar ?? 0,
         page_size: blog.page_size ?? 10,
@@ -72,6 +74,7 @@ export function populateFormFromBlog(form: InertiaForm<BlogFormData>, blog: Blog
     form.footer = data.footer;
     form.motto = data.motto;
     form.is_published = data.is_published;
+    form.allow_multiple_tag_filtering = data.allow_multiple_tag_filtering;
     form.locale = data.locale;
     form.sidebar = data.sidebar;
     form.page_size = data.page_size;

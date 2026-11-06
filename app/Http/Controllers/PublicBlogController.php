@@ -24,6 +24,7 @@ use App\Services\StatsService;
 use App\Services\TranslationService;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -56,9 +57,11 @@ class PublicBlogController extends BasePublicController
         $this->ensureBlogIsPublic($blog);
         $blog->load(['landingPage', 'user']);
 
-        $paginator = $query->handle($blog);
+        $activeTags = $this->resolveActiveTags($request, $blog);
+        $operator = $this->resolveTagOperator($request, $blog);
+        $paginator = $query->handle($blog, $activeTags, $operator);
 
-        return $this->renderLandingPage($blog, $paginator);
+        return $this->renderLandingPage($blog, $paginator, $activeTags, $operator);
     }
 
     /**
@@ -92,10 +95,11 @@ class PublicBlogController extends BasePublicController
     ): Response {
         $this->ensureBlogIsPublic($blog);
 
-        $tag = null;
-        if ($request->has('tag')) {
-            $tag = $blog->tags()->where('slug', $request->query('tag'))->first();
-        }
+        $tag = is_string($request->query('tag'))
+            ? $blog->tags()->where('slug', $request->query('tag'))->first()
+            : null;
+        $activeTags = $this->resolveActiveTags($request, $blog, $tag, includeLegacyQueryTag: true);
+        $operator = $this->resolveTagOperator($request, $blog);
 
         $post = $blog
             ->posts()
@@ -116,7 +120,7 @@ class PublicBlogController extends BasePublicController
             ])
             ->firstOrFail();
 
-        $paginator = $query->handle($blog, $tag);
+        $paginator = $query->handle($blog, $activeTags, $operator);
         $paginator->setPath(route('blog.public.landing', ['blog' => $blog->slug, 'mainDomain' => $mainDomain]));
 
         $metaDescription = $post->excerpt ?: $this->seo->generateMetaDescription($post->content_html);
@@ -126,10 +130,10 @@ class PublicBlogController extends BasePublicController
             'post' => new PublicPostDetailResource($post),
             'chrome' => $this->payloadBuilder->buildChrome(
                 $blog,
-                $this->navigation->getPostNavigation($blog, $post, $tag),
+                $this->navigation->getPostNavigation($blog, $post, $tag, $activeTags->all(), $operator),
                 withFooter: false,
             )->toArray(),
-            'listing' => $this->payloadBuilder->buildListing($blog, $paginator, $tag)->toArray(),
+            'listing' => $this->payloadBuilder->buildListing($blog, $paginator, $activeTags, $operator)->toArray(),
             'seo' => $this->seoBuilder->buildPostSeo($blog, $post, $metaDescription)->toArray(),
             'viewStats' => Inertia::defer(fn() => $this->getViewStats(Post::class, $post->id, $blog->user_id)),
         ]);
@@ -154,26 +158,84 @@ class PublicBlogController extends BasePublicController
 
         $blog->load(['landingPage', 'user']);
 
-        $paginator = $query->handle($blog, $tag);
+        $activeTags = $this->resolveActiveTags($request, $blog, $tag);
+        $operator = $this->resolveTagOperator($request, $blog);
+        $paginator = $query->handle($blog, $activeTags, $operator);
 
-        return $this->renderLandingPage($blog, $paginator, $tag);
+        return $this->renderLandingPage($blog, $paginator, $activeTags, $operator, $tag);
     }
 
-    private function renderLandingPage(Blog $blog, LengthAwarePaginator $paginator, ?Tag $tag = null): Response
+    /**
+     * @return Collection<int, Tag>
+     */
+    private function resolveActiveTags(Request $request, Blog $blog, ?Tag $routeTag = null, bool $includeLegacyQueryTag = false): Collection
+    {
+        $slugs = [];
+
+        if ($blog->allow_multiple_tag_filtering && is_array($request->query('tags'))) {
+            $slugs = array_values(array_filter(
+                $request->query('tags'),
+                static fn(mixed $slug): bool => is_string($slug) && $slug !== '' && strlen($slug) <= 255,
+            ));
+        }
+
+        if ($includeLegacyQueryTag && is_string($request->query('tag')) && $request->query('tag') !== '') {
+            $slugs[] = $request->query('tag');
+        }
+
+        if ($routeTag !== null) {
+            $slugs[] = $routeTag->slug;
+        }
+
+        $slugs = array_values(array_unique($slugs));
+        if ($slugs === []) {
+            return new Collection;
+        }
+
+        $tagsBySlug = $blog->tags()->whereIn('slug', $slugs)->get()->keyBy('slug');
+
+        return new Collection(array_values(array_filter(array_map(
+            static fn(string $slug): ?Tag => $tagsBySlug->get($slug),
+            $slugs,
+        ))));
+    }
+
+    private function resolveTagOperator(Request $request, Blog $blog): string
+    {
+        return $blog->allow_multiple_tag_filtering && strtoupper((string) $request->query('operator')) === 'OR'
+            ? 'OR'
+            : 'AND';
+    }
+
+    /**
+     * @param  Collection<int, Tag>  $activeTags
+     */
+    private function renderLandingPage(
+        Blog $blog,
+        LengthAwarePaginator $paginator,
+        Collection $activeTags,
+        string $operator,
+        ?Tag $routeTag = null,
+    ): Response
     {
         return $this->renderWithTranslations('public/blog/Landing', 'blog', [
             'blog' => new PublicBlogDetailResource($blog),
             'landingHtml' => $blog->landingPage?->content_html ?? '',
             'chrome' => $this->payloadBuilder->buildChrome(
                 $blog,
-                $this->navigation->getLandingNavigation($blog, $tag),
+                $this->navigation->getLandingNavigation($blog, $routeTag, $activeTags->all(), $operator),
             )->toArray(),
-            'listing' => $this->payloadBuilder->buildListing($blog, $paginator, $tag)->toArray(),
+            'listing' => $this->payloadBuilder->buildListing($blog, $paginator, $activeTags, $operator)->toArray(),
             'seo' => $this->seoBuilder->buildLandingSeo(
                 $blog,
                 $paginator,
                 $this->buildLandingMetaDescription($blog),
-                $tag,
+                $routeTag,
+                $activeTags->map(static fn(Tag $tag): array => [
+                    'name' => $tag->name,
+                    'slug' => $tag->slug,
+                ])->all(),
+                $operator,
             )->toArray(),
             'viewStats' => Inertia::defer(fn() => $this->getViewStats(Blog::class, $blog->id, $blog->user_id)),
         ]);

@@ -5,12 +5,14 @@ import { useBlogExcerpts } from '@/composables/useBlogExcerpts';
 import type { PostItem, Tag } from '@/types/blog.types';
 import type { Pagination } from '@/types';
 import { formatDate } from '@/utils/dateUtils';
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import { Info, Mail } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 type ActiveTag = Pick<Tag, 'id' | 'name' | 'slug'>;
+type TagOperator = 'AND' | 'OR';
+const TAG_OPERATORS: TagOperator[] = ['AND', 'OR'];
 
 type PaginationLink = {
     active: boolean;
@@ -26,6 +28,9 @@ const props = defineProps<{
     pagination?: Pagination | null;
     isGroup?: boolean;
     activeTag?: ActiveTag | null;
+    activeTags?: ActiveTag[];
+    operator?: TagOperator;
+    allowMultipleTagFiltering?: boolean;
     allTags?: Tag[];
 }>();
 
@@ -84,12 +89,15 @@ const paginationLinks = computed(() => props.pagination?.links ?? []);
 const hasPosts = computed(() => props.posts.length > 0);
 const hasPagination = computed(() => paginationLinks.value.length > 0);
 const hasTags = computed(() => Boolean(props.allTags?.length));
+const isMultiTagMode = computed(() => !props.isGroup && props.allowMultipleTagFiltering === true);
+const selectedTags = computed(() => props.activeTags ?? (props.activeTag ? [props.activeTag] : []));
+const activeOperator = computed(() => props.operator ?? 'AND');
 const postsListTitle = computed(() => {
     if (props.isGroup) {
         return props.activeTag ? t('group.posts_list.active_tag') : t('group.posts_list.title');
     }
 
-    return !props.activeTag ? t('blog.posts_list.title') : t('blog.posts_list.active_tag');
+    return selectedTags.value.length === 0 ? t('blog.posts_list.title') : t('blog.posts_list.active_tag');
 });
 
 function getPostRouteParams(post: PostItem) {
@@ -97,7 +105,10 @@ function getPostRouteParams(post: PostItem) {
         ? { group: props.blogSlug, postSlug: post.slug }
         : { blog: props.blogSlug, mainDomain: props.mainDomain, postSlug: post.slug };
 
-    if (props.activeTag) {
+    if (isMultiTagMode.value && selectedTags.value.length > 0) {
+        params.tags = selectedTags.value.map((tag) => tag.slug);
+        params.operator = activeOperator.value;
+    } else if (props.activeTag) {
         params.tag = props.activeTag.slug;
     }
 
@@ -111,15 +122,62 @@ function getPostHref(post: PostItem): string {
 function getBlogLandingHref(): string {
     const anchor = props.isGroup ? '#group-posts-list' : '#posts-list';
     const params = props.isGroup ? { blog: props.blogSlug } : { blog: props.blogSlug, mainDomain: props.mainDomain };
-    return `${route(ROUTE_NAMES.blogLanding, params)}${anchor}`;
+
+    if (!isMultiTagMode.value) {
+        return `${route(ROUTE_NAMES.blogLanding, params)}${anchor}`;
+    }
+
+    return getMultiTagFilterHref([], activeOperator.value, anchor);
 }
 
 function getTagHref(tag: Tag): string {
+    if (isMultiTagMode.value) {
+        const selectedSlugs = new Set(selectedTags.value.map((activeTag) => activeTag.slug));
+        if (selectedSlugs.has(tag.slug)) {
+            selectedSlugs.delete(tag.slug);
+        } else {
+            selectedSlugs.add(tag.slug);
+        }
+
+        return getMultiTagFilterHref([...selectedSlugs], activeOperator.value, '#posts-list');
+    }
     const anchor = props.isGroup ? '#group-posts-list' : '#posts-list';
-    const params = props.isGroup
-        ? { blog: props.blogSlug, tag: tag.slug }
-        : { blog: props.blogSlug, mainDomain: props.mainDomain, tag: tag.slug };
+    const params = props.isGroup ? { blog: props.blogSlug, tag: tag.slug } : { blog: props.blogSlug, mainDomain: props.mainDomain, tag: tag.slug };
     return `${route(ROUTE_NAMES.blogTag, params)}${anchor}`;
+}
+
+function getMultiTagFilterHref(slugs: string[], operator: TagOperator, anchor: string): string {
+    const params = { blog: props.blogSlug, mainDomain: props.mainDomain };
+    const landingRoute = route(ROUTE_NAMES.blogLanding, params);
+    const query = new URLSearchParams();
+
+    if (typeof window !== 'undefined') {
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.forEach((value, key) => {
+            if (!key.startsWith('tags[') && !['tags', 'tag', 'operator', 'page'].includes(key)) {
+                query.append(key, value);
+            }
+        });
+    }
+
+    slugs.forEach((slug) => query.append('tags[]', slug));
+    query.set('operator', operator);
+
+    return `${landingRoute}${landingRoute.includes('?') ? '&' : '?'}${query.toString()}${anchor}`;
+}
+
+function setTagOperator(operator: TagOperator): void {
+    const href = getMultiTagFilterHref(
+        selectedTags.value.map((tag) => tag.slug),
+        operator,
+        '#posts-list',
+    );
+
+    router.visit(href, { preserveScroll: true });
+}
+
+function isTagActive(tag: Tag): boolean {
+    return selectedTags.value.some((activeTag) => activeTag.id === tag.id);
 }
 
 function getNewsletterHref(): string {
@@ -127,11 +185,11 @@ function getNewsletterHref(): string {
 }
 
 function getTagLinkClasses(tag: Tag) {
-    return [tagLinkBaseClasses, props.activeTag?.id === tag.id ? activeTagLinkClasses : inactiveTagLinkClasses];
+    return [tagLinkBaseClasses, isTagActive(tag) ? activeTagLinkClasses : inactiveTagLinkClasses];
 }
 
 function getPostTagLinkClasses(tag: Tag) {
-    return ['text-xs font-medium transition-colors hover:text-link', tag.id === props.activeTag?.id ? 'text-link-hover' : 'text-muted-foreground'];
+    return ['text-xs font-medium transition-colors hover:text-link', isTagActive(tag) ? 'text-link-hover' : 'text-muted-foreground'];
 }
 
 function translatePaginationLabel(rawLabel: string): string {
@@ -155,7 +213,9 @@ function getPaginationLinkClasses(link: PaginationLink) {
         <div class="mb-4 flex items-center justify-between gap-4">
             <h2 :style="headerStyle" class="text-xl font-semibold text-primary opacity-90">
                 {{ postsListTitle }}:
-                <span v-if="activeTag" class="font-semibold text-primary-foreground">{{ activeTag.name }}</span>
+                <span v-if="selectedTags.length > 0" class="font-semibold text-primary-foreground">
+                    {{ selectedTags.map((tag) => tag.name).join(', ') }}
+                </span>
             </h2>
 
             <div class="flex items-center gap-2">
@@ -170,13 +230,27 @@ function getPaginationLinkClasses(link: PaginationLink) {
                     #{{ tag.name }}
                 </Link>
                 <Link
-                    v-if="activeTag"
+                    v-if="selectedTags.length > 0"
                     :class="[tagLinkBaseClasses, 'border-link bg-link-hover/10 text-link-hover']"
                     :href="getBlogLandingHref()"
                     preserve-scroll
                 >
                     {{ t('blog.posts_list.clear_filter') }}
                 </Link>
+            </div>
+            <div v-if="isMultiTagMode" class="mt-3 flex items-center gap-2 text-sm" role="group" :aria-label="t('blog.posts_list.operator_label')">
+                <span class="text-muted-foreground">{{ t('blog.posts_list.operator_label') }}:</span>
+                <button
+                    v-for="tagOperator in TAG_OPERATORS"
+                    :key="tagOperator"
+                    type="button"
+                    class="rounded border px-2 py-1 transition-colors"
+                    :class="activeOperator === tagOperator ? activeTagLinkClasses : inactiveTagLinkClasses"
+                    :aria-pressed="activeOperator === tagOperator"
+                    @click="setTagOperator(tagOperator)"
+                >
+                    {{ t(`blog.posts_list.operator_${tagOperator.toLowerCase()}`) }}
+                </button>
             </div>
         </div>
 

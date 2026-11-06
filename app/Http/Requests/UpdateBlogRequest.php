@@ -25,6 +25,7 @@ class UpdateBlogRequest extends FormRequest
             'footer' => ['nullable', 'string'],
             'motto' => ['nullable', 'string'],
             'is_published' => ['sometimes', 'boolean'],
+            'allow_multiple_tag_filtering' => ['sometimes', 'boolean'],
             'categories' => ['sometimes', 'array'],
             'categories.*' => ['integer', 'exists:categories,id'],
             'locale' => ['sometimes', 'string', 'in:' . implode(',', $config['supported_locales'])],
@@ -86,6 +87,10 @@ class UpdateBlogRequest extends FormRequest
 
         if (array_key_exists('is_published', $validated)) {
             $data['is_published'] = (bool) $validated['is_published'];
+        }
+
+        if (array_key_exists('allow_multiple_tag_filtering', $validated)) {
+            $data['allow_multiple_tag_filtering'] = (bool) $validated['allow_multiple_tag_filtering'];
         }
 
         if (array_key_exists('locale', $validated)) {

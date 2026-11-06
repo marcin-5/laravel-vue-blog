@@ -35,6 +35,34 @@ it('updates blog theme colors', function () {
         ->and($blog->theme)->toBe($themeData);
 });
 
+it('allows bloggers to enable multiple tag filtering', function () {
+    $user = User::factory()->create();
+    $blog = Blog::factory()->create(['user_id' => $user->id]);
+
+    expect($blog->allow_multiple_tag_filtering)->toBeFalse();
+
+    actingAs($user)
+        ->patch(route('blogs.update', $blog), [
+            'allow_multiple_tag_filtering' => true,
+        ])
+        ->assertRedirect();
+
+    expect($blog->refresh()->allow_multiple_tag_filtering)->toBeTrue();
+});
+
+it('rejects invalid values for multiple tag filtering', function () {
+    $user = User::factory()->create();
+    $blog = Blog::factory()->create(['user_id' => $user->id]);
+
+    actingAs($user)
+        ->patch(route('blogs.update', $blog), [
+            'allow_multiple_tag_filtering' => 'enabled',
+        ])
+        ->assertSessionHasErrors('allow_multiple_tag_filtering');
+
+    expect($blog->refresh()->allow_multiple_tag_filtering)->toBeFalse();
+});
+
 it('can set theme to null or empty', function () {
     $user = User::factory()->create();
     $blog = Blog::factory()->create([

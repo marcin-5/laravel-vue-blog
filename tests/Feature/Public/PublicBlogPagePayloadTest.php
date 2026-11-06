@@ -38,6 +38,7 @@ it('exposes grouped chrome and listing props on the landing page', function () {
         ->assertInertia(fn(Assert $page) => $page
             ->component('public/blog/Landing')
             ->has('blog')
+            ->where('blog.allowMultipleTagFiltering', false)
             ->has('landingHtml')
             ->where('chrome.locale', 'pl')
             ->where('chrome.sidebar', -30)
@@ -55,8 +56,20 @@ it('exposes grouped chrome and listing props on the landing page', function () {
         );
 });
 
+it('exposes whether a blog allows filtering by multiple tags', function () {
+    $blog = createPublicBlogWithPosts(['allow_multiple_tag_filtering' => true]);
+
+    $this
+        ->get(getBlogUrl($blog))
+        ->assertSuccessful()
+        ->assertInertia(fn(Assert $page) => $page
+            ->where('blog.allowMultipleTagFiltering', true)
+            ->etc(),
+        );
+});
+
 it('exposes grouped chrome and listing props alongside the post on the post page', function () {
-    $blog = createPublicBlogWithPosts();
+    $blog = createPublicBlogWithPosts(['allow_multiple_tag_filtering' => true]);
     $post = $blog->posts()->first();
 
     $this
@@ -65,6 +78,7 @@ it('exposes grouped chrome and listing props alongside the post on the post page
         ->assertInertia(fn(Assert $page) => $page
             ->component('public/blog/Post')
             ->has('blog')
+            ->where('blog.allowMultipleTagFiltering', true)
             ->has('post')
             ->has('seo')
             ->where('chrome.locale', 'pl')

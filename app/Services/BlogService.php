@@ -20,6 +20,7 @@ readonly class BlogService
         'motto',
         'footer',
         'is_published',
+        'allow_multiple_tag_filtering',
         'locale',
         'sidebar',
         'page_size',

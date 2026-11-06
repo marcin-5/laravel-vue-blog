@@ -7,11 +7,15 @@ namespace App\Queries\Public;
 use App\Models\Blog;
 use App\Models\Tag;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Number;
 
 class PublicBlogPostsQuery
 {
-    public function handle(Blog $blog, ?Tag $tag = null): LengthAwarePaginator
+    /**
+     * @param  Collection<int, Tag>  $tags
+     */
+    public function handle(Blog $blog, Collection $tags, string $operator = 'AND'): LengthAwarePaginator
     {
         $size = Number::clamp(
             (int) ($blog->page_size ?? config('blog.default_page_size')),
@@ -21,8 +25,13 @@ class PublicBlogPostsQuery
 
         $builder = $blog->posts()->forPublicListing()->with('tags');
 
-        if ($tag !== null) {
-            $builder->whereHas('tags', fn($q) => $q->whereKey($tag->id));
+        if ($tags->isNotEmpty()) {
+            $builder->whereHas(
+                'tags',
+                fn($query) => $query->whereIn('tags.id', $tags->modelKeys()),
+                '>=',
+                $operator === 'AND' ? $tags->count() : 1,
+            );
         }
 
         return $builder

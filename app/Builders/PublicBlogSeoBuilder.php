@@ -33,6 +33,8 @@ readonly class PublicBlogSeoBuilder
         LengthAwarePaginator $paginator,
         string $metaDescription,
         ?Tag $tag = null,
+        array $activeTags = [],
+        string $operator = 'AND',
     ): SeoData {
         $baseUrl = $this->getBlogBaseUrl($blog);
         $appBaseUrl = $this->getAppBaseUrl($blog);
@@ -41,7 +43,7 @@ readonly class PublicBlogSeoBuilder
         return new SeoData(
             title: $this->getLandingTitle($blog, $tag),
             description: $metaDescription,
-            canonicalUrl: $this->getLandingCanonicalUrl($baseUrl, $tag),
+            canonicalUrl: $this->getLandingCanonicalUrl($baseUrl, $tag, $activeTags, $operator),
             ogImage: $this->getOgImage($appBaseUrl, $locale),
             ogType: self::BLOG_OG_TYPE,
             locale: $locale,
@@ -85,8 +87,22 @@ readonly class PublicBlogSeoBuilder
         return $blog->seo_title ?: __('seo.title_format', ['page' => $blog->name, 'site' => config('app.name')]);
     }
 
-    private function getLandingCanonicalUrl(string $baseUrl, ?Tag $tag): string
+    /**
+     * @param  list<array{name: string, slug: string}>  $activeTags
+     */
+    private function getLandingCanonicalUrl(string $baseUrl, ?Tag $tag, array $activeTags, string $operator): string
     {
+        if (count($activeTags) > 1) {
+            return $baseUrl . '/?' . http_build_query([
+                'tags' => array_column($activeTags, 'slug'),
+                'operator' => $operator,
+            ]);
+        }
+
+        if (count($activeTags) === 1) {
+            return $baseUrl . '/tags/' . $activeTags[0]['slug'];
+        }
+
         if ($tag === null) {
             return $baseUrl;
         }

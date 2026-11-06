@@ -56,6 +56,8 @@ const hasFooterContent = computed(() => hasContent(props.chrome.footerHtml));
                     v-if="listing"
                     id="posts-list"
                     :activeTag="listing.activeTag"
+                    :activeTags="listing.activeTags"
+                    :allowMultipleTagFiltering="blog.allowMultipleTagFiltering"
                     :allTags="listing.allTags"
                     :blogId="blog.id"
                     :blogSlug="blog.slug"
@@ -63,6 +65,7 @@ const hasFooterContent = computed(() => hasContent(props.chrome.footerHtml));
                     :mainDomain="blog.main_domain ?? undefined"
                     :pagination="listing.pagination"
                     :posts="listing.posts"
+                    :operator="listing.operator"
                 />
             </slot>
         </template>

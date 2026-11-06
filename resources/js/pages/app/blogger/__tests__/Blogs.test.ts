@@ -100,6 +100,7 @@ describe('Blogs.vue', () => {
             seo_description: null,
             description: null,
             is_published: true,
+            allow_multiple_tag_filtering: false,
             locale: 'en',
         },
         {
@@ -111,6 +112,7 @@ describe('Blogs.vue', () => {
             seo_description: null,
             description: null,
             is_published: true,
+            allow_multiple_tag_filtering: false,
             locale: 'en',
         },
     ];
