@@ -123,6 +123,6 @@ describe('ProgressIndicators.vue', () => {
         expect(wrapper.text()).toContain('lead_alternative_target');
         expect(wrapper.text()).toContain('2');
         expect(wrapper.find('.lead-alternative-marker').exists()).toBe(true);
-        expect(wrapper.find('.lead-alternative-marker').attributes('style')).toContain('left: 66.66666666666666%');
+        expect(Number.parseFloat(wrapper.find('.lead-alternative-marker').element.style.left)).toBeCloseTo(200 / 3, 4);
     });
 });
