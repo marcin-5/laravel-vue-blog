@@ -8,7 +8,7 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build && npm run build:ssr \
+RUN npm run build:ssr \
     && find public bootstrap/ssr -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -d ' ' -f1 > assets.sha256
 
 # Stage 2: Base PHP image with common dependencies
