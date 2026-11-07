@@ -1,3 +1,4 @@
+import { ref } from 'vue';
 import { describe, expect, it } from 'vitest';
 import { useBlogExcerpts } from '../useBlogExcerpts';
 
@@ -13,6 +14,18 @@ describe('useBlogExcerpts', () => {
 
         excerpts1.value = false;
         expect(excerpts2.value).toBe(false);
+    });
+
+    it('follows the blog slug when it is passed as a getter', () => {
+        const slug = ref('blogReactiveA');
+        const { showExcerpts } = useBlogExcerpts(() => slug.value);
+        useBlogExcerpts('blogReactiveB').showExcerpts.value = false;
+
+        expect(showExcerpts.value).toBe(true);
+
+        slug.value = 'blogReactiveB';
+
+        expect(showExcerpts.value).toBe(false);
     });
 
     it('maintains separate state for different slugs', () => {

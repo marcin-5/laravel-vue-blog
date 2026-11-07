@@ -36,7 +36,7 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const { showExcerpts } = useBlogExcerpts(props.blogSlug);
+const { showExcerpts } = useBlogExcerpts(() => props.blogSlug);
 
 const paginationLinks = computed(() => props.pagination?.links ?? []);
 const hasPosts = computed(() => props.posts.length > 0);

@@ -1,18 +1,25 @@
 import { useLocalStorage } from '@vueuse/core';
+import { computed, toValue, type MaybeRefOrGetter, type Ref } from 'vue';
 
 // Singleton state — shared across all component instances
 // Store states per blog slug to avoid conflicts if navigating between blogs
-const excerptsStates: Record<string, any> = {};
+const excerptsStates: Record<string, Ref<boolean>> = {};
 
-export function useBlogExcerpts(blogSlug: string) {
-    const storageKey = `blog_show_excerpts_${blogSlug}`;
-
-    // Initialize state for this blog if not already done
+function getExcerptsState(blogSlug: string): Ref<boolean> {
     if (!excerptsStates[blogSlug]) {
-        excerptsStates[blogSlug] = useLocalStorage(storageKey, true);
+        excerptsStates[blogSlug] = useLocalStorage(`blog_show_excerpts_${blogSlug}`, true);
     }
 
-    const showExcerpts = excerptsStates[blogSlug];
+    return excerptsStates[blogSlug];
+}
+
+export function useBlogExcerpts(blogSlug: MaybeRefOrGetter<string>) {
+    const showExcerpts = computed({
+        get: () => getExcerptsState(toValue(blogSlug)).value,
+        set: (value: boolean) => {
+            getExcerptsState(toValue(blogSlug)).value = value;
+        },
+    });
 
     return { showExcerpts };
 }
