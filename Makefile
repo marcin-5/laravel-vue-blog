@@ -646,7 +646,9 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 	-$(DOCKER_COMPOSE_PROD) exec -T app php artisan optimize:clear || true
 	-$(DOCKER_COMPOSE_PROD) exec -T app php artisan package:discover --ansi || true
 	@echo "🚀 Recreating core services without touching caddy..."
-	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps app ssr queue scheduler
+	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps app
+	$(MAKE) prod-wait
+	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps ssr queue scheduler
 	$(MAKE) prod-health-runtime
 	$(MAKE) prod-versions
 	@echo ""

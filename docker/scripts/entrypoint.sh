@@ -65,52 +65,59 @@ fi
 # Initialize/sync built assets into mounted volumes only when the image changed.
 ASSET_VERSION_FILE=/opt/built/assets.sha256
 ASSET_MARKER=bootstrap/cache/.assets-version
+ASSET_LOCK=bootstrap/cache/.assets-sync.lock
 
-if [ -f "$ASSET_VERSION_FILE" ] && [ -f "$ASSET_MARKER" ] \
-    && [ "$(cat "$ASSET_VERSION_FILE")" = "$(cat "$ASSET_MARKER")" ]; then
-    echo "Built assets are already synchronized."
-else
-    echo "Synchronizing built assets into mounted volumes..."
+# Several containers (app, ssr, queue, scheduler) share the public_files volume.
+# The lock serializes the sync so no container reads or removes files while another one copies them.
+(
+    flock -x 9
 
-    if [ -d /opt/built/public/build ]; then
-        mkdir -p /var/www/html/public/build
-        if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/public/build/*; fi
-        cp -a /opt/built/public/build/. /var/www/html/public/build/
+    if [ -f "$ASSET_VERSION_FILE" ] && [ -f "$ASSET_MARKER" ] \
+        && [ "$(cat "$ASSET_VERSION_FILE")" = "$(cat "$ASSET_MARKER")" ]; then
+        echo "Built assets are already synchronized."
+    else
+        echo "Synchronizing built assets into mounted volumes..."
+
+        if [ -d /opt/built/public/build ]; then
+            mkdir -p /var/www/html/public/build
+            if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/public/build/*; fi
+            cp -a /opt/built/public/build/. /var/www/html/public/build/
+        fi
+
+        if [ -d /opt/built/public/img ]; then
+            mkdir -p /var/www/html/public/img
+            if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/public/img/*; fi
+            cp -a /opt/built/public/img/. /var/www/html/public/img/
+        fi
+
+        if [ -d /opt/built/public/pl ]; then
+            mkdir -p /var/www/html/public/pl
+            if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/public/pl/*; fi
+            cp -a /opt/built/public/pl/. /var/www/html/public/pl/
+        fi
+
+        if [ -d /opt/built/public/en ]; then
+            mkdir -p /var/www/html/public/en
+            if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/public/en/*; fi
+            cp -a /opt/built/public/en/. /var/www/html/public/en/
+        fi
+
+        if [ -d /opt/built/public ]; then
+            find /opt/built/public -maxdepth 1 -type f -exec cp -p {} /var/www/html/public/ \;
+        fi
+
+        if [ -d /opt/built/bootstrap/ssr ]; then
+            mkdir -p /var/www/html/bootstrap/ssr
+            if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/bootstrap/ssr/*; fi
+            cp -a /opt/built/bootstrap/ssr/. /var/www/html/bootstrap/ssr/
+        fi
+
+        if [ -f "$ASSET_VERSION_FILE" ]; then
+            cp "$ASSET_VERSION_FILE" "$ASSET_MARKER.tmp"
+            mv "$ASSET_MARKER.tmp" "$ASSET_MARKER"
+        fi
     fi
-
-    if [ -d /opt/built/public/img ]; then
-        mkdir -p /var/www/html/public/img
-        if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/public/img/*; fi
-        cp -a /opt/built/public/img/. /var/www/html/public/img/
-    fi
-
-    if [ -d /opt/built/public/pl ]; then
-        mkdir -p /var/www/html/public/pl
-        if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/public/pl/*; fi
-        cp -a /opt/built/public/pl/. /var/www/html/public/pl/
-    fi
-
-    if [ -d /opt/built/public/en ]; then
-        mkdir -p /var/www/html/public/en
-        if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/public/en/*; fi
-        cp -a /opt/built/public/en/. /var/www/html/public/en/
-    fi
-
-    if [ -d /opt/built/public ]; then
-        find /opt/built/public -maxdepth 1 -type f -exec cp -p {} /var/www/html/public/ \;
-    fi
-
-    if [ -d /opt/built/bootstrap/ssr ]; then
-        mkdir -p /var/www/html/bootstrap/ssr
-        if [ "$APP_ENV" = "production" ]; then rm -rf /var/www/html/bootstrap/ssr/*; fi
-        cp -a /opt/built/bootstrap/ssr/. /var/www/html/bootstrap/ssr/
-    fi
-
-    if [ -f "$ASSET_VERSION_FILE" ]; then
-        cp "$ASSET_VERSION_FILE" "$ASSET_MARKER.tmp"
-        mv "$ASSET_MARKER.tmp" "$ASSET_MARKER"
-    fi
-fi
+) 9>"$ASSET_LOCK"
 
 # If running as root, fix ownership and permissions on mounted volumes
 if [ "$(id -u)" = "0" ]; then
