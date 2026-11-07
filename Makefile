@@ -388,6 +388,15 @@ prod-check-assets: ## Verify built assets in app and SSR containers
 				exit 1
 			fi
 		done
+		if [ ! -f /var/www/html/bootstrap/cache/.assets-version ] \
+			|| [ "$$(cat /opt/built/assets.sha256)" != "$$(cat /var/www/html/bootstrap/cache/.assets-version)" ]; then
+			echo "❌ Production asset marker does not match the built image." >&2
+			exit 1
+		fi
+		if ! cmp -s /opt/built/public/build/manifest.json /var/www/html/public/build/manifest.json; then
+			echo "❌ Production Vite manifest differs from the built image." >&2
+			exit 1
+		fi
 	'; \
 	$(DOCKER_COMPOSE_PROD) exec -T ssr sh -lc '
 		test -d /var/www/html/bootstrap/ssr && test -n "$$(find /var/www/html/bootstrap/ssr -mindepth 1 -maxdepth 1 -print -quit)"
@@ -399,6 +408,7 @@ prod-deploy: ## Build/Start prod, run optimizations & migrations
 	git pull --ff-only
 	@echo "🧹 Clearing old bootstrap cache to prevent worker stuck..."
 	rm -rf /srv/laravel-blog/bootstrap_cache/* 2>/dev/null || true
+	rm -f /srv/laravel-blog/bootstrap_cache/.assets-version
 	$(DOCKER_COMPOSE_PROD) build app ssr
 	$(DOCKER_COMPOSE_PROD) up -d
 	$(MAKE) prod-health-runtime
@@ -630,6 +640,8 @@ prod-update: ## Update code from Git and restart selected services with zero-502
 	$(MAKE) prod-queue-pause-all
 	@echo "🧹 Clearing old bootstrap cache to prevent worker stuck..."
 	rm -rf /srv/laravel-blog/bootstrap_cache/* 2>/dev/null || true
+	@echo "🧹 Invalidating the built-assets synchronization marker..."
+	rm -f /srv/laravel-blog/bootstrap_cache/.assets-version
 	@echo "🔧 Clearing Laravel caches before recreate..."
 	-$(DOCKER_COMPOSE_PROD) exec -T app php artisan optimize:clear || true
 	-$(DOCKER_COMPOSE_PROD) exec -T app php artisan package:discover --ansi || true
@@ -660,6 +672,8 @@ prod-update-data: ## Pull code and rebuild only the app container for data/code 
 	$(DOCKER_COMPOSE_PROD) build app
 	$(MAKE) prod-maintenance-on
 	$(MAKE) prod-queue-pause-all
+	@echo "🧹 Invalidating the built-assets synchronization marker..."
+	rm -f /srv/laravel-blog/bootstrap_cache/.assets-version
 	@echo "🚀 Recreating app service..."
 	$(DOCKER_COMPOSE_PROD) up -d --force-recreate --no-deps app
 	$(MAKE) prod-wait
