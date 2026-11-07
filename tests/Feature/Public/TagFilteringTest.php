@@ -36,6 +36,7 @@ it('lists only posts assigned to the given tag within the blog', function () {
         )
         ->has('listing.posts', 2)
         ->has('listing.pagination')
+        ->where('seo.robots', 'noindex, follow')
         ->where('seo.canonicalUrl', getBlogUrl($blog, "/tags/$tag->slug")),
     );
 });
@@ -185,6 +186,7 @@ it('filters multiple tags using the selected operator', function (string $operat
             ->where('listing.operator', $operator)
             ->has('listing.activeTags', 2)
             ->has('listing.posts', $expectedCount)
+            ->where('seo.robots', 'noindex, follow')
             ->where('chrome.navigation.landingUrl', fn(string $url) => str_contains($url, 'tags%5B0%5D=' . $tagA->slug)
                 && str_contains($url, 'tags%5B1%5D=' . $tagB->slug)
                 && str_contains($url, 'operator=' . $operator))

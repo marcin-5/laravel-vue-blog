@@ -53,6 +53,7 @@ readonly class PublicBlogSeoBuilder
                 $baseUrl,
                 $metaDescription,
             ),
+            robots: $activeTags !== [] ? 'noindex, follow' : null,
         );
     }
 
