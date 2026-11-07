@@ -402,6 +402,10 @@ prod-check-assets: ## Verify built assets in app and SSR containers
 		test -d /var/www/html/bootstrap/ssr && test -n "$$(find /var/www/html/bootstrap/ssr -mindepth 1 -maxdepth 1 -print -quit)"
 	'
 
+prod-assets-status: ## Show built vs mounted asset manifests and marker (no manual --env-file needed)
+	@$(DOCKER_COMPOSE_PROD) exec -T app sh -lc 'ls -l --time-style=full-iso /opt/built/public/build/manifest.json /var/www/html/public/build/manifest.json /var/www/html/bootstrap/cache/.assets-version; sha256sum /opt/built/public/build/manifest.json /var/www/html/public/build/manifest.json; cat /opt/built/assets.sha256 /var/www/html/bootstrap/cache/.assets-version'
+	@$(DOCKER_COMPOSE_PROD) logs app | grep -i synchron || true
+
 # Full deployment flow: pull code/images, rebuild, wait for app, optimize, migrate
 prod-deploy: ## Build/Start prod, run optimizations & migrations
 	# If building from source on the server, ensure latest code first:

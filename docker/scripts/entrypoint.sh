@@ -72,8 +72,12 @@ ASSET_LOCK=bootstrap/cache/.assets-sync.lock
 (
     flock -x 9
 
+    # The marker alone is not enough: the public_files volume can keep a stale manifest.json
+    # while the marker matches the image, so the manifest content is compared as well.
     if [ -f "$ASSET_VERSION_FILE" ] && [ -f "$ASSET_MARKER" ] \
-        && [ "$(cat "$ASSET_VERSION_FILE")" = "$(cat "$ASSET_MARKER")" ]; then
+        && [ "$(cat "$ASSET_VERSION_FILE")" = "$(cat "$ASSET_MARKER")" ] \
+        && [ -f /opt/built/public/build/manifest.json ] \
+        && cmp -s /opt/built/public/build/manifest.json /var/www/html/public/build/manifest.json; then
         echo "Built assets are already synchronized."
     else
         echo "Synchronizing built assets into mounted volumes..."
