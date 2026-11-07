@@ -44,12 +44,17 @@ const postUrl = computed(() => {
     // We try to find the blog slug from the page props or from the post object if it was loaded with it
     const blog = (page.props.blogs as any[])?.find((b: any) => b.id === props.post.blog_id);
     const blogSlug = blog?.slug;
+    const mainDomain = blog?.main_domain;
 
-    if (!blogSlug) {
+    if (!blogSlug || !mainDomain) {
         return '';
     }
 
-    return `${window.location.origin}/${blogSlug}/${props.post.slug}`;
+    return route('blog.public.post', {
+        blog: blogSlug,
+        mainDomain,
+        postSlug: props.post.slug,
+    });
 });
 
 function copyUrl() {
