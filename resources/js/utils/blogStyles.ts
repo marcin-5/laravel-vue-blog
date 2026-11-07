@@ -10,7 +10,7 @@ export const blogBodyTextStyle = {
 
 export const blogHeaderStyle = {
     fontFamily: 'var(--blog-header-font)',
-    fontSize: 'calc(2rem * var(--blog-header-scale))',
+    fontSize: 'calc(1.25rem * var(--blog-header-scale))',
 };
 
 export const tagChipSizeClasses = {

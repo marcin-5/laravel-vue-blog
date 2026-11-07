@@ -3,7 +3,7 @@ import BlogPostListItem from '@/components/blog/BlogPostListItem.vue';
 import BlogPostsPagination from '@/components/blog/BlogPostsPagination.vue';
 import { Switch } from '@/components/ui/switch';
 import { useBlogExcerpts } from '@/composables/useBlogExcerpts';
-import { useBlogPostsListLinks, type ActiveTag, type TagOperator } from '@/composables/useBlogPostsListLinks';
+import { type ActiveTag, type TagOperator, useBlogPostsListLinks } from '@/composables/useBlogPostsListLinks';
 import type { PostItem, Tag } from '@/types/blog.types';
 import type { Pagination } from '@/types';
 import {
@@ -94,7 +94,7 @@ function isTagActive(tag: Tag): boolean {
 <template>
     <section :id="anchorId.slice(1)" :aria-label="t('blog.posts_list.aria')" :style="blogBodyTextStyle">
         <div class="mb-4 flex items-center justify-between gap-4">
-            <h2 :style="blogHeaderStyle" class="text-xl font-semibold text-primary opacity-90">
+            <h2 :style="blogHeaderStyle" class="leading-7 font-semibold text-primary opacity-90">
                 {{ postsListTitle }}:
                 <span v-if="selectedTags.length > 0" class="font-semibold text-primary-foreground">
                     {{ selectedTagNames }}
@@ -109,7 +109,14 @@ function isTagActive(tag: Tag): boolean {
 
         <div v-if="hasTags" class="mb-4">
             <div class="flex flex-wrap gap-2">
-                <Link v-for="tag in allTags" :key="tag.id" :class="getTagChipClasses(isTagActive(tag))" :href="getTagHref(tag)" preserve-scroll preserve-state>
+                <Link
+                    v-for="tag in allTags"
+                    :key="tag.id"
+                    :class="getTagChipClasses(isTagActive(tag))"
+                    :href="getTagHref(tag)"
+                    preserve-scroll
+                    preserve-state
+                >
                     #{{ tag.name }}
                 </Link>
                 <Link
@@ -147,11 +154,11 @@ function isTagActive(tag: Tag): boolean {
         <ul v-else class="space-y-3">
             <li v-for="post in posts" :key="post.id">
                 <BlogPostListItem
-                    :post="post"
-                    :show-excerpts="showExcerpts"
-                    :post-href="getPostHref(post)"
                     :get-tag-href="getTagHref"
                     :is-tag-active="isTagActive"
+                    :post="post"
+                    :post-href="getPostHref(post)"
+                    :show-excerpts="showExcerpts"
                 />
             </li>
         </ul>
