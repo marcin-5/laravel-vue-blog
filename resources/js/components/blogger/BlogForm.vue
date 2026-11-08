@@ -9,7 +9,7 @@ import BlogTagsSection from '@/components/blogger/BlogTagsSection.vue';
 import { useBlogFormLogic } from '@/composables/useBlogFormLogic';
 import { createApplyHandler } from '@/composables/useFormApply';
 import { useBloggerFormTranslations } from '@/composables/useBloggerFormTranslations';
-import type { AdminBlog as Blog, BlogFormData, Category } from '@/types/blog.types';
+import type { AdminBlog as Blog, BlogContentTranslations, BlogFormData, Category } from '@/types/blog.types';
 import { InertiaForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -60,31 +60,28 @@ const seoTranslations = computed(() => ({
     characters: t('blogger.post_form.characters'),
 }));
 
-const descriptionMarkdownTranslations = createMarkdownTranslations();
-const landingMarkdownTranslations = createMarkdownTranslations();
-const aboutMarkdownTranslations = createMarkdownTranslations();
-const footerMarkdownTranslations = createMarkdownTranslations();
+const markdownTranslations = createMarkdownTranslations();
 
-const contentTranslations = computed(() => ({
+const contentTranslations = computed<BlogContentTranslations>(() => ({
     description: {
         label: t('blogger.form.description_label'),
         placeholder: props.isEdit ? '' : t('blogger.form.description_placeholder'),
-        markdown: descriptionMarkdownTranslations.value,
+        markdown: markdownTranslations.value,
     },
     landingContent: {
         label: t('blogger.form.landing_content_label'),
         placeholder: props.isEdit ? '' : t('blogger.form.landing_content_placeholder'),
-        markdown: landingMarkdownTranslations.value,
+        markdown: markdownTranslations.value,
     },
     about: {
         label: t('blogger.form.about_label'),
         placeholder: props.isEdit ? '' : t('blogger.form.about_placeholder'),
-        markdown: aboutMarkdownTranslations.value,
+        markdown: markdownTranslations.value,
     },
     footer: {
         label: t('blogger.form.footer_label'),
         placeholder: props.isEdit ? '' : t('blogger.form.footer_placeholder'),
-        markdown: footerMarkdownTranslations.value,
+        markdown: markdownTranslations.value,
     },
 }));
 
@@ -110,6 +107,10 @@ function handleCancel() {
                 :is-edit="props.isEdit"
                 :translations="contentTranslations"
                 @cancel="handleCancel"
+                @update:description="form.description = $event"
+                @update:landing-content="form.landing_content = $event"
+                @update:about="form.about = $event"
+                @update:footer="form.footer = $event"
             />
 
             <FormPublishingSettings

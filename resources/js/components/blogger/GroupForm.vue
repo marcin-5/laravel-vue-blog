@@ -85,6 +85,7 @@ function handleCancel() {
 
             <EntityMarkdownField
                 :id="`${fieldIdPrefix}-content`"
+                storage-key="group.content"
                 v-model="form.content"
                 :error="form.errors.content"
                 :is-edit="props.isEdit"
@@ -97,6 +98,7 @@ function handleCancel() {
 
             <EntityMarkdownField
                 :id="`${fieldIdPrefix}-footer`"
+                storage-key="group.footer"
                 v-model="form.footer"
                 :error="form.errors.footer"
                 :is-edit="props.isEdit"

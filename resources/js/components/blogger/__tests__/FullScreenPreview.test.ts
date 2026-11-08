@@ -54,6 +54,7 @@ describe('FullScreenPreview', () => {
 
             const editor = document.getElementById('fullscreen-markdown');
             expect(editor).not.toBeNull();
+            expect(editor?.hasAttribute('rows')).toBe(false);
             editor?.dispatchEvent(new Event(eventName, { bubbles: true }));
 
             await nextTick();

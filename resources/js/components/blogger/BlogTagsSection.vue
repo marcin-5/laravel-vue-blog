@@ -201,6 +201,7 @@ onMounted(loadTags);
                 <EntityMarkdownField
                     v-if="editingTag"
                     :id="`${props.idPrefix}-${editingTag.id}-landing-page`"
+                    storage-key="blog.tag_landing_page"
                     v-model="landingPageHttp.content"
                     :error="landingPageHttp.errors.content"
                     :is-edit="true"

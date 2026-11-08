@@ -1,17 +1,19 @@
 <script lang="ts" setup>
 import { useMarkdownPreviewSection } from '@/composables/useMarkdownPreviewSection';
+import type { MarkdownPreviewTranslations } from '@/types/blog.types';
 import { computed } from 'vue';
 import MarkdownPreviewSection from './MarkdownPreviewSection.vue';
 
 interface Props {
     id: string;
+    storageKey: string;
     modelValue: string | null;
     error?: string;
     label: string;
     placeholder?: string;
     isEdit?: boolean;
     isProcessing?: boolean;
-    translations: any; // Result of createMarkdownTranslations
+    translations: MarkdownPreviewTranslations;
 }
 
 const props = defineProps<Props>();
@@ -43,6 +45,7 @@ function handleCancel() {
 <template>
     <MarkdownPreviewSection
         :id="props.id"
+        :storage-key="props.storageKey"
         v-model="value"
         :error="props.error"
         :is-edit="props.isEdit"

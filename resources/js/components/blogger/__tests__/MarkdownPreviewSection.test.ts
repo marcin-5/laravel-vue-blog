@@ -16,12 +16,15 @@ const translations = {
     preview: 'Preview',
     fullPreview: 'Full preview',
     splitView: 'Split view',
+    decreaseRows: 'Decrease textarea rows',
+    increaseRows: 'Increase textarea rows',
 };
 
 function mountSection(previewLayout: 'vertical' | 'horizontal', isFullPreview = false) {
     return mount(MarkdownPreviewSection, {
         props: {
             id: 'landing-markdown',
+            storageKey: 'blog.landing_content',
             label: 'Content',
             modelValue: '# Hello',
             isPreviewMode: true,
@@ -52,6 +55,14 @@ describe('MarkdownPreviewSection', () => {
         await wrapper.find('#landing-markdown').setValue('**bold**');
 
         expect(wrapper.emitted('input')).toEqual([['**bold**']]);
+    });
+
+    it('keeps the preview toggle available in the editor header', async () => {
+        const wrapper = mountSection('vertical');
+
+        await wrapper.findAll('button').find((button) => button.text() === 'Close preview')?.trigger('click');
+
+        expect(wrapper.emitted('togglePreview')).toEqual([['# Hello']]);
     });
 
     it('emits the opposite layout when the layout button is clicked', async () => {

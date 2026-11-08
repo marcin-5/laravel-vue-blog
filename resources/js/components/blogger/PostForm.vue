@@ -268,6 +268,7 @@ const { getRangeClass, getThresholdClass } = useSeoLengthClasses();
 
             <MarkdownPreviewSection
                 :id="`${fieldIdPrefix}-content`"
+                storage-key="post.content"
                 v-model="form.content"
                 :error="form.errors.content"
                 :hint="`${form.content?.length || 0} ${translationKeys.characters}`"
@@ -279,7 +280,6 @@ const { getRangeClass, getThresholdClass } = useSeoLengthClasses();
                 :placeholder="translationKeys.contentPlaceholder"
                 :preview-html="contentPreview.previewHtml.value"
                 :preview-layout="contentPreview.previewLayout.value"
-                :rows="props.isEdit ? 10 : 15"
                 :translations="contentTranslations"
                 @cancel="handleCancel"
                 @input="handleContentInput"
@@ -292,6 +292,7 @@ const { getRangeClass, getThresholdClass } = useSeoLengthClasses();
             <MarkdownPreviewSection
                 v-if="!isExtension"
                 :id="`${fieldIdPrefix}-summary`"
+                storage-key="post.summary"
                 v-model="form.summary"
                 :error="form.errors.summary"
                 :is-edit="props.isEdit"
@@ -302,7 +303,6 @@ const { getRangeClass, getThresholdClass } = useSeoLengthClasses();
                 :placeholder="translationKeys.summaryPlaceholder"
                 :preview-html="summaryPreview.previewHtml.value"
                 :preview-layout="summaryPreview.previewLayout.value"
-                :rows="props.isEdit ? 4 : 6"
                 :translations="summaryTranslations"
                 @cancel="handleCancel"
                 @input="handleSummaryInput"

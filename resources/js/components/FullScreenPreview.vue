@@ -107,6 +107,7 @@ function handleCancel() {
                                 :model-value="props.content"
                                 :placeholder="props.markdownPlaceholder"
                                 :hint="props.hint"
+                                :auto-size="true"
                                 type="textarea"
                                 @input="handleInput"
                                 @update:model-value="(value: any) => emit('update:content', value || '')"

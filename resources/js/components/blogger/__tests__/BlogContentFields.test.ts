@@ -27,11 +27,14 @@ const markdownTranslations = {
     markdownLabel: 'Markdown',
     previewLabel: 'Preview',
     previewModeTitle: 'Preview mode',
-    toggleLayout: 'Toggle layout',
+    horizontalLayout: 'Horizontal layout',
+    verticalLayout: 'Vertical layout',
     closePreview: 'Close preview',
     preview: 'Preview',
     fullPreview: 'Full preview',
     splitView: 'Split view',
+    decreaseRows: 'Decrease textarea rows',
+    increaseRows: 'Increase textarea rows',
 };
 
 const translations = {
@@ -57,6 +60,22 @@ describe('BlogContentFields', () => {
         expect(wrapper.find('[data-field-id="edit-blog-1-landing-content"]').exists()).toBe(true);
         expect(wrapper.find('[data-field-id="edit-blog-1-about"]').exists()).toBe(true);
         expect(wrapper.find('[data-field-id="edit-blog-1-footer"]').exists()).toBe(true);
+    });
+
+    it('emits field updates instead of mutating the form prop', async () => {
+        const wrapper = mount(BlogContentFields, {
+            props: {
+                fieldIdPrefix: 'edit-blog-1',
+                form: form as never,
+                isEdit: true,
+                translations,
+            },
+        });
+
+        await wrapper.findComponent({ name: 'EntityMarkdownField' }).vm.$emit('update:modelValue', 'Updated description');
+
+        expect(wrapper.emitted('update:description')).toEqual([['Updated description']]);
+        expect(form.description).toBeNull();
     });
 
     it('forwards cancel from a content field', async () => {

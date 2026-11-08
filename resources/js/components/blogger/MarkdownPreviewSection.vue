@@ -1,30 +1,14 @@
 <script lang="ts" setup>
-import { type PreviewLayout } from '@/types/blog.types';
+import type { MarkdownPreviewTranslations, PreviewLayout } from '@/types/blog.types';
 import FullScreenPreview from '@/components/FullScreenPreview.vue';
-import PostFormField from '@/components/blogger/PostFormField.vue';
+import MarkdownEditorField from '@/components/blogger/MarkdownEditorField.vue';
 import MarkdownPreview from '@/components/MarkdownPreview.vue';
 import { Button } from '@/components/ui/button';
-import InputError from '@/components/InputError.vue';
 import { computed } from 'vue';
-
-interface TranslationKeys {
-    cancel: string;
-    create: string;
-    save: string;
-    exitPreview: string;
-    markdownLabel: string;
-    previewLabel: string;
-    previewModeTitle: string;
-    horizontalLayout: string;
-    verticalLayout: string;
-    closePreview: string;
-    preview: string;
-    fullPreview: string;
-    splitView: string;
-}
 
 interface Props {
     id: string;
+    storageKey: string;
     label: string;
     modelValue: string | null;
     error?: string;
@@ -33,11 +17,10 @@ interface Props {
     isFullPreview: boolean;
     previewLayout: PreviewLayout;
     previewHtml: string;
-    rows?: number;
     minHeight?: string;
     isEdit?: boolean;
     isProcessing?: boolean;
-    translations: TranslationKeys;
+    translations: MarkdownPreviewTranslations;
     showSaveButton?: boolean;
     hint?: string;
 }
@@ -53,7 +36,6 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    rows: 3,
     minHeight: '150px',
     isEdit: false,
     isProcessing: false,
@@ -106,16 +88,22 @@ function handleLayoutToggle() {
             <div :class="props.isPreviewMode && props.previewLayout === 'vertical' ? 'flex gap-4' : 'space-y-4'">
                 <!-- Markdown Editor -->
                 <div :class="props.isPreviewMode && props.previewLayout === 'vertical' ? 'w-1/2' : ''">
-                    <PostFormField
+                    <MarkdownEditorField
                         :id="props.id"
-                        :hint="props.hint"
+                        :storage-key="props.storageKey"
                         :label="props.isPreviewMode ? props.translations.markdownLabel : props.label"
                         :model-value="props.modelValue"
+                        :error="props.error"
+                        :hint="props.hint"
                         :placeholder="props.placeholder"
-                        :rows="props.isPreviewMode ? (props.isEdit ? 20 : 30) : props.rows"
-                        type="textarea"
+                        :preview-mode="props.isPreviewMode"
+                        :preview-label="props.translations.preview"
+                        :close-preview-label="props.translations.closePreview"
+                        :decrease-rows-label="props.translations.decreaseRows"
+                        :increase-rows-label="props.translations.increaseRows"
                         @input="(value: string) => emit('input', value)"
-                        @update:model-value="(value: any) => emit('update:modelValue', value)"
+                        @update:model-value="(value: string) => emit('update:modelValue', value)"
+                        @toggle-preview="emit('togglePreview', $event)"
                     />
                 </div>
                 <!-- Preview Pane -->
@@ -126,13 +114,7 @@ function handleLayoutToggle() {
             </div>
         </div>
 
-        <InputError :message="props.error" />
-
-        <!-- Preview Controls -->
-        <div class="mt-2 flex justify-end gap-2">
-            <Button :variant="props.isPreviewMode ? 'exit' : 'toggle'" size="sm" type="button" @click="emit('togglePreview', props.modelValue ?? '')">
-                {{ props.isPreviewMode ? props.translations.closePreview : props.translations.preview }}
-            </Button>
+        <div v-if="props.isPreviewMode" class="mt-2 flex justify-end gap-2">
             <Button v-if="props.isPreviewMode" size="sm" type="button" variant="exit" @click="emit('toggleFullPreview', props.modelValue ?? '')">
                 {{ props.isFullPreview ? props.translations.splitView : props.translations.fullPreview }}
             </Button>

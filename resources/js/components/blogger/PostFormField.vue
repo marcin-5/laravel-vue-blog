@@ -9,6 +9,7 @@ interface Props {
     placeholder?: string;
     type?: 'input' | 'textarea' | 'custom';
     rows?: number;
+    autoSize?: boolean;
     required?: boolean;
     tooltip?: string;
     inputClass?: string;
@@ -34,12 +35,15 @@ function handleInput(event: Event) {
 
 <template>
     <div>
-        <label :for="props.id" class="mb-1 flex items-center gap-1 text-sm font-medium">
-            {{ props.label }}
-            <span v-if="props.tooltip" :title="props.tooltip" class="cursor-help text-muted-foreground">
-                <InfoIcon :size="14" />
-            </span>
-        </label>
+        <div class="mb-1 flex items-end justify-between gap-2">
+            <label :for="props.id" class="flex items-center gap-1 text-sm font-medium">
+                {{ props.label }}
+                <span v-if="props.tooltip" :title="props.tooltip" class="cursor-help text-muted-foreground">
+                    <InfoIcon :size="14" />
+                </span>
+            </label>
+            <slot name="header-actions" />
+        </div>
         <input
             v-if="props.type === 'input'"
             :id="props.id"
@@ -55,7 +59,7 @@ function handleInput(event: Event) {
             :id="props.id"
             :class="['block w-full rounded-md border px-3 py-2', props.inputClass]"
             :placeholder="props.placeholder"
-            :rows="props.rows"
+            :rows="props.autoSize ? undefined : props.rows"
             :value="modelValue ?? ''"
             @input="handleInput"
         />

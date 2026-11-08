@@ -422,6 +422,8 @@
             "create_post_button": "Create Post",
             "close_button": "Close",
             "preview_button": "Preview",
+            "decrease_rows_button": "Decrease textarea rows",
+            "increase_rows_button": "Increase textarea rows",
             "exit_preview_button": "Exit Preview",
             "full_preview_button": "Full Preview",
             "split_view_button": "Split View",

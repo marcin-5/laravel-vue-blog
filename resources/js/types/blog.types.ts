@@ -380,6 +380,37 @@ export interface BloggerItemContext<T extends ManageableItem, P extends AdminPos
 // ===== Blog form/composable shared types =====
 export type PreviewLayout = 'horizontal' | 'vertical';
 
+export interface MarkdownPreviewTranslations {
+    cancel: string;
+    create: string;
+    save: string;
+    exitPreview: string;
+    markdownLabel: string;
+    previewLabel: string;
+    previewModeTitle: string;
+    horizontalLayout: string;
+    verticalLayout: string;
+    closePreview: string;
+    preview: string;
+    fullPreview: string;
+    splitView: string;
+    decreaseRows: string;
+    increaseRows: string;
+}
+
+export interface BlogContentFieldTranslations {
+    label: string;
+    placeholder: string;
+    markdown: MarkdownPreviewTranslations;
+}
+
+export interface BlogContentTranslations {
+    description: BlogContentFieldTranslations;
+    landingContent: BlogContentFieldTranslations;
+    about: BlogContentFieldTranslations;
+    footer: BlogContentFieldTranslations;
+}
+
 export interface MarkdownPreviewSection {
     isPreviewMode: Ref<boolean>;
     isFullPreview: Ref<boolean>;

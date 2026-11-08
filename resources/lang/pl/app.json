@@ -423,6 +423,8 @@
             "create_post_button": "Utwórz Post",
             "close_button": "Zamknij",
             "preview_button": "Podgląd",
+            "decrease_rows_button": "Zmniejsz liczbę wierszy pola tekstowego",
+            "increase_rows_button": "Zwiększ liczbę wierszy pola tekstowego",
             "exit_preview_button": "Wyjdź z Podglądu",
             "full_preview_button": "Pełny Podgląd",
             "split_view_button": "Widok Podzielony",
