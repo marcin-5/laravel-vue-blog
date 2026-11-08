@@ -23,6 +23,7 @@ describe('MarkdownEditorField', () => {
         });
 
         expect(wrapper.find('label').text()).toBe('Description');
+        expect(wrapper.find('button[aria-label="Decrease rows"]').attributes('title')).toBe('Decrease rows');
         expect((wrapper.find('textarea').element as HTMLTextAreaElement).rows).toBe(5);
 
         await wrapper.find('button[aria-label="Increase rows"]').trigger('click');

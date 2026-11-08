@@ -42,8 +42,8 @@ const emit = defineEmits<{
     >
         <template #header-actions>
             <div class="flex items-center gap-2">
-                <Button :aria-label="props.decreaseRowsLabel" :disabled="!canDecrease" size="sm" type="button" variant="outline" @click="decrease">−</Button>
-                <Button :aria-label="props.increaseRowsLabel" :disabled="!canIncrease" size="sm" type="button" variant="outline" @click="increase">+</Button>
+                <Button :aria-label="props.decreaseRowsLabel" :disabled="!canDecrease" :title="props.decreaseRowsLabel" size="sm" type="button" variant="outline" @click="decrease">−</Button>
+                <Button :aria-label="props.increaseRowsLabel" :disabled="!canIncrease" :title="props.increaseRowsLabel" size="sm" type="button" variant="outline" @click="increase">+</Button>
                 <Button :variant="props.previewMode ? 'exit' : 'toggle'" size="sm" type="button" @click="emit('togglePreview', props.modelValue ?? '')">
                     {{ props.previewMode ? props.closePreviewLabel : props.previewLabel }}
                 </Button>

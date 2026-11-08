@@ -66,17 +66,24 @@ describe('MarkdownPreviewSection', () => {
         expect(previewHeader?.textContent).toContain('Preview');
         expect(previewHeader?.textContent).toContain('Full preview');
         expect(previewHeader?.textContent).toContain('Horizontal');
-        expect(previewHeader?.querySelectorAll('button')).toHaveLength(2);
+        expect(previewHeader?.querySelectorAll('button')).toHaveLength(4);
     });
 
     it('shows temporary preview height controls only in the stacked layout', async () => {
-        const wrapper = mountSection('horizontal');
+        const wrapper = mountSection('vertical');
 
         expect(wrapper.findAll('button').some((button) => button.attributes('aria-label') === 'Increase preview height')).toBe(true);
 
-        await wrapper.setProps({ previewLayout: 'vertical' });
+        await wrapper.setProps({ previewLayout: 'horizontal' });
 
         expect(wrapper.findAll('button').some((button) => button.attributes('aria-label') === 'Increase preview height')).toBe(false);
+    });
+
+    it('provides visible tooltip content for preview height controls', () => {
+        const wrapper = mountSection('vertical');
+        const increaseButton = wrapper.find('button[aria-label="Decrease preview height"]');
+
+        expect(increaseButton.attributes('title')).toBe('Decrease preview height');
     });
 
     it('keeps the preview toggle available in the editor header', async () => {

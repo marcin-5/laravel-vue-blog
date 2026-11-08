@@ -158,9 +158,9 @@ function handleLayoutToggle() {
                     <div class="mb-1 flex items-end justify-between gap-2">
                         <h3 class="text-sm font-medium">{{ props.translations.previewLabel }}</h3>
                         <div class="flex gap-2">
-                            <template v-if="props.previewLayout === 'horizontal'">
-                                <Button :aria-label="props.translations.decreasePreviewHeight" size="sm" type="button" variant="outline" @click="adjustPreviewHeight(-24)">−</Button>
-                                <Button :aria-label="props.translations.increasePreviewHeight" size="sm" type="button" variant="outline" @click="adjustPreviewHeight(24)">+</Button>
+                            <template v-if="props.previewLayout === 'vertical'">
+                                <Button :aria-label="props.translations.decreasePreviewHeight" :title="props.translations.decreasePreviewHeight" size="sm" type="button" variant="outline" @click="adjustPreviewHeight(-24)">−</Button>
+                                <Button :aria-label="props.translations.increasePreviewHeight" :title="props.translations.increasePreviewHeight" size="sm" type="button" variant="outline" @click="adjustPreviewHeight(24)">+</Button>
                             </template>
                             <Button size="sm" type="button" variant="exit" @click="emit('toggleFullPreview', props.modelValue ?? '')">
                                 {{ props.translations.fullPreview }}
