@@ -108,19 +108,20 @@ function handleLayoutToggle() {
                 </div>
                 <!-- Preview Pane -->
                 <div v-if="props.isPreviewMode" :class="props.previewLayout === 'vertical' ? 'w-1/2' : ''">
-                    <h3 class="mb-1 text-sm font-medium">{{ props.translations.previewLabel }}</h3>
+                    <div class="mb-1 flex items-end justify-between gap-2">
+                        <h3 class="text-sm font-medium">{{ props.translations.previewLabel }}</h3>
+                        <div class="flex gap-2">
+                            <Button size="sm" type="button" variant="exit" @click="emit('toggleFullPreview', props.modelValue ?? '')">
+                                {{ props.translations.fullPreview }}
+                            </Button>
+                            <Button size="sm" type="button" variant="toggle" @click="handleLayoutToggle">
+                                {{ toggleLayoutLabel }}
+                            </Button>
+                        </div>
+                    </div>
                     <MarkdownPreview :class="`min-h-[${props.minHeight}]`" :html="props.previewHtml" />
                 </div>
             </div>
-        </div>
-
-        <div v-if="props.isPreviewMode" class="mt-2 flex justify-end gap-2">
-            <Button v-if="props.isPreviewMode" size="sm" type="button" variant="exit" @click="emit('toggleFullPreview', props.modelValue ?? '')">
-                {{ props.isFullPreview ? props.translations.splitView : props.translations.fullPreview }}
-            </Button>
-            <Button v-if="props.isPreviewMode && !props.isFullPreview" size="sm" type="button" variant="toggle" @click="handleLayoutToggle">
-                {{ toggleLayoutLabel }}
-            </Button>
         </div>
     </div>
 </template>

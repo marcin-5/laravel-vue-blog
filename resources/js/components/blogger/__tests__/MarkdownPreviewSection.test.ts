@@ -57,6 +57,16 @@ describe('MarkdownPreviewSection', () => {
         expect(wrapper.emitted('input')).toEqual([['**bold**']]);
     });
 
+    it('shows preview actions in the header beside the preview label', () => {
+        const wrapper = mountSection('vertical');
+        const previewHeader = wrapper.find('h3').element.parentElement;
+
+        expect(previewHeader?.textContent).toContain('Preview');
+        expect(previewHeader?.textContent).toContain('Full preview');
+        expect(previewHeader?.textContent).toContain('Horizontal');
+        expect(previewHeader?.querySelectorAll('button')).toHaveLength(2);
+    });
+
     it('keeps the preview toggle available in the editor header', async () => {
         const wrapper = mountSection('vertical');
 
