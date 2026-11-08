@@ -18,6 +18,8 @@ const translations = {
     splitView: 'Split view',
     decreaseRows: 'Decrease textarea rows',
     increaseRows: 'Increase textarea rows',
+    decreasePreviewHeight: 'Decrease preview height',
+    increasePreviewHeight: 'Increase preview height',
 };
 
 function mountSection(previewLayout: 'vertical' | 'horizontal', isFullPreview = false) {
@@ -65,6 +67,16 @@ describe('MarkdownPreviewSection', () => {
         expect(previewHeader?.textContent).toContain('Full preview');
         expect(previewHeader?.textContent).toContain('Horizontal');
         expect(previewHeader?.querySelectorAll('button')).toHaveLength(2);
+    });
+
+    it('shows temporary preview height controls only in the stacked layout', async () => {
+        const wrapper = mountSection('horizontal');
+
+        expect(wrapper.findAll('button').some((button) => button.attributes('aria-label') === 'Increase preview height')).toBe(true);
+
+        await wrapper.setProps({ previewLayout: 'vertical' });
+
+        expect(wrapper.findAll('button').some((button) => button.attributes('aria-label') === 'Increase preview height')).toBe(false);
     });
 
     it('keeps the preview toggle available in the editor header', async () => {

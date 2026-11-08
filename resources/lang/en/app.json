@@ -424,6 +424,8 @@
             "preview_button": "Preview",
             "decrease_rows_button": "Decrease textarea rows",
             "increase_rows_button": "Increase textarea rows",
+            "decrease_preview_height_button": "Decrease preview height",
+            "increase_preview_height_button": "Increase preview height",
             "exit_preview_button": "Exit Preview",
             "full_preview_button": "Full Preview",
             "split_view_button": "Split View",

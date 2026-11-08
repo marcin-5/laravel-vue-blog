@@ -396,6 +396,8 @@ export interface MarkdownPreviewTranslations {
     splitView: string;
     decreaseRows: string;
     increaseRows: string;
+    decreasePreviewHeight: string;
+    increasePreviewHeight: string;
 }
 
 export interface BlogContentFieldTranslations {

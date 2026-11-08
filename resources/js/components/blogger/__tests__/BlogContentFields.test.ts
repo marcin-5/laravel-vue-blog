@@ -35,6 +35,8 @@ const markdownTranslations = {
     splitView: 'Split view',
     decreaseRows: 'Decrease textarea rows',
     increaseRows: 'Increase textarea rows',
+    decreasePreviewHeight: 'Decrease preview height',
+    increasePreviewHeight: 'Increase preview height',
 };
 
 const translations = {

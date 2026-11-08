@@ -4,7 +4,7 @@ import FullScreenPreview from '@/components/FullScreenPreview.vue';
 import MarkdownEditorField from '@/components/blogger/MarkdownEditorField.vue';
 import MarkdownPreview from '@/components/MarkdownPreview.vue';
 import { Button } from '@/components/ui/button';
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 
 interface Props {
     id: string;
@@ -43,10 +43,53 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<Emits>();
+const editorElement = ref<HTMLElement | null>(null);
+const editorHeight = ref(0);
+const previewHeightOffset = ref(0);
+let resizeObserver: ResizeObserver | undefined;
 
 const toggleLayoutLabel = computed(() =>
     props.previewLayout === 'vertical' ? props.translations.horizontalLayout : props.translations.verticalLayout,
 );
+
+const previewHeight = computed(() => {
+    if (props.previewLayout === 'vertical' || editorHeight.value === 0) {
+        return undefined;
+    }
+
+    return `${Math.max(120, editorHeight.value + previewHeightOffset.value)}px`;
+});
+
+watch(
+    editorElement,
+    (element) => {
+        resizeObserver?.disconnect();
+        if (!element || typeof ResizeObserver === 'undefined') {
+            return;
+        }
+
+        resizeObserver = new ResizeObserver(([entry]) => {
+            editorHeight.value = entry.contentRect.height;
+        });
+        resizeObserver.observe(element);
+    },
+    { flush: 'post' },
+);
+
+watch(
+    () => props.isPreviewMode,
+    (isPreviewMode) => {
+        if (!isPreviewMode) {
+            previewHeightOffset.value = 0;
+        }
+    },
+);
+
+onBeforeUnmount(() => resizeObserver?.disconnect());
+
+function adjustPreviewHeight(amount: number) {
+    previewHeightOffset.value += amount;
+}
 
 function handleLayoutToggle() {
     const newLayout = props.previewLayout === 'vertical' ? 'horizontal' : 'vertical';
@@ -85,9 +128,9 @@ function handleLayoutToggle() {
 
         <!-- Normal Mode -->
         <div v-else>
-            <div :class="props.isPreviewMode && props.previewLayout === 'vertical' ? 'flex gap-4' : 'space-y-4'">
+            <div :class="props.isPreviewMode && props.previewLayout === 'vertical' ? 'flex items-stretch gap-4' : 'space-y-4'">
                 <!-- Markdown Editor -->
-                <div :class="props.isPreviewMode && props.previewLayout === 'vertical' ? 'w-1/2' : ''">
+                <div ref="editorElement" :class="props.isPreviewMode && props.previewLayout === 'vertical' ? 'w-1/2' : ''">
                     <MarkdownEditorField
                         :id="props.id"
                         :storage-key="props.storageKey"
@@ -107,10 +150,18 @@ function handleLayoutToggle() {
                     />
                 </div>
                 <!-- Preview Pane -->
-                <div v-if="props.isPreviewMode" :class="props.previewLayout === 'vertical' ? 'w-1/2' : ''">
+                <div
+                    v-if="props.isPreviewMode"
+                    :class="props.previewLayout === 'vertical' ? 'flex w-1/2 flex-col' : 'flex flex-col'"
+                    :style="{ height: previewHeight, minHeight: props.minHeight }"
+                >
                     <div class="mb-1 flex items-end justify-between gap-2">
                         <h3 class="text-sm font-medium">{{ props.translations.previewLabel }}</h3>
                         <div class="flex gap-2">
+                            <template v-if="props.previewLayout === 'horizontal'">
+                                <Button :aria-label="props.translations.decreasePreviewHeight" size="sm" type="button" variant="outline" @click="adjustPreviewHeight(-24)">−</Button>
+                                <Button :aria-label="props.translations.increasePreviewHeight" size="sm" type="button" variant="outline" @click="adjustPreviewHeight(24)">+</Button>
+                            </template>
                             <Button size="sm" type="button" variant="exit" @click="emit('toggleFullPreview', props.modelValue ?? '')">
                                 {{ props.translations.fullPreview }}
                             </Button>
@@ -119,7 +170,7 @@ function handleLayoutToggle() {
                             </Button>
                         </div>
                     </div>
-                    <MarkdownPreview :class="`min-h-[${props.minHeight}]`" :html="props.previewHtml" />
+                    <MarkdownPreview class="min-h-0 flex-1" :html="props.previewHtml" />
                 </div>
             </div>
         </div>

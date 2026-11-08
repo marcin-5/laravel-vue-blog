@@ -76,6 +76,8 @@ export function useBloggerFormTranslations() {
             splitView: t('blogger.post_form.split_view_button'),
             decreaseRows: t('blogger.post_form.decrease_rows_button'),
             increaseRows: t('blogger.post_form.increase_rows_button'),
+            decreasePreviewHeight: t('blogger.post_form.decrease_preview_height_button'),
+            increasePreviewHeight: t('blogger.post_form.increase_preview_height_button'),
         }));
     }
 

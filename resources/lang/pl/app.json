@@ -425,6 +425,8 @@
             "preview_button": "Podgląd",
             "decrease_rows_button": "Zmniejsz liczbę wierszy pola tekstowego",
             "increase_rows_button": "Zwiększ liczbę wierszy pola tekstowego",
+            "decrease_preview_height_button": "Zmniejsz wysokość podglądu",
+            "increase_preview_height_button": "Zwiększ wysokość podglądu",
             "exit_preview_button": "Wyjdź z Podglądu",
             "full_preview_button": "Pełny Podgląd",
             "split_view_button": "Widok Podzielony",
