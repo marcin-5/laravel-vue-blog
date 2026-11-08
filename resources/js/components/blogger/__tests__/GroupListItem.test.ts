@@ -1,7 +1,7 @@
 import BloggerListItem from '@/components/blogger/BloggerListItem.vue';
 import GroupForm from '@/components/blogger/GroupForm.vue';
 import PostForm from '@/components/blogger/PostForm.vue';
-import type { AdminGroup } from '@/types/blog.types';
+import type { AdminGroup, BloggerItemContext } from '@/types/blog.types';
 import { mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
 import { nextTick } from 'vue';
@@ -38,14 +38,33 @@ vi.mock('@inertiajs/vue3', () => ({
 }));
 
 // Mock components
-vi.mock('@/components/blogger/BloggerListItem.vue', () => ({
-    default: {
-        name: 'BloggerListItem',
-        template:
-            '<div><slot name="actions" :handleEdit="context.actions.edit" :handleCreatePost="context.actions.createPost" :handleTogglePosts="context.actions.togglePosts" :isCreatingPost="context.isCreatingPost" :isEditing="context.isEditing" :isPostsExpanded="context.isPostsExpanded" /><slot v-if="context.isEditing" name="edit-form" :handleCancelEdit="context.actions.cancelEdit" /><slot v-if="context.isCreatingPost" name="create-post-form" :handleCancelCreatePost="context.actions.cancelCreatePost" /></div>',
-        props: ['context'],
-    },
-}));
+vi.mock('@/components/blogger/BloggerListItem.vue', async () => {
+    const { defineComponent, h } = await import('vue');
+
+    return {
+        default: defineComponent({
+            name: 'BloggerListItem',
+            props: ['context'],
+            setup(props, { slots }) {
+                return () =>
+                    h('div', [
+                        slots.actions?.({
+                            handleEdit: props.context.actions.edit,
+                            handleCreatePost: props.context.actions.createPost,
+                            handleTogglePosts: props.context.actions.togglePosts,
+                            isCreatingPost: props.context.isCreatingPost,
+                            isEditing: props.context.isEditing,
+                            isPostsExpanded: props.context.isPostsExpanded,
+                        }),
+                        ...(props.context.isEditing ? [slots['edit-form']?.({ handleCancelEdit: props.context.actions.cancelEdit })] : []),
+                        ...(props.context.isCreatingPost
+                            ? [slots['create-post-form']?.({ handleCancelCreatePost: props.context.actions.cancelCreatePost })]
+                            : []),
+                    ]);
+            },
+        }),
+    };
+});
 vi.mock('@/components/blogger/GroupForm.vue', () => ({
     default: { name: 'GroupForm', template: '<div>GroupForm</div>', props: ['form', 'group', 'isEdit', 'idPrefix'] },
 }));
@@ -85,20 +104,19 @@ describe('GroupListItem.vue', () => {
             props: defaultProps,
         });
 
-        const bloggerListItem = wrapper.findComponent(BloggerListItem as any);
+        const bloggerListItem = wrapper.findComponent(BloggerListItem);
         expect(bloggerListItem.exists()).toBe(true);
-        expect(bloggerListItem.props('context').subtitle).toBe(mockGroup.slug);
+        const { context } = bloggerListItem.props() as { context: BloggerItemContext<AdminGroup> };
+        expect(context.subtitle).toBe(mockGroup.slug);
     });
 
     it('renders GroupForm in edit-form slot', async () => {
         const wrapper = mount(GroupListItem, { props: defaultProps });
-        wrapper
-            .findComponent(BloggerListItem as any)
-            .props('context')
-            .actions.edit();
+        const { context } = wrapper.findComponent(BloggerListItem).props() as { context: BloggerItemContext<AdminGroup> };
+        context.actions.edit();
         await nextTick();
 
-        const groupForm = wrapper.findComponent(GroupForm as any);
+        const groupForm = wrapper.findComponent(GroupForm);
         expect(groupForm.exists()).toBe(true);
         expect(groupForm.props('isEdit')).toBeDefined();
         expect(groupForm.props('group')).toEqual(mockGroup);
@@ -106,28 +124,24 @@ describe('GroupListItem.vue', () => {
 
     it('renders PostForm in create-post-form slot', async () => {
         const wrapper = mount(GroupListItem, { props: defaultProps });
-        wrapper
-            .findComponent(BloggerListItem as any)
-            .props('context')
-            .actions.createPost();
+        const { context } = wrapper.findComponent(BloggerListItem).props() as { context: BloggerItemContext<AdminGroup> };
+        context.actions.createPost();
         await nextTick();
 
-        const postForm = wrapper.findComponent(PostForm as any);
+        const postForm = wrapper.findComponent(PostForm);
         expect(postForm.exists()).toBe(true);
         expect(postForm.props('groupId')).toBe(mockGroup.id);
     });
 
     it('submits the local entity form when GroupForm emits submit', async () => {
         const wrapper = mount(GroupListItem, { props: defaultProps });
-        wrapper
-            .findComponent(BloggerListItem as any)
-            .props('context')
-            .actions.edit();
+        const { context } = wrapper.findComponent(BloggerListItem).props() as { context: BloggerItemContext<AdminGroup> };
+        context.actions.edit();
         await nextTick();
 
-        const groupForm = wrapper.findComponent(GroupForm as any);
+        const groupForm = wrapper.findComponent(GroupForm);
         const mockForm = { name: 'Updated Group' };
-        await groupForm.vm.$emit('submit', mockForm);
+        groupForm.vm.$emit('submit', mockForm);
 
         expect(groupForm.exists()).toBe(true);
     });

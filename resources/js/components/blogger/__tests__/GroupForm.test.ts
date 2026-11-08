@@ -25,7 +25,11 @@ vi.mock('@inertiajs/vue3', () => ({
 
 // Mock components to simplify testing
 vi.mock('@/components/blogger/EntityMarkdownField.vue', () => ({
-    default: { name: 'EntityMarkdownField', template: '<div>EntityMarkdownField</div>' },
+    default: {
+        name: 'EntityMarkdownField',
+        props: ['id', 'storageKey', 'modelValue', 'error', 'label', 'placeholder', 'isEdit', 'isProcessing', 'translations'],
+        template: '<div>EntityMarkdownField</div>',
+    },
 }));
 vi.mock('@/components/blogger/EntityThemeSection.vue', () => ({
     default: { name: 'EntityThemeSection', template: '<div>EntityThemeSection</div>' },
@@ -53,6 +57,33 @@ describe('GroupForm.vue', () => {
             props: defaultProps,
         });
         expect(wrapper.find('form').exists()).toBe(true);
+    });
+
+    it('passes independent Markdown field configuration', () => {
+        const wrapper = mount(GroupForm, {
+            props: defaultProps,
+        });
+        const fields = wrapper.findAllComponents({ name: 'EntityMarkdownField' });
+
+        expect(fields).toHaveLength(2);
+        expect(fields[0].props()).toMatchObject({
+            id: 'create-group-new-content',
+            storageKey: 'group.content',
+            label: 'blogger.group_form.content_label',
+            placeholder: 'blogger.group_form.content_placeholder',
+            isEdit: false,
+            isProcessing: false,
+            translations: expect.objectContaining({ horizontalLayout: expect.any(String), verticalLayout: expect.any(String) }),
+        });
+        expect(fields[1].props()).toMatchObject({
+            id: 'create-group-new-footer',
+            storageKey: 'group.footer',
+            label: 'blogger.group_form.footer_label',
+            placeholder: 'blogger.group_form.footer_placeholder',
+            isEdit: false,
+            isProcessing: false,
+            translations: expect.objectContaining({ horizontalLayout: expect.any(String), verticalLayout: expect.any(String) }),
+        });
     });
 
     it('emits submit when handleSubmit is called', async () => {
