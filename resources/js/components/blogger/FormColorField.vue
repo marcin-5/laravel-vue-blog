@@ -26,6 +26,12 @@ function handleInput(event: Event) {
 <template>
     <PostFormField :id="props.id" :error="props.error" :label="props.label" :tooltip="props.tooltip" type="custom">
         <div class="flex items-center gap-2">
+            <span
+                :style="{ backgroundColor: props.modelValue || props.placeholder || 'transparent' }"
+                aria-hidden="true"
+                class="h-9 w-9 shrink-0 rounded border border-border"
+                data-testid="color-preview"
+            ></span>
             <input
                 :id="props.id"
                 :placeholder="props.placeholder"
@@ -34,12 +40,6 @@ function handleInput(event: Event) {
                 type="text"
                 @input="handleInput"
             />
-            <span
-                :style="{ backgroundColor: props.modelValue || props.placeholder || 'transparent' }"
-                aria-hidden="true"
-                class="h-9 w-9 shrink-0 rounded border border-border"
-                data-testid="color-preview"
-            ></span>
         </div>
     </PostFormField>
 </template>
