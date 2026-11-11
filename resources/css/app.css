@@ -138,7 +138,8 @@
     }
 }
 
-:root {
+:root,
+.light {
     --font-header-default: var(--font-roboto);
     --font-nav-default: var(--font-inter);
     --font-body-default: var(--font-nunito);

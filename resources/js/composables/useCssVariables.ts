@@ -1,10 +1,10 @@
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref, type Ref } from 'vue';
 
-export function useCssVariables(variableNames: string[]) {
+export function useCssVariables(variableNames: string[], targetElement?: Ref<HTMLElement | null>) {
     const variables = ref<Record<string, string>>({});
 
     const updateVariables = () => {
-        const style = getComputedStyle(document.documentElement);
+        const style = getComputedStyle(targetElement?.value ?? document.documentElement);
         variables.value = Object.fromEntries(variableNames.map((name) => [name, style.getPropertyValue(name).trim()]));
     };
 

@@ -33,6 +33,7 @@ const emit = defineEmits<{
 
 const { toast } = useToast();
 const fileInput = useTemplateRef<HTMLInputElement>('fileInput');
+const variantProbe = useTemplateRef<HTMLElement>('variantProbe');
 
 const { variables } = useCssVariables([
     '--background',
@@ -48,7 +49,7 @@ const { variables } = useCssVariables([
     '--breadcrumb-link',
     '--breadcrumb-link-active',
     '--card',
-]);
+], variantProbe);
 
 const { updateValue, colorFields, fontFields } = useThemeSection(props, emit);
 
@@ -145,6 +146,7 @@ async function handleImport(event: Event): Promise<void> {
 
 <template>
     <div>
+        <span ref="variantProbe" :class="resolveThemeVariant()" aria-hidden="true" class="hidden"></span>
         <div class="mb-2 flex items-center justify-between">
             <h4 class="text-sm font-medium opacity-80">{{ props.title }}</h4>
             <div class="flex gap-1">
