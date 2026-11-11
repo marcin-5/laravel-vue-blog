@@ -86,7 +86,8 @@ export function useBloggerItemState<TEntity extends ManageableItem>({ item, enti
         resetEntityEdit();
         resetPostCreation();
         resetPostEdit();
-        resetExtensionInteraction();
+        postState.creatingExtensionForId.value = null;
+        postState.editingExtensionId.value = null;
         uiState.toggleExtensions(post);
     }
 

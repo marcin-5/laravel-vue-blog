@@ -136,4 +136,42 @@ describe('useBloggerItemState', () => {
         expect(postState.postForm.reset).toHaveBeenCalled();
         expect(postState.postEditForm.reset).toHaveBeenCalled();
     });
+
+    it('allows an expanded extension list to be collapsed', () => {
+        const postState = createPostState();
+        const uiState = createUIState();
+        const entityState = createEntityState();
+        const post: PostItem = {
+            id: 4,
+            blog_id: 1,
+            group_id: null,
+            title: 'Post',
+            slug: 'post',
+            seo_title: null,
+            excerpt: null,
+            summary: null,
+            content: null,
+            is_published: true,
+            visibility: 'public',
+            related_posts: [],
+            external_links: [],
+        };
+        uiState.expandedExtensionsForId.value = post.id;
+        uiState.toggleExtensions.mockImplementation((toggledPost: PostItem) => {
+            uiState.expandedExtensionsForId.value = uiState.expandedExtensionsForId.value === toggledPost.id ? null : toggledPost.id;
+        });
+
+        mocks.postStates.push(postState);
+        mocks.uiStates.push(uiState);
+
+        const state = useBloggerItemState({
+            item: createItem(1),
+            entityState,
+            startCreatePost: vi.fn(),
+        });
+
+        state.toggleExtensions(post);
+
+        expect(uiState.expandedExtensionsForId.value).toBeNull();
+    });
 });
