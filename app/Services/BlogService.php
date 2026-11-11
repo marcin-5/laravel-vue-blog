@@ -35,13 +35,17 @@ readonly class BlogService
 
     public function getUserBlogs(User $user): Collection
     {
-        return Blog::query()
+        $blogs = Blog::query()
             ->where('user_id', $user->id)
             ->with(['landingPage:blog_id,content'])
             ->withPostsForIndex()
             ->withCategories()
             ->orderByDesc('created_at')
             ->get(self::BLOG_FIELDS);
+
+        $blogs->each(fn(Blog $blog) => $blog->append('main_domain'));
+
+        return $blogs;
     }
 
     public function getCategories(): Collection

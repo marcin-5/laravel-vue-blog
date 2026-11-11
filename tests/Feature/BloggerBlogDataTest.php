@@ -22,3 +22,21 @@ test('blogger dashboard includes about field in blogs data', function () {
         )
     );
 });
+
+test('blogger dashboard includes main domain in blogs data', function () {
+    $user = User::factory()->create();
+    $blog = Blog::factory()->create(['user_id' => $user->id]);
+
+    $response = $this->actingAs($user)
+        ->get(route('blogs.index'));
+
+    $response->assertStatus(200);
+    $response->assertInertia(fn($page) => $page
+        ->component('app/blogger/Blogs')
+        ->has('blogs.0', fn($page) => $page
+            ->where('slug', $blog->slug)
+            ->where('main_domain', $blog->main_domain)
+            ->etc()
+        )
+    );
+});
