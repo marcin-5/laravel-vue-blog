@@ -143,6 +143,12 @@ ALLOW_POSTGRES_MAJOR_UPGRADE ?= 0
 ALLOW_REDIS_MAJOR_UPGRADE ?= 0
 PROD_DIAG_LOG_LINES ?= 50
 PROD_DIAG_URL ?=
+dotenv_value = $(shell awk -F= -v key="$(1)" '$$1 == key { sub(/^[^=]*=/, ""); gsub(/^"|"$$/, ""); print; exit }' .env 2>/dev/null)
+PROD_SSH_HOST ?= $(call dotenv_value,PROD_SSH_HOST)
+PROD_SSH_USER ?= $(call dotenv_value,PROD_SSH_USER)
+PROD_SSH_PORT ?= $(or $(call dotenv_value,PROD_SSH_PORT),22)
+PROD_SSH_PATH ?= $(call dotenv_value,PROD_SSH_PATH)
+PROD_DUMP_DIR ?= $(or $(call dotenv_value,PROD_DUMP_DIR),backups/production-db-dumps)
 # DOCKER_COMPOSE_PROD = docker compose --env-file .env -p $(PROJECT_NAME) $(COMPOSE_FILES_PROD)
 DOCKER_COMPOSE_PROD = POSTGRES_IMAGE="$(POSTGRES_IMAGE)" REDIS_IMAGE="$(REDIS_IMAGE)" docker compose --env-file .env -p $(DOCKER_PROJECT_NAME_PROD) $(COMPOSE_FILES_PROD)
 QUEUE_PAUSE_STATE_FILE ?= /tmp/laravel-blog-$(DOCKER_PROJECT_NAME_PROD)-queues-paused
@@ -152,6 +158,7 @@ QUEUE_PAUSE_STATE_FILE ?= /tmp/laravel-blog-$(DOCKER_PROJECT_NAME_PROD)-queues-p
         prod-maintenance-on prod-maintenance-off prod-rebuild-pg-redis \
         prod-rebuild-app-services prod-rebuild-caddy \
         prod-rebuild-pg-redis-preflight prod-backup-pg-redis \
+        prod-db-dump \
         prod-prune prod-versions prod-check-assets prod-logs-queue prod-logs-app \
         prod-health-runtime prod-health-queue prod-queue-diag prod-queue-pause-all \
         prod-queue-continue-all prod-indexnow prod-diagnose prod-post-urls
@@ -189,6 +196,26 @@ prod-post-urls: ## List public post URLs for a production blog subdomain (HOST=b
 		echo "❌ Specify the blog subdomain: make prod-post-urls HOST=blog.example.com" >&2; exit 1; \
 	fi
 	$(DOCKER_COMPOSE_PROD) exec -T app php artisan blog:post-urls "$(HOST)"
+
+prod-db-dump: ## Download a timestamped production PostgreSQL dump over SSH
+	@set -eu; \
+	umask 077; \
+	if [ -z "$(PROD_SSH_HOST)" ] || [ -z "$(PROD_SSH_USER)" ] || [ -z "$(PROD_SSH_PATH)" ]; then \
+		echo "❌ Set PROD_SSH_HOST, PROD_SSH_USER, and PROD_SSH_PATH in .env." >&2; exit 1; \
+	fi; \
+	dump_dir="$(PROD_DUMP_DIR)"; \
+	mkdir -p "$$dump_dir"; \
+	timestamp=$$(date +%Y%m%d-%H%M%S); \
+	dump_file="$$dump_dir/production-$$timestamp.sql"; \
+	if [ -e "$$dump_file" ]; then dump_file="$$dump_dir/production-$$timestamp-$$$$.sql"; fi; \
+	temporary_file="$$dump_file.part"; \
+	trap 'rm -f "$$temporary_file"' EXIT HUP INT TERM; \
+	echo "Downloading production database to $$dump_file..."; \
+	ssh -p "$(PROD_SSH_PORT)" "$(PROD_SSH_USER)@$(PROD_SSH_HOST)" \
+		"cd '$(PROD_SSH_PATH)' && docker compose --env-file .env -p $(DOCKER_PROJECT_NAME_PROD) -f docker/docker-compose.yml -f docker/docker-compose.prod.yml exec -T postgres sh -c 'pg_dump --no-owner --no-acl --username=\$$POSTGRES_USER --dbname=\$$POSTGRES_DB'" > "$$temporary_file"; \
+	mv "$$temporary_file" "$$dump_file"; \
+	trap - EXIT HUP INT TERM; \
+	echo "✅ Database dump saved to $$dump_file"
 
 prod-queue-clear-logs: ## 🧹 Clear the queue worker log file
 	$(DOCKER_COMPOSE_PROD) exec -T queue sh -c '> /var/www/html/storage/logs/supervisor_queue.log'
