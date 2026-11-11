@@ -5,6 +5,7 @@ namespace App\Models\Concerns;
 use HTMLPurifier;
 use HTMLPurifier_Config;
 use ParsedownExtra;
+use RuntimeException;
 
 trait HasMarkdownContent
 {
@@ -33,7 +34,9 @@ trait HasMarkdownContent
         $html = $parser->text($content);
         $cachePath = config('app.htmlpurifier.cache_path');
         if (!is_dir($cachePath)) {
-            mkdir($cachePath, 0775, true);
+            if (!mkdir($cachePath, 0775, true) && !is_dir($cachePath)) {
+                throw new RuntimeException(sprintf('Directory "%s" was not created', $cachePath));
+            }
         }
 
         $config = HTMLPurifier_Config::createDefault();
@@ -41,11 +44,9 @@ trait HasMarkdownContent
         $config->set('HTML.SafeIframe', false);
         $config->set('URI.SafeIframeRegexp', null);
         $config->set('CSS.AllowedProperties', []);
-        $config->set('HTML.TargetBlank', true);
+        $config->set('HTML.TargetBlank', false);
         $config->set('Attr.EnableID', true);
-        $purifier = new HTMLPurifier($config);
-
-        return $purifier->purify($html);
+        return new HTMLPurifier($config)->purify($html);
     }
 
     /**
