@@ -17,7 +17,6 @@ const props = defineProps<PublicBlogPostPageProps>();
 const isListed = computed(() => props.post.visibility !== 'unlisted');
 const visibleListing = computed(() => (isListed.value ? props.listing : null));
 const postsListSpacingClass = computed(() => (props.chrome.sidebar ? '' : 'mt-6'));
-const landingUrl = computed(() => props.chrome.navigation?.landingUrl ?? props.blog.url);
 </script>
 
 <template>
@@ -51,7 +50,7 @@ const landingUrl = computed(() => props.chrome.navigation?.landingUrl ?? props.b
 
         <template #navigation>
             <BlogPostNav v-if="isListed" :activeTag="listing.activeTag" :navigation="chrome.navigation" />
-            <PostBackLink v-else :landingUrl="landingUrl" />
+            <PostBackLink v-else />
         </template>
     </PublicBlogShell>
 </template>

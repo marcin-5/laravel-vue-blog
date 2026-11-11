@@ -1,16 +1,11 @@
 <script lang="ts" setup>
-import { router } from '@inertiajs/vue3';
 import { ArrowLeft } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
-
-const props = defineProps<{
-    landingUrl: string;
-}>();
 
 const { t } = useI18n();
 
 const navigateBack = () => {
-    router.visit(props.landingUrl);
+    window.history.back();
 };
 </script>
 

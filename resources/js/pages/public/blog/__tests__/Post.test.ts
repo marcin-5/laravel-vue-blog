@@ -51,7 +51,7 @@ vi.mock('@/components/blog/BlogPostNav.vue', () => ({
 }));
 
 vi.mock('@/components/blog/PostBackLink.vue', () => ({
-    default: { name: 'PostBackLink', props: ['landingUrl'], template: '<div class="post-back-link" />' },
+    default: { name: 'PostBackLink', template: '<div class="post-back-link" />' },
 }));
 
 vi.mock('@/components/blog/BorderDivider.vue', () => ({
@@ -125,7 +125,7 @@ describe('Post.vue', () => {
 
         expect(wrapper.findComponent({ name: 'PublicBlogShell' }).props('listing')).toBeNull();
         expect(wrapper.findComponent({ name: 'BlogPostNav' }).exists()).toBe(false);
-        expect(wrapper.findComponent({ name: 'PostBackLink' }).props('landingUrl')).toBe('https://blog.test/landing');
+        expect(wrapper.findComponent({ name: 'PostBackLink' }).exists()).toBe(true);
     });
 
     it('falls back to the blog url when the navigation has no landing url', () => {
@@ -134,7 +134,7 @@ describe('Post.vue', () => {
             chrome: { ...chrome, navigation: undefined },
         });
 
-        expect(wrapper.findComponent({ name: 'PostBackLink' }).props('landingUrl')).toBe(blog.url);
+        expect(wrapper.findComponent({ name: 'PostBackLink' }).exists()).toBe(true);
     });
 
     it('spaces the posts list only when there is no sidebar', () => {
