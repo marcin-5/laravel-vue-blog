@@ -1,6 +1,8 @@
-import { ref } from 'vue';
+import type { Appearance, AppPageProps } from '@/types';
+import { usePage } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
 
-type Appearance = 'light' | 'dark' | 'system';
+export type { Appearance };
 
 export function updateTheme(value: Appearance) {
     if (typeof window === 'undefined') {
@@ -35,7 +37,7 @@ const mediaQuery = () => {
     return window.matchMedia('(prefers-color-scheme: dark)');
 };
 
-const getStoredAppearance = () => {
+const getStoredAppearance = (): Appearance | null => {
     if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
         return null;
     }
@@ -56,6 +58,9 @@ export function initializeTheme() {
 
     // Initialize theme from saved preference or default to system...
     const savedAppearance = getStoredAppearance();
+    if (savedAppearance) {
+        setCookie('appearance', savedAppearance);
+    }
     updateTheme(savedAppearance || 'system');
 
     // Set up system theme change listener...
@@ -65,16 +70,43 @@ export function initializeTheme() {
     return () => mq?.removeEventListener('change', handleSystemThemeChange);
 }
 
-// Singleton state — shared across all component instances
-const appearance = ref<Appearance>(getStoredAppearance() || 'system');
+// Singleton state — shared across all component instances on client
+const clientAppearance = ref<Appearance>(getStoredAppearance() || 'system');
 
 export function useAppearance() {
+    if (typeof window === 'undefined') {
+        try {
+            const page = usePage<AppPageProps>();
+            return {
+                appearance: computed<Appearance>(() => ((page?.props as any)?.appearance as Appearance) || 'system'),
+                updateAppearance: () => {},
+            };
+        } catch {
+            return {
+                appearance: ref<Appearance>('system'),
+                updateAppearance: () => {},
+            };
+        }
+    }
+
+    if (getStoredAppearance() === null) {
+        try {
+            const page = usePage<AppPageProps>();
+            const pageAppearance = (page?.props as any)?.appearance as Appearance | undefined;
+            if (pageAppearance && clientAppearance.value !== pageAppearance) {
+                clientAppearance.value = pageAppearance;
+            }
+        } catch {
+            // Ignore outside Inertia context
+        }
+    }
+
     function updateAppearance(value: Appearance) {
         if (typeof window === 'undefined') {
             return;
         }
 
-        appearance.value = value;
+        clientAppearance.value = value;
 
         // Store in localStorage for client-side persistence...
         localStorage.setItem('appearance', value);
@@ -86,7 +118,7 @@ export function useAppearance() {
     }
 
     return {
-        appearance,
+        appearance: clientAppearance,
         updateAppearance,
     };
 }

@@ -56,6 +56,8 @@ export interface InertiaPageProps {
     [key: string]: unknown;
 }
 
+export type Appearance = 'light' | 'dark' | 'system';
+
 export type AppPageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
     name: string;
     quote: { message: string; author: string };
@@ -64,6 +66,7 @@ export type AppPageProps<T extends Record<string, unknown> = Record<string, unkn
     ziggy: Config & { location: string };
     sidebarOpen: boolean;
     userGroups: UserGroup[];
+    appearance: Appearance;
 };
 
 export interface User {
