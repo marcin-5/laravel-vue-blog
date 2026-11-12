@@ -216,6 +216,11 @@
     background-color: color-mix(in srgb, var(--et-secondary), transparent 90%) !important;
 }
 
+/* Striped rows in the debug scores table, tinted with the active theme's secondary color */
+.enneagram-test-container .debug-scores-striped > div:nth-child(even) {
+    background-color: color-mix(in srgb, var(--et-secondary), transparent 75%) !important;
+}
+
 .enneagram-test-container .bg-foreground\/50 {
     background-color: color-mix(in srgb, var(--et-foreground), transparent 50%) !important;
 }
