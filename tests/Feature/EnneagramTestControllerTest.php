@@ -26,6 +26,7 @@ it('enables requested debug capabilities with valid URL keys', function () {
         ->where('debugHints', true)
         ->where('debugScores', true)
         ->where('initialLocale', 'pl')
+        ->where('initialTheme', 'theme-light-standard')
         ->has('autoConfirmSingleDefault')
         ->has('seo')
         ->missing('testData'),
@@ -128,5 +129,51 @@ it('loads the enneagram test page with English locale for secondary domain', fun
     $response->assertInertia(fn(Assert $page) => $page
         ->component('public/EnneagramTest/Index')
         ->where('initialLocale', 'en'),
+    );
+});
+
+it('passes initialTheme from unencrypted cookie when valid', function () {
+    $domain = 'enneagram-test.osobliwy.localhost';
+    config([
+        'app.domain_locales' => [
+            'enneagram-test.osobliwy.localhost' => 'pl',
+            'enneagram-test.peculiarmatters.localhost' => 'en',
+        ],
+        'enneagram.domains' => [
+            'enneagram-test.osobliwy.localhost' => 'pl',
+            'enneagram-test.peculiarmatters.localhost' => 'en',
+        ],
+    ]);
+
+    $response = $this->withUnencryptedCookie('enneagram_theme', 'theme-dark-forest')
+        ->get('http://' . $domain . '/');
+
+    $response->assertStatus(200);
+    $response->assertInertia(fn(Assert $page) => $page
+        ->component('public/EnneagramTest/Index')
+        ->where('initialTheme', 'theme-dark-forest'),
+    );
+});
+
+it('falls back to default theme when cookie contains invalid theme', function () {
+    $domain = 'enneagram-test.osobliwy.localhost';
+    config([
+        'app.domain_locales' => [
+            'enneagram-test.osobliwy.localhost' => 'pl',
+            'enneagram-test.peculiarmatters.localhost' => 'en',
+        ],
+        'enneagram.domains' => [
+            'enneagram-test.osobliwy.localhost' => 'pl',
+            'enneagram-test.peculiarmatters.localhost' => 'en',
+        ],
+    ]);
+
+    $response = $this->withUnencryptedCookie('enneagram_theme', 'invalid-theme')
+        ->get('http://' . $domain . '/');
+
+    $response->assertStatus(200);
+    $response->assertInertia(fn(Assert $page) => $page
+        ->component('public/EnneagramTest/Index')
+        ->where('initialTheme', 'theme-light-standard'),
     );
 });

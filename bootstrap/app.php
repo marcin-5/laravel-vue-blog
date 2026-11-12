@@ -29,7 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->encryptCookies(except: ['appearance', 'sidebar_state', 'cookie_consent', 'locale']);
+        $middleware->encryptCookies(except: ['appearance', 'sidebar_state', 'cookie_consent', 'locale', 'enneagram_theme']);
         $middleware->append(SecurityHeaders::class);
 
         $middleware->web(append: [

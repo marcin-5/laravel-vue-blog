@@ -1,3 +1,5 @@
+import type { EnneagramTheme } from './composables/useEnneagramPreferences';
+
 export type EnneagramLocale = 'pl' | 'en';
 
 export type TestAction = 'answer' | 'skip' | 'back';
@@ -132,6 +134,7 @@ export interface ResetTestResponse {
 
 export interface EnneagramPageProps {
     initialLocale: EnneagramLocale;
+    initialTheme?: EnneagramTheme;
     debugHints: boolean;
     debugScores: boolean;
     autoConfirmSingleDefault: boolean;

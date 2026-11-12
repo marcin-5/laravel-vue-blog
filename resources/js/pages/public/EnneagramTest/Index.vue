@@ -22,7 +22,7 @@ mergeLocaleMessage('pl', pl);
 locale.value = props.initialLocale;
 
 const autoConfirmSingle = shallowRef(props.autoConfirmSingleDefault);
-const preferences = useEnneagramPreferences(props.initialLocale);
+const preferences = useEnneagramPreferences(props.initialLocale, props.initialTheme);
 const session = useEnneagramTestSession();
 const state = computed(() => session.state.value);
 const processing = session.processing;
@@ -66,13 +66,7 @@ function startTest(extended: boolean): void {
 
         <h1 class="mb-6 text-center font-recursive text-3xl font-bold">{{ t('title') }}</h1>
 
-        <ApiErrorState
-            v-if="error"
-            :message="error.message"
-            :status="error.status"
-            @reset="handleReset"
-            @retry="session.retry"
-        />
+        <ApiErrorState v-if="error" :message="error.message" :status="error.status" @reset="handleReset" @retry="session.retry" />
 
         <StartScreen
             v-if="!state"

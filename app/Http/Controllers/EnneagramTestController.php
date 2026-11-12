@@ -21,8 +21,22 @@ final class EnneagramTestController extends Controller
         $this->debugAccess->authorize($request);
         $locale = app()->getLocale();
 
+        $themeCookie = (string) $request->cookie('enneagram_theme', 'theme-light-standard');
+        $validThemes = [
+            'theme-light-standard',
+            'theme-light-blue',
+            'theme-light-warm',
+            'theme-light-pastel',
+            'theme-dark-standard',
+            'theme-dark-forest',
+            'theme-dark-purple',
+            'theme-dark-amber',
+        ];
+        $initialTheme = in_array($themeCookie, $validThemes, true) ? $themeCookie : 'theme-light-standard';
+
         return Inertia::render('public/EnneagramTest/Index', [
             'initialLocale' => $locale,
+            'initialTheme' => $initialTheme,
             'debugHints' => $this->debugAccess->hintsEnabled(),
             'debugScores' => $this->debugAccess->scoresEnabled(),
             'autoConfirmSingleDefault' => (bool) config('enneagram.auto_confirm_single'),
