@@ -34,7 +34,7 @@ const stageTwoParts = computed(() => {
     <section
         aria-labelledby="enneagram-debug-title"
         aria-live="polite"
-        class="mx-auto max-w-4xl rounded-lg border border-dashed border-primary/50 bg-muted p-4 text-card-foreground"
+        class="mx-auto w-lg rounded-lg border border-dashed border-primary/50 bg-muted p-4 text-card-foreground"
     >
         <h2 id="enneagram-debug-title" class="mb-4 text-lg font-bold text-foreground">{{ t('debug_data') }}</h2>
 
