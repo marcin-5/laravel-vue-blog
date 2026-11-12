@@ -164,9 +164,18 @@ it('accepts answers with numeric stage two categories through the action endpoin
     $data = app(\App\Services\Enneagram\EnneagramTestDataLoader::class)->load('pl');
     $state = $engine->start($data, false, 12345, 'pl');
 
-    while ($state['stage'] === 1) {
+    while ($state['stage'] === 1 && $state['status'] === 'in_progress') {
         $view = $engine->present($state);
-        $state = $engine->apply($state, 'answer', array_slice($view['options'], 0, $view['answer_limit']));
+        $options = $view['options'];
+
+        if ($state['part'] === 2) {
+            $options = array_values(array_filter(
+                $options,
+                fn(array $option): bool => $option['category'] !== $state['stage1_part1_winner'],
+            ));
+        }
+
+        $state = $engine->apply($state, 'answer', array_slice($options, 0, $view['answer_limit']));
     }
 
     expect($state['stage'])->toBe(2)
