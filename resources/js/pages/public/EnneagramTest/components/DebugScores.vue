@@ -5,12 +5,29 @@ import type { EnneagramDebugState } from '../types';
 
 const props = defineProps<{
     debug: EnneagramDebugState;
+    stage: number;
+    part: number;
 }>();
 
 const { t } = useI18n();
 
-const stageOneParts = computed(() => Object.entries(props.debug.stage1));
-const stageTwoParts = computed(() => Object.entries(props.debug.stage2.perPart).sort(([first], [second]) => Number(first) - Number(second)));
+const stageOneParts = computed(() => {
+    const latestPart = props.stage === 1 ? props.part : 2;
+
+    return Object.entries(props.debug.stage1)
+        .filter(([part]) => Number(part.replace('part', '')) <= latestPart)
+        .sort(([first], [second]) => Number(second.replace('part', '')) - Number(first.replace('part', '')));
+});
+
+const stageTwoParts = computed(() => {
+    if (props.stage !== 2) {
+        return [];
+    }
+
+    return Object.entries(props.debug.stage2.perPart)
+        .filter(([part]) => Number(part) <= props.part)
+        .sort(([first], [second]) => Number(second) - Number(first));
+});
 </script>
 
 <template>
@@ -21,28 +38,23 @@ const stageTwoParts = computed(() => Object.entries(props.debug.stage2.perPart).
     >
         <h2 id="enneagram-debug-title" class="mb-4 text-lg font-bold text-foreground">{{ t('debug_data') }}</h2>
 
-        <div class="grid gap-4 md:grid-cols-2">
-            <div>
-                <h3 class="mb-2 text-sm font-bold text-foreground uppercase">{{ t('stage1_instincts') }}</h3>
-                <div class="grid gap-2 sm:grid-cols-2">
-                    <div v-for="[part, scores] in stageOneParts" :key="part" class="rounded border border-muted bg-card p-2">
-                        <h4 class="mb-1 border-b border-muted pb-1 text-xs font-bold">{{ t('part') }} {{ part.replace('part', '') }}</h4>
-                        <dl class="grid grid-cols-3 gap-2 text-xs">
-                            <div v-for="[category, score] in Object.entries(scores)" :key="category" class="flex flex-col">
-                                <dt class="text-muted-foreground uppercase">{{ category }}</dt>
-                                <dd class="font-bold text-foreground">{{ score }}</dd>
-                            </div>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-
-            <div>
+        <div class="flex flex-col gap-4">
+            <div v-if="props.stage >= 2">
                 <h3 class="mb-2 text-sm font-bold text-foreground uppercase">{{ t('stage2_types') }}</h3>
-                <div class="grid gap-2 sm:grid-cols-2">
+                <div class="rounded border border-muted bg-card p-2">
+                    <h4 class="mb-1 border-b border-muted pb-1 text-xs font-bold">{{ t('total_sum') }}</h4>
+                    <dl class="grid grid-cols-9 gap-3 text-xs">
+                        <div v-for="[type, score] in Object.entries(props.debug.stage2.total)" :key="type" class="flex flex-col text-center">
+                            <dt class="text-muted-foreground">{{ t('type_label', { type }) }}</dt>
+                            <dd class="font-bold text-foreground">{{ score }}</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <div class="mt-2 grid gap-2">
                     <div v-for="[part, scores] in stageTwoParts" :key="part" class="rounded border border-muted bg-card p-2">
                         <h4 class="mb-1 border-b border-muted pb-1 text-xs font-bold">{{ t('part') }} {{ part }}</h4>
-                        <dl class="grid grid-cols-3 gap-2 text-xs">
+                        <dl class="grid grid-cols-9 gap-3 text-center text-xs">
                             <div v-for="[type, score] in Object.entries(scores)" :key="type" class="flex flex-col">
                                 <dt class="text-muted-foreground">{{ t('type_label', { type }) }}</dt>
                                 <dd class="font-bold text-foreground">{{ score }}</dd>
@@ -50,15 +62,20 @@ const stageTwoParts = computed(() => Object.entries(props.debug.stage2.perPart).
                         </dl>
                     </div>
                 </div>
+            </div>
 
-                <div class="mt-2 rounded border border-muted bg-card p-2">
-                    <h4 class="mb-1 border-b border-muted pb-1 text-xs font-bold">{{ t('total_sum') }}</h4>
-                    <dl class="grid grid-cols-3 gap-2 text-xs sm:grid-cols-5">
-                        <div v-for="[type, score] in Object.entries(props.debug.stage2.total)" :key="type" class="flex flex-col">
-                            <dt class="text-muted-foreground">{{ t('type_label', { type }) }}</dt>
-                            <dd class="font-bold text-foreground">{{ score }}</dd>
-                        </div>
-                    </dl>
+            <div v-if="props.stage >= 1">
+                <h3 class="mb-2 text-sm font-bold text-foreground uppercase">{{ t('stage1_instincts') }}</h3>
+                <div class="grid gap-2">
+                    <div v-for="[part, scores] in stageOneParts" :key="part" class="rounded border border-muted bg-card p-2">
+                        <h4 class="mb-1 border-b border-muted pb-1 text-xs font-bold">{{ t('part') }} {{ part.replace('part', '') }}</h4>
+                        <dl class="grid grid-cols-3 gap-3 text-xs">
+                            <div v-for="[category, score] in Object.entries(scores)" :key="category" class="flex flex-col text-center">
+                                <dt class="text-muted-foreground uppercase">{{ category }}</dt>
+                                <dd class="font-bold text-foreground">{{ score }}</dd>
+                            </div>
+                        </dl>
+                    </div>
                 </div>
             </div>
         </div>

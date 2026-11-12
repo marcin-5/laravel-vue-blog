@@ -65,6 +65,6 @@ watch(
 
         <ProgressIndicators :state="props.state" />
 
-        <DebugScores v-if="props.debugScores && props.state.debug" :debug="props.state.debug" />
+        <DebugScores v-if="props.debugScores && props.state.debug" :debug="props.state.debug" :stage="props.state.stage" :part="props.state.part" />
     </section>
 </template>
