@@ -86,7 +86,9 @@
     --color-success-hover: var(--success-hover);
 
     --color-warning: var(--warning);
-    --color-warning-foreground: var(--warning-foreground);
+
+    --color-cookie: var(--cookie);
+    --color-cookie-foreground: var(--cookie-foreground);
 
     --color-border: var(--border);
     --color-input: var(--input);
@@ -172,8 +174,9 @@
     --error-hover: hsl(5 65% 50%);
     --success: hsl(135 50% 50%);
     --success-hover: hsl(135 65% 35%);
-    --warning: #eddaaede;
-    --warning-foreground: #222010;
+    --warning: #bb4d00;
+    --cookie: #eddaaede;
+    --cookie-foreground: #222010;
     --border: hsl(100 10% 80%);
     --input: hsl(100 15% 75%);
     --ring: hsl(0 0% 3.9%);
@@ -226,8 +229,9 @@
     --error-hover: hsl(5 65% 75%);
     --success: hsl(135 50% 50%);
     --success-hover: hsl(135 65% 65%);
-    --warning: #2c3726de;
-    --warning-foreground: #eede9e;
+    --warning: #ffba00;
+    --cookie: #2c3726de;
+    --cookie-foreground: #eede9e;
     --border: hsl(100 10% 15%);
     --input: hsl(100 5% 15%);
     --ring: hsl(0 0% 83.1%);

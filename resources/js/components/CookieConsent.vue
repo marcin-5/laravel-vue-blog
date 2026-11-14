@@ -49,9 +49,9 @@ const reject = () => {
 <template>
     <div
         v-if="show"
-        class="fixed right-0 bottom-0 left-0 z-50 flex flex-col items-center justify-between gap-4 border-t border-border bg-warning p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] sm:flex-row md:px-8"
+        class="bg-cookie fixed right-0 bottom-0 left-0 z-50 flex flex-col items-center justify-between gap-4 border-t border-border p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] sm:flex-row md:px-8"
     >
-        <p class="text-sm text-warning-foreground">
+        <p class="text-cookie-foreground text-sm">
             {{ t('common.cookie_notice.message') }}
         </p>
         <div class="flex gap-2">
