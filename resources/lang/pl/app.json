@@ -114,6 +114,9 @@
                 "font_family": "Rodzina fontów",
                 "blog_count": "Blogi używające fontu",
                 "blog_list": "Blogi używające tego fontu",
+                "sort_label": "Sortuj fonty",
+                "sort_default": "Kolejność domyślna",
+                "sort_usage": "Liczba użyć (od największej)",
                 "unused": "Żaden blog nie używa tego fontu"
             },
             "visitor_types": {

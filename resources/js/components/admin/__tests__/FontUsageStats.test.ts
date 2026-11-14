@@ -77,6 +77,35 @@ describe('FontUsageStats.vue', () => {
         expect(wrapper.text()).toContain('admin.stats.font_usage.unused');
         expect(wrapper.find('.grid').classes()).toEqual(expect.arrayContaining(['grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-3']));
         expect(wrapper.findAll('.grid > div')).toHaveLength(2);
-        expect(wrapper.find('.grid > div:nth-child(2) div > span').classes()).toContain('text-amber-700');
+        expect(wrapper.find('.grid > div:nth-child(2) div > span').classes()).toContain('text-warning');
+    });
+
+    it('keeps the default order and can sort fonts by usage count', async () => {
+        const wrapper = mount(FontUsageStats, { props: { stats } });
+
+        expect(wrapper.findAll('.grid > div > span').map((font) => font.text())).toEqual(['Inter', 'Afacad']);
+
+        await wrapper.find('select').setValue('true');
+
+        expect(wrapper.findAll('.grid > div > span').map((font) => font.text())).toEqual(['Inter', 'Afacad']);
+    });
+
+    it('sorts by usage count without mutating the original font list', async () => {
+        const wrapper = mount(FontUsageStats, {
+            props: {
+                stats: {
+                    ...stats,
+                    fonts: [
+                        { value: 'var(--font-afacad)', label: 'Afacad', count: 0, blogs: [] },
+                        { value: 'var(--font-inter)', label: 'Inter', count: 2, blogs: ['Alpha blog', 'Beta blog'] },
+                    ],
+                },
+            },
+        });
+
+        await wrapper.find('select').setValue('true');
+
+        expect(wrapper.findAll('.grid > div > span').map((font) => font.text())).toEqual(['Inter', 'Afacad']);
+        expect(wrapper.props('stats').fonts.map((font) => font.label)).toEqual(['Afacad', 'Inter']);
     });
 });
