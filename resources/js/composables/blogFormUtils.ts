@@ -1,20 +1,12 @@
 import type {
     AdminBlog as Blog,
     BlogFormData,
-    BlogTheme,
     AdminGroup as Group,
     GroupFormData,
     AdminPostItem as Post,
     PostFormData,
 } from '@/types/blog.types';
 import type { InertiaForm } from '@inertiajs/vue3';
-
-export function ensureThemeStructure(theme: BlogTheme | null | undefined): BlogTheme {
-    return {
-        light: theme?.light ?? {},
-        dark: theme?.dark ?? {},
-    };
-}
 
 export function createDefaultFormData(locale: string = 'en'): BlogFormData {
     return {
@@ -32,7 +24,6 @@ export function createDefaultFormData(locale: string = 'en'): BlogFormData {
         categories: [],
         sidebar: 0,
         page_size: 10,
-        theme: ensureThemeStructure(null),
         landing_content: null,
         about: null,
     };
@@ -57,7 +48,6 @@ export function createFormDataFromBlog(blog: Blog | undefined, defaultLocale: st
         sidebar: blog.sidebar ?? 0,
         page_size: blog.page_size ?? 10,
         categories: (blog.categories ?? []).map((c) => c.id),
-        theme: ensureThemeStructure(blog.theme),
         landing_content: blog.landing_page?.content ?? null,
         about: blog.about ?? null,
     };
@@ -79,7 +69,6 @@ export function populateFormFromBlog(form: InertiaForm<BlogFormData>, blog: Blog
     form.sidebar = data.sidebar;
     form.page_size = data.page_size;
     form.categories = data.categories;
-    form.theme = data.theme;
     form.landing_content = data.landing_content;
     form.about = data.about;
 }
@@ -94,7 +83,6 @@ export function createDefaultGroupFormData(locale: string = 'en'): GroupFormData
         locale,
         sidebar: 0,
         page_size: 10,
-        theme: ensureThemeStructure(null),
     };
 }
 
@@ -111,7 +99,6 @@ export function createFormDataFromGroup(group: Group | undefined, defaultLocale:
         locale: group.locale || defaultLocale,
         sidebar: group.sidebar ?? 0,
         page_size: group.page_size ?? 10,
-        theme: ensureThemeStructure(group.theme),
     };
 }
 
@@ -125,7 +112,6 @@ export function populateFormFromGroup(form: InertiaForm<GroupFormData>, group: G
     form.locale = data.locale;
     form.sidebar = data.sidebar;
     form.page_size = data.page_size;
-    form.theme = data.theme;
 }
 
 export function createDefaultPostFormData(blogId?: number): PostFormData {

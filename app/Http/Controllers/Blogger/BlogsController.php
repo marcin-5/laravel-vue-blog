@@ -10,6 +10,7 @@ use App\Models\Blog;
 use App\Services\BlogService;
 use App\Services\TranslationService;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -47,6 +48,29 @@ class BlogsController extends AuthenticatedController
                 'messages' => $this->translations->getPageTranslations('dashboard'),
             ],
             'seo' => $this->seoBuilder->build('My Blogs')->toArray(),
+        ]);
+    }
+
+    public function theme(Request $request): Response
+    {
+        $this->authorize('viewAny', Blog::class);
+        $user = $request->user();
+
+        $entities = Blog::query()
+            ->when(!$user->can('view_admin_users'), fn(Builder $query) => $query->where('user_id', $user->id))
+            ->orderBy('name')
+            ->get(['id', 'user_id', 'name', 'theme'])
+            ->filter(fn(Blog $blog): bool => $user->can('update', $blog))
+            ->map(fn(Blog $blog): array => [
+                'id' => $blog->id,
+                'name' => $blog->name,
+                'theme' => $blog->theme,
+            ])
+            ->values();
+
+        return Inertia::render('app/blogger/ThemeManagement', [
+            'entityType' => 'blog',
+            'entities' => $entities,
         ]);
     }
 

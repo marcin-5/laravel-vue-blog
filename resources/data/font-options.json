@@ -1,0 +1,21 @@
+[
+    { "label": "System Default", "value": "inherit" },
+    { "label": "[Sn] Afacad", "value": "var(--font-afacad)" },
+    { "label": "[Sn] Darker Grotesque", "value": "var(--font-darker-grotesque)" },
+    { "label": "[Sn] DM Sans", "value": "var(--font-dm-sans)" },
+    { "label": "[Sn] Inter", "value": "var(--font-inter)" },
+    { "label": "[Sn] Montserrat", "value": "var(--font-montserrat)" },
+    { "label": "[Sn] Nunito", "value": "var(--font-nunito)" },
+    { "label": "[Sn] Quicksand", "value": "var(--font-quicksand)" },
+    { "label": "[Sn] Raleway", "value": "var(--font-raleway)" },
+    { "label": "[Sn] Recursive", "value": "var(--font-recursive)" },
+    { "label": "[Sn] Roboto", "value": "var(--font-roboto)" },
+    { "label": "[Sn] Sofia semi condensed", "value": "var(--font-sofia-sans-semi-condensed)" },
+    { "label": "[Rm] Bitter", "value": "var(--font-bitter)" },
+    { "label": "[Rm] Faustina", "value": "var(--font-faustina)" },
+    { "label": "[Rm] Literata", "value": "var(--font-literata)" },
+    { "label": "[Rm] Kreon", "value": "var(--font-kreon)" },
+    { "label": "[Rm] Rokkitt", "value": "var(--font-rokkitt)" },
+    { "label": "[Rm] Vollkorn", "value": "var(--font-vollkorn)" },
+    { "label": "[Rm] Yrsa", "value": "var(--font-yrsa)" }
+]

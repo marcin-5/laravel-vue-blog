@@ -1,7 +1,6 @@
 import type { InertiaForm } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
 import { computed, watch } from 'vue';
-import { ensureThemeStructure } from './blogFormUtils';
 
 export interface UseEntityFormLogicOptions<TEntity, TFormData extends Record<string, any>> {
     entity: () => TEntity | undefined;
@@ -12,7 +11,7 @@ export interface UseEntityFormLogicOptions<TEntity, TFormData extends Record<str
     populateForm: (form: InertiaForm<TFormData>, entity: TEntity) => void;
 }
 
-export function useEntityFormLogic<TEntity extends { id?: number }, TFormData extends Record<string, any> & { theme?: any }>(
+export function useEntityFormLogic<TEntity extends { id?: number }, TFormData extends Record<string, any>>(
     options: UseEntityFormLogicOptions<TEntity, TFormData>,
 ) {
     const { isEdit = false, externalForm, entityType, createFormData, populateForm } = options;
@@ -24,11 +23,6 @@ export function useEntityFormLogic<TEntity extends { id?: number }, TFormData ex
         const suffix = options.entity()?.id ?? 'new';
         return `${base}-${suffix}`;
     });
-
-    // Ensure theme structure exists for new forms
-    if ('theme' in form) {
-        form.theme = ensureThemeStructure(form.theme as any);
-    }
 
     if (!externalForm) {
         watch(

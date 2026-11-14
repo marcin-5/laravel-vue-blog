@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import EntityMarkdownField from '@/components/blogger/EntityMarkdownField.vue';
-import EntityThemeSection from '@/components/blogger/EntityThemeSection.vue';
 import FormCheckboxField from '@/components/blogger/FormCheckboxField.vue';
 import FormPublishingSettings from '@/components/blogger/FormPublishingSettings.vue';
 import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
@@ -13,7 +12,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
-const { actionTranslations, themeSectionTranslations, createMarkdownTranslations } = useBloggerFormTranslations();
+const { actionTranslations, createMarkdownTranslations } = useBloggerFormTranslations();
 
 interface Props {
     group?: Group;
@@ -117,8 +116,6 @@ function handleCancel() {
             />
 
             <FormPublishingSettings v-model="form" :errors="form.errors" :id-prefix="fieldIdPrefix" />
-
-            <EntityThemeSection v-model="form.theme" :errors="form.errors" :id-prefix="fieldIdPrefix" :translations="themeSectionTranslations" />
 
             <FormSubmitActions
                 :is-edit="props.isEdit"

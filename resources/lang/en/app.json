@@ -106,6 +106,15 @@
                 "last_seen": "Last Seen",
                 "no_data": "No bot visits recorded"
             },
+            "font_usage": {
+                "title": "Blog font usage",
+                "blogger_filter": "Blogger",
+                "all_bloggers": "All bloggers",
+                "font_family": "Font family",
+                "blog_count": "Blogs using font",
+                "blog_list": "Blogs using this font",
+                "unused": "No blogs use this font"
+            },
             "visitor_types": {
                 "all": "All",
                 "bots": "Bots",
@@ -222,6 +231,14 @@
         "stats_title": "Statistics",
         "all_blogs": "All blogs",
         "all_my_blogs": "All my blogs",
+        "theme_management": {
+            "blog_title": "Blog appearance",
+            "group_title": "Group appearance",
+            "select_blog": "Select blog",
+            "select_group": "Select group",
+            "no_blogs": "You have no blogs whose appearance you can manage.",
+            "no_groups": "You have no groups whose appearance you can manage."
+        },
         "badges": {
             "draft": "Draft",
             "published": "Published",
@@ -335,6 +352,12 @@
             "theme_import": "Import theme",
             "theme_import_error": "Invalid theme file format.",
             "theme_import_success": "Theme data imported successfully.",
+            "theme_copy": "Copy theme",
+            "theme_paste": "Paste theme",
+            "theme_copy_error": "Could not copy the theme to the clipboard.",
+            "theme_copy_success": "Theme copied to the clipboard.",
+            "theme_paste_error": "Clipboard access failed or the copied theme format is invalid.",
+            "theme_paste_success": "Theme pasted successfully.",
             "theme_color_background": "--background",
             "theme_color_background_tooltip": "The background color of the page.",
             "theme_color_foreground": "--foreground",

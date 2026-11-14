@@ -13,10 +13,12 @@ use Illuminate\Support\Facades\Route;
 
 // Blogger routes for managing own blogs
 Route::middleware(['auth', 'verified', 'noindex'])->group(function () {
+    Route::get('blogs/theme', [BlogsController::class, 'theme'])->name('blogger.blogs.theme.index');
     Route::resource('blogs', BlogsController::class)
         ->only(['index', 'store', 'update']);
 
     // Groups - content management
+    Route::get('groups/content/theme', [GroupsController::class, 'theme'])->name('blogger.groups.theme.index');
     Route::resource('groups/content', GroupsController::class)
         ->only(['index', 'store', 'update'])
         ->names([

@@ -6,7 +6,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BarChart3, BookOpen, Folder, LayoutGrid, Mail, Users } from 'lucide-vue-next';
+import { BarChart3, BookOpen, Folder, LayoutGrid, Mail, Palette, Users } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -43,6 +43,12 @@ const mainNavItems = computed<NavItem[]>(() => [
         roles: ['view_blogs'],
     },
     {
+        title: t('common.nav.blog_theme'),
+        href: route('blogger.blogs.theme.index'),
+        icon: Palette,
+        roles: ['view_blogs'],
+    },
+    {
         title: t('common.nav.statistics'),
         href: '/blogs/stats',
         icon: BarChart3,
@@ -61,6 +67,12 @@ const footerNavItems = computed<NavItem[]>(() => [
         title: t('blogger.groups.title'),
         href: '/groups/content',
         icon: BookOpen,
+        roles: ['contribute_groups'],
+    },
+    {
+        title: t('common.nav.group_theme'),
+        href: route('blogger.groups.theme.index'),
+        icon: Palette,
         roles: ['contribute_groups'],
     },
     {

@@ -14,6 +14,8 @@
             "categories": "Categories",
             "statistics": "Statistics",
             "blogs": "Blogs",
+            "blog_theme": "Blog appearance",
+            "group_theme": "Group appearance",
             "messages": "Private messages",
             "font_size": {
                 "label": "Font size",

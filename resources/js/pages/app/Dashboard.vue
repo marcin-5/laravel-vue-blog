@@ -6,18 +6,19 @@ import { useDashboardView } from '@/composables/useDashboardView';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { type NewsletterSubscription } from '@/types/admin.types';
-import { type BlogStats, type BotStats, type PostsStats, type UserAgentStats } from '@/types/stats';
+import { type BlogStats, type BotStats, type FontUsageStats, type PostsStats, type UserAgentStats } from '@/types/stats';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 
-defineProps<{
+const props = defineProps<{
     newsletterSubscriptions?: NewsletterSubscription[];
     blogStats?: BlogStats[];
     postsStats?: PostsStats;
     userAgentStats?: UserAgentStats;
     botStats?: BotStats;
+    fontUsageStats?: FontUsageStats | null;
 }>();
 
 const { currentView } = useDashboardView();
@@ -30,6 +31,7 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [{ title: t('dashboard.titl
         <AdminDashboard
             v-if="currentView === 'admin'"
             :bot-stats="botStats"
+            :font-usage-stats="props.fontUsageStats"
             :newsletter-subscriptions="newsletterSubscriptions"
             :user-agent-stats="userAgentStats"
         />

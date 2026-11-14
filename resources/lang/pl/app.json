@@ -107,6 +107,15 @@
                 "last_seen": "Ostatnio widziany",
                 "no_data": "Brak zarejestrowanych odwiedzin botów"
             },
+            "font_usage": {
+                "title": "Użycie fontów w blogach",
+                "blogger_filter": "Bloger",
+                "all_bloggers": "Wszyscy blogerzy",
+                "font_family": "Rodzina fontów",
+                "blog_count": "Blogi używające fontu",
+                "blog_list": "Blogi używające tego fontu",
+                "unused": "Żaden blog nie używa tego fontu"
+            },
             "visitor_types": {
                 "all": "Wszyscy",
                 "bots": "Boty",
@@ -223,6 +232,14 @@
         "stats_title": "Statystyki",
         "all_blogs": "Wszystkie blogi",
         "all_my_blogs": "Wszystkie moje blogi",
+        "theme_management": {
+            "blog_title": "Wygląd bloga",
+            "group_title": "Wygląd grupy",
+            "select_blog": "Wybierz blog",
+            "select_group": "Wybierz grupę",
+            "no_blogs": "Nie masz blogów, których wyglądem możesz zarządzać.",
+            "no_groups": "Nie masz grup, których wyglądem możesz zarządzać."
+        },
         "badges": {
             "draft": "Szkic",
             "published": "Opublikowany",
@@ -336,6 +353,12 @@
             "theme_import": "Importuj motyw",
             "theme_import_error": "Nieprawidłowy format pliku motywu.",
             "theme_import_success": "Dane motywu wczytane pomyślnie.",
+            "theme_copy": "Kopiuj motyw",
+            "theme_paste": "Wklej motyw",
+            "theme_copy_error": "Nie udało się skopiować motywu do schowka.",
+            "theme_copy_success": "Motyw skopiowano do schowka.",
+            "theme_paste_error": "Brak dostępu do schowka lub nieprawidłowy format skopiowanego motywu.",
+            "theme_paste_success": "Motyw wklejono pomyślnie.",
             "theme_color_background": "--background",
             "theme_color_background_tooltip": "Kolor tła strony.",
             "theme_color_foreground": "--foreground",

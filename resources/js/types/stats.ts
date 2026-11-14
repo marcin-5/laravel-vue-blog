@@ -50,6 +50,19 @@ export type VisitorRow = {
 export type UserOption = { id: number; name: string };
 export type BlogOption = { id: number; name: string };
 
+export interface FontUsageEntry {
+    value: string;
+    label: string;
+    count: number;
+    blogs: string[];
+}
+
+export interface FontUsageStats {
+    bloggers: UserOption[];
+    selectedBloggerId: number | null;
+    fonts: FontUsageEntry[];
+}
+
 export interface FilterState {
     range: StatsRange;
     sort: string;

@@ -1,6 +1,6 @@
 import type { ThemeTranslations } from '@/composables/useThemeSection';
 import { mount } from '@vue/test-utils';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import FormThemeSection from '../FormThemeSection.vue';
 
 vi.mock('@/components/blogger/FormColorField.vue', () => ({
@@ -45,11 +45,14 @@ vi.mock('@/components/ui/tooltip', () => ({
     TooltipButton: {
         name: 'TooltipButton',
         props: ['tooltipContent'],
+        emits: ['click'],
         template: '<button class="tooltip-button" @click="$emit(\'click\')"><slot /></button>',
     },
 }));
 
 vi.mock('lucide-vue-next', () => ({
+    ClipboardPaste: { name: 'ClipboardPaste', template: '<div class="paste-icon" />' },
+    Copy: { name: 'Copy', template: '<div class="copy-icon" />' },
     Download: { name: 'Download', template: '<div class="download-icon" />' },
     Upload: { name: 'Upload', template: '<div class="upload-icon" />' },
     Settings2: { name: 'Settings2', template: '<div class="settings-icon" />' },
@@ -109,6 +112,12 @@ const translations: ThemeTranslations = {
     exportTooltip: 'Export Theme',
     importSuccess: 'Import successful',
     importError: 'Import failed',
+    copyTooltip: 'Copy theme',
+    pasteTooltip: 'Paste theme',
+    copyError: 'Copy failed',
+    copySuccess: 'Copy successful',
+    pasteError: 'Paste failed',
+    pasteSuccess: 'Paste successful',
 };
 
 const baseProps = {
@@ -166,6 +175,10 @@ describe('FormThemeSection.vue', () => {
     beforeEach(() => {
         vi.clearAllMocks();
     });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
     it('renders with correct title', () => {
         const wrapper = mountComponent();
 
@@ -220,6 +233,98 @@ describe('FormThemeSection.vue', () => {
         } finally {
             exportEnvironment.restore();
         }
+    });
+
+    it('copies the current color variant to the clipboard when clicked', async () => {
+        const wrapper = mountComponent();
+        const clipboard = {
+            readText: vi.fn(),
+            writeText: vi.fn().mockResolvedValue(undefined),
+        };
+        vi.stubGlobal('navigator', { clipboard });
+
+        const copyButton = wrapper.find('.copy-icon').element.closest('button') as HTMLButtonElement | null;
+
+        expect(copyButton).not.toBeNull();
+        expect(clipboard.readText).not.toHaveBeenCalled();
+
+        await copyButton!.click();
+
+        expect(clipboard.writeText).toHaveBeenCalledWith(JSON.stringify(baseProps.colors, null, 2));
+        expect(mockToast).toHaveBeenCalledWith({ title: 'Copy successful', variant: 'default' });
+    });
+
+    it('reports clipboard write failures', async () => {
+        const wrapper = mountComponent();
+        const clipboard = {
+            readText: vi.fn(),
+            writeText: vi.fn().mockRejectedValue(new Error('Clipboard unavailable')),
+        };
+        vi.stubGlobal('navigator', { clipboard });
+
+        await wrapper.find('.copy-icon').element.closest('button')!.click();
+
+        expect(mockToast).toHaveBeenCalledWith({ title: 'Copy failed', variant: 'destructive' });
+    });
+
+    it('pastes a valid color map into the current variant when clicked', async () => {
+        const wrapper = mountComponent();
+        const pastedColors = {
+            '--background': '#111111',
+            '--font-header': 'var(--font-inter)',
+        };
+        const clipboard = {
+            readText: vi.fn().mockResolvedValue(JSON.stringify(pastedColors)),
+            writeText: vi.fn(),
+        };
+        vi.stubGlobal('navigator', { clipboard });
+
+        const pasteButton = wrapper.find('.paste-icon').element.closest('button') as HTMLButtonElement | null;
+
+        expect(pasteButton).not.toBeNull();
+        expect(pasteButton?.hasAttribute('disabled')).toBe(false);
+        expect(clipboard.readText).not.toHaveBeenCalled();
+
+        await pasteButton!.click();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(clipboard.readText).toHaveBeenCalledOnce();
+        expect(getFirstEmittedColors(wrapper)).toEqual({ ...baseProps.colors, ...pastedColors });
+        expect(mockToast).toHaveBeenCalledWith({ title: 'Paste successful', variant: 'default' });
+    });
+
+    it('reports clipboard read failures without changing colors', async () => {
+        const wrapper = mountComponent();
+        const clipboard = {
+            readText: vi.fn().mockRejectedValue(new Error('Clipboard unavailable')),
+            writeText: vi.fn(),
+        };
+        vi.stubGlobal('navigator', { clipboard });
+
+        await wrapper.find('.paste-icon').element.closest('button')!.click();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(wrapper.emitted('update:colors')).toBeUndefined();
+        expect(mockToast).toHaveBeenCalledWith({ title: 'Paste failed', variant: 'destructive' });
+    });
+
+    it.each([
+        ['invalid JSON', '{invalid'],
+        ['an array instead of a color map', JSON.stringify(['#ffffff'])],
+        ['non-string color values', JSON.stringify({ '--background': 42 })],
+    ])('rejects clipboard contents with %s without changing colors', async (_description, clipboardText) => {
+        const wrapper = mountComponent();
+        const clipboard = {
+            readText: vi.fn().mockResolvedValue(clipboardText),
+            writeText: vi.fn(),
+        };
+        vi.stubGlobal('navigator', { clipboard });
+
+        await wrapper.find('.paste-icon').element.closest('button')!.click();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(wrapper.emitted('update:colors')).toBeUndefined();
+        expect(mockToast).toHaveBeenCalledWith({ title: 'Paste failed', variant: 'destructive' });
     });
 
     it('handles theme import successfully', async () => {

@@ -1,4 +1,5 @@
 import type { ThemeColors } from '@/types/blog.types';
+import FONT_OPTIONS_DATA from '../../data/font-options.json';
 import { computed, type WritableComputedRef } from 'vue';
 
 export interface ThemeTranslations {
@@ -40,6 +41,12 @@ export interface ThemeTranslations {
     importTooltip?: string;
     importError?: string;
     importSuccess?: string;
+    copyTooltip?: string;
+    pasteTooltip?: string;
+    copyError?: string;
+    copySuccess?: string;
+    pasteError?: string;
+    pasteSuccess?: string;
 }
 
 type ScaleKey = '--header-scale' | '--body-scale' | '--motto-scale' | '--excerpt-scale' | '--footer-scale';
@@ -82,27 +89,7 @@ const DEFAULT_SCALE_MAX = 120;
 const FOOTER_SCALE_MIN = 80;
 const FOOTER_SCALE_MAX = 110;
 
-export const FONT_OPTIONS = [
-    { label: 'System Default', value: 'inherit' },
-    { label: '[Sn] Afacad', value: 'var(--font-afacad)' },
-    { label: '[Sn] Darker Grotesque', value: 'var(--font-darker-grotesque)' },
-    { label: '[Sn] DM Sans', value: 'var(--font-dm-sans)' },
-    { label: '[Sn] Inter', value: 'var(--font-inter)' },
-    { label: '[Sn] Montserrat', value: 'var(--font-montserrat)' },
-    { label: '[Sn] Nunito', value: 'var(--font-nunito)' },
-    { label: '[Sn] Quicksand', value: 'var(--font-quicksand)' },
-    { label: '[Sn] Raleway', value: 'var(--font-raleway)' },
-    { label: '[Sn] Recursive', value: 'var(--font-recursive)' },
-    { label: '[Sn] Roboto', value: 'var(--font-roboto)' },
-    { label: '[Sn] Sofia semi condensed', value: 'var(--font-sofia-semi-condensed)' },
-    { label: '[Rm] Bitter', value: 'var(--font-bitter)' },
-    { label: '[Rm] Faustina', value: 'var(--font-faustina)' },
-    { label: '[Rm] Literata', value: 'var(--font-literata)' },
-    { label: '[Rm] Kreon', value: 'var(--font-kreon)' },
-    { label: '[Rm] Rokkitt', value: 'var(--font-rokkitt)' },
-    { label: '[Rm] Vollkorn', value: 'var(--font-vollkorn)' },
-    { label: '[Rm] Yrsa', value: 'var(--font-yrsa)' },
-] as const;
+export const FONT_OPTIONS = FONT_OPTIONS_DATA;
 
 export const MOTTO_STYLE_OPTIONS = [
     { label: 'Italic', value: 'italic' },

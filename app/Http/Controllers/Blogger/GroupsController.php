@@ -7,8 +7,10 @@ use App\Http\Controllers\AuthenticatedController;
 use App\Http\Requests\StoreGroupRequest;
 use App\Http\Requests\UpdateGroupRequest;
 use App\Models\Group;
+use App\Models\GroupMember;
 use App\Services\GroupService;
 use App\Services\TranslationService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -45,6 +47,41 @@ class GroupsController extends AuthenticatedController
                 'messages' => $this->translations->getPageTranslations('dashboard'),
             ],
             'seo' => $this->seoBuilder->build('My Groups')->toArray(),
+        ]);
+    }
+
+    public function theme(Request $request): Response
+    {
+        $this->authorize('viewAny', Group::class);
+        $user = $request->user();
+        $query = Group::query();
+
+        if (!$user->isAdmin() && !$user->hasAbility('manage-group')) {
+            $query->where(function (Builder $query) use ($user): void {
+                $query
+                    ->where('user_id', $user->id)
+                    ->orWhereHas('members', function (Builder $memberQuery) use ($user): void {
+                        $memberQuery
+                            ->whereKey($user->id)
+                            ->where('group_user.role', GroupMember::ROLE_MAINTAINER);
+                    });
+            });
+        }
+
+        $entities = $query
+            ->orderBy('name')
+            ->get(['id', 'user_id', 'name', 'theme'])
+            ->filter(fn(Group $group): bool => $user->can('update', $group))
+            ->map(fn(Group $group): array => [
+                'id' => $group->id,
+                'name' => $group->name,
+                'theme' => $group->theme,
+            ])
+            ->values();
+
+        return Inertia::render('app/blogger/ThemeManagement', [
+            'entityType' => 'group',
+            'entities' => $entities,
         ]);
     }
 

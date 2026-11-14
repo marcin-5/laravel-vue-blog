@@ -72,6 +72,18 @@ describe('BlogForm.vue', () => {
         expect(wrapper.findComponent({ name: 'BlogContentFields' }).exists()).toBe(true);
     });
 
+    it('does not render a theme editor or include theme in form data', async () => {
+        const wrapper = mount(BlogForm, {
+            props: defaultProps,
+        });
+
+        expect(wrapper.findComponent({ name: 'EntityThemeSection' }).exists()).toBe(false);
+
+        await wrapper.find('form').trigger('submit');
+
+        expect(wrapper.emitted('submit')![0][0]).not.toHaveProperty('theme');
+    });
+
     it('emits submit when handleSubmit is called', async () => {
         const wrapper = mount(BlogForm, {
             props: defaultProps,

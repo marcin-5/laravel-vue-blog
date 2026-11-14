@@ -1,16 +1,18 @@
 <script lang="ts" setup>
 import BotStats from '@/components/admin/BotStats.vue';
+import FontUsageStats from '@/components/admin/FontUsageStats.vue';
 import RecentSubscriptions from '@/components/admin/RecentSubscriptions.vue';
 import UserAgentStats from '@/components/admin/UserAgentStats.vue';
 import StatsSkeleton from '@/components/StatsSkeleton.vue';
 import type { NewsletterSubscription } from '@/types/admin.types';
-import type { BotStats as BotStatsType, UserAgentStats as UserAgentStatsType } from '@/types/stats';
+import type { BotStats as BotStatsType, FontUsageStats as FontUsageStatsType, UserAgentStats as UserAgentStatsType } from '@/types/stats';
 import PlaceholderPattern from '../PlaceholderPattern.vue';
 
 defineProps<{
     newsletterSubscriptions?: NewsletterSubscription[];
     userAgentStats?: UserAgentStatsType;
     botStats?: BotStatsType;
+    fontUsageStats?: FontUsageStatsType | null;
 }>();
 </script>
 
@@ -32,6 +34,10 @@ defineProps<{
             </div>
             <StatsSkeleton v-else class="aspect-video" />
         </div>
+        <div v-if="fontUsageStats" class="relative rounded-xl">
+            <FontUsageStats :stats="fontUsageStats" />
+        </div>
+        <StatsSkeleton v-else-if="fontUsageStats === undefined" class="min-h-72" />
         <div class="relative min-h-screen flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min">
             <PlaceholderPattern />
         </div>

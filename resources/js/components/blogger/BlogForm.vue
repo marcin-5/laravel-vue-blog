@@ -2,7 +2,6 @@
 import CategorySelector from '@/components/CategorySelector.vue';
 import BlogContentFields from '@/components/blogger/BlogContentFields.vue';
 import BlogSeoFields from '@/components/blogger/BlogSeoFields.vue';
-import EntityThemeSection from '@/components/blogger/EntityThemeSection.vue';
 import FormPublishingSettings from '@/components/blogger/FormPublishingSettings.vue';
 import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
 import BlogTagsSection from '@/components/blogger/BlogTagsSection.vue';
@@ -15,7 +14,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
-const { actionTranslations, themeSectionTranslations, createMarkdownTranslations } = useBloggerFormTranslations();
+const { actionTranslations, createMarkdownTranslations } = useBloggerFormTranslations();
 
 interface Props {
     blog?: Blog;
@@ -119,8 +118,6 @@ function handleCancel() {
                 :errors="form.errors"
                 :id-prefix="fieldIdPrefix"
             />
-
-            <EntityThemeSection v-model="form.theme" :errors="form.errors" :id-prefix="fieldIdPrefix" :translations="themeSectionTranslations" />
 
             <CategorySelector
                 :categories="props.categories"

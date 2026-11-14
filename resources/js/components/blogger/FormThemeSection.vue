@@ -9,7 +9,7 @@ import { useCssVariables } from '@/composables/useCssVariables';
 import { FONT_OPTIONS, type ThemeTranslations, useThemeSection } from '@/composables/useThemeSection';
 import { useToast } from '@/composables/useToast';
 import type { BlogTheme, ThemeColors } from '@/types/blog.types';
-import { Download, Settings2, Upload } from 'lucide-vue-next';
+import { ClipboardPaste, Copy, Download, Settings2, Upload } from 'lucide-vue-next';
 import { useTemplateRef } from 'vue';
 
 interface Props {
@@ -22,6 +22,10 @@ interface Props {
 
 const IMPORT_ERROR_FALLBACK = 'Import failed';
 const IMPORT_SUCCESS_FALLBACK = 'Import successful';
+const COPY_ERROR_FALLBACK = 'Clipboard copy failed';
+const COPY_SUCCESS_FALLBACK = 'Theme copied to clipboard';
+const PASTE_ERROR_FALLBACK = 'Clipboard content is invalid or unavailable';
+const PASTE_SUCCESS_FALLBACK = 'Theme pasted successfully';
 const DEFAULT_FONT_VALUE = 'inherit';
 const THEME_FILE_EXTENSION = '.json';
 
@@ -58,18 +62,31 @@ function resolveThemeVariant(): 'light' | 'dark' {
 }
 
 function isThemeColors(value: unknown): value is ThemeColors {
-    return typeof value === 'object' && value !== null;
+    return typeof value === 'object' && value !== null && !Array.isArray(value) && Object.values(value).every((color) => typeof color === 'string');
+}
+
+function isBlogTheme(value: unknown): value is BlogTheme {
+    return (
+        typeof value === 'object' &&
+        value !== null &&
+        !Array.isArray(value) &&
+        ('light' in value || 'dark' in value) &&
+        ((value as BlogTheme).light === undefined || isThemeColors((value as BlogTheme).light)) &&
+        ((value as BlogTheme).dark === undefined || isThemeColors((value as BlogTheme).dark))
+    );
 }
 
 function normalizeImportedTheme(theme: unknown): ThemeColors {
-    const themeObject = theme as BlogTheme | ThemeColors;
-
-    if ('light' in themeObject || 'dark' in themeObject) {
+    if (isBlogTheme(theme)) {
         const variant = resolveThemeVariant();
-        return (themeObject[variant] ?? (variant === 'light' ? themeObject.dark : themeObject.light) ?? {}) as ThemeColors;
+        return theme[variant] ?? (variant === 'light' ? theme.dark : theme.light) ?? {};
     }
 
-    return themeObject as ThemeColors;
+    if (isThemeColors(theme)) {
+        return theme;
+    }
+
+    throw new Error('Invalid theme format');
 }
 
 function mergeColors(colors: ThemeColors): ThemeColors {
@@ -93,6 +110,34 @@ function showImportSuccessToast(): void {
     });
 }
 
+function showCopyErrorToast(): void {
+    toast({
+        title: props.translations.copyError || COPY_ERROR_FALLBACK,
+        variant: 'destructive',
+    });
+}
+
+function showCopySuccessToast(): void {
+    toast({
+        title: props.translations.copySuccess || COPY_SUCCESS_FALLBACK,
+        variant: 'default',
+    });
+}
+
+function showPasteErrorToast(): void {
+    toast({
+        title: props.translations.pasteError || PASTE_ERROR_FALLBACK,
+        variant: 'destructive',
+    });
+}
+
+function showPasteSuccessToast(): void {
+    toast({
+        title: props.translations.pasteSuccess || PASTE_SUCCESS_FALLBACK,
+        variant: 'default',
+    });
+}
+
 function buildExportFileName(): string {
     const variant = resolveThemeVariant();
     const date = new Date().toISOString().split('T')[0];
@@ -112,6 +157,32 @@ function exportTheme(): void {
     URL.revokeObjectURL(url);
 }
 
+async function copyTheme(): Promise<void> {
+    try {
+        await navigator.clipboard.writeText(JSON.stringify(props.colors ?? {}, null, 2));
+        showCopySuccessToast();
+    } catch {
+        showCopyErrorToast();
+    }
+}
+
+async function pasteTheme(): Promise<void> {
+    try {
+        const clipboardText = await navigator.clipboard.readText();
+        const parsedTheme: unknown = JSON.parse(clipboardText);
+
+        if (!isThemeColors(parsedTheme)) {
+            showPasteErrorToast();
+            return;
+        }
+
+        emit('update:colors', mergeColors(parsedTheme));
+        showPasteSuccessToast();
+    } catch {
+        showPasteErrorToast();
+    }
+}
+
 function openFilePicker(): void {
     fileInput.value?.click();
 }
@@ -127,11 +198,6 @@ async function handleImport(event: Event): Promise<void> {
     try {
         const fileContent = await file.text();
         const parsedTheme = JSON.parse(fileContent);
-
-        if (!isThemeColors(parsedTheme)) {
-            showImportErrorToast();
-            return;
-        }
 
         const importedColors = normalizeImportedTheme(parsedTheme);
         emit('update:colors', mergeColors(importedColors));
@@ -159,6 +225,12 @@ async function handleImport(event: Event): Promise<void> {
                     @click="openFilePicker"
                 >
                     <Upload class="h-3.5 w-3.5" />
+                </TooltipButton>
+                <TooltipButton :tooltip-content="props.translations.copyTooltip || ''" size="sm" type="button" variant="ghost" @click="copyTheme">
+                    <Copy class="h-3.5 w-3.5" />
+                </TooltipButton>
+                <TooltipButton :tooltip-content="props.translations.pasteTooltip || ''" size="sm" type="button" variant="ghost" @click="pasteTheme">
+                    <ClipboardPaste class="h-3.5 w-3.5" />
                 </TooltipButton>
                 <TooltipButton :tooltip-content="props.translations.exportTooltip || ''" size="sm" type="button" variant="ghost" @click="exportTheme">
                     <Download class="h-3.5 w-3.5" />

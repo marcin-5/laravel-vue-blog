@@ -5,35 +5,11 @@ import {
     createDefaultGroupFormData,
     createFormDataFromBlog,
     createFormDataFromGroup,
-    ensureThemeStructure,
     populateFormFromBlog,
     populateFormFromGroup,
 } from '../blogFormUtils';
 
 describe('blogFormUtils', () => {
-    describe('ensureThemeStructure', () => {
-        it('returns default structure when theme is null or undefined', () => {
-            expect(ensureThemeStructure(null)).toEqual({ light: {}, dark: {} });
-            expect(ensureThemeStructure(undefined)).toEqual({ light: {}, dark: {} });
-        });
-
-        it('preserves existing theme structure', () => {
-            const theme = {
-                light: { '--primary': '#ffd020' },
-                dark: { '--primary': '#b0ff20' },
-            };
-            expect(ensureThemeStructure(theme)).toEqual(theme);
-        });
-
-        it('fills missing parts of theme structure', () => {
-            const partialTheme = { light: { '--primary': '#ffb020' } } as any;
-            expect(ensureThemeStructure(partialTheme)).toEqual({
-                light: { '--primary': '#ffb020' },
-                dark: {},
-            });
-        });
-    });
-
     describe('createDefaultFormData', () => {
         it('returns default form data with provided locale', () => {
             const data = createDefaultFormData('pl');
@@ -42,7 +18,7 @@ describe('blogFormUtils', () => {
             expect(data.seo_title).toBe(null);
             expect(data.is_published).toBe(false);
             expect(data.allow_multiple_tag_filtering).toBe(false);
-            expect(data.theme).toEqual({ light: {}, dark: {} });
+            expect(data).not.toHaveProperty('theme');
         });
 
         it('uses "en" as default locale', () => {
@@ -91,7 +67,6 @@ describe('blogFormUtils', () => {
                 sidebar: 1,
                 page_size: 20,
                 categories: [10],
-                theme: { light: { '--bg': '#eee' }, dark: {} },
                 landing_content: 'Landing Content',
                 about: null,
             });
@@ -118,7 +93,6 @@ describe('blogFormUtils', () => {
                 sidebar: 0,
                 page_size: 0,
                 categories: [],
-                theme: null,
                 landing_content: '',
             } as any;
 
@@ -146,7 +120,7 @@ describe('blogFormUtils', () => {
             expect(data.locale).toBe('pl');
             expect(data.name).toBe('');
             expect(data.allow_registration).toBe(false);
-            expect(data.theme).toEqual({ light: {}, dark: {} });
+            expect(data).not.toHaveProperty('theme');
         });
     });
 
@@ -166,7 +140,6 @@ describe('blogFormUtils', () => {
                 locale: 'de',
                 sidebar: 1,
                 page_size: 20,
-                theme: { light: { '--bg': '#eee' }, dark: {} },
             };
 
             const data = createFormDataFromGroup(group as Group);
@@ -180,7 +153,6 @@ describe('blogFormUtils', () => {
                 locale: 'de',
                 sidebar: 1,
                 page_size: 20,
-                theme: { light: { '--bg': '#eee' }, dark: {} },
             });
         });
     });
@@ -196,7 +168,6 @@ describe('blogFormUtils', () => {
                 locale: '',
                 sidebar: 0,
                 page_size: 0,
-                theme: null,
             } as any;
 
             const group: Partial<Group> = {

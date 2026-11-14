@@ -5,11 +5,15 @@ namespace App\Http\Controllers;
 use App\Builders\SimpleSeoBuilder;
 use App\Queries\Dashboard\BlogStatsQuery;
 use App\Queries\Dashboard\BotStatsQuery;
+use App\Queries\Dashboard\FontUsageStatsQuery;
 use App\Queries\Dashboard\NewsletterStatsQuery;
 use App\Queries\Dashboard\PostStatsQuery;
+use App\Enums\UserRole;
 use App\Services\TranslationService;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -25,6 +29,7 @@ class DashboardController extends Controller
         protected BotStatsQuery $botQuery,
         protected BlogStatsQuery $blogQuery,
         protected PostStatsQuery $postQuery,
+        protected FontUsageStatsQuery $fontUsageQuery,
     ) {}
 
     /**
@@ -34,6 +39,23 @@ class DashboardController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
+        $canViewAdminStats = $user->can('view_admin_stats');
+        $selectedBloggerId = null;
+
+        if ($canViewAdminStats) {
+            $validated = $request->validate([
+                'blogger_id' => [
+                    'nullable',
+                    'integer',
+                    Rule::exists('users', 'id')->where(fn(QueryBuilder $query): QueryBuilder => $query->whereIn(
+                        'role',
+                        [UserRole::Admin->value, UserRole::Blogger->value],
+                    )),
+                ],
+            ]);
+            $selectedBloggerId = isset($validated['blogger_id']) ? (int) $validated['blogger_id'] : null;
+        }
+
         $messages = $this->translations->getPageTranslations('dashboard');
 
         return Inertia::render('app/Dashboard', [
@@ -47,6 +69,9 @@ class DashboardController extends Controller
             ),
             'botStats' => Inertia::defer(
                 fn() => $user->can('view_admin_stats') ? $this->botQuery->handle()['botStats'] : null,
+            ),
+            'fontUsageStats' => Inertia::defer(
+                fn() => $canViewAdminStats ? $this->fontUsageQuery->handle($selectedBloggerId) : null,
             ),
             'translations' => [
                 'locale' => app()->getLocale(),

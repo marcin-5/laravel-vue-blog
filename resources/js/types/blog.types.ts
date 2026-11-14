@@ -12,6 +12,12 @@ export type BlogTheme = {
 
 export type ThemeColors = Record<string, string>;
 
+export interface ThemeManagementEntity {
+    id: number;
+    name: string;
+    theme: BlogTheme | null;
+}
+
 export interface Blog {
     id: number;
     name: string;
@@ -498,7 +504,6 @@ export interface BlogFormData {
     categories: number[];
     landing_content: string | null;
     about: string | null;
-    theme: BlogTheme | null;
     [key: string]: any;
 }
 
@@ -511,7 +516,6 @@ export interface GroupFormData {
     locale: string;
     sidebar: number;
     page_size: number;
-    theme: BlogTheme | null;
     [key: string]: any;
 }
 
