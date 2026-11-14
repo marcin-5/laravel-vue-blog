@@ -32,6 +32,6 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: t('admin.stats.title'), href: '/
     </Head>
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <StatsPage v-bind="statsPageProps" />
+        <StatsPage :config="statsPageProps.config" :data="statsPageProps.data" :filters="statsPageProps.filters" :options="statsPageProps.options" />
     </AppLayout>
 </template>

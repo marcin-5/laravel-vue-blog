@@ -26,6 +26,6 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: t('blogger.stats_title'), href: 
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <StatsPage v-bind="statsPageProps" />
+        <StatsPage :config="statsPageProps.config" :data="statsPageProps.data" :filters="statsPageProps.filters" :options="statsPageProps.options" />
     </AppLayout>
 </template>
