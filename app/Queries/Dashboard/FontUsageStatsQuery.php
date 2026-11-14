@@ -100,7 +100,7 @@ class FontUsageStatsQuery
         /** @var list<array{label: string, value: string}> $fontOptions */
         $fontOptions = 'data/font-options.json'
                 |> resource_path(...)
-                |> File(...)
+                |> file_get_contents(...)
                 |> (static fn($x) => json_decode($x, true, flags: JSON_THROW_ON_ERROR));
 
         return $fontOptions;
