@@ -31,18 +31,13 @@ watch(
 function updateBloggerFilter(value: AcceptableValue | undefined): void {
     selectedBloggerId.value = typeof value === 'number' ? value : undefined;
 
-    router.get(
-        route('dashboard'),
-        selectedBloggerId.value ? { blogger_id: selectedBloggerId.value } : {},
-        {
-            only: ['fontUsageStats'],
-            preserveScroll: true,
-            preserveState: true,
-            replace: true,
-        },
-    );
+    router.get(route('dashboard'), selectedBloggerId.value ? { blogger_id: selectedBloggerId.value } : {}, {
+        only: ['fontUsageStats'],
+        preserveScroll: true,
+        preserveState: true,
+        replace: true,
+    });
 }
-
 </script>
 
 <template>
@@ -60,42 +55,32 @@ function updateBloggerFilter(value: AcceptableValue | undefined): void {
         </CardHeader>
         <CardContent>
             <TooltipProvider>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead>
-                            <tr class="border-b text-left text-muted-foreground">
-                                <th class="py-2 pr-4 font-medium">{{ t('admin.stats.font_usage.font_family') }}</th>
-                                <th class="py-2 text-right font-medium">{{ t('admin.stats.font_usage.blog_count') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="font in stats.fonts" :key="font.value" class="border-b last:border-0">
-                                <td class="py-2 pr-4">{{ font.label }}</td>
-                                <td class="py-2 text-right">
-                                    <span :class="font.count === 0 ? 'font-semibold text-amber-700 dark:text-amber-400' : 'font-medium'">
-                                        {{ font.count }}
-                                    </span>
-                                    <Tooltip>
-                                        <TooltipTrigger as-child>
-                                            <button
-                                                :aria-label="t('admin.stats.font_usage.blog_list')"
-                                                class="ml-2 inline-flex size-6 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
-                                                type="button"
-                                            >
-                                                <Info class="size-4" />
-                                            </button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <ul v-if="font.blogs.length" class="max-w-xs space-y-1">
-                                                <li v-for="(blogName, index) in font.blogs" :key="index">{{ blogName }}</li>
-                                            </ul>
-                                            <p v-else>{{ t('admin.stats.font_usage.unused') }}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="grid grid-cols-1 gap-x-6 sm:grid-cols-2 lg:grid-cols-3">
+                    <div v-for="font in stats.fonts" :key="font.value" class="flex items-center justify-between gap-2 border-b py-2">
+                        <span class="min-w-0">{{ font.label }}</span>
+                        <div class="flex shrink-0 items-center">
+                            <span :class="font.count === 0 ? 'font-semibold text-warning' : 'font-medium'">
+                                {{ font.count }}
+                            </span>
+                            <Tooltip>
+                                <TooltipTrigger as-child>
+                                    <button
+                                        :aria-label="t('admin.stats.font_usage.blog_list')"
+                                        class="ml-2 inline-flex size-6 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
+                                        type="button"
+                                    >
+                                        <Info class="size-4" />
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <ul v-if="font.blogs.length" class="max-w-xs space-y-1">
+                                        <li v-for="(blogName, index) in font.blogs" :key="index">{{ blogName }}</li>
+                                    </ul>
+                                    <p v-else>{{ t('admin.stats.font_usage.unused') }}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </div>
+                    </div>
                 </div>
             </TooltipProvider>
         </CardContent>

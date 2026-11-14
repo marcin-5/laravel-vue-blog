@@ -75,7 +75,8 @@ describe('FontUsageStats.vue', () => {
 
         expect(wrapper.text()).toContain('Alpha blog');
         expect(wrapper.text()).toContain('admin.stats.font_usage.unused');
-        expect(wrapper.find('tbody tr:nth-child(2) span').classes()).toContain('text-amber-700');
-        expect(wrapper.findAll('tbody tr')).toHaveLength(2);
+        expect(wrapper.find('.grid').classes()).toEqual(expect.arrayContaining(['grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-3']));
+        expect(wrapper.findAll('.grid > div')).toHaveLength(2);
+        expect(wrapper.find('.grid > div:nth-child(2) div > span').classes()).toContain('text-amber-700');
     });
 });
