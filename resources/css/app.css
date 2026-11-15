@@ -7,11 +7,11 @@
 @theme inline {
     --font-afacad: 'Afacad Variable', sans-serif;
     --font-darker-grotesque: 'Darker Grotesque Variable', sans-serif;
-    --font-dm-sans: 'DM Sans Variable', sans-serif;
     --font-inter: 'Inter Variable', sans-serif;
     --font-montserrat: 'Montserrat Variable', sans-serif;
     --font-nunito: 'Nunito Variable', sans-serif;
     --font-quicksand: 'Quicksand Variable', sans-serif;
+    --font-rajdhani: 'Rajdhani', sans-serif;
     --font-raleway: 'Raleway Variable', sans-serif;
     --font-recursive: 'Recursive Variable', sans-serif;
     --font-roboto: 'Roboto Variable', sans-serif;
@@ -147,7 +147,7 @@
     --font-body-default: var(--font-nunito);
     --font-motto-default: var(--font-vollkorn);
     --font-excerpt-default: var(--font-sofia-semi-condensed);
-    --font-footer-default: var(--font-dm-sans);
+    --font-footer-default: var(--font-rajdhani);
 
     --background: hsl(60 22% 99%);
     --foreground: hsl(0 0% 9%);

@@ -1,7 +1,6 @@
 import '@fontsource-variable/afacad';
 import '@fontsource-variable/bitter';
 import '@fontsource-variable/darker-grotesque';
-import '@fontsource-variable/dm-sans';
 import '@fontsource-variable/faustina';
 import '@fontsource-variable/inter';
 import '@fontsource-variable/kreon';
@@ -18,6 +17,7 @@ import '@fontsource-variable/vollkorn';
 import '@fontsource-variable/yrsa';
 import '@fontsource/cinzel-decorative/900.css';
 import '@fontsource/cinzel/700.css';
+import '@fontsource/rajdhani';
 import '../css/app.css';
 
 import { initializeVisitorId } from '@/composables/useVisitorId';
