@@ -20,7 +20,8 @@ test('authenticated users without permissions see empty stats', function () {
     $user = User::factory()->create();
     $this->actingAs($user);
 
-    $this->get('/dashboard')
+    $this
+        ->get('/dashboard')
         ->assertSuccessful()
         ->assertInertia(fn(Assert $page) => $page
             ->component('app/Dashboard')
@@ -30,8 +31,8 @@ test('authenticated users without permissions see empty stats', function () {
                 ->where('postsStats', [])
                 ->where('userAgentStats', null)
                 ->where('botStats', null)
-                ->where('fontUsageStats', null)
-            )
+                ->where('fontUsageStats', null),
+            ),
         );
 });
 
@@ -43,7 +44,8 @@ test('authenticated users with view_blogs permission see blog stats', function (
     $blog = createBlog(['user_id' => $user->id, 'name' => 'Test Blog']);
     createPost($blog, ['title' => 'Test Post']);
 
-    $this->get('/dashboard')
+    $this
+        ->get('/dashboard')
         ->assertSuccessful()
         ->assertInertia(fn(Assert $page) => $page
             ->component('app/Dashboard')
@@ -55,8 +57,8 @@ test('authenticated users with view_blogs permission see blog stats', function (
                 ->where('newsletterSubscriptions', [])
                 ->where('userAgentStats', null)
                 ->where('botStats', null)
-                ->where('fontUsageStats', null)
-            )
+                ->where('fontUsageStats', null),
+            ),
         );
 });
 
@@ -68,7 +70,8 @@ test('authenticated users with view_admin_stats permission see admin stats', fun
     $blog = createBlog(['name' => 'Other Blog']);
     createSubscription($blog, ['email' => 'subscriber@example.com']);
 
-    $this->get('/dashboard')
+    $this
+        ->get('/dashboard')
         ->assertSuccessful()
         ->assertInertia(fn(Assert $page) => $page
             ->component('app/Dashboard')
@@ -79,8 +82,8 @@ test('authenticated users with view_admin_stats permission see admin stats', fun
                 ->has('botStats')
                 ->has('fontUsageStats.fonts', 19)
                 ->where('blogStats', [])
-                ->where('postsStats', [])
-            )
+                ->where('postsStats', []),
+            ),
         );
 });
 
@@ -92,7 +95,8 @@ test('authenticated users with all permissions see all stats', function () {
     $blog = createBlog(['user_id' => $user->id, 'name' => 'My Blog']);
     createSubscription($blog, ['email' => 'subscriber@example.com']);
 
-    $this->get('/dashboard')
+    $this
+        ->get('/dashboard')
         ->assertSuccessful()
         ->assertInertia(fn(Assert $page) => $page
             ->component('app/Dashboard')
@@ -101,9 +105,9 @@ test('authenticated users with all permissions see all stats', function () {
                 ->has('blogStats')
                 ->has('postsStats')
                 ->has('userAgentStats')
-                ->has('botStats')
+                ->has('botStats'),
             )
-            ->has('translations')
+            ->has('translations'),
         );
 });
 
@@ -142,7 +146,8 @@ test('admin font usage stats include all bloggers and every catalog font by defa
         'theme' => ['dark' => ['--font-body' => 'var(--font-inter)']],
     ]);
 
-    $this->actingAs($admin)
+    $this
+        ->actingAs($admin)
         ->get('/dashboard')
         ->assertSuccessful()
         ->assertInertia(fn(Assert $page) => $page
@@ -150,14 +155,14 @@ test('admin font usage stats include all bloggers and every catalog font by defa
                 ->where('fontUsageStats.selectedBloggerId', null)
                 ->where('fontUsageStats.bloggers', $expectedBloggers)
                 ->has('fontUsageStats.fonts', 19)
-                ->where('fontUsageStats.fonts.4.value', 'var(--font-inter)')
-                ->where('fontUsageStats.fonts.4.count', 2)
-                ->where('fontUsageStats.fonts.4.blogs', ['First Blogger Blog', 'Second Blogger Blog'])
+                ->where('fontUsageStats.fonts.3.value', 'var(--font-inter)')
+                ->where('fontUsageStats.fonts.3.count', 2)
+                ->where('fontUsageStats.fonts.3.blogs', ['First Blogger Blog', 'Second Blogger Blog'])
                 ->where('fontUsageStats.fonts.12.count', 1)
                 ->where('fontUsageStats.fonts.12.blogs', ['First Blogger Blog'])
                 ->where('fontUsageStats.fonts.1.count', 0)
-                ->where('fontUsageStats.fonts.1.blogs', [])
-            )
+                ->where('fontUsageStats.fonts.1.blogs', []),
+            ),
         );
 });
 
@@ -179,7 +184,8 @@ test('admin font usage stats filter blogs by the selected blogger', function () 
         'theme' => ['light' => ['--font-header' => 'var(--font-bitter)']],
     ]);
 
-    $this->actingAs($admin)
+    $this
+        ->actingAs($admin)
         ->get('/dashboard?blogger_id=' . $selectedBlogger->id)
         ->assertSuccessful()
         ->assertInertia(fn(Assert $page) => $page
@@ -188,8 +194,8 @@ test('admin font usage stats filter blogs by the selected blogger', function () 
                 ->where('fontUsageStats.fonts.10.value', 'var(--font-roboto)')
                 ->where('fontUsageStats.fonts.10.count', 1)
                 ->where('fontUsageStats.fonts.10.blogs', ['Selected Blog'])
-                ->where('fontUsageStats.fonts.12.count', 0)
-            )
+                ->where('fontUsageStats.fonts.12.count', 0),
+            ),
         );
 });
 
@@ -198,7 +204,8 @@ test('admin font usage filter rejects users who are not bloggers', function () {
     $admin->givePermissionTo('view_admin_stats');
     $regularUser = User::factory()->create();
 
-    $this->actingAs($admin)
+    $this
+        ->actingAs($admin)
         ->get('/dashboard?blogger_id=' . $regularUser->id)
         ->assertSessionHasErrors('blogger_id');
 });
