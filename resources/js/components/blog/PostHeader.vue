@@ -65,7 +65,7 @@ const canStartPrivateMessage = computed(() => Boolean(page.props.auth.user && pr
                 @click="dialogOpen = true"
             >
                 <Mail class="size-3.5" />
-                {{ t('private_messaging.actions.contact_owner', 'Private message') }}
+                {{ t('messages.private_messaging.actions.contact_owner', 'Private message') }}
             </Button>
         </p>
         <PrivateMessageDialog
