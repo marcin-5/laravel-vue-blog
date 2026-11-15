@@ -49,3 +49,12 @@ test('normal post on subdomain is still intercepted by blog post route', functio
 
     expect($route->getName())->toBe('blog.public.post');
 });
+
+test('private conversation routes on a blog subdomain are not intercepted by public redirects', function () {
+    $route = Route::getRoutes()->match(request()->create(
+        'http://test-blog.osobliwy.pl/blog-private-conversations/3',
+        'GET',
+    ));
+
+    expect($route->getName())->toBe('blog-private-conversations.show');
+});

@@ -19,7 +19,7 @@ use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Support\Facades\Route;
 use Spatie\MarkdownResponse\Middleware\ProvideMarkdownResponse;
 
-$reservedSlugs = 'about|contact|newsletter|enneagram-test|admin|api|dashboard|settings|_|_debugbar|_telescope|robots|sitemap|sitemap\.xml|robots\.txt|login|register|logout|www|posts|blogs|groups|data|markdown';
+$reservedSlugs = 'about|contact|newsletter|enneagram-test|admin|api|dashboard|settings|_|_debugbar|_telescope|robots|sitemap|sitemap\.xml|robots\.txt|login|register|logout|www|posts|blogs|groups|data|markdown|blog-private-conversations|group-private-conversations|private-conversations|private-messages';
 $reservedRegex = '^(?!(' . $reservedSlugs . ')($|/)).+$';
 $resolveBlog = static function (string $blogSlug): Blog {
     $blog = Blog::fromSlugAndHost($blogSlug, request()->getHost());
