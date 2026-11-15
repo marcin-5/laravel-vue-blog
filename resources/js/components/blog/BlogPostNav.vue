@@ -63,7 +63,7 @@ const homeNavHref = computed(() => (props.navigation?.isLandingPage ? undefined 
 const getLinkStateClasses = (isClickable: boolean, ...extraClasses: string[]) =>
     clsx(NAV_LINK_CLASSES.base, ...extraClasses, isClickable ? NAV_LINK_CLASSES.active : NAV_LINK_CLASSES.inactive);
 
-const getPostNavLinkClasses = (post?: NavPost | null) => getLinkStateClasses(!!post, 'gap-2');
+const getPostNavLinkClasses = (post?: NavPost | null) => getLinkStateClasses(!!post, 'min-w-0 max-w-[45%] gap-2');
 const getHomeLinkClasses = (isClickable: boolean) => getLinkStateClasses(isClickable, 'font-medium');
 
 const getPostNavLabelClass = (direction: PostNavDirection) => clsx('text-xs', direction === 'previous' ? 'opacity-75' : 'opacity-90');
@@ -103,9 +103,9 @@ const getMobilePostNavLabel = (item: PostNavItem) =>
             >
                 <span v-if="isPreviousPostNavItem(item)" class="text-lg">{{ item.arrow }}</span>
 
-                <div v-if="item.post" :class="item.contentAlignmentClass" class="flex flex-col">
+                <div v-if="item.post" :class="item.contentAlignmentClass" class="flex min-w-0 flex-col">
                     <span :class="getPostNavLabelClass(item.direction)">{{ t(item.labelKey) }}</span>
-                    <span class="font-medium">{{ item.post.title }}</span>
+                    <span :title="item.post.title" class="block w-full truncate font-medium">{{ item.post.title }}</span>
                 </div>
                 <span v-else>{{ t(item.labelKey) }}</span>
 
