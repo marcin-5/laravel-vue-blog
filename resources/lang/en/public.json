@@ -168,5 +168,15 @@
         "no_blogs_yet": "There are no blogs on this page yet.",
         "will_change_soon": "This will change soon and you will find interesting posts here.",
         "invite_soon": "Come back soon"
+    },
+    "messages": {
+        "success_title": "Success",
+        "success_manage": "Your newsletter subscriptions have been updated.",
+        "success_subscribe": "You have subscribed to the newsletter.",
+        "error_title": "Error",
+        "error_manage": "Unable to update your newsletter subscriptions.",
+        "error_subscribe": "Unable to subscribe to the newsletter.",
+        "unsubscribed_title": "Unsubscribed",
+        "unsubscribed": "You have unsubscribed from the newsletter."
     }
 }

@@ -168,5 +168,15 @@
         "no_blogs_yet": "Jeszcze nie ma na tej stronie żadnego bloga.",
         "will_change_soon": "Wkrótce to się zmieni i znajdziesz tu ciekawe wpisy.",
         "invite_soon": "Zapraszam wkrótce"
+    },
+    "messages": {
+        "success_title": "Sukces",
+        "success_manage": "Twoje subskrypcje newslettera zostały zaktualizowane.",
+        "success_subscribe": "Subskrybujesz newsletter.",
+        "error_title": "Błąd",
+        "error_manage": "Nie udało się zaktualizować subskrypcji newslettera.",
+        "error_subscribe": "Nie udało się zapisać do newslettera.",
+        "unsubscribed_title": "Wypisano",
+        "unsubscribed": "Wypisano Cię z newslettera."
     }
 }
