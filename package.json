@@ -16,11 +16,11 @@
         "@types/node": "^26.6.6",
         "@vitest/coverage-v8": "^5.1.0",
         "@vue/eslint-config-typescript": "^14.9.0",
-        "@vue/test-utils": "^2.5.1",
+        "@vue/test-utils": "^2.6.0",
         "eslint": "^9.39.5",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-vue": "^10.12.1",
-        "jsdom": "^31.0.0",
+        "jsdom": "^31.0.1",
         "prettier": "^3.10.1",
         "prettier-plugin-organize-imports": "^4.3.0",
         "prettier-plugin-tailwindcss": "^0.8.1",
@@ -70,12 +70,12 @@
         "typescript": "~6.0.3",
         "vite": "8.3.8",
         "vue": "^3.5.45",
-        "vue-i18n": "^11.4.18",
-        "ziggy-js": "^2.6.5"
+        "vue-i18n": "^11.4.20",
+        "ziggy-js": "^2.7.0"
     },
     "optionalDependencies": {
-        "@rollup/rollup-linux-x64-gnu": "4.68.2",
-        "@rollup/rollup-linux-x64-musl": "4.68.2",
+        "@rollup/rollup-linux-x64-gnu": "4.68.3",
+        "@rollup/rollup-linux-x64-musl": "4.68.3",
         "@tailwindcss/oxide-linux-x64-gnu": "^4.3.5",
         "lightningcss-linux-x64-gnu": "^1.33.0"
     },
