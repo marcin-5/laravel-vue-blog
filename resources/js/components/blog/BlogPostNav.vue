@@ -93,7 +93,7 @@ const getMobilePostNavLabel = (item: PostNavItem) =>
         <BorderDivider class="my-4 pt-2" />
 
         <!-- Desktop Navigation -->
-        <div class="hidden items-center justify-between gap-4 lg:flex">
+        <div class="hidden items-stretch justify-between gap-4 lg:flex">
             <component
                 :is="getPostNavComponent(item.post)"
                 v-for="item in postNavItems"
