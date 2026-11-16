@@ -27,8 +27,8 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -54,20 +54,16 @@ class PublicBlogController extends BasePublicController
      * Route: /{blog:slug}
      * @throws FileNotFoundException
      */
-    public function landing(Request $request, Blog $blog, string $mainDomain, PublicBlogPostsQuery $query): Response|RedirectResponse
-    {
+    public function landing(
+        Request $request,
+        Blog $blog,
+        string $mainDomain,
+        PublicBlogPostsQuery $query,
+    ): Response|RedirectResponse {
         $this->ensureBlogIsPublic($blog);
 
         if ((string) $request->query('page') === '1') {
-            $queryParameters = $request->query();
-            unset($queryParameters['page']);
-
-            $url = $request->url();
-            if ($queryParameters !== []) {
-                $url .= '?' . http_build_query($queryParameters);
-            }
-
-            return redirect()->to($url, 301);
+            return $this->redirectWithoutQueryParameters($request, ['page']);
         }
 
         $blog->load(['landingPage', 'user']);
@@ -92,6 +88,24 @@ class PublicBlogController extends BasePublicController
         config([
             'app.name' => SetLocale::getAppNameForLocale($locale),
         ]);
+    }
+
+    /**
+     * @param  list<string>  $parameters
+     */
+    private function redirectWithoutQueryParameters(Request $request, array $parameters): RedirectResponse
+    {
+        $queryParameters = $request->query();
+        foreach ($parameters as $parameter) {
+            unset($queryParameters[$parameter]);
+        }
+
+        $url = $request->url();
+        if ($queryParameters !== []) {
+            $url .= '?' . http_build_query($queryParameters);
+        }
+
+        return redirect()->to($url, 301);
     }
 
     /**
@@ -214,8 +228,12 @@ class PublicBlogController extends BasePublicController
         string $mainDomain,
         string $postSlug,
         PublicBlogPostsQuery $query,
-    ): Response {
+    ): Response|RedirectResponse {
         $this->ensureBlogIsPublic($blog);
+
+        if (array_key_exists('page', $request->query())) {
+            return $this->redirectWithoutQueryParameters($request, ['page']);
+        }
 
         $tag = is_string($request->query('tag'))
             ? $blog->tags()->where('slug', $request->query('tag'))->first()

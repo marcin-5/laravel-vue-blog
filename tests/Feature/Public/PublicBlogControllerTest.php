@@ -108,6 +108,20 @@ it('returns 404 for unpublished post on public blog', function () {
     $response->assertNotFound();
 });
 
+it('redirects post URLs with a page parameter to the clean post URL', function () {
+    $owner = User::factory()->create();
+    $blog = Blog::factory()->for($owner)->create(['is_published' => true]);
+    $post = Post::factory()->for($blog)->create([
+        'is_published' => true,
+        'published_at' => now()->subDay(),
+        'visibility' => Post::VIS_PUBLIC,
+    ]);
+
+    $this->get(getBlogUrl($blog, "/$post->slug") . '?page=3&tag=updates&utm_source=newsletter')
+        ->assertRedirect(getBlogUrl($blog, "/$post->slug") . '?tag=updates&utm_source=newsletter')
+        ->assertStatus(301);
+});
+
 it('returns 200 for published post on published blog and checks sidebar position', function () {
     $owner = User::factory()->create();
     $blog = Blog::factory()->for($owner)->create([
