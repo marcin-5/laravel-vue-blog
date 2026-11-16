@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -53,9 +54,22 @@ class PublicBlogController extends BasePublicController
      * Route: /{blog:slug}
      * @throws FileNotFoundException
      */
-    public function landing(Request $request, Blog $blog, string $mainDomain, PublicBlogPostsQuery $query): Response
+    public function landing(Request $request, Blog $blog, string $mainDomain, PublicBlogPostsQuery $query): Response|RedirectResponse
     {
         $this->ensureBlogIsPublic($blog);
+
+        if ((string) $request->query('page') === '1') {
+            $queryParameters = $request->query();
+            unset($queryParameters['page']);
+
+            $url = $request->url();
+            if ($queryParameters !== []) {
+                $url .= '?' . http_build_query($queryParameters);
+            }
+
+            return redirect()->to($url, 301);
+        }
+
         $blog->load(['landingPage', 'user']);
 
         $activeTags = $this->resolveActiveTags($request, $blog);

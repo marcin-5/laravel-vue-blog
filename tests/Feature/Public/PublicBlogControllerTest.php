@@ -46,6 +46,15 @@ it('returns 200 for published blog on landing page and sets locale', function ()
     );
 });
 
+it('redirects the first blog landing page to its clean URL', function () {
+    $owner = User::factory()->create();
+    $blog = Blog::factory()->for($owner)->create(['is_published' => true]);
+
+    $this->get(getBlogUrl($blog) . '?page=1&operator=OR')
+        ->assertRedirect(getBlogUrl($blog) . '?operator=OR')
+        ->assertStatus(301);
+});
+
 it('uses seo_title for blog landing when available and falls back to name', function () {
     $owner = User::factory()->create();
     $blog = Blog::factory()->for($owner)->create([
