@@ -50,7 +50,7 @@ vi.mock('@/components/ui/tooltip', () => ({
     },
 }));
 
-vi.mock('lucide-vue-next', () => ({
+vi.mock('@lucide/vue', () => ({
     ClipboardPaste: { name: 'ClipboardPaste', template: '<div class="paste-icon" />' },
     Copy: { name: 'Copy', template: '<div class="copy-icon" />' },
     Download: { name: 'Download', template: '<div class="download-icon" />' },

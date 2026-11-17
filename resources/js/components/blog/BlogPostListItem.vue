@@ -3,7 +3,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import type { PostItem, Tag } from '@/types/blog.types';
 import { formatDate } from '@/utils/dateUtils';
 import { Link } from '@inertiajs/vue3';
-import { Info } from 'lucide-vue-next';
+import { Info } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{

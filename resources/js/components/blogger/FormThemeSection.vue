@@ -9,7 +9,7 @@ import { useCssVariables } from '@/composables/useCssVariables';
 import { FONT_OPTIONS, type ThemeTranslations, useThemeSection } from '@/composables/useThemeSection';
 import { useToast } from '@/composables/useToast';
 import type { BlogTheme, ThemeColors } from '@/types/blog.types';
-import { ClipboardPaste, Copy, Download, Settings2, Upload } from 'lucide-vue-next';
+import { ClipboardPaste, Copy, Download, Settings2, Upload } from '@lucide/vue';
 import { useTemplateRef } from 'vue';
 
 interface Props {

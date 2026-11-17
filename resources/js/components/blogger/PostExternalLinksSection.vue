@@ -6,7 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Textarea } from '@/components/ui/textarea/index';
 import type { ExternalLinkItem } from '@/types/blog.types';
 import { Link } from '@inertiajs/vue3';
-import { Check, Info, Pencil, Plus, Trash2 } from 'lucide-vue-next';
+import { Check, Info, Pencil, Plus, Trash2 } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
 interface Props {

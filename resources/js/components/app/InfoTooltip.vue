@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Info } from 'lucide-vue-next';
+import { Info } from '@lucide/vue';
 
 interface Props {
     title: string;

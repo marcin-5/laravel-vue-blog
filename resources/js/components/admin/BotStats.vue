@@ -3,7 +3,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { BotStats, BotViewEntry } from '@/types/stats';
 import { formatDateTime } from '@/utils/dateUtils';
-import { Info } from 'lucide-vue-next';
+import { Info } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import StatsSwitcher from '../stats/StatsSwitcher.vue';

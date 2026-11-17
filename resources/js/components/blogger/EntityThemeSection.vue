@@ -3,7 +3,7 @@ import FormThemeSection from '@/components/blogger/FormThemeSection.vue';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { type ThemeTranslations } from '@/composables/useThemeSection';
 import type { BlogTheme } from '@/types/blog.types';
-import { Info } from 'lucide-vue-next';
+import { Info } from '@lucide/vue';
 import { computed } from 'vue';
 
 interface EntityThemeTranslations extends ThemeTranslations {

@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/composables/useToast';
 import type { AdminPostItem as PostItem } from '@/types/blog.types';
 import { useHttp } from '@inertiajs/vue3';
-import { GripVertical, Plus, Trash2 } from 'lucide-vue-next';
+import { GripVertical, Plus, Trash2 } from '@lucide/vue';
 import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 

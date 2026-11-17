@@ -4,7 +4,7 @@ import FontSizeAdjuster from '@/components/FontSizeAdjuster.vue';
 import HomeButton from '@/components/HomeButton.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import { Link, usePage } from '@inertiajs/vue3';
-import { Menu, X } from 'lucide-vue-next';
+import { Menu, X } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 

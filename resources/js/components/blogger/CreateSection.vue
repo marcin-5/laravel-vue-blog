@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { TooltipButton } from '@/components/ui/tooltip';
-import { Plus, X } from 'lucide-vue-next';
+import { Plus, X } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();

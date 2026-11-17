@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import EntityMarkdownField from '@/components/blogger/EntityMarkdownField.vue';
 import { useBloggerFormTranslations } from '@/composables/useBloggerFormTranslations';
 import { Button } from '@/components/ui/button';
-import { Check, FileText, Plus, X } from 'lucide-vue-next';
+import { Check, FileText, Plus, X } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 

@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { UserAgentEntry, UserAgentStats } from '@/types/stats';
-import { Info } from 'lucide-vue-next';
+import { Info } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import StatsSwitcher from '../stats/StatsSwitcher.vue';

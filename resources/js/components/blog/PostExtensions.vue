@@ -4,7 +4,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { PostExtension } from '@/types/blog.types';
 import { blogBodyTextStyle } from '@/utils/blogStyles';
-import { Lock, LockOpen } from 'lucide-vue-next';
+import { Lock, LockOpen } from '@lucide/vue';
 import { ref } from 'vue';
 
 defineProps<{

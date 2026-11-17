@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import BorderDivider from '@/components/blog/BorderDivider.vue';
 import { Link } from '@inertiajs/vue3';
-import { ArrowDown } from 'lucide-vue-next';
+import { ArrowDown } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 
 withDefaults(

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import InputError from '@/components/InputError.vue';
-import { InfoIcon } from 'lucide-vue-next';
+import { InfoIcon } from '@lucide/vue';
 
 interface Props {
     id: string;

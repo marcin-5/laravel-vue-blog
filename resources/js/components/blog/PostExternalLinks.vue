@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Info } from 'lucide-vue-next';
+import { Info } from '@lucide/vue';
 
 interface ExternalLinkItem {
     id?: number;

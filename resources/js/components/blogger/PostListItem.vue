@@ -6,7 +6,7 @@ import { TooltipButton } from '@/components/ui/tooltip';
 import { useToast } from '@/composables/useToast';
 import type { AdminPostItem as PostItem } from '@/types/blog.types';
 import { usePage } from '@inertiajs/vue3';
-import { ChevronDown, ChevronUp, Copy, Pencil, X } from 'lucide-vue-next';
+import { ChevronDown, ChevronUp, Copy, Pencil, X } from '@lucide/vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 

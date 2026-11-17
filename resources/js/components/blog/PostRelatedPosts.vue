@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Link } from '@inertiajs/vue3';
-import { Info } from 'lucide-vue-next';
+import { Info } from '@lucide/vue';
 import { computed } from 'vue';
 
 interface RelatedPostMinimal {

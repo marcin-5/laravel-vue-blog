@@ -36,7 +36,7 @@ vi.mock('@/components/ui/tooltip', () => ({
     TooltipProvider: { template: '<div><slot /></div>' },
     TooltipTrigger: { template: '<div><slot /></div>' },
 }));
-vi.mock('lucide-vue-next', () => ({ Info: { template: '<span />' }, Mail: { template: '<span />' } }));
+vi.mock('@lucide/vue', () => ({ Info: { template: '<span />' }, Mail: { template: '<span />' } }));
 
 const tagA = { id: 1, blog_id: 7, name: 'Alpha', slug: 'alpha' };
 const tagB = { id: 2, blog_id: 7, name: 'Beta', slug: 'beta' };

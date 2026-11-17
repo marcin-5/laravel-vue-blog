@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label/index';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select/index';
 import type { RelatedPostItem } from '@/types/blog.types';
 import { Link, useHttp } from '@inertiajs/vue3';
-import { Plus, Trash2 } from 'lucide-vue-next';
+import { Plus, Trash2 } from '@lucide/vue';
 import { computed, onMounted, ref, watch } from 'vue';
 
 interface Props {

@@ -6,7 +6,7 @@ import { useToast } from '@/composables/useToast';
 import type { AppPageProps } from '@/types';
 import type { Comment, Thread } from '@/types/blog.types';
 import { Link, useHttp, usePage } from '@inertiajs/vue3';
-import { Plus } from 'lucide-vue-next';
+import { Plus } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 

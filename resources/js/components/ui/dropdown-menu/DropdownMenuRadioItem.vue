@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { cn } from '@/utils/classUtils'
-import { Circle } from 'lucide-vue-next'
+import { Circle } from '@lucide/vue'
 import {
   DropdownMenuItemIndicator,
   DropdownMenuRadioItem,

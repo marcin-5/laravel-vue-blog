@@ -15,7 +15,7 @@ import {
     tagChipSizeClasses,
 } from '@/utils/blogStyles';
 import { Link, router } from '@inertiajs/vue3';
-import { Mail } from 'lucide-vue-next';
+import { Mail } from '@lucide/vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 

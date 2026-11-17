@@ -3,7 +3,7 @@ import CommentReplyForm from '@/components/comments/CommentReplyForm.vue';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import type { Comment } from '@/types/blog.types';
-import { Check, Pencil, Reply, Trash2, X } from 'lucide-vue-next';
+import { Check, Pencil, Reply, Trash2, X } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 

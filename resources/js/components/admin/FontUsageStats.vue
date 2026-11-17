@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { FontUsageStats } from '@/types/stats';
 import { router } from '@inertiajs/vue3';
-import { Info } from 'lucide-vue-next';
+import { Info } from '@lucide/vue';
 import type { AcceptableValue } from 'reka-ui';
 import { computed, ref, shallowRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';

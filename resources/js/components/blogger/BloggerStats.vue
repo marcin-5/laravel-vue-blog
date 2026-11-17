@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import StatCard from '@/components/blogger/StatCard.vue';
 import type { BlogStats } from '@/types/stats';
-import { BookOpen, Calendar, Eye, Mail } from 'lucide-vue-next';
+import { BookOpen, Calendar, Eye, Mail } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();

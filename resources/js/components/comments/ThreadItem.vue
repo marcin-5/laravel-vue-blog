@@ -7,7 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { Comment, Thread } from '@/types/blog.types';
-import { ChevronDown, Lock, LockOpen, Trash2 } from 'lucide-vue-next';
+import { ChevronDown, Lock, LockOpen, Trash2 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 
 withDefaults(

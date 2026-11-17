@@ -38,7 +38,7 @@ vi.mock('@/components/ui/tooltip', () => ({
     TooltipTrigger: { template: '<div><slot /></div>' },
 }));
 
-vi.mock('lucide-vue-next', () => ({
+vi.mock('@lucide/vue', () => ({
     Info: { template: '<span />' },
 }));
 

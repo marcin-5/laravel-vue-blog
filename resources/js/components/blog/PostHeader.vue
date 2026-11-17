@@ -5,7 +5,7 @@ import ViewStatsComponent from '@/components/blog/ViewStats.vue';
 import type { AppPageProps, SEO } from '@/types';
 import type { PostDetails, ViewStats } from '@/types/blog.types';
 import { usePage } from '@inertiajs/vue3';
-import { Mail } from 'lucide-vue-next';
+import { Mail } from '@lucide/vue';
 import { formatDate, shouldShowUpdatedDate } from '@/utils/dateUtils';
 import { blogHeaderStyle } from '@/utils/blogStyles';
 import { computed, shallowRef } from 'vue';
