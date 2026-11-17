@@ -60,7 +60,7 @@
         "clsx": "^2.1.1",
         "concurrently": "^10.0.7",
         "laravel-vite-plugin": "^3.2.1",
-        "lucide-vue-next": "^1.0.0",
+        "@lucide/vue": "^1.0.0",
         "npm-check-updates": "^23.1.1",
         "nstall": "^0.2.0",
         "reka-ui": "^2.11.0",
@@ -80,7 +80,8 @@
         "lightningcss-linux-x64-gnu": "^1.33.0"
     },
     "overrides": {
-        "minimatch": "^11.0.4",
-        "glob": "^14.0.2"
+        "glob": "^14.0.2",
+        "minimatch": "^11.0.1",
+        "postcss-selector-parser": "^6.1.5"
     }
 }
