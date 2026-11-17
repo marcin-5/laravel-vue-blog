@@ -82,6 +82,26 @@ it('updateBlog updates blog fields, extracts landing_content, syncs categories',
         ->and($blog->categories->first()->id)->toBe($categoryId);
 });
 
+it('clears landing page content when an empty value is provided', function () {
+    $user = User::factory()->create();
+    $blog = Blog::factory()->for($user)->create();
+    $blog->landingPage()->create(['content' => 'Existing landing content']);
+
+    app(BlogService::class)->updateBlog($blog, ['landing_content' => null]);
+
+    expect($blog->fresh()->landingPage->content)->toBe('');
+});
+
+it('preserves landing page content when landing_content is omitted', function () {
+    $user = User::factory()->create();
+    $blog = Blog::factory()->for($user)->create();
+    $blog->landingPage()->create(['content' => 'Existing landing content']);
+
+    app(BlogService::class)->updateBlog($blog, ['name' => 'Updated name']);
+
+    expect($blog->fresh()->landingPage->content)->toBe('Existing landing content');
+});
+
 it('updateBlog updates blog without landing_content and clears categories if empty array', function () {
     $user = User::factory()->create();
     $blog = Blog::factory()->for($user)->create();

@@ -64,24 +64,30 @@ readonly class BlogService
         return $blog;
     }
 
-    private function extractLandingContent(array &$blogData): ?string
+    /**
+     * @return array{content: string}|null
+     */
+    private function extractLandingContent(array &$blogData): ?array
     {
         if (!array_key_exists('landing_content', $blogData)) {
             return null;
         }
-        $landingContent = $blogData['landing_content'];
+        $landingContent = $blogData['landing_content'] ?? '';
         unset($blogData['landing_content']);
-        return $landingContent;
+        return ['content' => $landingContent];
     }
 
-    private function updateLandingPage(Blog $blog, ?string $content): void
+    /**
+     * @param array{content: string}|null $landingContent
+     */
+    private function updateLandingPage(Blog $blog, ?array $landingContent): void
     {
-        if ($content === null) {
+        if ($landingContent === null) {
             return;
         }
         $blog->landingPage()->updateOrCreate(
             ['blog_id' => $blog->id],
-            ['content' => $content],
+            ['content' => $landingContent['content']],
         );
     }
 
