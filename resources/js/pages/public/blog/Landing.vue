@@ -18,7 +18,7 @@ const postsListSpacingClass = computed(() => (hasLandingContent.value ? 'mt-6' :
     <PublicBlogShell :blog="blog" :chrome="chrome" :contentSpacingClass="postsListSpacingClass" :listing="listing">
         <template #header>
             <BlogHeader :blog="blog" :viewStats="viewStats" />
-            <ScrollToPostsLink :class="{ 'xl:hidden': chrome.sidebar }" />
+            <ScrollToPostsLink v-if="landingHtml" :class="{ 'xl:hidden': chrome.sidebar }" />
         </template>
 
         <template #content>
