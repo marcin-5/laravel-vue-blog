@@ -17,7 +17,7 @@ interface Props {
 
 const props = defineProps<Props>();
 const { t } = useI18n();
-const state = useBlogItemState(props.item);
+const state = useBlogItemState(() => props.item);
 const {
     editForm,
     editingPostId,

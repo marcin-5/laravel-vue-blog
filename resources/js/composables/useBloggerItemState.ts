@@ -1,6 +1,6 @@
 import type { ManageableItem, AdminPostItem as PostItem } from '@/types/blog.types';
-import type { Ref } from 'vue';
-import { computed } from 'vue';
+import type { MaybeRefOrGetter, Ref } from 'vue';
+import { computed, toValue } from 'vue';
 import { usePostForm } from './usePostForm';
 import { useUIState } from './useUIState';
 
@@ -13,7 +13,7 @@ export interface BloggerEntityState<TEntity extends ManageableItem> {
 }
 
 export interface UseBloggerItemStateOptions<TEntity extends ManageableItem> {
-    item: TEntity;
+    item: MaybeRefOrGetter<TEntity>;
     entityState: BloggerEntityState<TEntity>;
     startCreatePost(postState: ReturnType<typeof usePostForm>): void;
 }
@@ -21,10 +21,11 @@ export interface UseBloggerItemStateOptions<TEntity extends ManageableItem> {
 export function useBloggerItemState<TEntity extends ManageableItem>({ item, entityState, startCreatePost }: UseBloggerItemStateOptions<TEntity>) {
     const postState = usePostForm();
     const uiState = useUIState();
+    const getItem = () => toValue(item);
 
-    const isEditing = computed(() => entityState.editingId.value === item.id);
-    const isCreatingPost = computed(() => postState.creatingPostForId.value === item.id);
-    const isPostsExpanded = computed(() => uiState.expandedPostsForId.value === item.id);
+    const isEditing = computed(() => entityState.editingId.value === getItem().id);
+    const isCreatingPost = computed(() => postState.creatingPostForId.value === getItem().id);
+    const isPostsExpanded = computed(() => uiState.expandedPostsForId.value === getItem().id);
 
     function resetEntityEdit() {
         entityState.editingId.value = null;
@@ -56,7 +57,7 @@ export function useBloggerItemState<TEntity extends ManageableItem>({ item, enti
     function edit() {
         resetPostInteraction();
         uiState.expandedPostsForId.value = null;
-        entityState.startEdit(item);
+        entityState.startEdit(getItem());
     }
 
     function createPost() {
@@ -72,7 +73,7 @@ export function useBloggerItemState<TEntity extends ManageableItem>({ item, enti
         resetPostCreation();
         resetPostEdit();
         resetExtensionInteraction();
-        uiState.togglePosts(item);
+        uiState.togglePosts(getItem());
     }
 
     function editPost(post: PostItem) {
@@ -104,6 +105,6 @@ export function useBloggerItemState<TEntity extends ManageableItem>({ item, enti
         togglePosts,
         editPost,
         toggleExtensions,
-        submitEdit: () => entityState.submitEdit(item),
+        submitEdit: () => entityState.submitEdit(getItem()),
     };
 }

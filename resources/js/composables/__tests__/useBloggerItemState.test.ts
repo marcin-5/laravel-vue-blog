@@ -66,6 +66,30 @@ function createItem(id: number) {
 }
 
 describe('useBloggerItemState', () => {
+    it('uses the latest item when editing or submitting after props change', () => {
+        const postState = createPostState();
+        const uiState = createUIState();
+        const entityState = createEntityState();
+        const item = ref(createItem(1));
+
+        mocks.postStates.push(postState);
+        mocks.uiStates.push(uiState);
+
+        const state = useBloggerItemState({
+            item: () => item.value,
+            entityState,
+            startCreatePost: vi.fn(),
+        });
+        const updatedItem = { ...createItem(1), name: 'Updated item' };
+
+        item.value = updatedItem;
+        state.edit();
+        state.submitEdit();
+
+        expect(entityState.startEdit).toHaveBeenCalledWith(updatedItem);
+        expect(entityState.submitEdit).toHaveBeenCalledWith(updatedItem);
+    });
+
     it('keeps state independent for two list items', () => {
         const firstPostState = createPostState();
         const secondPostState = createPostState();
