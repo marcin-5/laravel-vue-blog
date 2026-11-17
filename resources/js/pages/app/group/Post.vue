@@ -58,6 +58,7 @@ defineProps<{
         </template>
 
         <template #breadcrumbs>
+            <BorderDivider class="my-2" />
             <BlogBreadcrumbs :breadcrumbs="navigation?.breadcrumbs ?? []" />
         </template>
 

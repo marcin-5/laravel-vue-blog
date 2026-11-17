@@ -82,6 +82,7 @@ const postsListTitle = computed(() => t('group.posts_list.title'));
         </template>
 
         <template #breadcrumbs>
+            <BorderDivider class="my-2" />
             <BlogBreadcrumbs :breadcrumbs="navigation?.breadcrumbs ?? []" />
         </template>
 
@@ -103,7 +104,7 @@ const postsListTitle = computed(() => t('group.posts_list.title'));
 
         <template #footer>
             <template v-if="hasFooterContent">
-                <BorderDivider class="my-4" />
+                <BorderDivider class="my-2" />
                 <BlogFooter :html="group.footer || ''" />
             </template>
         </template>
