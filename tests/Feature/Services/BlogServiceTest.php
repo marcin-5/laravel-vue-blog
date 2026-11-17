@@ -37,8 +37,8 @@ it(
         expect($blogs)->toHaveCount(2)
             ->and($blogs->first()->id)->toBe($blogNew->id)
             ->and($blogs->last()->id)->toBe($blogOld->id)
-            ->and($blogs->first()->relationLoaded('landingPage'))->toBeTrue()
-            ->and($blogs->first()->relationLoaded('categories'))->toBeTrue()
+            ->and($blogs[0]->relationLoaded('landingPage'))->toBeTrue()
+            ->and($blogs[0]->relationLoaded('categories'))->toBeTrue()
             ->and($blogs->first()->updated_at)->toBeNull();
     },
 );
