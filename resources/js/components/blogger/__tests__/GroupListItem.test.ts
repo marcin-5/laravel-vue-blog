@@ -122,6 +122,19 @@ describe('GroupListItem.vue', () => {
         expect(groupForm.props('group')).toEqual(mockGroup);
     });
 
+    it('uses the latest group props when opening the edit form', async () => {
+        const wrapper = mount(GroupListItem, { props: defaultProps });
+        const updatedGroup = { ...mockGroup, name: 'Updated Group' };
+
+        await wrapper.setProps({ item: updatedGroup });
+        const { context } = wrapper.findComponent(BloggerListItem).props() as { context: BloggerItemContext<AdminGroup> };
+        context.actions.edit();
+        await nextTick();
+
+        expect(wrapper.findComponent(GroupForm).props('group')).toEqual(updatedGroup);
+        expect(context.editForm.name).toBe('Updated Group');
+    });
+
     it('renders PostForm in create-post-form slot', async () => {
         const wrapper = mount(GroupListItem, { props: defaultProps });
         const { context } = wrapper.findComponent(BloggerListItem).props() as { context: BloggerItemContext<AdminGroup> };

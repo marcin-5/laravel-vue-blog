@@ -18,7 +18,7 @@ const page = usePage<AppPageProps>();
 const props = defineProps<{ item: Group }>();
 
 const canEdit = computed(() => page.props.auth.user?.id === props.item.user_id);
-const state = useGroupItemState(props.item);
+const state = useGroupItemState(() => props.item);
 const {
     editForm,
     editingPostId,
