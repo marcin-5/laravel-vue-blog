@@ -154,4 +154,43 @@ describe('BlogPostsList multi-tag filters', () => {
         expect(betaLink?.attributes('preserve-state')).toBe('');
         expect(wrapper.find('[role="group"]').exists()).toBe(false);
     });
+
+    it('hides pagination when there is no previous or next page', () => {
+        const wrapper = mountList({
+            pagination: {
+                links: [
+                    { url: null, label: 'Previous', active: false },
+                    { url: '/blogs/sample-blog?page=1', label: '1', active: true },
+                    { url: null, label: 'Next', active: false },
+                ],
+                prevUrl: null,
+                nextUrl: null,
+                current_page: 1,
+                last_page: 1,
+                total: 1,
+            },
+        });
+
+        expect(wrapper.find('nav[aria-label="blog.pagination.aria"]').exists()).toBe(false);
+    });
+
+    it('shows pagination when a previous or next page is available', () => {
+        const wrapper = mountList({
+            pagination: {
+                links: [
+                    { url: null, label: 'Previous', active: false },
+                    { url: '/blogs/sample-blog?page=1', label: '1', active: true },
+                    { url: '/blogs/sample-blog?page=2', label: '2', active: false },
+                    { url: '/blogs/sample-blog?page=2', label: 'Next', active: false },
+                ],
+                prevUrl: null,
+                nextUrl: '/blogs/sample-blog?page=2',
+                current_page: 1,
+                last_page: 2,
+                total: 2,
+            },
+        });
+
+        expect(wrapper.find('nav[aria-label="blog.pagination.aria"]').exists()).toBe(true);
+    });
 });

@@ -40,7 +40,7 @@ const { showExcerpts } = useBlogExcerpts(() => props.blogSlug);
 
 const paginationLinks = computed(() => props.pagination?.links ?? []);
 const hasPosts = computed(() => props.posts.length > 0);
-const hasPagination = computed(() => paginationLinks.value.length > 0);
+const hasPagination = computed(() => Boolean(props.pagination?.prevUrl || props.pagination?.nextUrl));
 const hasTags = computed(() => Boolean(props.allTags?.length));
 
 const {
