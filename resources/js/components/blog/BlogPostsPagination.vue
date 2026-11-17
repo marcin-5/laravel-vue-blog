@@ -48,7 +48,7 @@ function getPaginationLinkClasses(link: PaginationLink) {
 </script>
 
 <template>
-    <nav :aria-label="t('blog.pagination.aria')" :style="navigationStyle" class="mt-4 flex items-center justify-center gap-1">
+    <nav :aria-label="t('blog.pagination.aria')" :style="navigationStyle" class="flex items-center gap-1">
         <template v-for="(link, index) in links" :key="index">
             <Link v-if="link.url" :class="getPaginationLinkClasses(link)" :href="link.url" preserve-scroll>
                 {{ translatePaginationLabel(String(link.label)) }}

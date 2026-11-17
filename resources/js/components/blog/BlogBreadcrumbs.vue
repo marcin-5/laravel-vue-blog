@@ -3,7 +3,6 @@ import type { BreadcrumbItem } from '@/types/blog.types';
 import { Link } from '@inertiajs/vue3';
 import clsx from 'clsx';
 import { computed } from 'vue';
-import BorderDivider from '@/components/blog/BorderDivider.vue';
 
 const props = defineProps<{
     breadcrumbs: BreadcrumbItem[];
@@ -40,5 +39,4 @@ const getBreadcrumbClasses = (index: number) =>
             <span v-if="!isLastBreadcrumb(index)" class="mx-2 text-breadcrumb-link opacity-60"> / </span>
         </li>
     </ol>
-    <BorderDivider class="mt-2 mb-4 pt-2" />
 </template>

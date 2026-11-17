@@ -48,7 +48,7 @@ const postsListSpacingClass = computed(() => (props.chrome.sidebar ? '' : 'mt-6'
             />
         </template>
 
-        <template #navigation>
+        <template #post-navigation>
             <BlogPostNav v-if="isListed" :activeTag="listing.activeTag" :navigation="chrome.navigation" />
             <PostBackLink v-else />
         </template>

@@ -48,7 +48,7 @@ const textClass = computed(() => (props.isPublic ? 'text-primary' : 'text-foregr
 
                 <slot name="middle-divider"></slot>
 
-                <slot name="breadcrumbs"></slot>
+                <slot name="post-navigation"></slot>
 
                 <slot name="sidebar-content"></slot>
             </div>
@@ -63,11 +63,11 @@ const textClass = computed(() => (props.isPublic ? 'text-primary' : 'text-foregr
                     <slot name="header"></slot>
                     <slot name="content"></slot>
                     <slot name="middle-divider"></slot>
-                    <slot name="breadcrumbs"></slot>
+                    <slot name="post-navigation"></slot>
                 </main>
             </div>
 
-            <slot name="navigation"></slot>
+            <slot name="breadcrumbs"></slot>
             <slot name="footer"></slot>
         </div>
     </div>

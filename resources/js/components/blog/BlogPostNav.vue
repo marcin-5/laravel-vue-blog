@@ -90,8 +90,6 @@ const getMobilePostNavLabel = (item: PostNavItem) =>
 
 <template>
     <nav v-if="shouldShowNavigation && navigation" :aria-label="t('blog.post_nav.aria')" :style="{ fontFamily: 'var(--blog-nav-font)' }">
-        <BorderDivider class="my-4 pt-2" />
-
         <!-- Desktop Navigation -->
         <div class="hidden items-stretch justify-between gap-4 lg:flex">
             <component
@@ -138,5 +136,7 @@ const getMobilePostNavLabel = (item: PostNavItem) =>
                 </div>
             </div>
         </div>
+
+        <BorderDivider class="my-4" />
     </nav>
 </template>

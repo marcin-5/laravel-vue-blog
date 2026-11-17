@@ -163,13 +163,15 @@ function isTagActive(tag: Tag): boolean {
             </li>
         </ul>
 
-        <BlogPostsPagination v-if="hasPagination" :links="paginationLinks" />
+        <div class="center-stretch my-2 flex justify-between">
+            <BlogPostsPagination v-if="hasPagination" :links="paginationLinks" />
 
-        <div v-if="!isGroup" class="mt-4">
-            <Link :href="getNewsletterHref()" class="inline-flex items-center gap-1.5 text-sm font-medium text-link-hover hover:text-primary">
-                <Mail class="h-4 w-4 shrink-0" />
-                <span>{{ t('blog.posts_list.newsletter_subscribe') }}</span>
-            </Link>
+            <div v-if="!isGroup" class="mt-4">
+                <Link :href="getNewsletterHref()" class="inline-flex items-center gap-1.5 text-sm font-medium text-link-hover hover:text-primary">
+                    <Mail class="h-4 w-4 shrink-0" />
+                    <span>{{ t('blog.posts_list.newsletter_subscribe') }}</span>
+                </Link>
+            </div>
         </div>
     </section>
 </template>

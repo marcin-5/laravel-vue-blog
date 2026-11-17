@@ -65,7 +65,7 @@ defineProps<{
             <BlogPostsList :blogId="group.id" :blogSlug="group.slug" :class="{ 'mt-6': !sidebar }" :pagination="pagination" :posts="posts" is-group />
         </template>
 
-        <template #navigation>
+        <template #post-navigation>
             <BlogPostNav :navigation="navigation" />
         </template>
     </BlogLayout>

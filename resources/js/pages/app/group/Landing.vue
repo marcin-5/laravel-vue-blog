@@ -97,7 +97,7 @@ const postsListTitle = computed(() => t('group.posts_list.title'));
             />
         </template>
 
-        <template #navigation>
+        <template #post-navigation>
             <BlogPostNav :navigation="navigation" />
         </template>
 

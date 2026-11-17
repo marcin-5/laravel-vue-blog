@@ -42,12 +42,14 @@ const hasFooterContent = computed(() => hasContent(props.chrome.footerHtml));
             <slot name="content"></slot>
         </template>
 
-        <template #middle-divider>
-            <BorderDivider :class="middleDividerClass" />
+        <template #post-navigation>
+            <slot name="post-navigation">
+                <BlogPostNav v-if="listing" :activeTag="listing.activeTag" :navigation="chrome.navigation" />
+            </slot>
         </template>
 
-        <template #breadcrumbs>
-            <BlogBreadcrumbs :breadcrumbs="breadcrumbs" />
+        <template #middle-divider>
+            <BorderDivider :class="middleDividerClass" />
         </template>
 
         <template #sidebar-content>
@@ -57,28 +59,29 @@ const hasFooterContent = computed(() => hasContent(props.chrome.footerHtml));
                     id="posts-list"
                     :activeTag="listing.activeTag"
                     :activeTags="listing.activeTags"
-                    :allowMultipleTagFiltering="blog.allowMultipleTagFiltering"
                     :allTags="listing.allTags"
+                    :allowMultipleTagFiltering="blog.allowMultipleTagFiltering"
                     :blogId="blog.id"
                     :blogSlug="blog.slug"
                     :class="contentSpacingClass"
                     :mainDomain="blog.main_domain ?? undefined"
+                    :operator="listing.operator"
                     :pagination="listing.pagination"
                     :posts="listing.posts"
-                    :operator="listing.operator"
                 />
             </slot>
         </template>
 
-        <template #navigation>
-            <slot name="navigation">
-                <BlogPostNav v-if="listing" :activeTag="listing.activeTag" :navigation="chrome.navigation" />
+        <template #breadcrumbs>
+            <slot name="breadcrumbs">
+                <BorderDivider class="my-2" />
+                <BlogBreadcrumbs :breadcrumbs="breadcrumbs" />
             </slot>
         </template>
 
         <template #footer>
             <template v-if="hasFooterContent">
-                <BorderDivider class="my-4" />
+                <BorderDivider class="my-2" />
                 <BlogFooter :html="chrome.footerHtml || ''" />
             </template>
         </template>
