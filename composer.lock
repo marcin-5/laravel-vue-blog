@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d0aa6a5caeadab2b05ff6f8a9b8f1a8c",
+    "content-hash": "5ac417d2add3b69c2e5f8a6f7a87967a",
     "packages": [
         {
             "name": "brick/math",
@@ -8139,6 +8139,70 @@
             ],
             "time": "2026-10-28T13:25:29+00:00",
             "published-time": "2026-10-28T13:26:00+00:00"
+        },
+        {
+            "name": "goez/laravel-fakedown",
+            "version": "0.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/goez-tools/laravel-fakedown.git",
+                "reference": "97aa0cc31654b36c2d4bbc36ba525768b2e136c1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/goez-tools/laravel-fakedown/zipball/97aa0cc31654b36c2d4bbc36ba525768b2e136c1",
+                "reference": "97aa0cc31654b36c2d4bbc36ba525768b2e136c1",
+                "shasum": ""
+            },
+            "require": {
+                "fakerphp/faker": "^1.20",
+                "illuminate/console": ">=10.0",
+                "illuminate/support": ">=10.0",
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.22",
+                "mockery/mockery": "^1.5",
+                "orchestra/testbench": "^8.0|^9.0",
+                "phpunit/phpunit": "^10.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Goez\\LaravelFakedown\\FakedownServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Goez\\LaravelFakedown\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jace Ju",
+                    "email": "jaceju@gmail.com"
+                }
+            ],
+            "description": "A Laravel package for generating fake Markdown content",
+            "keywords": [
+                "fake-data",
+                "faker",
+                "laravel",
+                "markdown",
+                "testing"
+            ],
+            "support": {
+                "issues": "https://github.com/goez-tools/laravel-fakedown/issues",
+                "source": "https://github.com/goez-tools/laravel-fakedown/tree/0.0.1"
+            },
+            "time": "2025-06-13T03:22:59+00:00",
+            "published-time": "2025-06-13T03:23:21+00:00"
         },
         {
             "name": "hamcrest/hamcrest-php",

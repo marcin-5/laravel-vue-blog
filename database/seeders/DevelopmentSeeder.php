@@ -12,6 +12,7 @@ use App\Models\LandingPage;
 use App\Models\Post;
 use App\Models\RelatedPost;
 use App\Models\User;
+use Goez\LaravelFakedown\FakedownGenerator;
 use Illuminate\Database\Seeder;
 use Random\RandomException;
 
@@ -55,9 +56,87 @@ class DevelopmentSeeder extends Seeder
     ];
 
     private const array COLOR_PALETTES = [
-        ['light' => ['--primary' => 'hsl(220 65% 38%)', '--primary-foreground' => 'hsl(220 70% 96%)', '--secondary' => 'hsl(220 35% 88%)', '--link' => 'hsl(220 75% 42%)'], 'dark' => ['--primary' => 'hsl(220 55% 72%)', '--primary-foreground' => 'hsl(220 65% 12%)', '--secondary' => 'hsl(220 30% 24%)', '--link' => 'hsl(220 75% 78%)']],
-        ['light' => ['--primary' => 'hsl(145 55% 32%)', '--primary-foreground' => 'hsl(145 60% 97%)', '--secondary' => 'hsl(145 30% 88%)', '--link' => 'hsl(145 65% 30%)'], 'dark' => ['--primary' => 'hsl(145 45% 68%)', '--primary-foreground' => 'hsl(145 60% 10%)', '--secondary' => 'hsl(145 25% 22%)', '--link' => 'hsl(145 65% 74%)']],
-        ['light' => ['--primary' => 'hsl(345 60% 43%)', '--primary-foreground' => 'hsl(345 70% 98%)', '--secondary' => 'hsl(345 35% 90%)', '--link' => 'hsl(345 70% 42%)'], 'dark' => ['--primary' => 'hsl(345 55% 72%)', '--primary-foreground' => 'hsl(345 65% 12%)', '--secondary' => 'hsl(345 30% 25%)', '--link' => 'hsl(345 75% 78%)']],
+        [
+            'light' => [
+                '--primary' => 'hsl(200 65% 38%)',
+                '--primary-foreground' => 'hsl(220 70% 56%)',
+                '--secondary' => 'hsl(220 35% 88%)',
+                '--link' => 'hsl(180 75% 42%)',
+            ],
+            'dark' => [
+                '--primary' => 'hsl(180 55% 72%)',
+                '--primary-foreground' => 'hsl(220 65% 82%)',
+                '--secondary' => 'hsl(220 30% 24%)',
+                '--link' => 'hsl(200 75% 78%)',
+            ],
+        ],
+        [
+            'light' => [
+                '--primary' => 'hsl(115 55% 32%)',
+                '--primary-foreground' => 'hsl(145 60% 67%)',
+                '--secondary' => 'hsl(125 30% 88%)',
+                '--link' => 'hsl(155 65% 30%)',
+            ],
+            'dark' => [
+                '--primary' => 'hsl(155 45% 68%)',
+                '--primary-foreground' => 'hsl(125 60% 90%)',
+                '--secondary' => 'hsl(145 25% 22%)',
+                '--link' => 'hsl(115 65% 74%)',
+            ],
+        ],
+        [
+            'light' => [
+                '--primary' => 'hsl(355 60% 43%)',
+                '--primary-foreground' => 'hsl(345 70% 78%)',
+                '--secondary' => 'hsl(5 35% 90%)',
+                '--link' => 'hsl(345 70% 42%)',
+            ],
+            'dark' => [
+                '--primary' => 'hsl(325 55% 72%)',
+                '--primary-foreground' => 'hsl(345 65% 72%)',
+                '--secondary' => 'hsl(345 30% 25%)',
+                '--link' => 'hsl(355 75% 78%)',
+            ],
+        ],
+    ];
+
+    private const array CONTENT_TOPICS = [
+        'technology' => [
+            'headings' => ['Technologia w praktyce', 'Narzędzia przyszłości', 'Cyfrowe rozwiązania'],
+            'sentences' => [
+                'Nowoczesne narzędzia zmieniają sposób, w jaki rozwiązujemy codzienne problemy.',
+                'Dobrze zaprojektowane oprogramowanie łączy prostotę obsługi z niezawodnością.',
+                'Przemyślana architektura ułatwia rozwój i utrzymanie każdego projektu.',
+                'Automatyzacja pozwala poświęcić więcej czasu na kreatywne zadania.',
+            ],
+        ],
+        'travel' => [
+            'headings' => ['W drogę ku przygodzie', 'Odkrywanie nowych miejsc', 'Podróżnicze inspiracje'],
+            'sentences' => [
+                'Każda podróż pozwala spojrzeć na znane sprawy z zupełnie nowej perspektywy.',
+                'Lokalne smaki i spotkania z mieszkańcami zostają w pamięci na długo.',
+                'Najciekawsze szlaki często prowadzą z dala od utartych turystycznych ścieżek.',
+                'Dobre przygotowanie daje swobodę, by cieszyć się każdą chwilą wyprawy.',
+            ],
+        ],
+        'food' => [
+            'headings' => ['Smaki, które inspirują', 'Sekrety dobrej kuchni', 'Przy stole'],
+            'sentences' => [
+                'Sezonowe składniki potrafią wydobyć z prostego dania wyjątkowy smak.',
+                'Wspólne gotowanie sprawia, że nawet codzienny posiłek staje się okazją do spotkania.',
+                'Dobrze dobrane przyprawy nadają potrawom głębi i niepowtarzalnego charakteru.',
+                'Najlepsze przepisy zostawiają miejsce na własne pomysły i eksperymenty.',
+            ],
+        ],
+        'health' => [
+            'headings' => ['Codzienna troska o siebie', 'Małe kroki ku zdrowiu', 'Dobre nawyki'],
+            'sentences' => [
+                'Regularny odpoczynek pomaga odzyskać energię i lepiej radzić sobie z wyzwaniami.',
+                'Niewielkie zmiany w codziennych nawykach mogą przynieść długofalowe korzyści.',
+                'Ruch dopasowany do własnych możliwości wspiera dobre samopoczucie.',
+                'Uważność na potrzeby organizmu pomaga zachować równowagę każdego dnia.',
+            ],
+        ],
     ];
 
     /**
@@ -105,28 +184,33 @@ class DevelopmentSeeder extends Seeder
                 ->create();
 
             $blogs->each(
-                /**
-                 * @throws RandomException
-                 */ function (Blog $blog) use ($categories): void {
-                    $categoryCount = random_int(self::BLOG_CATEGORIES_MIN, self::BLOG_CATEGORIES_MAX);
+            /**
+             * @throws RandomException
+             */ function (Blog $blog) use ($categories): void {
+                $topic = self::CONTENT_TOPICS[array_rand(self::CONTENT_TOPICS)];
+                $categoryCount = random_int(self::BLOG_CATEGORIES_MIN, self::BLOG_CATEGORIES_MAX);
 
-                    $blog->categories()->attach(
-                        $categories->random($categoryCount),
-                    );
+                $blog->categories()->attach(
+                    $categories->random($categoryCount),
+                );
 
-                    LandingPage::factory()->create([
-                        'blog_id' => $blog->id,
-                    ]);
+                LandingPage::factory()->create([
+                    'blog_id' => $blog->id,
+                    'content' => $this->generateMarkdownContent($topic),
+                ]);
 
-                    $postCount = random_int(self::POSTS_PER_BLOG_MIN, self::POSTS_PER_BLOG_MAX);
+                $postCount = random_int(self::POSTS_PER_BLOG_MIN, self::POSTS_PER_BLOG_MAX);
+                $seeder = $this;
 
-                    $posts = Post::factory($postCount)->create([
+                $posts = Post::factory($postCount)
+                    ->state(fn(): array => ['content' => $seeder->generateMarkdownContent($topic)])
+                    ->create([
                         'blog_id' => $blog->id,
                         'user_id' => $blog->user_id,
                     ]);
 
-                    $this->seedRelationsForPosts($posts, $blog);
-                },
+                $this->seedRelationsForPosts($posts, $blog);
+            },
             );
         });
     }
@@ -150,44 +234,64 @@ class DevelopmentSeeder extends Seeder
         ];
     }
 
+    private function generateMarkdownContent(array $topic): string
+    {
+        $generator = new FakedownGenerator([
+            'default_language' => 'en',
+            'default_length' => random_int(3, 6),
+            'templates' => ['en' => $topic],
+            'structure' => [
+                'enable_headings' => true,
+                'enable_lists' => true,
+                'enable_code_blocks' => true,
+                'enable_tables' => true,
+                'enable_blockquotes' => true,
+                'enable_links' => true,
+                'enable_images' => true,
+            ],
+        ]);
+
+        return $generator->generate();
+    }
+
     private function seedRelationsForPosts($posts, Blog $blog): void
     {
         $posts->each(
-            /**
-             * @throws RandomException
-             */ function (Post $post) use ($posts, $blog): void {
-                // Seeding related posts: 0 or 1, then if 1, then 1 or 2
-                if (random_int(0, 1) === 1) {
-                    $count = random_int(1, 2);
-                    $potentialRelated = $posts->reject(fn(Post $p) => $p->id === $post->id);
+        /**
+         * @throws RandomException
+         */ function (Post $post) use ($posts, $blog): void {
+            // Seeding related posts: 0 or 1, then if 1, then 1 or 2
+            if (random_int(0, 1) === 1) {
+                $count = random_int(1, 2);
+                $potentialRelated = $posts->reject(fn(Post $p) => $p->id === $post->id);
 
-                    if ($potentialRelated->isNotEmpty()) {
-                        $countToTake = min($count, $potentialRelated->count());
-                        $relatedToCreate = $potentialRelated->random($countToTake);
+                if ($potentialRelated->isNotEmpty()) {
+                    $countToTake = min($count, $potentialRelated->count());
+                    $relatedToCreate = $potentialRelated->random($countToTake);
 
-                        if ($relatedToCreate instanceof Post) {
-                            $relatedToCreate = collect([$relatedToCreate]);
-                        }
-
-                        $relatedToCreate->each(function (Post $rp, int $index) use ($post, $blog): void {
-                            RelatedPost::factory()->create([
-                                'post_id' => $post->id,
-                                'blog_id' => $blog->id,
-                                'related_post_id' => $rp->id,
-                                'display_order' => $index,
-                            ]);
-                        });
+                    if ($relatedToCreate instanceof Post) {
+                        $relatedToCreate = collect([$relatedToCreate]);
                     }
-                }
 
-                // Seeding external links (optional, but good for completeness)
-                if (random_int(0, 1) === 1) {
-                    $count = random_int(1, 3);
-                    ExternalLink::factory($count)->create([
-                        'post_id' => $post->id,
-                    ]);
+                    $relatedToCreate->each(function (Post $rp, int $index) use ($post, $blog): void {
+                        RelatedPost::factory()->create([
+                            'post_id' => $post->id,
+                            'blog_id' => $blog->id,
+                            'related_post_id' => $rp->id,
+                            'display_order' => $index,
+                        ]);
+                    });
                 }
-            },
+            }
+
+            // Seeding external links (optional, but good for completeness)
+            if (random_int(0, 1) === 1) {
+                $count = random_int(1, 3);
+                ExternalLink::factory($count)->create([
+                    'post_id' => $post->id,
+                ]);
+            }
+        },
         );
     }
 
