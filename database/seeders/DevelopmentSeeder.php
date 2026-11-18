@@ -47,6 +47,19 @@ class DevelopmentSeeder extends Seeder
 
     private const int POSTS_PER_GROUP_MAX = 5;
 
+    private const array FONT_PAIRS = [
+        ['--font-header' => 'var(--font-raleway)', '--font-body' => 'var(--font-inter)'],
+        ['--font-header' => 'var(--font-bitter)', '--font-body' => 'var(--font-nunito)'],
+        ['--font-header' => 'var(--font-montserrat)', '--font-body' => 'var(--font-faustina)'],
+        ['--font-header' => 'var(--font-vollkorn)', '--font-body' => 'var(--font-roboto)'],
+    ];
+
+    private const array COLOR_PALETTES = [
+        ['light' => ['--primary' => 'hsl(220 65% 38%)', '--primary-foreground' => 'hsl(220 70% 96%)', '--secondary' => 'hsl(220 35% 88%)', '--link' => 'hsl(220 75% 42%)'], 'dark' => ['--primary' => 'hsl(220 55% 72%)', '--primary-foreground' => 'hsl(220 65% 12%)', '--secondary' => 'hsl(220 30% 24%)', '--link' => 'hsl(220 75% 78%)']],
+        ['light' => ['--primary' => 'hsl(145 55% 32%)', '--primary-foreground' => 'hsl(145 60% 97%)', '--secondary' => 'hsl(145 30% 88%)', '--link' => 'hsl(145 65% 30%)'], 'dark' => ['--primary' => 'hsl(145 45% 68%)', '--primary-foreground' => 'hsl(145 60% 10%)', '--secondary' => 'hsl(145 25% 22%)', '--link' => 'hsl(145 65% 74%)']],
+        ['light' => ['--primary' => 'hsl(345 60% 43%)', '--primary-foreground' => 'hsl(345 70% 98%)', '--secondary' => 'hsl(345 35% 90%)', '--link' => 'hsl(345 70% 42%)'], 'dark' => ['--primary' => 'hsl(345 55% 72%)', '--primary-foreground' => 'hsl(345 65% 12%)', '--secondary' => 'hsl(345 30% 25%)', '--link' => 'hsl(345 75% 78%)']],
+    ];
+
     /**
      * Run the database seeds.
      */
@@ -82,10 +95,14 @@ class DevelopmentSeeder extends Seeder
     {
         $bloggers->each(function (User $blogger) use ($categories): void {
             $blogCount = random_int(self::BLOGS_PER_BLOGGER_MIN, self::BLOGS_PER_BLOGGER_MAX);
+            $randomBlogPresentation = fn(): array => $this->randomBlogPresentation();
 
-            $blogs = Blog::factory($blogCount)->create([
-                'user_id' => $blogger->id,
-            ]);
+            $blogs = Blog::factory($blogCount)
+                ->state(fn(): array => [
+                    'user_id' => $blogger->id,
+                    ...$randomBlogPresentation(),
+                ])
+                ->create();
 
             $blogs->each(
                 /**
@@ -112,6 +129,25 @@ class DevelopmentSeeder extends Seeder
                 },
             );
         });
+    }
+
+    /**
+     * @return array{theme: array{light: array<string, string>, dark: array<string, string>}, footer: string|null, motto: string|null, about: string|null}
+     * @throws RandomException
+     */
+    private function randomBlogPresentation(): array
+    {
+        $fonts = self::FONT_PAIRS[array_rand(self::FONT_PAIRS)];
+        $palette = self::COLOR_PALETTES[array_rand(self::COLOR_PALETTES)];
+        $lightTheme = [...$palette['light'], ...$fonts];
+        $darkTheme = [...$palette['dark'], ...$fonts];
+
+        return [
+            'theme' => ['light' => $lightTheme, 'dark' => $darkTheme],
+            'footer' => random_int(0, 1) === 1 ? 'Dziękujemy za odwiedziny! Do zobaczenia wkrótce.' : null,
+            'motto' => random_int(0, 1) === 1 ? 'Każda podróż zaczyna się od pierwszego kroku.' : null,
+            'about' => random_int(0, 1) === 1 ? 'To miejsce na kilka słów o autorze i tematyce bloga.' : null,
+        ];
     }
 
     private function seedRelationsForPosts($posts, Blog $blog): void
