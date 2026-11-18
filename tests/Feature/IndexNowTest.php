@@ -1,8 +1,10 @@
 <?php
 
 use App\Jobs\IndexNowSubmitJob;
+use App\DTOs\IndexNowItem;
 use App\Models\Blog;
 use App\Models\IndexNowQueuedUrl;
+use App\Models\IndexNowSubmission;
 use App\Models\Post;
 use App\Models\User;
 use App\Services\IndexNowService;
@@ -37,6 +39,7 @@ test('it queues blog url for submission when created and published', function ()
             route('blog.public.landing', ['blog' => $blog->slug, 'mainDomain' => $blog->main_domain]),
         )->exists(),
     )->toBeTrue();
+    expect(IndexNowQueuedUrl::where('url', route('blog.public.landing', ['blog' => $blog->slug, 'mainDomain' => $blog->main_domain]))->value('blog_id'))->toBe($blog->id);
     Queue::assertPushed(IndexNowSubmitJob::class);
 });
 
@@ -71,6 +74,13 @@ test('it queues post url for submission when published and public', function () 
             ),
         )->exists(),
     )->toBeTrue();
+    $queuedPostUrl = route('blog.public.post', [
+        'blog' => $blog->slug,
+        'postSlug' => $post->slug,
+        'mainDomain' => $blog->main_domain,
+    ]);
+    expect(IndexNowQueuedUrl::where('url', $queuedPostUrl)->value('blog_id'))->toBe($blog->id);
+    expect(IndexNowQueuedUrl::where('url', $queuedPostUrl)->value('post_id'))->toBe($post->id);
     Queue::assertPushed(IndexNowSubmitJob::class);
 });
 
@@ -147,6 +157,8 @@ test('artisan command submits a post URL on the blog subdomain', function () {
             && $request['urlList'] === [$canonicalUrl]
             && !in_array($legacyUrl, $request['urlList'], true);
     });
+    expect(IndexNowSubmission::where('url', $canonicalUrl)->value('blog_id'))->toBe($blog->id);
+    expect(IndexNowSubmission::where('url', $canonicalUrl)->value('post_id'))->toBe($post->id);
 });
 
 test('artisan command rejects an ambiguous blog slug without locale', function () {
@@ -216,21 +228,23 @@ test('artisan command submits landing about and public posts for a localized blo
 
 test('it sends separate IndexNow payloads for each URL host', function () {
     $service = app(IndexNowService::class);
-    $urls = [
-        'https://enneagram.osobliwy.blog',
-        'https://enneagram.osobliwy.blog/about',
-        'https://enneagram.peculiarmatters.blog',
+    $items = [
+        new IndexNowItem('https://enneagram.osobliwy.blog', 1),
+        new IndexNowItem('https://enneagram.osobliwy.blog/about', 1),
+        new IndexNowItem('https://enneagram.peculiarmatters.blog', 2, 7),
     ];
 
-    expect($service->submitUrls($urls))->toBeTrue();
+    expect($service->submitUrls($items))->toBeTrue();
 
     Http::assertSentCount(2);
     Http::assertSent(fn($request): bool => $request['host'] === 'enneagram.osobliwy.blog'
         && $request['keyLocation'] === 'https://enneagram.osobliwy.blog/test-key.txt'
-        && $request['urlList'] === array_slice($urls, 0, 2));
+        && $request['urlList'] === array_map(fn(IndexNowItem $item) => $item->url, array_slice($items, 0, 2)));
     Http::assertSent(fn($request): bool => $request['host'] === 'enneagram.peculiarmatters.blog'
         && $request['keyLocation'] === 'https://enneagram.peculiarmatters.blog/test-key.txt'
-        && $request['urlList'] === [$urls[2]]);
+        && $request['urlList'] === [$items[2]->url]);
+    expect(IndexNowSubmission::count())->toBe(3);
+    expect(IndexNowSubmission::where('url', $items[2]->url)->value('post_id'))->toBe(7);
 });
 
 test('it reports failure when one IndexNow host payload fails', function () {
@@ -239,11 +253,13 @@ test('it reports failure when one IndexNow host payload fails', function () {
     $service = app(IndexNowService::class);
 
     expect($service->submitUrls([
-        'https://enneagram.osobliwy.blog',
-        'https://enneagram.peculiarmatters.blog',
+        new IndexNowItem('https://enneagram.osobliwy.blog', 1),
+        new IndexNowItem('https://enneagram.peculiarmatters.blog', 2),
     ]))->toBeFalse();
 
     Http::assertSentCount(2);
+    expect(IndexNowSubmission::where('succeeded', false)->count())->toBe(1);
+    expect(IndexNowSubmission::where('http_status', 500)->exists())->toBeTrue();
 });
 
 test('artisan command shows pending queue status', function () {
@@ -254,6 +270,31 @@ test('artisan command shows pending queue status', function () {
         ->artisan('blog:indexnow', ['--logs' => true])
         ->assertExitCode(0)
         ->expectsOutput('Pending IndexNow URL queue: 2 URL(s) waiting to be submitted.');
+});
+
+test('artisan command prints submission history newest first and honors the limit', function () {
+    IndexNowSubmission::create([
+        'url' => 'https://example.test/older',
+        'succeeded' => false,
+        'submitted_at' => now()->subMinute(),
+    ]);
+    IndexNowSubmission::create([
+        'url' => 'https://example.test/newer',
+        'succeeded' => true,
+        'http_status' => 200,
+        'submitted_at' => now(),
+    ]);
+
+    $this->artisan('blog:indexnow', ['--history' => true, '--limit' => 1])
+        ->assertExitCode(0)
+        ->expectsOutputToContain('https://example.test/newer')
+        ->doesntExpectOutputToContain('https://example.test/older');
+});
+
+test('artisan command rejects an invalid submission history limit', function () {
+    $this->artisan('blog:indexnow', ['--history' => true, '--limit' => 501])
+        ->assertExitCode(1)
+        ->expectsOutput('History limit must be an integer between 1 and 500.');
 });
 
 test('it only queues for relevant attribute changes', function () {
