@@ -8,5 +8,5 @@ class IndexNowQueuedUrl extends Model
 {
     protected $table = 'index_now_queued_urls';
 
-    protected $fillable = ['url'];
+    protected $fillable = ['url', 'blog_id', 'post_id'];
 }

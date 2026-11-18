@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DTOs\IndexNowItem;
+use App\Models\IndexNowSubmission;
 use Exception;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
@@ -18,32 +20,33 @@ readonly class IndexNowService
     /**
      * Submit a list of URLs to the IndexNow API.
      *
-     * @param  array<string>  $urls  The list of URLs to submit.
+     * @param  array<IndexNowItem>  $items  The list of URLs and their model context.
      */
-    public function submitUrls(array $urls): bool
+    public function submitUrls(array $items): bool
     {
         $endpoint = 'https://api.indexnow.org/indexnow';
 
-        if (app()->environment('local') && !app()->runningUnitTests()) {
-            Log::info('IndexNow submission skipped in local environment.', ['urls' => $urls]);
+        if (app()->environment('local') && !app()->environment('testing')) {
+            Log::info('IndexNow submission skipped in local environment.', ['urls' => array_map(fn(IndexNowItem $item) => $item->url, $items)]);
             return true;
         }
 
         $urlsByHost = [];
-        foreach (array_unique($urls) as $url) {
-            $host = parse_url($url, PHP_URL_HOST);
+        foreach ($items as $item) {
+            $host = parse_url($item->url, PHP_URL_HOST);
 
             if (!$host) {
-                Log::error('IndexNow submission failed: URL has no host.', ['url' => $url]);
-
-                return false;
+                Log::error('IndexNow submission failed: URL has no host.', ['url' => $item->url]);
+                $this->recordSubmission($item, false, null, 'URL has no host.');
+                $allSuccessful = false;
+                continue;
             }
 
-            $urlsByHost[$host][] = $url;
+            $urlsByHost[$host][$item->url] ??= $item;
         }
 
         if (!$urlsByHost) {
-            return false;
+            return isset($allSuccessful) ? $allSuccessful : false;
         }
 
         $key = $this->getApiKey();
@@ -53,14 +56,20 @@ readonly class IndexNowService
 
         if (!$key) {
             Log::error('IndexNow submission failed: Missing API Key or App Host.');
+            foreach ($urlsByHost as $hostItems) {
+                foreach ($hostItems as $item) {
+                    $this->recordSubmission($item, false, null, 'Missing API Key or App Host.');
+                }
+            }
             return false;
         }
 
         $this->ensureKeyFileExists();
 
-        $allSuccessful = true;
+        $allSuccessful ??= true;
 
-        foreach ($urlsByHost as $host => $hostUrls) {
+        foreach ($urlsByHost as $host => $hostItems) {
+            $hostUrls = array_keys($hostItems);
             $scheme = parse_url($hostUrls[0], PHP_URL_SCHEME) ?: 'https';
             $keyLocation = $scheme . '://' . $host . '/' . $key . '.txt';
             $payload = [
@@ -80,16 +89,39 @@ readonly class IndexNowService
                     'urls_count' => count($hostUrls),
                 ]);
 
-                if (!$response->successful()) {
-                    $allSuccessful = false;
+                foreach ($hostItems as $item) {
+                    $this->recordSubmission(
+                        $item,
+                        $response->successful(),
+                        $response->status(),
+                        $response->successful() ? null : $response->body(),
+                    );
                 }
+
+                $allSuccessful = $allSuccessful && $response->successful();
             } catch (Exception $e) {
                 Log::error('IndexNow API request failed: ' . $e->getMessage(), ['host' => $host]);
+                foreach ($hostItems as $item) {
+                    $this->recordSubmission($item, false, null, $e->getMessage());
+                }
                 $allSuccessful = false;
             }
         }
 
         return $allSuccessful;
+    }
+
+    private function recordSubmission(IndexNowItem $item, bool $succeeded, ?int $httpStatus, ?string $errorMessage): void
+    {
+        IndexNowSubmission::create([
+            'url' => $item->url,
+            'blog_id' => $item->blogId,
+            'post_id' => $item->postId,
+            'succeeded' => $succeeded,
+            'http_status' => $httpStatus,
+            'error_message' => $errorMessage,
+            'submitted_at' => now(),
+        ]);
     }
 
     /**

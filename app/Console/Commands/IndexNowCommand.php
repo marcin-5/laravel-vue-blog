@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\DTOs\IndexNowItem;
+use App\Models\IndexNowSubmission;
 use App\Models\Blog;
 use App\Models\IndexNowQueuedUrl;
 use App\Models\Post;
@@ -10,7 +12,7 @@ use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
-#[Signature('blog:indexnow {path? : blog_slug, blog_slug/post_slug, or blog_slug/about} {--locale= : Blog locale (pl or en)} {--logs : Show only recent logs}')]
+#[Signature('blog:indexnow {path? : blog_slug, blog_slug/post_slug, or blog_slug/about} {--locale= : Blog locale (pl or en)} {--logs : Show only recent logs} {--history : Show submission history} {--limit=25 : Number of history rows to show}')]
 #[Description('Submit URLs to IndexNow API')]
 class IndexNowCommand extends Command
 {
@@ -23,6 +25,10 @@ class IndexNowCommand extends Command
             $this->displayRecentLogs(20);
 
             return self::SUCCESS;
+        }
+
+        if ($this->option('history')) {
+            return $this->displaySubmissionHistory();
         }
 
         $path = $this->argument('path');
@@ -69,7 +75,7 @@ class IndexNowCommand extends Command
                 }
 
                 $this->info("Submitting about page: $blogSlug/about...");
-                $urls = [$this->getAboutUrl($blog)];
+                $urls = [new IndexNowItem($this->getAboutUrl($blog), $blog->id)];
             } else {
                 $post = $blog->posts()
                     ->published()
@@ -84,11 +90,11 @@ class IndexNowCommand extends Command
                     return self::FAILURE;
                 }
                 $this->info("Submitting post: $blogSlug/$pageSlug...");
-                $urls = [route('blog.public.post', [
+                $urls = [new IndexNowItem(route('blog.public.post', [
                     'blog' => $blogSlug,
                     'postSlug' => $pageSlug,
                     'mainDomain' => $blog->main_domain,
-                ])];
+                ]), $blog->id, $post->id)];
             }
         }
 
@@ -97,12 +103,13 @@ class IndexNowCommand extends Command
             return self::SUCCESS;
         }
 
-        $filteredUrls = array_filter($urls, function ($url) use ($indexNowService) {
+        $filteredUrls = array_filter($urls, function (IndexNowItem $item) use ($indexNowService) {
             // In manual command, we can skip checking is_published/visibility
             // if the user asks for it, but according to requirements, we should stick to the rules.
             // However, the artisan command is usually used to force, so I will only check robots.txt.
-            return $indexNowService->isAllowedByRobots($url);
+            return $indexNowService->isAllowedByRobots($item->url);
         });
+        $filteredUrls = array_values($filteredUrls);
 
         if (empty($filteredUrls)) {
             $this->warn('All URLs were filtered out by robots.txt.');
@@ -172,13 +179,50 @@ class IndexNowCommand extends Command
         $this->info("Pending IndexNow URL queue: $pendingCount URL(s) waiting to be submitted.");
     }
 
+    protected function displaySubmissionHistory(): int
+    {
+        $limit = filter_var($this->option('limit'), FILTER_VALIDATE_INT);
+
+        if ($limit === false || $limit < 1 || $limit > 500) {
+            $this->error('History limit must be an integer between 1 and 500.');
+
+            return self::FAILURE;
+        }
+
+        $submissions = IndexNowSubmission::query()
+            ->orderByDesc('submitted_at')
+            ->orderByDesc('id')
+            ->limit($limit)
+            ->get();
+
+        if ($submissions->isEmpty()) {
+            $this->info('No IndexNow submission history found.');
+
+            return self::SUCCESS;
+        }
+
+        $this->table(
+            ['Submitted at', 'Result', 'HTTP', 'Blog ID', 'Post ID', 'URL'],
+            $submissions->map(fn(IndexNowSubmission $submission): array => [
+                $submission->submitted_at->format('Y-m-d H:i:s'),
+                $submission->succeeded ? 'Success' : 'Failure',
+                $submission->http_status ?? '-',
+                $submission->blog_id ?? '-',
+                $submission->post_id ?? '-',
+                $submission->url,
+            ])->all(),
+        );
+
+        return self::SUCCESS;
+    }
+
     protected function getAllUrls(): array
     {
         $urls = [];
 
         Blog::withoutGlobalScopes()->where('is_published', true)->each(function (Blog $blog) use (&$urls): void {
-            $urls[] = $blog->public_url;
-            $urls[] = $this->getAboutUrl($blog);
+            $urls[] = new IndexNowItem($blog->public_url, $blog->id);
+            $urls[] = new IndexNowItem($this->getAboutUrl($blog), $blog->id);
         });
 
         Post::published()->public()->whereNull('group_id')->whereHas('blog', fn($q) => $q
@@ -186,11 +230,11 @@ class IndexNowCommand extends Command
             ->where('is_published', true))
             ->with('blog')
             ->each(function (Post $post) use (&$urls): void {
-                $urls[] = route('blog.public.post', [
+                $urls[] = new IndexNowItem(route('blog.public.post', [
                     'blog' => $post->blog->slug,
                     'postSlug' => $post->slug,
                     'mainDomain' => $post->blog->main_domain,
-                ]);
+                ]), $post->blog_id, $post->id);
             });
 
         return $urls;
@@ -198,14 +242,17 @@ class IndexNowCommand extends Command
 
     protected function getBlogUrls(Blog $blog): array
     {
-        $urls = [$blog->public_url, $this->getAboutUrl($blog)];
+        $urls = [
+            new IndexNowItem($blog->public_url, $blog->id),
+            new IndexNowItem($this->getAboutUrl($blog), $blog->id),
+        ];
 
         $blog->posts()->published()->public()->whereNull('group_id')->each(function (Post $post) use ($blog, &$urls): void {
-            $urls[] = route('blog.public.post', [
+            $urls[] = new IndexNowItem(route('blog.public.post', [
                 'blog' => $blog->slug,
                 'postSlug' => $post->slug,
                 'mainDomain' => $blog->main_domain,
-            ]);
+            ]), $blog->id, $post->id);
         });
 
         return $urls;

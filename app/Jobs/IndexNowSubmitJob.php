@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\DTOs\IndexNowItem;
 use App\Models\IndexNowQueuedUrl;
 use App\Services\IndexNowService;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -30,16 +31,20 @@ class IndexNowSubmitJob implements ShouldQueue
             return;
         }
 
-        $urls = IndexNowQueuedUrl::pluck('url')->toArray();
+        $items = IndexNowQueuedUrl::query()->get()->map(fn(IndexNowQueuedUrl $queuedUrl) => new IndexNowItem(
+            $queuedUrl->url,
+            $queuedUrl->blog_id,
+            $queuedUrl->post_id,
+        ))->all();
 
-        if (empty($urls)) {
+        if (empty($items)) {
             Log::info('IndexNowSubmitJob: No URLs to submit.');
             return;
         }
 
-        if ($indexNowService->submitUrls($urls)) {
+        if ($indexNowService->submitUrls($items)) {
             IndexNowQueuedUrl::truncate();
-            Log::info('IndexNowSubmitJob: Successfully submitted ' . count($urls) . ' URLs.');
+            Log::info('IndexNowSubmitJob: Successfully submitted ' . count($items) . ' URLs.');
         } else {
             Log::error('IndexNowSubmitJob: Failed to submit URLs.');
         }

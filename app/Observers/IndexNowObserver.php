@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Jobs\IndexNowSubmitJob;
+use App\DTOs\IndexNowItem;
 use App\Models\Blog;
 use App\Models\IndexNowQueuedUrl;
 use App\Models\Post;
@@ -35,31 +36,31 @@ class IndexNowObserver
                 : ['name', 'seo_title', 'slug', 'description', 'motto', 'footer', 'about', 'about_seo_description', 'contact_seo_description', 'is_published', 'visibility'];
 
             if ($model->wasRecentlyCreated || $model->wasChanged($relevantAttributes)) {
-                IndexNowQueuedUrl::updateOrCreate(['url' => $url]);
+                $this->queueUrl($url, $model);
 
                 if ($model instanceof Blog && $this->shouldQueueAbout($model)) {
-                    IndexNowQueuedUrl::updateOrCreate(['url' => $this->getAboutUrl($model)]);
+                    $this->queueUrl($this->getAboutUrl($model), $model);
                 }
 
                 if ($model instanceof Blog && $this->shouldQueueContact($model)) {
-                    IndexNowQueuedUrl::updateOrCreate(['url' => $this->getContactUrl($model)]);
+                    $this->queueUrl($this->getContactUrl($model), $model);
                 }
 
                 if ($model->wasChanged('slug')) {
                     $oldUrl = $this->getOldUrl($model);
                     if ($oldUrl) {
-                        IndexNowQueuedUrl::updateOrCreate(['url' => $oldUrl]);
+                        $this->queueUrl($oldUrl, $model);
                     }
 
                     if ($model instanceof Blog) {
                         $oldAboutUrl = $this->getOldAboutUrl($model);
                         if ($oldAboutUrl) {
-                            IndexNowQueuedUrl::updateOrCreate(['url' => $oldAboutUrl]);
+                            $this->queueUrl($oldAboutUrl, $model);
                         }
 
                         $oldContactUrl = $this->getOldContactUrl($model);
                         if ($oldContactUrl) {
-                            IndexNowQueuedUrl::updateOrCreate(['url' => $oldContactUrl]);
+                            $this->queueUrl($oldContactUrl, $model);
                         }
 
                         $this->queuePostsForBlog($model);
@@ -93,6 +94,24 @@ class IndexNowObserver
         }
 
         return $blog->public_url;
+    }
+
+    protected function queueUrl(string $url, Post|Blog $model): void
+    {
+        $post = $model instanceof Post ? $model : null;
+        $item = new IndexNowItem(
+            $url,
+            $post?->blog_id ?? ($model instanceof Blog ? $model->id : null),
+            $post?->id,
+        );
+
+        IndexNowQueuedUrl::updateOrCreate(
+            ['url' => $item->url],
+            [
+                'blog_id' => $item->blogId,
+                'post_id' => $item->postId,
+            ],
+        );
     }
 
     protected function getVisibility(Post|Blog $model): string
@@ -204,8 +223,8 @@ class IndexNowObserver
                 'mainDomain' => $mainDomain,
             ]);
 
-            IndexNowQueuedUrl::updateOrCreate(['url' => $newUrl]);
-            IndexNowQueuedUrl::updateOrCreate(['url' => $oldUrl]);
+            $this->queueUrl($newUrl, $post);
+            $this->queueUrl($oldUrl, $post);
         });
     }
 
