@@ -161,7 +161,7 @@ QUEUE_PAUSE_STATE_FILE ?= /tmp/laravel-blog-$(DOCKER_PROJECT_NAME_PROD)-queues-p
         prod-db-dump \
         prod-prune prod-versions prod-check-assets prod-logs-queue prod-logs-app \
         prod-health-runtime prod-health-queue prod-queue-diag prod-queue-pause-all \
-        prod-queue-continue-all prod-indexnow prod-diagnose prod-post-urls
+        prod-queue-continue-all prod-indexnow prod-indexnow-history prod-indexnow-logs prod-diagnose prod-post-urls
 
 prod-up: ## Start production services
 	$(DOCKER_COMPOSE_PROD) up -d
@@ -190,6 +190,9 @@ prod-indexnow: ## 🚀 Run IndexNow command in production (Examples: make prod-i
 
 prod-indexnow-logs: ## 📜 Show recent IndexNow API response logs from production
 	$(DOCKER_COMPOSE_PROD) exec -T app php artisan blog:indexnow --logs
+
+prod-indexnow-history: ## 📜 Show recent IndexNow submission history (LIMIT=25)
+	$(DOCKER_COMPOSE_PROD) exec -T app php artisan blog:indexnow --history --limit=$(or $(LIMIT),25)
 
 prod-post-urls: ## List public post URLs for a production blog subdomain (HOST=blog.example.com)
 	@if [ -z "$(HOST)" ]; then \
