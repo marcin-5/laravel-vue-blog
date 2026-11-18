@@ -88,6 +88,21 @@
         "extension_deleted": "Extension deleted successfully."
     },
     "admin": {
+        "logs": {
+            "title": "Logs",
+            "type": "Log type",
+            "indexnow": "IndexNow",
+            "submitted_at": "Submitted at",
+            "result": "Result",
+            "success": "API accepted",
+            "failure": "Failed",
+            "blog": "Blog",
+            "post": "Post",
+            "url": "Submitted URL",
+            "no_data": "No IndexNow submissions found",
+            "deleted_blog": "Deleted blog (ID: {id})",
+            "deleted_post": "Deleted post (ID: {id})"
+        },
         "stats": {
             "title": "Statistics",
             "user_agents": {

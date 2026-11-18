@@ -6,7 +6,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BarChart3, BookOpen, Folder, LayoutGrid, Mail, Palette, Users } from '@lucide/vue';
+import { BarChart3, BookOpen, Folder, LayoutGrid, Logs, Mail, Palette, Users } from '@lucide/vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -34,6 +34,12 @@ const mainNavItems = computed<NavItem[]>(() => [
         title: t('common.nav.statistics'),
         href: '/admin/stats',
         icon: BarChart3,
+        roles: ['view_admin_stats'],
+    },
+    {
+        title: t('common.nav.logs'),
+        href: '/admin/logs',
+        icon: Logs,
         roles: ['view_admin_stats'],
     },
     {

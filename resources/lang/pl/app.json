@@ -89,6 +89,21 @@
         "extension_deleted": "Rozszerzenie zostało usunięte pomyślnie."
     },
     "admin": {
+        "logs": {
+            "title": "Logi",
+            "type": "Rodzaj logu",
+            "indexnow": "IndexNow",
+            "submitted_at": "Data zgłoszenia",
+            "result": "Wynik",
+            "success": "API przyjęło zgłoszenie",
+            "failure": "Niepowodzenie",
+            "blog": "Blog",
+            "post": "Wpis",
+            "url": "Zgłoszony URL",
+            "no_data": "Brak zgłoszeń IndexNow",
+            "deleted_blog": "Usunięty blog (ID: {id})",
+            "deleted_post": "Usunięty wpis (ID: {id})"
+        },
         "stats": {
             "title": "Statystyki",
             "user_agents": {
