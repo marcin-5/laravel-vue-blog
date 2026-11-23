@@ -85,6 +85,15 @@ readonly class PublicBlogSeoBuilder
             return __('seo.title_format', ['page' => $tag->name, 'site' => $blog->name]);
         }
 
+        return $this->resolveHtmlTitle($blog);
+    }
+
+    public function resolveHtmlTitle(Blog $blog, ?Post $post = null): string
+    {
+        if ($post !== null) {
+            return $post->seo_title ?: __('seo.title_format', ['page' => $post->title, 'site' => $blog->name]);
+        }
+
         return $blog->seo_title ?: __('seo.title_format', ['page' => $blog->name, 'site' => config('app.name')]);
     }
 
@@ -144,7 +153,7 @@ readonly class PublicBlogSeoBuilder
 
     private function getPostTitle(Blog $blog, Post $post): string
     {
-        return $post->seo_title ?: __('seo.title_format', ['page' => $post->title, 'site' => $blog->name]);
+        return $this->resolveHtmlTitle($blog, $post);
     }
 
     /**

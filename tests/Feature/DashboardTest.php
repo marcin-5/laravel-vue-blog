@@ -29,6 +29,7 @@ test('authenticated users without permissions see empty stats', function () {
                 ->where('newsletterSubscriptions', [])
                 ->where('blogStats', [])
                 ->where('postsStats', [])
+                ->where('seoTitleIssues', [])
                 ->where('userAgentStats', null)
                 ->where('botStats', null)
                 ->where('fontUsageStats', null),
@@ -42,7 +43,8 @@ test('authenticated users with view_blogs permission see blog stats', function (
     $this->actingAs($user);
 
     $blog = createBlog(['user_id' => $user->id, 'name' => 'Test Blog']);
-    createPost($blog, ['title' => 'Test Post']);
+    $blog->update(['seo_title' => 'Short']);
+    createPost($blog, ['title' => 'Test Post', 'seo_title' => 'Tiny']);
 
     $this
         ->get('/dashboard')
@@ -52,6 +54,9 @@ test('authenticated users with view_blogs permission see blog stats', function (
             ->loadDeferredProps(fn(Assert $page) => $page
                 ->has('blogStats', 1)
                 ->where('blogStats.0.name', 'Test Blog')
+                ->has('seoTitleIssues', 2)
+                ->where('seoTitleIssues.0.type', 'blog')
+                ->where('seoTitleIssues.1.type', 'post')
                 ->has('postsStats.timeline')
                 ->has('postsStats.performance')
                 ->where('newsletterSubscriptions', [])

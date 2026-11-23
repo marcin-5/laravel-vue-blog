@@ -3,6 +3,16 @@ export type StatsRange = 'today' | 'week' | 'month' | 'half_year' | 'year' | 'li
 export type StatsGroupBy = 'visitor_id' | 'fingerprint';
 export type StatsVisitorType = 'all' | 'bots' | 'anonymous' | 'markdown';
 
+export interface SeoTitleIssue {
+    type: 'blog' | 'post';
+    blog_id: number;
+    post_id: number | null;
+    blog_name: string;
+    title: string;
+    length: number;
+    edit_url: string;
+}
+
 export interface StatsSortOption {
     readonly value: string;
     readonly label: string;

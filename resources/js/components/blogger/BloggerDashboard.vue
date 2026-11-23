@@ -1,14 +1,17 @@
 <script lang="ts" setup>
 import StatsSkeleton from '@/components/StatsSkeleton.vue';
-import type { BlogStats, PostsStats } from '@/types/stats';
+import type { BlogStats, PostsStats, SeoTitleIssue } from '@/types/stats';
+import { Deferred } from '@inertiajs/vue3';
 import PlaceholderPattern from '../PlaceholderPattern.vue';
 import BloggerStats from './BloggerStats.vue';
 import PostPerformanceStats from './PostPerformanceStats.vue';
 import PostTimelineStats from './PostTimelineStats.vue';
+import SeoTitleIssuesList from './SeoTitleIssuesList.vue';
 
 defineProps<{
     blogStats?: BlogStats[];
     postsStats?: PostsStats;
+    seoTitleIssues?: SeoTitleIssue[];
 }>();
 </script>
 
@@ -25,6 +28,12 @@ defineProps<{
         </div>
         <BloggerStats v-if="blogStats" :stats="blogStats" />
         <StatsSkeleton v-else class="h-48" />
+        <Deferred data="seoTitleIssues">
+            <template #fallback>
+                <StatsSkeleton class="h-48" />
+            </template>
+            <SeoTitleIssuesList :issues="seoTitleIssues ?? []" />
+        </Deferred>
         <div class="relative min-h-screen flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min">
             <PlaceholderPattern />
         </div>

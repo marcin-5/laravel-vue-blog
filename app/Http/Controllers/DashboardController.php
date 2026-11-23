@@ -8,6 +8,7 @@ use App\Queries\Dashboard\BotStatsQuery;
 use App\Queries\Dashboard\FontUsageStatsQuery;
 use App\Queries\Dashboard\NewsletterStatsQuery;
 use App\Queries\Dashboard\PostStatsQuery;
+use App\Queries\Dashboard\SeoTitleIssuesQuery;
 use App\Enums\UserRole;
 use App\Services\TranslationService;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
@@ -29,6 +30,7 @@ class DashboardController extends Controller
         protected BotStatsQuery $botQuery,
         protected BlogStatsQuery $blogQuery,
         protected PostStatsQuery $postQuery,
+        protected SeoTitleIssuesQuery $seoTitleIssuesQuery,
         protected FontUsageStatsQuery $fontUsageQuery,
     ) {}
 
@@ -64,6 +66,9 @@ class DashboardController extends Controller
             ),
             'blogStats' => Inertia::defer(fn() => $user->can('view_blogs') ? $this->blogQuery->handle($user) : []),
             'postsStats' => Inertia::defer(fn() => $user->can('view_blogs') ? $this->postQuery->handle($user) : []),
+            'seoTitleIssues' => Inertia::defer(
+                fn() => $user->can('view_blogs') ? $this->seoTitleIssuesQuery->handle($user) : [],
+            ),
             'userAgentStats' => Inertia::defer(
                 fn() => $user->can('view_admin_stats') ? $this->botQuery->handle()['userAgentStats'] : null,
             ),

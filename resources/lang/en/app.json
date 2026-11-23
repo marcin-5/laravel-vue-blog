@@ -247,6 +247,15 @@
     "blogger": {
         "title": "Blogs",
         "stats_title": "Statistics",
+        "seo_title_issues": {
+            "title": "Short SEO titles",
+            "description": "These blog pages have generated HTML titles shorter than 15 characters.",
+            "blog": "Blog home page",
+            "post": "Post",
+            "length": "characters",
+            "edit": "Open blog editor",
+            "empty": "All blog page titles meet the minimum length."
+        },
         "all_blogs": "All blogs",
         "all_my_blogs": "All my blogs",
         "theme_management": {

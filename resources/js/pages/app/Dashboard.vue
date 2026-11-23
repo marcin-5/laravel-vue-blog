@@ -6,7 +6,7 @@ import { useDashboardView } from '@/composables/useDashboardView';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { type NewsletterSubscription } from '@/types/admin.types';
-import { type BlogStats, type BotStats, type FontUsageStats, type PostsStats, type UserAgentStats } from '@/types/stats';
+import { type BlogStats, type BotStats, type FontUsageStats, type PostsStats, type SeoTitleIssue, type UserAgentStats } from '@/types/stats';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -16,6 +16,7 @@ const props = defineProps<{
     newsletterSubscriptions?: NewsletterSubscription[];
     blogStats?: BlogStats[];
     postsStats?: PostsStats;
+    seoTitleIssues?: SeoTitleIssue[];
     userAgentStats?: UserAgentStats;
     botStats?: BotStats;
     fontUsageStats?: FontUsageStats | null;
@@ -35,7 +36,12 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [{ title: t('dashboard.titl
             :newsletter-subscriptions="newsletterSubscriptions"
             :user-agent-stats="userAgentStats"
         />
-        <BloggerDashboard v-else-if="currentView === 'blogger'" :blog-stats="blogStats || []" :posts-stats="postsStats" />
+        <BloggerDashboard
+            v-else-if="currentView === 'blogger'"
+            :blog-stats="blogStats || []"
+            :posts-stats="postsStats"
+            :seo-title-issues="seoTitleIssues"
+        />
         <UserDashboard v-else />
     </AppLayout>
 </template>

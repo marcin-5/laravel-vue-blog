@@ -248,6 +248,15 @@
     "blogger": {
         "title": "Blogi",
         "stats_title": "Statystyki",
+        "seo_title_issues": {
+            "title": "Zbyt krótkie tytuły SEO",
+            "description": "Te strony bloga mają wygenerowane tytuły HTML krótsze niż 15 znaków.",
+            "blog": "Strona główna bloga",
+            "post": "Wpis",
+            "length": "znaków",
+            "edit": "Otwórz edytor bloga",
+            "empty": "Wszystkie tytuły stron bloga spełniają minimalną długość."
+        },
         "all_blogs": "Wszystkie blogi",
         "all_my_blogs": "Wszystkie moje blogi",
         "theme_management": {
