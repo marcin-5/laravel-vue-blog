@@ -12,7 +12,7 @@ vi.mock('@/components/blog/PublicBlogShell.vue', () => ({
                 <slot name="header" />
                 <slot name="content" />
                 <slot name="sidebar-content" />
-                <slot name="navigation" />
+                <slot name="post-navigation" />
             </div>
         `,
     },
@@ -72,7 +72,7 @@ describe('Landing.vue', () => {
 
     it('keeps the scroll link visible when there is no sidebar', () => {
         const wrapper = mount(Landing, {
-            props: { blog, chrome: { ...chrome, sidebar: 0 }, listing, landingHtml: '' },
+            props: { blog, chrome: { ...chrome, sidebar: 0 }, listing, landingHtml: '<p>Hello</p>' },
         });
 
         expect(wrapper.findComponent({ name: 'ScrollToPostsLink' }).classes()).not.toContain('xl:hidden');

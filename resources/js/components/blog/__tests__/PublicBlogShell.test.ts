@@ -15,7 +15,7 @@ vi.mock('@/components/blog/BlogLayout.vue', () => ({
                 <slot name="middle-divider" />
                 <slot name="breadcrumbs" />
                 <slot name="sidebar-content" />
-                <slot name="navigation" />
+                <slot name="post-navigation" />
                 <slot name="footer" />
             </div>
         `,
@@ -160,7 +160,7 @@ describe('PublicBlogShell.vue', () => {
             slots: {
                 header: '<h1 class="page-header">Header</h1>',
                 content: '<div class="page-content">Content</div>',
-                navigation: '<div class="back-link">Back</div>',
+                'post-navigation': '<div class="back-link">Back</div>',
                 'sidebar-content': '<div class="custom-sidebar">Sidebar</div>',
             },
         });

@@ -12,7 +12,7 @@ vi.mock('@/components/blog/PublicBlogShell.vue', () => ({
                 <slot name="header" />
                 <slot name="content" />
                 <slot name="sidebar-content" />
-                <slot name="navigation" />
+                <slot name="post-navigation" />
             </div>
         `,
     },
