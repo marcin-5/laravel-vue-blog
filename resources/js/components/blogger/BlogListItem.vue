@@ -83,57 +83,59 @@ function handleReload() {
 </script>
 
 <template>
-    <BloggerListItem :context="context" @post-updated="handleReload">
-        <template #badges>
-            <div v-if="item.categories && item.categories.length" class="mt-1 flex flex-wrap gap-2">
-                <span
-                    v-for="cat in item.categories"
-                    :key="`badge-${item.id}-${cat.id}`"
-                    class="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground"
-                >
-                    {{ localizedName(cat.name as any) }}
-                </span>
-            </div>
-        </template>
+    <div :id="`blog-${item.id}`">
+        <BloggerListItem :context="context" @post-updated="handleReload">
+            <template #badges>
+                <div v-if="item.categories && item.categories.length" class="mt-1 flex flex-wrap gap-2">
+                    <span
+                        v-for="cat in item.categories"
+                        :key="`badge-${item.id}-${cat.id}`"
+                        class="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                    >
+                        {{ localizedName(cat.name as any) }}
+                    </span>
+                </div>
+            </template>
 
-        <template #actions="{ handleEdit, handleCreatePost, handleTogglePosts, isCreatingPost, isEditing, isPostsExpanded }">
-            <ItemActionGroup
-                :is-creating-post="isCreatingPost"
-                :is-editing="isEditing"
-                :is-posts-expanded="isPostsExpanded"
-                @edit="handleEdit"
-                @create-post="handleCreatePost"
-                @toggle-posts="handleTogglePosts"
-            />
-        </template>
+            <template #actions="{ handleEdit, handleCreatePost, handleTogglePosts, isCreatingPost, isEditing, isPostsExpanded }">
+                <ItemActionGroup
+                    :is-creating-post="isCreatingPost"
+                    :is-editing="isEditing"
+                    :is-posts-expanded="isPostsExpanded"
+                    @edit="handleEdit"
+                    @create-post="handleCreatePost"
+                    @toggle-posts="handleTogglePosts"
+                />
+            </template>
 
-        <template #edit-form="{ handleCancelEdit }">
-            <BlogForm
-                :blog="item"
-                :categories="categories"
-                :form="editForm"
-                :id-prefix="`edit-${item.id}`"
-                :is-edit="true"
-                class="mt-4"
-                @cancel="handleCancelEdit"
-                @submit="submitEdit"
-            />
-        </template>
+            <template #edit-form="{ handleCancelEdit }">
+                <BlogForm
+                    :blog="item"
+                    :categories="categories"
+                    :form="editForm"
+                    :id-prefix="`edit-${item.id}`"
+                    :is-edit="true"
+                    class="mt-4"
+                    @cancel="handleCancelEdit"
+                    @submit="submitEdit"
+                />
+            </template>
 
-        <template #create-post-form="">
-            <PostForm
-                :blog-id="item.id"
-                :form="postForm"
-                :id-prefix="`post-${item.id}`"
-                :is-edit="false"
-                class="mt-4"
-                @cancel="cancelCreatePost"
-                @submit="submitCreatePost"
-            />
-        </template>
+            <template #create-post-form="">
+                <PostForm
+                    :blog-id="item.id"
+                    :form="postForm"
+                    :id-prefix="`post-${item.id}`"
+                    :is-edit="false"
+                    class="mt-4"
+                    @cancel="cancelCreatePost"
+                    @submit="submitCreatePost"
+                />
+            </template>
 
-        <template #no-posts>
-            {{ t('blogger.posts.empty') }}
-        </template>
-    </BloggerListItem>
+            <template #no-posts>
+                {{ t('blogger.posts.empty') }}
+            </template>
+        </BloggerListItem>
+    </div>
 </template>
