@@ -37,8 +37,6 @@
     <link rel="icon" href="/{{ $iconsLocale }}/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/{{ $iconsLocale }}/apple-touch-icon.png">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
-
     @routes
     @vite(['resources/js/app.ts'])
     <x-inertia::head>
