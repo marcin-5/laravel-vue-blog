@@ -250,6 +250,7 @@
         "stats_title": "Statystyki",
         "seo_title_issues": {
             "title": "Zbyt krótkie tytuły SEO",
+            "title_label": "Tytuł",
             "description": "Te strony bloga mają wygenerowane tytuły HTML krótsze niż 15 znaków.",
             "blog": "Strona główna bloga",
             "post": "Wpis",

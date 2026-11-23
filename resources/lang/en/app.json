@@ -249,6 +249,7 @@
         "stats_title": "Statistics",
         "seo_title_issues": {
             "title": "Short SEO titles",
+            "title_label": "Title",
             "description": "These blog pages have generated HTML titles shorter than 15 characters.",
             "blog": "Blog home page",
             "post": "Post",

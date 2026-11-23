@@ -41,6 +41,8 @@ describe('SeoTitleIssuesList.vue', () => {
         const wrapper = mount(SeoTitleIssuesList, { props: { issues: [] } });
 
         expect(wrapper.text()).toContain('blogger.seo_title_issues.empty');
+        expect(wrapper.text()).not.toContain('blogger.seo_title_issues.title');
+        expect(wrapper.text()).not.toContain('blogger.seo_title_issues.description');
         expect(wrapper.find('ul').exists()).toBe(false);
         expect(wrapper.find('a').exists()).toBe(false);
     });
