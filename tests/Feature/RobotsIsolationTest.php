@@ -30,8 +30,14 @@ class RobotsIsolationTest extends TestCase
         $response->assertHeader('Content-Type', 'text/plain; charset=UTF-8');
         $response->assertSee('User-agent: *');
         $response->assertSee('Disallow: /_/');
+        $response->assertSee('Disallow: /admin');
+        $response->assertSee('Disallow: /blogs');
+        $response->assertSee('Disallow: /blog-private-conversations');
+        $response->assertSee('Disallow: /group-private-conversations');
+        $response->assertSee('Disallow: /groups');
+        $response->assertSee('Disallow: /settings');
         $response->assertSee('Sitemap: http://osobliwy.pl/sitemap.xml');
-        $response->assertSee('Host: osobliwy.pl');
+        $response->assertDontSee('Host:');
 
         $this->app['env'] = $originalEnv;
     }
@@ -54,7 +60,7 @@ class RobotsIsolationTest extends TestCase
         $response->assertSee('User-agent: *');
         $response->assertSee('Disallow: /_/');
         $response->assertSee('Sitemap: http://my-blog.osobliwy.pl/sitemap.xml');
-        $response->assertSee('Host: my-blog.osobliwy.pl');
+        $response->assertDontSee('Host:');
 
         $this->app['env'] = $originalEnv;
     }

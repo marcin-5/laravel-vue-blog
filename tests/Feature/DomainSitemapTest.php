@@ -23,11 +23,10 @@ class DomainSitemapTest extends TestCase
             ->assertStatus(200)
             ->assertSee('Sitemap: http://blog.pl/sitemap.xml');
 
-        // Host might or might not have trailing slash depending on Laravel version/config
         $content = $response->getContent();
-        $this->assertTrue(
-            str_contains($content, 'Host: blog.pl'),
-            'robots.txt should contain Host: blog.pl. Content: ' . $content,
+        $this->assertFalse(
+            str_contains($content, 'Host:'),
+            'robots.txt should not contain Host directive. Content: ' . $content,
         );
 
         $this
