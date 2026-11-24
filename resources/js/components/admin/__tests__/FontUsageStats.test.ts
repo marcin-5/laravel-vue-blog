@@ -1,5 +1,6 @@
 import { mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { nextTick } from 'vue';
 import FontUsageStats from '../FontUsageStats.vue';
 import { router } from '@inertiajs/vue3';
 
@@ -58,6 +59,7 @@ const stats = {
 describe('FontUsageStats.vue', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        localStorage.clear();
     });
 
     it('filters by blogger through the dashboard query string', async () => {
@@ -97,6 +99,20 @@ describe('FontUsageStats.vue', () => {
 
         expect(wrapper.find('button[aria-label="Collapse font usage stats"]').attributes('aria-expanded')).toBe('true');
         expect(wrapper.findAll('.grid > div')).toHaveLength(2);
+    });
+
+    it('remembers the collapsed state after remounting', async () => {
+        const wrapper = mount(FontUsageStats, { props: { stats } });
+
+        await wrapper.find('button[aria-label="Collapse font usage stats"]').trigger('click');
+        expect(localStorage.getItem('font-usage-stats-collapsed')).toBe('true');
+        wrapper.unmount();
+
+        const remountedWrapper = mount(FontUsageStats, { props: { stats } });
+        await nextTick();
+
+        expect(remountedWrapper.find('button[aria-label="Expand font usage stats"]').exists()).toBe(true);
+        expect(remountedWrapper.find('.grid').exists()).toBe(false);
     });
 
     it('keeps the default order and can sort fonts by usage count', async () => {

@@ -6,7 +6,7 @@ import type { FontUsageStats } from '@/types/stats';
 import { router } from '@inertiajs/vue3';
 import { ChevronDown, ChevronUp, Info } from '@lucide/vue';
 import type { AcceptableValue } from 'reka-ui';
-import { computed, ref, shallowRef, watch } from 'vue';
+import { computed, onMounted, ref, shallowRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
@@ -17,6 +17,15 @@ const { t } = useI18n();
 const selectedBloggerId = ref<number | undefined>(props.stats.selectedBloggerId ?? undefined);
 const sortByUsage = shallowRef(false);
 const isCollapsed = shallowRef(false);
+const collapsedStateKey = 'font-usage-stats-collapsed';
+
+onMounted(() => {
+    isCollapsed.value = localStorage.getItem(collapsedStateKey) === 'true';
+});
+
+watch(isCollapsed, (collapsed) => {
+    localStorage.setItem(collapsedStateKey, String(collapsed));
+});
 
 const bloggerOptions = computed(() => [
     { value: 'all', label: t('admin.stats.font_usage.all_bloggers') },
