@@ -102,7 +102,7 @@ const displayedFonts = computed(() =>
             <TooltipProvider>
                 <div class="grid grid-cols-1 gap-x-6 sm:grid-cols-2 lg:grid-cols-3">
                     <div v-for="font in displayedFonts" :key="font.value" class="flex items-center justify-between gap-2 border-b py-2">
-                        <span class="min-w-0">{{ font.label }}</span>
+                        <span :style="{ fontFamily: font.value }" class="min-w-0">{{ font.label }}</span>
                         <div class="flex shrink-0 items-center">
                             <span :class="font.count === 0 ? 'font-semibold text-warning' : 'font-medium'">
                                 {{ font.count }}
