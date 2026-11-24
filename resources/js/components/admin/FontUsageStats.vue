@@ -23,6 +23,11 @@ const bloggerOptions = computed(() => [
     ...props.stats.bloggers.map((blogger) => ({ value: blogger.id, label: blogger.name })),
 ]);
 
+const sortOptions = computed(() => [
+    { value: 'default', label: t('admin.stats.font_usage.sort_default') },
+    { value: 'usage', label: t('admin.stats.font_usage.sort_usage') },
+]);
+
 watch(
     () => props.stats.selectedBloggerId,
     (bloggerId) => {
@@ -39,6 +44,10 @@ function updateBloggerFilter(value: AcceptableValue | undefined): void {
         preserveState: true,
         replace: true,
     });
+}
+
+function updateSort(value: AcceptableValue | undefined): void {
+    sortByUsage.value = value === 'usage';
 }
 
 const displayedFonts = computed(() =>
@@ -62,7 +71,7 @@ const displayedFonts = computed(() =>
                 </button>
                 <CardTitle>{{ t('admin.stats.font_usage.title') }}</CardTitle>
             </div>
-            <div v-if="!isCollapsed" class="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div v-if="!isCollapsed" class="flex flex-col gap-4 sm:flex-row sm:items-end">
                 <FilterSelect
                     :label="t('admin.stats.font_usage.blogger_filter')"
                     :model-value="selectedBloggerId"
@@ -71,13 +80,13 @@ const displayedFonts = computed(() =>
                     min-width="min-w-48"
                     @update:model-value="updateBloggerFilter"
                 />
-                <label class="flex flex-col gap-1 text-xs text-muted-foreground">
-                    {{ t('admin.stats.font_usage.sort_label') }}
-                    <select v-model="sortByUsage" class="h-9 min-w-48 rounded-md border border-input bg-background px-3 text-sm text-foreground">
-                        <option :value="false">{{ t('admin.stats.font_usage.sort_default') }}</option>
-                        <option :value="true">{{ t('admin.stats.font_usage.sort_usage') }}</option>
-                    </select>
-                </label>
+                <FilterSelect
+                    :label="t('admin.stats.font_usage.sort_label')"
+                    :model-value="sortByUsage ? 'usage' : 'default'"
+                    :options="sortOptions"
+                    min-width="min-w-48"
+                    @update:model-value="updateSort"
+                />
             </div>
         </CardHeader>
         <CardContent v-if="!isCollapsed">

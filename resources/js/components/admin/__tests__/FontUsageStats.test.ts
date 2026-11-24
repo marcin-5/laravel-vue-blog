@@ -63,7 +63,7 @@ describe('FontUsageStats.vue', () => {
     it('filters by blogger through the dashboard query string', async () => {
         const wrapper = mount(FontUsageStats, { props: { stats } });
 
-        await wrapper.findAll('button')[2].trigger('click');
+        await wrapper.findAll('button').find((button) => button.text() === 'Blogger Seven')!.trigger('click');
 
         expect(router.get).toHaveBeenCalledWith(
             '/dashboard',
@@ -91,7 +91,7 @@ describe('FontUsageStats.vue', () => {
 
         expect(wrapper.find('button[aria-label="Expand font usage stats"]').attributes('aria-expanded')).toBe('false');
         expect(wrapper.find('.grid').exists()).toBe(false);
-        expect(wrapper.find('select').exists()).toBe(false);
+        expect(wrapper.text()).not.toContain('admin.stats.font_usage.sort_label');
 
         await wrapper.find('button[aria-label="Expand font usage stats"]').trigger('click');
 
@@ -104,7 +104,7 @@ describe('FontUsageStats.vue', () => {
 
         expect(wrapper.findAll('.grid > div > span').map((font) => font.text())).toEqual(['Inter', 'Afacad']);
 
-        await wrapper.find('select').setValue('true');
+        await wrapper.findAll('button').find((button) => button.text() === 'admin.stats.font_usage.sort_usage')!.trigger('click');
 
         expect(wrapper.findAll('.grid > div > span').map((font) => font.text())).toEqual(['Inter', 'Afacad']);
     });
@@ -122,7 +122,7 @@ describe('FontUsageStats.vue', () => {
             },
         });
 
-        await wrapper.find('select').setValue('true');
+        await wrapper.findAll('button').find((button) => button.text() === 'admin.stats.font_usage.sort_usage')!.trigger('click');
 
         expect(wrapper.findAll('.grid > div > span').map((font) => font.text())).toEqual(['Inter', 'Afacad']);
         expect(wrapper.props('stats').fonts.map((font) => font.label)).toEqual(['Afacad', 'Inter']);
