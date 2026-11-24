@@ -245,7 +245,16 @@
         "pl": "Polish"
     },
     "blogger": {
-        "title": "Blogs",
+        "verification": {
+            "title": "Bing site verification",
+            "blog": "Blog",
+            "owner": "Owner",
+            "token": "Bing verification token",
+            "actions": "Actions",
+            "save": "Save",
+            "saving": "Saving…",
+            "empty": "No blogs found."
+        },
         "stats_title": "Statistics",
         "seo_title_issues": {
             "title": "Short SEO titles",

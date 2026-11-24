@@ -23,6 +23,7 @@ use Throwable;
  * @property string $name
  * @property string $slug
  * @property string|null $description
+ * @property string|null $bing_site_verification_token
  * @property string|null $seo_description
  * @property string|null $about_seo_description
  * @property string|null $contact_seo_description
@@ -54,6 +55,7 @@ class Blog extends Model
         'contact_seo_description',
         'slug',
         'description',
+        'bing_site_verification_token',
         'motto',
         'footer',
         'is_published',

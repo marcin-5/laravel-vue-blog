@@ -31,6 +31,7 @@ const structuredDataJson = computed(() => serializeStructuredData(pageSeo.value?
         <title>{{ seoDefaults.title }}</title>
         <meta name="description" :content="seoDefaults.description" />
         <meta name="robots" :content="seoDefaults.robots" />
+        <meta v-if="pageSeo?.bingSiteVerificationToken" name="msvalidate.01" :content="pageSeo.bingSiteVerificationToken" />
         <link v-if="pageSeo?.canonicalUrl" :href="pageSeo.canonicalUrl" rel="canonical" />
         <meta :content="seoDefaults.locale" http-equiv="content-language" />
 

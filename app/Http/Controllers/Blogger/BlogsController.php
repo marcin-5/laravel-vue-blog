@@ -42,6 +42,19 @@ class BlogsController extends AuthenticatedController
         return Inertia::render('app/blogger/Blogs', [
             'blogs' => $blogs,
             'categories' => $categories,
+            ...($user->can('view_admin_users') ? [
+                'adminBlogs' => Blog::query()
+                    ->with('user:id,name')
+                    ->orderBy('name')
+                    ->get(['id', 'user_id', 'name', 'bing_site_verification_token'])
+                    ->map(fn(Blog $blog): array => [
+                        'id' => $blog->id,
+                        'name' => $blog->name,
+                        'owner_name' => $blog->user->name,
+                        'bing_site_verification_token' => $blog->bing_site_verification_token,
+                    ])
+                    ->values(),
+            ] : []),
             'canCreate' => $user->canCreateBlog(),
             'translations' => [
                 'locale' => app()->getLocale(),

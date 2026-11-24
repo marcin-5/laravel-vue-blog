@@ -74,3 +74,33 @@ test('about page title uses "O blogu" in Polish', function () {
             ->where('seo.title', 'O blogu - BlogTestowy'),
         );
 });
+
+test('blog landing page exposes the Bing verification token for that blog only', function () {
+    $blog = createBlog([
+        'is_published' => true,
+        'bing_site_verification_token' => 'current-blog-bing-token',
+    ]);
+    createBlog([
+        'is_published' => true,
+        'bing_site_verification_token' => 'other-blog-bing-token',
+    ]);
+
+    $this->get(getBlogUrl($blog))
+        ->assertSuccessful()
+        ->assertInertia(fn(Assert $page) => $page
+            ->where('seo.bingSiteVerificationToken', 'current-blog-bing-token'),
+        );
+});
+
+test('blog landing page omits the Bing verification token when it is unset', function () {
+    $blog = createBlog([
+        'is_published' => true,
+        'bing_site_verification_token' => null,
+    ]);
+
+    $this->get(getBlogUrl($blog))
+        ->assertSuccessful()
+        ->assertInertia(fn(Assert $page) => $page
+            ->missing('seo.bingSiteVerificationToken'),
+        );
+});

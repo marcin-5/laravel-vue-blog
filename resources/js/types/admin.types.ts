@@ -5,6 +5,13 @@ export interface CategoryRow {
     blogs_count?: number;
 }
 
+export interface BlogVerificationRow {
+    id: number;
+    name: string;
+    owner_name: string;
+    bing_site_verification_token: string | null;
+}
+
 export type Role = 'admin' | 'blogger' | 'user';
 
 export interface UserWithQuota {

@@ -54,6 +54,7 @@ readonly class PublicBlogSeoBuilder
                 $metaDescription,
             ),
             robots: $activeTags !== [] ? 'noindex, follow' : null,
+            bingSiteVerificationToken: $blog->bing_site_verification_token,
         );
     }
 

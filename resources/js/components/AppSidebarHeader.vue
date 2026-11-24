@@ -31,6 +31,7 @@ const isDashboard = computed(() => page.url === '/dashboard');
             </template>
         </div>
         <div class="flex flex-1 items-center justify-center">
+            <slot name="header-actions" />
             <DashboardViewSwitcher v-if="isDashboard" />
         </div>
         <div class="ml-auto">

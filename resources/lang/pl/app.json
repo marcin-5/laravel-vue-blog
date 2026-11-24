@@ -246,7 +246,16 @@
         "pl": "Polski"
     },
     "blogger": {
-        "title": "Blogi",
+        "verification": {
+            "title": "Weryfikacja witryny Bing",
+            "blog": "Blog",
+            "owner": "Właściciel",
+            "token": "Token weryfikacyjny Bing",
+            "actions": "Akcje",
+            "save": "Zapisz",
+            "saving": "Zapisywanie…",
+            "empty": "Nie znaleziono blogów."
+        },
         "stats_title": "Statystyki",
         "seo_title_issues": {
             "title": "Zbyt krótkie tytuły SEO",

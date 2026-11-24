@@ -91,6 +91,7 @@ export interface SEO {
     ogType: string;
     locale: string;
     robots?: string;
+    bingSiteVerificationToken?: string | null;
     publishedTime?: string | null;
     modifiedTime?: string | null;
     structuredData: Record<string, any>;
