@@ -39,6 +39,8 @@ vi.mock('@/components/ui/tooltip', () => ({
 }));
 
 vi.mock('@lucide/vue', () => ({
+    ChevronDown: { template: '<span />' },
+    ChevronUp: { template: '<span />' },
     Info: { template: '<span />' },
 }));
 
@@ -61,7 +63,7 @@ describe('FontUsageStats.vue', () => {
     it('filters by blogger through the dashboard query string', async () => {
         const wrapper = mount(FontUsageStats, { props: { stats } });
 
-        await wrapper.findAll('button')[1].trigger('click');
+        await wrapper.findAll('button')[2].trigger('click');
 
         expect(router.get).toHaveBeenCalledWith(
             '/dashboard',
@@ -78,6 +80,23 @@ describe('FontUsageStats.vue', () => {
         expect(wrapper.find('.grid').classes()).toEqual(expect.arrayContaining(['grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-3']));
         expect(wrapper.findAll('.grid > div')).toHaveLength(2);
         expect(wrapper.find('.grid > div:nth-child(2) div > span').classes()).toContain('text-warning');
+    });
+
+    it('collapses to the title header and expands to show all font rows', async () => {
+        const wrapper = mount(FontUsageStats, { props: { stats } });
+        const toggle = wrapper.find('button[aria-label="Collapse font usage stats"]');
+
+        expect(toggle.attributes('aria-expanded')).toBe('true');
+        await toggle.trigger('click');
+
+        expect(wrapper.find('button[aria-label="Expand font usage stats"]').attributes('aria-expanded')).toBe('false');
+        expect(wrapper.find('.grid').exists()).toBe(false);
+        expect(wrapper.find('select').exists()).toBe(false);
+
+        await wrapper.find('button[aria-label="Expand font usage stats"]').trigger('click');
+
+        expect(wrapper.find('button[aria-label="Collapse font usage stats"]').attributes('aria-expanded')).toBe('true');
+        expect(wrapper.findAll('.grid > div')).toHaveLength(2);
     });
 
     it('keeps the default order and can sort fonts by usage count', async () => {

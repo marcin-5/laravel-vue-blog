@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { FontUsageStats } from '@/types/stats';
 import { router } from '@inertiajs/vue3';
-import { Info } from '@lucide/vue';
+import { ChevronDown, ChevronUp, Info } from '@lucide/vue';
 import type { AcceptableValue } from 'reka-ui';
 import { computed, ref, shallowRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -16,6 +16,7 @@ const props = defineProps<{
 const { t } = useI18n();
 const selectedBloggerId = ref<number | undefined>(props.stats.selectedBloggerId ?? undefined);
 const sortByUsage = shallowRef(false);
+const isCollapsed = shallowRef(false);
 
 const bloggerOptions = computed(() => [
     { value: 'all', label: t('admin.stats.font_usage.all_bloggers') },
@@ -47,9 +48,21 @@ const displayedFonts = computed(() =>
 
 <template>
     <Card>
-        <CardHeader class="gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <CardTitle>{{ t('admin.stats.font_usage.title') }}</CardTitle>
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <CardHeader class="sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center gap-4">
+                <button
+                    :aria-expanded="!isCollapsed"
+                    :aria-label="isCollapsed ? 'Expand font usage stats' : 'Collapse font usage stats'"
+                    class="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
+                    type="button"
+                    @click="isCollapsed = !isCollapsed"
+                >
+                    <ChevronDown v-if="isCollapsed" class="size-4" />
+                    <ChevronUp v-else class="size-4" />
+                </button>
+                <CardTitle>{{ t('admin.stats.font_usage.title') }}</CardTitle>
+            </div>
+            <div v-if="!isCollapsed" class="flex flex-col gap-3 sm:flex-row sm:items-end">
                 <FilterSelect
                     :label="t('admin.stats.font_usage.blogger_filter')"
                     :model-value="selectedBloggerId"
@@ -67,7 +80,7 @@ const displayedFonts = computed(() =>
                 </label>
             </div>
         </CardHeader>
-        <CardContent>
+        <CardContent v-if="!isCollapsed">
             <TooltipProvider>
                 <div class="grid grid-cols-1 gap-x-6 sm:grid-cols-2 lg:grid-cols-3">
                     <div v-for="font in displayedFonts" :key="font.value" class="flex items-center justify-between gap-2 border-b py-2">
