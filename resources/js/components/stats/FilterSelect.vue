@@ -27,7 +27,7 @@ defineEmits<{
 
 <template>
     <div class="flex flex-col">
-        <label class="mb-1 text-xs text-muted-foreground">{{ label }}</label>
+        <label class="mb-1 ml-1 text-xs text-muted-foreground">{{ label }}</label>
         <Select
             :model-value="modelValue?.toString() ?? 'all'"
             @update:model-value="$emit('update:modelValue', $event === 'all' ? undefined : Number($event) || $event)"
