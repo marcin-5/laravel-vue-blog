@@ -57,7 +57,7 @@ const displayedFonts = computed(() =>
 
 <template>
     <Card>
-        <CardHeader class="sm:flex-row sm:items-center sm:justify-between">
+        <CardHeader :class="isCollapsed ? 'grid-rows-1 items-center' : 'sm:flex-row sm:items-center sm:justify-between'">
             <div class="flex items-center gap-4">
                 <button
                     :aria-expanded="!isCollapsed"
