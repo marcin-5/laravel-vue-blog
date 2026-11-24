@@ -60,7 +60,7 @@
         "clsx": "^2.1.1",
         "concurrently": "^10.0.7",
         "laravel-vite-plugin": "^3.2.1",
-        "@lucide/vue": "^1.78.0",
+        "@lucide/vue": "^1.79.0",
         "npm-check-updates": "^23.1.1",
         "nstall": "^0.2.0",
         "reka-ui": "^2.11.0",
