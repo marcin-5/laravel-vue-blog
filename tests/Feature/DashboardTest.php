@@ -181,7 +181,7 @@ test('admin font usage stats filter blogs by the selected blogger', function () 
     createBlog([
         'user_id' => $selectedBlogger->id,
         'name' => 'Selected Blog',
-        'theme' => ['light' => ['--font-header' => 'var(--font-roboto)']],
+        'theme' => ['light' => ['--font-header' => 'var(--font-baloo-2)']],
     ]);
     createBlog([
         'user_id' => $otherBlogger->id,
@@ -196,7 +196,7 @@ test('admin font usage stats filter blogs by the selected blogger', function () 
         ->assertInertia(fn(Assert $page) => $page
             ->loadDeferredProps(fn(Assert $page) => $page
                 ->where('fontUsageStats.selectedBloggerId', $selectedBlogger->id)
-                ->where('fontUsageStats.fonts.10.value', 'var(--font-roboto)')
+                ->where('fontUsageStats.fonts.10.value', 'var(--font-baloo-2)')
                 ->where('fontUsageStats.fonts.10.count', 1)
                 ->where('fontUsageStats.fonts.10.blogs', ['Selected Blog'])
                 ->where('fontUsageStats.fonts.12.count', 0),

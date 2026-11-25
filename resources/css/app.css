@@ -6,6 +6,7 @@
 
 @theme inline {
     --font-afacad: 'Afacad Variable', sans-serif;
+    --font-baloo-2: 'Baloo 2 Variable', sans-serif;
     --font-darker-grotesque: 'Darker Grotesque Variable', sans-serif;
     --font-inter: 'Inter Variable', sans-serif;
     --font-montserrat: 'Montserrat Variable', sans-serif;
@@ -14,7 +15,6 @@
     --font-rajdhani: 'Rajdhani', sans-serif;
     --font-raleway: 'Raleway Variable', sans-serif;
     --font-recursive: 'Recursive Variable', sans-serif;
-    --font-roboto: 'Roboto Variable', sans-serif;
     --font-sofia-semi-condensed: 'Sofia Sans Semi Condensed Variable', sans-serif;
     --font-bitter: 'Bitter Variable', serif;
     --font-faustina: 'Faustina Variable', serif;
@@ -142,7 +142,7 @@
 
 :root,
 .light {
-    --font-header-default: var(--font-roboto);
+    --font-header-default: var(--font-baloo-2);
     --font-nav-default: var(--font-inter);
     --font-body-default: var(--font-nunito);
     --font-motto-default: var(--font-vollkorn);

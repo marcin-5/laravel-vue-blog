@@ -52,7 +52,7 @@ class DevelopmentSeeder extends Seeder
         ['--font-header' => 'var(--font-raleway)', '--font-body' => 'var(--font-inter)'],
         ['--font-header' => 'var(--font-bitter)', '--font-body' => 'var(--font-nunito)'],
         ['--font-header' => 'var(--font-montserrat)', '--font-body' => 'var(--font-faustina)'],
-        ['--font-header' => 'var(--font-vollkorn)', '--font-body' => 'var(--font-roboto)'],
+        ['--font-header' => 'var(--font-vollkorn)', '--font-body' => 'var(--font-baloo-2)'],
     ];
 
     private const array COLOR_PALETTES = [
@@ -184,33 +184,33 @@ class DevelopmentSeeder extends Seeder
                 ->create();
 
             $blogs->each(
-            /**
-             * @throws RandomException
-             */ function (Blog $blog) use ($categories): void {
-                $topic = self::CONTENT_TOPICS[array_rand(self::CONTENT_TOPICS)];
-                $categoryCount = random_int(self::BLOG_CATEGORIES_MIN, self::BLOG_CATEGORIES_MAX);
+                /**
+                 * @throws RandomException
+                 */ function (Blog $blog) use ($categories): void {
+                    $topic = self::CONTENT_TOPICS[array_rand(self::CONTENT_TOPICS)];
+                    $categoryCount = random_int(self::BLOG_CATEGORIES_MIN, self::BLOG_CATEGORIES_MAX);
 
-                $blog->categories()->attach(
-                    $categories->random($categoryCount),
-                );
+                    $blog->categories()->attach(
+                        $categories->random($categoryCount),
+                    );
 
-                LandingPage::factory()->create([
-                    'blog_id' => $blog->id,
-                    'content' => $this->generateMarkdownContent($topic),
-                ]);
-
-                $postCount = random_int(self::POSTS_PER_BLOG_MIN, self::POSTS_PER_BLOG_MAX);
-                $seeder = $this;
-
-                $posts = Post::factory($postCount)
-                    ->state(fn(): array => ['content' => $seeder->generateMarkdownContent($topic)])
-                    ->create([
+                    LandingPage::factory()->create([
                         'blog_id' => $blog->id,
-                        'user_id' => $blog->user_id,
+                        'content' => $this->generateMarkdownContent($topic),
                     ]);
 
-                $this->seedRelationsForPosts($posts, $blog);
-            },
+                    $postCount = random_int(self::POSTS_PER_BLOG_MIN, self::POSTS_PER_BLOG_MAX);
+                    $seeder = $this;
+
+                    $posts = Post::factory($postCount)
+                        ->state(fn(): array => ['content' => $seeder->generateMarkdownContent($topic)])
+                        ->create([
+                            'blog_id' => $blog->id,
+                            'user_id' => $blog->user_id,
+                        ]);
+
+                    $this->seedRelationsForPosts($posts, $blog);
+                },
             );
         });
     }
@@ -257,41 +257,41 @@ class DevelopmentSeeder extends Seeder
     private function seedRelationsForPosts($posts, Blog $blog): void
     {
         $posts->each(
-        /**
-         * @throws RandomException
-         */ function (Post $post) use ($posts, $blog): void {
-            // Seeding related posts: 0 or 1, then if 1, then 1 or 2
-            if (random_int(0, 1) === 1) {
-                $count = random_int(1, 2);
-                $potentialRelated = $posts->reject(fn(Post $p) => $p->id === $post->id);
+            /**
+             * @throws RandomException
+             */ function (Post $post) use ($posts, $blog): void {
+                // Seeding related posts: 0 or 1, then if 1, then 1 or 2
+                if (random_int(0, 1) === 1) {
+                    $count = random_int(1, 2);
+                    $potentialRelated = $posts->reject(fn(Post $p) => $p->id === $post->id);
 
-                if ($potentialRelated->isNotEmpty()) {
-                    $countToTake = min($count, $potentialRelated->count());
-                    $relatedToCreate = $potentialRelated->random($countToTake);
+                    if ($potentialRelated->isNotEmpty()) {
+                        $countToTake = min($count, $potentialRelated->count());
+                        $relatedToCreate = $potentialRelated->random($countToTake);
 
-                    if ($relatedToCreate instanceof Post) {
-                        $relatedToCreate = collect([$relatedToCreate]);
+                        if ($relatedToCreate instanceof Post) {
+                            $relatedToCreate = collect([$relatedToCreate]);
+                        }
+
+                        $relatedToCreate->each(function (Post $rp, int $index) use ($post, $blog): void {
+                            RelatedPost::factory()->create([
+                                'post_id' => $post->id,
+                                'blog_id' => $blog->id,
+                                'related_post_id' => $rp->id,
+                                'display_order' => $index,
+                            ]);
+                        });
                     }
-
-                    $relatedToCreate->each(function (Post $rp, int $index) use ($post, $blog): void {
-                        RelatedPost::factory()->create([
-                            'post_id' => $post->id,
-                            'blog_id' => $blog->id,
-                            'related_post_id' => $rp->id,
-                            'display_order' => $index,
-                        ]);
-                    });
                 }
-            }
 
-            // Seeding external links (optional, but good for completeness)
-            if (random_int(0, 1) === 1) {
-                $count = random_int(1, 3);
-                ExternalLink::factory($count)->create([
-                    'post_id' => $post->id,
-                ]);
-            }
-        },
+                // Seeding external links (optional, but good for completeness)
+                if (random_int(0, 1) === 1) {
+                    $count = random_int(1, 3);
+                    ExternalLink::factory($count)->create([
+                        'post_id' => $post->id,
+                    ]);
+                }
+            },
         );
     }
 

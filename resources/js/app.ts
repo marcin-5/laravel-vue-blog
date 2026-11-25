@@ -1,4 +1,5 @@
 import '@fontsource-variable/afacad';
+import '@fontsource-variable/baloo-2';
 import '@fontsource-variable/bitter';
 import '@fontsource-variable/darker-grotesque';
 import '@fontsource-variable/faustina';
@@ -10,7 +11,6 @@ import '@fontsource-variable/nunito';
 import '@fontsource-variable/quicksand';
 import '@fontsource-variable/raleway';
 import '@fontsource-variable/recursive';
-import '@fontsource-variable/roboto';
 import '@fontsource-variable/rokkitt';
 import '@fontsource-variable/sofia-sans-semi-condensed';
 import '@fontsource-variable/vollkorn';
