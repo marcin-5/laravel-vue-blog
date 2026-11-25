@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Queries\Dashboard\FontUsageStatsQuery;
 use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Permission;
 
@@ -160,15 +161,44 @@ test('admin font usage stats include all bloggers and every catalog font by defa
                 ->where('fontUsageStats.selectedBloggerId', null)
                 ->where('fontUsageStats.bloggers', $expectedBloggers)
                 ->has('fontUsageStats.fonts', 19)
-                ->where('fontUsageStats.fonts.3.value', 'var(--font-inter)')
-                ->where('fontUsageStats.fonts.3.count', 2)
-                ->where('fontUsageStats.fonts.3.blogs', ['First Blogger Blog', 'Second Blogger Blog'])
+                ->where('fontUsageStats.fonts.4.value', 'var(--font-inter)')
+                ->where('fontUsageStats.fonts.4.count', 2)
+                ->where('fontUsageStats.fonts.4.blogs', ['First Blogger Blog', 'Second Blogger Blog'])
                 ->where('fontUsageStats.fonts.12.count', 1)
                 ->where('fontUsageStats.fonts.12.blogs', ['First Blogger Blog'])
                 ->where('fontUsageStats.fonts.1.count', 0)
                 ->where('fontUsageStats.fonts.1.blogs', []),
             ),
         );
+});
+
+test('font usage stats include alternative fonts and count each font once per blog', function () {
+    $blogger = User::factory()->create(['role' => 'blogger']);
+    $blogName = 'Alternative Font Blog';
+
+    createBlog([
+        'user_id' => $blogger->id,
+        'name' => $blogName,
+        'theme' => [
+            'light' => [
+                '--font-header-alternative' => 'var(--font-yrsa)',
+                '--font-body-alternative' => 'var(--font-afacad)',
+            ],
+            'dark' => [
+                '--font-header-alternative' => 'var(--font-montserrat)',
+                '--font-body-alternative' => 'var(--font-afacad)',
+            ],
+        ],
+    ]);
+
+    $fontsByValue = collect(app(FontUsageStatsQuery::class)->handle()['fonts'])->keyBy('value');
+
+    expect($fontsByValue['var(--font-yrsa)']['count'])->toBe(1)
+        ->and($fontsByValue['var(--font-yrsa)']['blogs'])->toBe([$blogName])
+        ->and($fontsByValue['var(--font-montserrat)']['count'])->toBe(1)
+        ->and($fontsByValue['var(--font-montserrat)']['blogs'])->toBe([$blogName])
+        ->and($fontsByValue['var(--font-afacad)']['count'])->toBe(1)
+        ->and($fontsByValue['var(--font-afacad)']['blogs'])->toBe([$blogName]);
 });
 
 test('admin font usage stats filter blogs by the selected blogger', function () {
@@ -196,9 +226,9 @@ test('admin font usage stats filter blogs by the selected blogger', function () 
         ->assertInertia(fn(Assert $page) => $page
             ->loadDeferredProps(fn(Assert $page) => $page
                 ->where('fontUsageStats.selectedBloggerId', $selectedBlogger->id)
-                ->where('fontUsageStats.fonts.10.value', 'var(--font-baloo-2)')
-                ->where('fontUsageStats.fonts.10.count', 1)
-                ->where('fontUsageStats.fonts.10.blogs', ['Selected Blog'])
+                ->where('fontUsageStats.fonts.2.value', 'var(--font-baloo-2)')
+                ->where('fontUsageStats.fonts.2.count', 1)
+                ->where('fontUsageStats.fonts.2.blogs', ['Selected Blog'])
                 ->where('fontUsageStats.fonts.12.count', 0),
             ),
         );

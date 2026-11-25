@@ -13,7 +13,9 @@ class FontUsageStatsQuery
 {
     private const array FONT_THEME_KEYS = [
         '--font-header',
+        '--font-header-alternative',
         '--font-body',
+        '--font-body-alternative',
         '--font-motto',
         '--font-excerpt',
         '--font-footer',
