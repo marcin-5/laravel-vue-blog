@@ -241,6 +241,62 @@ describe('FormThemeSection.vue', () => {
         expect(wrapper.findAll('.form-select-field')).toHaveLength(8);
     });
 
+    it.each(['blog-theme-light', 'blog-theme-dark'])('provides size popovers for alternative fonts in %s', async (idPrefix) => {
+        const wrapper = mount(FormThemeSection, {
+            props: {
+                ...baseProps,
+                idPrefix,
+                colors: {
+                    ...baseProps.colors,
+                    '--header-scale': '1.05',
+                    '--body-scale': '0.95',
+                },
+            },
+        });
+        const sliders = wrapper.findAllComponents({ name: 'Slider' });
+
+        expect(sliders).toHaveLength(7);
+        expect(sliders[0].props('modelValue')).toEqual([105]);
+        expect(sliders[1].props('modelValue')).toEqual([95]);
+        expect(sliders[5].props('modelValue')).toEqual([105]);
+        expect(sliders[6].props('modelValue')).toEqual([95]);
+
+        await sliders[5].trigger('click');
+        await sliders[6].trigger('click');
+
+        expect(wrapper.emitted('update:colors')?.[0]?.[0]).toMatchObject({
+            '--header-scale': '1.05',
+            '--body-scale': '0.95',
+            '--header-scale-alternative': '1.1',
+        });
+        expect(wrapper.emitted('update:colors')?.[1]?.[0]).toMatchObject({
+            '--header-scale': '1.05',
+            '--body-scale': '0.95',
+            '--body-scale-alternative': '1.1',
+        });
+    });
+
+    it('uses configured alternative font scales without changing the default scales', () => {
+        const wrapper = mount(FormThemeSection, {
+            props: {
+                ...baseProps,
+                colors: {
+                    ...baseProps.colors,
+                    '--header-scale': '1.05',
+                    '--body-scale': '0.95',
+                    '--header-scale-alternative': '1.12',
+                    '--body-scale-alternative': '0.9',
+                },
+            },
+        });
+        const sliders = wrapper.findAllComponents({ name: 'Slider' });
+
+        expect(sliders[0].props('modelValue')).toEqual([105]);
+        expect(sliders[1].props('modelValue')).toEqual([95]);
+        expect(sliders[5].props('modelValue')).toEqual([112]);
+        expect(sliders[6].props('modelValue')).toEqual([90]);
+    });
+
     it('exports theme when export button is clicked', async () => {
         const wrapper = mountComponent();
         const exportEnvironment = mockExportEnvironment();

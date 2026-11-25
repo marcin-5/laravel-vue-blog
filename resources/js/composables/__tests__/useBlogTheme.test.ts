@@ -94,6 +94,8 @@ describe('useBlogTheme', () => {
                 '--font-body': 'var(--font-inter)',
                 '--font-header-alternative': 'var(--font-yrsa)',
                 '--font-body-alternative': 'var(--font-yrsa)',
+                '--header-scale-alternative': '1.3',
+                '--body-scale-alternative': '0.9',
             },
         }));
         const useAlternativeFonts = ref(false);
@@ -104,10 +106,27 @@ describe('useBlogTheme', () => {
 
         useAlternativeFonts.value = true;
 
-        expect(mergedThemeStyle.value['--header-scale']).toBe('1.1');
-        expect(mergedThemeStyle.value['--body-scale']).toBe('1.32');
-        expect(mergedThemeStyle.value['--blog-header-scale']).toBe('1.1');
-        expect(mergedThemeStyle.value['--blog-body-scale']).toBe('1.32');
+        expect(Number(mergedThemeStyle.value['--header-scale'])).toBeCloseTo(1.43);
+        expect(Number(mergedThemeStyle.value['--body-scale'])).toBeCloseTo(0.99);
+        expect(Number(mergedThemeStyle.value['--blog-header-scale'])).toBeCloseTo(1.43);
+        expect(Number(mergedThemeStyle.value['--blog-body-scale'])).toBeCloseTo(0.99);
+    });
+
+    it('uses default scales for alternative fonts when legacy themes have no alternative scales', () => {
+        const theme = computed(() => ({
+            light: {
+                '--header-scale': '1.2',
+                '--body-scale': '0.9',
+                '--font-header': 'var(--font-inter)',
+                '--font-body': 'var(--font-inter)',
+                '--font-header-alternative': 'var(--font-inter)',
+                '--font-body-alternative': 'var(--font-inter)',
+            },
+        }));
+        const { mergedThemeStyle } = useBlogTheme(theme, ref(true));
+
+        expect(mergedThemeStyle.value['--header-scale']).toBe('1.2');
+        expect(mergedThemeStyle.value['--body-scale']).toBe('0.9');
     });
 
     it('applies font weight corrections', () => {

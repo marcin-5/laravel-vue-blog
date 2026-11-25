@@ -4,6 +4,21 @@ import type { BlogTheme } from '@/types/blog.types';
 import { useMediaQuery } from '@vueuse/core';
 import { computed, ref, type ComputedRef, type Ref } from 'vue';
 
+const ALTERNATIVE_FONT_ROLES = [
+    {
+        role: 'header',
+        fontKey: '--font-header-alternative',
+        scaleKey: '--header-scale',
+        alternativeScaleKey: '--header-scale-alternative',
+    },
+    {
+        role: 'body',
+        fontKey: '--font-body-alternative',
+        scaleKey: '--body-scale',
+        alternativeScaleKey: '--body-scale-alternative',
+    },
+] as const;
+
 function mapThemeKeyToStyles(key: string, value: string, style: Record<string, string>, currentTheme: Record<string, string>): void {
     let finalValue = value;
 
@@ -84,14 +99,19 @@ export function useBlogTheme(theme: ComputedRef<BlogTheme | undefined>, useAlter
         const activeTheme = { ...currentTheme.value };
         const style: Record<string, string> = {};
 
-        for (const [role, key] of [['header', '--font-header-alternative'], ['body', '--font-body-alternative']] as const) {
-            const alternativeFont = activeTheme[key];
+        for (const { role, fontKey, scaleKey, alternativeScaleKey } of ALTERNATIVE_FONT_ROLES) {
+            const alternativeFont = activeTheme[fontKey];
 
             if (useAlternativeFonts.value && alternativeFont && alternativeFont !== NO_ALTERNATIVE_FONT) {
                 activeTheme[`--font-${role}`] = alternativeFont;
+
+                if (activeTheme[alternativeScaleKey] !== undefined) {
+                    activeTheme[scaleKey] = activeTheme[alternativeScaleKey];
+                }
             }
 
-            delete activeTheme[key];
+            delete activeTheme[fontKey];
+            delete activeTheme[alternativeScaleKey];
         }
 
         processDefinedKeys(activeTheme, style);

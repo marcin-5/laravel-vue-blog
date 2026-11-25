@@ -287,15 +287,38 @@ async function handleImport(event: Event): Promise<void> {
         </div>
 
         <div class="mb-6 grid grid-cols-1 gap-4 border-b border-border pb-6 xl:grid-cols-2">
-            <FormSelectField
-                v-for="field in alternativeFontFields"
-                :id="`${props.idPrefix}-${field.idSuffix}`"
-                :key="field.key"
-                :label="field.label"
-                :model-value="props.colors?.[field.key] || NO_ALTERNATIVE_FONT"
-                :options="alternativeFontOptions"
-                @update:model-value="updateValue(field.key, $event.toString())"
-            />
+            <div v-for="field in alternativeFontFields" :key="field.key" class="flex w-full items-end gap-2">
+                <FormSelectField
+                    :id="`${props.idPrefix}-${field.idSuffix}`"
+                    :label="field.label"
+                    :model-value="props.colors?.[field.key] || NO_ALTERNATIVE_FONT"
+                    :options="alternativeFontOptions"
+                    class="grow"
+                    @update:model-value="updateValue(field.key, $event.toString())"
+                />
+                <Popover>
+                    <PopoverTrigger as-child>
+                        <Button class="h-8 w-8 shrink-0" size="icon" variant="ghost">
+                            <Settings2 class="h-4 w-4" />
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent class="w-64">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-medium">{{ props.translations.fontScaleCorrection || 'Size correction' }}</span>
+                                <span class="font-mono text-xs">{{ field.scaleValue.value[0] }}%</span>
+                            </div>
+                            <Slider
+                                :max="field.scaleMax"
+                                :min="field.scaleMin"
+                                :model-value="field.scaleValue.value"
+                                :step="1"
+                                @update:model-value="field.scaleValue.value = $event as number[]"
+                            />
+                        </div>
+                    </PopoverContent>
+                </Popover>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">

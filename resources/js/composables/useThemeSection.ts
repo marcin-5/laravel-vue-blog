@@ -54,6 +54,7 @@ export interface ThemeTranslations {
 }
 
 type ScaleKey = '--header-scale' | '--body-scale' | '--motto-scale' | '--excerpt-scale' | '--footer-scale';
+type AlternativeScaleKey = '--header-scale-alternative' | '--body-scale-alternative';
 
 interface ColorFieldConfig {
     key: string;
@@ -83,6 +84,19 @@ interface FontFieldDefinition {
 }
 
 interface FontFieldConfig extends FontFieldDefinition {
+    scaleValue: WritableComputedRef<number[]>;
+}
+
+interface AlternativeFontFieldDefinition {
+    key: string;
+    idSuffix: string;
+    label: string;
+    scaleKey: AlternativeScaleKey;
+    scaleMin: number;
+    scaleMax: number;
+}
+
+interface AlternativeFontFieldConfig extends AlternativeFontFieldDefinition {
     scaleValue: WritableComputedRef<number[]>;
 }
 
@@ -205,17 +219,19 @@ export function useThemeSection(props: { colors?: ThemeColors; translations: The
         });
     }
 
-    function getScaleValue(scaleKey: ScaleKey): number {
-        return Number.parseFloat(props.colors?.[scaleKey] ?? String(DEFAULT_SCALE));
+    function getScaleValue(scaleKey: ScaleKey | AlternativeScaleKey, fallbackScaleKey?: ScaleKey): number {
+        const scale = props.colors?.[scaleKey] ?? (fallbackScaleKey ? props.colors?.[fallbackScaleKey] : undefined) ?? String(DEFAULT_SCALE);
+
+        return Number.parseFloat(scale);
     }
 
-    function updateScaleValue(scaleKey: ScaleKey, nextScale: number) {
+    function updateScaleValue(scaleKey: ScaleKey | AlternativeScaleKey, nextScale: number) {
         updateValue(scaleKey, nextScale.toString());
     }
 
-    function createScaleComputed(scaleKey: ScaleKey): WritableComputedRef<number[]> {
+    function createScaleComputed(scaleKey: ScaleKey | AlternativeScaleKey, fallbackScaleKey?: ScaleKey): WritableComputedRef<number[]> {
         return computed({
-            get: () => [Math.round(getScaleValue(scaleKey) * PERCENT_MULTIPLIER)],
+            get: () => [Math.round(getScaleValue(scaleKey, fallbackScaleKey) * PERCENT_MULTIPLIER)],
             set: ([value]) => updateScaleValue(scaleKey, value / PERCENT_MULTIPLIER),
         });
     }
@@ -228,6 +244,11 @@ export function useThemeSection(props: { colors?: ThemeColors; translations: The
         '--footer-scale': createScaleComputed('--footer-scale'),
     };
 
+    const alternativeScaleValues: Record<AlternativeScaleKey, WritableComputedRef<number[]>> = {
+        '--header-scale-alternative': createScaleComputed('--header-scale-alternative', '--header-scale'),
+        '--body-scale-alternative': createScaleComputed('--body-scale-alternative', '--body-scale'),
+    };
+
     const colorFields = computed(() => COLOR_FIELD_CONFIG);
 
     const fontFields = computed<FontFieldConfig[]>(() =>
@@ -237,18 +258,31 @@ export function useThemeSection(props: { colors?: ThemeColors; translations: The
         })),
     );
 
-    const alternativeFontFields = computed(() => [
-        {
-            key: '--font-header-alternative',
-            idSuffix: 'font-header-alternative',
-            label: props.translations.fontHeaderAlternative ?? '',
-        },
-        {
-            key: '--font-body-alternative',
-            idSuffix: 'font-body-alternative',
-            label: props.translations.fontBodyAlternative ?? '',
-        },
-    ]);
+    const alternativeFontFields = computed<AlternativeFontFieldConfig[]>(() => {
+        const fieldDefinitions: AlternativeFontFieldDefinition[] = [
+            {
+                key: '--font-header-alternative',
+                idSuffix: 'font-header-alternative',
+                label: props.translations.fontHeaderAlternative ?? '',
+                scaleKey: '--header-scale-alternative',
+                scaleMin: DEFAULT_SCALE_MIN,
+                scaleMax: DEFAULT_SCALE_MAX,
+            },
+            {
+                key: '--font-body-alternative',
+                idSuffix: 'font-body-alternative',
+                label: props.translations.fontBodyAlternative ?? '',
+                scaleKey: '--body-scale-alternative',
+                scaleMin: DEFAULT_SCALE_MIN,
+                scaleMax: DEFAULT_SCALE_MAX,
+            },
+        ];
+
+        return fieldDefinitions.map((field) => ({
+            ...field,
+            scaleValue: alternativeScaleValues[field.scaleKey],
+        }));
+    });
 
     const alternativeFontOptions = computed(() => [
         { label: props.translations.fontNone ?? '', value: NO_ALTERNATIVE_FONT },
