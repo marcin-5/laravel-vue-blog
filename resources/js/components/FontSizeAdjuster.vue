@@ -13,8 +13,8 @@ const { fontSize, updateFontSize } = useFontSize();
 <template>
     <DropdownMenu>
         <DropdownMenuTrigger as-child>
-            <Button class="h-9 w-9" size="icon" variant="toggle">
-                <TypeIcon class="h-4 w-4" />
+            <Button class="h-9 w-9" size="icon" variant="outline">
+                <TypeIcon class="size-5" />
                 <span class="sr-only">{{ t('common.nav.font_size.adjust') }}</span>
             </Button>
         </DropdownMenuTrigger>

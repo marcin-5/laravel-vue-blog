@@ -46,7 +46,10 @@ interface NavLink {
 const commonLinks = computed<NavLink[]>(() => {
     const aboutLabel = blog.value ? t('common.nav.about') : t('common.nav.about_home');
 
-    return [{ route: 'about', label: aboutLabel }, { route: 'contact', label: t('common.nav.contact') }];
+    return [
+        { route: 'about', label: aboutLabel },
+        { route: 'contact', label: t('common.nav.contact') },
+    ];
 });
 
 const authLinks = computed<NavLink[]>(() => [
@@ -97,13 +100,13 @@ watch(
                 </div>
                 <!-- Theme toggle is always visible -->
                 <div class="flex items-center gap-4">
-                    <FontSizeAdjuster />
                     <FontSetToggle
                         v-if="props.hasAlternativeFonts"
                         :active="props.fontSetActive"
                         :label="t('common.nav.font_set_toggle')"
                         @toggle="emit('toggle-font-set')"
                     />
+                    <FontSizeAdjuster />
                     <ThemeToggle />
                 </div>
                 <!-- Hamburger (mobile only), placed next to ThemeToggle) -->
