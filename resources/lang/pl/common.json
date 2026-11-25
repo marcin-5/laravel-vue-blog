@@ -21,7 +21,8 @@
             "font_size": {
                 "label": "Wielkość czcionki",
                 "adjust": "Dostosuj wielkość czcionki"
-            }
+            },
+            "font_set_toggle": "Przełącz zestaw fontów"
         },
         "cookie_notice": {
             "message": "Ta strona używa ciasteczek i lokalnego przechowywania danych potrzebnych do prawidłowego działania i analityki odwiedzin.",

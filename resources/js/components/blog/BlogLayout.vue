@@ -2,6 +2,7 @@
 import PublicNavbar from '@/components/PublicNavbar.vue';
 import HeadSEO from '@/components/HeadSEO.vue';
 import { useBlogTheme } from '@/composables/useBlogTheme';
+import { useFontSetPreference } from '@/composables/useFontSetPreference';
 import { useSidebarLayout } from '@/composables/useSidebarLayout';
 import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '@/types/blog';
 import type { BlogTheme } from '@/types/blog.types';
@@ -12,6 +13,8 @@ const props = defineProps<{
     sidebar?: number;
     isPublic?: boolean;
     maxWidthClass?: string;
+    ownerType: 'blog' | 'group';
+    ownerId: number;
 }>();
 
 const { hasSidebar, asideStyle, mainStyle, asideOrderClass, mainOrderClass, navbarMaxWidth } = useSidebarLayout({
@@ -20,7 +23,8 @@ const { hasSidebar, asideStyle, mainStyle, asideOrderClass, mainOrderClass, navb
     maxPercent: SIDEBAR_MAX_WIDTH,
 });
 
-const { mergedThemeStyle } = useBlogTheme(computed(() => props.theme || undefined));
+const fontSetPreference = useFontSetPreference(() => props.ownerType, () => props.ownerId);
+const { mergedThemeStyle, hasAlternativeFonts } = useBlogTheme(computed(() => props.theme || undefined), fontSetPreference);
 
 const containerClass = computed(() => [
     'mx-auto w-full p-4 sm:px-12 md:px-16',
@@ -33,7 +37,12 @@ const textClass = computed(() => (props.isPublic ? 'text-primary' : 'text-foregr
 <template>
     <HeadSEO />
     <div :class="['flex min-h-screen flex-col bg-background antialiased', textClass]" :style="mergedThemeStyle">
-        <PublicNavbar :maxWidth="navbarMaxWidth" />
+        <PublicNavbar
+            :font-set-active="fontSetPreference"
+            :has-alternative-fonts="hasAlternativeFonts"
+            :maxWidth="navbarMaxWidth"
+            @toggle-font-set="fontSetPreference = !fontSetPreference"
+        />
 
         <div :class="containerClass">
             <slot name="top-divider"></slot>

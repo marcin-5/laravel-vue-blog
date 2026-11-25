@@ -6,6 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Slider } from '@/components/ui/slider';
 import { TooltipButton } from '@/components/ui/tooltip';
 import { useCssVariables } from '@/composables/useCssVariables';
+import { NO_ALTERNATIVE_FONT } from '@/constants/fonts';
 import { FONT_OPTIONS, type ThemeTranslations, useThemeSection } from '@/composables/useThemeSection';
 import { useToast } from '@/composables/useToast';
 import type { BlogTheme, ThemeColors } from '@/types/blog.types';
@@ -55,7 +56,7 @@ const { variables } = useCssVariables([
     '--card',
 ], variantProbe);
 
-const { updateValue, colorFields, fontFields } = useThemeSection(props, emit);
+const { updateValue, colorFields, fontFields, alternativeFontFields, alternativeFontOptions } = useThemeSection(props, emit);
 
 function resolveThemeVariant(): 'light' | 'dark' {
     return props.idPrefix.includes('light') ? 'light' : 'dark';
@@ -283,6 +284,18 @@ async function handleImport(event: Event): Promise<void> {
                     @update:model-value="updateValue(field.additionalField!.key, $event.toString())"
                 />
             </template>
+        </div>
+
+        <div class="mb-6 grid grid-cols-1 gap-4 border-b border-border pb-6 xl:grid-cols-2">
+            <FormSelectField
+                v-for="field in alternativeFontFields"
+                :id="`${props.idPrefix}-${field.idSuffix}`"
+                :key="field.key"
+                :label="field.label"
+                :model-value="props.colors?.[field.key] || NO_ALTERNATIVE_FONT"
+                :options="alternativeFontOptions"
+                @update:model-value="updateValue(field.key, $event.toString())"
+            />
         </div>
 
         <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">

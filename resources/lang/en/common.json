@@ -21,7 +21,8 @@
             "font_size": {
                 "label": "Font size",
                 "adjust": "Adjust font size"
-            }
+            },
+            "font_set_toggle": "Toggle font set"
         },
         "cookie_notice": {
             "message": "This site uses cookies and local data storage required for proper operation and visit analytics.",

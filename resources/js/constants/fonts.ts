@@ -47,3 +47,5 @@ export const SCALE_TO_FONT_MAP: Record<string, string> = {
     '--excerpt-scale': '--font-excerpt',
     '--footer-scale': '--font-footer',
 };
+
+export const NO_ALTERNATIVE_FONT = '__no_alternative_font__';

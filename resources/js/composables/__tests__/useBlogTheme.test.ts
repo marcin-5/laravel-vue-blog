@@ -97,4 +97,53 @@ describe('useBlogTheme', () => {
 
         expect(mergedThemeStyle.value['--blog-header-weight']).toBe('500');
     });
+
+    it('uses configured alternative fonts only when the font set is enabled', () => {
+        appearance.value = 'light';
+        const theme = computed(() => ({
+            light: {
+                '--font-header': 'var(--font-inter)',
+                '--font-body': 'var(--font-yrsa)',
+                '--font-header-alternative': 'var(--font-bitter)',
+                '--font-body-alternative': '__no_alternative_font__',
+            },
+            dark: {
+                '--font-header': 'var(--font-inter)',
+                '--font-header-alternative': 'var(--font-vollkorn)',
+            },
+        }));
+        const useAlternativeFonts = ref(false);
+        const { mergedThemeStyle, hasAlternativeFonts } = useBlogTheme(theme, useAlternativeFonts);
+
+        expect(hasAlternativeFonts.value).toBe(true);
+        expect(mergedThemeStyle.value['--blog-header-font']).toBe('var(--font-inter)');
+        expect(mergedThemeStyle.value['--blog-body-font']).toBe('var(--font-yrsa)');
+        expect(mergedThemeStyle.value['--blog-header-alternative-font']).toBeUndefined();
+        expect(mergedThemeStyle.value['--blog-body-alternative-font']).toBeUndefined();
+
+        useAlternativeFonts.value = true;
+
+        expect(mergedThemeStyle.value['--blog-header-font']).toBe('var(--font-bitter)');
+        expect(mergedThemeStyle.value['--blog-body-font']).toBe('var(--font-yrsa)');
+
+        appearance.value = 'dark';
+
+        expect(mergedThemeStyle.value['--blog-header-font']).toBe('var(--font-vollkorn)');
+        expect(mergedThemeStyle.value['--blog-body-font']).toBeUndefined();
+    });
+
+    it('does not expose alternatives configured as none', () => {
+        appearance.value = 'light';
+        const theme = computed(() => ({
+            light: {
+                '--font-header-alternative': '__no_alternative_font__',
+                '--font-body-alternative': '__no_alternative_font__',
+            },
+        }));
+        const { mergedThemeStyle, hasAlternativeFonts } = useBlogTheme(theme, ref(true));
+
+        expect(hasAlternativeFonts.value).toBe(false);
+        expect(mergedThemeStyle.value['--blog-header-alternative-font']).toBeUndefined();
+        expect(mergedThemeStyle.value['--blog-body-alternative-font']).toBeUndefined();
+    });
 });

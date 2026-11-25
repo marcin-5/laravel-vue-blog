@@ -104,6 +104,9 @@ const translations: ThemeTranslations = {
     cardTooltip: 'Card tooltip',
     fontHeader: 'Header Font',
     fontBody: 'Body Font',
+    fontHeaderAlternative: 'Alternative Header Font',
+    fontBodyAlternative: 'Alternative Body Font',
+    fontNone: 'None',
     fontMotto: 'Motto Font',
     fontExcerpt: 'Excerpt Font',
     fontFooter: 'Footer Font',
@@ -214,6 +217,28 @@ describe('FormThemeSection.vue', () => {
         expect(getFirstEmittedColors(wrapper)).toMatchObject({
             '--font-header': 'new-font',
         });
+    });
+
+    it.each(['blog-theme-light', 'blog-theme-dark'])('renders and saves alternative font fields for %s', async (idPrefix) => {
+        const wrapper = mount(FormThemeSection, {
+            props: {
+                ...baseProps,
+                idPrefix,
+                colors: { ...baseProps.colors, '--font-header-alternative': '__no_alternative_font__' },
+            },
+        });
+        const alternativeHeader = wrapper.find('#' + idPrefix + '-font-header-alternative');
+        const alternativeFields = wrapper.findAllComponents({ name: 'FormSelectField' }).slice(-2);
+
+        expect(alternativeHeader.exists()).toBe(true);
+        expect(alternativeFields[0].props('options')).toContainEqual({ label: 'None', value: '__no_alternative_font__' });
+
+        await alternativeHeader.trigger('click');
+
+        expect(wrapper.emitted('update:colors')?.[0]?.[0]).toMatchObject({
+            '--font-header-alternative': 'new-font',
+        });
+        expect(wrapper.findAll('.form-select-field')).toHaveLength(8);
     });
 
     it('exports theme when export button is clicked', async () => {

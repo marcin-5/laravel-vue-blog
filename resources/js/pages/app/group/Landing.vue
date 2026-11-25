@@ -58,7 +58,7 @@ const postsListTitle = computed(() => t('group.posts_list.title'));
 <template>
     <Head :title="group.name" />
 
-    <BlogLayout :isPublic="false" :sidebar="sidebar" :theme="theme">
+    <BlogLayout :isPublic="false" :owner-id="group.id" owner-type="group" :sidebar="sidebar" :theme="theme">
         <template #top-divider>
             <BorderDivider class="mb-4" />
         </template>

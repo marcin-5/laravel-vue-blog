@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import CookieConsent from '@/components/CookieConsent.vue';
 import FontSizeAdjuster from '@/components/FontSizeAdjuster.vue';
+import FontSetToggle from '@/components/FontSetToggle.vue';
 import HomeButton from '@/components/HomeButton.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import { Link, usePage } from '@inertiajs/vue3';
@@ -11,11 +12,19 @@ import { useI18n } from 'vue-i18n';
 const props = withDefaults(
     defineProps<{
         maxWidth?: string;
+        hasAlternativeFonts?: boolean;
+        fontSetActive?: boolean;
     }>(),
     {
         maxWidth: 'max-w-[1024px]',
+        hasAlternativeFonts: false,
+        fontSetActive: false,
     },
 );
+
+const emit = defineEmits<{
+    (event: 'toggle-font-set'): void;
+}>();
 
 // Use translations already injected via props (hydrated in app.ts/ssr.ts)
 const { t } = useI18n();
@@ -89,6 +98,12 @@ watch(
                 <!-- Theme toggle is always visible -->
                 <div class="flex items-center gap-4">
                     <FontSizeAdjuster />
+                    <FontSetToggle
+                        v-if="props.hasAlternativeFonts"
+                        :active="props.fontSetActive"
+                        :label="t('common.nav.font_set_toggle')"
+                        @toggle="emit('toggle-font-set')"
+                    />
                     <ThemeToggle />
                 </div>
                 <!-- Hamburger (mobile only), placed next to ThemeToggle) -->

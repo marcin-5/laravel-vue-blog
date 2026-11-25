@@ -1,5 +1,6 @@
 import type { ThemeColors } from '@/types/blog.types';
 import FONT_OPTIONS_DATA from '../../data/font-options.json';
+import { NO_ALTERNATIVE_FONT } from '@/constants/fonts';
 import { computed, type WritableComputedRef } from 'vue';
 
 export interface ThemeTranslations {
@@ -31,6 +32,9 @@ export interface ThemeTranslations {
     cardTooltip: string;
     fontHeader?: string;
     fontBody?: string;
+    fontHeaderAlternative?: string;
+    fontBodyAlternative?: string;
+    fontNone?: string;
     fontMotto?: string;
     fontExcerpt?: string;
     fontFooter?: string;
@@ -193,7 +197,7 @@ const FONT_FIELD_DEFINITIONS: FontFieldDefinition[] = [
     },
 ];
 
-export function useThemeSection(props: { colors?: ThemeColors }, emit: (e: 'update:colors', value: ThemeColors) => void) {
+export function useThemeSection(props: { colors?: ThemeColors; translations: ThemeTranslations }, emit: (e: 'update:colors', value: ThemeColors) => void) {
     function updateValue(key: string, value: string) {
         emit('update:colors', {
             ...(props.colors ?? {}),
@@ -233,9 +237,29 @@ export function useThemeSection(props: { colors?: ThemeColors }, emit: (e: 'upda
         })),
     );
 
+    const alternativeFontFields = computed(() => [
+        {
+            key: '--font-header-alternative',
+            idSuffix: 'font-header-alternative',
+            label: props.translations.fontHeaderAlternative ?? '',
+        },
+        {
+            key: '--font-body-alternative',
+            idSuffix: 'font-body-alternative',
+            label: props.translations.fontBodyAlternative ?? '',
+        },
+    ]);
+
+    const alternativeFontOptions = computed(() => [
+        { label: props.translations.fontNone ?? '', value: NO_ALTERNATIVE_FONT },
+        ...FONT_OPTIONS,
+    ]);
+
     return {
         updateValue,
         colorFields,
         fontFields,
+        alternativeFontFields,
+        alternativeFontOptions,
     };
 }

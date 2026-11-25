@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import InputError from '@/components/InputError.vue';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useI18n } from 'vue-i18n';
 
 interface SelectOption {
     value: string | number;
@@ -21,6 +22,7 @@ interface Emits {
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
+const { t } = useI18n();
 
 function handleUpdate(value: any) {
     emit('update:modelValue', value);
@@ -32,12 +34,10 @@ function handleUpdate(value: any) {
         <label :for="props.id" class="text-xs font-medium opacity-70">{{ props.label }}</label>
         <Select :model-value="props.modelValue.toString()" @update:model-value="handleUpdate">
             <SelectTrigger :id="props.id" class="h-8 w-full">
-                <SelectValue placeholder="Wybierz opcję..." />
+                <SelectValue :placeholder="t('blogger.form.select_option_placeholder')" />
             </SelectTrigger>
             <SelectContent>
-                <SelectItem v-for="option in props.options" :key="option.value" :value="option.value.toString()">
-                    {{ option.label }}
-                </SelectItem>
+                <SelectItem v-for="option in props.options" :key="option.value" :value="option.value.toString()"> {{ option.label }} </SelectItem>
             </SelectContent>
         </Select>
         <InputError :message="props.error" />

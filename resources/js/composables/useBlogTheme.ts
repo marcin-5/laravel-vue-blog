@@ -1,8 +1,8 @@
 import { useAppearance } from '@/composables/useAppearance';
-import { getFontSizeCorrection, getFontWeightCorrection, SCALE_TO_FONT_MAP, SPECIAL_KEY_MAPPINGS } from '@/constants/fonts';
+import { getFontSizeCorrection, getFontWeightCorrection, NO_ALTERNATIVE_FONT, SCALE_TO_FONT_MAP, SPECIAL_KEY_MAPPINGS } from '@/constants/fonts';
 import type { BlogTheme } from '@/types/blog.types';
 import { useMediaQuery } from '@vueuse/core';
-import { computed, ref, type ComputedRef } from 'vue';
+import { computed, ref, type ComputedRef, type Ref } from 'vue';
 
 function mapThemeKeyToStyles(key: string, value: string, style: Record<string, string>, currentTheme: Record<string, string>): void {
     let finalValue = value;
@@ -65,7 +65,7 @@ function processFontAndColorKeys(currentTheme: Record<string, string>, style: Re
     }
 }
 
-export function useBlogTheme(theme: ComputedRef<BlogTheme | undefined>) {
+export function useBlogTheme(theme: ComputedRef<BlogTheme | undefined>, useAlternativeFonts: Ref<boolean> = ref(false)) {
     const { appearance } = useAppearance();
 
     // SSR-safe media query
@@ -73,16 +73,33 @@ export function useBlogTheme(theme: ComputedRef<BlogTheme | undefined>) {
 
     const isDark = computed(() => appearance.value === 'dark' || (appearance.value === 'system' && isSystemDark.value));
 
+    const currentTheme = computed(() => (isDark.value ? theme.value?.dark : theme.value?.light) ?? {});
+    const hasAlternativeFonts = computed(() => ['--font-header-alternative', '--font-body-alternative'].some((key) => {
+        const value = currentTheme.value[key];
+
+        return Boolean(value && value !== NO_ALTERNATIVE_FONT);
+    }));
+
     const mergedThemeStyle = computed<Record<string, string>>(() => {
-        const currentTheme = (isDark.value ? theme.value?.dark : theme.value?.light) ?? {};
+        const activeTheme = { ...currentTheme.value };
         const style: Record<string, string> = {};
 
-        processDefinedKeys(currentTheme, style);
-        processMissingScales(currentTheme, style);
-        processFontAndColorKeys(currentTheme, style);
+        for (const [role, key] of [['header', '--font-header-alternative'], ['body', '--font-body-alternative']] as const) {
+            const alternativeFont = activeTheme[key];
+
+            if (useAlternativeFonts.value && alternativeFont && alternativeFont !== NO_ALTERNATIVE_FONT) {
+                activeTheme[`--font-${role}`] = alternativeFont;
+            }
+
+            delete activeTheme[key];
+        }
+
+        processDefinedKeys(activeTheme, style);
+        processMissingScales(activeTheme, style);
+        processFontAndColorKeys(activeTheme, style);
 
         return style;
     });
 
-    return { isDark, mergedThemeStyle };
+    return { isDark, mergedThemeStyle, hasAlternativeFonts };
 }
