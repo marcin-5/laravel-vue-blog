@@ -85,6 +85,31 @@ describe('useBlogTheme', () => {
         expect(mergedThemeStyle.value['--header-scale']).toBe('1.1');
     });
 
+    it('applies font size corrections to active alternative fonts', () => {
+        const theme = computed(() => ({
+            light: {
+                '--header-scale': '1.0',
+                '--body-scale': '1.2',
+                '--font-header': 'var(--font-inter)',
+                '--font-body': 'var(--font-inter)',
+                '--font-header-alternative': 'var(--font-yrsa)',
+                '--font-body-alternative': 'var(--font-yrsa)',
+            },
+        }));
+        const useAlternativeFonts = ref(false);
+        const { mergedThemeStyle } = useBlogTheme(theme, useAlternativeFonts);
+
+        expect(mergedThemeStyle.value['--header-scale']).toBe('1');
+        expect(mergedThemeStyle.value['--body-scale']).toBe('1.2');
+
+        useAlternativeFonts.value = true;
+
+        expect(mergedThemeStyle.value['--header-scale']).toBe('1.1');
+        expect(mergedThemeStyle.value['--body-scale']).toBe('1.32');
+        expect(mergedThemeStyle.value['--blog-header-scale']).toBe('1.1');
+        expect(mergedThemeStyle.value['--blog-body-scale']).toBe('1.32');
+    });
+
     it('applies font weight corrections', () => {
         const theme = computed<any>(() => ({
             light: {
