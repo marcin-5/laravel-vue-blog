@@ -181,7 +181,7 @@ test('font usage stats include alternative fonts and count each font once per bl
         'name' => $blogName,
         'theme' => [
             'light' => [
-                '--font-header-alternative' => 'var(--font-yrsa)',
+                '--font-header-alternative' => 'var(--font-manuale)',
                 '--font-body-alternative' => 'var(--font-afacad)',
             ],
             'dark' => [
@@ -193,8 +193,9 @@ test('font usage stats include alternative fonts and count each font once per bl
 
     $fontsByValue = collect(app(FontUsageStatsQuery::class)->handle()['fonts'])->keyBy('value');
 
-    expect($fontsByValue['var(--font-yrsa)']['count'])->toBe(1)
-        ->and($fontsByValue['var(--font-yrsa)']['blogs'])->toBe([$blogName])
+    expect($fontsByValue['var(--font-manuale)']['count'])
+        ->toBe(1)
+        ->and($fontsByValue['var(--font-manuale)']['blogs'])->toBe([$blogName])
         ->and($fontsByValue['var(--font-montserrat)']['count'])->toBe(1)
         ->and($fontsByValue['var(--font-montserrat)']['blogs'])->toBe([$blogName])
         ->and($fontsByValue['var(--font-afacad)']['count'])->toBe(1)

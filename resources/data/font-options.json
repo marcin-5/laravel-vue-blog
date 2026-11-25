@@ -13,9 +13,9 @@
     { "label": "[Sn] Sofia semi condensed", "value": "var(--font-sofia-sans-semi-condensed)" },
     { "label": "[Rm] Bitter", "value": "var(--font-bitter)" },
     { "label": "[Rm] Faustina", "value": "var(--font-faustina)" },
-    { "label": "[Rm] Literata", "value": "var(--font-literata)" },
     { "label": "[Rm] Kreon", "value": "var(--font-kreon)" },
+    { "label": "[Rm] Literata", "value": "var(--font-literata)" },
+    { "label": "[Rm] Manuale", "value": "var(--font-manuale)" },
     { "label": "[Rm] Rokkitt", "value": "var(--font-rokkitt)" },
-    { "label": "[Rm] Vollkorn", "value": "var(--font-vollkorn)" },
-    { "label": "[Rm] Yrsa", "value": "var(--font-yrsa)" }
+    { "label": "[Rm] Vollkorn", "value": "var(--font-vollkorn)" }
 ]

@@ -75,7 +75,7 @@ describe('useBlogTheme', () => {
         const theme = computed<any>(() => ({
             light: {
                 '--header-scale': '1.0',
-                '--font-header': 'var(--font-yrsa)', // Correction is 1.1 in fonts.ts
+                '--font-header': 'var(--font-manuale)', // Correction is 1.1 in fonts.ts
             },
         }));
 
@@ -92,8 +92,8 @@ describe('useBlogTheme', () => {
                 '--body-scale': '1.2',
                 '--font-header': 'var(--font-inter)',
                 '--font-body': 'var(--font-inter)',
-                '--font-header-alternative': 'var(--font-yrsa)',
-                '--font-body-alternative': 'var(--font-yrsa)',
+                '--font-header-alternative': 'var(--font-manuale)',
+                '--font-body-alternative': 'var(--font-manuale)',
                 '--header-scale-alternative': '1.3',
                 '--body-scale-alternative': '0.9',
             },
@@ -147,7 +147,7 @@ describe('useBlogTheme', () => {
         const theme = computed(() => ({
             light: {
                 '--font-header': 'var(--font-inter)',
-                '--font-body': 'var(--font-yrsa)',
+                '--font-body': 'var(--font-manuale)',
                 '--font-header-alternative': 'var(--font-bitter)',
                 '--font-body-alternative': '__no_alternative_font__',
             },
@@ -161,14 +161,14 @@ describe('useBlogTheme', () => {
 
         expect(hasAlternativeFonts.value).toBe(true);
         expect(mergedThemeStyle.value['--blog-header-font']).toBe('var(--font-inter)');
-        expect(mergedThemeStyle.value['--blog-body-font']).toBe('var(--font-yrsa)');
+        expect(mergedThemeStyle.value['--blog-body-font']).toBe('var(--font-manuale)');
         expect(mergedThemeStyle.value['--blog-header-alternative-font']).toBeUndefined();
         expect(mergedThemeStyle.value['--blog-body-alternative-font']).toBeUndefined();
 
         useAlternativeFonts.value = true;
 
         expect(mergedThemeStyle.value['--blog-header-font']).toBe('var(--font-bitter)');
-        expect(mergedThemeStyle.value['--blog-body-font']).toBe('var(--font-yrsa)');
+        expect(mergedThemeStyle.value['--blog-body-font']).toBe('var(--font-manuale)');
 
         appearance.value = 'dark';
 

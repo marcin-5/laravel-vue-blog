@@ -5,18 +5,18 @@ export const FONT_SIZE_CORRECTIONS: Record<string, number> = {
     'var(--font-darker-grotesque)': 1.0,
     'var(--font-faustina)': 1.0,
     'var(--font-inter)': 1.0,
-    'var(--font-kreon)': 1.0,
+    'var(--font-kreon)': 1.1,
     'var(--font-literata)': 1.0,
+    'var(--font-manuale)': 1.0,
     'var(--font-montserrat)': 1.0,
     'var(--font-nunito)': 1.0,
     'var(--font-quicksand)': 1.0,
     'var(--font-rajdhani)': 1.0,
     'var(--font-raleway)': 1.0,
     'var(--font-recursive)': 1.0,
-    'var(--font-rokkitt)': 1.0,
+    'var(--font-rokkitt)': 1.1,
     'var(--font-sofia-semi-condensed)': 1.0,
     'var(--font-vollkorn)': 1.0,
-    'var(--font-yrsa)': 1.1,
 };
 
 export const FONT_WEIGHT_CORRECTIONS: Record<string, string> = {
