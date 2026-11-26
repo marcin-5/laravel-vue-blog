@@ -9,6 +9,7 @@ const props = defineProps<{
         <div
             :style="{
                 fontFamily: 'var(--blog-footer-font)',
+                fontWeight: 'var(--blog-footer-weight, 400)',
                 '--blog-body-scale': 'var(--blog-footer-scale)',
                 '--blog-header-scale': 'var(--blog-footer-scale)',
                 '--blog-motto-scale': 'var(--blog-footer-scale)',

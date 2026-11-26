@@ -266,6 +266,12 @@
 }
 
 @layer base {
+    :root {
+        --blog-body-weight: initial;
+        --blog-header-weight: initial;
+        --blog-motto-weight: initial;
+    }
+
     select option {
         background-color: var(--color-secondary);
         color: var(--color-secondary-foreground);
@@ -299,6 +305,7 @@
     .prose {
         @apply text-foreground;
         font-family: var(--blog-body-font), sans-serif;
+        font-weight: var(--blog-body-weight, 400);
         line-height: 1.75;
         max-width: none;
     }
@@ -307,7 +314,7 @@
         @apply text-foreground;
         font-family: var(--blog-header-font), sans-serif;
         font-size: calc(2.25rem * var(--blog-header-scale));
-        font-weight: 800;
+        font-weight: var(--blog-header-weight, 800);
         line-height: 1.1111111;
         margin-top: 0;
         margin-bottom: 0.8888889em;
@@ -317,7 +324,7 @@
         @apply text-foreground;
         font-family: var(--blog-header-font), sans-serif;
         font-size: calc(1.875rem * var(--blog-header-scale));
-        font-weight: 700;
+        font-weight: var(--blog-header-weight, 700);
         line-height: 1.3333333;
         margin-top: 2em;
         margin-bottom: 1em;
@@ -327,7 +334,7 @@
         @apply text-foreground;
         font-family: var(--blog-header-font), sans-serif;
         font-size: calc(1.5rem * var(--blog-header-scale));
-        font-weight: 600;
+        font-weight: var(--blog-header-weight, 600);
         line-height: 1.6;
         margin-top: 1.6em;
         margin-bottom: 0.6em;
@@ -337,7 +344,7 @@
         @apply text-foreground;
         font-family: var(--blog-header-font), sans-serif;
         font-size: calc(1.25rem * var(--blog-header-scale));
-        font-weight: 600;
+        font-weight: var(--blog-header-weight, 600);
         line-height: 1.5;
         margin-top: 1.5em;
         margin-bottom: 0.5em;
@@ -347,7 +354,7 @@
         @apply text-foreground;
         font-family: var(--blog-header-font), sans-serif;
         font-size: calc(1.125rem * var(--blog-header-scale));
-        font-weight: 600;
+        font-weight: var(--blog-header-weight, 600);
         line-height: 1.5555556;
         margin-top: 1.5555556em;
         margin-bottom: 0.4444444em;
@@ -357,7 +364,7 @@
         @apply text-foreground;
         font-family: var(--blog-header-font), sans-serif;
         font-size: calc(1rem * var(--blog-header-scale));
-        font-weight: 600;
+        font-weight: var(--blog-header-weight, 600);
         line-height: 1.75;
         margin-top: 1.75em;
         margin-bottom: 0.75em;
@@ -381,7 +388,7 @@
         @apply border-l-border text-muted-foreground;
         font-family: var(--blog-motto-font), serif;
         font-size: calc(1rem * var(--blog-motto-scale));
-        font-weight: 500;
+        font-weight: var(--blog-motto-weight, 500);
         font-style: var(--blog-motto-style);
         border-left-width: 0.25rem;
         margin-top: 1.6em;

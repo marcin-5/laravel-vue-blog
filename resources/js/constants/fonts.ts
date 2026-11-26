@@ -21,6 +21,9 @@ export const FONT_SIZE_CORRECTIONS: Record<string, number> = {
 
 export const FONT_WEIGHT_CORRECTIONS: Record<string, string> = {
     'var(--font-darker-grotesque)': '500',
+    'var(--font-literata)': '300',
+    'var(--font-rajdhani)': '450',
+    'var(--font-quicksand)': '450',
 };
 
 export function getFontSizeCorrection(fontValue: string): number {

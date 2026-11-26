@@ -19,7 +19,7 @@ const { t } = useI18n();
 const excerptStyle = {
     fontFamily: 'var(--blog-excerpt-font)',
     fontSize: 'calc(1rem * var(--blog-excerpt-scale))',
-    fontWeight: 'var(--blog-excerpt-weight)',
+    fontWeight: 'var(--blog-excerpt-weight, 400)',
 };
 
 function getPostTagLinkClasses(tag: Tag) {

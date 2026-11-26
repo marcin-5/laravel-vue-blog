@@ -2,6 +2,7 @@
 import FilterSelect from '@/components/stats/FilterSelect.vue';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { getFontSizeCorrection, getFontWeightCorrection } from '@/constants/fonts';
 import type { FontUsageStats } from '@/types/stats';
 import { router } from '@inertiajs/vue3';
 import { ChevronDown, ChevronUp, Info } from '@lucide/vue';
@@ -62,6 +63,16 @@ function updateSort(value: AcceptableValue | undefined): void {
 const displayedFonts = computed(() =>
     sortByUsage.value ? [...props.stats.fonts].sort((first, second) => second.count - first.count) : props.stats.fonts,
 );
+
+function getFontStyle(fontValue: string): Record<string, string> {
+    const fontWeightCorrection = getFontWeightCorrection(fontValue);
+
+    return {
+        fontFamily: fontValue,
+        fontSize: `${getFontSizeCorrection(fontValue)}rem`,
+        ...(fontWeightCorrection ? { fontWeight: fontWeightCorrection } : {}),
+    };
+}
 </script>
 
 <template>
@@ -102,7 +113,7 @@ const displayedFonts = computed(() =>
             <TooltipProvider>
                 <div class="grid grid-cols-1 gap-x-6 sm:grid-cols-2 lg:grid-cols-3">
                     <div v-for="font in displayedFonts" :key="font.value" class="flex items-center justify-between gap-2 border-b py-2">
-                        <span :style="{ fontFamily: font.value }" class="min-w-0">{{ font.label }}</span>
+                        <span :style="getFontStyle(font.value)" class="min-w-0">{{ font.label }}</span>
                         <div class="flex shrink-0 items-center">
                             <span :class="font.count === 0 ? 'font-semibold text-warning' : 'font-medium'">
                                 {{ font.count }}

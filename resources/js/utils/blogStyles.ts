@@ -6,11 +6,13 @@ export const clearTagFilterClasses = 'border-link bg-link-hover/10 text-link-hov
 export const blogBodyTextStyle = {
     fontFamily: 'var(--blog-body-font)',
     fontSize: 'calc(1rem * var(--blog-body-scale))',
+    fontWeight: 'var(--blog-body-weight, 400)',
 };
 
 export const blogHeaderStyle = {
     fontFamily: 'var(--blog-header-font)',
     fontSize: 'calc(1.25rem * var(--blog-header-scale))',
+    fontWeight: 'var(--blog-header-weight, inherit)',
 };
 
 export const tagChipSizeClasses = {

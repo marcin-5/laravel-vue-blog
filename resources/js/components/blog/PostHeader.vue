@@ -37,7 +37,9 @@ const canStartPrivateMessage = computed(() => Boolean(page.props.auth.user && pr
 
 <template>
     <header :style="blogHeaderStyle" class="mb-4">
-        <h1 class="mb-2 font-[inherit] text-[1em] leading-tight font-bold text-foreground">{{ post.title }}</h1>
+        <h1 :style="{ fontWeight: 'var(--blog-header-weight, 700)' }" class="mb-2 font-[inherit] text-[1em] leading-tight font-bold text-foreground">
+            {{ post.title }}
+        </h1>
         <ViewStatsComponent
             v-if="viewStats"
             :anonymous="viewStats?.anonymous"
@@ -51,7 +53,11 @@ const canStartPrivateMessage = computed(() => Boolean(page.props.auth.user && pr
         <p v-if="showUpdated" class="-mt-1 mb-2 text-xs text-muted-foreground italic">{{ updatedLabel }} {{ formattedUpdatedDate }}</p>
         <p
             v-if="post.author"
-            :style="{ fontFamily: 'var(--blog-footer-font)', fontSize: 'calc(1rem * var(--blog-body-scale))' }"
+            :style="{
+                fontFamily: 'var(--blog-footer-font)',
+                fontSize: 'calc(1rem * var(--blog-body-scale))',
+                fontWeight: 'var(--blog-footer-weight, 400)',
+            }"
             class="text-foreground"
         >
             {{ authorLabel }}
