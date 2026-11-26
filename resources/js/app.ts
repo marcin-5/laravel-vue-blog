@@ -13,7 +13,7 @@ import '@fontsource-variable/overpass';
 import '@fontsource-variable/raleway';
 import '@fontsource-variable/recursive';
 import '@fontsource-variable/rokkitt';
-import '@fontsource-variable/sofia-sans-semi-condensed';
+import '@fontsource-variable/sofia-sans';
 import '@fontsource-variable/vollkorn';
 import '@fontsource/cinzel-decorative/900.css';
 import '@fontsource/cinzel/700.css';

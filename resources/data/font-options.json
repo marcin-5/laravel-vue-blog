@@ -10,7 +10,7 @@
     { "label": "[Sn] Rajdhani", "value": "var(--font-rajdhani)" },
     { "label": "[Sn] Raleway", "value": "var(--font-raleway)" },
     { "label": "[Sn] Recursive", "value": "var(--font-recursive)" },
-    { "label": "[Sn] Sofia semi condensed", "value": "var(--font-sofia-sans-semi-condensed)" },
+    { "label": "[Sn] Sofia Sans", "value": "var(--font-sofia-sans)" },
     { "label": "[Rm] Bitter", "value": "var(--font-bitter)" },
     { "label": "[Rm] Faustina", "value": "var(--font-faustina)" },
     { "label": "[Rm] Kreon", "value": "var(--font-kreon)" },

@@ -15,7 +15,7 @@ export const FONT_SIZE_CORRECTIONS: Record<string, number> = {
     'var(--font-raleway)': 1.0,
     'var(--font-recursive)': 1.0,
     'var(--font-rokkitt)': 1.1,
-    'var(--font-sofia-semi-condensed)': 1.0,
+    'var(--font-sofia-sans)': 1.0,
     'var(--font-vollkorn)': 1.0,
 };
 
