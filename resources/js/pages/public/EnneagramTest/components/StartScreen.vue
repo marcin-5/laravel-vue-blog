@@ -21,7 +21,7 @@ function updateAutoConfirm(event: Event): void {
 
 <template>
     <section class="mx-auto max-w-4xl rounded-lg bg-card p-6 shadow-md md:p-8" aria-labelledby="enneagram-start-title">
-        <h2 id="enneagram-start-title" class="mb-4 font-quicksand text-xl font-semibold text-foreground">
+        <h2 id="enneagram-start-title" class="mb-4 font-overpass text-xl font-semibold text-foreground">
             {{ t('welcome') }}
         </h2>
         <p class="mb-4 text-primary">{{ t('description') }}</p>

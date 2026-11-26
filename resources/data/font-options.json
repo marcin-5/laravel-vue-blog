@@ -6,7 +6,7 @@
     { "label": "[Sn] Inter", "value": "var(--font-inter)" },
     { "label": "[Sn] Montserrat", "value": "var(--font-montserrat)" },
     { "label": "[Sn] Nunito", "value": "var(--font-nunito)" },
-    { "label": "[Sn] Quicksand", "value": "var(--font-quicksand)" },
+    { "label": "[Sn] Overpass", "value": "var(--font-overpass)" },
     { "label": "[Sn] Rajdhani", "value": "var(--font-rajdhani)" },
     { "label": "[Sn] Raleway", "value": "var(--font-raleway)" },
     { "label": "[Sn] Recursive", "value": "var(--font-recursive)" },

@@ -71,7 +71,7 @@ function submitAnswer(): void {
 </script>
 
 <template>
-    <Card class="w-full bg-card font-quicksand text-card-foreground">
+    <Card class="w-full bg-card font-overpass text-card-foreground">
         <CardHeader class="mx-2 px-2 md:px-3 lg:px-4">
             <CardTitle class="text-base text-pretty wrap-break-word text-foreground md:text-lg">
                 {{ question.question }}

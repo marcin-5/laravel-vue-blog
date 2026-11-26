@@ -9,7 +9,7 @@ import '@fontsource-variable/literata';
 import '@fontsource-variable/manuale';
 import '@fontsource-variable/montserrat';
 import '@fontsource-variable/nunito';
-import '@fontsource-variable/quicksand';
+import '@fontsource-variable/overpass';
 import '@fontsource-variable/raleway';
 import '@fontsource-variable/recursive';
 import '@fontsource-variable/rokkitt';
