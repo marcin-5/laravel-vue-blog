@@ -1,9 +1,9 @@
 import '@fontsource-variable/afacad';
-import '@fontsource-variable/assistant';
 import '@fontsource-variable/baloo-2';
 import '@fontsource-variable/bitter';
 import '@fontsource-variable/dosis';
 import '@fontsource-variable/faustina';
+import '@fontsource-variable/figtree';
 import '@fontsource-variable/inter';
 import '@fontsource-variable/kreon';
 import '@fontsource-variable/literata';

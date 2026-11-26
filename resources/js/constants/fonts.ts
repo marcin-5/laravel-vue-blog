@@ -1,10 +1,10 @@
 export const FONT_SIZE_CORRECTIONS: Record<string, number> = {
     'var(--font-afacad)': 1.0,
-    'var(--font-assistant)': 1.0,
     'var(--font-baloo-2)': 1.0,
     'var(--font-bitter)': 1.0,
     'var(--font-dosis)': 1.0,
     'var(--font-faustina)': 1.0,
+    'var(--font-figtree)': 1.0,
     'var(--font-inter)': 1.0,
     'var(--font-kreon)': 1.1,
     'var(--font-literata)': 1.0,
