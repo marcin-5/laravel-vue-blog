@@ -142,12 +142,12 @@
 
 :root,
 .light {
-    --font-header-default: var(--font-baloo-2);
-    --font-nav-default: var(--font-inter);
-    --font-body-default: var(--font-nunito);
+    --font-header-default: var(--font-inter);
+    --font-nav-default: var(--font-nunito);
+    --font-body-default: var(--font-recursive);
     --font-motto-default: var(--font-vollkorn);
-    --font-excerpt-default: var(--font-sofia-semi-condensed);
-    --font-footer-default: var(--font-rajdhani);
+    --font-excerpt-default: var(--font-baloo-2);
+    --font-footer-default: var(--font-recursive);
 
     --background: hsl(60 22% 99%);
     --foreground: hsl(0 0% 9%);
