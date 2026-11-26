@@ -146,7 +146,7 @@
     --font-nav-default: var(--font-recursive);
     --font-body-default: var(--font-nunito);
     --font-motto-default: var(--font-vollkorn);
-    --font-excerpt-default: var(--font-baloo-2);
+    --font-excerpt-default: var(--font-sofia-sans);
     --font-footer-default: var(--font-recursive);
 
     --background: hsl(60 22% 99%);
