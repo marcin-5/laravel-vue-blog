@@ -1,4 +1,5 @@
 import '@fontsource-variable/afacad';
+import '@fontsource-variable/assistant';
 import '@fontsource-variable/baloo-2';
 import '@fontsource-variable/bitter';
 import '@fontsource-variable/dosis';
@@ -17,7 +18,6 @@ import '@fontsource-variable/sofia-sans';
 import '@fontsource-variable/vollkorn';
 import '@fontsource/cinzel-decorative/900.css';
 import '@fontsource/cinzel/700.css';
-import '@fontsource/rajdhani';
 import '../css/app.css';
 
 import { initializeVisitorId } from '@/composables/useVisitorId';

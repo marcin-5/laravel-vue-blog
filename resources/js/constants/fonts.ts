@@ -1,5 +1,6 @@
 export const FONT_SIZE_CORRECTIONS: Record<string, number> = {
     'var(--font-afacad)': 1.0,
+    'var(--font-assistant)': 1.0,
     'var(--font-baloo-2)': 1.0,
     'var(--font-bitter)': 1.0,
     'var(--font-dosis)': 1.0,
@@ -11,7 +12,6 @@ export const FONT_SIZE_CORRECTIONS: Record<string, number> = {
     'var(--font-montserrat)': 1.0,
     'var(--font-nunito)': 1.0,
     'var(--font-overpass)': 1.0,
-    'var(--font-rajdhani)': 1.0,
     'var(--font-raleway)': 1.0,
     'var(--font-recursive)': 1.0,
     'var(--font-rokkitt)': 1.1,
@@ -21,7 +21,6 @@ export const FONT_SIZE_CORRECTIONS: Record<string, number> = {
 
 export const FONT_WEIGHT_CORRECTIONS: Record<string, string> = {
     'var(--font-literata)': '300',
-    'var(--font-rajdhani)': '450',
 };
 
 export function getFontSizeCorrection(fontValue: string): number {
