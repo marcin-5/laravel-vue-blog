@@ -102,7 +102,9 @@ function handleReload() {
                     :is-creating-post="isCreatingPost"
                     :is-editing="isEditing"
                     :is-posts-expanded="isPostsExpanded"
+                    :recommended-links-url="route('blogger.recommended-links.index', item.id)"
                     @edit="handleEdit"
+                    @manage-recommended-links="router.visit(route('blogger.recommended-links.index', item.id))"
                     @create-post="handleCreatePost"
                     @toggle-posts="handleTogglePosts"
                 />

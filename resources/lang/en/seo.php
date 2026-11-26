@@ -9,5 +9,9 @@ return [
         'description' => 'You may ask a question or offer a viewpoint here.',
         'title' => 'Contact',
     ],
+    'recommended' => [
+        'description' => 'Explore websites recommended by :blog.',
+        'title' => 'Recommended websites',
+    ],
     'title_format' => ':page - :site',
 ];

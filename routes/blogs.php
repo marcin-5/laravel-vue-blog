@@ -6,6 +6,7 @@ use App\Http\Controllers\Blogger\GroupsController;
 use App\Http\Controllers\Blogger\PostsController;
 use App\Http\Controllers\Blogger\TagsController;
 use App\Http\Controllers\Blogger\PublicDataController;
+use App\Http\Controllers\Blogger\RecommendedLinksController;
 use App\Http\Controllers\Blogger\StatsController as BloggerStatsController;
 use App\Http\Controllers\PrivateConversationController;
 use App\Http\Controllers\MarkdownController;
@@ -16,6 +17,13 @@ Route::middleware(['auth', 'verified', 'noindex'])->group(function () {
     Route::get('blogs/theme', [BlogsController::class, 'theme'])->name('blogger.blogs.theme.index');
     Route::resource('blogs', BlogsController::class)
         ->only(['index', 'store', 'update']);
+
+    Route::prefix('blogs/{blog}/recommended-links')->name('blogger.recommended-links.')->scopeBindings()->group(function () {
+        Route::get('/', [RecommendedLinksController::class, 'index'])->name('index');
+        Route::post('/', [RecommendedLinksController::class, 'store'])->name('store');
+        Route::patch('/{recommendedLink}', [RecommendedLinksController::class, 'update'])->name('update');
+        Route::delete('/{recommendedLink}', [RecommendedLinksController::class, 'destroy'])->name('destroy');
+    });
 
     // Groups - content management
     Route::get('groups/content/theme', [GroupsController::class, 'theme'])->name('blogger.groups.theme.index');

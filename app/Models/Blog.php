@@ -134,7 +134,7 @@ class Blog extends Model
 
     protected static function booted(): void
     {
-        static::addGlobalScope('locale', function (Builder $builder) {
+        static::addGlobalScope('locale', static function (Builder $builder) {
             // Do not apply the locale scope in console
             if (app()->runningInConsole()) {
                 return;
@@ -154,16 +154,16 @@ class Blog extends Model
             // On blog subdomains (e.g. slug.osobliwy.localhost), we must NOT scope by app locale
             // because route-model binding needs to find the blog regardless of current locale.
             // We still want locale scoping on main domains (welcome page etc.).
-            if (self::fromHost((string) request()->getHost())) {
+            if (self::fromHost(request()->getHost())) {
                 return;
             }
 
             $builder->where('blogs.locale', app()->getLocale());
         });
 
-        static::created(fn($blog) => app(SitemapObserver::class)->regenerateSitemap($blog));
-        static::updated(fn($blog) => app(SitemapObserver::class)->regenerateSitemap($blog));
-        static::deleted(fn($blog) => app(SitemapObserver::class)->regenerateSitemap($blog));
+        static::created(static fn($blog) => app(SitemapObserver::class)->regenerateSitemap($blog));
+        static::updated(static fn($blog) => app(SitemapObserver::class)->regenerateSitemap($blog));
+        static::deleted(static fn($blog) => app(SitemapObserver::class)->regenerateSitemap($blog));
     }
 
     /**
@@ -265,6 +265,14 @@ class Blog extends Model
     public function tags(): HasMany
     {
         return $this->hasMany(Tag::class);
+    }
+
+    /**
+     * Recommended external links for this blog.
+     */
+    public function recommendedLinks(): HasMany
+    {
+        return $this->hasMany(RecommendedLink::class)->orderBy('id');
     }
 
     /**

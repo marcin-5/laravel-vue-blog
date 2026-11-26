@@ -16,16 +16,20 @@ readonly class BlogNavigationService
     /**
      * @param  list<Tag>  $activeTags
      */
-    public function getLandingNavigation(Blog|Group $entity, ?Tag $tag = null, array $activeTags = [], string $operator = 'AND'): array
-    {
+    public function getLandingNavigation(
+        Blog|Group $entity,
+        ?Tag $tag = null,
+        array $activeTags = [],
+        string $operator = 'AND',
+    ): array {
         $tagSuffix = $this->getTagCacheSuffix($tag, $activeTags, $operator);
         $locale = app()->getLocale();
         $mainDomain = $locale === 'pl' ? config('app.domain') : config('app.domain_secondary');
         $isExternal = request()->getHost() !== $mainDomain;
-        $contextKey = ":{$locale}:" . ($isExternal ? 'external' : 'internal');
+        $contextKey = ":$locale:" . ($isExternal ? 'external' : 'internal');
 
         return Cache::tags(["navigation:{$entity->getMorphClass()}:$entity->id"])->remember(
-            "landing_navigation:{$entity->getMorphClass()}:$entity->id$tagSuffix$contextKey",
+            "landing_navigation_v3:{$entity->getMorphClass()}:$entity->id$tagSuffix$contextKey",
             now()->addMinutes(30),
             fn() => $this->buildLandingNavigation($entity, $tag, $activeTags, $operator),
         );
@@ -34,8 +38,27 @@ readonly class BlogNavigationService
     /**
      * @param  list<Tag>  $activeTags
      */
-    private function buildLandingNavigation(Blog|Group $entity, ?Tag $tag = null, array $activeTags = [], string $operator = 'AND'): array
+    private function getTagCacheSuffix(?Tag $tag, array $activeTags, string $operator): string
     {
+        if ($activeTags !== []) {
+            return ':tags:' . implode(
+                ',',
+                array_map(static fn(Tag $activeTag): int => $activeTag->id, $activeTags),
+            ) . ':' . $operator;
+        }
+
+        return $tag ? ":tag:$tag->id" : '';
+    }
+
+    /**
+     * @param  list<Tag>  $activeTags
+     */
+    private function buildLandingNavigation(
+        Blog|Group $entity,
+        ?Tag $tag = null,
+        array $activeTags = [],
+        string $operator = 'AND',
+    ): array {
         $query = $entity instanceof Blog
             ? $entity->posts()->forPublicListing()
             : $entity->posts()->forGroupView();
@@ -43,7 +66,10 @@ readonly class BlogNavigationService
         if ($activeTags !== []) {
             $query->whereHas(
                 'tags',
-                fn(Builder $tagQuery) => $tagQuery->whereIn('tags.id', array_map(static fn(Tag $activeTag): int => $activeTag->id, $activeTags)),
+                fn(Builder $tagQuery) => $tagQuery->whereIn(
+                    'tags.id',
+                    array_map(static fn(Tag $activeTag): int => $activeTag->id, $activeTags),
+                ),
                 '>=',
                 $operator === 'AND' ? count($activeTags) : 1,
             );
@@ -55,8 +81,15 @@ readonly class BlogNavigationService
 
         return [
             'prevPost' => null,
-            'nextPost' => $latestPost ? $this->formatPostLink($entity, $latestPost, $tag, $activeTags, $operator) : null,
+            'nextPost' => $latestPost ? $this->formatPostLink(
+                $entity,
+                $latestPost,
+                $tag,
+                $activeTags,
+                $operator,
+            ) : null,
             'landingUrl' => $this->getLandingUrl($entity, $tag, $activeTags, $operator),
+            'recommendedLinksUrl' => $entity instanceof Blog ? $this->getRecommendedLinksUrl($entity) : null,
             'isLandingPage' => true,
             'isGroup' => $entity instanceof Group,
             'breadcrumbs' => $this->buildBreadcrumbs($entity),
@@ -66,8 +99,13 @@ readonly class BlogNavigationService
     /**
      * @param  list<Tag>  $activeTags
      */
-    private function formatPostLink(Blog|Group $entity, Post $post, ?Tag $tag = null, array $activeTags = [], string $operator = 'AND'): array
-    {
+    private function formatPostLink(
+        Blog|Group $entity,
+        Post $post,
+        ?Tag $tag = null,
+        array $activeTags = [],
+        string $operator = 'AND',
+    ): array {
         $routeName = $entity instanceof Blog ? 'blog.public.post' : 'group.post';
         $paramName = $entity instanceof Blog ? 'blog' : 'group';
 
@@ -97,8 +135,12 @@ readonly class BlogNavigationService
     /**
      * @param  list<Tag>  $activeTags
      */
-    private function getLandingUrl(Blog|Group $entity, ?Tag $tag = null, array $activeTags = [], string $operator = 'AND'): string
-    {
+    private function getLandingUrl(
+        Blog|Group $entity,
+        ?Tag $tag = null,
+        array $activeTags = [],
+        string $operator = 'AND',
+    ): string {
         if ($entity instanceof Blog && count($activeTags) > 1) {
             return route('blog.public.landing', [
                 'blog' => $entity->slug,
@@ -111,13 +153,17 @@ readonly class BlogNavigationService
         if ($entity instanceof Blog && count($activeTags) === 1) {
             $mainDomain = $entity->locale === 'pl' ? config('app.domain') : config('app.domain_secondary');
 
-            return route('blog.public.tag', ['blog' => $entity->slug, 'tag' => $activeTags[0]->slug, 'mainDomain' => $mainDomain]);
+            return route(
+                'blog.public.tag',
+                ['blog' => $entity->slug, 'tag' => $activeTags[0]->slug, 'mainDomain' => $mainDomain],
+            );
         }
 
         if ($tag && $entity instanceof Blog) {
             $mainDomain = $entity->locale === 'pl' ? config('app.domain') : config('app.domain_secondary');
 
-            return route('blog.public.tag', ['blog' => $entity->slug, 'tag' => $tag->slug, 'mainDomain' => $mainDomain]);
+            return route('blog.public.tag', ['blog' => $entity->slug, 'tag' => $tag->slug, 'mainDomain' => $mainDomain],
+            );
         }
 
         $routeName = $entity instanceof Blog ? 'blog.public.landing' : 'group.landing';
@@ -129,6 +175,17 @@ readonly class BlogNavigationService
         }
 
         return route($routeName, $params);
+    }
+
+    private function getRecommendedLinksUrl(Blog $blog): ?string
+    {
+        if (!$blog->recommendedLinks()->exists()) {
+            return null;
+        }
+
+        $mainDomain = $blog->locale === 'pl' ? config('app.domain') : config('app.domain_secondary');
+
+        return route('blog.public.recommended', ['blog' => $blog->slug, 'mainDomain' => $mainDomain]);
     }
 
     private function buildBreadcrumbs(Blog|Group $entity, ?Post $post = null): array
@@ -161,16 +218,21 @@ readonly class BlogNavigationService
     /**
      * @param  list<Tag>  $activeTags
      */
-    public function getPostNavigation(Blog|Group $entity, Post $post, ?Tag $tag = null, array $activeTags = [], string $operator = 'AND'): array
-    {
+    public function getPostNavigation(
+        Blog|Group $entity,
+        Post $post,
+        ?Tag $tag = null,
+        array $activeTags = [],
+        string $operator = 'AND',
+    ): array {
         $tagSuffix = $this->getTagCacheSuffix($tag, $activeTags, $operator);
         $locale = app()->getLocale();
         $mainDomain = $locale === 'pl' ? config('app.domain') : config('app.domain_secondary');
         $isExternal = request()->getHost() !== $mainDomain;
-        $contextKey = ":{$locale}:" . ($isExternal ? 'external' : 'internal');
+        $contextKey = ":$locale:" . ($isExternal ? 'external' : 'internal');
 
         return Cache::tags(["navigation:{$entity->getMorphClass()}:$entity->id"])->remember(
-            "post_navigation:{$entity->getMorphClass()}:$entity->id:$post->id$tagSuffix$contextKey",
+            "post_navigation_v3:{$entity->getMorphClass()}:$entity->id:$post->id$tagSuffix$contextKey",
             now()->addMinutes(30),
             fn() => $this->buildPostNavigation($entity, $post, $tag, $activeTags, $operator),
         );
@@ -179,8 +241,13 @@ readonly class BlogNavigationService
     /**
      * @param  list<Tag>  $activeTags
      */
-    private function buildPostNavigation(Blog|Group $entity, Post $post, ?Tag $tag = null, array $activeTags = [], string $operator = 'AND'): array
-    {
+    private function buildPostNavigation(
+        Blog|Group $entity,
+        Post $post,
+        ?Tag $tag = null,
+        array $activeTags = [],
+        string $operator = 'AND',
+    ): array {
         $prevPost = $this->getAdjacentPost($entity, $post, 'previous', $tag, $activeTags, $operator);
         $nextPost = $this->getAdjacentPost($entity, $post, 'next', $tag, $activeTags, $operator);
 
@@ -188,6 +255,7 @@ readonly class BlogNavigationService
             'prevPost' => $prevPost ? $this->formatPostLink($entity, $prevPost, $tag, $activeTags, $operator) : null,
             'nextPost' => $nextPost ? $this->formatPostLink($entity, $nextPost, $tag, $activeTags, $operator) : null,
             'landingUrl' => $this->getLandingUrl($entity, $tag, $activeTags, $operator),
+            'recommendedLinksUrl' => $entity instanceof Blog ? $this->getRecommendedLinksUrl($entity) : null,
             'isLandingPage' => false,
             'isGroup' => $entity instanceof Group,
             'breadcrumbs' => $this->buildBreadcrumbs($entity, $post),
@@ -197,8 +265,14 @@ readonly class BlogNavigationService
     /**
      * @param  list<Tag>  $activeTags
      */
-    private function getAdjacentPost(Blog|Group $entity, Post $post, string $direction, ?Tag $tag = null, array $activeTags = [], string $operator = 'AND'): ?Post
-    {
+    private function getAdjacentPost(
+        Blog|Group $entity,
+        Post $post,
+        string $direction,
+        ?Tag $tag = null,
+        array $activeTags = [],
+        string $operator = 'AND',
+    ): ?Post {
         $compare = $direction === 'next' ? '<' : '>';
         $order = $direction === 'next' ? 'desc' : 'asc';
 
@@ -213,7 +287,10 @@ readonly class BlogNavigationService
         if ($activeTags !== []) {
             $query->whereHas(
                 'tags',
-                fn(Builder $tagQuery) => $tagQuery->whereIn('tags.id', array_map(static fn(Tag $activeTag): int => $activeTag->id, $activeTags)),
+                fn(Builder $tagQuery) => $tagQuery->whereIn(
+                    'tags.id',
+                    array_map(static fn(Tag $activeTag): int => $activeTag->id, $activeTags),
+                ),
                 '>=',
                 $operator === 'AND' ? count($activeTags) : 1,
             );
@@ -235,17 +312,5 @@ readonly class BlogNavigationService
             ->orderBy('published_at', $order)
             ->orderBy('created_at', $order)
             ->first();
-    }
-
-    /**
-     * @param  list<Tag>  $activeTags
-     */
-    private function getTagCacheSuffix(?Tag $tag, array $activeTags, string $operator): string
-    {
-        if ($activeTags !== []) {
-            return ':tags:' . implode(',', array_map(static fn(Tag $activeTag): int => $activeTag->id, $activeTags)) . ':' . $operator;
-        }
-
-        return $tag ? ":tag:{$tag->id}" : '';
     }
 }

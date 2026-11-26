@@ -337,8 +337,26 @@
             "show_posts": "Show Posts",
             "add_post": "Add Post",
             "add_post_to": "Add post to",
+            "recommended_links": "Manage recommended links",
             "view_group": "View group",
             "preview_group": "Preview group"
+        },
+        "recommended_links": {
+            "title": "Recommended links for {blog}",
+            "breadcrumb": "Recommended links",
+            "url": "URL",
+            "name": "Name (optional)",
+            "description": "Description (optional)",
+            "add": "Add link",
+            "save": "Save",
+            "cancel": "Cancel",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirm_delete": "Delete this recommended link?",
+            "empty": "No recommended links yet.",
+            "created": "Recommended link added.",
+            "updated": "Recommended link updated.",
+            "deleted": "Recommended link deleted."
         },
         "posts": {
             "empty": "No posts yet"

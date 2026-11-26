@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { TooltipButton } from '@/components/ui/tooltip';
-import { ChevronDown, ChevronUp, Pencil, Plus, X } from '@lucide/vue';
+import { ChevronDown, ChevronUp, Link as LinkIcon, Pencil, Plus, X } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -11,23 +11,36 @@ interface Props {
     isPostsExpanded: boolean;
     showAddPost?: boolean;
     canEdit?: boolean;
+    recommendedLinksUrl?: string;
 }
 
 withDefaults(defineProps<Props>(), {
     showAddPost: true,
     canEdit: true,
+    recommendedLinksUrl: undefined,
 });
 
 defineEmits<{
     (e: 'edit'): void;
     (e: 'createPost'): void;
     (e: 'togglePosts'): void;
+    (e: 'manageRecommendedLinks'): void;
 }>();
 </script>
 
 <template>
     <div class="flex items-center gap-2">
         <slot name="prefix" />
+
+        <TooltipButton
+            v-if="recommendedLinksUrl"
+            :tooltip-content="t('blogger.actions.recommended_links')"
+            size="icon"
+            variant="ghost"
+            @click="$emit('manageRecommendedLinks')"
+        >
+            <LinkIcon />
+        </TooltipButton>
 
         <TooltipButton
             v-if="canEdit"

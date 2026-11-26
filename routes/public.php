@@ -19,7 +19,7 @@ use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Support\Facades\Route;
 use Spatie\MarkdownResponse\Middleware\ProvideMarkdownResponse;
 
-$reservedSlugs = 'about|contact|newsletter|enneagram-test|admin|api|dashboard|settings|_|_debugbar|_telescope|robots|sitemap|sitemap\.xml|robots\.txt|login|register|logout|www|posts|blogs|groups|data|markdown|blog-private-conversations|group-private-conversations|private-conversations|private-messages';
+$reservedSlugs = 'about|contact|recommended|newsletter|enneagram-test|admin|api|dashboard|settings|_|_debugbar|_telescope|robots|sitemap|sitemap\.xml|robots\.txt|login|register|logout|www|posts|blogs|groups|data|markdown|blog-private-conversations|group-private-conversations|private-conversations|private-messages';
 $reservedRegex = '^(?!(' . $reservedSlugs . ')($|/)).+$';
 $resolveBlog = static function (string $blogSlug): Blog {
     $blog = Blog::fromSlugAndHost($blogSlug, request()->getHost());
@@ -68,6 +68,9 @@ Route::domain('{blog:slug}.{mainDomain}')
         Route::post('/contact', [PublicBlogController::class, 'submitContact'])
             ->name('blog.public.contact.submit')
             ->middleware(['throttle:6,1']);
+
+        Route::get('/recommended', [PublicBlogController::class, 'recommended'])
+            ->name('blog.public.recommended');
 
         Route::get('/tags/{tag:slug}', [PublicBlogController::class, 'tag'])
             ->name('blog.public.tag');

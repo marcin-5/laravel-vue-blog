@@ -222,4 +222,36 @@ readonly class PublicBlogSeoBuilder
             ],
         );
     }
+
+    /**
+     * Build SEO data for the recommended links page.
+     */
+    public function buildRecommendedLinksSeo(Blog $blog): SeoData
+    {
+        $baseUrl = $this->getBlogBaseUrl($blog);
+        $appBaseUrl = $this->getAppBaseUrl($blog);
+        $locale = app()->getLocale();
+        $canonicalUrl = $baseUrl . '/recommended';
+        $title = __('seo.title_format', [
+            'page' => __('seo.recommended.title'),
+            'site' => $blog->name,
+        ]);
+        $description = __('seo.recommended.description', ['blog' => $blog->name]);
+
+        return new SeoData(
+            title: $title,
+            description: $description,
+            canonicalUrl: $canonicalUrl,
+            ogImage: $this->getOgImage($appBaseUrl, $locale),
+            ogType: self::BLOG_OG_TYPE,
+            locale: $locale,
+            structuredData: [
+                '@context' => 'https://schema.org',
+                '@type' => 'CollectionPage',
+                'name' => $title,
+                'url' => $canonicalUrl,
+                'description' => $description,
+            ],
+        );
+    }
 }

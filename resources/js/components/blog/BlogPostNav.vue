@@ -54,7 +54,9 @@ const POST_NAV_ITEM_CONFIG = {
 } as const satisfies Record<PostNavDirection, Omit<PostNavItem, 'direction' | 'post'>>;
 
 const shouldShowNavigation = computed(
-    () => !!props.navigation && (!!props.navigation.nextPost || !!props.navigation.prevPost || !props.navigation.isLandingPage),
+    () =>
+        !!props.navigation &&
+        (!!props.navigation.nextPost || !!props.navigation.prevPost || !!props.navigation.recommendedLinksUrl || !props.navigation.isLandingPage),
 );
 
 const homeNavComponent = computed(() => (props.navigation?.isLandingPage ? 'span' : Link));
@@ -65,6 +67,9 @@ const getLinkStateClasses = (isClickable: boolean, ...extraClasses: string[]) =>
 
 const getPostNavLinkClasses = (post?: NavPost | null) => getLinkStateClasses(!!post, 'min-w-0 max-w-[45%] gap-2');
 const getHomeLinkClasses = (isClickable: boolean) => getLinkStateClasses(isClickable, 'font-medium');
+
+const getPostNavLabelKey = (direction: PostNavDirection) =>
+    direction === 'next' && props.navigation?.isLandingPage ? 'blog.post_nav.latest_post' : POST_NAV_ITEM_CONFIG[direction].labelKey;
 
 const getPostNavLabelClass = (direction: PostNavDirection) => clsx('text-xs', direction === 'previous' ? 'opacity-75' : 'opacity-90');
 
@@ -85,13 +90,35 @@ const getPostNavComponent = (post?: NavPost | null) => (post ? Link : 'span');
 const isPreviousPostNavItem = (item: PostNavItem) => item.direction === 'previous';
 
 const getMobilePostNavLabel = (item: PostNavItem) =>
-    isPreviousPostNavItem(item) ? `${item.arrow} ${t(item.labelKey)}` : `${t(item.labelKey)} ${item.arrow}`;
+    isPreviousPostNavItem(item) ? `${item.arrow} ${t(item.labelKey)}` : `${t(getPostNavLabelKey(item.direction))} ${item.arrow}`;
 </script>
 
 <template>
     <nav v-if="shouldShowNavigation && navigation" :aria-label="t('blog.post_nav.aria')" :style="{ fontFamily: 'var(--blog-nav-font)' }">
         <!-- Desktop Navigation -->
-        <div class="hidden items-stretch justify-between gap-4 lg:flex">
+        <div v-if="navigation.isLandingPage" class="desktop-navigation hidden items-stretch justify-between gap-4 lg:flex">
+            <Link
+                v-if="navigation.recommendedLinksUrl"
+                :class="getLinkStateClasses(true, 'max-w-[45%] min-w-0 gap-2')"
+                :href="navigation.recommendedLinksUrl"
+            >
+                {{ t('blog.recommended_links.heading') }}
+            </Link>
+            <component
+                :is="getPostNavComponent(navigation.nextPost)"
+                :class="[getPostNavLinkClasses(navigation.nextPost), 'ml-auto']"
+                :href="navigation.nextPost?.url"
+            >
+                <div v-if="navigation.nextPost" class="flex min-w-0 flex-col items-end">
+                    <span class="text-xs opacity-90">{{ t('blog.post_nav.latest_post') }}</span>
+                    <span :title="navigation.nextPost.title" class="block w-full truncate font-medium">{{ navigation.nextPost.title }}</span>
+                </div>
+                <span v-else>{{ t('blog.post_nav.latest_post') }}</span>
+                <span class="text-lg">→</span>
+            </component>
+        </div>
+
+        <div v-else class="desktop-navigation hidden items-stretch justify-between gap-4 lg:flex">
             <component
                 :is="getPostNavComponent(item.post)"
                 v-for="item in postNavItems"
@@ -102,7 +129,7 @@ const getMobilePostNavLabel = (item: PostNavItem) =>
                 <span v-if="isPreviousPostNavItem(item)" class="text-lg">{{ item.arrow }}</span>
 
                 <div v-if="item.post" :class="item.contentAlignmentClass" class="flex min-w-0 flex-col">
-                    <span :class="getPostNavLabelClass(item.direction)">{{ t(item.labelKey) }}</span>
+                    <span :class="getPostNavLabelClass(item.direction)">{{ t(getPostNavLabelKey(item.direction)) }}</span>
                     <span :title="item.post.title" class="block w-full truncate font-medium">{{ item.post.title }}</span>
                 </div>
                 <span v-else>{{ t(item.labelKey) }}</span>
@@ -113,10 +140,17 @@ const getMobilePostNavLabel = (item: PostNavItem) =>
             <component :is="homeNavComponent" :class="getHomeLinkClasses(!navigation.isLandingPage)" :href="homeNavHref" class="order-2">
                 {{ t('blog.post_nav.home_page') }}
             </component>
+            <Link
+                v-if="navigation.recommendedLinksUrl"
+                :href="navigation.recommendedLinksUrl"
+                class="order-4 inline-flex items-center rounded-sm border border-border bg-card px-3 py-2 text-xs text-primary transition-colors hover:bg-secondary md:text-sm"
+            >
+                {{ t('blog.recommended_links.heading') }}
+            </Link>
         </div>
 
         <!-- Mobile Navigation -->
-        <div class="lg:hidden">
+        <div class="mobile-navigation lg:hidden">
             <div class="flex flex-col gap-4 text-sm">
                 <div v-for="item in linkedPostNavItems" :key="item.direction" class="flex flex-col">
                     <span class="mb-1 text-xs opacity-70">{{ getMobilePostNavLabel(item) }}</span>
@@ -134,6 +168,10 @@ const getMobilePostNavLabel = (item: PostNavItem) =>
                         <span>{{ t('blog.post_nav.home_page') }}</span>
                     </Link>
                 </div>
+
+                <Link v-if="navigation.recommendedLinksUrl" :href="navigation.recommendedLinksUrl" class="font-medium text-primary hover:underline">
+                    {{ t('blog.recommended_links.heading') }}
+                </Link>
             </div>
         </div>
 

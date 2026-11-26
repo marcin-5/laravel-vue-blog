@@ -46,6 +46,10 @@
     },
     "blog": {
         "author": "Author:",
+        "recommended_links": {
+            "heading": "Recommended websites",
+            "empty": "No recommended websites yet."
+        },
         "scroll_to_posts_list": "Scroll to posts list",
         "posts_list": {
             "aria": "Posts list",
@@ -67,6 +71,7 @@
             "aria": "Post navigation",
             "previous": "Previous",
             "next": "Next",
+            "latest_post": "Latest post",
             "back": "Back",
             "home_page": "Home page"
         },

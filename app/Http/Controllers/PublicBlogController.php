@@ -326,6 +326,29 @@ class PublicBlogController extends BasePublicController
     }
 
     /**
+     * Show recommended links for a blog.
+     * Route: /recommended
+     * @throws FileNotFoundException
+     */
+    public function recommended(Request $request, Blog $blog, string $mainDomain): Response
+    {
+        $this->ensureBlogIsPublic($blog);
+        $blog->load(['landingPage', 'user']);
+
+        return $this->renderWithTranslations('public/blog/Recommended', 'blog', [
+            'blog' => new PublicBlogDetailResource($blog),
+            'chrome' => $this->payloadBuilder->buildChrome(
+                $blog,
+                $this->navigation->getLandingNavigation($blog),
+            )->toArray(),
+            'recommendedLinks' => $blog->recommendedLinks()
+                ->get(['id', 'url', 'name', 'description'])
+                ->toArray(),
+            'seo' => $this->seoBuilder->buildRecommendedLinksSeo($blog)->toArray(),
+        ]);
+    }
+
+    /**
      * Show the contact page for a blog.
      * Route: /contact
      * @throws FileNotFoundException

@@ -46,6 +46,10 @@
     },
     "blog": {
         "author": "Autor:",
+        "recommended_links": {
+            "heading": "Polecane strony",
+            "empty": "Brak polecanych stron."
+        },
         "scroll_to_posts_list": "Przewiń do listy wpisów",
         "posts_list": {
             "aria": "Lista wpisów",
@@ -67,6 +71,7 @@
             "aria": "Nawigacja między postami",
             "previous": "Poprzedni",
             "next": "Następny",
+            "latest_post": "Najnowszy wpis",
             "back": "Powrót",
             "home_page": "Strona główna"
         },

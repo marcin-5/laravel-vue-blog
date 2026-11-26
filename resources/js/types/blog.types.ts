@@ -124,6 +124,7 @@ export interface Navigation {
     prevPost?: NavPost | null;
     nextPost?: NavPost | null;
     landingUrl: string;
+    recommendedLinksUrl?: string | null;
     isLandingPage?: boolean;
     isGroup?: boolean;
     breadcrumbs?: BreadcrumbItem[];
@@ -168,6 +169,18 @@ export interface PublicBlogPostPageProps extends PublicBlogPageProps {
 }
 
 export type PublicBlogStaticPageProps = PublicBlogPageProps;
+
+export interface RecommendedLinkItem {
+    id: number;
+    url: string;
+    name: string | null;
+    description: string | null;
+}
+
+export interface PublicBlogRecommendedLinksPageProps extends PublicBlogPageProps {
+    recommendedLinks: RecommendedLinkItem[];
+    seo: SEO;
+}
 
 export interface PublicBlogContactPageProps extends PublicBlogStaticPageProps {
     recipientName?: string;
