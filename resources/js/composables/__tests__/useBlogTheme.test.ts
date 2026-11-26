@@ -132,7 +132,7 @@ describe('useBlogTheme', () => {
     it('applies font weight corrections', () => {
         const theme = computed<any>(() => ({
             light: {
-                '--font-header': 'var(--font-darker-grotesque)', // Weight correction is 500
+                '--font-header': 'var(--font-dosis)', // Weight correction is 500
             },
         }));
 

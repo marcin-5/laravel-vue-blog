@@ -2,7 +2,7 @@
     { "label": "System Default", "value": "inherit" },
     { "label": "[Sn] Afacad", "value": "var(--font-afacad)" },
     { "label": "[Sn] Baloo 2", "value": "var(--font-baloo-2)" },
-    { "label": "[Sn] Darker Grotesque", "value": "var(--font-darker-grotesque)" },
+    { "label": "[Sn] Dosis", "value": "var(--font-dosis)" },
     { "label": "[Sn] Inter", "value": "var(--font-inter)" },
     { "label": "[Sn] Montserrat", "value": "var(--font-montserrat)" },
     { "label": "[Sn] Nunito", "value": "var(--font-nunito)" },

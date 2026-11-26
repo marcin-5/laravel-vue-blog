@@ -2,7 +2,7 @@ export const FONT_SIZE_CORRECTIONS: Record<string, number> = {
     'var(--font-afacad)': 1.0,
     'var(--font-baloo-2)': 1.0,
     'var(--font-bitter)': 1.0,
-    'var(--font-darker-grotesque)': 1.0,
+    'var(--font-dosis)': 1.0,
     'var(--font-faustina)': 1.0,
     'var(--font-inter)': 1.0,
     'var(--font-kreon)': 1.1,
@@ -20,7 +20,6 @@ export const FONT_SIZE_CORRECTIONS: Record<string, number> = {
 };
 
 export const FONT_WEIGHT_CORRECTIONS: Record<string, string> = {
-    'var(--font-darker-grotesque)': '500',
     'var(--font-literata)': '300',
     'var(--font-rajdhani)': '450',
     'var(--font-quicksand)': '450',

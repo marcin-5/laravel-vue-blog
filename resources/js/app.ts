@@ -1,7 +1,7 @@
 import '@fontsource-variable/afacad';
 import '@fontsource-variable/baloo-2';
 import '@fontsource-variable/bitter';
-import '@fontsource-variable/darker-grotesque';
+import '@fontsource-variable/dosis';
 import '@fontsource-variable/faustina';
 import '@fontsource-variable/inter';
 import '@fontsource-variable/kreon';
