@@ -143,8 +143,8 @@
 :root,
 .light {
     --font-header-default: var(--font-inter);
-    --font-nav-default: var(--font-nunito);
-    --font-body-default: var(--font-recursive);
+    --font-nav-default: var(--font-recursive);
+    --font-body-default: var(--font-nunito);
     --font-motto-default: var(--font-vollkorn);
     --font-excerpt-default: var(--font-baloo-2);
     --font-footer-default: var(--font-recursive);

@@ -1,6 +1,6 @@
-<script setup lang="ts">
-import type { HTMLAttributes } from 'vue'
-import { cn } from '@/utils/classUtils'
+<script lang="ts" setup>
+import type { HTMLAttributes } from 'vue';
+import { cn } from '@/utils/classUtils';
 
 const props = defineProps<{
   class?: HTMLAttributes['class']
@@ -9,9 +9,9 @@ const props = defineProps<{
 
 <template>
   <div
-    data-slot="sidebar-content"
+    :class="cn('font-nav flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden', props.class)"
     data-sidebar="content"
-    :class="cn('flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden', props.class)"
+    data-slot="sidebar-content"
   >
     <slot />
   </div>
