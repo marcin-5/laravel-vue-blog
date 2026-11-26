@@ -24,7 +24,7 @@ const userGroups = computed(() => page.props.userGroups ?? []);
                 :href="route('group.landing', group.slug)"
                 class="group-card group flex flex-col rounded-2xl border-gray-300 bg-stone-50 px-4 py-2 text-gray-700 shadow-md backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:shadow-lg dark:border-gray-600 dark:bg-mist-800 dark:text-zinc-200"
             >
-                <h3 class="font-sans text-xl">
+                <h3 class="font-body text-lg">
                     {{ group.name }}
                 </h3>
             </Link>
