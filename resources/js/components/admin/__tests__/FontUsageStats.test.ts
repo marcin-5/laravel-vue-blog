@@ -95,16 +95,16 @@ describe('FontUsageStats.vue', () => {
                     ...stats,
                     fonts: [
                         { value: 'var(--font-kreon)', label: 'Kreon', count: 1, blogs: [] },
-                        { value: 'var(--font-overpass)', label: 'Overpass', count: 1, blogs: [] },
+                        { value: 'var(--font-literata)', label: 'Literata', count: 1, blogs: [] },
                     ],
                 },
             },
         });
 
-        const [kreon, overpass] = wrapper.findAll('.grid > div > span');
+        const [kreon, literata] = wrapper.findAll('.grid > div > span');
 
         expect(kreon.attributes('style')).toBe('font-family: var(--font-kreon); font-size: 1.1rem;');
-        expect(overpass.attributes('style')).toBe('font-family: var(--font-overpass); font-size: 1rem; font-weight: 450;');
+        expect(literata.attributes('style')).toBe('font-family: var(--font-literata); font-size: 1rem; font-weight: 300;');
     });
 
     it('collapses to the title header and expands to show all font rows', async () => {

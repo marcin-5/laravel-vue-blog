@@ -75,7 +75,7 @@ describe('useBlogTheme', () => {
         const theme = computed<any>(() => ({
             light: {
                 '--header-scale': '1.0',
-                '--font-header': 'var(--font-manuale)', // Correction is 1.1 in fonts.ts
+                '--font-header': 'var(--font-kreon)',
             },
         }));
 
@@ -92,8 +92,8 @@ describe('useBlogTheme', () => {
                 '--body-scale': '1.2',
                 '--font-header': 'var(--font-inter)',
                 '--font-body': 'var(--font-inter)',
-                '--font-header-alternative': 'var(--font-manuale)',
-                '--font-body-alternative': 'var(--font-manuale)',
+                '--font-header-alternative': 'var(--font-kreon)',
+                '--font-body-alternative': 'var(--font-kreon)',
                 '--header-scale-alternative': '1.3',
                 '--body-scale-alternative': '0.9',
             },
@@ -132,14 +132,14 @@ describe('useBlogTheme', () => {
     it('applies font weight corrections', () => {
         const theme = computed<any>(() => ({
             light: {
-                '--font-header': 'var(--font-dosis)', // Weight correction is 500
+                '--font-header': 'var(--font-literata)',
             },
         }));
 
         appearance.value = 'light';
         const { mergedThemeStyle } = useBlogTheme(theme);
 
-        expect(mergedThemeStyle.value['--blog-header-weight']).toBe('500');
+        expect(mergedThemeStyle.value['--blog-header-weight']).toBe('300');
     });
 
     it('uses configured alternative fonts only when the font set is enabled', () => {
