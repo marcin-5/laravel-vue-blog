@@ -141,7 +141,7 @@ const getMobilePostNavLabel = (item: PostNavItem) =>
                 {{ t('blog.post_nav.home_page') }}
             </component>
             <Link
-                v-if="navigation.recommendedLinksUrl"
+                v-if="navigation.recommendedLinksUrl && navigation.isLandingPage"
                 :href="navigation.recommendedLinksUrl"
                 class="order-4 inline-flex items-center rounded-sm border border-border bg-card px-3 py-2 text-xs text-primary transition-colors hover:bg-secondary md:text-sm"
             >
@@ -169,7 +169,11 @@ const getMobilePostNavLabel = (item: PostNavItem) =>
                     </Link>
                 </div>
 
-                <Link v-if="navigation.recommendedLinksUrl" :href="navigation.recommendedLinksUrl" class="font-medium text-primary hover:underline">
+                <Link
+                    v-if="navigation.recommendedLinksUrl && navigation.isLandingPage"
+                    :href="navigation.recommendedLinksUrl"
+                    class="font-medium text-primary hover:underline"
+                >
                     {{ t('blog.recommended_links.heading') }}
                 </Link>
             </div>
