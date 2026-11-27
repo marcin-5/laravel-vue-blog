@@ -14,6 +14,7 @@ const props = withDefaults(
         blog: Blog;
         chrome: BlogChrome;
         listing?: PostListing | null;
+        sidebar?: number;
         contentSpacingClass?: string;
         middleDividerClass?: string;
     }>(),
@@ -29,7 +30,7 @@ const hasFooterContent = computed(() => hasContent(props.chrome.footerHtml));
 </script>
 
 <template>
-    <BlogLayout v-if="blog" :isPublic="true" :owner-id="blog.id" owner-type="blog" :sidebar="chrome.sidebar" :theme="blog.theme">
+    <BlogLayout v-if="blog" :isPublic="true" :owner-id="blog.id" owner-type="blog" :sidebar="props.sidebar ?? chrome.sidebar" :theme="blog.theme">
         <template #top-divider>
             <BorderDivider class="mb-4" />
         </template>

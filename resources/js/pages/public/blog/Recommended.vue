@@ -11,7 +11,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-    <PublicBlogShell :blog="blog" :chrome="chrome">
+    <PublicBlogShell :blog="blog" :chrome="chrome" :sidebar="0">
         <template #header>
             <BlogHeader :blog="blog" />
         </template>

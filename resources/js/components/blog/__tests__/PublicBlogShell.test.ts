@@ -101,6 +101,12 @@ describe('PublicBlogShell.vue', () => {
         expect(layout.props('isPublic')).toBe(true);
     });
 
+    it('allows pages to override the chrome sidebar setting', () => {
+        const layout = mountShell({ sidebar: 0 }).findComponent({ name: 'BlogLayout' });
+
+        expect(layout.props('sidebar')).toBe(0);
+    });
+
     it('renders the breadcrumbs coming from the chrome navigation', () => {
         const wrapper = mountShell();
 
