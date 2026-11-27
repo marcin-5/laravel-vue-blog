@@ -161,7 +161,7 @@ test('admin font usage stats include all bloggers and every catalog font by defa
                 ->where('fontUsageStats.selectedBloggerId', null)
                 ->where('fontUsageStats.bloggers', $expectedBloggers)
                 ->has('fontUsageStats.fonts', 19)
-                ->where('fontUsageStats.fonts.4.value', 'var(--font-inter)')
+                ->where('fontUsageStats.fonts.4.value', 'var(--font-figtree)')
                 ->where('fontUsageStats.fonts.4.count', 2)
                 ->where('fontUsageStats.fonts.4.blogs', ['First Blogger Blog', 'Second Blogger Blog'])
                 ->where('fontUsageStats.fonts.12.count', 1)
