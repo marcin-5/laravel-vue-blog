@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Blogger;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateRecommendedLinkRequest extends FormRequest
 {
@@ -19,6 +20,13 @@ class UpdateRecommendedLinkRequest extends FormRequest
             'url' => ['required', 'url', 'max:2048'],
             'name' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'category_id' => [
+                'sometimes',
+                'nullable',
+                'integer',
+                Rule::exists('recommended_link_categories', 'id')
+                    ->where('blog_id', $this->route('blog')->id),
+            ],
         ];
     }
 }

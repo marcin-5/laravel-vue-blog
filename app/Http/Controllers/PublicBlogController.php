@@ -14,6 +14,8 @@ use App\Http\Resources\PublicBlogResource;
 use App\Http\Resources\PublicPostDetailResource;
 use App\Models\Blog;
 use App\Models\Post;
+use App\Models\RecommendedLink;
+use App\Models\RecommendedLinkCategory;
 use App\Models\Tag;
 use App\Models\Thread;
 use App\Queries\Public\PublicBlogPostsQuery;
@@ -333,7 +335,19 @@ class PublicBlogController extends BasePublicController
     public function recommended(Request $request, Blog $blog, string $mainDomain): Response
     {
         $this->ensureBlogIsPublic($blog);
-        $blog->load(['landingPage', 'user']);
+        $blog->load([
+            'landingPage',
+            'user',
+            'recommendedLinks',
+            'recommendedLinkCategories.recommendedLinks',
+        ]);
+
+        $recommendedLinkProps = static fn(RecommendedLink $link): array => $link->only([
+            'id',
+            'url',
+            'name',
+            'description',
+        ]);
 
         return $this->renderWithTranslations('public/blog/Recommended', 'blog', [
             'blog' => new PublicBlogDetailResource($blog),
@@ -341,9 +355,21 @@ class PublicBlogController extends BasePublicController
                 $blog,
                 $this->navigation->getLandingNavigation($blog),
             )->toArray(),
-            'recommendedLinks' => $blog->recommendedLinks()
-                ->get(['id', 'url', 'name', 'description'])
-                ->toArray(),
+            'recommendedLinks' => $blog->recommendedLinks
+                ->whereNull('category_id')
+                ->map($recommendedLinkProps)
+                ->values()
+                ->all(),
+            'recommendedLinkCategories' => $blog->recommendedLinkCategories
+                ->map(fn(RecommendedLinkCategory $category): array => [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'recommendedLinks' => $category->recommendedLinks
+                        ->map($recommendedLinkProps)
+                        ->values()
+                        ->all(),
+                ])
+                ->all(),
             'seo' => $this->seoBuilder->buildRecommendedLinksSeo($blog)->toArray(),
         ]);
     }

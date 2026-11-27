@@ -6,6 +6,7 @@ use App\Http\Controllers\Blogger\GroupsController;
 use App\Http\Controllers\Blogger\PostsController;
 use App\Http\Controllers\Blogger\TagsController;
 use App\Http\Controllers\Blogger\PublicDataController;
+use App\Http\Controllers\Blogger\RecommendedLinkCategoriesController;
 use App\Http\Controllers\Blogger\RecommendedLinksController;
 use App\Http\Controllers\Blogger\StatsController as BloggerStatsController;
 use App\Http\Controllers\PrivateConversationController;
@@ -21,8 +22,17 @@ Route::middleware(['auth', 'verified', 'noindex'])->group(function () {
     Route::prefix('blogs/{blog}/recommended-links')->name('blogger.recommended-links.')->scopeBindings()->group(function () {
         Route::get('/', [RecommendedLinksController::class, 'index'])->name('index');
         Route::post('/', [RecommendedLinksController::class, 'store'])->name('store');
+        Route::put('/reorder', [RecommendedLinksController::class, 'reorder'])->name('reorder');
         Route::patch('/{recommendedLink}', [RecommendedLinksController::class, 'update'])->name('update');
         Route::delete('/{recommendedLink}', [RecommendedLinksController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('blogs/{blog}/recommended-link-categories')->name('blogger.recommended-link-categories.')->scopeBindings()->group(function () {
+        Route::get('/', [RecommendedLinkCategoriesController::class, 'index'])->name('index');
+        Route::post('/', [RecommendedLinkCategoriesController::class, 'store'])->name('store');
+        Route::put('/reorder', [RecommendedLinkCategoriesController::class, 'reorder'])->name('reorder');
+        Route::patch('/{recommendedLinkCategory}', [RecommendedLinkCategoriesController::class, 'update'])->name('update');
+        Route::delete('/{recommendedLinkCategory}', [RecommendedLinkCategoriesController::class, 'destroy'])->name('destroy');
     });
 
     // Groups - content management

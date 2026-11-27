@@ -16,10 +16,21 @@ class RecommendedLink extends Model
         'url',
         'name',
         'description',
+        'category_id',
+        'display_order',
+    ];
+
+    protected $casts = [
+        'display_order' => 'integer',
     ];
 
     public function blog(): BelongsTo
     {
         return $this->belongsTo(Blog::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(RecommendedLinkCategory::class, 'category_id');
     }
 }

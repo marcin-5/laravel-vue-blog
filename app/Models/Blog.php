@@ -272,7 +272,12 @@ class Blog extends Model
      */
     public function recommendedLinks(): HasMany
     {
-        return $this->hasMany(RecommendedLink::class)->orderBy('id');
+        return $this->hasMany(RecommendedLink::class)->orderBy('display_order')->orderBy('id');
+    }
+
+    public function recommendedLinkCategories(): HasMany
+    {
+        return $this->hasMany(RecommendedLinkCategory::class)->orderBy('display_order')->orderBy('id');
     }
 
     /**

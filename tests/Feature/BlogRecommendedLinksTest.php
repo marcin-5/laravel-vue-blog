@@ -3,8 +3,12 @@
 use App\Models\Blog;
 use App\Models\Post;
 use App\Models\RecommendedLink;
+use App\Models\RecommendedLinkCategory;
 use App\Models\User;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 
 beforeEach(function () {
     Config::set('app.domain', 'osobliwy.pl');
@@ -136,4 +140,82 @@ it('escapes recommended link names and descriptions in the rendered page', funct
         ->toContain('&lt;script&gt;')
         ->not->toContain('<script>alert(1)</script>')
         ->not->toContain('<script>alert(2)</script>');
+});
+
+it('groups public links by category order and orders links within each section', function () {
+    $blog = Blog::factory()->for(User::factory())->create([
+        'slug' => 'ordered-recommendations',
+        'is_published' => true,
+        'locale' => 'en',
+    ]);
+    $firstCategory = RecommendedLinkCategory::factory()->for($blog)->create([
+        'name' => 'Culture',
+        'display_order' => 1,
+    ]);
+    $secondCategory = RecommendedLinkCategory::factory()->for($blog)->create([
+        'name' => 'Science',
+        'display_order' => 0,
+    ]);
+    RecommendedLink::factory()->for($blog)->create([
+        'url' => 'https://example.com/uncategorized-last',
+        'display_order' => 1,
+    ]);
+    RecommendedLink::factory()->for($blog)->create([
+        'url' => 'https://example.com/uncategorized-first',
+        'display_order' => 0,
+    ]);
+    RecommendedLink::factory()->for($blog)->create([
+        'category_id' => $firstCategory->id,
+        'url' => 'https://example.com/culture-last',
+        'display_order' => 1,
+    ]);
+    RecommendedLink::factory()->for($blog)->create([
+        'category_id' => $firstCategory->id,
+        'url' => 'https://example.com/culture-first',
+        'display_order' => 0,
+    ]);
+    RecommendedLink::factory()->for($blog)->create([
+        'category_id' => $secondCategory->id,
+        'url' => 'https://example.com/science',
+        'display_order' => 0,
+    ]);
+
+    $this->get('http://ordered-recommendations.osobliwy.com/recommended')
+        ->assertOk()
+        ->assertInertia(fn($page) => $page
+            ->where('recommendedLinks.0.url', 'https://example.com/uncategorized-first')
+            ->where('recommendedLinks.1.url', 'https://example.com/uncategorized-last')
+            ->where('recommendedLinkCategories.0.name', 'Science')
+            ->where('recommendedLinkCategories.0.recommendedLinks.0.url', 'https://example.com/science')
+            ->where('recommendedLinkCategories.1.name', 'Culture')
+            ->where('recommendedLinkCategories.1.recommendedLinks.0.url', 'https://example.com/culture-first')
+            ->where('recommendedLinkCategories.1.recommendedLinks.1.url', 'https://example.com/culture-last'));
+});
+
+it('eager loads public recommended links with a fixed number of relationship queries', function () {
+    $blog = Blog::factory()->for(User::factory())->create([
+        'slug' => 'eager-loaded-recommendations',
+        'is_published' => true,
+        'locale' => 'en',
+    ]);
+
+    foreach (range(1, 4) as $order) {
+        $category = RecommendedLinkCategory::factory()->for($blog)->create(['display_order' => $order]);
+        RecommendedLink::factory()->for($blog)->create([
+            'category_id' => $category->id,
+            'display_order' => 0,
+        ]);
+    }
+
+    Cache::flush();
+    $recommendedLinkQueries = 0;
+    DB::listen(function (QueryExecuted $query) use (&$recommendedLinkQueries): void {
+        if (str_contains($query->sql, 'recommended_links')) {
+            $recommendedLinkQueries++;
+        }
+    });
+
+    $this->get('http://eager-loaded-recommendations.osobliwy.com/recommended')->assertOk();
+
+    expect($recommendedLinkQueries)->toBe(3);
 });

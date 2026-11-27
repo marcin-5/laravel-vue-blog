@@ -177,8 +177,15 @@ export interface RecommendedLinkItem {
     description: string | null;
 }
 
+export interface RecommendedLinkCategoryItem {
+    id: number;
+    name: string;
+    recommendedLinks: RecommendedLinkItem[];
+}
+
 export interface PublicBlogRecommendedLinksPageProps extends PublicBlogPageProps {
     recommendedLinks: RecommendedLinkItem[];
+    recommendedLinkCategories: RecommendedLinkCategoryItem[];
     seo: SEO;
 }
 
