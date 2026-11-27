@@ -4,7 +4,6 @@ import BlogContentFields from '@/components/blogger/BlogContentFields.vue';
 import BlogSeoFields from '@/components/blogger/BlogSeoFields.vue';
 import FormPublishingSettings from '@/components/blogger/FormPublishingSettings.vue';
 import FormSubmitActions from '@/components/blogger/FormSubmitActions.vue';
-import BlogTagsSection from '@/components/blogger/BlogTagsSection.vue';
 import { useBlogFormLogic } from '@/composables/useBlogFormLogic';
 import { createApplyHandler } from '@/composables/useFormApply';
 import { useBloggerFormTranslations } from '@/composables/useBloggerFormTranslations';
@@ -128,8 +127,6 @@ function handleCancel() {
             <div v-if="form.errors.categories" class="mt-1 text-sm font-semibold text-error">
                 {{ form.errors.categories }}
             </div>
-
-            <BlogTagsSection v-if="props.isEdit && props.blog" :blog-id="props.blog.id" :id-prefix="`${fieldIdPrefix}-tags`" />
 
             <FormSubmitActions
                 :is-edit="props.isEdit"

@@ -4,6 +4,7 @@ use App\Models\Blog;
 use App\Models\Group;
 use App\Models\Post;
 use App\Models\User;
+use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\actingAs;
 
@@ -39,11 +40,13 @@ describe('group post extensions', function () {
         ]);
 
         actingAs($this->user)
-            ->getJson(route('blogger.posts.extensions.available', $this->post))
-            ->assertOk()
-            ->assertJsonCount(1)
-            ->assertJsonFragment(['title' => 'Group Extension'])
-            ->assertJsonMissing(['title' => 'Other Extension']);
+            ->get(route('blogger.posts.extensions.index', ['post' => $this->post->id, 'context' => 'group']))
+            ->assertSuccessful()
+            ->assertInertia(fn(Assert $page) => $page
+                ->where('context', 'group')
+                ->has('availableExtensions', 1)
+                ->where('availableExtensions.0.title', 'Group Extension')
+                ->where('backUrl', route('blogger.groups.content.index')));
     });
 
     it('still works for blog posts (without group)', function () {
@@ -63,18 +66,20 @@ describe('group post extensions', function () {
 
         // We need to act as owner of the blog for this one
         actingAs($this->otherUser)
-            ->getJson(route('blogger.posts.extensions.available', $blogPost))
-            ->assertOk()
-            ->assertJsonCount(1)
-            ->assertJsonFragment(['title' => 'Blog Extension']);
+            ->get(route('blogger.posts.extensions.index', $blogPost))
+            ->assertSuccessful()
+            ->assertInertia(fn(Assert $page) => $page
+                ->where('context', 'blog')
+                ->has('availableExtensions', 1)
+                ->where('availableExtensions.0.title', 'Blog Extension'));
     });
 
     it('allows owner of the group to manage extensions even if they dont own the blog', function () {
         actingAs($this->user)
-            ->postJson(route('blogger.posts.extensions.attach', $this->post), [
+            ->post(route('blogger.posts.extensions.attach', ['post' => $this->post->id, 'context' => 'group']), [
                 'extension_post_id' => $this->extension->id,
             ])
-            ->assertOk();
+            ->assertRedirect(route('blogger.posts.extensions.index', ['post' => $this->post->id, 'context' => 'group']));
 
         $this->assertDatabaseHas('post_extensions', [
             'post_id' => $this->post->id,
@@ -82,8 +87,12 @@ describe('group post extensions', function () {
         ]);
 
         actingAs($this->user)
-            ->deleteJson(route('blogger.posts.extensions.detach', [$this->post, $this->extension->id]))
-            ->assertOk();
+            ->delete(route('blogger.posts.extensions.detach', [
+                'post' => $this->post->id,
+                'extensionPostId' => $this->extension->id,
+                'context' => 'group',
+            ]))
+            ->assertRedirect(route('blogger.posts.extensions.index', ['post' => $this->post->id, 'context' => 'group']));
 
         $this->assertDatabaseMissing('post_extensions', [
             'post_id' => $this->post->id,

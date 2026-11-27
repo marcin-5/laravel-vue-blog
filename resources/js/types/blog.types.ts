@@ -333,7 +333,6 @@ export interface ListItemProps<T extends ManageableItem> {
     isCreatingPost?: boolean;
     isPostsExpanded?: boolean;
     editingPostId?: number | null;
-    expandedExtensionsForId?: number | null;
     creatingExtensionId?: number | null;
     editingExtensionId?: number | null;
     extensionForm?: any;
@@ -351,7 +350,6 @@ export interface ListItemEmits<T extends ManageableItem, P extends AdminPostItem
     (e: 'editPost', post: P): void;
     (e: 'submitEditPost', form: any, post: P): void;
     (e: 'cancelEditPost'): void;
-    (e: 'toggleExtensions', post: P): void;
     (e: 'createExtension', post: P): void;
     (e: 'submitCreateExtension', form: any, post: P): void;
     (e: 'cancelCreateExtension'): void;
@@ -375,7 +373,6 @@ export interface BloggerItemActions<P extends AdminPostItem = AdminPostItem> {
     createPost(): void;
     togglePosts(): void;
     editPost(post: P): void;
-    toggleExtensions(post: P): void;
     cancelEdit(): void;
     cancelCreatePost(): void;
     submitEdit(): void;
@@ -392,12 +389,12 @@ export interface BloggerItemActions<P extends AdminPostItem = AdminPostItem> {
 
 export interface BloggerItemContext<T extends ManageableItem, P extends AdminPostItem = AdminPostItem> {
     item: T;
+    sourceContext: 'blog' | 'group';
     subtitle?: string;
     isEditing: boolean;
     isCreatingPost: boolean;
     isPostsExpanded: boolean;
     editingPostId: number | null;
-    expandedExtensionsForId: number | null;
     editForm?: any;
     postEditForm?: any;
     actions: BloggerItemActions<P>;

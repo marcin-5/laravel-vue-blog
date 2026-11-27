@@ -45,9 +45,7 @@ function createPostState() {
 function createUIState() {
     return {
         expandedPostsForId: ref<number | null>(null),
-        expandedExtensionsForId: ref<number | null>(null),
         togglePosts: vi.fn(),
-        toggleExtensions: vi.fn(),
     };
 }
 
@@ -123,7 +121,7 @@ describe('useBloggerItemState', () => {
         expect(second.isCreatingPost.value).toBe(false);
     });
 
-    it('coordinates post and extension transitions within one item', () => {
+    it('resets extension content forms before editing a post', () => {
         const postState = createPostState();
         const uiState = createUIState();
         const entityState = createEntityState();
@@ -145,6 +143,9 @@ describe('useBloggerItemState', () => {
 
         mocks.postStates.push(postState);
         mocks.uiStates.push(uiState);
+
+        postState.creatingExtensionForId.value = 6;
+        postState.editingExtensionId.value = 8;
 
         const state = useBloggerItemState({
             item: createItem(1),
@@ -153,37 +154,17 @@ describe('useBloggerItemState', () => {
         });
 
         state.editPost(post);
-        state.toggleExtensions(post);
 
         expect(postState.startEditPost).toHaveBeenCalledWith(post);
-        expect(uiState.toggleExtensions).toHaveBeenCalledWith(post);
+        expect(postState.creatingExtensionForId.value).toBeNull();
+        expect(postState.editingExtensionId.value).toBeNull();
         expect(postState.postForm.reset).toHaveBeenCalled();
-        expect(postState.postEditForm.reset).toHaveBeenCalled();
     });
 
-    it('allows an expanded extension list to be collapsed', () => {
+    it('does not expose inline extension list state', () => {
         const postState = createPostState();
         const uiState = createUIState();
         const entityState = createEntityState();
-        const post: PostItem = {
-            id: 4,
-            blog_id: 1,
-            group_id: null,
-            title: 'Post',
-            slug: 'post',
-            seo_title: null,
-            excerpt: null,
-            summary: null,
-            content: null,
-            is_published: true,
-            visibility: 'public',
-            related_posts: [],
-            external_links: [],
-        };
-        uiState.expandedExtensionsForId.value = post.id;
-        uiState.toggleExtensions.mockImplementation((toggledPost: PostItem) => {
-            uiState.expandedExtensionsForId.value = uiState.expandedExtensionsForId.value === toggledPost.id ? null : toggledPost.id;
-        });
 
         mocks.postStates.push(postState);
         mocks.uiStates.push(uiState);
@@ -194,8 +175,7 @@ describe('useBloggerItemState', () => {
             startCreatePost: vi.fn(),
         });
 
-        state.toggleExtensions(post);
-
-        expect(uiState.expandedExtensionsForId.value).toBeNull();
+        expect(state).not.toHaveProperty('toggleExtensions');
+        expect(uiState).not.toHaveProperty('expandedExtensionsForId');
     });
 });

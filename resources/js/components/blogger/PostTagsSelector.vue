@@ -38,7 +38,7 @@ function toggle(slug: string) {
 const fieldId = computed(() => `${props.idPrefix}-selector`);
 
 async function loadTags() {
-    const res = await fetch(route('blogger.tags.index', { blog: props.blogId }), {
+    const res = await fetch(route('blogger.tags.options', { blog: props.blogId }), {
         headers: { Accept: 'application/json' },
     });
     available.value = await res.json();

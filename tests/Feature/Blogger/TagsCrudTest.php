@@ -4,69 +4,74 @@ use App\Models\Blog;
 use App\Models\Tag;
 use App\Models\TagLandingPage;
 use App\Models\User;
+use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\deleteJson;
-use function Pest\Laravel\getJson;
-use function Pest\Laravel\putJson;
-use function Pest\Laravel\patchJson;
-use function Pest\Laravel\postJson;
 
-it('allows owner to CRUD tags for a blog with unique slug per blog', function () {
+it('renders tag management with blog tags and landing page content', function () {
+    $owner = User::factory()->create();
+    $blog = Blog::factory()->for($owner)->create();
+    $tag = Tag::factory()->for($blog)->create(['name' => 'Laravel', 'slug' => 'laravel']);
+    TagLandingPage::factory()->for($tag)->create(['content' => '# Laravel']);
+
+    actingAs($owner)
+        ->get(route('blogger.tags.index', $blog))
+        ->assertSuccessful()
+        ->assertInertia(fn(Assert $page) => $page
+            ->component('app/blogger/Tags')
+            ->where('blog.id', $blog->id)
+            ->has('tags', 1)
+            ->where('tags.0.id', $tag->id)
+            ->where('tags.0.landing_page_content', '# Laravel'));
+});
+
+it('creates updates and deletes tags through Inertia redirects', function () {
     $owner = User::factory()->create();
     $blog = Blog::factory()->for($owner)->create();
 
     actingAs($owner);
 
-    // Create
-    $create = postJson(route('blogger.tags.store', $blog), [
+    $this->post(route('blogger.tags.store', $blog), [
         'name' => 'Laravel',
-    ])->assertCreated();
+    ])->assertRedirect(route('blogger.tags.index', $blog))
+        ->assertSessionHas('success', __('blogger.tags.created'));
 
-    $tagId = $create->json('id');
-    $tagSlug = $create->json('slug');
-    expect(Tag::whereKey($tagId)->where('blog_id', $blog->id)->exists())->toBeTrue();
+    $tag = Tag::query()->where('blog_id', $blog->id)->where('slug', 'laravel')->firstOrFail();
 
-    // Index
-    getJson(route('blogger.tags.index', $blog))
-        ->assertOk()
-        ->assertJsonFragment(['name' => 'Laravel']);
-
-    // Update
-    $updated = patchJson(route('blogger.tags.update', [$blog, $tagSlug]), [
+    $this->patch(route('blogger.tags.update', [$blog, $tag]), [
         'name' => 'PHP',
-    ])->assertOk()->assertJsonFragment(['name' => 'PHP']);
-    $tagSlug = $updated->json('slug');
+    ])->assertRedirect(route('blogger.tags.index', $blog))
+        ->assertSessionHas('success', __('blogger.tags.updated'));
 
-    // Uniqueness per blog
-    postJson(route('blogger.tags.store', $blog), [
-        'name' => 'PHP', // same slug -> should be 422 unique
-    ])->assertUnprocessable();
+    expect($tag->fresh()->name)->toBe('PHP')
+        ->and($tag->fresh()->slug)->toBe('php');
 
-    // Delete
-    deleteJson(route('blogger.tags.destroy', [$blog, $tagSlug]))->assertOk();
-    expect(Tag::whereKey($tagId)->exists())->toBeFalse();
+    $this->post(route('blogger.tags.store', $blog), [
+        'name' => 'PHP',
+    ])->assertSessionHasErrors('slug');
+
+    $this->delete(route('blogger.tags.destroy', [$blog, $tag->fresh()]))
+        ->assertRedirect(route('blogger.tags.index', $blog))
+        ->assertSessionHas('success', __('blogger.tags.deleted'));
+
+    expect(Tag::whereKey($tag->id)->exists())->toBeFalse();
 });
 
-it('allows a blog owner to read and save markdown landing content for a tag', function () {
+it('saves markdown landing page content through an Inertia redirect', function () {
     $owner = User::factory()->create();
     $blog = Blog::factory()->for($owner)->create();
     $tag = Tag::factory()->for($blog)->create();
 
-    actingAs($owner);
-
-    getJson(route('blogger.tags.landing-page.show', [$blog, $tag]))
-        ->assertOk()
-        ->assertExactJson(['content' => '']);
-
-    putJson(route('blogger.tags.landing-page.update', [$blog, $tag]), [
-        'content' => '# Tag content',
-    ])->assertOk()->assertExactJson(['content' => '# Tag content']);
+    actingAs($owner)
+        ->put(route('blogger.tags.landing-page.update', [$blog, $tag]), [
+            'content' => '# Tag content',
+        ])->assertRedirect(route('blogger.tags.index', $blog))
+        ->assertSessionHas('success', __('blogger.tags.landing_page_saved'));
 
     expect($tag->fresh()->landingPage->content)->toBe('# Tag content');
 });
 
-it('returns 404 when a blog owner requests landing content for another blogs tag', function () {
+it('returns 404 when a blog owner submits another blogs tag', function () {
     $owner = User::factory()->create();
     $blog = Blog::factory()->for($owner)->create();
     $otherBlog = Blog::factory()->for(User::factory()->create())->create();
@@ -74,10 +79,38 @@ it('returns 404 when a blog owner requests landing content for another blogs tag
 
     actingAs($owner);
 
-    getJson(route('blogger.tags.landing-page.show', [$blog, $tag]))->assertNotFound();
-    putJson(route('blogger.tags.landing-page.update', [$blog, $tag]), [
+    $this->patch(route('blogger.tags.update', [$blog, $tag]), [
+        'name' => 'Should not be saved',
+    ])->assertNotFound();
+
+    $this->put(route('blogger.tags.landing-page.update', [$blog, $tag]), [
         'content' => 'Should not be saved',
     ])->assertNotFound();
 
     expect(TagLandingPage::query()->exists())->toBeFalse();
+});
+
+it('forbids users without blog access from managing tags', function () {
+    $blog = Blog::factory()->for(User::factory())->create();
+    $tag = Tag::factory()->for($blog)->create();
+    $otherUser = User::factory()->create();
+
+    actingAs($otherUser);
+
+    $this->post(route('blogger.tags.store', $blog), ['name' => 'Unauthorized'])->assertForbidden();
+    $this->delete(route('blogger.tags.destroy', [$blog, $tag]))->assertForbidden();
+
+    expect(Tag::query()->where('blog_id', $blog->id)->count())->toBe(1)
+        ->and($tag->fresh()->name)->not->toBe('Unauthorized');
+});
+
+it('keeps the post tag selector read-only endpoint as JSON', function () {
+    $owner = User::factory()->create();
+    $blog = Blog::factory()->for($owner)->create();
+    $tag = Tag::factory()->for($blog)->create(['name' => 'Laravel', 'slug' => 'laravel']);
+
+    actingAs($owner)
+        ->getJson(route('blogger.tags.options', $blog))
+        ->assertOk()
+        ->assertExactJson([['id' => $tag->id, 'name' => 'Laravel', 'slug' => 'laravel']]);
 });

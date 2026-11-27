@@ -204,27 +204,27 @@ it('reorders links only within their category or uncategorized section', functio
     ]);
 
     actingAs($owner)
-        ->putJson(route('blogger.recommended-links.reorder', $blog), [
+        ->put(route('blogger.recommended-links.reorder', $blog), [
             'category_id' => null,
             'link_ids' => [$uncategorizedSecond->id, $uncategorizedFirst->id],
         ])
-        ->assertOk();
+        ->assertRedirect(route('blogger.recommended-links.index', $blog))
+        ->assertSessionHas('success', __('blogger.recommended_links.reordered'));
 
-    $this->putJson(route('blogger.recommended-links.reorder', $blog), [
+    $this->put(route('blogger.recommended-links.reorder', $blog), [
         'category_id' => $category->id,
         'link_ids' => [$categorizedSecond->id, $categorizedFirst->id],
-    ])->assertOk();
+    ])->assertRedirect(route('blogger.recommended-links.index', $blog));
 
     assertDatabaseHas('recommended_links', ['id' => $uncategorizedSecond->id, 'display_order' => 0]);
     assertDatabaseHas('recommended_links', ['id' => $uncategorizedFirst->id, 'display_order' => 1]);
     assertDatabaseHas('recommended_links', ['id' => $categorizedSecond->id, 'display_order' => 0]);
     assertDatabaseHas('recommended_links', ['id' => $categorizedFirst->id, 'display_order' => 1]);
 
-    $this->putJson(route('blogger.recommended-links.reorder', $blog), [
+    $this->put(route('blogger.recommended-links.reorder', $blog), [
         'category_id' => $category->id,
         'link_ids' => [$categorizedFirst->id, $uncategorizedFirst->id],
-    ])->assertUnprocessable()
-        ->assertJsonValidationErrors('link_ids');
+    ])->assertSessionHasErrors('link_ids');
 });
 
 it('rolls back every link order update when one link fails to save', function () {
@@ -240,7 +240,7 @@ it('rolls back every link order update when one link fails to save', function ()
     $this->withoutExceptionHandling();
 
     expect(fn() => actingAs($owner)
-        ->putJson(route('blogger.recommended-links.reorder', $blog), [
+        ->put(route('blogger.recommended-links.reorder', $blog), [
             'category_id' => null,
             'link_ids' => [$secondLink->id, $firstLink->id],
         ]))->toThrow(RuntimeException::class);

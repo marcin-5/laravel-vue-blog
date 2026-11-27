@@ -1,12 +1,11 @@
 <script lang="ts" setup>
-import PostExtensionManager from '@/components/blogger/PostExtensionManager.vue';
 import PostForm from '@/components/blogger/PostForm.vue';
 import { Badge } from '@/components/ui/badge';
 import { TooltipButton } from '@/components/ui/tooltip';
 import { useToast } from '@/composables/useToast';
 import type { AdminPostItem as PostItem } from '@/types/blog.types';
-import { usePage } from '@inertiajs/vue3';
-import { ChevronDown, ChevronUp, Copy, Pencil, X } from '@lucide/vue';
+import { router, usePage } from '@inertiajs/vue3';
+import { Copy, Link as LinkIcon, Pencil, X } from '@lucide/vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -18,15 +17,13 @@ interface Props {
     post: PostItem;
     isEditing: boolean;
     editForm?: any; // External edit form instance
-    isExtensionsExpanded: boolean;
+    sourceContext: 'blog' | 'group';
 }
 
 interface Emits {
     (e: 'edit', post: PostItem): void;
     (e: 'submitEdit', form: any, post: PostItem): void;
     (e: 'cancelEdit'): void;
-    (e: 'toggleExtensions', post: PostItem): void;
-    (e: 'updated'): void;
 }
 
 const props = defineProps<Props>();
@@ -35,10 +32,11 @@ const emit = defineEmits<Emits>();
 const editButtonVariant = computed(() => (props.isEditing ? 'exit' : 'toggle'));
 const editButtonLabel = computed(() => (props.isEditing ? t('blogger.post_item.close_button') : t('blogger.post_item.edit_button')));
 
-const extensionsButtonVariant = computed(() => (props.isExtensionsExpanded ? 'exit' : 'toggle'));
-const extensionsButtonLabel = computed(() =>
-    props.isExtensionsExpanded ? t('blogger.post_item.hide_extensions') : t('blogger.post_item.show_extensions'),
-);
+const extensionsUrl = computed(() => {
+    const parameters = props.sourceContext === 'group' ? { post: props.post.id, context: 'group' } : { post: props.post.id };
+
+    return route('blogger.posts.extensions.index', parameters);
+});
 
 const postUrl = computed(() => {
     // We try to find the blog slug from the page props or from the post object if it was loaded with it
@@ -107,13 +105,13 @@ function copyUrl() {
 
                 <TooltipButton
                     v-if="post.visibility !== 'extension'"
-                    :tooltip-content="extensionsButtonLabel"
-                    :variant="extensionsButtonVariant"
+                    :tooltip-content="t('blogger.post_item.manage_extensions')"
+                    data-testid="manage-extensions"
                     size="icon"
-                    @click="emit('toggleExtensions', post)"
+                    variant="ghost"
+                    @click="router.visit(extensionsUrl)"
                 >
-                    <ChevronUp v-if="isExtensionsExpanded" />
-                    <ChevronDown v-else />
+                    <LinkIcon />
                 </TooltipButton>
             </div>
         </div>
@@ -128,21 +126,5 @@ function copyUrl() {
             @cancel="emit('cancelEdit')"
             @submit="(form) => emit('submitEdit', form, post)"
         />
-
-        <!-- Extensions Management -->
-        <div v-if="isExtensionsExpanded" class="mt-4 ml-4 border-t pt-4">
-            <PostExtensionManager :post="post" @updated="emit('updated')" />
-
-            <div class="mt-4 flex justify-end">
-                <TooltipButton
-                    :tooltip-content="t('blogger.extensions.hide_list')"
-                    size="icon"
-                    variant="ghost"
-                    @click="emit('toggleExtensions', post)"
-                >
-                    <ChevronUp />
-                </TooltipButton>
-            </div>
-        </div>
     </div>
 </template>

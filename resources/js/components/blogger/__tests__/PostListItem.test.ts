@@ -1,8 +1,12 @@
+import { router } from '@inertiajs/vue3';
 import { mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
 import PostListItem from '../PostListItem.vue';
 
+const routeMock = vi.fn(() => 'extensions-url');
+
 vi.mock('@inertiajs/vue3', () => ({
+    router: { visit: vi.fn() },
     usePage: () => ({
         props: {
             blogs: [{ id: 4, slug: 'my-blog', main_domain: 'example.com' }],
@@ -18,10 +22,6 @@ vi.mock('@/composables/useToast', () => ({
     useToast: () => ({ toast: vi.fn() }),
 }));
 
-vi.mock('@/components/blogger/PostExtensionManager.vue', () => ({
-    default: { template: '<div />' },
-}));
-
 vi.mock('@/components/blogger/PostForm.vue', () => ({
     default: { template: '<div />' },
 }));
@@ -34,11 +34,38 @@ vi.mock('@/components/ui/tooltip', () => ({
     TooltipButton: {
         name: 'TooltipButton',
         props: ['tooltipContent'],
-        template: '<button @click="$emit(\'click\')"><slot /></button>',
+        inheritAttrs: false,
+        template: '<button v-bind="$attrs" @click="$emit(\'click\')"><slot /></button>',
     },
 }));
 
 describe('PostListItem.vue', () => {
+    it('navigates to extension management with its source context', async () => {
+        (global as any).route = routeMock;
+
+        const wrapper = mount(PostListItem, {
+            props: {
+                post: {
+                    id: 9,
+                    blog_id: 4,
+                    group_id: 7,
+                    title: 'Post',
+                    slug: 'post',
+                    visibility: 'public',
+                } as any,
+                isEditing: false,
+                sourceContext: 'group',
+            },
+        });
+
+        await wrapper.get('[data-testid="manage-extensions"]').trigger('click');
+
+        expect(routeMock).toHaveBeenCalledWith('blogger.posts.extensions.index', {
+            post: 9,
+            context: 'group',
+        });
+        expect(router.visit).toHaveBeenCalledWith('extensions-url');
+    });
     it('copies the unlisted post URL using its blog subdomain', async () => {
         const writeText = vi.fn().mockResolvedValue(undefined);
         Object.defineProperty(navigator, 'clipboard', {
@@ -57,7 +84,7 @@ describe('PostListItem.vue', () => {
                     visibility: 'unlisted',
                 } as any,
                 isEditing: false,
-                isExtensionsExpanded: false,
+                sourceContext: 'blog',
             },
         });
 

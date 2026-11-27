@@ -22,7 +22,6 @@ const state = useGroupItemState(() => props.item);
 const {
     editForm,
     editingPostId,
-    expandedExtensionsForId,
     isCreatingPost,
     isEditing,
     isPostsExpanded,
@@ -43,18 +42,17 @@ const {
     submitEdit,
     submitEditExtension,
     submitEditPost,
-    toggleExtensions,
     togglePosts,
 } = state;
 const postForm = rawPostForm as any;
 const context = computed<BloggerItemContext<Group, PostItem>>(() => ({
     item: props.item,
+    sourceContext: 'group',
     subtitle: props.item.slug,
     isEditing: isEditing.value,
     isCreatingPost: isCreatingPost.value,
     isPostsExpanded: isPostsExpanded.value,
     editingPostId: editingPostId.value,
-    expandedExtensionsForId: expandedExtensionsForId.value,
     editForm,
     postEditForm,
     actions: {
@@ -62,7 +60,6 @@ const context = computed<BloggerItemContext<Group, PostItem>>(() => ({
         createPost,
         togglePosts,
         editPost,
-        toggleExtensions,
         cancelEdit,
         cancelCreatePost,
         submitEdit,
@@ -77,14 +74,10 @@ const context = computed<BloggerItemContext<Group, PostItem>>(() => ({
         cancelEditExtension,
     },
 }));
-
-function handleReload() {
-    router.reload({ only: ['groups'] });
-}
 </script>
 
 <template>
-    <BloggerListItem :context="context" @post-updated="handleReload">
+    <BloggerListItem :context="context">
         <template #actions="{ handleEdit, handleCreatePost, handleTogglePosts, isCreatingPost, isEditing, isPostsExpanded }">
             <ItemActionGroup
                 :can-edit="canEdit"

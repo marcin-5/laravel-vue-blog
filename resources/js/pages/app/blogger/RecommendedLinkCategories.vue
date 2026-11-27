@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/composables/useToast';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
-import { Head, Link, router, useHttp } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { ArrowLeft } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -25,7 +25,7 @@ const { t } = useI18n();
 const { toast } = useToast();
 const editingCategory = ref<RecommendedLinkCategory | null>(null);
 const categories = ref([...props.categories]);
-const orderHttp = useHttp<{ category_ids: number[] }, { success: boolean }>({ category_ids: [] });
+const isReordering = ref(false);
 const title = computed(() => t('blogger.recommended_link_categories.title', { blog: props.blog.name }));
 const breadcrumbs = computed<BreadcrumbItem[]>(() => [
     { title: t('blogger.breadcrumb.dashboard'), href: '/dashboard' },
@@ -43,7 +43,7 @@ watch(
 
 function moveCategory(index: number, direction: -1 | 1) {
     const destination = index + direction;
-    if (destination < 0 || destination >= categories.value.length || orderHttp.processing) {
+    if (destination < 0 || destination >= categories.value.length || isReordering.value) {
         return;
     }
 
@@ -52,15 +52,26 @@ function moveCategory(index: number, direction: -1 | 1) {
     const [category] = reorderedCategories.splice(index, 1);
     reorderedCategories.splice(destination, 0, category);
     categories.value = reorderedCategories;
-    orderHttp.category_ids = reorderedCategories.map((item) => item.id);
+    isReordering.value = true;
 
-    orderHttp.put(route('blogger.recommended-link-categories.reorder', props.blog.id)).catch(() => {
-        categories.value = previousOrder;
-        toast({
-            title: t('blogger.recommended_link_categories.reorder_failed'),
-            variant: 'destructive',
-        });
-    });
+    router.put(
+        route('blogger.recommended-link-categories.reorder', props.blog.id),
+        { category_ids: reorderedCategories.map((item) => item.id) },
+        {
+            only: ['categories'],
+            preserveScroll: true,
+            onError: () => {
+                categories.value = previousOrder;
+                toast({
+                    title: t('blogger.recommended_link_categories.reorder_failed'),
+                    variant: 'destructive',
+                });
+            },
+            onFinish: () => {
+                isReordering.value = false;
+            },
+        },
+    );
 }
 
 function editCategory(category: RecommendedLinkCategory) {
@@ -113,7 +124,7 @@ function deleteCategory(category: RecommendedLinkCategory) {
 
             <RecommendedLinkCategoryList
                 :categories="categories"
-                :processing="orderHttp.processing"
+                :processing="isReordering"
                 @delete="deleteCategory"
                 @edit="editCategory"
                 @move="moveCategory"

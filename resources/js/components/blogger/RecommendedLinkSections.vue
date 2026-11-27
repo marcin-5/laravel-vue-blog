@@ -2,7 +2,7 @@
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/composables/useToast';
-import { router, useForm, useHttp } from '@inertiajs/vue3';
+import { router, useForm } from '@inertiajs/vue3';
 import { ArrowDown, ArrowUp, Pencil, Trash2 } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -38,15 +38,12 @@ const { t } = useI18n();
 const { toast } = useToast();
 const links = ref([...props.recommendedLinks]);
 const editingId = ref<number | null>(null);
+const isReordering = ref(false);
 const editForm = useForm({
     url: '',
     name: '',
     description: '',
     category_id: null as number | null,
-});
-const reorderHttp = useHttp<{ category_id: number | null; link_ids: number[] }, { success: boolean }>({
-    category_id: null,
-    link_ids: [],
 });
 const sections = computed<LinkSection[]>(() => {
     const orderedLinks = [...links.value].sort((a, b) => a.display_order - b.display_order || a.id - b.id);
@@ -104,7 +101,7 @@ function deleteLink(link: RecommendedLink) {
 
 function moveLink(section: LinkSection, index: number, direction: -1 | 1) {
     const destination = index + direction;
-    if (destination < 0 || destination >= section.links.length || reorderHttp.processing) {
+    if (destination < 0 || destination >= section.links.length || isReordering.value) {
         return;
     }
 
@@ -118,16 +115,26 @@ function moveLink(section: LinkSection, index: number, direction: -1 | 1) {
     links.value = links.value.map((item) =>
         reorderedOrder.has(item.id) ? { ...item, display_order: reorderedOrder.get(item.id)! } : item,
     );
-    reorderHttp.category_id = section.categoryId;
-    reorderHttp.link_ids = reorderedIds;
+    isReordering.value = true;
 
-    reorderHttp.put(route('blogger.recommended-links.reorder', props.blogId)).catch(() => {
-        links.value = previousLinks;
-        toast({
-            title: t('blogger.recommended_links.reorder_failed'),
-            variant: 'destructive',
-        });
-    });
+    router.put(
+        route('blogger.recommended-links.reorder', props.blogId),
+        { category_id: section.categoryId, link_ids: reorderedIds },
+        {
+            only: ['recommendedLinks'],
+            preserveScroll: true,
+            onError: () => {
+                links.value = previousLinks;
+                toast({
+                    title: t('blogger.recommended_links.reorder_failed'),
+                    variant: 'destructive',
+                });
+            },
+            onFinish: () => {
+                isReordering.value = false;
+            },
+        },
+    );
 }
 </script>
 
@@ -206,7 +213,7 @@ function moveLink(section: LinkSection, index: number, direction: -1 | 1) {
                         <div class="flex items-center gap-1">
                             <Button
                                 :aria-label="t('blogger.recommended_links.move_up')"
-                                :disabled="reorderHttp.processing || index === 0"
+                                :disabled="isReordering || index === 0"
                                 class="size-8"
                                 size="icon"
                                 type="button"
@@ -217,7 +224,7 @@ function moveLink(section: LinkSection, index: number, direction: -1 | 1) {
                             </Button>
                             <Button
                                 :aria-label="t('blogger.recommended_links.move_down')"
-                                :disabled="reorderHttp.processing || index === section.links.length - 1"
+                                :disabled="isReordering || index === section.links.length - 1"
                                 class="size-8"
                                 size="icon"
                                 type="button"

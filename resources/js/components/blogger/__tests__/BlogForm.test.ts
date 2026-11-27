@@ -40,9 +40,6 @@ vi.mock('@/components/blogger/FormPublishingSettings.vue', () => ({
 vi.mock('@/components/blogger/FormSubmitActions.vue', () => ({
     default: { name: 'FormSubmitActions', template: '<div>FormSubmitActions</div>' },
 }));
-vi.mock('@/components/blogger/BlogTagsSection.vue', () => ({
-    default: { name: 'BlogTagsSection', template: '<div>BlogTagsSection</div>' },
-}));
 vi.mock('@/components/blogger/PostFormField.vue', () => ({
     default: { name: 'PostFormField', template: '<div>PostFormField</div>' },
 }));
@@ -70,6 +67,18 @@ describe('BlogForm.vue', () => {
 
         expect(wrapper.findComponent({ name: 'BlogSeoFields' }).exists()).toBe(true);
         expect(wrapper.findComponent({ name: 'BlogContentFields' }).exists()).toBe(true);
+    });
+
+    it('does not embed tag management in the blog form', () => {
+        const wrapper = mount(BlogForm, {
+            props: {
+                ...defaultProps,
+                isEdit: true,
+                blog: { id: 1, name: 'Test Blog', slug: 'test-blog' } as any,
+            },
+        });
+
+        expect(wrapper.findComponent({ name: 'BlogTagsSection' }).exists()).toBe(false);
     });
 
     it('does not render a theme editor or include theme in form data', async () => {

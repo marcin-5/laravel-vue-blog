@@ -21,7 +21,6 @@ const state = useBlogItemState(() => props.item);
 const {
     editForm,
     editingPostId,
-    expandedExtensionsForId,
     isCreatingPost,
     isEditing,
     isPostsExpanded,
@@ -42,18 +41,17 @@ const {
     submitEdit,
     submitEditExtension,
     submitEditPost,
-    toggleExtensions,
     togglePosts,
 } = state;
 const postForm = rawPostForm as any;
 const context = computed<BloggerItemContext<Blog, PostItem>>(() => ({
     item: props.item,
+    sourceContext: 'blog',
     subtitle: `/${props.item.slug} · ${props.item.creation_date ?? ''}`,
     isEditing: isEditing.value,
     isCreatingPost: isCreatingPost.value,
     isPostsExpanded: isPostsExpanded.value,
     editingPostId: editingPostId.value,
-    expandedExtensionsForId: expandedExtensionsForId.value,
     editForm,
     postEditForm,
     actions: {
@@ -61,7 +59,6 @@ const context = computed<BloggerItemContext<Blog, PostItem>>(() => ({
         createPost,
         togglePosts,
         editPost,
-        toggleExtensions,
         cancelEdit,
         cancelCreatePost,
         submitEdit,
@@ -76,15 +73,11 @@ const context = computed<BloggerItemContext<Blog, PostItem>>(() => ({
         cancelEditExtension,
     },
 }));
-
-function handleReload() {
-    router.reload({ only: ['blogs'] });
-}
 </script>
 
 <template>
     <div :id="`blog-${item.id}`">
-        <BloggerListItem :context="context" @post-updated="handleReload">
+        <BloggerListItem :context="context">
             <template #badges>
                 <div v-if="item.categories && item.categories.length" class="mt-1 flex flex-wrap gap-2">
                     <span
@@ -103,8 +96,10 @@ function handleReload() {
                     :is-editing="isEditing"
                     :is-posts-expanded="isPostsExpanded"
                     :recommended-links-url="route('blogger.recommended-links.index', item.id)"
+                    :tags-url="route('blogger.tags.index', item.id)"
                     @edit="handleEdit"
                     @manage-recommended-links="router.visit(route('blogger.recommended-links.index', item.id))"
+                    @manage-tags="router.visit(route('blogger.tags.index', item.id))"
                     @create-post="handleCreatePost"
                     @toggle-posts="handleTogglePosts"
                 />

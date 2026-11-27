@@ -4,6 +4,7 @@ use App\Http\Controllers\Blogger\BlogsController;
 use App\Http\Controllers\Blogger\GroupMembersController;
 use App\Http\Controllers\Blogger\GroupsController;
 use App\Http\Controllers\Blogger\PostsController;
+use App\Http\Controllers\Blogger\PostExtensionsController;
 use App\Http\Controllers\Blogger\TagsController;
 use App\Http\Controllers\Blogger\PublicDataController;
 use App\Http\Controllers\Blogger\RecommendedLinkCategoriesController;
@@ -72,25 +73,22 @@ Route::middleware(['auth', 'verified', 'noindex'])->group(function () {
     Route::patch('posts/{post}', [PostsController::class, 'update'])->name('posts.update');
 
     // Blog Tags management
-    Route::prefix('blogs/{blog}')->group(function () {
+    Route::prefix('blogs/{blog}')->scopeBindings()->group(function () {
+        Route::get('tags/options', [TagsController::class, 'options'])->name('blogger.tags.options');
         Route::get('tags', [TagsController::class, 'index'])->name('blogger.tags.index');
         Route::post('tags', [TagsController::class, 'store'])->name('blogger.tags.store');
-        Route::get('tags/{tag}/landing-page', [TagsController::class, 'landingPage'])->name('blogger.tags.landing-page.show');
         Route::put('tags/{tag}/landing-page', [TagsController::class, 'updateLandingPage'])->name('blogger.tags.landing-page.update');
         Route::patch('tags/{tag}', [TagsController::class, 'update'])->name('blogger.tags.update');
         Route::delete('tags/{tag}', [TagsController::class, 'destroy'])->name('blogger.tags.destroy');
     });
 
-    // Post Extensions (New pivot-based routes)
-    Route::prefix('blogger/posts/{post}')->group(function () {
-        Route::get('extensions/available', [PostsController::class, 'availableExtensions'])
-            ->name('blogger.posts.extensions.available');
-        Route::post('extensions', [PostsController::class, 'attachExtension'])
-            ->name('blogger.posts.extensions.attach');
-        Route::delete('extensions/{extensionPostId}', [PostsController::class, 'detachExtension'])
-            ->name('blogger.posts.extensions.detach');
-        Route::put('extensions/reorder', [PostsController::class, 'reorderExtensions'])
-            ->name('blogger.posts.extensions.reorder');
+    Route::prefix('blogger/posts/{post}/extensions')->name('blogger.posts.extensions.')->group(function () {
+        Route::get('/', [PostExtensionsController::class, 'index'])->name('index');
+        Route::post('/', [PostExtensionsController::class, 'store'])->name('attach');
+        Route::delete('/{extensionPostId}', [PostExtensionsController::class, 'destroy'])
+            ->whereNumber('extensionPostId')
+            ->name('detach');
+        Route::put('/reorder', [PostExtensionsController::class, 'reorder'])->name('reorder');
     });
 
     // Markdown preview route

@@ -54,19 +54,18 @@ it('stores category order and requires every category in the blog exactly once',
     $secondCategory = RecommendedLinkCategory::factory()->for($blog)->create(['display_order' => 1]);
 
     actingAs($owner)
-        ->putJson(route('blogger.recommended-link-categories.reorder', $blog), [
+        ->put(route('blogger.recommended-link-categories.reorder', $blog), [
             'category_ids' => [$secondCategory->id, $firstCategory->id],
         ])
-        ->assertOk()
-        ->assertJson(['success' => true]);
+        ->assertRedirect(route('blogger.recommended-link-categories.index', $blog))
+        ->assertSessionHas('success', __('blogger.recommended_link_categories.reordered'));
 
     assertDatabaseHas('recommended_link_categories', ['id' => $secondCategory->id, 'display_order' => 0]);
     assertDatabaseHas('recommended_link_categories', ['id' => $firstCategory->id, 'display_order' => 1]);
 
-    $this->putJson(route('blogger.recommended-link-categories.reorder', $blog), [
+    $this->put(route('blogger.recommended-link-categories.reorder', $blog), [
         'category_ids' => [$secondCategory->id],
-    ])->assertUnprocessable()
-        ->assertJsonValidationErrors('category_ids');
+    ])->assertSessionHasErrors('category_ids');
 
     assertDatabaseHas('recommended_link_categories', ['id' => $secondCategory->id, 'display_order' => 0]);
     assertDatabaseHas('recommended_link_categories', ['id' => $firstCategory->id, 'display_order' => 1]);
@@ -85,7 +84,7 @@ it('rolls back the complete category reorder when an update is canceled', functi
     $this->withoutExceptionHandling();
 
     expect(fn() => actingAs($owner)
-        ->putJson(route('blogger.recommended-link-categories.reorder', $blog), [
+        ->put(route('blogger.recommended-link-categories.reorder', $blog), [
             'category_ids' => [$secondCategory->id, $firstCategory->id],
         ]))->toThrow(RuntimeException::class);
 
@@ -104,15 +103,14 @@ it('denies access to categories outside the blog owner boundary', function () {
 
     $this->get(route('blogger.recommended-link-categories.index', $otherBlog))->assertForbidden();
     $this->post(route('blogger.recommended-link-categories.store', $otherBlog), ['name' => 'Denied'])->assertForbidden();
-    $this->putJson(route('blogger.recommended-link-categories.reorder', $otherBlog), [
+    $this->put(route('blogger.recommended-link-categories.reorder', $otherBlog), [
         'category_ids' => [$category->id],
     ])->assertForbidden();
     $this->patch(route('blogger.recommended-link-categories.update', [$blog, $category]), ['name' => 'Changed'])->assertNotFound();
     $this->delete(route('blogger.recommended-link-categories.destroy', [$blog, $category]))->assertNotFound();
-    $this->putJson(route('blogger.recommended-link-categories.reorder', $blog), [
+    $this->put(route('blogger.recommended-link-categories.reorder', $blog), [
         'category_ids' => [$category->id],
-    ])->assertUnprocessable()
-        ->assertJsonValidationErrors('category_ids.0');
+    ])->assertSessionHasErrors('category_ids.0');
 
     expect($category->fresh()->name)->not->toBe('Changed');
 });

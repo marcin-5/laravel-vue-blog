@@ -83,9 +83,7 @@ vi.mock('@/composables/usePostForm', () => ({
 vi.mock('@/composables/useUIState', () => ({
     useUIState: () => ({
         expandedPostsForId: { value: null },
-        expandedExtensionsForId: { value: null },
         togglePosts: vi.fn(),
-        toggleExtensions: vi.fn(),
     }),
 }));
 

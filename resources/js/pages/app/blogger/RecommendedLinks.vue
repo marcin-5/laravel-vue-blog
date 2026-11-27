@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ArrowLeft } from '@lucide/vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -53,12 +54,20 @@ function submitCreate() {
         <div class="mx-auto flex w-full max-w-4xl flex-col gap-6 p-4">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <h1 class="text-xl font-semibold">{{ title }}</h1>
-                <Link
-                    :href="route('blogger.recommended-link-categories.index', props.blog.id)"
-                    class="inline-flex items-center rounded-md border px-3 py-2 text-sm font-medium transition hover:bg-muted"
-                >
-                    {{ t('blogger.recommended_links.manage_categories') }}
-                </Link>
+                <div class="flex flex-wrap items-center gap-2">
+                    <Button as-child variant="outline">
+                        <Link :href="route('blogs.index')">
+                            <ArrowLeft class="mr-2 size-4" />
+                            {{ t('blogger.recommended_links.back_to_blogs') }}
+                        </Link>
+                    </Button>
+                    <Link
+                        :href="route('blogger.recommended-link-categories.index', props.blog.id)"
+                        class="inline-flex items-center rounded-md border px-3 py-2 text-sm font-medium transition hover:bg-muted"
+                    >
+                        {{ t('blogger.recommended_links.manage_categories') }}
+                    </Link>
+                </div>
             </div>
 
             <form class="space-y-4 rounded-xl border border-sidebar-border/70 bg-card p-5 shadow-sm" @submit.prevent="submitCreate">

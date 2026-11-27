@@ -42,16 +42,15 @@ export function useBloggerItemState<TEntity extends ManageableItem>({ item, enti
         postState.postEditForm.reset();
     }
 
-    function resetExtensionInteraction() {
+    function resetExtensionFormState() {
         postState.creatingExtensionForId.value = null;
         postState.editingExtensionId.value = null;
-        uiState.expandedExtensionsForId.value = null;
     }
 
     function resetPostInteraction() {
         resetPostCreation();
         resetPostEdit();
-        resetExtensionInteraction();
+        resetExtensionFormState();
     }
 
     function edit() {
@@ -64,7 +63,7 @@ export function useBloggerItemState<TEntity extends ManageableItem>({ item, enti
         resetEntityEdit();
         resetPostEdit();
         uiState.expandedPostsForId.value = null;
-        resetExtensionInteraction();
+        resetExtensionFormState();
         startCreatePost(postState);
     }
 
@@ -72,25 +71,17 @@ export function useBloggerItemState<TEntity extends ManageableItem>({ item, enti
         resetEntityEdit();
         resetPostCreation();
         resetPostEdit();
-        resetExtensionInteraction();
+        resetExtensionFormState();
         uiState.togglePosts(getItem());
     }
 
     function editPost(post: PostItem) {
         resetEntityEdit();
         resetPostCreation();
-        resetExtensionInteraction();
+        resetExtensionFormState();
         postState.startEditPost(post);
     }
 
-    function toggleExtensions(post: PostItem) {
-        resetEntityEdit();
-        resetPostCreation();
-        resetPostEdit();
-        postState.creatingExtensionForId.value = null;
-        postState.editingExtensionId.value = null;
-        uiState.toggleExtensions(post);
-    }
 
     return {
         ...postState,
@@ -99,12 +90,10 @@ export function useBloggerItemState<TEntity extends ManageableItem>({ item, enti
         isCreatingPost,
         isPostsExpanded,
         editingPostId: postState.editingPostId,
-        expandedExtensionsForId: uiState.expandedExtensionsForId,
         edit,
         createPost,
         togglePosts,
         editPost,
-        toggleExtensions,
         submitEdit: () => entityState.submitEdit(getItem()),
     };
 }

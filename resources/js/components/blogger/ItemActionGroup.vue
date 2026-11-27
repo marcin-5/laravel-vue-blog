@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { TooltipButton } from '@/components/ui/tooltip';
-import { ChevronDown, ChevronUp, Link as LinkIcon, Pencil, Plus, X } from '@lucide/vue';
+import { ChevronDown, ChevronUp, Link as LinkIcon, Pencil, Plus, Tag, X } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -12,12 +12,14 @@ interface Props {
     showAddPost?: boolean;
     canEdit?: boolean;
     recommendedLinksUrl?: string;
+    tagsUrl?: string;
 }
 
 withDefaults(defineProps<Props>(), {
     showAddPost: true,
     canEdit: true,
     recommendedLinksUrl: undefined,
+    tagsUrl: undefined,
 });
 
 defineEmits<{
@@ -25,6 +27,7 @@ defineEmits<{
     (e: 'createPost'): void;
     (e: 'togglePosts'): void;
     (e: 'manageRecommendedLinks'): void;
+    (e: 'manageTags'): void;
 }>();
 </script>
 
@@ -40,6 +43,10 @@ defineEmits<{
             @click="$emit('manageRecommendedLinks')"
         >
             <LinkIcon />
+        </TooltipButton>
+
+        <TooltipButton v-if="tagsUrl" :tooltip-content="t('blogger.actions.manage_tags')" size="icon" variant="ghost" @click="$emit('manageTags')">
+            <Tag />
         </TooltipButton>
 
         <TooltipButton

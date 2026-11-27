@@ -7,9 +7,6 @@ import { useI18n } from 'vue-i18n';
 const props = defineProps<{
     context: BloggerItemContext<T, P>;
 }>();
-const emit = defineEmits<{
-    postUpdated: [];
-}>();
 
 const { t } = useI18n();
 const actions = props.context.actions;
@@ -17,7 +14,6 @@ const handleEdit = () => actions.edit();
 const handleCreatePost = () => actions.createPost();
 const handleTogglePosts = () => actions.togglePosts();
 const handleEditPost = (post: AdminPostItem) => actions.editPost(post as P);
-const handleToggleExtensions = (post: AdminPostItem) => actions.toggleExtensions(post as P);
 </script>
 
 <template>
@@ -65,13 +61,11 @@ const handleToggleExtensions = (post: AdminPostItem) => actions.toggleExtensions
                     :key="post.id"
                     :edit-form="context.postEditForm"
                     :is-editing="context.editingPostId === post.id"
-                    :is-extensions-expanded="context.expandedExtensionsForId === post.id"
                     :post="post"
+                    :source-context="context.sourceContext"
                     @edit="handleEditPost"
-                    @updated="emit('postUpdated')"
                     @cancel-edit="context.actions.cancelEditPost"
                     @submit-edit="context.actions.submitEditPost"
-                    @toggle-extensions="handleToggleExtensions"
                 />
             </div>
             <div v-else class="py-4 text-center text-sm text-muted-foreground">

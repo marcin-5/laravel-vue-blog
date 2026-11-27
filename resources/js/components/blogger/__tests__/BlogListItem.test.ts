@@ -1,7 +1,10 @@
 import type { AdminBlog } from '@/types/blog.types';
+import { router } from '@inertiajs/vue3';
 import { mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
 import BlogListItem from '../BlogListItem.vue';
+
+const routeMock = vi.fn((name: string, id: number) => `${name}/${id}`);
 
 const mocks = vi.hoisted(() => ({
     entityStates: [] as any[],
@@ -16,7 +19,7 @@ vi.mock('vue-i18n', () => ({
 
 vi.mock('@inertiajs/vue3', () => ({
     useForm: vi.fn(),
-    router: { reload: vi.fn() },
+    router: { reload: vi.fn(), visit: vi.fn() },
 }));
 
 vi.mock('@/composables/useBlogForm', () => ({
@@ -40,11 +43,33 @@ vi.mock('@/components/blogger/BloggerListItem.vue', () => ({
         name: 'BloggerListItem',
         props: ['context'],
         emits: ['create-post'],
-        template: '<button type="button" @click="$emit(\'create-post\', context.item)">{{ context.item.name }}</button>',
+        setup() {
+            const noop = () => {};
+
+            return { noop };
+        },
+        template: `<div>
+            <slot
+                name="actions"
+                :handle-edit="noop"
+                :handle-create-post="noop"
+                :handle-toggle-posts="noop"
+                :is-creating-post="false"
+                :is-editing="false"
+                :is-posts-expanded="false"
+            />
+            <button type="button" @click="$emit('create-post', context.item)">{{ context.item.name }}</button>
+        </div>`,
     },
 }));
 vi.mock('@/components/blogger/BlogForm.vue', () => ({ default: { template: '<div />' } }));
-vi.mock('@/components/blogger/ItemActionGroup.vue', () => ({ default: { template: '<div />' } }));
+vi.mock('@/components/blogger/ItemActionGroup.vue', () => ({
+    default: {
+        name: 'ItemActionGroup',
+        emits: ['manage-tags'],
+        template: '<button data-testid="manage-tags" type="button" @click="$emit(\'manage-tags\')">Manage tags</button>',
+    },
+}));
 vi.mock('@/components/blogger/PostForm.vue', () => ({ default: { template: '<div />' } }));
 
 function createEntityState() {
@@ -91,9 +116,7 @@ function createPostState() {
 function createUIState() {
     return {
         expandedPostsForId: { value: null },
-        expandedExtensionsForId: { value: null },
         togglePosts: vi.fn(),
-        toggleExtensions: vi.fn(),
     };
 }
 
@@ -113,6 +136,22 @@ function createBlog(id: number): AdminBlog {
 }
 
 describe('BlogListItem.vue', () => {
+    it('navigates to the blog tag management page', async () => {
+        mocks.entityStates.push(createEntityState());
+        mocks.postStates.push(createPostState());
+        mocks.uiStates.push(createUIState());
+
+        const wrapper = mount(BlogListItem, {
+            props: { item: createBlog(1), categories: [] },
+            global: { mocks: { route: routeMock } },
+        });
+
+        await wrapper.get('[data-testid="manage-tags"]').trigger('click');
+
+        expect(routeMock).toHaveBeenCalledWith('blogger.tags.index', 1);
+        expect(router.visit).toHaveBeenCalledWith('blogger.tags.index/1');
+    });
+
     it('keeps create-post actions isolated between mounted items', async () => {
         const firstPostState = createPostState();
         const secondPostState = createPostState();
@@ -121,11 +160,14 @@ describe('BlogListItem.vue', () => {
         mocks.postStates.push(firstPostState, secondPostState);
         mocks.uiStates.push(createUIState(), createUIState());
 
-        const wrapper = mount({
-            components: { BlogListItem },
-            template: '<div><BlogListItem v-for="blog in blogs" :key="blog.id" :categories="[]" :item="blog" /></div>',
-            data: () => ({ blogs: [createBlog(1), createBlog(2)] }),
-        });
+        const wrapper = mount(
+            {
+                components: { BlogListItem },
+                template: '<div><BlogListItem v-for="blog in blogs" :key="blog.id" :categories="[]" :item="blog" /></div>',
+                data: () => ({ blogs: [createBlog(1), createBlog(2)] }),
+            },
+            { global: { mocks: { route: routeMock } } },
+        );
 
         wrapper.findAllComponents({ name: 'BloggerListItem' })[0].props('context').actions.createPost();
 

@@ -3,6 +3,7 @@
 use App\Models\Blog;
 use App\Models\Post;
 use App\Models\User;
+use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\actingAs;
 
@@ -58,18 +59,45 @@ describe('post extension basics', function () {
 });
 
 describe('post extension management actions', function () {
-    it('can attach extension to a post', function () {
+    it('renders assigned and available extensions as Inertia props', function () {
+        $attached = Post::factory()->create([
+            'blog_id' => $this->blog->id,
+            'visibility' => Post::VIS_EXTENSION,
+            'title' => 'Attached extension',
+        ]);
+        $available = Post::factory()->create([
+            'blog_id' => $this->blog->id,
+            'visibility' => Post::VIS_EXTENSION,
+            'title' => 'Available extension',
+        ]);
+        $this->post->extensions()->attach($attached->id, ['display_order' => 1]);
+
+        actingAs($this->user)
+            ->get(route('blogger.posts.extensions.index', $this->post))
+            ->assertSuccessful()
+            ->assertInertia(fn(Assert $page) => $page
+                ->component('app/blogger/PostExtensions')
+                ->where('post.id', $this->post->id)
+                ->where('context', 'blog')
+                ->has('extensions', 1)
+                ->where('extensions.0.id', $attached->id)
+                ->has('availableExtensions', 1)
+                ->where('availableExtensions.0.id', $available->id));
+    });
+
+    it('can attach an extension to a post through an Inertia redirect', function () {
         $extension = Post::factory()->create([
             'blog_id' => $this->blog->id,
             'visibility' => Post::VIS_EXTENSION,
         ]);
 
         actingAs($this->user)
-            ->postJson(route('blogger.posts.extensions.attach', $this->post), [
+            ->post(route('blogger.posts.extensions.attach', $this->post), [
                 'extension_post_id' => $extension->id,
                 'display_order' => 1,
             ])
-            ->assertOk();
+            ->assertRedirect(route('blogger.posts.extensions.index', $this->post))
+            ->assertSessionHas('success', __('blogger.extensions.attached_success'));
 
         expect($this->post->fresh()->extensions)->toHaveCount(1);
         $this->assertDatabaseHas('post_extensions', [
@@ -79,7 +107,7 @@ describe('post extension management actions', function () {
         ]);
     });
 
-    it('can detach extension from a post', function () {
+    it('can detach an extension from a post through an Inertia redirect', function () {
         $extension = Post::factory()->create([
             'blog_id' => $this->blog->id,
             'visibility' => Post::VIS_EXTENSION,
@@ -88,13 +116,25 @@ describe('post extension management actions', function () {
         $this->post->extensions()->attach($extension->id);
 
         actingAs($this->user)
-            ->deleteJson(route('blogger.posts.extensions.detach', [$this->post, $extension->id]))
-            ->assertOk();
+            ->delete(route('blogger.posts.extensions.detach', [$this->post, $extension->id]))
+            ->assertRedirect(route('blogger.posts.extensions.index', $this->post))
+            ->assertSessionHas('success', __('blogger.extensions.detached_success'));
 
         expect($this->post->fresh()->extensions)->toHaveCount(0);
     });
 
-    it('can reorder extensions', function () {
+    it('rejects detaching an extension that is not attached to this post', function () {
+        $extension = Post::factory()->create([
+            'blog_id' => $this->blog->id,
+            'visibility' => Post::VIS_EXTENSION,
+        ]);
+
+        actingAs($this->user)
+            ->delete(route('blogger.posts.extensions.detach', [$this->post, $extension->id]))
+            ->assertSessionHasErrors(['extension_post_id']);
+    });
+
+    it('can reorder extensions through an Inertia redirect', function () {
         $ext1 = Post::factory()->create(['blog_id' => $this->blog->id, 'visibility' => Post::VIS_EXTENSION]);
         $ext2 = Post::factory()->create(['blog_id' => $this->blog->id, 'visibility' => Post::VIS_EXTENSION]);
 
@@ -102,13 +142,14 @@ describe('post extension management actions', function () {
         $this->post->extensions()->attach($ext2->id, ['display_order' => 2]);
 
         actingAs($this->user)
-            ->putJson(route('blogger.posts.extensions.reorder', $this->post), [
+            ->put(route('blogger.posts.extensions.reorder', $this->post), [
                 'extensions' => [
                     ['id' => $ext1->id, 'display_order' => 2],
                     ['id' => $ext2->id, 'display_order' => 1],
                 ],
             ])
-            ->assertOk();
+            ->assertRedirect(route('blogger.posts.extensions.index', $this->post))
+            ->assertSessionHas('success', __('blogger.extensions.reordered_success'));
 
         $extensions = $this->post->fresh()->extensions;
         expect($extensions->first()->id)->toBe($ext2->id)
@@ -116,32 +157,21 @@ describe('post extension management actions', function () {
     });
 });
 
-describe('available extensions listing', function () {
-    it('excludes already attached extensions from available list', function () {
-        $ext1 = Post::factory()->create(
-            ['blog_id' => $this->blog->id, 'visibility' => Post::VIS_EXTENSION, 'title' => 'Ext 1'],
-        );
-        $ext2 = Post::factory()->create(
-            ['blog_id' => $this->blog->id, 'visibility' => Post::VIS_EXTENSION, 'title' => 'Ext 2'],
-        );
-
-        $this->post->extensions()->attach($ext1->id);
-
-        actingAs($this->user)
-            ->getJson(route('blogger.posts.extensions.available', $this->post))
-            ->assertOk()
-            ->assertJsonCount(1)
-            ->assertJsonFragment(['title' => 'Ext 2'])
-            ->assertJsonMissing(['title' => 'Ext 1']);
-    });
-
-    it('excludes self from available extensions', function () {
+describe('extension selection', function () {
+    it('excludes attached extensions and the current post from available props', function () {
+        $attached = Post::factory()->create([
+            'blog_id' => $this->blog->id,
+            'visibility' => Post::VIS_EXTENSION,
+            'title' => 'Attached extension',
+        ]);
+        $this->post->extensions()->attach($attached->id);
         $this->post->update(['visibility' => Post::VIS_EXTENSION]);
 
         actingAs($this->user)
-            ->getJson(route('blogger.posts.extensions.available', $this->post))
-            ->assertOk()
-            ->assertJsonMissing(['title' => $this->post->title]);
+            ->get(route('blogger.posts.extensions.index', $this->post))
+            ->assertInertia(fn(Assert $page) => $page
+                ->where('availableExtensions', [])
+                ->where('extensions.0.id', $attached->id));
     });
 });
 
@@ -154,9 +184,17 @@ describe('authorization and validation', function () {
         ]);
 
         actingAs($otherUser)
-            ->postJson(route('blogger.posts.extensions.attach', $this->post), [
+            ->post(route('blogger.posts.extensions.attach', $this->post), [
                 'extension_post_id' => $extension->id,
             ])
+            ->assertForbidden();
+    });
+
+    it('prevents users without post access from viewing extension management', function () {
+        $otherUser = User::factory()->create();
+
+        actingAs($otherUser)
+            ->get(route('blogger.posts.extensions.index', $this->post))
             ->assertForbidden();
     });
 
@@ -169,7 +207,7 @@ describe('authorization and validation', function () {
         $this->post->extensions()->attach($extension->id);
 
         actingAs($otherUser)
-            ->deleteJson(route('blogger.posts.extensions.detach', [$this->post, $extension->id]))
+            ->delete(route('blogger.posts.extensions.detach', [$this->post, $extension->id]))
             ->assertForbidden();
     });
 
@@ -179,31 +217,55 @@ describe('authorization and validation', function () {
         $this->post->extensions()->attach($ext1->id, ['display_order' => 1]);
 
         actingAs($otherUser)
-            ->putJson(route('blogger.posts.extensions.reorder', $this->post), [
+            ->put(route('blogger.posts.extensions.reorder', $this->post), [
                 'extensions' => [['id' => $ext1->id, 'display_order' => 2]],
             ])
             ->assertForbidden();
     });
 
-    it('requires valid extension_post_id when attaching', function () {
+    it('requires a valid extension_post_id when attaching', function () {
         actingAs($this->user)
-            ->postJson(route('blogger.posts.extensions.attach', $this->post), [
+            ->post(route('blogger.posts.extensions.attach', $this->post), [
                 'extension_post_id' => 99999,
             ])
-            ->assertJsonValidationErrors(['extension_post_id']);
+            ->assertSessionHasErrors(['extension_post_id']);
     });
 
-    it('validates reorder structure', function () {
-        actingAs($this->user)
-            ->putJson(route('blogger.posts.extensions.reorder', $this->post), [
-                'extensions' => 'not-an-array',
-            ])
-            ->assertJsonValidationErrors(['extensions']);
+    it('rejects extensions that do not belong to the post when attaching', function () {
+        $otherBlog = Blog::factory()->for(User::factory())->create();
+        $extension = Post::factory()->create([
+            'blog_id' => $otherBlog->id,
+            'visibility' => Post::VIS_EXTENSION,
+        ]);
 
         actingAs($this->user)
-            ->putJson(route('blogger.posts.extensions.reorder', $this->post), [
+            ->post(route('blogger.posts.extensions.attach', $this->post), [
+                'extension_post_id' => $extension->id,
+            ])
+            ->assertSessionHasErrors(['extension_post_id']);
+    });
+
+    it('validates reorder structure and attached extension membership', function () {
+        actingAs($this->user)
+            ->put(route('blogger.posts.extensions.reorder', $this->post), [
+                'extensions' => 'not-an-array',
+            ])
+            ->assertSessionHasErrors(['extensions']);
+
+        actingAs($this->user)
+            ->put(route('blogger.posts.extensions.reorder', $this->post), [
                 'extensions' => [['id' => $this->post->id]], // missing display_order
             ])
-            ->assertJsonValidationErrors(['extensions.0.display_order']);
+            ->assertSessionHasErrors(['extensions.0.display_order']);
+
+        $extension = Post::factory()->create(['blog_id' => $this->blog->id, 'visibility' => Post::VIS_EXTENSION]);
+        $this->post->extensions()->attach($extension->id, ['display_order' => 1]);
+        $otherExtension = Post::factory()->create(['blog_id' => $this->blog->id, 'visibility' => Post::VIS_EXTENSION]);
+
+        actingAs($this->user)
+            ->put(route('blogger.posts.extensions.reorder', $this->post), [
+                'extensions' => [['id' => $otherExtension->id, 'display_order' => 1]],
+            ])
+            ->assertSessionHasErrors(['extensions.0.id']);
     });
 });

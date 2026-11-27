@@ -3,131 +3,81 @@
 namespace App\Http\Controllers\Blogger;
 
 use App\Http\Controllers\AuthenticatedController;
+use App\Http\Requests\Blogger\DestroyTagRequest;
+use App\Http\Requests\Blogger\StoreTagRequest;
+use App\Http\Requests\Blogger\UpdateTagLandingPageRequest;
+use App\Http\Requests\Blogger\UpdateTagRequest;
 use App\Models\Blog;
 use App\Models\Tag;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class TagsController extends AuthenticatedController
 {
-    /**
-     * List tags for a blog.
-     */
-    public function index(Blog $blog): JsonResponse
+    public function index(Blog $blog): Response
     {
         $this->authorize('update', $blog);
 
-        return response()->json(
-            $blog->tags()->orderBy('name')->get(['id', 'name', 'slug'])
-        );
-    }
-
-    /**
-     * Get landing page content for a tag.
-     */
-    public function landingPage(Blog $blog, Tag $tag): JsonResponse
-    {
-        $this->authorize('update', $blog);
-        abort_unless($tag->blog_id === $blog->id, 404);
-
-        return response()->json([
-            'content' => $tag->landingPage?->content ?? '',
+        return Inertia::render('app/blogger/Tags', [
+            'blog' => $blog->only(['id', 'name']),
+            'tags' => $blog->tags()
+                ->with('landingPage')
+                ->orderBy('name')
+                ->get(['id', 'name', 'slug'])
+                ->map(fn(Tag $tag): array => [
+                    'id' => $tag->id,
+                    'name' => $tag->name,
+                    'slug' => $tag->slug,
+                    'landing_page_content' => $tag->landingPage?->content ?? '',
+                ])
+                ->values(),
         ]);
     }
 
-    /**
-     * Save landing page content for a tag.
-     */
-    public function updateLandingPage(Request $request, Blog $blog, Tag $tag): JsonResponse
+    public function options(Blog $blog): JsonResponse
     {
         $this->authorize('update', $blog);
-        abort_unless($tag->blog_id === $blog->id, 404);
 
-        $data = $request->validate([
-            'content' => ['nullable', 'string'],
-        ]);
+        return response()->json($blog->tags()->orderBy('name')->get(['id', 'name', 'slug']));
+    }
 
+    public function updateLandingPage(UpdateTagLandingPageRequest $request, Blog $blog, Tag $tag): RedirectResponse
+    {
         $landingPage = $tag->landingPage()->firstOrNew();
-        $landingPage->content = $data['content'] ?? '';
+        $landingPage->content = $request->validated('content') ?? '';
         $landingPage->save();
 
-        return response()->json([
-            'content' => $landingPage->content,
-        ]);
+        return redirect()
+            ->route('blogger.tags.index', $blog)
+            ->with('success', __('blogger.tags.landing_page_saved'));
     }
 
-    /**
-     * Create a new tag for a blog.
-     */
-    public function store(Request $request, Blog $blog): JsonResponse
+    public function store(StoreTagRequest $request, Blog $blog): RedirectResponse
     {
-        $this->authorize('update', $blog);
+        $blog->tags()->create($request->safe()->only(['name', 'slug']));
 
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:100'],
-            'slug' => ['nullable', 'string', 'max:120'],
-        ]);
-
-        $slug = $data['slug'] ?? str($data['name'])->slug()->toString();
-        $exists = Tag::query()->where('blog_id', $blog->id)->where('slug', $slug)->exists();
-        if ($exists) {
-            throw ValidationException::withMessages([
-                'slug' => __('validation.unique', ['attribute' => 'slug']),
-            ]);
-        }
-
-        $tag = $blog->tags()->create([
-            'name' => $data['name'],
-            'slug' => $slug,
-        ]);
-
-        return response()->json(['id' => $tag->id, 'name' => $tag->name, 'slug' => $tag->slug], 201);
+        return redirect()
+            ->route('blogger.tags.index', $blog)
+            ->with('success', __('blogger.tags.created'));
     }
 
-    /**
-     * Update an existing tag on a blog.
-     */
-    public function update(Request $request, Blog $blog, Tag $tag): JsonResponse
+    public function update(UpdateTagRequest $request, Blog $blog, Tag $tag): RedirectResponse
     {
-        $this->authorize('update', $blog);
-        abort_unless($tag->blog_id === $blog->id, 404);
+        $tag->update($request->safe()->only(['name', 'slug']));
 
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:100'],
-            'slug' => ['nullable', 'string', 'max:120'],
-        ]);
-
-        $slug = $data['slug'] ?? str($data['name'])->slug()->toString();
-        $exists = Tag::query()
-            ->where('blog_id', $blog->id)
-            ->where('slug', $slug)
-            ->whereKeyNot($tag->id)
-            ->exists();
-        if ($exists) {
-            throw ValidationException::withMessages([
-                'slug' => __('validation.unique', ['attribute' => 'slug']),
-            ]);
-        }
-
-        $tag->update([
-            'name' => $data['name'],
-            'slug' => $slug,
-        ]);
-
-        return response()->json(['id' => $tag->id, 'name' => $tag->name, 'slug' => $tag->slug]);
+        return redirect()
+            ->route('blogger.tags.index', $blog)
+            ->with('success', __('blogger.tags.updated'));
     }
 
-    /**
-     * Delete a tag from a blog.
-     */
-    public function destroy(Blog $blog, Tag $tag): JsonResponse
+    public function destroy(DestroyTagRequest $request, Blog $blog, Tag $tag): RedirectResponse
     {
-        $this->authorize('update', $blog);
-        abort_unless($tag->blog_id === $blog->id, 404);
-
         $tag->delete();
 
-        return response()->json(['status' => 'ok']);
+        return redirect()
+            ->route('blogger.tags.index', $blog)
+            ->with('success', __('blogger.tags.deleted'));
     }
 }

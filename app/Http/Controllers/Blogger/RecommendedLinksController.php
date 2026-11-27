@@ -8,7 +8,6 @@ use App\Http\Requests\Blogger\StoreRecommendedLinkRequest;
 use App\Http\Requests\Blogger\UpdateRecommendedLinkRequest;
 use App\Models\Blog;
 use App\Models\RecommendedLink;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -60,7 +59,7 @@ class RecommendedLinksController extends AuthenticatedController
     /**
      * @throws Throwable
      */
-    public function reorder(ReorderRecommendedLinksRequest $request, Blog $blog): JsonResponse
+    public function reorder(ReorderRecommendedLinksRequest $request, Blog $blog): RedirectResponse
     {
         $categoryId = $request->validated('category_id');
         $linkIds = array_map('intval', $request->validated('link_ids'));
@@ -91,7 +90,9 @@ class RecommendedLinksController extends AuthenticatedController
 
         $this->clearNavigationCache($blog);
 
-        return response()->json(['success' => true]);
+        return redirect()
+            ->route('blogger.recommended-links.index', $blog)
+            ->with('success', __('blogger.recommended_links.reordered'));
     }
 
     public function update(

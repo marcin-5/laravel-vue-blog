@@ -8,7 +8,6 @@ use App\Http\Requests\Blogger\StoreRecommendedLinkCategoryRequest;
 use App\Http\Requests\Blogger\UpdateRecommendedLinkCategoryRequest;
 use App\Models\Blog;
 use App\Models\RecommendedLinkCategory;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -64,7 +63,7 @@ class RecommendedLinkCategoriesController extends AuthenticatedController
     /**
      * @throws Throwable
      */
-    public function reorder(ReorderRecommendedLinkCategoriesRequest $request, Blog $blog): JsonResponse
+    public function reorder(ReorderRecommendedLinkCategoriesRequest $request, Blog $blog): RedirectResponse
     {
         $this->authorize('update', $blog);
 
@@ -88,6 +87,8 @@ class RecommendedLinkCategoriesController extends AuthenticatedController
             }
         });
 
-        return response()->json(['success' => true]);
+        return redirect()
+            ->route('blogger.recommended-link-categories.index', $blog)
+            ->with('success', __('blogger.recommended_link_categories.reordered'));
     }
 }

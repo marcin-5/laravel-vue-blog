@@ -27,11 +27,11 @@ describe('BloggerListItem.vue', () => {
                 is_published: true,
                 posts: [post],
             },
+            sourceContext: 'group' as const,
             isEditing: false,
             isCreatingPost: false,
             isPostsExpanded: true,
             editingPostId: post.id,
-            expandedExtensionsForId: null,
             editForm: { name: 'Group edit form' },
             postEditForm,
             actions: {
@@ -39,7 +39,6 @@ describe('BloggerListItem.vue', () => {
                 createPost: vi.fn(),
                 togglePosts: vi.fn(),
                 editPost: vi.fn(),
-                toggleExtensions: vi.fn(),
                 cancelEdit: vi.fn(),
                 cancelCreatePost: vi.fn(),
                 submitEdit: vi.fn(),
@@ -57,7 +56,7 @@ describe('BloggerListItem.vue', () => {
 
         const postListItemStub = {
             name: 'PostListItem',
-            props: ['editForm', 'isEditing', 'isExtensionsExpanded', 'post'],
+            props: ['editForm', 'isEditing', 'post', 'sourceContext'],
             template: '<div />',
         };
 
@@ -74,5 +73,6 @@ describe('BloggerListItem.vue', () => {
         });
 
         expect(wrapper.findComponent(postListItemStub).props('editForm')).toEqual(postEditForm);
+        expect(wrapper.findComponent(postListItemStub).props('sourceContext')).toBe('group');
     });
 });
