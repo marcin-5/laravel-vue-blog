@@ -16,7 +16,7 @@ const props = withDefaults(
         fontSetActive?: boolean;
     }>(),
     {
-        maxWidth: 'max-w-[1024px]',
+        maxWidth: 'max-w-screen-xl',
         hasAlternativeFonts: false,
         fontSetActive: false,
     },

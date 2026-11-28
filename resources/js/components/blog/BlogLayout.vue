@@ -52,7 +52,7 @@ const textClass = computed(() => (props.isPublic ? 'text-primary' : 'text-foregr
         <PublicNavbar
             :font-set-active="fontSetPreference"
             :has-alternative-fonts="hasAlternativeFonts"
-            :maxWidth="navbarMaxWidth"
+            :maxWidth="props.isPublic && !hasSidebar ? 'max-w-screen-xl' : navbarMaxWidth"
             @toggle-font-set="fontSetPreference = !fontSetPreference"
         />
 
