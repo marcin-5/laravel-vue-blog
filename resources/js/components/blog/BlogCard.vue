@@ -20,7 +20,7 @@ const hasCategories = computed(() => props.blog.categories.length > 0);
 </script>
 
 <template>
-    <Card class="border-stone-300 bg-olive-100 p-4 hover:shadow-md dark:border-neutral-700 dark:bg-mist-900">
+    <Card class="gap-2 border-stone-300 bg-olive-100 p-4 hover:shadow-md dark:border-neutral-700 dark:bg-mist-900">
         <h2 class="mb-1 font-header text-xl font-semibold text-mist-800 dark:text-mist-100">
             <a :href="blogUrl" class="hover:text-neutral-500 hover:dark:text-stone-300" @click="handleContentClick">
                 {{ blog.name }}
