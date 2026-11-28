@@ -101,7 +101,20 @@
             "url": "Submitted URL",
             "no_data": "No IndexNow submissions found",
             "deleted_blog": "Deleted blog (ID: {id})",
-            "deleted_post": "Deleted post (ID: {id})"
+            "deleted_post": "Deleted post (ID: {id})",
+            "indexnow_failure_count": "{count} failed IndexNow job(s)",
+            "indexnow_latest_failures": "Showing up to 10 latest failures.",
+            "indexnow_more": "More",
+            "indexnow_hide_failures": "Hide details",
+            "indexnow_loading": "Loading failure details...",
+            "indexnow_load_failed": "Failed to load failure details.",
+            "indexnow_no_failures": "No failed IndexNow jobs remain.",
+            "indexnow_retry": "Retry",
+            "indexnow_retrying": "Retrying...",
+            "indexnow_retry_failed": "Could not retry this failed job.",
+            "indexnow_copy": "Copy to clipboard",
+            "indexnow_copied": "Copied",
+            "indexnow_copy_failed": "Could not copy the stack trace."
         },
         "stats": {
             "title": "Statistics",

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import AppLayout from '@/layouts/AppLayout.vue';
+import IndexNowFailures from '@/components/admin/IndexNowFailures.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -37,6 +38,7 @@ const props = defineProps<{
     perPage: number;
     perPageOptions: number[];
     logTypes: LogType[];
+    indexNowFailureCount: number;
 }>();
 
 const { t } = useI18n();
@@ -54,20 +56,32 @@ function updateFilters(filters: Record<string, string | number>): void {
             <div class="flex flex-wrap items-end gap-4">
                 <label class="flex flex-col gap-2 text-sm font-medium">
                     {{ t('admin.logs.type') }}
-                    <select class="rounded-md border bg-background px-3 py-2" :value="props.type" @change="updateFilters({ type: ($event.target as HTMLSelectElement).value, per_page: props.perPage })">
-                        <option v-for="logType in props.logTypes" :key="logType.value" :value="logType.value">{{ t(`admin.logs.${logType.value}`) }}</option>
+                    <select
+                        :value="props.type"
+                        class="rounded-md border bg-background px-3 py-2"
+                        @change="updateFilters({ type: ($event.target as HTMLSelectElement).value, per_page: props.perPage })"
+                    >
+                        <option v-for="logType in props.logTypes" :key="logType.value" :value="logType.value">
+                            {{ t(`admin.logs.${logType.value}`) }}
+                        </option>
                     </select>
                 </label>
                 <label class="flex flex-col gap-2 text-sm font-medium">
                     {{ t('list.per_page') }}
-                    <select class="rounded-md border bg-background px-3 py-2" :value="props.perPage" @change="updateFilters({ type: props.type, per_page: Number(($event.target as HTMLSelectElement).value) })">
+                    <select
+                        :value="props.perPage"
+                        class="rounded-md border bg-background px-3 py-2"
+                        @change="updateFilters({ type: props.type, per_page: Number(($event.target as HTMLSelectElement).value) })"
+                    >
                         <option v-for="pageSize in props.perPageOptions" :key="pageSize" :value="pageSize">{{ pageSize }}</option>
                     </select>
                 </label>
             </div>
 
+            <IndexNowFailures :failure-count="props.indexNowFailureCount" />
+
             <div class="overflow-x-auto rounded-lg border">
-                <table class="w-full min-w-[900px] text-left text-sm">
+                <table class="w-full min-w-225 text-left text-sm">
                     <thead class="bg-muted/50">
                         <tr>
                             <th class="p-3">{{ t('admin.logs.submitted_at') }}</th>
@@ -79,12 +93,14 @@ function updateFilters(filters: Record<string, string | number>): void {
                     </thead>
                     <tbody>
                         <tr v-for="submission in props.logs.data" :key="submission.id" class="border-t align-top">
-                            <td class="whitespace-nowrap p-3">{{ new Date(submission.submitted_at).toLocaleString() }}</td>
+                            <td class="p-3 whitespace-nowrap">{{ new Date(submission.submitted_at).toLocaleString() }}</td>
                             <td class="p-3">
                                 <span :class="submission.succeeded ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'">
                                     {{ submission.succeeded ? t('admin.logs.success') : t('admin.logs.failure') }}
                                 </span>
-                                <span v-if="submission.http_status" class="block text-xs text-muted-foreground">HTTP {{ submission.http_status }}</span>
+                                <span v-if="submission.http_status" class="block text-xs text-muted-foreground"
+                                    >HTTP {{ submission.http_status }}</span
+                                >
                             </td>
                             <td class="p-3">
                                 {{ submission.blog?.name ?? (submission.blog_id ? t('admin.logs.deleted_blog', { id: submission.blog_id }) : '—') }}
@@ -92,10 +108,10 @@ function updateFilters(filters: Record<string, string | number>): void {
                             <td class="p-3">
                                 {{ submission.post?.title ?? (submission.post_id ? t('admin.logs.deleted_post', { id: submission.post_id }) : '—') }}
                             </td>
-                            <td class="max-w-xl break-all p-3 font-mono text-xs">{{ submission.url }}</td>
+                            <td class="max-w-xl p-3 font-mono text-xs break-all">{{ submission.url }}</td>
                         </tr>
                         <tr v-if="props.logs.data.length === 0">
-                            <td colspan="5" class="p-8 text-center text-muted-foreground">{{ t('admin.logs.no_data') }}</td>
+                            <td class="p-8 text-center text-muted-foreground" colspan="5">{{ t('admin.logs.no_data') }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -104,8 +120,12 @@ function updateFilters(filters: Record<string, string | number>): void {
             <div class="flex items-center justify-between gap-4 text-sm">
                 <span>{{ props.logs.total }} · {{ props.logs.current_page }} / {{ props.logs.last_page }}</span>
                 <div class="flex gap-2">
-                    <Link v-if="props.logs.prev_page_url" :href="props.logs.prev_page_url" class="rounded-md border px-3 py-2">{{ t('pagination.previous') }}</Link>
-                    <Link v-if="props.logs.next_page_url" :href="props.logs.next_page_url" class="rounded-md border px-3 py-2">{{ t('pagination.next') }}</Link>
+                    <Link v-if="props.logs.prev_page_url" :href="props.logs.prev_page_url" class="rounded-md border px-3 py-2">{{
+                        t('pagination.previous')
+                    }}</Link>
+                    <Link v-if="props.logs.next_page_url" :href="props.logs.next_page_url" class="rounded-md border px-3 py-2">{{
+                        t('pagination.next')
+                    }}</Link>
                 </div>
             </div>
         </div>

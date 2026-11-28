@@ -102,7 +102,20 @@
             "url": "Zgłoszony URL",
             "no_data": "Brak zgłoszeń IndexNow",
             "deleted_blog": "Usunięty blog (ID: {id})",
-            "deleted_post": "Usunięty wpis (ID: {id})"
+            "deleted_post": "Usunięty post (ID: {id})",
+            "indexnow_failure_count": "Nieudane zadania IndexNow: {count}",
+            "indexnow_latest_failures": "Wyświetlono maksymalnie 10 najnowszych błędów.",
+            "indexnow_more": "Więcej",
+            "indexnow_hide_failures": "Ukryj szczegóły",
+            "indexnow_loading": "Pobieranie szczegółów błędów...",
+            "indexnow_load_failed": "Nie udało się pobrać szczegółów błędów.",
+            "indexnow_no_failures": "Brak nieudanych zadań IndexNow.",
+            "indexnow_retry": "Ponów",
+            "indexnow_retrying": "Ponawianie...",
+            "indexnow_retry_failed": "Nie udało się ponowić tego zadania.",
+            "indexnow_copy": "Kopiuj do schowka",
+            "indexnow_copied": "Skopiowano",
+            "indexnow_copy_failed": "Nie udało się skopiować stack trace."
         },
         "stats": {
             "title": "Statystyki",

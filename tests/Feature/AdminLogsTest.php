@@ -1,11 +1,14 @@
 <?php
 
 use App\Enums\UserRole;
+use App\Jobs\IndexNowSubmitJob;
 use App\Models\Blog;
 use App\Models\IndexNowSubmission;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
@@ -93,6 +96,136 @@ test('admin cannot select an unsupported page size', function () {
         ->assertSessionHasErrors('per_page');
 });
 
+test('admin sees the count of failed IndexNow jobs without exception details in page props', function () {
+    $admin = User::factory()->create(['role' => UserRole::Admin->value]);
+
+    DB::table('failed_jobs')->insert([
+        [
+            'uuid' => (string) Str::uuid(),
+            'connection' => 'redis',
+            'queue' => 'default',
+            'payload' => indexNowFailedJobPayload(IndexNowSubmitJob::class),
+            'exception' => 'IndexNow failure details',
+            'failed_at' => now(),
+        ],
+        [
+            'uuid' => (string) Str::uuid(),
+            'connection' => 'redis',
+            'queue' => 'default',
+            'payload' => indexNowFailedJobPayload('App\\Jobs\\OtherJob'),
+            'exception' => 'Another job failure',
+            'failed_at' => now(),
+        ],
+    ]);
+
+    $response = $this->actingAs($admin)
+        ->get(route('admin.logs.index'))
+        ->assertOk()
+        ->assertInertia(fn(Assert $page) => $page
+            ->where('indexNowFailureCount', 1)
+            ->missing('indexNowFailures'),
+        );
+
+    $response->assertDontSee('IndexNow failure details');
+});
+
+test('only admins can access failed IndexNow job details', function () {
+    $user = User::factory()->create(['role' => UserRole::Blogger->value]);
+
+    $this->actingAs($user)
+        ->getJson(route('admin.logs.indexnow-failures'))
+        ->assertForbidden();
+
+    $this->actingAs($user)
+        ->postJson(route('admin.logs.indexnow-failures.retry', (string) Str::uuid()))
+        ->assertForbidden();
+});
+
+test('admin can load the latest bounded IndexNow failure details without job payloads', function () {
+    $admin = User::factory()->create(['role' => UserRole::Admin->value]);
+    $failureUuids = [];
+
+    foreach (range(1, 12) as $number) {
+        $uuid = (string) Str::uuid();
+        $failureUuids[$number] = $uuid;
+
+        DB::table('failed_jobs')->insert([
+            'uuid' => $uuid,
+            'connection' => 'redis',
+            'queue' => 'default',
+            'payload' => indexNowFailedJobPayload(IndexNowSubmitJob::class),
+            'exception' => "IndexNow exception {$number}",
+            'failed_at' => now()->subSeconds(13 - $number),
+        ]);
+    }
+
+    DB::table('failed_jobs')->insert([
+        'uuid' => (string) Str::uuid(),
+        'connection' => 'redis',
+        'queue' => 'default',
+        'payload' => indexNowFailedJobPayload('App\\Jobs\\OtherJob'),
+        'exception' => 'Unrelated job exception',
+        'failed_at' => now(),
+    ]);
+
+    $this->actingAs($admin)
+        ->getJson(route('admin.logs.indexnow-failures'))
+        ->assertOk()
+        ->assertJsonCount(10, 'failures')
+        ->assertJsonPath('failures.0.uuid', $failureUuids[12])
+        ->assertJsonPath('failures.0.exception', 'IndexNow exception 12')
+        ->assertJsonMissingPath('failures.0.payload')
+        ->assertJsonMissing(['exception' => 'Unrelated job exception']);
+});
+
+test('missing and non-IndexNow failed job UUIDs return not found', function () {
+    $admin = User::factory()->create(['role' => UserRole::Admin->value]);
+    $uuid = (string) Str::uuid();
+
+    DB::table('failed_jobs')->insert([
+        'uuid' => $uuid,
+        'connection' => 'redis',
+        'queue' => 'default',
+        'payload' => indexNowFailedJobPayload('App\\Jobs\\OtherJob'),
+        'exception' => 'Unrelated job exception',
+        'failed_at' => now(),
+    ]);
+
+    $this->actingAs($admin)
+        ->getJson(route('admin.logs.indexnow-failures'))
+        ->assertOk()
+        ->assertJsonCount(0, 'failures');
+
+    $this->actingAs($admin)
+        ->postJson(route('admin.logs.indexnow-failures.retry', $uuid))
+        ->assertNotFound();
+
+    $this->actingAs($admin)
+        ->postJson(route('admin.logs.indexnow-failures.retry', (string) Str::uuid()))
+        ->assertNotFound();
+});
+
+test('admin can retry one failed IndexNow job by UUID', function () {
+    $admin = User::factory()->create(['role' => UserRole::Admin->value]);
+    $uuid = (string) Str::uuid();
+
+    DB::table('failed_jobs')->insert([
+        'uuid' => $uuid,
+        'connection' => 'sync',
+        'queue' => 'default',
+        'payload' => indexNowFailedJobPayload(IndexNowSubmitJob::class, new IndexNowSubmitJob),
+        'exception' => 'Previous IndexNow failure',
+        'failed_at' => now(),
+    ]);
+
+    $this->actingAs($admin)
+        ->postJson(route('admin.logs.indexnow-failures.retry', $uuid))
+        ->assertOk()
+        ->assertJson(['retried' => true]);
+
+    $this->assertDatabaseMissing('failed_jobs', ['uuid' => $uuid]);
+});
+
 test('history retains model identifiers when related records no longer exist', function () {
     $admin = User::factory()->create(['role' => UserRole::Admin->value]);
     $submission = IndexNowSubmission::create([
@@ -114,3 +247,16 @@ test('history retains model identifiers when related records no longer exist', f
             ->where('logs.data.0.url', $submission->url),
         );
 });
+
+function indexNowFailedJobPayload(string $jobClass, ?object $job = null): string
+{
+    return json_encode([
+        'uuid' => (string) Str::uuid(),
+        'displayName' => $jobClass,
+        'job' => 'Illuminate\\Queue\\CallQueuedHandler@call',
+        'data' => [
+            'commandName' => $jobClass,
+            'command' => serialize($job ?? new stdClass),
+        ],
+    ], JSON_THROW_ON_ERROR);
+}
