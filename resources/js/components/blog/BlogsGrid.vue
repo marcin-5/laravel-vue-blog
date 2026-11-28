@@ -8,7 +8,7 @@ const props = defineProps<{
     class?: string;
 }>();
 
-const GRID_BASE_CLASSES = 'grid grid-cols-1 gap-4 sm:grid-cols-2';
+const GRID_BASE_CLASSES = 'grid grid-cols-1 gap-4 xl:grid-cols-2';
 
 const gridClasses = computed(() => [GRID_BASE_CLASSES, props.class]);
 </script>

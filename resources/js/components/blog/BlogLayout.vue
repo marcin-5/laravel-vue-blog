@@ -23,12 +23,24 @@ const { hasSidebar, asideStyle, mainStyle, asideOrderClass, mainOrderClass, navb
     maxPercent: SIDEBAR_MAX_WIDTH,
 });
 
-const fontSetPreference = useFontSetPreference(() => props.ownerType, () => props.ownerId);
-const { mergedThemeStyle, hasAlternativeFonts } = useBlogTheme(computed(() => props.theme || undefined), fontSetPreference);
+const fontSetPreference = useFontSetPreference(
+    () => props.ownerType,
+    () => props.ownerId,
+);
+const { mergedThemeStyle, hasAlternativeFonts } = useBlogTheme(
+    computed(() => props.theme || undefined),
+    fontSetPreference,
+);
 
 const containerClass = computed(() => [
     'mx-auto w-full p-4 sm:px-12 md:px-16',
-    props.maxWidthClass ? props.maxWidthClass : hasSidebar.value ? 'max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl' : 'max-w-screen-lg',
+    props.maxWidthClass
+        ? props.maxWidthClass
+        : hasSidebar.value
+          ? 'max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl'
+          : props.isPublic
+            ? 'max-w-screen-xl'
+            : 'max-w-screen-lg',
 ]);
 
 const textClass = computed(() => (props.isPublic ? 'text-primary' : 'text-foreground'));
