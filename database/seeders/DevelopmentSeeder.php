@@ -50,8 +50,8 @@ class DevelopmentSeeder extends Seeder
 
     private const array FONT_PAIRS = [
         ['--font-header' => 'var(--font-raleway)', '--font-body' => 'var(--font-inter)'],
-        ['--font-header' => 'var(--font-bitter)', '--font-body' => 'var(--font-nunito)'],
-        ['--font-header' => 'var(--font-montserrat)', '--font-body' => 'var(--font-faustina)'],
+        ['--font-header' => 'var(--font-bitter)', '--font-body' => 'var(--font-recursive)'],
+        ['--font-header' => 'var(--font-montserrat)', '--font-body' => 'var(--font-manualle)'],
         ['--font-header' => 'var(--font-vollkorn)', '--font-body' => 'var(--font-baloo-2)'],
     ];
 

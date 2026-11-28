@@ -142,12 +142,12 @@
 
 :root,
 .light {
-    --font-header-default: var(--font-inter);
+    --font-header-default: var(--font-overpass);
     --font-nav-default: var(--font-recursive);
-    --font-body-default: var(--font-nunito);
+    --font-body-default: var(--font-figtree);
     --font-motto-default: var(--font-vollkorn);
-    --font-excerpt-default: var(--font-afacad);
-    --font-footer-default: var(--font-recursive);
+    --font-excerpt-default: var(--font-sofia-sans);
+    --font-footer-default: var(--font-nunito);
 
     --background: hsl(60 22% 99%);
     --foreground: hsl(0 0% 9%);
