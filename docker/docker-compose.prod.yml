@@ -27,6 +27,7 @@ services:
       - /srv/laravel-blog/bootstrap_cache:/var/www/html/bootstrap/cache
       # Queue also needs access to the new SSR assets
       - ssr_assets:/var/www/html/bootstrap/ssr
+      - public_files:/var/www/html/public
 
   scheduler:
     build: !reset null

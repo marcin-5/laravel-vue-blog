@@ -129,6 +129,8 @@ if [ "$(id -u)" = "0" ]; then
     find storage bootstrap/cache ! -user www-data -exec chown www-data:www-data {} +
     find storage bootstrap/cache -type d ! -perm -g+rwx -exec chmod g+rwx {} +
     find storage bootstrap/cache -type f ! -perm -g+rw -exec chmod g+rw {} +
+    chown www-data:www-data public
+    chmod 775 public
 fi
 
 # Laravel-specific initialization for production
